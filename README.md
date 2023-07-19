@@ -1,6 +1,6 @@
-# `pascalscript`
+# `PascalScript`
 
-`pascalscript` should be a (Turbo) Pascal inspired interpreted language written in C (C17 <http://www.bitsavers.org/pdf/borland/turbo_pascal/>) using lex and yacc or bison.
+`PascalScript` should be a (Turbo) Pascal inspired interpreted language written in C (C17 <http://www.bitsavers.org/pdf/borland/turbo_pascal/>) using lex and yacc or bison.
 
 At first, a simple CLI should be implemented:
 
@@ -8,7 +8,7 @@ At first, a simple CLI should be implemented:
 pascalscript hello.pas
 ```
 
-And `hello.pas` should be like:
+And the traditional `hello.pas` should be like:
 
 ```pascal
 program hello;
