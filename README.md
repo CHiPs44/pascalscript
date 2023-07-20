@@ -1,6 +1,6 @@
 # `PascalScript`
 
-`PascalScript` should be a (Turbo) Pascal inspired interpreted language written in C (C17 <http://www.bitsavers.org/pdf/borland/turbo_pascal/>) using lex and yacc or bison.
+`PascalScript` should be a (Turbo) Pascal inspired interpreted language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using lex and yacc or bison.
 
 At first, a simple CLI should be implemented:
 
