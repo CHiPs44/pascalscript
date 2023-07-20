@@ -18,11 +18,12 @@ begin
     end
     else
     begin
+        s := '';
         if number < 0 then
         begin
             number := -number;
+            s := '-';
         end;
-        s := '';
         while number > 0 do
         begin
             digit := number mod 10;
