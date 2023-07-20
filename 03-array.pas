@@ -1,37 +1,61 @@
 program arrays;
 
-uses sysutils;
+const COUNT = 20;
 
-const COUNT = 10;
-
-var numbers: array[0..COUNT - 1] of integer;
-var strings: array[0..COUNT - 1] of string;
+var Numbers: array[0..COUNT - 1] of LongInt;
+var Strings: array[0..COUNT - 1] of string;
 var i: integer;
-var n: integer;
+var n: LongInt;
 
-function pad(n: integer; w: integer): string;
+{ Same as Free Pascal SysUtils }
+function Int2Str(number: LongInt): string;
+var s: string;
+var digit: integer;
+begin
+    if number = 0 then
+    begin
+        s := '0';
+    end
+    else
+    begin
+        if number < 0 then
+        begin
+            number := -number;
+        end;
+        s := '';
+        while number > 0 do
+        begin
+            digit := number mod 10;
+            number := number div 10;
+            s := Chr(Ord('0') + digit) + s;
+        end;
+    end;
+    Int2Str := s;
+end;
+
+function Pad(n: LongInt; w: integer): string;
 var s: string;
 begin
-    s := inttostr(n);
-    while length(s) < w do
+    s := Int2Str(n);
+    while Length(s) < w do
     begin
         s := '0' + s;
     end;
-    pad := s;
+    Pad := s;
 end;
 
 begin
     n := 1;
     for i := 0 to COUNT - 1 do
     begin
-        numbers[i] := n;
-        strings[i] := '#' + pad(i, 2) + ' ' + inttostr(n);
+        Numbers[i] := n;
+        Strings[i] := '#' + Pad(i, 2) + ' ' + Int2Str(n);
         n := n * 2;
     end;
-    writeln('i  n    s');
-    writeln('-- ---- ----------');
+    WriteLn('#  | Number | String    ');
+    WriteLn('---|--------|-----------');
     for i := 0 to COUNT - 1 do
     begin
-        writeln(pad(i, 2), ' ', numbers[i]:4, ' ', strings[i]);
+        WriteLn(Pad(i, 2), ' | ', Numbers[i]:6, ' | ', Strings[i]);
     end;
 end.
