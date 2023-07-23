@@ -2,28 +2,30 @@
 
 ## Introduction
 
-`PascalScript` should be a (Turbo) Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using `lex` and `yacc` (or `bison`).
+`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using `lex` and `yacc` (or `bison`).
 
-At first, a simple CLI should be implemented under GNU/Linux:
+At first, a simple CLI should be implemented (under GNU/Linux):
 
 ```bash
-pascalscript hello.pas
+pascalscript < hello.pas
 ```
 
 And the traditional `hello.pas` should be like:
 
 ```pascal
-program hello;
+program Hello;
 begin
-  writeln('Hello, world!');
-end;
+  WriteLn('Hello, world!');
+end.
 ```
 
 In the future, it should be embeddable in other projects, like lua is for example.
 
-Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of of an authoritative reference implementation.
+Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an authoritative reference implementation.
 
-## Links
+## Links to seemingly useful documentations
+
+### Pascal
 
 - <https://delphi.fandom.com/wiki/Object_Pascal_Grammar>
 - <https://www.cs.kent.edu/~durand/CS43101Fall2004/resources/Pascal-EBNF.html>
@@ -31,25 +33,40 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of of an
 - <http://www.bitsavers.org/pdf/borland/turbo_pascal/>
 - <https://github.com/kdakan/Building-a-Pascal-Compiler>
 - <https://standardpascal.org/>
+- Free Pascal Reference guide <https://www.freepascal.org/docs-html/ref/ref.html>
 
-## Intended features
+### `lex` / `flex` and `yacc` / `bison` stuff
 
-There should several steps before we get a "final" product.
+- "lex et yacc" (french) <https://pageperso.lis-lab.fr/alexis.nasr/Ens/Compilation/cmX_lex_yacc.pdf>
+- "Flex (Fast Lexical Analyzer Generator)" <https://www.geeksforgeeks.org/flex-fast-lexical-analyzer-generator/>
+- "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
+
+## Features
+
+There should be several steps before we get a "final" product.
 
 ### Integer only
 
 This will make the base for the lexer, the tokenizer and the interpreter itself.
 
-Just constants, variables, arithmetical expressions, a single parameter `WriteLn`, and comments.
+Features will be:
 
-- Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn` `=` `:=` `:` `;` `,` `{` `}` `(*` `*)`
-- Identifiers: `[a-z|A-Z][a-z|A-Z|0-9]*` (no underscore at first)
+- constants
+- variables
+- arithmetical expressions
+- a single parameter `WriteLn`
+- comments
+
+
+- Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn`
+- Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)`
+- Identifiers: `[a-z|A-Z][a-z|A-Z|0-9|_]*` (no underscore as first char)
 - Integer constants: `[0-9]*`
-- Operators: `+` `-` `*` `div` `mod` (`/` will come with real type)
+- Operators: `+` `-` `*` `/` (`/` will be used as `div` for now, and `mod` will wait a bit)
 
 ```pascal
-             1         2         3         4         5         6         7         8         9        10        11
-    12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+             1         2         3         4         5         6         7         8         9        10        11        12
+    123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
  1  program step1; (* will we go above 9? *)
  2  const foo = 1;  { No negative }
  3  var a: integer; { One at a time }
