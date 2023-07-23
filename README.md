@@ -57,7 +57,6 @@ Features will be:
 - a single parameter `WriteLn`
 - comments
 
-
 - Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn`
 - Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)`
 - Identifiers: `[a-z|A-Z][a-z|A-Z|0-9|_]*` (no underscore as first char)

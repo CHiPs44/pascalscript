@@ -1,12 +1,22 @@
 %{
     #include <stdio.h>
-    int yylval;
+    #include <string.h>
+    #include "lexer.h"
+    // int yylval;
+    token_t yylval;
 %}
 
+/* "real" keywords */
 %tokens T_PROGRAM T_CONST T_VAR T_BEGIN T_END
-%tokens T_INTEGER
+/* operators */
+%tokens T_PLUS T_MINUS T_STAR T_SLASH T_DIV T_MOD
+/* assignment */
+%tokens T_ASSIGN
+/* standard library */
 %tokens T_WRITELN
-
+/* type(s) */
+%tokens T_INTEGER
+/* values / constants */
 %tokens T_INT_VAL
 
 %option yylineno
@@ -18,35 +28,30 @@ eol         [\r\n]
 
 %%
 
-{int_val} {
-    yylval = atoi(yytext); 
+{identifier} {
+    yylval.type = IDENTIFIER;
+    int n = strncpy(yylval.value.identifier, yytext); 
     return T_INT_VAL; 
 }
 
-+         { return T_PLUS; }
--         { return T_MINUS; }
-*         { return T_STAR; }
-/         { return T_SLASH; }
-div       { return T_DIV; }
-mod       { return T_MOD; }
-:=        { return T_ASSIGN; }
+{int_val} {
+    yylval.type = INT_VAL;
+    yylval.value.int_val = atoi(yytext); 
+    return T_INT_VAL; 
+}
 
-program      {
-          fprintf( stderr, " [PROGRAM]" );
-          yylval.sval = strdup(yytext);
-          return PROGRAM;
-        }
+"+"       { return T_PLUS;    }
+"-"       { return T_MINUS;   }
+"*"       { return T_STAR;    }
+"/"       { return T_SLASH;   }
+"div"     { return T_DIV;     }
+"mod"     { return T_MOD;     }
+":="      { return T_ASSIGN;  }
 
-var        {
-          fprintf( stderr, " [VAR]" );
-          yylval.sval = strdup(yytext);
-          return VAR;
-        }
-integer      {
-          fprintf( stderr, " [INTEGER]" );
-          yylval.sval = strdup(yytext);
-          return INTEGER;
-        }
+"program" { return T_PROGRAM; }
+
+"var"     { return T_VAR;     }
+"integer" { return T_INTEGER; }
 
  /* identifier tokens */
 {identifier}  {
@@ -69,3 +74,5 @@ integer      {
         }
 
 %%
+
+/* EOF */
