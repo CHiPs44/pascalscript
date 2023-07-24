@@ -7,6 +7,9 @@
 #include "error.h"
 #include "lexer.h"
 
+token_t yylval;
+token_t *token = &yylval;
+
 /**
  * @brief Copy current identifier into current token
  * 
@@ -14,7 +17,7 @@
  * @param buffer 
  * @return int ERROR_NONE | ERROR_IDENTIFIER_TOO_LONG
  */
-int copy_identifier(token_t *token, const char *buffer)
+int copy_identifier(const char *buffer)
 {
     size_t length = strlen(buffer);
     if (length>MAX_IDENTIFIER) {

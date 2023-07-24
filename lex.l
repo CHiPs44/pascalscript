@@ -3,21 +3,8 @@
     #include <string.h>
     #include "lexer.h"
     // int yylval;
-    token_t yylval;
+    extern token_t yylval;
 %}
-
-/* "real" keywords */
-%tokens T_PROGRAM T_CONST T_VAR T_BEGIN T_END
-/* operators */
-%tokens T_PLUS T_MINUS T_STAR T_SLASH T_DIV T_MOD
-/* assignment */
-%tokens T_ASSIGN
-/* standard library */
-%tokens T_WRITELN
-/* type(s) */
-%tokens T_INTEGER
-/* values / constants */
-%tokens T_INT_VAL
 
 %option yylineno
 
@@ -29,9 +16,9 @@ eol         [\r\n]
 %%
 
 {identifier} {
-    yylval.type = IDENTIFIER;
-    int n = strncpy(yylval.value.identifier, yytext); 
-    return T_INT_VAL; 
+  int error = copy_identifier(yytext);
+  if (error == ERROR_NONE)
+    return T_IDENTIFIER;
 }
 
 {int_val} {
