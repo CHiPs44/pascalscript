@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#define MAX_IDENTIFIER 32
+#define MAX_IDENTIFIER 31
 
 typedef enum _token_type_t {
     IDENTIFIER,

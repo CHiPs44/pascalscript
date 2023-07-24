@@ -8,6 +8,8 @@ At first, a simple CLI should be implemented (under GNU/Linux):
 
 ```bash
 pascalscript < hello.pas
+# with UUOC (useless use of cat ;-))
+cat hello.pas | pascalscript
 ```
 
 And the traditional `hello.pas` should be like:
@@ -27,13 +29,13 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 
 ### Pascal
 
-- <https://delphi.fandom.com/wiki/Object_Pascal_Grammar>
-- <https://www.cs.kent.edu/~durand/CS43101Fall2004/resources/Pascal-EBNF.html>
-- <http://www.felix-colibri.com/papers/compilers/pascal_grammar/pascal_grammar.html>
-- <http://www.bitsavers.org/pdf/borland/turbo_pascal/>
-- <https://github.com/kdakan/Building-a-Pascal-Compiler>
-- <https://standardpascal.org/>
-- Free Pascal Reference guide <https://www.freepascal.org/docs-html/ref/ref.html>
+- "Object Pascal Grammar" <https://delphi.fandom.com/wiki/Object_Pascal_Grammar>
+- "Pascal EBNF" <https://www.cs.kent.edu/~durand/CS43101Fall2004/resources/Pascal-EBNF.html>
+- "Pascal grammar" <http://www.felix-colibri.com/papers/compilers/pascal_grammar/pascal_grammar.html>
+- "Turbo Pascal documentations PDF" <http://www.bitsavers.org/pdf/borland/turbo_pascal/>
+- "building a Pascal compiler" <https://github.com/kdakan/Building-a-Pascal-Compiler>
+- "Standard Pascal" <https://standardpascal.org/>
+- "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
@@ -43,24 +45,28 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 
 ## Features
 
-There should be several steps before we get a "final" product.
+There will be many steps before we get a "final" product.
 
-### Integer only
+### Integer only version
 
 This will make the base for the lexer, the tokenizer and the interpreter itself.
 
-Features will be:
+Features should be:
 
-- constants
-- variables
-- arithmetical expressions
-- a single parameter `WriteLn`
-- comments
+- Integer constants
+- Integer variables
+- Arithmetical expressions
+- A single integer parameter `WriteLn`
+- Comments
+
+Integer type will be the default of C `int` type.
+
+Language elements are limited to:
 
 - Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn`
 - Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)`
-- Identifiers: `[a-z|A-Z][a-z|A-Z|0-9|_]*` (no underscore as first char)
-- Integer constants: `[0-9]*`
+- Identifiers: `[a-z|A-Z|_][a-z|A-Z|0-9|_]*`
+- Integer constants: `[0-9]*` (positive)
 - Operators: `+` `-` `*` `/` (`/` will be used as `div` for now, and `mod` will wait a bit)
 
 ```pascal
@@ -87,9 +93,8 @@ Remarks;
 
 Improvements to this first sight:
 
-- Negative constants so we don't mess with an unary operator
-- `var a, b, c: integer;` should be implemented
-- Allow `_` in identifiers
+- Negative constants / unary operator `-`
+- `var a, b, c: integer;` should be implemented 
 
 ### Conditional
 
@@ -124,9 +129,26 @@ New keywords: while do repeat until
 TODO!
 ```
 
-### Functions and procedures
+### Procedures (`+++`)
 
-This means we have local variables, and recursive calls.
+This means we have local variables.
+
+```pascal
+ 1  program step3;
+ 2  var a: integer;
+ 3  procedure sum(a: integer, b: integer, var c: integer);
+ 4  begin
+ 5    c := a + b;
+ 6  end;
+ 7  begin
+ 8    sum(12, 34, a);
+ 9    WriteLn(a);
+10  end.
+```
+
+### Functions
+
+This means we have recursive calls.
 
 ```pascal
  1  program step3;
@@ -146,25 +168,53 @@ This means we have local variables, and recursive calls.
 15  end.
 ```
 
-### Further features
+### Other features
+
+### Types
+
+- Ranges (`..`)
+- Enums
+- Arrays
+- Char (ASCII / ANSI)
+- Strings (ASCII / ANSI)
+- Sets
+- Reals
+- Pointers (`^`, `@`, ...)
+- Byte (8), word (16), long (32) and longlong (64)
 
 #### Case statement
 
-New
+This will wait until we have implemented range types.
 
 ```pascal
   ...
   case x of
     1: a := 1;
     2: a := 2;
-    3..5: a := 3; { not at first sight? }
+    3..5: a := 3;
     else
       a := 34;
   end;
   ...
 ```
 
-This may wait until we have implemented range types.
+### Standard library
+
+- Write / WriteLn for all types
+- UTF-8 support
+
+### Units
+
+This would make PascalScript much more usable and extensible.
+
+### Objects
+
+- Turbo Pascal 5.5 syntax
+
+### Extensions
+
+- File I/O with calls more POSIX like instead of standard Pascal?
+  - fopen / fclose / fread / fwrite / lseek / ...
 
 ## Stack based VM or simpler runtime status?
 
@@ -173,6 +223,7 @@ Should we implement a stack based VM to execute code, and make the interpreter i
 Or should we have a simpler "runtime status" like:
 
 - `program`: source code of the program to execute
-- `symbols`: hashtable with lower case key for the name, and an integer as value for now
-
-global / local scope and other value types (real, boolean, string, function, procedure, ...) should come at their own time.
+- `symbols`: hashtable with lower case key for the name, an integer as value, and some flags
+  - constant / variable flag
+  - global / local scope and other value types (real, boolean, string, function, procedure, ...) should come at their own time
+  - ...
