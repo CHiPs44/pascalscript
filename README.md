@@ -1,4 +1,4 @@
-# `PascalScript`
+# `PascalScript` - an interpreted Pascal dialect
 
 ## Introduction
 
