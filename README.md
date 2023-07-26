@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using `lex` and `yacc` (or `bison`).
+`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using `lex` and `yacc` (in fact `flex` and `bison`).
 
 At first, a simple CLI should be implemented (under GNU/Linux):
 
@@ -229,3 +229,11 @@ Or should we have a simpler "runtime status" like:
   - constant / variable flag
   - global / local scope and other value types (real, boolean, string, function, procedure, ...) should come at their own time
   - ...
+
+## License
+
+GNU General Public License v3.0 or later, see file `LICENSE`.
+
+Each file should contains this:
+
+`SPDX-License-Identifier: GPL-3.0-or-later`
