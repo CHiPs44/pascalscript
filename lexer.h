@@ -16,4 +16,8 @@ typedef struct _token_t {
     } value;
 } token_t;
 
+extern int copy_identifier(const char *buffer);
+
+extern int copy_integer_value(const char *buffer);
+
 #endif

@@ -13,7 +13,6 @@ token_t *token = &yylval;
 /**
  * @brief Copy current identifier into current token
  * 
- * @param token 
  * @param buffer 
  * @return int ERROR_NONE | ERROR_IDENTIFIER_TOO_LONG
  */
@@ -31,11 +30,10 @@ int copy_identifier(const char *buffer)
 /**
  * @brief Parse current integer value into current token
  * 
- * @param token 
  * @param buffer 
  * @return int  ERROR_NONE
  */
-int copy_int_val(token_t *token, const char *buffer)
+int copy_integer_value(const char *buffer)
 {
     long val = strtol(buffer, 0, 10);
     if (val == LONG_MAX && errno == ERANGE) {

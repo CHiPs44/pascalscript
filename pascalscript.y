@@ -1,8 +1,12 @@
 %{
+#include <stdio.h>
+#include "lexer.h"
 %}
 
-/* "real" keywords */
-%token T_PROGRAM T_CONST T_VAR T_BEGIN T_END
+/* %define parse.error detailed */
+/* %define api.pure */
+%define api.value.type { token_t }
+
 /* operators */
 %token T_PLUS T_MINUS T_STAR T_SLASH T_DIV T_MOD
 /* assignment */
@@ -14,6 +18,8 @@
 %token T_SEMICOLON
 %token T_DOT
 %token T_EQUALS
+/* "real" keywords */
+%token T_PROGRAM T_CONST T_VAR T_BEGIN T_END
 /* standard library */
 %token T_WRITELN
 /* type(s) */
@@ -23,16 +29,21 @@
 /* identifier */
 %token T_IDENTIFIER
 
+%start program
+
 %%
 
 program:
-    T_PROGRAM T_IDENTIFIER T_SEMICOLON
-    { constant_declaration_list }
-    { variable_declaration_list }
+    program_declaration
+    constant_declaration_list
+    variable_declaration_list
     T_BEGIN
-        { statement_list }
+        statement_list
     T_END T_DOT
 ;
+
+program_declaration
+    : T_PROGRAM T_IDENTIFIER T_SEMICOLON
 
 constant_declaration_list
     : constant_declaration
@@ -48,6 +59,15 @@ variable_declaration_list
 ;
 variable_declaration
     : T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+;
+
+statement_list
+    : statement
+    | statement_list statement
+;
+statement
+    : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+    | T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 ;
 
 expression
@@ -69,19 +89,6 @@ factor
 ;
 scalar
     : T_INTEGER_VALUE
-;
-
-statement_list:
-    | statement
-    | statement_list statement
-;
-statement:
-| assignment
-| writeln
-;
-assignment: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
-;
-writeln:    T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 ;
 
 %%
