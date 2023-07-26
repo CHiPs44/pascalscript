@@ -36,12 +36,14 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "building a Pascal compiler" <https://github.com/kdakan/Building-a-Pascal-Compiler>
 - "Standard Pascal" <https://standardpascal.org/>
 - "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
+- "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
 - "lex et yacc" (french) <https://pageperso.lis-lab.fr/alexis.nasr/Ens/Compilation/cmX_lex_yacc.pdf>
 - "Flex (Fast Lexical Analyzer Generator)" <https://www.geeksforgeeks.org/flex-fast-lexical-analyzer-generator/>
 - "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
+- "Mini manuel d'utilisation de Lex et Yacc (french)" <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
 
 ## Features
 
