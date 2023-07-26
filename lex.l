@@ -19,12 +19,13 @@ eol         [\r\n]
   int error = copy_identifier(yytext);
   if (error == ERROR_NONE)
     return T_IDENTIFIER;
+  yyerror()
 }
 
 {int_val} {
     yylval.type = INT_VAL;
     yylval.value.int_val = atoi(yytext); 
-    return T_INT_VAL; 
+    return T_INTEGER_VALUE; 
 }
 
 "+"       { return T_PLUS;    }
@@ -45,20 +46,18 @@ eol         [\r\n]
           fprintf( stderr, " [IDENT:%s]", yylval.sval = strdup(yytext));
           return IDENT;
         }
-{string}    {
-          fprintf( stderr, " [STRING:%s]", yylval.sval = strdup(yytext) );
-          return STRING;
-        }
 
- /* ignore whitespace and set default */
-{whitespace}   { ; }
-{endline}     {
-          fprintf( stderr, "\n%d ", yylineno );
-        }
-.        {
-          fprintf( stderr, " {%c}", yytext[0] );
-          return yytext[0];
-        }
+/* ignore whitespace and set default */
+{whitespace}  {
+                ;
+              }
+{eol}         {
+                fprintf( stderr, "\n%d ", yylineno );
+              }
+.             {
+                fprintf( stderr, " {%c}", yytext[0] );
+                return yytext[0];
+              }
 
 %%
 

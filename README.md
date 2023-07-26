@@ -44,12 +44,13 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Flex (Fast Lexical Analyzer Generator)" <https://www.geeksforgeeks.org/flex-fast-lexical-analyzer-generator/>
 - "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
 - "Mini manuel d'utilisation de Lex et Yacc (french)" <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
+- "ANSI C grammar" <https://www.lysator.liu.se/c/ANSI-C-grammar-y.html>
 
 ## Features
 
 There will be many steps before we get a "final" product.
 
-### Integer only version
+### Step 1: integer only calculator, without any flow control
 
 This will make the base for the lexer, the tokenizer and the interpreter itself.
 
@@ -98,9 +99,9 @@ Improvements to this first sight:
 - Negative constants / unary operator `-`
 - `var a, b, c: integer;` should be implemented 
 
-### Conditional
+### Step 2: Conditional
 
-New keywords: if then else
+New keywords: `if` `then` `else`
 
 New operators: `<` `>` `<=` `>=` `<>` `and` `or` `not` (`=` with a different meaning is already there for constants)
 

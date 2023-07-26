@@ -7,29 +7,86 @@
 %token T_PLUS T_MINUS T_STAR T_SLASH T_DIV T_MOD
 /* assignment */
 %token T_ASSIGN
+/* parenthesis */
+%token T_LEFT_PARENTHESIS
+%token T_RIGHT_PARENTHESIS
+%token T_COLON
+%token T_SEMICOLON
+%token T_DOT
+%token T_EQUALS
 /* standard library */
 %token T_WRITELN
 /* type(s) */
 %token T_INTEGER
 /* values / constants */
-%token T_INT_VAL
+%token T_INTEGER_VALUE
 /* identifier */
 %token T_IDENTIFIER
 
 %%
 
-expression: expression ’+’ terme
-| expression ’-’ terme
-| terme
+program:
+    T_PROGRAM T_IDENTIFIER T_SEMICOLON
+    { constant_declaration_list }
+    { variable_declaration_list }
+    T_BEGIN
+        { statement_list }
+    T_END T_DOT
 ;
-terme: terme ’*’ facteur
-| terme ’/’ facteur
-| facteur
+
+constant_declaration_list
+    : constant_declaration
+    | constant_declaration_list constant_declaration
 ;
-facteur: ’(’ expression ’)’
-| ’-’ facteur
-| NOMBRE
+constant_declaration
+    : T_CONST T_IDENTIFIER T_EQUALS T_INTEGER_VALUE T_SEMICOLON
 ;
+
+variable_declaration_list
+    : variable_declaration
+    | variable_declaration_list variable_declaration
+;
+variable_declaration
+    : T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+;
+
+expression
+    : expression T_PLUS term
+    | expression T_MINUS term
+    | term
+;
+term
+    : term T_STAR factor
+    | term T_SLASH factor
+    | term T_DIV factor
+    | term T_MOD factor
+    | factor
+;
+factor
+    : T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+    | T_MINUS factor
+    | scalar
+;
+scalar
+    : T_INTEGER_VALUE
+;
+
+statement_list:
+    | statement
+    | statement_list statement
+;
+statement:
+| assignment
+| writeln
+;
+assignment: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+;
+writeln:    T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+;
+
 %%
 int yyerror(void)
-{ fprintf(stderr, "erreur de syntaxe\n"); return 1;}
+{
+    fprintf(stderr, "erreur de syntaxe\n"); 
+    return 1;
+}
