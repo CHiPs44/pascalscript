@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+/* A Bison parser, made by GNU Bison 3.5.1.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,9 +31,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
-   especially those whose name start with YY_ or yy_.  They are
-   private implementation details that can be changed or removed.  */
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
 #ifndef YY_YY_PASCALSCRIPT_TAB_H_INCLUDED
 # define YY_YY_PASCALSCRIPT_TAB_H_INCLUDED
@@ -45,39 +44,34 @@
 extern int yydebug;
 #endif
 
-/* Token kinds.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    T_PLUS = 258,                  /* T_PLUS  */
-    T_MINUS = 259,                 /* T_MINUS  */
-    T_STAR = 260,                  /* T_STAR  */
-    T_SLASH = 261,                 /* T_SLASH  */
-    T_DIV = 262,                   /* T_DIV  */
-    T_MOD = 263,                   /* T_MOD  */
-    T_ASSIGN = 264,                /* T_ASSIGN  */
-    T_LEFT_PARENTHESIS = 265,      /* T_LEFT_PARENTHESIS  */
-    T_RIGHT_PARENTHESIS = 266,     /* T_RIGHT_PARENTHESIS  */
-    T_COLON = 267,                 /* T_COLON  */
-    T_SEMICOLON = 268,             /* T_SEMICOLON  */
-    T_DOT = 269,                   /* T_DOT  */
-    T_EQUALS = 270,                /* T_EQUALS  */
-    T_PROGRAM = 271,               /* T_PROGRAM  */
-    T_CONST = 272,                 /* T_CONST  */
-    T_VAR = 273,                   /* T_VAR  */
-    T_BEGIN = 274,                 /* T_BEGIN  */
-    T_END = 275,                   /* T_END  */
-    T_WRITELN = 276,               /* T_WRITELN  */
-    T_INTEGER = 277,               /* T_INTEGER  */
-    T_INTEGER_VALUE = 278,         /* T_INTEGER_VALUE  */
-    T_IDENTIFIER = 279             /* T_IDENTIFIER  */
+    T_PLUS = 258,
+    T_MINUS = 259,
+    T_STAR = 260,
+    T_SLASH = 261,
+    T_DIV = 262,
+    T_MOD = 263,
+    T_ASSIGN = 264,
+    T_LEFT_PARENTHESIS = 265,
+    T_RIGHT_PARENTHESIS = 266,
+    T_COLON = 267,
+    T_SEMICOLON = 268,
+    T_DOT = 269,
+    T_EQUALS = 270,
+    T_PROGRAM = 271,
+    T_CONST = 272,
+    T_VAR = 273,
+    T_BEGIN = 274,
+    T_END = 275,
+    T_WRITELN = 276,
+    T_INTEGER = 277,
+    T_INTEGER_VALUE = 278,
+    T_IDENTIFIER = 279
   };
-  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
@@ -90,8 +84,6 @@ typedef  token_t  YYSTYPE;
 
 extern YYSTYPE yylval;
 
-
 int yyparse (void);
-
 
 #endif /* !YY_YY_PASCALSCRIPT_TAB_H_INCLUDED  */

@@ -907,7 +907,7 @@ YY_RULE_SETUP
   int error = copy_integer_value(yytext);
   if (error == ERROR_NONE)
     return T_INTEGER_VALUE;
-  return YYerror;
+  YYERROR;
 }
 	YY_BREAK
 case 22:
@@ -917,7 +917,7 @@ YY_RULE_SETUP
   int error = copy_identifier(yytext);
   if (error == ERROR_NONE)
     return T_IDENTIFIER;
-  return YYerror;
+  YYERROR;
 }
 	YY_BREAK
 case 23:
@@ -941,7 +941,7 @@ YY_RULE_SETUP
 {
   fprintf( stderr, " {%c}", yytext[0] );
   // return yytext[0];
-  return YYerror;
+  YYERROR;
 }
 	YY_BREAK
 case 26:

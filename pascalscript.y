@@ -91,9 +91,14 @@ scalar
     : T_INTEGER_VALUE
 ;
 
+ error
+
 %%
-int yyerror(void)
+
+/* int yyerror(void)
 {
     fprintf(stderr, "erreur de syntaxe\n"); 
     return 1;
-}
+} */
+
+/* EOF */
