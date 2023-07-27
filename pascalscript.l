@@ -3,9 +3,7 @@
     #include <string.h>
     #include "error.h"
     #include "lexer.h"
-    // #define YYSTYPE token_t
     #include "pascalscript.tab.h"
-    // extern YYSTYPE yylval;
 %}
 
 %option yylineno

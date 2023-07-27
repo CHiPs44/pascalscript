@@ -525,9 +525,9 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    35,    35,    44,    47,    48,    51,    55,    56,    59,
-      63,    64,    67,    68,    72,    73,    74,    77,    78,    79,
-      80,    81,    84,    85,    86,    89
+       0,    37,    37,    46,    49,    50,    53,    57,    58,    61,
+      65,    66,    69,    70,    74,    75,    76,    79,    80,    81,
+      82,    83,    86,    87,    88,    91
 };
 #endif
 
@@ -1315,7 +1315,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 92 "pascalscript.y"
+#line 94 "pascalscript.y"
 
 int yyerror(void)
 {
