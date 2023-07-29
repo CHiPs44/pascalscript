@@ -512,8 +512,10 @@ char *yytext;
     #include "error.h"
     #include "lexer.h"
     #include "pascalscript.tab.h"
-#line 516 "pascalscript.lex.c"
-#line 517 "pascalscript.lex.c"
+
+    int yyerror(char *message);
+#line 518 "pascalscript.lex.c"
+#line 519 "pascalscript.lex.c"
 
 #define INITIAL 0
 
@@ -730,10 +732,10 @@ YY_DECL
 		}
 
 	{
-#line 16 "pascalscript.l"
+#line 18 "pascalscript.l"
 
 
-#line 737 "pascalscript.lex.c"
+#line 739 "pascalscript.lex.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -802,127 +804,127 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 18 "pascalscript.l"
+#line 20 "pascalscript.l"
 { return T_PLUS;              }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 19 "pascalscript.l"
+#line 21 "pascalscript.l"
 { return T_MINUS;             }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "pascalscript.l"
+#line 22 "pascalscript.l"
 { return T_STAR;              }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 21 "pascalscript.l"
+#line 23 "pascalscript.l"
 { return T_SLASH;             }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 22 "pascalscript.l"
+#line 24 "pascalscript.l"
 { return T_DIV;               }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 23 "pascalscript.l"
+#line 25 "pascalscript.l"
 { return T_MOD;               }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 24 "pascalscript.l"
+#line 26 "pascalscript.l"
 { return T_ASSIGN;            }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 25 "pascalscript.l"
+#line 27 "pascalscript.l"
 { return T_LEFT_PARENTHESIS;  }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 26 "pascalscript.l"
+#line 28 "pascalscript.l"
 { return T_RIGHT_PARENTHESIS; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 27 "pascalscript.l"
+#line 29 "pascalscript.l"
 { return T_COLON;             }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 28 "pascalscript.l"
+#line 30 "pascalscript.l"
 { return T_SEMICOLON;         }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 29 "pascalscript.l"
+#line 31 "pascalscript.l"
 { return T_DOT;               }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 30 "pascalscript.l"
+#line 32 "pascalscript.l"
 { return T_EQUALS;            }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 31 "pascalscript.l"
+#line 33 "pascalscript.l"
 { return T_PROGRAM;           }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 32 "pascalscript.l"
+#line 34 "pascalscript.l"
 { return T_CONST;             }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 33 "pascalscript.l"
+#line 35 "pascalscript.l"
 { return T_VAR;               }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 34 "pascalscript.l"
+#line 36 "pascalscript.l"
 { return T_BEGIN;             }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 35 "pascalscript.l"
+#line 37 "pascalscript.l"
 { return T_END;               }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 36 "pascalscript.l"
+#line 38 "pascalscript.l"
 { return T_WRITELN;           }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 37 "pascalscript.l"
+#line 39 "pascalscript.l"
 { return T_INTEGER;           }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 39 "pascalscript.l"
+#line 41 "pascalscript.l"
 {
-  int error = copy_integer_value(yytext);
-  if (error == ERROR_NONE)
+  int zzerror = copy_integer_value(yytext);
+  if (zzerror == ERROR_NONE)
     return T_INTEGER_VALUE;
-  YYERROR;
+  yyerror("Invalid integer value");
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 46 "pascalscript.l"
+#line 48 "pascalscript.l"
 {
-  int error = copy_identifier(yytext);
-  if (error == ERROR_NONE)
+  int zzerror = copy_identifier(yytext);
+  if (zzerror == ERROR_NONE)
     return T_IDENTIFIER;
-  YYERROR;
+  yyerror("Invalid identifier");
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 53 "pascalscript.l"
+#line 55 "pascalscript.l"
 {
   fprintf( stderr, " [ ]");
 }
@@ -930,26 +932,27 @@ YY_RULE_SETUP
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 56 "pascalscript.l"
+#line 58 "pascalscript.l"
 {
   fprintf( stderr, "\n%d ", yylineno );
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 59 "pascalscript.l"
+#line 61 "pascalscript.l"
 {
   fprintf( stderr, " {%c}", yytext[0] );
   // return yytext[0];
-  YYERROR;
+  yyerror("Invalid source");
+  yyterminate();
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 65 "pascalscript.l"
+#line 68 "pascalscript.l"
 ECHO;
 	YY_BREAK
-#line 953 "pascalscript.lex.c"
+#line 956 "pascalscript.lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1966,24 +1969,18 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 65 "pascalscript.l"
+#line 68 "pascalscript.l"
 
 
 int yyerror(char *message) 
 {
   fprintf(stderr, "Error: %s\n", message);
-  exit(1);
+  // exit(1);
 }
 
 int yywrap()
 {
   return 1;
-}
-
-int main(void)
-{
-  yyparse();
-  return 0;
 }
 
 /* EOF */

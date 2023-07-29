@@ -3,6 +3,7 @@
         "errno.h": "c",
         "error.h": "c",
         "err.h": "c",
-        "cerrno": "c"
+        "cerrno": "c",
+        "pascalscript.tab.h": "c"
     }
 }

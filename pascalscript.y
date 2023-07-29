@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
 #include "lexer.h"
+// extern void yyerror(string *message);
+    int yyerror(char *message);
 %}
 
 /* %define parse.error detailed */
@@ -90,8 +92,6 @@ factor
 scalar
     : T_INTEGER_VALUE
 ;
-
- error
 
 %%
 

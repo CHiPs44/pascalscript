@@ -4,6 +4,8 @@
     #include "error.h"
     #include "lexer.h"
     #include "pascalscript.tab.h"
+
+    int yyerror(char *message);
 %}
 
 %option yylineno
@@ -37,17 +39,17 @@ eol           [\r\n]
 "integer" { return T_INTEGER;           }
 
 {integer_value} {
-  int error = copy_integer_value(yytext);
-  if (error == ERROR_NONE)
+  int zzerror = copy_integer_value(yytext);
+  if (zzerror == ERROR_NONE)
     return T_INTEGER_VALUE;
-  YYERROR;
+  yyerror("Invalid integer value");
 }
 
 {identifier} {
-  int error = copy_identifier(yytext);
-  if (error == ERROR_NONE)
+  int zzerror = copy_identifier(yytext);
+  if (zzerror == ERROR_NONE)
     return T_IDENTIFIER;
-  YYERROR;
+  yyerror("Invalid identifier");
 }
 
 {whitespace} {
@@ -59,7 +61,8 @@ eol           [\r\n]
 . {
   fprintf( stderr, " {%c}", yytext[0] );
   // return yytext[0];
-  YYERROR;
+  yyerror("Invalid source");
+  yyterminate();
 }
 
 %%
@@ -67,18 +70,12 @@ eol           [\r\n]
 int yyerror(char *message) 
 {
   fprintf(stderr, "Error: %s\n", message);
-  exit(1);
+  // exit(1);
 }
 
 int yywrap()
 {
   return 1;
-}
-
-int main(void)
-{
-  yyparse();
-  return 0;
 }
 
 /* EOF */
