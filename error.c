@@ -1,11 +1,14 @@
+#include <stdio.h>
 #include "error.h"
 
-char *error_get_message(error_t code)
+static char error_unknown[31];
+
+char *error_get_message(error_code_t code)
 {
     switch (code)
     {
     case ERROR_NONE:
-        return "";
+        return "No";
     case ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case ERROR_OVERFLOW:
@@ -19,7 +22,8 @@ char *error_get_message(error_t code)
     case ERROR_CONSTANT_VALUE:
         return "Constant value";
     default:
-        return "Unknown error code";
+        snprintf(error_unknown, 31, "Unknown error code %d", code);
+        return error_unknown;
     }
 }
 

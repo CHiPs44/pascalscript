@@ -1,7 +1,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-typedef enum _error_t {
+typedef enum _error_code_t {
     ERROR_NONE,
     /* lexer */
     ERROR_IDENTIFIER_TOO_LONG,
@@ -12,8 +12,8 @@ typedef enum _error_t {
     ERROR_UNKOWN_IDENTIFIER,
     ERROR_CONSTANT_VALUE,
     /* ...*/
-} error_t;
+} error_code_t;
 
-extern char *error_get_message(error_t code);
+extern char *error_get_message(error_code_t code);
 
 #endif 

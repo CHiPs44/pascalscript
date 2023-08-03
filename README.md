@@ -73,31 +73,48 @@ Language elements are limited to:
 - Operators: `+` `-` `*` `/` (`/` will be used as `div` for now, and `mod` will wait a bit)
 
 ```pascal
-             1         2         3         4         5         6         7         8         9        10        11        12
-    123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
- 1  program step1; (* will we go above 9? *)
- 2  const foo = 1;  { No negative }
- 3  var a: integer; { One at a time }
- 3  var b: integer;
- 3  var c: integer;
- 4  begin
- 5    a := foo;
- 6    b := 2;
- 7    c := a + b;
- 8    WriteLn(c);
- 9    d := a * b div c; { will throw an error "Undeclared identifier 'd' at line 9, column 3" and stop execution }
-10    foo := 12;        { will throw an error "Constant 'foo' cannot be assigned at line 10, column 3" and stop execution }
-11  end.
+program step1a;
+const   foo = 1;
+var     a: integer;
+        b: integer;
+        c: integer;
+begin
+        a := foo;
+        b := 2;
+        c := a + b;
+        WriteLn(c);
+        { will throw an error "Undeclared identifier 'd' at line L, column C" and stop execution }
+        d := a * b div c;
+        { will throw an error "Constant 'foo' cannot be assigned at line L, column C" and stop execution }
+        foo := 12;
+end. { . is mandatory }
 ```
 
-Remarks;
+Remarks:
 
 - Comments will be paired, beginning with `{` means we go until `}`, no mix with `(*` and `*)`, so they can be imbricated on one level
+- No `//` one line comments
 
 Improvements to this first sight:
 
-- Negative constants / unary operator `-`
-- `var a, b, c: integer;` should be implemented 
+- `var a, b, c: integer;` should be implemented
+- `Write` variant to output without a line break
+- `const` could be used for string literals instead of integers only
+- `Write` and `WriteLn` should accept a string constant as parameter
+
+```pascal
+program step1b;
+const   foo = 1;
+        msg = 'Result is: ';
+var     a, b, c: integer;
+begin
+        a := foo;
+        b := 2;
+        c := a + b;
+        Write(msg);
+        WriteLn(c);
+end.
+```
 
 ### Step 2: Conditional
 
@@ -106,105 +123,148 @@ New keywords: `if` `then` `else`
 New operators: `<` `>` `<=` `>=` `<>` `and` `or` `not` (`=` with a different meaning is already there for constants)
 
 ```pascal
- 1  program step2; (* will we go above 9? *)
- 2  var a, b, c: integer;
- 3  begin
- 4    a := 1;
- 5    b := 2;
- 6    c := a + b;
- 7    if not(c <= 3) then { means c > 3 but we should illustrate not unary operator }
- 8    begin
- 9      WriteLn(1);
-10      WriteLn(c);
-11    end { no ;? }
-12    else
-13      WriteLn(0);
-14  end.
+program step2;
+const   MSG1 = 'C is greater than 3.';
+        MSG2 = 'C is less than 3.';
+var     a, b, c: integer;
+begin
+        a := 1;
+        b := 2;
+        c := a + b;
+        if not(c <= 3) then { means c > 3 but we should illustrate not unary operator ;-) }
+        begin
+          WriteLn(MSG1);
+          WriteLn(c);
+        end { no ; }
+        else
+          WriteLn(MSG2);
+end.
 ```
 
 NB: no booleans mean false is zero, true is not zero.
 
 ### Loops
 
-New keywords: while do repeat until
+New keywords: `while` `do` `repeat` `until` `for` `to` `downto`
 
 ```pascal
-TODO!
+program step3;
+var     i: integer;
+begin
+        i := 1;
+        while i < 5 do
+        begin
+          WriteLn(i);
+          i := i + 1;
+        end;
+        i := 1;
+        repeat
+          WriteLn(i);
+          i := i + 1;
+        until i > 5;
+        for i := 9 downto 0 do
+        begin
+          WriteLn(i);
+        end;
+end.
 ```
+
+NB:
+
+- Implement `break` and `continue`?
+- Will be improved with `in` keyword for arrays and sets
 
 ### Procedures (`+++`)
 
-This means we have local variables.
+This means we have local variables and recursive calls.
 
 ```pascal
- 1  program step3;
- 2  var a: integer;
- 3  procedure sum(a: integer, b: integer, var c: integer);
- 4  begin
- 5    c := a + b;
- 6  end;
- 7  begin
- 8    sum(12, 34, a);
- 9    WriteLn(a);
-10  end.
+program step3;
+
+var     a: integer;
+
+procedure sum(a: integer, b: integer, var c: integer);
+var     sum: integer;
+begin
+        sum := a + b;
+        c := sum;
+end;
+
+begin
+  sum(12, 34, a);
+  WriteLn(a);
+end.
 ```
 
 ### Functions
 
-This means we have recursive calls.
-
 ```pascal
- 1  program step3;
- 2  var a: integer;
- 3  function fact(n: integer): integer;
- 4  var f : integer;
- 5  begin
- 6    if n < 1 then
- 7      f := 1;
- 8    else
- 9      f := n * fact(n - 1);
-10    fact := f;
-11  end;
-12  begin
-13    a := fact(5);
-14    WriteLn(a);
-15  end.
+program step3;
+var     a: integer;
+function fact(n: integer): integer;
+var     f: integer;
+begin
+        if n <= 1 then
+                f := 1;
+        else
+                f := n * fact(n - 1);
+        fact := f;
+end;
+begin
+        a := fact(5);
+        WriteLn(a);
+end.
 ```
 
 ### Other features
 
 ### Types
 
+- Signed and unsigned integers:
+  - Byte / Shortint (8 bits)
+  - Word / Smallint (16 bits)
+  - Longword / Longint (32 bits)
+  - QWord / Int64 (64 bits)
+  - `integer` is either a 16 or 32 bits signed type, depending on?
+- Reals
+  - As singles or doubles?
 - Ranges (`..`)
 - Enums
 - Arrays
-- Char (ASCII / ANSI)
-- Strings (ASCII / ANSI)
-- Sets
-- Reals
+- Char (8 bits)
+- Strings (array of chars)
+- Sets (256 values max)
 - Pointers (`^`, `@`, ...)
-- Byte (8), word (16), long (32) and longlong (64)
 
 #### Case statement
 
 This will wait until we have implemented range types.
 
 ```pascal
-  ...
-  case x of
-    1: a := 1;
-    2: a := 2;
-    3..5: a := 3;
-    else
-      a := 34;
-  end;
-  ...
+        ...
+        case x of
+                1: a := 1;
+                2: a := 2;
+                3..5: a := 3;
+        else
+                a := 34;
+        end;
+        ...
 ```
 
 ### Standard library
 
-- Write / WriteLn for all types
-- UTF-8 support
+- Write / WriteLn for all types``
+- Mathematical functions and constants
+  - `sqrt`
+  - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
+  - `ln` `log`
+- Character set(s):
+  - ASCII support only? (more than 127 is undefined behaviour)
+  - ANSI / Codepage support? (437 for US and 850 for Western EU first)
+  - UTF-8 support?
+  - UTF-16 support?
+  - UTF-32 support?
 
 ### Units
 

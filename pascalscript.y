@@ -95,10 +95,12 @@ scalar
 
 %%
 
-/* int yyerror(void)
+/*
+int yyerror(char *message)
 {
-    fprintf(stderr, "erreur de syntaxe\n"); 
+    fprintf(stderr, "Syntax error: %s\n", message); 
     return 1;
-} */
+}
+*/
 
 /* EOF */
