@@ -220,20 +220,21 @@ end.
 
 ### Types
 
-- Signed and unsigned integers:
-  - Byte / Shortint (8 bits)
-  - Word / Smallint (16 bits)
-  - Longword / Longint (32 bits)
-  - QWord / Int64 (64 bits)
-  - `integer` is either a 16 or 32 bits signed type, depending on?
+- Unsigned and signed integers:
+  - 8 bits: Byte / Shortint
+  - 16 bits: Word / Smallint
+  - 32 bits: Longword / Longint
+  - 64 bits: QWord / Int64
+  - `integer` is 32 bits signed type, period.
 - Reals
-  - As singles or doubles?
+  - As singles or doubles, depending on compilation option?
 - Ranges (`..`)
 - Enums
 - Arrays
-- Char (8 bits)
+- Char (see below)
 - Strings (array of chars)
-- Sets (256 values max)
+- Sets (256 values max?)
+- Records
 - Pointers (`^`, `@`, ...)
 
 #### Case statement
@@ -252,19 +253,51 @@ This will wait until we have implemented range types.
         ...
 ```
 
-### Standard library
+### Characters and strings
 
-- Write / WriteLn for all types``
-- Mathematical functions and constants
-  - `sqrt`
-  - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
-  - `ln` `log`
-- Character set(s):
-  - ASCII support only? (more than 127 is undefined behaviour)
-  - ANSI / Codepage support? (437 for US and 850 for Western EU first)
-  - UTF-8 support?
-  - UTF-16 support?
-  - UTF-32 support?
+- ASCII support only?
+  - 128 to 255 is undefined behaviour
+  - 1 byte per char
+  - fixed length make string operations easy
+  - maximum length: 255 (length is a byte, too)
+- ANSI / Codepage support?
+  - 437 for US and 850 for Western EU first
+  - 1 byte per char
+  - fixed length make string operations easy
+  - maximum length: 255 (length is a byte, too)
+- UTF-8 support?
+  - all Unicode chars can be encoded
+  - 1 byte per char for ASCII only text
+  - variable length make string operations hard to implement
+  - maximum length: 255 (length is a byte, too)
+- UTF-16 support?
+  - many Unicode chars can be encoded
+  - 2 bytes per char for ASCII only text
+  - fixed length make string operations easy
+  - maximum length: 65535 (length is a 16 bits word, too)
+- UTF-32 support?
+  - all Unicode chars can be encoded
+  - 4 bytes per char for ASCII only text
+  - fixed length make string operations easy
+  - maximum length: either4294967295 (length is a 32 bits word, too)
+
+### Standard libraries
+
+#### I/O
+
+- Compatible:
+  - Write / WriteLn for all base types, with variable number of arguments
+- File I/O with more POSIX like calls instead of standard Pascal?
+  - `fopen` / `fclose` / `fread` / `fwrite` / `lseek` / ...
+- Format function with `{}` placeholders?
+  - `Format('A={}, B={}', a, b)` with a=1 and b=2 should return `A=1, B=2`
+
+#### Mathematical functions and constant(s)
+
+- `sqrt`
+- `sin` `cos` `tan` `asin` `acos` `atan` `pi`
+- `ln` `log`
+- ...
 
 ### Units
 
@@ -272,12 +305,11 @@ This would make PascalScript much more usable and extensible.
 
 ### Objects
 
-- Turbo Pascal 5.5 syntax
+Turbo Pascal 5.5 syntax should be enough.
 
 ### Extensions
 
-- File I/O with calls more POSIX like instead of standard Pascal?
-  - fopen / fclose / fread / fwrite / lseek / ...
+- Variable length arrays?
 
 ## Stack based VM or simpler runtime status?
 
@@ -287,8 +319,9 @@ Or should we have a simpler "runtime status" like:
 
 - `program`: source code of the program to execute
 - `symbols`: hashtable with lower case key for the name, an integer as value, and some flags
-  - constant / variable flag
-  - global / local scope and other value types (real, boolean, string, function, procedure, ...) should come at their own time
+  - kind: constant, variable, procedure, function, ...
+  - global / local scope
+  - other value types (real, boolean, string, function, procedure, ...) should come at their own time
   - ...
 
 ## License

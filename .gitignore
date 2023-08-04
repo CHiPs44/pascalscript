@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Pascal tool?
+GPATH
+GRTAGS
+GTAGS
+.vscode/GTEMP.pas
