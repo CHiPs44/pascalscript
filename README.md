@@ -172,7 +172,7 @@ end.
 NB:
 
 - Implement `break` and `continue`?
-- Will be improved with `in` keyword for arrays and sets
+- `for` loops will be improved with `in` keyword for arrays and sets
 
 ### Procedures (`+++`)
 
@@ -318,7 +318,7 @@ Should we implement a stack based VM to execute code, and make the interpreter i
 Or should we have a simpler "runtime status" like:
 
 - `program`: source code of the program to execute
-- `symbols`: hashtable with lower case key for the name, an integer as value, and some flags
+- `symbol_table`: hashtable with lower case key for the name, an integer as value, and necessary data
   - kind: constant, variable, procedure, function, ...
   - global / local scope
   - other value types (real, boolean, string, function, procedure, ...) should come at their own time
@@ -326,7 +326,7 @@ Or should we have a simpler "runtime status" like:
 
 ## License
 
-GNU General Public License v3.0 or later, see file `LICENSE`.
+GNU General Public License 3.0 or later, see file `LICENSE`.
 
 Each file should contains this:
 
