@@ -4,6 +4,6 @@
 #include "symbol_table.h"
 
 extern void global_table_init();
-extern bool global_table_add(symbol_t *symbol);
+extern int global_table_add(symbol_t *symbol);
 
 #endif 

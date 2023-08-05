@@ -75,7 +75,7 @@ int symbol_table_search(symbol_table_t *table, char *name)
  * @brief Get symbol
  *
  * @param name normalized
- * @return int index of symbol or -1 if not found
+ * @return symbol or NULL if not found
  */
 symbol_t *symbol_table_get(symbol_table_t *table, char *name)
 {

@@ -6,6 +6,7 @@
         "cerrno": "c",
         "pascalscript.tab.h": "c",
         "typeinfo": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "stdbool.h": "c"
     }
 }
