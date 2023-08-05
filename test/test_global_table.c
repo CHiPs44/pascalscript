@@ -8,10 +8,6 @@
 int main(void)
 {
     symbol_t *result;
-    // constant1.value.i = 0x0000DEAD;
-    // variable2.value.i = 0x0000BEEF;
-    // constant3.value.i = 0x12345678;
-    // constant4.value.i = 0x12345678;
     printf("TEST GLOBAL TABLE: BEGIN\n");
     global_table_init();
     printf("TEST GLOBAL TABLE: INIT OK\n");
