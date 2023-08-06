@@ -1,0 +1,31 @@
+/*
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
+#ifndef _RUNTIME_ERROR_H_
+#define _RUNTIME_ERROR_H_
+
+typedef enum _runtime_error_t
+{
+    RUNTIME_OK,
+    RUNTIME_STACK_EMPTY,
+    RUNTIME_STACK_OVERFLOW,
+    RUNTIME_GLOBAL_TABLE_FULL,
+    RUNTIME_UNKNOWN_UNARY_OPERATOR,
+    RUNTIME_UNKNOWN_BINARY_OPERATOR,
+    RUNTIME_EXPECTED_NUMBER,
+    RUNTIME_END_ENUM,
+} runtime_error_t;
+
+const char *runtime_error_messages[RUNTIME_END_ENUM - 1] = {
+    "OK",
+    "Stack empty",
+    "Stack overflow",
+    "Global table full",
+    "Unknown unary operator",
+    "Unknown binary operator",
+    "Number expected"};
+
+extern char *runtime_error_get_message(const runtime_error_t runtime_error);
+
+#endif

@@ -10,17 +10,19 @@
 typedef enum _kind_t
 {
     KIND_UNKNOWN = 0,
+    KIND_AUTO,
+    KIND_FREE,
     KIND_CONSTANT,
     KIND_VARIABLE,
-    // KIND_TYPE
     // KIND_PROCEDURE,
     // KIND_FUNCTION,
+    // KIND_TYPE,
 } kind_t;
 
 typedef enum _type_t
 {
     // for constants and variables
-    TYPE_UNDEFINED = 0,
+    TYPE_NONE = 0,
     TYPE_INTEGER,
     // TYPE_UNSIGNED_INTEGER,
     // TYPE_CHAR,

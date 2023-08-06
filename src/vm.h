@@ -1,3 +1,7 @@
+/*
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 #ifndef _VM_H
 #define _VM_H
 
@@ -17,9 +21,12 @@ extern void vm_init(vm_t *vm);
 
 extern symbol_t *vm_global_get(vm_t *vm, char *name);
 extern int       vm_global_add(vm_t *vm, symbol_t *symbol);
-extern symbol_t *vm_global_del(vm_t *vm, char *name);
+// extern symbol_t *vm_global_del(vm_t *vm, char *name);
 
 extern int       vm_stack_push(vm_t *vm, symbol_t *symbol);
-extern symbol_t *vm_stack_pop (vm_t *vm, symbol_stack_t *stack);
+extern symbol_t *vm_stack_pop (vm_t *vm);
+
+extern symbol_t *vm_auto_add_int(vm_t *vm, int value);
+extern int vm_auto_del(vm_t *vm, char *name);
 
 #endif
