@@ -3,25 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "symbol.h"
 #include "symbol_table.h"
-
-/**
- * @brief Normalize symbol (=> UPPERCASE) in place (no string copy)
- *
- * @param name
- */
-void symbol_normalize_name(char *name)
-{
-    while (*name)
-    {
-        /* a-z => A-Z */
-        if (*name >= 'a' && *name <= 'z')
-        {
-            *name -= ('a' - 'A');
-        }
-        name++;
-    }
-}
 
 void symbol_table_init(symbol_table_t *table)
 {
@@ -93,9 +76,9 @@ symbol_t *symbol_table_get(symbol_table_t *table, char *name)
  *        if table is full
  *        or symbol already exists
  *
- * @param table
- * @param symbol
- * @return int index of added symbol (>=0) or error (<0)
+ * @param Table
+ * @param Symbol
+ * @return Index of added symbol (>=0) or error (<0)
  */
 int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
 {
@@ -108,10 +91,36 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     {
         return SYMBOL_TABLE_ERROR_EXISTS;
     }
-    index = table->count;
+    // Find first free location
+    index = 0;
+    while (table->symbols[index]!=NULL)
+    {
+        index += 1;
+    }
     table->symbols[index] = symbol;
     table->count += 1;
     return index;
+}
+
+/**
+ * @brief Delete symbol
+ *
+ * @param Table
+ * @param Normalized name
+ * @return Symbol or NULL if not found
+ */
+symbol_t *symbol_table_del(symbol_table_t *table, char *name)
+{
+    symbol_t *symbol = NULL;
+    int index = symbol_table_search(table, name);
+    if (index >= 0)
+    {
+        symbol = table->symbols[index];
+        // Free this location by NULLing it
+        table->symbols[index] = NULL;
+        table->count -= 1;
+    }
+    return symbol;
 }
 
 /* EOF */

@@ -7,6 +7,10 @@
         "pascalscript.tab.h": "c",
         "typeinfo": "c",
         "algorithm": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "symbol_table.h": "c",
+        "stdlib.h": "c",
+        "symbol_stack.h": "c",
+        "symbol.h": "c"
     }
 }

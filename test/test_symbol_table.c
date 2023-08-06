@@ -1,14 +1,17 @@
 #include <stdio.h>
 
+#include "../src/symbol.h"
 #define SYMBOL_TABLE_SIZE 3
 #include "../src/symbol_table.h"
-#include "../src/symbol_table.c"
 
 symbol_table_t table;
 symbol_t constant1 = {"CONSTANT1", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x0000DEAD};
 symbol_t variable2 = {"VARIABLE2", KIND_VARIABLE, TYPE_INTEGER, sizeof(int), 0x0000BEEF};
 symbol_t constant3 = {"CONSTANT3", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x12345678};
 symbol_t constant4 = {"CONSTANT4", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x12345678};
+
+#include "../src/symbol_table.c"
+#include "../src/symbol.c"
 
 int main(void)
 {
