@@ -1,4 +1,6 @@
 %{
+    /* SPDX-License-Identifier: GPL-3.0-or-later */
+
     #include <stdio.h>
     #include <string.h>
     #include "error.h"
@@ -13,30 +15,55 @@
 identifier    [a-zA-Z][a-zA-Z0-9]*
 integer_value [0-9]+
 whitespace    [ \t]+
-eol           [\r\n]
-
+eol           [\r\n|\r|\n]
+A             [Aa]
+B             [Bb]
+C             [Cc]
+D             [Dd]
+E             [Ee]
+F             [Ff]
+G             [Gg]
+H             [Hh]
+I             [Ii]
+J             [Jj]
+K             [Kk]
+L             [Ll]
+M             [Mm]
+N             [Nn]
+O             [Oo]
+P             [Pp]
+Q             [Qq]
+R             [Rr]
+S             [Ss]
+T             [Tt]
+U             [Uu]
+V             [Vv]
+W             [Ww]
+X             [Xx]
+Y             [Yy]
+Z             [Zz]
 %%
 
-"+"       { return T_PLUS;              }
-"-"       { return T_MINUS;             }
-"*"       { return T_STAR;              }
-"/"       { return T_SLASH;             }
-"div"     { return T_DIV;               }
-"mod"     { return T_MOD;               }
-":="      { return T_ASSIGN;            }
-"("       { return T_LEFT_PARENTHESIS;  }
-")"       { return T_RIGHT_PARENTHESIS; }
-":"       { return T_COLON;             }
-";"       { return T_SEMICOLON;         }
-"."       { return T_DOT;               }
-"="       { return T_EQUALS;            }
-"program" { return T_PROGRAM;           }
-"const"   { return T_CONST;             }
-"var"     { return T_VAR;               }
-"begin"   { return T_BEGIN;             }
-"end"     { return T_END;               }
-"writeln" { return T_WRITELN;           }
-"integer" { return T_INTEGER;           }
+"+"                   { return T_PLUS;              }
+"-"                   { return T_MINUS;             }
+"*"                   { return T_STAR;              }
+"/"                   { return T_SLASH;             }
+{D}{I}{V}             { return T_DIV;               }
+{M}{O}{D}             { return T_MOD;               }
+":="                  { return T_ASSIGN;            }
+"("                   { return T_LEFT_PARENTHESIS;  }
+")"                   { return T_RIGHT_PARENTHESIS; }
+":"                   { return T_COLON;             }
+";"                   { return T_SEMICOLON;         }
+"."                   { return T_DOT;               }
+"="                   { return T_EQUALS;            }
+{P}{R}{O}{G}{R}{A}{M} { return T_PROGRAM;           }
+{C}{O}{N}{S}{T}       { return T_CONST;             }
+{V}{A}{R}             { return T_VAR;               }
+{B}{E}{G}{I}{N}       { return T_BEGIN;             }
+{E}{N}{D}             { return T_END;               }
+{W}{R}{I}{T}{E}{L}{N} { return T_WRITELN;           }
+{I}{N}{T}{E}{G}{E}{R} { return T_INTEGER;           }
 
 {integer_value} {
   int zzerror = copy_integer_value(yytext);
@@ -55,9 +82,11 @@ eol           [\r\n]
 {whitespace} {
   fprintf( stderr, " [ ]");
 }
+
 {eol} {
   fprintf( stderr, "\n%d ", yylineno );
 }
+
 . {
   fprintf( stderr, " {%c}", yytext[0] );
   // return yytext[0];

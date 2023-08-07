@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include "error.h"
 
-static char error_unknown[31];
+static char error_unknown[32];
 
 char *error_get_message(error_code_t code)
 {
     switch (code)
     {
     case ERROR_NONE:
-        return "No";
+        return "None";
     case ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case ERROR_OVERFLOW:

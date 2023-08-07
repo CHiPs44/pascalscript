@@ -37,6 +37,7 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Standard Pascal" <https://standardpascal.org/>
 - "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
 - "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
+- "Simple Swift interpreter for the Pascal language" <https://github.com/igorkulman/SwiftPascalInterpreter>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 

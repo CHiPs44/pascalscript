@@ -22,8 +22,8 @@ typedef struct _token_t
 extern token_t yylval;
 extern token_t *token;
 
-extern int copy_identifier(const char *buffer);
+extern error_code_t copy_identifier(const char *buffer);
 
-extern int copy_integer_value(const char *buffer);
+extern error_code_t copy_integer_value(const char *buffer);
 
 #endif

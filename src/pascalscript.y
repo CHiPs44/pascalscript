@@ -1,7 +1,10 @@
 %{
-#include <stdio.h>
-#include "lexer.h"
-// extern void yyerror(string *message);
+    /* SPDX-License-Identifier: GPL-3.0-or-later */
+
+    #include <stdio.h>
+    #include "lexer.h"
+
+    // extern void yyerror(string *message);
     int yyerror(char *message);
 %}
 
@@ -30,6 +33,8 @@
 %token T_INTEGER_VALUE
 /* identifier */
 %token T_IDENTIFIER
+/* reserved / not implemented */
+/* %token T_RESERVED */
 
 %start program
 
