@@ -1,9 +1,20 @@
+/*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 #ifndef _SYMBOL_STACK_H
 #define _SYMBOL_STACK_H
 
 #include <stdbool.h>
 
 #include "symbol.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #ifndef SYMBOL_STACK_SIZE
 #define SYMBOL_STACK_SIZE 256
@@ -28,5 +39,8 @@ extern symbol_t *symbol_stack_peek(symbol_stack_t *stack);
 
 // extern int stack_add(symbol_stack_t *stack);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* _SYMBOL_STACK_H */

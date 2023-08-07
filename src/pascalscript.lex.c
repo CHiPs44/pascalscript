@@ -399,14 +399,14 @@ static const YY_CHAR yy_ec[256] =
         1,    2,    1,    1,    1,    1,    1,    1,    1,    5,
         6,    7,    8,    1,    9,   10,   11,   12,   12,   12,
        12,   12,   12,   12,   12,   12,   12,   13,   14,    1,
-       15,    1,    1,    1,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-        1,    1,    1,    1,    1,    1,   17,   18,   19,   20,
+       15,    1,    1,    1,   16,   17,   18,   19,   20,   21,
+       22,   21,   23,   21,   21,   24,   25,   26,   27,   28,
+       21,   29,   30,   31,   21,   32,   33,   21,   21,   21,
+        1,    1,    1,    1,    1,    1,   16,   17,   18,   19,
 
-       21,   16,   22,   16,   23,   16,   16,   24,   25,   26,
-       27,   28,   16,   29,   30,   31,   16,   32,   33,   16,
-       16,   16,    1,    1,    1,    1,    1,    1,    1,    1,
+       20,   21,   22,   21,   23,   21,   21,   24,   25,   26,
+       27,   28,   21,   29,   30,   31,   21,   32,   33,   21,
+       21,   21,    1,    4,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -434,11 +434,11 @@ static const YY_CHAR yy_meta[34] =
 static const flex_int16_t yy_base[69] =
     {   0,
         0,    0,   74,   75,   71,   75,   75,   75,   75,   75,
-       75,   75,   75,   75,   60,   56,   75,   75,    0,   49,
-       42,   45,   41,   40,   38,   35,   46,   33,   59,   48,
-       75,    0,   37,   32,   25,   36,   24,   34,   26,   23,
-       28,   27,   19,    0,    0,   27,    0,   25,    0,   15,
-       19,   13,   21,   13,   20,    0,    0,   19,   22,   14,
+       75,   75,   75,   75,   60,   56,   75,   75,    0,   50,
+       42,   45,   41,   40,   38,   35,   47,   33,   59,   48,
+       75,    0,   37,   32,   25,   37,   24,   35,   26,   23,
+       28,   27,   19,    0,    0,   28,    0,   25,    0,   15,
+       19,   13,   21,   13,   21,    0,    0,   20,   23,   14,
         8,   11,    9,    0,    0,    0,   75,   32
     } ;
 
@@ -456,8 +456,8 @@ static const flex_int16_t yy_def[69] =
 static const flex_int16_t yy_nxt[109] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
-       14,   15,   16,   17,   18,   19,   19,   20,   21,   22,
-       23,   19,   24,   19,   25,   19,   19,   26,   19,   19,
+       14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
+       19,   19,   24,   19,   25,   19,   19,   26,   19,   19,
        19,   27,   28,   32,   66,   65,   64,   63,   62,   61,
        60,   59,   58,   57,   56,   55,   54,   53,   52,   51,
        50,   49,   48,   47,   46,   45,   44,   43,   42,   30,
@@ -507,15 +507,22 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "pascalscript.l"
 #line 2 "pascalscript.l"
-    #include <stdio.h>
-    #include <string.h>
-    #include "error.h"
-    #include "lexer.h"
-    #include "pascalscript.tab.h"
+/*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
 
-    int yyerror(char *message);
-#line 518 "pascalscript.lex.c"
-#line 519 "pascalscript.lex.c"
+#include <stdio.h>
+#include <string.h>
+#include "error.h"
+#include "lexer.h"
+#include "pascalscript.tab.h"
+
+int yyerror(char *message);
+
+#line 525 "pascalscript.lex.c"
+#line 526 "pascalscript.lex.c"
 
 #define INITIAL 0
 
@@ -732,10 +739,10 @@ YY_DECL
 		}
 
 	{
-#line 18 "pascalscript.l"
+#line 50 "pascalscript.l"
 
 
-#line 739 "pascalscript.lex.c"
+#line 746 "pascalscript.lex.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -804,107 +811,107 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 20 "pascalscript.l"
+#line 52 "pascalscript.l"
 { return T_PLUS;              }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "pascalscript.l"
+#line 53 "pascalscript.l"
 { return T_MINUS;             }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 22 "pascalscript.l"
+#line 54 "pascalscript.l"
 { return T_STAR;              }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "pascalscript.l"
+#line 55 "pascalscript.l"
 { return T_SLASH;             }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 24 "pascalscript.l"
+#line 56 "pascalscript.l"
 { return T_DIV;               }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 25 "pascalscript.l"
+#line 57 "pascalscript.l"
 { return T_MOD;               }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 26 "pascalscript.l"
+#line 58 "pascalscript.l"
 { return T_ASSIGN;            }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 27 "pascalscript.l"
+#line 59 "pascalscript.l"
 { return T_LEFT_PARENTHESIS;  }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "pascalscript.l"
+#line 60 "pascalscript.l"
 { return T_RIGHT_PARENTHESIS; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 29 "pascalscript.l"
+#line 61 "pascalscript.l"
 { return T_COLON;             }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 30 "pascalscript.l"
+#line 62 "pascalscript.l"
 { return T_SEMICOLON;         }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 31 "pascalscript.l"
+#line 63 "pascalscript.l"
 { return T_DOT;               }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 32 "pascalscript.l"
+#line 64 "pascalscript.l"
 { return T_EQUALS;            }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 33 "pascalscript.l"
+#line 65 "pascalscript.l"
 { return T_PROGRAM;           }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 34 "pascalscript.l"
+#line 66 "pascalscript.l"
 { return T_CONST;             }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 35 "pascalscript.l"
+#line 67 "pascalscript.l"
 { return T_VAR;               }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 36 "pascalscript.l"
+#line 68 "pascalscript.l"
 { return T_BEGIN;             }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 37 "pascalscript.l"
+#line 69 "pascalscript.l"
 { return T_END;               }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 38 "pascalscript.l"
+#line 70 "pascalscript.l"
 { return T_WRITELN;           }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 39 "pascalscript.l"
+#line 71 "pascalscript.l"
 { return T_INTEGER;           }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 41 "pascalscript.l"
+#line 73 "pascalscript.l"
 {
   int zzerror = copy_integer_value(yytext);
   if (zzerror == ERROR_NONE)
@@ -914,7 +921,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "pascalscript.l"
+#line 80 "pascalscript.l"
 {
   int zzerror = copy_identifier(yytext);
   if (zzerror == ERROR_NONE)
@@ -924,7 +931,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "pascalscript.l"
+#line 87 "pascalscript.l"
 {
   fprintf( stderr, " [ ]");
 }
@@ -932,14 +939,14 @@ YY_RULE_SETUP
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 58 "pascalscript.l"
+#line 91 "pascalscript.l"
 {
   fprintf( stderr, "\n%d ", yylineno );
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 61 "pascalscript.l"
+#line 95 "pascalscript.l"
 {
   fprintf( stderr, " {%c}", yytext[0] );
   // return yytext[0];
@@ -949,10 +956,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 68 "pascalscript.l"
+#line 102 "pascalscript.l"
 ECHO;
 	YY_BREAK
-#line 956 "pascalscript.lex.c"
+#line 963 "pascalscript.lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1969,7 +1976,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 68 "pascalscript.l"
+#line 102 "pascalscript.l"
 
 
 int yyerror(char *message) 

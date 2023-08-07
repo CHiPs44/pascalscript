@@ -327,8 +327,14 @@ Or should we have a simpler "runtime status" like:
 
 ## License
 
-GNU General Public License 3.0 or later, see file `LICENSE`.
+This project is licensed under GNU General Public License 3.0 or later, see file `LICENSE`.
 
-Each file should contains this:
+Each file should contains this header:
 
-`SPDX-License-Identifier: GPL-3.0-or-later`
+```c
+/*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+```

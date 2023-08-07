@@ -1,9 +1,16 @@
 /*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _OP_H_
-#define _OP_H_
+#ifndef _OPERATOR_H_
+#define _OPERATOR_H_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef enum _operator_t {
     OP_NOP,
@@ -27,4 +34,8 @@ typedef enum _operator_t {
 extern runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator);
 extern runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* _OPERATOR_H_ */

@@ -3,7 +3,6 @@
         "errno.h": "c",
         "error.h": "c",
         "err.h": "c",
-        "cerrno": "c",
         "pascalscript.tab.h": "c",
         "typeinfo": "c",
         "algorithm": "c",

@@ -1,13 +1,18 @@
 %{
-    /* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
 
-    #include <stdio.h>
-    #include <string.h>
-    #include "error.h"
-    #include "lexer.h"
-    #include "pascalscript.tab.h"
+#include <stdio.h>
+#include <string.h>
+#include "error.h"
+#include "lexer.h"
+#include "pascalscript.tab.h"
 
-    int yyerror(char *message);
+int yyerror(char *message);
+
 %}
 
 %option yylineno

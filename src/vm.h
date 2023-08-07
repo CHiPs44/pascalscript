@@ -1,4 +1,6 @@
 /*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -7,6 +9,11 @@
 
 #include "symbol_table.h"
 #include "symbol_stack.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef struct _vm_t
 {
@@ -29,4 +36,8 @@ extern symbol_t *vm_stack_pop (vm_t *vm);
 extern symbol_t *vm_auto_add_int(vm_t *vm, int value);
 extern int vm_auto_del(vm_t *vm, char *name);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* _VM_H */
