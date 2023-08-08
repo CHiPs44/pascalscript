@@ -24,7 +24,7 @@ typedef enum _runtime_error_t
     RUNTIME_END_ENUM,
 } runtime_error_t;
 
-const char *runtime_error_messages[RUNTIME_END_ENUM - 1] = {
+const char *runtime_error_messages[RUNTIME_END_ENUM] = {
     "OK",
     "Stack empty",
     "Stack overflow",
@@ -33,7 +33,7 @@ const char *runtime_error_messages[RUNTIME_END_ENUM - 1] = {
     "Unknown binary operator",
     "Number expected"};
 
-extern char *runtime_error_get_message(const runtime_error_t runtime_error);
+extern const char *runtime_error_get_message(const runtime_error_t runtime_error);
 
 #ifdef __cplusplus
 }

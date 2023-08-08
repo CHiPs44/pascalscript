@@ -28,55 +28,55 @@ void symbol_normalize_name(char *name)
 
 char *symbol_get_kind_name(kind_t kind)
 {
-    char *kind;
+    char *kind_name;
     /*          12345678 */
     switch (kind)
     {
     case KIND_UNKNOWN:
-        kind = "UNKNOWN ";
+        kind_name = "UNKNOWN ";
         break;
     case KIND_AUTO:
-        kind = "AUTO    ";
+        kind_name = "AUTO    ";
         break;
     case KIND_FREE:
-        kind = "FREE    ";
+        kind_name = "FREE    ";
         break;
     case KIND_CONSTANT:
-        kind = "CONSTANT";
+        kind_name = "CONSTANT";
         break;
     case KIND_VARIABLE:
-        kind = "VARIABLE";
+        kind_name = "VARIABLE";
         break;
     default:
-        kind = "????????";
+        kind_name = "????????";
         break;
     }
-    return kind;
+    return kind_name;
 }
 
 char *symbol_get_type_name(type_t type)
 {
-    char *type;
+    char *type_name;
     /*          12345678 */
     switch (type)
     {
     case TYPE_NONE:
-        type = "NONE    ";
+        type_name = "NONE    ";
         break;
     case TYPE_INTEGER:
-        type = "INTEGER ";
+        type_name = "INTEGER ";
         break;
     default:
-        type = "????????";
+        type_name = "????????";
         break;
     }
-    return type;
+    return type_name;
 }
 
 void symbol_dump(symbol_t *symbol)
 {
-    char *kind = symbol_get_kind_name(symbol->kind);
-    char *type = symbol_get_type_name(symbol->type);
+    char *kind_name = symbol_get_kind_name(symbol->kind);
+    char *type_name = symbol_get_type_name(symbol->type);
     char value[32];
     switch (symbol->type)
     {
@@ -84,15 +84,15 @@ void symbol_dump(symbol_t *symbol)
         snprintf(value, 31, "?");
         break;
     case TYPE_INTEGER:
-        snprintf(value, 31, "%d / %08x", symbol->value.i);
+        snprintf(value, 31, "%d / %08x", symbol->value.i, symbol->value.i);
         break;
     default:
         snprintf(value, 31, "?");
         break;
     }
     fprintf(stderr,
-            "SYMBOL: name=%s, type=%s, kind=%s, size=%d, value=%s\n",
-            symbol->name, kind, type, symbol->size, value);
+            "SYMBOL: name=%s, type=%s, kind=%s, size=%ld, value=%s\n",
+            symbol->name, kind_name, type_name, symbol->size, value);
 }
 
 /* EOF */

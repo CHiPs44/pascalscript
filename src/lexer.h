@@ -7,6 +7,8 @@
 #ifndef _LEXER_H
 #define _LEXER_H
 
+#include "error.h"
+
 #ifdef __cplusplus
 extern "C"
 {

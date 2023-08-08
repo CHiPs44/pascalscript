@@ -34,7 +34,7 @@ extern int       vm_stack_push(vm_t *vm, symbol_t *symbol);
 extern symbol_t *vm_stack_pop (vm_t *vm);
 
 extern symbol_t *vm_auto_add_int(vm_t *vm, int value);
-extern int vm_auto_del(vm_t *vm, char *name);
+extern int vm_auto_free(vm_t *vm, char *name);
 
 #ifdef __cplusplus
 }

@@ -10,6 +10,7 @@
         "symbol_table.h": "c",
         "stdlib.h": "c",
         "symbol_stack.h": "c",
-        "symbol.h": "c"
+        "symbol.h": "c",
+        "vm.h": "c"
     }
 }

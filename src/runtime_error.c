@@ -8,7 +8,7 @@
 
 #include "runtime_error.h"
 
-char *runtime_error_get_message(const runtime_error_t runtime_error)
+const char *runtime_error_get_message(const runtime_error_t runtime_error)
 {
     if  (runtime_error>=RUNTIME_OK&& runtime_error<RUNTIME_END_ENUM) {
         return runtime_error_messages[runtime_error];

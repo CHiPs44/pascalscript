@@ -42,7 +42,7 @@ error_code_t copy_identifier(const char *buffer)
  */
 error_code_t copy_integer_value(const char *buffer)
 {
-    int val = strtoi(buffer, 0, 10);
+    int val = strtol(buffer, 0, 10);
     if (val == INT_MAX && errno == ERANGE)
     {
         return ERROR_OVERFLOW;

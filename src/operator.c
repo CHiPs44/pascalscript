@@ -24,7 +24,7 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
         return RUNTIME_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
-        vm_auto_del(vm, a->name);
+        vm_auto_free(vm, a->name);
     switch (operator)
     {
     case OP_NEG:
@@ -37,7 +37,7 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
             return RUNTIME_GLOBAL_TABLE_FULL;
         if (vm_stack_push(vm, b) == SYMBOL_STACK_OVERFLOW)
         {
-            vm_auto_del(vm, b->name);
+            vm_auto_free(vm, b->name);
             return RUNTIME_STACK_OVERFLOW;
         }
         return RUNTIME_OK;
@@ -53,13 +53,13 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
         return RUNTIME_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (b->kind == KIND_AUTO)
-        vm_auto_del(vm, b->name);
+        vm_auto_free(vm, b->name);
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
-        vm_auto_del(vm, a->name);
+        vm_auto_free(vm, a->name);
     switch (operator)
     {
     case OP_ADD:
@@ -86,7 +86,7 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
             return RUNTIME_GLOBAL_TABLE_FULL;
         if (vm_stack_push(vm, c) == SYMBOL_STACK_OVERFLOW)
         {
-            vm_auto_del(vm, c->name);
+            vm_auto_free(vm, c->name);
             return RUNTIME_STACK_OVERFLOW;
         }
         return RUNTIME_OK;
