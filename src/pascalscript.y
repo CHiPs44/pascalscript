@@ -8,12 +8,12 @@
 #include <stdio.h>
 #include "lexer.h"
 
-// extern void yyerror(string *message);
-int yyerror(char *message);
+int yyerror(const char *message);
+extern int yylex (void);
 
 %}
 
-/* %define parse.error detailed */
+%define parse.error detailed
 /* %define api.pure */
 %define api.value.type { token_t }
 
@@ -85,6 +85,7 @@ program_declaration
 
 constant_declaration_block
     : T_CONST constant_declaration_list
+    |
 ;
 constant_declaration_list
     : constant_declaration
@@ -99,13 +100,14 @@ constant_literal
 
 variable_declaration_block
     : T_VAR variable_declaration_list
+    |
 ;
 variable_declaration_list
     : variable_declaration
     | variable_declaration_list variable_declaration
 ;
 variable_declaration
-    : T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+    : T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
 ;
 
 statement_list
@@ -139,6 +141,7 @@ factor
     : T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
     | T_MINUS factor
     | scalar
+    | T_IDENTIFIER
 ;
 scalar
     : T_INTEGER_VALUE

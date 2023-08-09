@@ -7,74 +7,77 @@ Grammaire
     2 program_declaration: T_PROGRAM T_IDENTIFIER T_SEMICOLON
 
     3 constant_declaration_block: T_CONST constant_declaration_list
+    4                           | ε
 
-    4 constant_declaration_list: constant_declaration
-    5                          | constant_declaration_list constant_declaration
+    5 constant_declaration_list: constant_declaration
+    6                          | constant_declaration_list constant_declaration
 
-    6 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
+    7 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
 
-    7 constant_literal: T_INTEGER_VALUE
+    8 constant_literal: T_INTEGER_VALUE
 
-    8 variable_declaration_block: T_VAR variable_declaration_list
+    9 variable_declaration_block: T_VAR variable_declaration_list
+   10                           | ε
 
-    9 variable_declaration_list: variable_declaration
-   10                          | variable_declaration_list variable_declaration
+   11 variable_declaration_list: variable_declaration
+   12                          | variable_declaration_list variable_declaration
 
-   11 variable_declaration: T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+   13 variable_declaration: T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
 
-   12 statement_list: statement
-   13               | statement_list statement
+   14 statement_list: statement
+   15               | statement_list statement
 
-   14 statement: assignement
-   15          | writeln
+   16 statement: assignement
+   17          | writeln
 
-   16 assignement: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+   18 assignement: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
 
-   17 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+   19 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 
-   18 expression: expression T_PLUS term
-   19           | expression T_MINUS term
-   20           | term
+   20 expression: expression T_PLUS term
+   21           | expression T_MINUS term
+   22           | term
 
-   21 term: term T_STAR factor
-   22     | term T_SLASH factor
-   23     | term T_DIV factor
-   24     | term T_MOD factor
-   25     | factor
+   23 term: term T_STAR factor
+   24     | term T_SLASH factor
+   25     | term T_DIV factor
+   26     | term T_MOD factor
+   27     | factor
 
-   26 factor: T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | T_MINUS factor
-   28       | scalar
+   28 factor: T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | T_MINUS factor
+   30       | scalar
+   31       | T_IDENTIFIER
 
-   29 scalar: T_INTEGER_VALUE
+   32 scalar: T_INTEGER_VALUE
 
 
 Terminaux, suivis des règles où ils apparaissent
 
     $end (0) 0
     error (256)
-    T_PLUS (258) 18
-    T_MINUS (259) 19 27
-    T_STAR (260) 21
-    T_SLASH (261) 22
-    T_DIV (262) 23
-    T_MOD (263) 24
-    T_ASSIGN (264) 16
-    T_LEFT_PARENTHESIS (265) 17 26
-    T_RIGHT_PARENTHESIS (266) 17 26
-    T_COLON (267) 11
-    T_SEMICOLON (268) 2 6 11 16 17
+    T_PLUS (258) 20
+    T_MINUS (259) 21 29
+    T_STAR (260) 23
+    T_SLASH (261) 24
+    T_DIV (262) 25
+    T_MOD (263) 26
+    T_ASSIGN (264) 18
+    T_LEFT_PARENTHESIS (265) 19 28
+    T_RIGHT_PARENTHESIS (266) 19 28
+    T_COLON (267) 13
+    T_SEMICOLON (268) 2 7 13 18 19
     T_DOT (269) 1
-    T_EQUALS (270) 6
+    T_EQUALS (270) 7
     T_PROGRAM (271) 2
     T_CONST (272) 3
-    T_VAR (273) 8 11
+    T_VAR (273) 9
     T_BEGIN (274) 1
     T_END (275) 1
-    T_WRITELN (276) 17
-    T_INTEGER (277) 11
-    T_INTEGER_VALUE (278) 7 29
-    T_IDENTIFIER (279) 2 6 11 16 17
+    T_WRITELN (276) 19
+    T_INTEGER (277) 13
+    T_INTEGER_VALUE (278) 8 32
+    T_IDENTIFIER (279) 2 7 13 18 19 31
 
 
 Non-terminaux, suivis des règles où ils apparaissent
@@ -88,50 +91,50 @@ Non-terminaux, suivis des règles où ils apparaissent
         à gauche: 2
         à droite: 1
     constant_declaration_block (28)
-        à gauche: 3
+        à gauche: 3 4
         à droite: 1
     constant_declaration_list (29)
-        à gauche: 4 5
-        à droite: 3 5
+        à gauche: 5 6
+        à droite: 3 6
     constant_declaration (30)
-        à gauche: 6
-        à droite: 4 5
-    constant_literal (31)
         à gauche: 7
-        à droite: 6
-    variable_declaration_block (32)
+        à droite: 5 6
+    constant_literal (31)
         à gauche: 8
+        à droite: 7
+    variable_declaration_block (32)
+        à gauche: 9 10
         à droite: 1
     variable_declaration_list (33)
-        à gauche: 9 10
-        à droite: 8 10
+        à gauche: 11 12
+        à droite: 9 12
     variable_declaration (34)
-        à gauche: 11
-        à droite: 9 10
+        à gauche: 13
+        à droite: 11 12
     statement_list (35)
-        à gauche: 12 13
-        à droite: 1 13
-    statement (36)
         à gauche: 14 15
-        à droite: 12 13
+        à droite: 1 15
+    statement (36)
+        à gauche: 16 17
+        à droite: 14 15
     assignement (37)
-        à gauche: 16
-        à droite: 14
+        à gauche: 18
+        à droite: 16
     writeln (38)
-        à gauche: 17
-        à droite: 15
+        à gauche: 19
+        à droite: 17
     expression (39)
-        à gauche: 18 19 20
-        à droite: 16 18 19 26
+        à gauche: 20 21 22
+        à droite: 18 20 21 28
     term (40)
-        à gauche: 21 22 23 24 25
-        à droite: 18 19 20 21 22 23 24
+        à gauche: 23 24 25 26 27
+        à droite: 20 21 22 23 24 25 26
     factor (41)
-        à gauche: 26 27 28
-        à droite: 21 22 23 24 25 27
+        à gauche: 28 29 30 31
+        à droite: 23 24 25 26 27 29
     scalar (42)
-        à gauche: 29
-        à droite: 28
+        à gauche: 32
+        à droite: 30
 
 
 État 0
@@ -164,8 +167,11 @@ Non-terminaux, suivis des règles où ils apparaissent
 
     1 program: program_declaration • constant_declaration_block variable_declaration_block T_BEGIN statement_list T_END T_DOT
     3 constant_declaration_block: • T_CONST constant_declaration_list
+    4                           | ε •  [T_VAR, T_BEGIN]
 
     T_CONST  décalage et aller à l'état 6
+
+    $défaut  réduction par utilisation de la règle 4 (constant_declaration_block)
 
     constant_declaration_block  aller à l'état 7
 
@@ -187,9 +193,9 @@ Non-terminaux, suivis des règles où ils apparaissent
 État 6
 
     3 constant_declaration_block: T_CONST • constant_declaration_list
-    4 constant_declaration_list: • constant_declaration
-    5                          | • constant_declaration_list constant_declaration
-    6 constant_declaration: • T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
+    5 constant_declaration_list: • constant_declaration
+    6                          | • constant_declaration_list constant_declaration
+    7 constant_declaration: • T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
 
     T_IDENTIFIER  décalage et aller à l'état 9
 
@@ -200,9 +206,12 @@ Non-terminaux, suivis des règles où ils apparaissent
 État 7
 
     1 program: program_declaration constant_declaration_block • variable_declaration_block T_BEGIN statement_list T_END T_DOT
-    8 variable_declaration_block: • T_VAR variable_declaration_list
+    9 variable_declaration_block: • T_VAR variable_declaration_list
+   10                           | ε •  [T_BEGIN]
 
     T_VAR  décalage et aller à l'état 12
+
+    $défaut  réduction par utilisation de la règle 10 (variable_declaration_block)
 
     variable_declaration_block  aller à l'état 13
 
@@ -216,16 +225,16 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 9
 
-    6 constant_declaration: T_IDENTIFIER • T_EQUALS constant_literal T_SEMICOLON
+    7 constant_declaration: T_IDENTIFIER • T_EQUALS constant_literal T_SEMICOLON
 
     T_EQUALS  décalage et aller à l'état 14
 
 
 État 10
 
-    3 constant_declaration_block: T_CONST constant_declaration_list •  [T_VAR]
-    5 constant_declaration_list: constant_declaration_list • constant_declaration
-    6 constant_declaration: • T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
+    3 constant_declaration_block: T_CONST constant_declaration_list •  [T_VAR, T_BEGIN]
+    6 constant_declaration_list: constant_declaration_list • constant_declaration
+    7 constant_declaration: • T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON
 
     T_IDENTIFIER  décalage et aller à l'état 9
 
@@ -236,19 +245,19 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 11
 
-    4 constant_declaration_list: constant_declaration •
+    5 constant_declaration_list: constant_declaration •
 
-    $défaut  réduction par utilisation de la règle 4 (constant_declaration_list)
+    $défaut  réduction par utilisation de la règle 5 (constant_declaration_list)
 
 
 État 12
 
-    8 variable_declaration_block: T_VAR • variable_declaration_list
-    9 variable_declaration_list: • variable_declaration
-   10                          | • variable_declaration_list variable_declaration
-   11 variable_declaration: • T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+    9 variable_declaration_block: T_VAR • variable_declaration_list
+   11 variable_declaration_list: • variable_declaration
+   12                          | • variable_declaration_list variable_declaration
+   13 variable_declaration: • T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
 
-    T_VAR  décalage et aller à l'état 16
+    T_IDENTIFIER  décalage et aller à l'état 16
 
     variable_declaration_list  aller à l'état 17
     variable_declaration       aller à l'état 18
@@ -263,8 +272,8 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 14
 
-    6 constant_declaration: T_IDENTIFIER T_EQUALS • constant_literal T_SEMICOLON
-    7 constant_literal: • T_INTEGER_VALUE
+    7 constant_declaration: T_IDENTIFIER T_EQUALS • constant_literal T_SEMICOLON
+    8 constant_literal: • T_INTEGER_VALUE
 
     T_INTEGER_VALUE  décalage et aller à l'état 20
 
@@ -273,47 +282,47 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 15
 
-    5 constant_declaration_list: constant_declaration_list constant_declaration •
+    6 constant_declaration_list: constant_declaration_list constant_declaration •
 
-    $défaut  réduction par utilisation de la règle 5 (constant_declaration_list)
+    $défaut  réduction par utilisation de la règle 6 (constant_declaration_list)
 
 
 État 16
 
-   11 variable_declaration: T_VAR • T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+   13 variable_declaration: T_IDENTIFIER • T_COLON T_INTEGER T_SEMICOLON
 
-    T_IDENTIFIER  décalage et aller à l'état 22
+    T_COLON  décalage et aller à l'état 22
 
 
 État 17
 
-    8 variable_declaration_block: T_VAR variable_declaration_list •  [T_BEGIN]
-   10 variable_declaration_list: variable_declaration_list • variable_declaration
-   11 variable_declaration: • T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+    9 variable_declaration_block: T_VAR variable_declaration_list •  [T_BEGIN]
+   12 variable_declaration_list: variable_declaration_list • variable_declaration
+   13 variable_declaration: • T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
 
-    T_VAR  décalage et aller à l'état 16
+    T_IDENTIFIER  décalage et aller à l'état 16
 
-    $défaut  réduction par utilisation de la règle 8 (variable_declaration_block)
+    $défaut  réduction par utilisation de la règle 9 (variable_declaration_block)
 
     variable_declaration  aller à l'état 23
 
 
 État 18
 
-    9 variable_declaration_list: variable_declaration •
+   11 variable_declaration_list: variable_declaration •
 
-    $défaut  réduction par utilisation de la règle 9 (variable_declaration_list)
+    $défaut  réduction par utilisation de la règle 11 (variable_declaration_list)
 
 
 État 19
 
     1 program: program_declaration constant_declaration_block variable_declaration_block T_BEGIN • statement_list T_END T_DOT
-   12 statement_list: • statement
-   13               | • statement_list statement
-   14 statement: • assignement
-   15          | • writeln
-   16 assignement: • T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
-   17 writeln: • T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+   14 statement_list: • statement
+   15               | • statement_list statement
+   16 statement: • assignement
+   17          | • writeln
+   18 assignement: • T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+   19 writeln: • T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 
     T_WRITELN     décalage et aller à l'état 24
     T_IDENTIFIER  décalage et aller à l'état 25
@@ -326,42 +335,42 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 20
 
-    7 constant_literal: T_INTEGER_VALUE •
+    8 constant_literal: T_INTEGER_VALUE •
 
-    $défaut  réduction par utilisation de la règle 7 (constant_literal)
+    $défaut  réduction par utilisation de la règle 8 (constant_literal)
 
 
 État 21
 
-    6 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal • T_SEMICOLON
+    7 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal • T_SEMICOLON
 
     T_SEMICOLON  décalage et aller à l'état 30
 
 
 État 22
 
-   11 variable_declaration: T_VAR T_IDENTIFIER • T_COLON T_INTEGER T_SEMICOLON
+   13 variable_declaration: T_IDENTIFIER T_COLON • T_INTEGER T_SEMICOLON
 
-    T_COLON  décalage et aller à l'état 31
+    T_INTEGER  décalage et aller à l'état 31
 
 
 État 23
 
-   10 variable_declaration_list: variable_declaration_list variable_declaration •
+   12 variable_declaration_list: variable_declaration_list variable_declaration •
 
-    $défaut  réduction par utilisation de la règle 10 (variable_declaration_list)
+    $défaut  réduction par utilisation de la règle 12 (variable_declaration_list)
 
 
 État 24
 
-   17 writeln: T_WRITELN • T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+   19 writeln: T_WRITELN • T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 
     T_LEFT_PARENTHESIS  décalage et aller à l'état 32
 
 
 État 25
 
-   16 assignement: T_IDENTIFIER • T_ASSIGN expression T_SEMICOLON
+   18 assignement: T_IDENTIFIER • T_ASSIGN expression T_SEMICOLON
 
     T_ASSIGN  décalage et aller à l'état 33
 
@@ -369,11 +378,11 @@ Non-terminaux, suivis des règles où ils apparaissent
 État 26
 
     1 program: program_declaration constant_declaration_block variable_declaration_block T_BEGIN statement_list • T_END T_DOT
-   13 statement_list: statement_list • statement
-   14 statement: • assignement
-   15          | • writeln
-   16 assignement: • T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
-   17 writeln: • T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+   15 statement_list: statement_list • statement
+   16 statement: • assignement
+   17          | • writeln
+   18 assignement: • T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+   19 writeln: • T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 
     T_END         décalage et aller à l'état 34
     T_WRITELN     décalage et aller à l'état 24
@@ -386,167 +395,383 @@ Non-terminaux, suivis des règles où ils apparaissent
 
 État 27
 
-   12 statement_list: statement •
+   14 statement_list: statement •
 
-    $défaut  réduction par utilisation de la règle 12 (statement_list)
+    $défaut  réduction par utilisation de la règle 14 (statement_list)
 
 
 État 28
 
-   14 statement: assignement •
+   16 statement: assignement •
 
-    $défaut  réduction par utilisation de la règle 14 (statement)
+    $défaut  réduction par utilisation de la règle 16 (statement)
 
 
 État 29
 
-   15 statement: writeln •
+   17 statement: writeln •
 
-    $défaut  réduction par utilisation de la règle 15 (statement)
+    $défaut  réduction par utilisation de la règle 17 (statement)
 
 
 État 30
 
-    6 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON •
+    7 constant_declaration: T_IDENTIFIER T_EQUALS constant_literal T_SEMICOLON •
 
-    $défaut  réduction par utilisation de la règle 6 (constant_declaration)
+    $défaut  réduction par utilisation de la règle 7 (constant_declaration)
 
 
 État 31
 
-   11 variable_declaration: T_VAR T_IDENTIFIER T_COLON • T_INTEGER T_SEMICOLON
+   13 variable_declaration: T_IDENTIFIER T_COLON T_INTEGER • T_SEMICOLON
 
-    T_INTEGER  décalage et aller à l'état 36
+    T_SEMICOLON  décalage et aller à l'état 36
 
 
 État 32
 
-   17 writeln: T_WRITELN T_LEFT_PARENTHESIS • T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+   19 writeln: T_WRITELN T_LEFT_PARENTHESIS • T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 
     T_IDENTIFIER  décalage et aller à l'état 37
 
 
 État 33
 
-   16 assignement: T_IDENTIFIER T_ASSIGN • expression T_SEMICOLON
-   18 expression: • expression T_PLUS term
-   19           | • expression T_MINUS term
-   20           | • term
-   21 term: • term T_STAR factor
-   22     | • term T_SLASH factor
-   23     | • term T_DIV factor
-   24     | • term T_MOD factor
-   25     | • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
+   18 assignement: T_IDENTIFIER T_ASSIGN • expression T_SEMICOLON
+   20 expression: • expression T_PLUS term
+   21           | • expression T_MINUS term
+   22           | • term
+   23 term: • term T_STAR factor
+   24     | • term T_SLASH factor
+   25     | • term T_DIV factor
+   26     | • term T_MOD factor
+   27     | • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
 
     T_MINUS             décalage et aller à l'état 38
     T_LEFT_PARENTHESIS  décalage et aller à l'état 39
     T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
 
-    expression  aller à l'état 41
-    term        aller à l'état 42
-    factor      aller à l'état 43
-    scalar      aller à l'état 44
+    expression  aller à l'état 42
+    term        aller à l'état 43
+    factor      aller à l'état 44
+    scalar      aller à l'état 45
 
 
 État 34
 
     1 program: program_declaration constant_declaration_block variable_declaration_block T_BEGIN statement_list T_END • T_DOT
 
-    T_DOT  décalage et aller à l'état 45
+    T_DOT  décalage et aller à l'état 46
 
 
 État 35
 
-   13 statement_list: statement_list statement •
+   15 statement_list: statement_list statement •
 
-    $défaut  réduction par utilisation de la règle 13 (statement_list)
+    $défaut  réduction par utilisation de la règle 15 (statement_list)
 
 
 État 36
 
-   11 variable_declaration: T_VAR T_IDENTIFIER T_COLON T_INTEGER • T_SEMICOLON
+   13 variable_declaration: T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON •
 
-    T_SEMICOLON  décalage et aller à l'état 46
+    $défaut  réduction par utilisation de la règle 13 (variable_declaration)
 
 
 État 37
 
-   17 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER • T_RIGHT_PARENTHESIS T_SEMICOLON
+   19 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER • T_RIGHT_PARENTHESIS T_SEMICOLON
 
     T_RIGHT_PARENTHESIS  décalage et aller à l'état 47
 
 
 État 38
 
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   27       | T_MINUS • factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   29       | T_MINUS • factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
 
     T_MINUS             décalage et aller à l'état 38
     T_LEFT_PARENTHESIS  décalage et aller à l'état 39
     T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
 
     factor  aller à l'état 48
-    scalar  aller à l'état 44
+    scalar  aller à l'état 45
 
 
 État 39
 
-   18 expression: • expression T_PLUS term
-   19           | • expression T_MINUS term
-   20           | • term
-   21 term: • term T_STAR factor
-   22     | • term T_SLASH factor
-   23     | • term T_DIV factor
-   24     | • term T_MOD factor
-   25     | • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   26       | T_LEFT_PARENTHESIS • expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
+   20 expression: • expression T_PLUS term
+   21           | • expression T_MINUS term
+   22           | • term
+   23 term: • term T_STAR factor
+   24     | • term T_SLASH factor
+   25     | • term T_DIV factor
+   26     | • term T_MOD factor
+   27     | • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   28       | T_LEFT_PARENTHESIS • expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
 
     T_MINUS             décalage et aller à l'état 38
     T_LEFT_PARENTHESIS  décalage et aller à l'état 39
     T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
 
     expression  aller à l'état 49
-    term        aller à l'état 42
-    factor      aller à l'état 43
-    scalar      aller à l'état 44
+    term        aller à l'état 43
+    factor      aller à l'état 44
+    scalar      aller à l'état 45
 
 
 État 40
 
-   29 scalar: T_INTEGER_VALUE •
+   32 scalar: T_INTEGER_VALUE •
 
-    $défaut  réduction par utilisation de la règle 29 (scalar)
+    $défaut  réduction par utilisation de la règle 32 (scalar)
 
 
 État 41
 
-   16 assignement: T_IDENTIFIER T_ASSIGN expression • T_SEMICOLON
-   18 expression: expression • T_PLUS term
-   19           | expression • T_MINUS term
+   31 factor: T_IDENTIFIER •
+
+    $défaut  réduction par utilisation de la règle 31 (factor)
+
+
+État 42
+
+   18 assignement: T_IDENTIFIER T_ASSIGN expression • T_SEMICOLON
+   20 expression: expression • T_PLUS term
+   21           | expression • T_MINUS term
 
     T_PLUS       décalage et aller à l'état 50
     T_MINUS      décalage et aller à l'état 51
     T_SEMICOLON  décalage et aller à l'état 52
 
 
-État 42
+État 43
 
-   20 expression: term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
-   21 term: term • T_STAR factor
-   22     | term • T_SLASH factor
-   23     | term • T_DIV factor
-   24     | term • T_MOD factor
+   22 expression: term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
+   23 term: term • T_STAR factor
+   24     | term • T_SLASH factor
+   25     | term • T_DIV factor
+   26     | term • T_MOD factor
+
+    T_STAR   décalage et aller à l'état 53
+    T_SLASH  décalage et aller à l'état 54
+    T_DIV    décalage et aller à l'état 55
+    T_MOD    décalage et aller à l'état 56
+
+    $défaut  réduction par utilisation de la règle 22 (expression)
+
+
+État 44
+
+   27 term: factor •
+
+    $défaut  réduction par utilisation de la règle 27 (term)
+
+
+État 45
+
+   30 factor: scalar •
+
+    $défaut  réduction par utilisation de la règle 30 (factor)
+
+
+État 46
+
+    1 program: program_declaration constant_declaration_block variable_declaration_block T_BEGIN statement_list T_END T_DOT •
+
+    $défaut  réduction par utilisation de la règle 1 (program)
+
+
+État 47
+
+   19 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS • T_SEMICOLON
+
+    T_SEMICOLON  décalage et aller à l'état 57
+
+
+État 48
+
+   29 factor: T_MINUS factor •
+
+    $défaut  réduction par utilisation de la règle 29 (factor)
+
+
+État 49
+
+   20 expression: expression • T_PLUS term
+   21           | expression • T_MINUS term
+   28 factor: T_LEFT_PARENTHESIS expression • T_RIGHT_PARENTHESIS
+
+    T_PLUS               décalage et aller à l'état 50
+    T_MINUS              décalage et aller à l'état 51
+    T_RIGHT_PARENTHESIS  décalage et aller à l'état 58
+
+
+État 50
+
+   20 expression: expression T_PLUS • term
+   23 term: • term T_STAR factor
+   24     | • term T_SLASH factor
+   25     | • term T_DIV factor
+   26     | • term T_MOD factor
+   27     | • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    term    aller à l'état 59
+    factor  aller à l'état 44
+    scalar  aller à l'état 45
+
+
+État 51
+
+   21 expression: expression T_MINUS • term
+   23 term: • term T_STAR factor
+   24     | • term T_SLASH factor
+   25     | • term T_DIV factor
+   26     | • term T_MOD factor
+   27     | • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    term    aller à l'état 60
+    factor  aller à l'état 44
+    scalar  aller à l'état 45
+
+
+État 52
+
+   18 assignement: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON •
+
+    $défaut  réduction par utilisation de la règle 18 (assignement)
+
+
+État 53
+
+   23 term: term T_STAR • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    factor  aller à l'état 61
+    scalar  aller à l'état 45
+
+
+État 54
+
+   24 term: term T_SLASH • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    factor  aller à l'état 62
+    scalar  aller à l'état 45
+
+
+État 55
+
+   25 term: term T_DIV • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    factor  aller à l'état 63
+    scalar  aller à l'état 45
+
+
+État 56
+
+   26 term: term T_MOD • factor
+   28 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
+   29       | • T_MINUS factor
+   30       | • scalar
+   31       | • T_IDENTIFIER
+   32 scalar: • T_INTEGER_VALUE
+
+    T_MINUS             décalage et aller à l'état 38
+    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
+    T_INTEGER_VALUE     décalage et aller à l'état 40
+    T_IDENTIFIER        décalage et aller à l'état 41
+
+    factor  aller à l'état 64
+    scalar  aller à l'état 45
+
+
+État 57
+
+   19 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON •
+
+    $défaut  réduction par utilisation de la règle 19 (writeln)
+
+
+État 58
+
+   28 factor: T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS •
+
+    $défaut  réduction par utilisation de la règle 28 (factor)
+
+
+État 59
+
+   20 expression: expression T_PLUS term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
+   23 term: term • T_STAR factor
+   24     | term • T_SLASH factor
+   25     | term • T_DIV factor
+   26     | term • T_MOD factor
 
     T_STAR   décalage et aller à l'état 53
     T_SLASH  décalage et aller à l'état 54
@@ -556,243 +781,45 @@ Non-terminaux, suivis des règles où ils apparaissent
     $défaut  réduction par utilisation de la règle 20 (expression)
 
 
-État 43
-
-   25 term: factor •
-
-    $défaut  réduction par utilisation de la règle 25 (term)
-
-
-État 44
-
-   28 factor: scalar •
-
-    $défaut  réduction par utilisation de la règle 28 (factor)
-
-
-État 45
-
-    1 program: program_declaration constant_declaration_block variable_declaration_block T_BEGIN statement_list T_END T_DOT •
-
-    $défaut  réduction par utilisation de la règle 1 (program)
-
-
-État 46
-
-   11 variable_declaration: T_VAR T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON •
-
-    $défaut  réduction par utilisation de la règle 11 (variable_declaration)
-
-
-État 47
-
-   17 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS • T_SEMICOLON
-
-    T_SEMICOLON  décalage et aller à l'état 57
-
-
-État 48
-
-   27 factor: T_MINUS factor •
-
-    $défaut  réduction par utilisation de la règle 27 (factor)
-
-
-État 49
-
-   18 expression: expression • T_PLUS term
-   19           | expression • T_MINUS term
-   26 factor: T_LEFT_PARENTHESIS expression • T_RIGHT_PARENTHESIS
-
-    T_PLUS               décalage et aller à l'état 50
-    T_MINUS              décalage et aller à l'état 51
-    T_RIGHT_PARENTHESIS  décalage et aller à l'état 58
-
-
-État 50
-
-   18 expression: expression T_PLUS • term
-   21 term: • term T_STAR factor
-   22     | • term T_SLASH factor
-   23     | • term T_DIV factor
-   24     | • term T_MOD factor
-   25     | • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    term    aller à l'état 59
-    factor  aller à l'état 43
-    scalar  aller à l'état 44
-
-
-État 51
-
-   19 expression: expression T_MINUS • term
-   21 term: • term T_STAR factor
-   22     | • term T_SLASH factor
-   23     | • term T_DIV factor
-   24     | • term T_MOD factor
-   25     | • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    term    aller à l'état 60
-    factor  aller à l'état 43
-    scalar  aller à l'état 44
-
-
-État 52
-
-   16 assignement: T_IDENTIFIER T_ASSIGN expression T_SEMICOLON •
-
-    $défaut  réduction par utilisation de la règle 16 (assignement)
-
-
-État 53
-
-   21 term: term T_STAR • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    factor  aller à l'état 61
-    scalar  aller à l'état 44
-
-
-État 54
-
-   22 term: term T_SLASH • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    factor  aller à l'état 62
-    scalar  aller à l'état 44
-
-
-État 55
-
-   23 term: term T_DIV • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    factor  aller à l'état 63
-    scalar  aller à l'état 44
-
-
-État 56
-
-   24 term: term T_MOD • factor
-   26 factor: • T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
-   27       | • T_MINUS factor
-   28       | • scalar
-   29 scalar: • T_INTEGER_VALUE
-
-    T_MINUS             décalage et aller à l'état 38
-    T_LEFT_PARENTHESIS  décalage et aller à l'état 39
-    T_INTEGER_VALUE     décalage et aller à l'état 40
-
-    factor  aller à l'état 64
-    scalar  aller à l'état 44
-
-
-État 57
-
-   17 writeln: T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON •
-
-    $défaut  réduction par utilisation de la règle 17 (writeln)
-
-
-État 58
-
-   26 factor: T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS •
-
-    $défaut  réduction par utilisation de la règle 26 (factor)
-
-
-État 59
-
-   18 expression: expression T_PLUS term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
-   21 term: term • T_STAR factor
-   22     | term • T_SLASH factor
-   23     | term • T_DIV factor
-   24     | term • T_MOD factor
-
-    T_STAR   décalage et aller à l'état 53
-    T_SLASH  décalage et aller à l'état 54
-    T_DIV    décalage et aller à l'état 55
-    T_MOD    décalage et aller à l'état 56
-
-    $défaut  réduction par utilisation de la règle 18 (expression)
-
-
 État 60
 
-   19 expression: expression T_MINUS term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
-   21 term: term • T_STAR factor
-   22     | term • T_SLASH factor
-   23     | term • T_DIV factor
-   24     | term • T_MOD factor
+   21 expression: expression T_MINUS term •  [T_PLUS, T_MINUS, T_RIGHT_PARENTHESIS, T_SEMICOLON]
+   23 term: term • T_STAR factor
+   24     | term • T_SLASH factor
+   25     | term • T_DIV factor
+   26     | term • T_MOD factor
 
     T_STAR   décalage et aller à l'état 53
     T_SLASH  décalage et aller à l'état 54
     T_DIV    décalage et aller à l'état 55
     T_MOD    décalage et aller à l'état 56
 
-    $défaut  réduction par utilisation de la règle 19 (expression)
+    $défaut  réduction par utilisation de la règle 21 (expression)
 
 
 État 61
 
-   21 term: term T_STAR factor •
-
-    $défaut  réduction par utilisation de la règle 21 (term)
-
-
-État 62
-
-   22 term: term T_SLASH factor •
-
-    $défaut  réduction par utilisation de la règle 22 (term)
-
-
-État 63
-
-   23 term: term T_DIV factor •
+   23 term: term T_STAR factor •
 
     $défaut  réduction par utilisation de la règle 23 (term)
 
 
-État 64
+État 62
 
-   24 term: term T_MOD factor •
+   24 term: term T_SLASH factor •
 
     $défaut  réduction par utilisation de la règle 24 (term)
+
+
+État 63
+
+   25 term: term T_DIV factor •
+
+    $défaut  réduction par utilisation de la règle 25 (term)
+
+
+État 64
+
+   26 term: term T_MOD factor •
+
+    $défaut  réduction par utilisation de la règle 26 (term)

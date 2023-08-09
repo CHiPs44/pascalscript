@@ -56,3 +56,7 @@ GPATH
 GRTAGS
 GTAGS
 .vscode/GTEMP.pas
+
+# Project
+src/pascalscript
+

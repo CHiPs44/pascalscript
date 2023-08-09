@@ -8,7 +8,7 @@ var
 begin
   a := foo;
   b := 2;
-  c := a + b;
+  c := (a + b) * (foo + 2) / 1000;
   WriteLn(c);
   d := a * b div c;
   foo := 12;

@@ -13,7 +13,7 @@
 #include "error.h"
 #include "lexer.h"
 
-token_t yylval;
+// token_t yylval;
 token_t *token = &yylval;
 
 /**
