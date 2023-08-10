@@ -20,36 +20,38 @@ token_t *token = &yylval;
  * @brief Copy current identifier into current token
  *
  * @param buffer
- * @return int ERROR_NONE | ERROR_IDENTIFIER_TOO_LONG
+ * @return int LEXER_ERROR_NONE | LEXER_ERROR_IDENTIFIER_TOO_LONG
  */
 error_code_t copy_identifier(const char *buffer)
 {
     size_t length = strlen(buffer);
     if (length > MAX_IDENTIFIER)
     {
-        return ERROR_IDENTIFIER_TOO_LONG;
+        return LEXER_ERROR_IDENTIFIER_TOO_LONG;
     }
     token->type = IDENTIFIER;
     strcpy(token->value.identifier, buffer);
-    return ERROR_NONE;
+    return LEXER_ERROR_NONE;
 }
 
 /**
  * @brief Parse current integer value into current token
  *
  * @param buffer
- * @return int  ERROR_NONE | ERROR_OVERFLOW
+ * @return int  LEXER_ERROR_NONE | LEXER_ERROR_OVERFLOW
  */
 error_code_t copy_integer_value(const char *buffer)
 {
-    int val = strtol(buffer, 0, 10);
-    if (val == INT_MAX && errno == ERANGE)
+    long val = strtoul(buffer, 0, 10);
+    // fprintf(stderr, " [copy_integer_value %s %ld %d %d]", buffer, val, errno, INT_MAX);
+    if (errno == ERANGE || val > INT_MAX)
     {
-        return ERROR_OVERFLOW;
+        fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %ld", buffer, val);
+        return LEXER_ERROR_OVERFLOW;
     }
     token->type = INT_VAL;
-    token->value.int_val = val;
-    return ERROR_NONE;
+    token->value.int_val = (int)val;
+    return LEXER_ERROR_NONE;
 }
 
 /* EOF */

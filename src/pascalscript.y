@@ -96,6 +96,7 @@ constant_declaration
 ;
 constant_literal
     : T_INTEGER_VALUE
+    | T_MINUS T_INTEGER_VALUE
 ;
 
 variable_declaration_block

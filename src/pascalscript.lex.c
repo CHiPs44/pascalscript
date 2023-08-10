@@ -371,8 +371,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 26
-#define YY_END_OF_BUFFER 27
+#define YY_NUM_RULES 36
+#define YY_END_OF_BUFFER 37
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -380,15 +380,17 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[68] =
+static const flex_int16_t yy_accept[85] =
     {   0,
-        0,    0,   27,   25,   23,   24,   24,    8,    9,    3,
-        1,    2,   12,    4,   21,   10,   11,   13,   22,   22,
-       22,   22,   22,   22,   22,   22,   22,   22,   23,   21,
-        7,   22,   22,   22,   22,   22,   22,   22,   22,   22,
-       22,   22,   22,    5,   18,   22,    6,   22,   16,   22,
-       22,   22,   22,   22,   22,   17,   15,   22,   22,   22,
-       22,   22,   22,   20,   14,   19,    0
+        0,    0,    0,    0,    0,    0,    0,    0,   37,   35,
+       33,   34,   34,   18,   19,   13,   11,   12,   22,   14,
+       31,   20,   21,   23,   32,   32,   32,   32,   32,   32,
+       32,   32,   32,   32,    1,    2,    3,    5,    6,    5,
+        9,   10,   33,    4,    8,   31,   17,   32,   32,   32,
+       32,   32,   32,   32,   32,   32,   32,    7,   32,   32,
+       15,   28,   32,   16,   32,   26,   32,   32,   32,   32,
+       32,   32,   27,   25,   32,   32,   32,   32,   32,   32,
+       30,   24,   29,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -406,7 +408,7 @@ static const YY_CHAR yy_ec[256] =
 
        20,   21,   22,   21,   23,   21,   21,   24,   25,   26,
        27,   28,   21,   29,   30,   31,   21,   32,   33,   21,
-       21,   21,    1,    4,    1,    1,    1,    1,    1,    1,
+       21,   21,   34,    4,   35,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -423,73 +425,81 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[34] =
+static const YY_CHAR yy_meta[36] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    2,    1,    1,    1,    2,    2,    2,    2,    2,
         2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
-        2,    2,    2
+        2,    2,    2,    1,    1
     } ;
 
-static const flex_int16_t yy_base[69] =
+static const flex_int16_t yy_base[89] =
     {   0,
-        0,    0,   74,   75,   71,   75,   75,   75,   75,   75,
-       75,   75,   75,   75,   60,   56,   75,   75,    0,   50,
-       42,   45,   41,   40,   38,   35,   47,   33,   59,   48,
-       75,    0,   37,   32,   25,   37,   24,   35,   26,   23,
-       28,   27,   19,    0,    0,   28,    0,   25,    0,   15,
-       19,   13,   21,   13,   21,    0,    0,   20,   23,   14,
-        8,   11,    9,    0,    0,    0,   75,   32
+        0,    0,   58,   57,   33,   34,   88,   87,   89,   94,
+       86,   94,   94,   80,   94,   94,   94,   94,   94,   75,
+       73,   69,   94,   94,    0,   63,   55,   58,   54,   53,
+       51,   48,   60,   46,   94,   94,   94,   94,   94,   68,
+       94,   94,   71,   94,   94,   60,   94,    0,   49,   44,
+       37,   49,   36,   47,   38,   35,   40,   94,   39,   31,
+        0,    0,   40,    0,   37,    0,   27,   31,   25,   33,
+       25,   33,    0,    0,   32,   35,   26,   20,   23,   13,
+        0,    0,    0,   94,   41,   43,   45,   36
     } ;
 
-static const flex_int16_t yy_def[69] =
+static const flex_int16_t yy_def[89] =
     {   0,
-       67,    1,   67,   67,   67,   67,   67,   67,   67,   67,
-       67,   67,   67,   67,   67,   67,   67,   67,   68,   68,
-       68,   68,   68,   68,   68,   68,   68,   68,   67,   67,
-       67,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       68,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       68,   68,   68,   68,   68,   68,   68,   68,   68,   68,
-       68,   68,   68,   68,   68,   68,    0,   67
+       84,    1,   85,   85,   86,   86,   87,   87,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   88,   88,   88,   88,   88,   88,
+       88,   88,   88,   88,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   88,   88,   88,
+       88,   88,   88,   88,   88,   88,   88,   84,   88,   88,
+       88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
+       88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
+       88,   88,   88,    0,   84,   84,   84,   84
     } ;
 
-static const flex_int16_t yy_nxt[109] =
+static const flex_int16_t yy_nxt[130] =
     {   0,
-        4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
-       14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
-       19,   19,   24,   19,   25,   19,   19,   26,   19,   19,
-       19,   27,   28,   32,   66,   65,   64,   63,   62,   61,
-       60,   59,   58,   57,   56,   55,   54,   53,   52,   51,
-       50,   49,   48,   47,   46,   45,   44,   43,   42,   30,
-       29,   41,   40,   39,   38,   37,   36,   35,   34,   33,
-       31,   30,   29,   67,    3,   67,   67,   67,   67,   67,
-       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
-       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+       10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
+       20,   21,   22,   23,   24,   25,   26,   27,   28,   29,
+       25,   25,   30,   25,   31,   25,   25,   32,   25,   25,
+       25,   33,   34,   35,   10,   39,   39,   48,   83,   40,
+       40,   36,   36,   38,   38,   41,   41,   82,   81,   80,
+       79,   78,   77,   76,   75,   74,   73,   72,   71,   70,
+       69,   68,   67,   66,   65,   64,   63,   62,   61,   60,
+       59,   46,   43,   58,   57,   56,   55,   54,   53,   52,
+       51,   50,   49,   47,   46,   45,   44,   43,   84,   42,
+       42,   37,   37,    9,   84,   84,   84,   84,   84,   84,
 
-       67,   67,   67,   67,   67,   67,   67,   67
+       84,   84,   84,   84,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   84,   84
     } ;
 
-static const flex_int16_t yy_chk[109] =
+static const flex_int16_t yy_chk[130] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,   68,   63,   62,   61,   60,   59,   58,
-       55,   54,   53,   52,   51,   50,   48,   46,   43,   42,
-       41,   40,   39,   38,   37,   36,   35,   34,   33,   30,
-       29,   28,   27,   26,   25,   24,   23,   22,   21,   20,
-       16,   15,    5,    3,   67,   67,   67,   67,   67,   67,
-       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
-       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+        1,    1,    1,    1,    1,    5,    6,   88,   80,    5,
+        6,   85,   85,   86,   86,   87,   87,   79,   78,   77,
+       76,   75,   72,   71,   70,   69,   68,   67,   65,   63,
+       60,   59,   57,   56,   55,   54,   53,   52,   51,   50,
+       49,   46,   43,   40,   34,   33,   32,   31,   30,   29,
+       28,   27,   26,   22,   21,   20,   14,   11,    9,    8,
+        7,    4,    3,   84,   84,   84,   84,   84,   84,   84,
 
-       67,   67,   67,   67,   67,   67,   67,   67
+       84,   84,   84,   84,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   84,   84,   84,
+       84,   84,   84,   84,   84,   84,   84,   84,   84
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[27] =
+static const flex_int32_t yy_rule_can_match_eol[37] =
     {   0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 1, 0, 0,     };
+0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,     };
 
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
@@ -521,10 +531,16 @@ char *yytext;
 
 int yyerror(char *message);
 
-#line 525 "pascalscript.lex.c"
-#line 526 "pascalscript.lex.c"
+#line 535 "pascalscript.lex.c"
+/* cf.   // https://github.com/TimD1/DragonCompiler/blob/master/compiler.l */
+/* define exclusive comment states */
+
+#line 539 "pascalscript.lex.c"
 
 #define INITIAL 0
+#define COMMENT1 1
+#define COMMENT2 2
+#define COMMENT3 3
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -739,10 +755,10 @@ YY_DECL
 		}
 
 	{
-#line 50 "pascalscript.l"
+#line 57 "pascalscript.l"
 
 
-#line 746 "pascalscript.lex.c"
+#line 762 "pascalscript.lex.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -769,13 +785,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 68 )
+				if ( yy_current_state >= 85 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 75 );
+		while ( yy_base[yy_current_state] != 94 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -811,162 +827,209 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 52 "pascalscript.l"
-{ fprintf(stderr, "+ "       ); return T_PLUS;              }
+#line 59 "pascalscript.l"
+{ BEGIN COMMENT1; }
 	YY_BREAK
 case 2:
+/* rule 2 can match eol */
 YY_RULE_SETUP
-#line 53 "pascalscript.l"
-{ fprintf(stderr, "- "       ); return T_MINUS;             }
+#line 60 "pascalscript.l"
+{ ; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 54 "pascalscript.l"
-{ fprintf(stderr, "* "       ); return T_STAR;              }
+#line 61 "pascalscript.l"
+{ fprintf(stderr, "{COMMENT}"); BEGIN INITIAL; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 55 "pascalscript.l"
-{ fprintf(stderr, "/ "       ); return T_SLASH;             }
+#line 62 "pascalscript.l"
+{ BEGIN COMMENT2; }
 	YY_BREAK
 case 5:
-YY_RULE_SETUP
-#line 56 "pascalscript.l"
-{ fprintf(stderr, "DIV "     ); return T_DIV;               }
-	YY_BREAK
+#line 65 "pascalscript.l"
 case 6:
+/* rule 6 can match eol */
 YY_RULE_SETUP
-#line 57 "pascalscript.l"
-{ fprintf(stderr, "MOD "     ); return T_MOD;               }
+#line 65 "pascalscript.l"
+{ ; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 58 "pascalscript.l"
-{ fprintf(stderr, ":= "      ); return T_ASSIGN;            }
+#line 66 "pascalscript.l"
+{ fprintf(stderr, "(*COMMENT*)"); BEGIN INITIAL; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 59 "pascalscript.l"
-{ fprintf(stderr, "( "       ); return T_LEFT_PARENTHESIS;  }
+#line 68 "pascalscript.l"
+{ BEGIN COMMENT3; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 60 "pascalscript.l"
-{ fprintf(stderr, ") "       ); return T_RIGHT_PARENTHESIS; }
+#line 69 "pascalscript.l"
+{ ; }
 	YY_BREAK
 case 10:
+/* rule 10 can match eol */
 YY_RULE_SETUP
-#line 61 "pascalscript.l"
-{ fprintf(stderr, ": "       ); return T_COLON;             }
+#line 70 "pascalscript.l"
+{ fprintf(stderr, "//COMMENT\n"); BEGIN INITIAL; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 62 "pascalscript.l"
-{ fprintf(stderr, "; "       ); return T_SEMICOLON;         }
+#line 72 "pascalscript.l"
+{ fprintf(stderr, " +"       ); return T_PLUS;              }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 63 "pascalscript.l"
-{ fprintf(stderr, ". "       ); return T_DOT;               }
+#line 73 "pascalscript.l"
+{ fprintf(stderr, " -"       ); return T_MINUS;             }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 64 "pascalscript.l"
-{ fprintf(stderr, "= "       ); return T_EQUALS;            }
+#line 74 "pascalscript.l"
+{ fprintf(stderr, " *"       ); return T_STAR;              }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 65 "pascalscript.l"
-{ fprintf(stderr, "PROGRAM " ); return T_PROGRAM;           }
+#line 75 "pascalscript.l"
+{ fprintf(stderr, " /"       ); return T_SLASH;             }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 66 "pascalscript.l"
-{ fprintf(stderr, "CONST "   ); return T_CONST;             }
+#line 76 "pascalscript.l"
+{ fprintf(stderr, " DIV"     ); return T_DIV;               }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 67 "pascalscript.l"
-{ fprintf(stderr, "VAR "     ); return T_VAR;               }
+#line 77 "pascalscript.l"
+{ fprintf(stderr, " MOD"     ); return T_MOD;               }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 68 "pascalscript.l"
-{ fprintf(stderr, "BEGIN "   ); return T_BEGIN;             }
+#line 78 "pascalscript.l"
+{ fprintf(stderr, " :="      ); return T_ASSIGN;            }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 69 "pascalscript.l"
-{ fprintf(stderr, "END "     ); return T_END;               }
+#line 79 "pascalscript.l"
+{ fprintf(stderr, " ("       ); return T_LEFT_PARENTHESIS;  }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 70 "pascalscript.l"
-{ fprintf(stderr, "WRITELN " ); return T_WRITELN;           }
+#line 80 "pascalscript.l"
+{ fprintf(stderr, " )"       ); return T_RIGHT_PARENTHESIS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 71 "pascalscript.l"
-{ fprintf(stderr, "INTEGER " ); return T_INTEGER;           }
+#line 81 "pascalscript.l"
+{ fprintf(stderr, " :"       ); return T_COLON;             }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 73 "pascalscript.l"
-{
-  int zzerror = copy_integer_value(yytext);
-  if (zzerror == ERROR_NONE)
-  {
-    fprintf(stderr, "T_INTEGER_VALUE:[%s] ", yytext);
-    return T_INTEGER_VALUE;
-  }
-  yyerror("Invalid integer value");
-}
+#line 82 "pascalscript.l"
+{ fprintf(stderr, " ;"       ); return T_SEMICOLON;         }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 83 "pascalscript.l"
-{
-  int zzerror = copy_identifier(yytext);
-  if (zzerror == ERROR_NONE)
-  {
-    fprintf(stderr, "T_IDENTIFIER:[%s] ", yytext);
-    return T_IDENTIFIER;
-  }
-  yyerror("Invalid identifier");
-}
+{ fprintf(stderr, " ."       ); return T_DOT;               }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 93 "pascalscript.l"
-{
-  // fprintf(stderr, "[ ] ");
-}
+#line 84 "pascalscript.l"
+{ fprintf(stderr, " ="       ); return T_EQUALS;            }
 	YY_BREAK
 case 24:
-/* rule 24 can match eol */
 YY_RULE_SETUP
-#line 97 "pascalscript.l"
-{
-  fprintf(stderr, "\n%d ", yylineno );
-}
+#line 86 "pascalscript.l"
+{ fprintf(stderr, " PROGRAM" ); return T_PROGRAM;           }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 101 "pascalscript.l"
-{
-  fprintf(stderr, "{%c} ", yytext[0] );
-  // return yytext[0];
-  yyerror("Invalid source");
-  yyterminate();
-}
+#line 87 "pascalscript.l"
+{ fprintf(stderr, " CONST"   ); return T_CONST;             }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 108 "pascalscript.l"
+#line 88 "pascalscript.l"
+{ fprintf(stderr, " VAR"     ); return T_VAR;               }
+	YY_BREAK
+case 27:
+YY_RULE_SETUP
+#line 89 "pascalscript.l"
+{ fprintf(stderr, " BEGIN"   ); return T_BEGIN;             }
+	YY_BREAK
+case 28:
+YY_RULE_SETUP
+#line 90 "pascalscript.l"
+{ fprintf(stderr, " END"     ); return T_END;               }
+	YY_BREAK
+case 29:
+YY_RULE_SETUP
+#line 91 "pascalscript.l"
+{ fprintf(stderr, " WRITELN" ); return T_WRITELN;           }
+	YY_BREAK
+case 30:
+YY_RULE_SETUP
+#line 92 "pascalscript.l"
+{ fprintf(stderr, " INTEGER" ); return T_INTEGER;           }
+	YY_BREAK
+case 31:
+YY_RULE_SETUP
+#line 94 "pascalscript.l"
+{ int zzerror = copy_integer_value(yytext);
+                          if (zzerror == LEXER_ERROR_NONE)
+                          {
+                            fprintf(stderr, " T_INTEGER_VALUE:[%s]", yytext);
+                            return T_INTEGER_VALUE;
+                          }
+                          yyerror("Invalid integer value");
+                          yyterminate();
+                        }
+	YY_BREAK
+case 32:
+YY_RULE_SETUP
+#line 104 "pascalscript.l"
+{ int zzerror = copy_identifier(yytext);
+                          if (zzerror == LEXER_ERROR_NONE)
+                          {
+                            fprintf(stderr, " T_IDENTIFIER:[%s]", yytext);
+                            return T_IDENTIFIER;
+                          }
+                          yyerror("Invalid identifier");
+                          yyterminate();
+                        }
+	YY_BREAK
+case 33:
+YY_RULE_SETUP
+#line 114 "pascalscript.l"
+{ ; }
+	YY_BREAK
+case 34:
+/* rule 34 can match eol */
+YY_RULE_SETUP
+#line 116 "pascalscript.l"
+{ fprintf(stderr, "\n%d ", yylineno ); }
+	YY_BREAK
+case 35:
+YY_RULE_SETUP
+#line 118 "pascalscript.l"
+{ fprintf(stderr, " {%c}", yytext[0] );
+                          yyerror("Invalid source code");
+                          yyterminate();
+                        }
+	YY_BREAK
+case 36:
+YY_RULE_SETUP
+#line 123 "pascalscript.l"
 ECHO;
 	YY_BREAK
-#line 969 "pascalscript.lex.c"
+#line 1029 "pascalscript.lex.c"
 case YY_STATE_EOF(INITIAL):
+case YY_STATE_EOF(COMMENT1):
+case YY_STATE_EOF(COMMENT2):
+case YY_STATE_EOF(COMMENT3):
 	yyterminate();
 
 	case YY_END_OF_BUFFER:
@@ -1262,7 +1325,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 68 )
+			if ( yy_current_state >= 85 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1290,11 +1353,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 68 )
+		if ( yy_current_state >= 85 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 67);
+	yy_is_jam = (yy_current_state == 84);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1982,14 +2045,14 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 108 "pascalscript.l"
+#line 123 "pascalscript.l"
 
 
-int yyerror(char *message) 
-{
-  fprintf(stderr, "Error: %s\n", message);
-  // exit(1);
-}
+// int yyerror(char *message) 
+// {
+//   fprintf(stderr, "LEX Error: %s\n", message);
+//   // exit(1);
+// }
 
 int yywrap()
 {

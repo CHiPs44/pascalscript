@@ -1,14 +1,14 @@
 program first;
 const
-  foo = 1;
+  foo = 1000;
 var
   a: integer;
   b: integer;
   c: integer;
 begin
-  a := foo;
+  a := 1;
   b := 2;
-  c := (a + b) * (foo + 2) / 1000;
+  c := (a + b) * (foo + foo) / 1000;
   WriteLn(c);
   d := a * b div c;
   foo := 12;

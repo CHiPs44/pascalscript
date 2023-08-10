@@ -1,8 +1,8 @@
 program second;
 
 const foo = 1;
-const msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
-const result = 'The result is: ';
+      msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
+      result = 'The result is: ';
 
 var a, b, c: integer;
 

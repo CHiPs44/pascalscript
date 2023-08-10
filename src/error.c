@@ -13,19 +13,19 @@ char *error_get_message(error_code_t code)
 {
     switch (code)
     {
-    case ERROR_NONE:
+    case LEXER_ERROR_NONE:
         return "None";
-    case ERROR_IDENTIFIER_TOO_LONG:
+    case LEXER_ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
-    case ERROR_OVERFLOW:
+    case LEXER_ERROR_OVERFLOW:
         return "Overflow";
-    case ERROR_SYNTAX:
+    case PARSER_ERROR_SYNTAX:
         return "Syntax";
-    case ERROR_UNEXPECTED:
+    case PARSER_ERROR_UNEXPECTED:
         return "Unexpected";
-    case ERROR_UNKOWN_IDENTIFIER:
+    case PARSER_ERROR_UNKOWN_IDENTIFIER:
         return "Unknown identifier";
-    case ERROR_CONSTANT_VALUE:
+    case PARSER_ERROR_CONSTANT_VALUE:
         return "Constant value";
     default:
         snprintf(error_unknown, 31, "Unknown error code %d", code);
