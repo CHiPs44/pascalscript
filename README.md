@@ -46,6 +46,8 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
 - "Mini manuel d'utilisation de Lex et Yacc (french)" <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
 - "ANSI C grammar" <https://www.lysator.liu.se/c/ANSI-C-grammar-y.html>
+- "Examples from flex itself" `/usr/share/doc/flex/examples/` and `/usr/share/doc/flex/examples/manual/`
+- "Examples from GNU Bison itself" `/usr/share/doc/bison/examples/c/`
 
 ## Features
 

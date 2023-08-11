@@ -12,10 +12,10 @@
 
 /**
  * @brief Execute unary operator
- * 
+ *
  * @param vm_t *vm
- * @param operator_t operator 
- * @return runtime_error_t 
+ * @param operator_t operator
+ * @return runtime_error_t                                            ù*********
  */
 runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
 {
@@ -41,6 +41,8 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
             return RUNTIME_STACK_OVERFLOW;
         }
         return RUNTIME_OK;
+    default:
+        break;
     }
     return RUNTIME_UNKNOWN_UNARY_OPERATOR;
 }
@@ -90,6 +92,8 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
             return RUNTIME_STACK_OVERFLOW;
         }
         return RUNTIME_OK;
+    default:
+        break;
     }
     return RUNTIME_UNKNOWN_BINARY_OPERATOR;
 }

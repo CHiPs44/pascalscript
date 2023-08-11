@@ -59,4 +59,7 @@ GTAGS
 
 # Project
 src/pascalscript
-
+src/pascalscript.lex.c
+src/pascalscript.output
+src/pascalscript.tab.c
+src/pascalscript.tab.h

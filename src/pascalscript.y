@@ -34,6 +34,7 @@ extern int yylex (void);
 /* %token T_TYPE
 %token T_PROCEDURE T_FUNCTION */
 /* standard library */
+%token T_WRITE
 %token T_WRITELN
 /* type(s) */
 %token T_INTEGER
@@ -46,26 +47,27 @@ extern int yylex (void);
 /* %token T_RESERVED */
 
 /* boolean */
-/* %token T_BOOLEAN
+%token T_BOOLEAN
 %token T_BOOLEAN_VALUE
 %token T_FALSE
-%token T_TRUE */
+%token T_TRUE
 
 /* real */
-/* %token T_REAL
-%token T_REAL_VALUE */
+%token T_REAL
+%token T_REAL_VALUE
 
 /* char/string */
-/* %token T_QUOTE
 %token T_CHAR
-%token T_STRING
 %token T_CHAR_VALUE
-%token T_STRING_VALUE */
+%token T_STRING
+%token T_STRING_VALUE
 
 /* array */
-/* %token T_ARRAY
+%token T_ARRAY
 %token T_OF
-%token T_DOT_DOT */
+%token T_DOT_DOT
+%token T_LEFT_BRACKET
+%token T_RIGHT_BRACKET
 
 %start program
 
@@ -97,7 +99,16 @@ constant_declaration
 constant_literal
     : T_INTEGER_VALUE
     | T_MINUS T_INTEGER_VALUE
+    | T_FALSE
+    | T_TRUE
+    | T_REAL_VALUE
+    | T_CHAR_VALUE
+    | T_STRING_VALUE
 ;
+/* constant_boolean
+    : T_FALSE
+    | T_TRUE
+; */
 
 variable_declaration_block
     : T_VAR variable_declaration_list
@@ -108,8 +119,19 @@ variable_declaration_list
     | variable_declaration_list variable_declaration
 ;
 variable_declaration
-    : T_IDENTIFIER T_COLON T_INTEGER T_SEMICOLON
+    : T_IDENTIFIER T_COLON variable_type T_SEMICOLON
 ;
+
+variable_type
+    : T_INTEGER
+    | T_BOOLEAN
+    | T_REAL
+    | T_CHAR
+    | T_STRING
+    | array_type_declaration
+
+array_type_declaration
+    : T_ARRAY T_LEFT_BRACKET T_INTEGER_VALUE T_DOT_DOT T_INTEGER_VALUE T_RIGHT_BRACKET T_OF variable_type
 
 statement_list
     : statement
@@ -117,10 +139,14 @@ statement_list
 ;
 statement
     : assignement
+    | write
     | writeln
 ;
 assignement
     : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+;
+write
+    : T_WRITE T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 ;
 writeln
     : T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
@@ -141,11 +167,15 @@ term
 factor
     : T_LEFT_PARENTHESIS expression T_RIGHT_PARENTHESIS
     | T_MINUS factor
-    | scalar
+    | value
     | T_IDENTIFIER
 ;
-scalar
+value
     : T_INTEGER_VALUE
+    | T_REAL_VALUE
+    | T_BOOLEAN_VALUE
+    | T_CHAR_VALUE
+    | T_STRING_VALUE
 ;
 
 %%

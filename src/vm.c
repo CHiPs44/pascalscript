@@ -12,10 +12,10 @@
 #include "vm.h"
 
 symbol_t default_globals[] = {
-    {"_PS_VERSION", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x00000001L},  // 0.0.0.1
-    {"_PS_VER_DATE", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x20230805L}, // 5-aug-2023
-    {"MAXINT", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 2147483647L},
-    //  { "PI", KIND_CONSTANT, TYPE_REAL, sizeof(double), 3.141592653589793 },
+    {"_PS_VERSION", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0x00000001L}},  // 0.0.0.1
+    {"_PS_VER_DATE", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0x20230805L}}, // 5-aug-2023
+    {"MAXINT", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {2147483647L}},
+    //  { "PI", KIND_CONSTANT, TYPE_REAL, sizeof(double), {3.141592653589793} },
 };
 
 /**
@@ -62,8 +62,8 @@ int vm_global_add(vm_t *vm, symbol_t *symbol)
 }
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param VM
  * @param Symbol name
  * @return index of symbol or -1 if not found

@@ -176,7 +176,7 @@ int symbol_table_gc(symbol_table_t *table)
     int count = 0;
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
-        if (table->symbols[i].kind = KIND_FREE)
+        if (table->symbols[i].kind == KIND_FREE)
         {
             table->symbols[i].kind = KIND_UNKNOWN;
             table->count -= 1;
