@@ -14,14 +14,15 @@ pascalscript.lex.c pascalscript.tab.c
 all: $(PROJECT)
 
 pascalscript: $(SOURCES)
-	$(CC) $(CFLAGS) -o pascalscript pascalscript.lex.c pascalscript.tab.c lexer.c error.c
+	$(CC) $(CFLAGS) -o pascalscript $(SOURCES)
 
 pascalscript.tab.c pascalscript.tab.h: pascalscript.y
-	bison -rall -d -opascalscript.tab.c pascalscript.y
+	bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
 
 pascalscript.lex.c: pascalscript.l pascalscript.tab.h
 	flex -opascalscript.lex.c pascalscript.l
 
 clean:
 	rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
+
 # EOF

@@ -17,7 +17,7 @@
  * @param operator_t operator
  * @return runtime_error_t                                            ù*********
  */
-runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
+runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 {
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
@@ -25,7 +25,7 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
-    switch (operator)
+    switch (op)
     {
     case OP_NEG:
         if (a->type != TYPE_INTEGER)
@@ -47,7 +47,7 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t operator)
     return RUNTIME_UNKNOWN_UNARY_OPERATOR;
 }
 
-runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
+runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t op)
 {
     value_t result;
     symbol_t *b = vm_stack_pop(vm);
@@ -62,7 +62,7 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
-    switch (operator)
+    switch (op)
     {
     case OP_ADD:
     case OP_SUB:
@@ -73,15 +73,15 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t operator)
             return RUNTIME_EXPECTED_NUMBER;
         if (b->type != TYPE_INTEGER)
             return RUNTIME_EXPECTED_NUMBER;
-        if (operator== OP_ADD)
+        if (op== OP_ADD)
             result.i = a->value.i + b->value.i;
-        if (operator== OP_SUB)
+        if (op== OP_SUB)
             result.i = a->value.i - b->value.i;
-        if (operator== OP_MUL)
+        if (op== OP_MUL)
             result.i = a->value.i * b->value.i;
-        if (operator== OP_DIV)
+        if (op== OP_DIV)
             result.i = a->value.i / b->value.i;
-        if (operator== OP_MOD)
+        if (op== OP_MOD)
             result.i = a->value.i % b->value.i;
         symbol_t *c = vm_auto_add_int(vm, result.i);
         if (c == NULL)

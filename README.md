@@ -33,7 +33,7 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Pascal EBNF" <https://www.cs.kent.edu/~durand/CS43101Fall2004/resources/Pascal-EBNF.html>
 - "Pascal grammar" <http://www.felix-colibri.com/papers/compilers/pascal_grammar/pascal_grammar.html>
 - "Turbo Pascal documentations PDF" <http://www.bitsavers.org/pdf/borland/turbo_pascal/>
-- "building a Pascal compiler" <https://github.com/kdakan/Building-a-Pascal-Compiler>
+- "Building a Pascal compiler" <https://github.com/kdakan/Building-a-Pascal-Compiler>
 - "Standard Pascal" <https://standardpascal.org/>
 - "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
 - "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
@@ -41,10 +41,15 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
+#### French
+
 - "lex et yacc" (french) <https://pageperso.lis-lab.fr/alexis.nasr/Ens/Compilation/cmX_lex_yacc.pdf>
+- "Mini manuel d'utilisation de Lex et Yacc" (french) <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
+
+#### English
+
 - "Flex (Fast Lexical Analyzer Generator)" <https://www.geeksforgeeks.org/flex-fast-lexical-analyzer-generator/>
 - "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
-- "Mini manuel d'utilisation de Lex et Yacc (french)" <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
 - "ANSI C grammar" <https://www.lysator.liu.se/c/ANSI-C-grammar-y.html>
 - "Examples from flex itself" `/usr/share/doc/flex/examples/` and `/usr/share/doc/flex/examples/manual/`
 - "Examples from GNU Bison itself" `/usr/share/doc/bison/examples/c/`
@@ -57,12 +62,12 @@ There will be many steps before we get a "final" product.
 
 This will make the base for the lexer, the tokenizer and the interpreter itself.
 
-Features should be:
+Features are:
 
 - Integer constants
 - Integer variables
 - Arithmetical expressions
-- A single integer parameter `WriteLn`
+- A single integer parameter procedure: `WriteLn`
 - Comments
 
 Integer type will be the default of C `int` type.
@@ -70,10 +75,10 @@ Integer type will be the default of C `int` type.
 Language elements are limited to:
 
 - Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn`
-- Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)`
+- Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)` `//`
 - Identifiers: `[a-z|A-Z|_][a-z|A-Z|0-9|_]*`
 - Integer constants: `[0-9]*` (positive)
-- Operators: `+` `-` `*` `/` (`/` will be used as `div` for now, and `mod` will wait a bit)
+- Operators: `+` `-` `*` `/` `div` `mod`
 
 ```pascal
 program step1a;
@@ -96,7 +101,7 @@ end. { . is mandatory }
 Remarks:
 
 - Comments will be paired, beginning with `{` means we go until `}`, no mix with `(*` and `*)`, so they can be imbricated on one level
-- No `//` one line comments
+- `//` one line comments came essentially for free when digging an already made set of rules for the lexical analyzer
 
 Improvements to this first sight:
 
@@ -175,16 +180,16 @@ end.
 NB:
 
 - Implement `break` and `continue`?
-- `for` loops will be improved with `in` keyword for arrays and sets
+- `for` loops will be improved later with `in` keyword for arrays and sets
 
-### Procedures (`+++`)
+### Procedures
 
-This means we have local variables and recursive calls.
+This means we have input and output ("by reference") parameters, local variables, and recursive calls.
 
 ```pascal
-program step3;
+program step4;
 
-var     a: integer;
+var a: integer;
 
 procedure sum(a: integer, b: integer, var c: integer);
 var     sum: integer;
@@ -203,40 +208,46 @@ end.
 
 ```pascal
 program step3;
-var     a: integer;
+
+var a: integer;
+
 function fact(n: integer): integer;
-var     f: integer;
+var f: integer;
 begin
-        if n <= 1 then
-                f := 1;
-        else
-                f := n * fact(n - 1);
-        fact := f;
+  if n <= 1 then
+    f := 1
+  else
+    f := n * fact(n - 1);
+  fact := f;
 end;
+
 begin
-        a := fact(5);
-        WriteLn(a);
+  a := fact(5);
+  WriteLn(a);
 end.
 ```
+
+### Base types:
+
+- `integer` is 32 bits signed type
+- `real` is `double`, not `float`
 
 ### Other features
 
 ### Types
 
 - Unsigned and signed integers:
-  - 8 bits: Byte / Shortint
-  - 16 bits: Word / Smallint
-  - 32 bits: Longword / Longint
-  - 64 bits: QWord / Int64
   - `integer` is 32 bits signed type, period.
-- Reals
-  - As singles or doubles, depending on compilation option?
-- Ranges (`..`)
-- Enums
-- Arrays
+  - 8 bits: `Byte` / `Shortint`
+  - 16 bits: `Word` / `Smallint`
+  - 32 bits: `Longword` / `Longint`
+  - 64 bits: `QWord` / `Int64`
+- Ranges: `Min .. Max`
+- Enums: `(One, Two, Three, Four)`
+- Arrays: `Array[1..10] Of Integer`
 - Char (see below)
 - Strings (array of chars)
-- Sets (256 values max?)
+- Sets: `` (256 values max?)
 - Records
 - Pointers (`^`, `@`, ...)
 

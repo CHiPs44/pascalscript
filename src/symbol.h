@@ -9,6 +9,8 @@
 
 #include <stdlib.h>
 
+#include "pascalscript.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -39,15 +41,16 @@ typedef enum _type_t
     // TYPE_CHAR,
     // TYPE_STRING,
     // TYPE_REAL,
+    // TYPE_POINTER,
 } type_t;
 
 typedef union _value_t
 {
-    int i;
-    // uint u;
-    // char c;
-    // char *s;
-    // double r;
+    PS_INTEGER i;
+    // PS_UNSIGNED_INTEGER u;
+    // PS_CHAR c;
+    // PS_STRING s;
+    // PS_REAL r;
 } value_t;
 
 typedef struct _symbol_t

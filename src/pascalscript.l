@@ -46,39 +46,38 @@ F             [Ff]
 G             [Gg]
 H             [Hh]
 I             [Ii]
-J             [Jj]
-K             [Kk]
+/*J             [Jj]*/
+/*K             [Kk]*/
 L             [Ll]
 M             [Mm]
 N             [Nn]
 O             [Oo]
 P             [Pp]
-Q             [Qq]
+/*Q             [Qq]*/
 R             [Rr]
 S             [Ss]
 T             [Tt]
 U             [Uu]
 V             [Vv]
 W             [Ww]
-X             [Xx]
+/*X             [Xx]*/
 Y             [Yy]
-Z             [Zz]
+/*Z             [Zz]*/
 
 %%
 
+ /* COMMENTS */
 "{"                     { BEGIN COMMENT1; }
 <COMMENT1>[^}]          { ; }
 <COMMENT1>"}"           { fprintf(stderr, "{COMMENT}"); BEGIN INITIAL; }
-
 "(*"                    { BEGIN COMMENT2; }
 <COMMENT2>.             |
 <COMMENT2>\n            { ; }
 <COMMENT2>"*)"          { fprintf(stderr, "(*COMMENT*)"); BEGIN INITIAL; }
-
 "//"                    { BEGIN COMMENT3; }
 <COMMENT3>.             { ; }
 <COMMENT3>\n            { fprintf(stderr, "//COMMENT\n"); BEGIN INITIAL; }
-
+ /* OPERATORS */
 "+"                     { fprintf(stderr, " +"       ); return T_PLUS;              }
 "-"                     { fprintf(stderr, " -"       ); return T_MINUS;             }
 "*"                     { fprintf(stderr, " *"       ); return T_STAR;              }
@@ -92,19 +91,18 @@ Z             [Zz]
 ";"                     { fprintf(stderr, " ;"       ); return T_SEMICOLON;         }
 "."                     { fprintf(stderr, " ."       ); return T_DOT;               }
 "="                     { fprintf(stderr, " ="       ); return T_EQUALS;            }
-".."                    { fprintf(stderr, " .."      ); return T_DOT_DOT;           }
-"["                     { fprintf(stderr, " ["       ); return T_LEFT_BRACKET;      }
-"]"                     { fprintf(stderr, " ]"       ); return T_RIGHT_BRACKET;     }
-
+ /* KEYWORDS */
 {P}{R}{O}{G}{R}{A}{M}   { fprintf(stderr, " PROGRAM" ); return T_PROGRAM;           }
 {C}{O}{N}{S}{T}         { fprintf(stderr, " CONST"   ); return T_CONST;             }
 {V}{A}{R}               { fprintf(stderr, " VAR"     ); return T_VAR;               }
 {B}{E}{G}{I}{N}         { fprintf(stderr, " BEGIN"   ); return T_BEGIN;             }
 {E}{N}{D}               { fprintf(stderr, " END"     ); return T_END;               }
-{W}{R}{I}{T}{E}{L}{N}   { fprintf(stderr, " WRITELN" ); return T_WRITELN;           }
 {I}{N}{T}{E}{G}{E}{R}   { fprintf(stderr, " INTEGER" ); return T_INTEGER;           }
-
- /* from future import ;-) */
+ /* FROM FUTURE IMPORT ;-) */
+".."                    { fprintf(stderr, " .."      ); return T_DOT_DOT;           }
+"["                     { fprintf(stderr, " ["       ); return T_LEFT_BRACKET;      }
+"]"                     { fprintf(stderr, " ]"       ); return T_RIGHT_BRACKET;     }
+{W}{R}{I}{T}{E}         { fprintf(stderr, " WRITE"   ); return T_WRITE;             }
 {B}{O}{O}{L}{E}{A}{N}   { fprintf(stderr, " BOOLEAN" ); return T_BOOLEAN;           }
 {F}{A}{L}{S}{E}         { fprintf(stderr, " FALSE"   ); return T_FALSE;             }
 {T}{R}{U}{E}            { fprintf(stderr, " TRUE"    ); return T_TRUE;              }

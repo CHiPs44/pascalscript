@@ -282,9 +282,9 @@ enum yysymbol_kind_t
   YYSYMBOL_array_type_declaration = 52,    /* array_type_declaration  */
   YYSYMBOL_statement_list = 53,            /* statement_list  */
   YYSYMBOL_statement = 54,                 /* statement  */
-  YYSYMBOL_assignement = 55,               /* assignement  */
-  YYSYMBOL_write = 56,                     /* write  */
-  YYSYMBOL_writeln = 57,                   /* writeln  */
+  YYSYMBOL_write = 55,                     /* write  */
+  YYSYMBOL_writeln = 56,                   /* writeln  */
+  YYSYMBOL_assignement = 57,               /* assignement  */
   YYSYMBOL_expression = 58,                /* expression  */
   YYSYMBOL_term = 59,                      /* term  */
   YYSYMBOL_factor = 60,                    /* factor  */
@@ -712,7 +712,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
   "constant_declaration_list", "constant_declaration", "constant_literal",
   "variable_declaration_block", "variable_declaration_list",
   "variable_declaration", "variable_type", "array_type_declaration",
-  "statement_list", "statement", "assignement", "write", "writeln",
+  "statement_list", "statement", "write", "writeln", "assignement",
   "expression", "term", "factor", "value", YY_NULLPTR
   };
   return yy_sname[yysymbol];
@@ -753,12 +753,12 @@ static const yytype_int8 yydefact[] =
        0,     0,     0,     5,     0,     1,     0,    17,     3,     0,
        4,     6,     0,     0,     0,     7,     0,    16,    18,     0,
        0,     9,    11,    12,    13,    14,    15,     0,     0,    19,
-       0,     0,     0,     0,    28,    30,    31,    32,    10,     8,
+       0,     0,     0,     0,    28,    31,    32,    30,    10,     8,
       21,    22,    23,    24,    25,     0,     0,    26,     0,     0,
        0,     0,    29,     0,    20,     0,     0,     0,     0,    48,
       47,    50,    49,    51,    52,     0,    38,    43,    46,     2,
-       0,     0,     0,    45,     0,     0,     0,    33,     0,     0,
-       0,     0,     0,    34,    35,    44,    36,    37,    39,    40,
+       0,     0,     0,    45,     0,     0,     0,    35,     0,     0,
+       0,     0,     0,    33,    34,    44,    36,    37,    39,    40,
       41,    42,     0,     0,     0,    27
 };
 
@@ -838,7 +838,7 @@ static const yytype_int8 yyr2[] =
        0,     2,     7,     3,     2,     0,     1,     2,     4,     1,
        2,     1,     1,     1,     1,     1,     2,     0,     1,     2,
        4,     1,     1,     1,     1,     1,     1,     8,     1,     2,
-       1,     1,     1,     4,     5,     5,     3,     3,     1,     3,
+       1,     1,     1,     5,     5,     4,     3,     3,     1,     3,
        3,     3,     3,     1,     3,     2,     1,     1,     1,     1,
        1,     1,     1
 };

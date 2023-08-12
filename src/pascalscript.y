@@ -142,14 +142,14 @@ statement
     | write
     | writeln
 ;
-assignement
-    : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
-;
 write
     : T_WRITE T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 ;
 writeln
     : T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
+;
+assignement
+    : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
 ;
 
 expression
