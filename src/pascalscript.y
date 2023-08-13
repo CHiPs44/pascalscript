@@ -22,20 +22,14 @@ extern int yylex (void);
 /* assignment */
 %token T_ASSIGN
 /* parenthesis */
-%token T_LEFT_PARENTHESIS
-%token T_RIGHT_PARENTHESIS
+%token T_LEFT_PARENTHESIS T_RIGHT_PARENTHESIS
 /* other punctuation */
-%token T_COLON
-%token T_SEMICOLON
-%token T_DOT
-%token T_EQUALS
+%token T_COLON T_SEMICOLON T_DOT T_EQUALS 
 /* "real" keywords */
 %token T_PROGRAM T_CONST T_VAR T_BEGIN T_END
-/* %token T_TYPE
-%token T_PROCEDURE T_FUNCTION */
+/* %token T_TYPE T_PROCEDURE T_FUNCTION */
 /* standard library */
-%token T_WRITE
-%token T_WRITELN
+%token T_WRITE T_WRITELN
 /* type(s) */
 %token T_INTEGER
 /* values / constants */
@@ -47,27 +41,17 @@ extern int yylex (void);
 /* %token T_RESERVED */
 
 /* boolean */
-%token T_BOOLEAN
-%token T_BOOLEAN_VALUE
-%token T_FALSE
-%token T_TRUE
+%token T_BOOLEAN T_BOOLEAN_VALUE T_FALSE T_TRUE
 
 /* real */
-%token T_REAL
-%token T_REAL_VALUE
+%token T_REAL T_REAL_VALUE
 
 /* char/string */
-%token T_CHAR
-%token T_CHAR_VALUE
-%token T_STRING
-%token T_STRING_VALUE
+%token T_CHAR T_CHAR_VALUE
+%token T_STRING T_STRING_VALUE
 
 /* array */
-%token T_ARRAY
-%token T_OF
-%token T_DOT_DOT
-%token T_LEFT_BRACKET
-%token T_RIGHT_BRACKET
+%token T_ARRAY T_OF T_DOT_DOT T_LEFT_BRACKET T_RIGHT_BRACKET
 
 %start program
 
@@ -142,14 +126,14 @@ statement
     | write
     | writeln
 ;
+assignement
+    : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
+;
 write
     : T_WRITE T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
 ;
 writeln
     : T_WRITELN T_LEFT_PARENTHESIS T_IDENTIFIER T_RIGHT_PARENTHESIS T_SEMICOLON
-;
-assignement
-    : T_IDENTIFIER T_ASSIGN expression T_SEMICOLON
 ;
 
 expression

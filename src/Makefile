@@ -13,16 +13,18 @@ pascalscript.lex.c pascalscript.tab.c
 
 all: $(PROJECT)
 
-pascalscript: $(SOURCES)
-	$(CC) $(CFLAGS) -o pascalscript $(SOURCES)
+$(PROJECT): $(SOURCES)
+	echo $(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES)
 
-pascalscript.tab.c pascalscript.tab.h: pascalscript.y
-	bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
+# TODO seems *.y is built by a default rule as a call to yacc that replace pascalscript.c
 
-pascalscript.lex.c: pascalscript.l pascalscript.tab.h
-	flex -opascalscript.lex.c pascalscript.l
+pascalscript.tab.c: pascalscript.y
+	echo bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
+
+pascalscript.lex.c: pascalscript.l pascalscript.tab.c
+	echo flex --outfile=pascalscript.lex.c pascalscript.l
 
 clean:
-	rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
+	echo rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
 
 # EOF
