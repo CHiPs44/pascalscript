@@ -7,7 +7,7 @@
 #include "symbol.h"
 #include "vm.h"
 #include "symbol_stack.h"
-#include "runtime_error.h"
+#include "error.h"
 #include "operator.h"
 
 /**
@@ -15,9 +15,9 @@
  *
  * @param vm_t *vm
  * @param operator_t operator
- * @return runtime_error_t                                            ù*********
+ * @return error_t                                            ù*********
  */
-runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t op)
+error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 {
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
@@ -40,14 +40,14 @@ runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t op)
             vm_auto_free(vm, b->name);
             return RUNTIME_STACK_OVERFLOW;
         }
-        return RUNTIME_OK;
+        return ERROR_NONE;
     default:
         break;
     }
     return RUNTIME_UNKNOWN_UNARY_OPERATOR;
 }
 
-runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t op)
+error_t vm_exec_op_binary(vm_t *vm, operator_t op)
 {
     value_t result;
     symbol_t *b = vm_stack_pop(vm);
@@ -91,7 +91,7 @@ runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t op)
             vm_auto_free(vm, c->name);
             return RUNTIME_STACK_OVERFLOW;
         }
-        return RUNTIME_OK;
+        return ERROR_NONE;
     default:
         break;
     }

@@ -12,46 +12,47 @@
 
 #include "error.h"
 #include "lexer.h"
-
-// token_t yylval;
-token_t *token = &yylval;
+#include "symbol.h"
 
 /**
- * @brief Copy current identifier into current token
+ * @brief Copy current identifier into current yylval
  *
- * @param buffer
- * @return int LEXER_ERROR_NONE | LEXER_ERROR_IDENTIFIER_TOO_LONG
+ * @param yytext
+ * @return int ERROR_NONE | LEXER_ERROR_IDENTIFIER_TOO_LONG
  */
-error_code_t copy_identifier(const char *buffer)
+error_t lexer_copy_identifier()
 {
-    size_t length = strlen(buffer);
+    char identifier[MAX_IDENTIFIER + 1];
+    size_t length = strlen(yytext);
     if (length > MAX_IDENTIFIER)
     {
         return LEXER_ERROR_IDENTIFIER_TOO_LONG;
     }
-    token->type = IDENTIFIER;
-    strcpy(token->value.identifier, buffer);
-    return LEXER_ERROR_NONE;
+    yylval.type = IDENTIFIER;
+    strcpy(identifier, yytext);
+    symbol_normalize_name(identifier);
+    strcpy(yylval.value.identifier, identifier);
+    return ERROR_NONE;
 }
 
 /**
- * @brief Parse current integer value into current token
+ * @brief Parse current integer value into current yylval
  *
- * @param buffer
- * @return int  LEXER_ERROR_NONE | LEXER_ERROR_OVERFLOW
+ * @param yytext
+ * @return error_t ERROR_NONE | LEXER_ERROR_OVERFLOW
  */
-error_code_t copy_integer_value(const char *buffer)
+error_t lexer_copy_integer_value()
 {
-    long val = strtoul(buffer, 0, 10);
-    // fprintf(stderr, " [copy_integer_value %s %ld %d %d]", buffer, val, errno, INT_MAX);
+    long val = strtoul(yytext, 0, 10);
+    fprintf(stderr, " [lexer_copy_integer_value %s %ld %d %d]", yytext, val, errno, INT_MAX);
     if (errno == ERANGE || val > INT_MAX)
     {
-        fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %ld", buffer, val);
+        fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %ld", yytext, val);
         return LEXER_ERROR_OVERFLOW;
     }
-    token->type = INT_VAL;
-    token->value.int_val = (int)val;
-    return LEXER_ERROR_NONE;
+    yylval.type = INT_VAL;
+    yylval.value.int_val = (int)val;
+    return ERROR_NONE;
 }
 
 /* EOF */

@@ -12,20 +12,26 @@ extern "C"
 {
 #endif
 
-typedef enum _error_code_t {
-    LEXER_ERROR_NONE,
+typedef enum _error_t {
+    ERROR_NONE,
     /* lexer */
-    LEXER_ERROR_IDENTIFIER_TOO_LONG,
+    LEXER_ERROR_IDENTIFIER_TOO_LONG = 1000,
     LEXER_ERROR_OVERFLOW,
     /* parser */
-    PARSER_ERROR_SYNTAX,
+    PARSER_ERROR_SYNTAX = 2000,
     PARSER_ERROR_UNEXPECTED,
     PARSER_ERROR_UNKOWN_IDENTIFIER,
     PARSER_ERROR_CONSTANT_VALUE,
-    /* ...*/
-} error_code_t;
+    /* runtime */
+    RUNTIME_STACK_EMPTY = 3000,
+    RUNTIME_STACK_OVERFLOW,
+    RUNTIME_GLOBAL_TABLE_FULL,
+    RUNTIME_UNKNOWN_UNARY_OPERATOR,
+    RUNTIME_UNKNOWN_BINARY_OPERATOR,
+    RUNTIME_EXPECTED_NUMBER,
+} error_t;
 
-extern char *error_get_message(error_code_t code);
+extern char *error_get_message(error_t code);
 
 #ifdef __cplusplus
 }

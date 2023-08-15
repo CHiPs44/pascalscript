@@ -9,16 +9,22 @@
 
 static char error_unknown[32];
 
-char *error_get_message(error_code_t code)
+char *error_get_message(error_t code)
 {
     switch (code)
     {
-    case LEXER_ERROR_NONE:
+    case ERROR_NONE:
         return "None";
+    /*
+     * LEXER ERRORS
+     */
     case LEXER_ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case LEXER_ERROR_OVERFLOW:
         return "Overflow";
+    /*
+     * PARSER ERRORS
+     */
     case PARSER_ERROR_SYNTAX:
         return "Syntax";
     case PARSER_ERROR_UNEXPECTED:
@@ -27,6 +33,21 @@ char *error_get_message(error_code_t code)
         return "Unknown identifier";
     case PARSER_ERROR_CONSTANT_VALUE:
         return "Constant value";
+    /*
+     * RUNTIME ERRORS
+     */
+    case RUNTIME_STACK_EMPTY:
+        return "Stack empty";
+    case RUNTIME_STACK_OVERFLOW:
+        return "Stack overflow";
+    case RUNTIME_GLOBAL_TABLE_FULL:
+        return "Global table full";
+    case RUNTIME_UNKNOWN_UNARY_OPERATOR:
+        return "Unknown unary operator";
+    case RUNTIME_UNKNOWN_BINARY_OPERATOR:
+        return "Unknown binary operator";
+    case RUNTIME_EXPECTED_NUMBER:
+        return "Number expected";
     default:
         snprintf(error_unknown, 31, "Unknown error code %d", code);
         return error_unknown;

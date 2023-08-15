@@ -14,7 +14,7 @@ extern int yylex (void);
 %}
 
 %define parse.error detailed
-/* %define api.pure */
+%define parse.trace
 %define api.value.type { token_t }
 
 /* operators */

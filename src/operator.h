@@ -7,7 +7,7 @@
 #ifndef _OPERATOR_H_
 #define _OPERATOR_H_
 
-#include "runtime_error.h"
+#include "error.h"
 #include "vm.h"
 
 #ifdef __cplusplus
@@ -34,8 +34,8 @@ typedef enum _operator_t {
     OP_END_ENUM
 } operator_t;
 
-extern runtime_error_t vm_exec_op_unary(vm_t *vm, operator_t op);
-extern runtime_error_t vm_exec_op_binary(vm_t *vm, operator_t op);
+extern error_t vm_exec_op_unary(vm_t *vm, operator_t op);
+extern error_t vm_exec_op_binary(vm_t *vm, operator_t op);
 
 #ifdef __cplusplus
 }

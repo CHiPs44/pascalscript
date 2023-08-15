@@ -98,6 +98,7 @@ Y             [Yy]
 {B}{E}{G}{I}{N}         { fprintf(stderr, " BEGIN"   ); return T_BEGIN;             }
 {E}{N}{D}               { fprintf(stderr, " END"     ); return T_END;               }
 {I}{N}{T}{E}{G}{E}{R}   { fprintf(stderr, " INTEGER" ); return T_INTEGER;           }
+{W}{R}{I}{T}{E}{L}{N}   { fprintf(stderr, " WRITELN" ); return T_WRITE;             }
  /* FROM FUTURE IMPORT ;-) */
 ".."                    { fprintf(stderr, " .."      ); return T_DOT_DOT;           }
 "["                     { fprintf(stderr, " ["       ); return T_LEFT_BRACKET;      }
@@ -112,8 +113,8 @@ Y             [Yy]
 {A}{R}{R}{A}{Y}         { fprintf(stderr, " ARRAY"   ); return T_ARRAY;             }
 {O}{F}                  { fprintf(stderr, " OF"      ); return T_OF;                }
 
-{integer_value}         { int zzerror = copy_integer_value(yytext);
-                          if (zzerror == LEXER_ERROR_NONE)
+{integer_value}         { int zzerror = lexer_copy_integer_value(yytext);
+                          if (zzerror == ERROR_NONE)
                           {
                             fprintf(stderr, " T_INTEGER_VALUE:[%s]", yytext);
                             return T_INTEGER_VALUE;
@@ -134,10 +135,12 @@ Y             [Yy]
                           return T_STRING_VALUE;
                         }
 {bad_string}            { yyerror("Unterminated string"); }
-{identifier}            { int zzerror = copy_identifier(yytext);
-                          if (zzerror == LEXER_ERROR_NONE)
+{identifier}            { int zzerror = lexer_copy_identifier(yytext);
+                          if (zzerror == ERROR_NONE)
                           {
-                            fprintf(stderr, " T_IDENTIFIER:[%s]", yytext);
+                            fprintf(stderr, " T_IDENTIFIER:[%s %s]", yytext, yylval.value.identifier);
+                            // if (strcmp(yylval.value.identifier, "WRITE")==0) return T_WRITE;
+                            // if (strcmp(yylval.value.identifier, "WRITELN")==0) return T_WRITELN;
                             return T_IDENTIFIER;
                           }
                           yyerror("Invalid identifier");

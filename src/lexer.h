@@ -32,12 +32,27 @@ typedef struct _token_t
     } value;
 } token_t;
 
+// typedef enum error_t {
+//     ERROR_NONE,
+//     /* lexer */
+//     LEXER_ERROR_IDENTIFIER_TOO_LONG,
+//     LEXER_ERROR_OVERFLOW,
+//     /* parser */
+//     PARSER_ERROR_SYNTAX,
+//     PARSER_ERROR_UNEXPECTED,
+//     PARSER_ERROR_UNKOWN_IDENTIFIER,
+//     PARSER_ERROR_CONSTANT_VALUE,
+//     /* ...*/
+// } error_t;
+
 extern token_t yylval;
-extern token_t *token;
+extern char *yytext;
 
-extern error_code_t copy_identifier(const char *buffer);
+extern error_t lexer_copy_identifier();
 
-extern error_code_t copy_integer_value(const char *buffer);
+extern error_t lexer_copy_integer_value();
+
+// extern char *error_get_message(error_t code);
 
 #ifdef __cplusplus
 }
