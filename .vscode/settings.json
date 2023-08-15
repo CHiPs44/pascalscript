@@ -11,6 +11,10 @@
         "stdlib.h": "c",
         "symbol_stack.h": "c",
         "symbol.h": "c",
-        "vm.h": "c"
+        "vm.h": "c",
+        "limits.h": "c",
+        "string.h": "c",
+        "lexer.h": "c",
+        "pascalscript.h": "c"
     }
 }

@@ -29,6 +29,7 @@ typedef struct _symbol_table_t
 
 /* clang-format off */
 extern void      symbol_table_init(symbol_table_t *table);
+extern void      symbol_table_dump(symbol_table_t *table, char *title);
 extern int       symbol_table_find(symbol_table_t *table, char *name);
 extern symbol_t *symbol_table_get (symbol_table_t *table, char *name);
 extern int       symbol_table_add (symbol_table_t *table, symbol_t *symbol);

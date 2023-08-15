@@ -8,12 +8,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "pascalscript.h"
 #include "symbol.h"
 #include "vm.h"
 
 symbol_t default_globals[] = {
-    {"_PS_VERSION", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0x00000001L}},  // 0.0.0.1
-    {"_PS_VER_DATE", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0x20230805L}}, // 5-aug-2023
+    {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0}},
     {"MAXINT", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {2147483647L}},
     //  { "PI", KIND_CONSTANT, TYPE_REAL, sizeof(double), {3.141592653589793} },
 };
@@ -29,10 +29,13 @@ void vm_init(vm_t *vm)
     vm->column = -1;
     // Symbol table
     symbol_table_init(&vm->globals);
+    default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_COUNT & 0xff);
     for (int i = 0; i < sizeof(default_globals) / sizeof(default_globals[0]); i += 1)
     {
         symbol_table_add(&vm->globals, &default_globals[i]);
     }
+    symbol_table_add(&vm->globals, &default_globals[0]);
+    symbol_table_add(&vm->globals, &default_globals[1]);
     // Stack
     symbol_stack_init(&vm->stack);
 }

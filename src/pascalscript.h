@@ -14,6 +14,19 @@ extern "C"
 {
 #endif
 
+#ifndef PS_VERSION_MAJOR
+#define PS_VERSION_MAJOR 0
+#endif
+#ifndef PS_VERSION_MINOR
+#define PS_VERSION_MINOR 0
+#endif
+#ifndef PS_VERSION_PATCH
+#define PS_VERSION_PATCH 1
+#endif
+#ifndef PS_VERSION_COUNT
+#define PS_VERSION_COUNT 0
+#endif
+
 #ifndef PS_INTEGER
 #define PS_INTEGER int
 #endif

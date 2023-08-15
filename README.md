@@ -184,10 +184,10 @@ NB:
 
 ### Procedures
 
-This means we have input and output ("by reference") parameters, local variables, and recursive calls.
+This means we have input ("by value") and output ("by reference") parameters, local variables, and recursive calls.
 
 ```pascal
-program step4;
+program step4a;
 
 var a: integer;
 
@@ -207,10 +207,11 @@ end.
 ### Functions
 
 ```pascal
-program step3;
+program step4b;
 
 var a: integer;
 
+(* The "de-facto" standard of recursive functions *)
 function fact(n: integer): integer;
 var f: integer;
 begin
@@ -227,7 +228,7 @@ begin
 end.
 ```
 
-### Base types:
+### Base types
 
 - `integer` is 32 bits signed type
 - `real` is `double`, not `float`

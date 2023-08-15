@@ -7,8 +7,11 @@ const
   // HelloWorld2 = 123456789023457890123456789023457890;
   // HelloWorld3 = 4294967295;
   // HelloWorld3 = 2147483648;
+// var
+//   test: integer;
 begin
-  WriteLn(HelloWorld0);
+  // test := 1 + 2;
+  Write(HelloWorld0);
   WriteLn(HelloWorld1);
-  // Test line commment
+  WriteLn('Hello, world!');
 end.
