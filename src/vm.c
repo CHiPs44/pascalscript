@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "pascalscript.h"
+#include "error.h"
 #include "symbol.h"
 #include "vm.h"
 
@@ -65,7 +66,7 @@ int vm_global_add(vm_t *vm, symbol_t *symbol)
 }
 
 /**
- * @brief
+ * @brief Delete global
  *
  * @param VM
  * @param Symbol name
@@ -101,6 +102,39 @@ symbol_t *vm_auto_add_int(vm_t *vm, int value)
 int vm_auto_free(vm_t *vm, char *name)
 {
     return symbol_table_free(&vm->globals, name);
+}
+
+/**
+ * @brief Garbage collector: release free symbols
+ *
+ * @param VM
+ * @return Count of garbage collected symbols
+ */
+int vm_auto_gc(vm_t *vm)
+{
+    int count = symbol_table_gc(&vm->globals);
+    fprintf(stderr, "*** VM_AUTO_GC: %d\n", count);
+    return count;
+}
+
+error_t vm_exec_assign(vm_t *vm)
+{
+    value_t result;
+    symbol_t *value = vm_stack_pop(vm);
+    if (value == NULL)
+        return RUNTIME_STACK_EMPTY;
+    if (value->kind == KIND_AUTO)
+        vm_auto_free(vm, value->name);
+    symbol_t *variable = vm_stack_pop(vm);
+    if (variable == NULL)
+        return RUNTIME_STACK_EMPTY;
+    if (variable->kind != KIND_VARIABLE)
+        return RUNTIME_EXPECTED_VARIABLE;
+    if (variable->type != value->type)
+        return RUNTIME_TYPE_MISMATCH;
+    variable->value = value->value;
+    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
+    return ERROR_NONE;
 }
 
 /* EOF */

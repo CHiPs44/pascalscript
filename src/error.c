@@ -11,6 +11,10 @@ static char error_unknown[32];
 
 char *error_get_message(error_t code)
 {
+    // char *from = error_is_from_lexer(code)     ? "LEXER"
+    //              : error_is_from_parser(code)  ? "PARSER"
+    //              : error_is_from_runtime(code) ? "RUNTIME"
+    //                                            : "???";
     switch (code)
     {
     case ERROR_NONE:
@@ -46,8 +50,12 @@ char *error_get_message(error_t code)
         return "Unknown unary operator";
     case RUNTIME_UNKNOWN_BINARY_OPERATOR:
         return "Unknown binary operator";
+    case RUNTIME_EXPECTED_VARIABLE:
+        return "Variable expected";
     case RUNTIME_EXPECTED_NUMBER:
         return "Number expected";
+    case RUNTIME_TYPE_MISMATCH:
+        return "Type mismatch";
     default:
         snprintf(error_unknown, 31, "Unknown error code %d", code);
         return error_unknown;

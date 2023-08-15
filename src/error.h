@@ -29,7 +29,13 @@ typedef enum _error_t {
     RUNTIME_UNKNOWN_UNARY_OPERATOR,
     RUNTIME_UNKNOWN_BINARY_OPERATOR,
     RUNTIME_EXPECTED_NUMBER,
+    RUNTIME_EXPECTED_VARIABLE,
+    RUNTIME_TYPE_MISMATCH,
 } error_t;
+
+#define error_is_from_lexer(code) (code >= 1000 && code <= 1999)
+#define error_is_from_parser(code) (code >= 2000 && code <= 2999)
+#define error_is_from_runtime(code) (code >= 3000 && code <= 3999)
 
 extern char *error_get_message(error_t code);
 

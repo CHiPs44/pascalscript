@@ -32,14 +32,14 @@ void symbol_table_dump(symbol_table_t *table, char *title)
 {
     symbol_t *s;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
-    fprintf(stderr, "#   name                            kind type value        value\n");
-    fprintf(stderr, "--- ------------------------------- ---- ---- ------------ --------\n");
+    fprintf(stderr, "#   name                            kind type value (dec)  value (hex)\n");
+    fprintf(stderr, "--- ------------------------------- ---- ---- ------------ -----------\n");
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
         if (table->symbols[i].kind != KIND_UNKNOWN)
         {
             s = &table->symbols[i];
-            fprintf(stderr, "%03d %-*s %4d %4d %12d %08x\n",
+            fprintf(stderr, "%03d %-*s %4d %4d %12d 0x%08x\n",
                     i, MAX_SYMBOL_NAME, s->name, s->kind, s->type, s->value.i, s->value.i);
         }
     }
@@ -113,7 +113,7 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     {
         snprintf(table->symbols[index].name,
                  MAX_SYMBOL_NAME,
-                 "_PS_AUTO_%06x_",
+                 "#PS_AUTO_%04x",
                  index);
     }
     else
