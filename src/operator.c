@@ -15,24 +15,37 @@
  *
  * @param vm_t *vm
  * @param operator_t operator
- * @return error_t                                            ù*********
+ * @return error_t
  */
 error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 {
+    int result;
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
-    switch (op)
+    if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
-    case OP_NEG:
         if (a->type != TYPE_INTEGER)
         {
             return RUNTIME_EXPECTED_NUMBER;
         }
-        symbol_t *b = vm_auto_add_int(vm, -a->value.i);
+        result = a->value.i;
+        switch (op)
+        {
+        case OP_NEG:
+            result = -result;
+            break;
+        case OP_BOOL_NOT:
+            result = !result;
+            break;
+        case OP_BIT_NOT:
+            result = ~result;
+            break;
+        }
+        symbol_t *b = vm_auto_add_int(vm, result);
         if (b == NULL)
             return RUNTIME_GLOBAL_TABLE_FULL;
         if (vm_stack_push(vm, b) == SYMBOL_STACK_OVERFLOW)
@@ -41,8 +54,6 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
             return RUNTIME_STACK_OVERFLOW;
         }
         return ERROR_NONE;
-    default:
-        break;
     }
     return RUNTIME_UNKNOWN_UNARY_OPERATOR;
 }
@@ -62,27 +73,34 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
-    switch (op)
+    if (op == OP_ADD || op == OP_SUB || op == OP_MUL || op == OP_DIV || op == OP_MOD)
     {
-    case OP_ADD:
-    case OP_SUB:
-    case OP_MUL:
-    case OP_DIV:
-    case OP_MOD:
         if (a->type != TYPE_INTEGER)
             return RUNTIME_EXPECTED_NUMBER;
         if (b->type != TYPE_INTEGER)
             return RUNTIME_EXPECTED_NUMBER;
-        if (op== OP_ADD)
+        switch (op)
+        {
+        case OP_ADD:
             result.i = a->value.i + b->value.i;
-        if (op== OP_SUB)
+            break;
+        case OP_SUB:
             result.i = a->value.i - b->value.i;
-        if (op== OP_MUL)
+            break;
+        case OP_MUL:
             result.i = a->value.i * b->value.i;
-        if (op== OP_DIV)
+            break;
+        case OP_DIV:
+            if (b->value.i == 0)
+                return RUNTIME_DIVISION_BY_ZERO;
             result.i = a->value.i / b->value.i;
-        if (op== OP_MOD)
+            break;
+        case OP_MOD:
+            if (b->value.i == 0)
+                return RUNTIME_DIVISION_BY_ZERO;
             result.i = a->value.i % b->value.i;
+            break;
+        }
         symbol_t *c = vm_auto_add_int(vm, result.i);
         if (c == NULL)
             return RUNTIME_GLOBAL_TABLE_FULL;
@@ -92,8 +110,6 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
             return RUNTIME_STACK_OVERFLOW;
         }
         return ERROR_NONE;
-    default:
-        break;
     }
     return RUNTIME_UNKNOWN_BINARY_OPERATOR;
 }

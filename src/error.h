@@ -31,6 +31,7 @@ typedef enum _error_t {
     RUNTIME_EXPECTED_NUMBER,
     RUNTIME_EXPECTED_VARIABLE,
     RUNTIME_TYPE_MISMATCH,
+    RUNTIME_DIVISION_BY_ZERO,
 } error_t;
 
 #define error_is_from_lexer(code) (code >= 1000 && code <= 1999)

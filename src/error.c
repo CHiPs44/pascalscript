@@ -56,6 +56,8 @@ char *error_get_message(error_t code)
         return "Number expected";
     case RUNTIME_TYPE_MISMATCH:
         return "Type mismatch";
+    case RUNTIME_DIVISION_BY_ZERO:
+        return "Division by zero";
     default:
         snprintf(error_unknown, 31, "Unknown error code %d", code);
         return error_unknown;
