@@ -30,8 +30,6 @@ typedef enum _operator_t {
     OP_BOOL_NOT,
     OP_BOOL_AND,
     OP_BOOL_OR,
-    OP_BOOL_XOR,
-    OP_END_ENUM
 } operator_t;
 
 extern error_t vm_exec_op_unary(vm_t *vm, operator_t op);

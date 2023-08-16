@@ -119,7 +119,6 @@ int vm_auto_gc(vm_t *vm)
 
 error_t vm_exec_assign(vm_t *vm)
 {
-    value_t result;
     symbol_t *value = vm_stack_pop(vm);
     if (value == NULL)
         return RUNTIME_STACK_EMPTY;

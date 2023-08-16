@@ -39,10 +39,12 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
             result = -result;
             break;
         case OP_BOOL_NOT:
-            result = !result;
+            result = (int)(!(bool)result);
             break;
         case OP_BIT_NOT:
             result = ~result;
+            break;
+        default:
             break;
         }
         symbol_t *b = vm_auto_add_int(vm, result);
@@ -73,7 +75,11 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
-    if (op == OP_ADD || op == OP_SUB || op == OP_MUL || op == OP_DIV || op == OP_MOD)
+    if (op == OP_ADD || op == OP_SUB ||
+        op == OP_MUL || op == OP_DIV ||
+        op == OP_MOD || op == OP_BIT_AND ||
+        op == OP_BIT_OR || op == OP_BIT_XOR ||
+        op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
         if (a->type != TYPE_INTEGER)
             return RUNTIME_EXPECTED_NUMBER;
@@ -99,6 +105,23 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
             if (b->value.i == 0)
                 return RUNTIME_DIVISION_BY_ZERO;
             result.i = a->value.i % b->value.i;
+            break;
+        case OP_BIT_AND:
+            result.i = a->value.i & b->value.i;
+            break;
+        case OP_BIT_OR:
+            result.i = a->value.i | b->value.i;
+            break;
+        case OP_BIT_XOR:
+            result.i = a->value.i ^ b->value.i;
+            break;
+        case OP_BOOL_AND:
+            result.i = (int)((bool)(a->value.i) && (bool)(b->value.i));
+            break;
+        case OP_BOOL_OR:
+            result.i = (int)((bool)(a->value.i) || (bool)(b->value.i));
+            break;
+        default:
             break;
         }
         symbol_t *c = vm_auto_add_int(vm, result.i);

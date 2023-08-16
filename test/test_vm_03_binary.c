@@ -21,26 +21,27 @@ int main(void)
 {
     int result;
     error_t code;
-    printf("TEST VM #02 UNARY: BEGIN\n");
+    printf("TEST VM #03 BINARY: BEGIN\n");
     vm_init(vm);
     symbol_table_dump(&vm->globals, "Init");
-    printf("TEST VM #02 UNARY: INIT OK\n");
+    printf("TEST VM #03 BINARY: INIT OK\n");
     symbol_t symbol = {"I", KIND_VARIABLE, TYPE_INTEGER, sizeof(PS_INTEGER), {0}};
     result = vm_global_add(vm, &symbol);
     symbol_table_dump(&vm->globals, "VAR I: INTEGER;");
-    printf("TEST VM #02 UNARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
-    symbol_t *three = vm_auto_add_int(vm, 3);
+    printf("TEST VM #03 BINARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     vm_stack_push(vm, vm_global_get(vm, "I"));
-    vm_stack_push(vm, three);
-    code = vm_exec_op_unary(vm, OP_NEG);
-    printf("TEST VM #02 UNARY: -3; %s %d\n", code == ERROR_NONE ? "OK" : "KO", code);
-    symbol_stack_dump(&vm->stack, "2 PUSH?");
+    symbol_t *n1234 = vm_auto_add_int(vm, 1234);
+    symbol_t *n5678 = vm_auto_add_int(vm, 5678);
+    vm_stack_push(vm, n1234);
+    vm_stack_push(vm, n5678);
+    symbol_stack_dump(&vm->stack, "3 PUSH?");
+    code = vm_exec_op_binary(vm, OP_ADD);
+    printf("TEST VM #03 BINARY: 6912; %s %d\n", code == ERROR_NONE ? "OK" : "KO", code);
     code = vm_exec_assign(vm);
-    // int count = 
     vm_auto_gc(vm);
-    symbol_stack_dump(&vm->stack, "2 POP?");
-    symbol_table_dump(&vm->globals, "I=-3?");
-    printf("TEST VM #02 UNARY: I := -3; %s %d\n", code == ERROR_NONE ? "OK" : "KO", code);
-    printf("TEST VM #02 UNARY: END\n");
+    symbol_stack_dump(&vm->stack, "3 POP?");
+    symbol_table_dump(&vm->globals, "I=6912?");
+    printf("TEST VM #03 BINARY: I := 1234 + 5678 = 6912; %s %d\n", code == ERROR_NONE ? "OK" : "KO", code);
+    printf("TEST VM #03 BINARY: END\n");
     return 0;
 }

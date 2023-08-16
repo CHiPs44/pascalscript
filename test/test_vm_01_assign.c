@@ -32,7 +32,8 @@ int main(void)
     vm_stack_push(vm, three);
     symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
-    int count = vm_auto_gc(vm);
+    // int count = 
+    vm_auto_gc(vm);
     symbol_stack_dump(&vm->stack, "2 POP?");
     symbol_table_dump(&vm->globals, "I=3?");
     printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == ERROR_NONE ? "OK" : "KO", code);
