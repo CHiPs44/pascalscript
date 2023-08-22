@@ -22,7 +22,8 @@ $(PROJECT): $(SOURCES)
 %.c: %.l
 
 pascalscript.tab.c: pascalscript.y
-	bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
+	# bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
+	bison -rall --output=pascalscript.tab.c --defines=pascalscript.tab.h pascalscript.y
 
 pascalscript.lex.c: pascalscript.l pascalscript.tab.c
 	flex --outfile=pascalscript.lex.c pascalscript.l

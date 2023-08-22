@@ -13,7 +13,9 @@ extern int yylex (void);
 
 %}
 
+/*
 %define parse.error detailed
+*/
 %define parse.trace
 %define api.value.type { token_t }
 
@@ -24,7 +26,7 @@ extern int yylex (void);
 /* parenthesis */
 %token T_LEFT_PARENTHESIS T_RIGHT_PARENTHESIS
 /* other punctuation */
-%token T_COLON T_SEMICOLON T_DOT T_EQUALS 
+%token T_COLON T_SEMICOLON T_DOT T_EQUALS T_COMMA
 /* "real" keywords */
 %token T_PROGRAM T_CONST T_VAR T_BEGIN T_END
 /* %token T_TYPE T_PROCEDURE T_FUNCTION */
@@ -68,6 +70,11 @@ program:
 
 program_declaration
     : T_PROGRAM T_IDENTIFIER T_SEMICOLON
+    | T_PROGRAM T_IDENTIFIER T_LEFT_PARENTHESIS program_parameter_list T_RIGHT_PARENTHESIS T_SEMICOLON
+
+program_parameter_list
+    : T_IDENTIFIER
+    | T_IDENTIFIER T_COMMA program_parameter_list
 
 constant_declaration_block
     : T_CONST constant_declaration_list

@@ -95,6 +95,7 @@ Y                 [Yy]
 ";"                     { if (lexer_trace) fprintf(stderr,  " ;"       ); return T_SEMICOLON;         }
 "."                     { if (lexer_trace) fprintf(stderr,  " ."       ); return T_DOT;               }
 "="                     { if (lexer_trace) fprintf(stderr,  " ="       ); return T_EQUALS;            }
+","                     { if (lexer_trace) fprintf(stderr,  " ,"       ); return T_COMMA;             }
 
  /* KEYWORDS */
 {P}{R}{O}{G}{R}{A}{M}   { if (lexer_trace) fprintf(stderr,  " PROGRAM" ); return T_PROGRAM;           }

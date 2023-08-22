@@ -69,3 +69,4 @@ extern void symbol_normalize_name(char *name);
 #endif
 
 #endif /* _SYMBOL_H */
+            
