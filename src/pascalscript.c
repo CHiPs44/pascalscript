@@ -22,7 +22,7 @@ int main(void)
   // symbol_table_dump(&vm->globals,"Init");
   symbol_t *ps_version = vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
-         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_COUNT,
+         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
   /* Interpret stdin */
   return yyparse();

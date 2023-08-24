@@ -23,8 +23,8 @@ extern "C"
 #ifndef PS_VERSION_PATCH
 #define PS_VERSION_PATCH 1
 #endif
-#ifndef PS_VERSION_COUNT
-#define PS_VERSION_COUNT 0
+#ifndef PS_VERSION_INDEX
+#define PS_VERSION_INDEX 0
 #endif
 
 #ifndef PS_INTEGER

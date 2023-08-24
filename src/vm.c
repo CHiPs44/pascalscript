@@ -31,7 +31,7 @@ void vm_init(vm_t *vm)
     vm->column = -1;
     // Symbol table
     symbol_table_init(&vm->globals);
-    default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_COUNT & 0xff);
+    default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);
     for (int i = 0; i < sizeof(default_globals) / sizeof(default_globals[0]); i += 1)
     {
         symbol_table_add(&vm->globals, &default_globals[i]);
@@ -100,6 +100,13 @@ symbol_t *vm_auto_add_int(vm_t *vm, int value)
     return index >= 0 ? &vm->globals.symbols[index] : NULL;
 }
 
+/**
+ * @brief Free auto variable after use
+ *
+ * @param VM
+ * @param string Normalized name
+ * @return index of symbol or -1 if not found
+ */
 int vm_auto_free(vm_t *vm, char *name)
 {
     return symbol_table_free(&vm->globals, name);
@@ -118,6 +125,12 @@ int vm_auto_gc(vm_t *vm)
     return count;
 }
 
+/**
+ * @brief Execute ASSIGN statement
+ *      POP value
+ *      POP variable
+ *      SET variable TO value
+*/
 error_t vm_exec_assign(vm_t *vm)
 {
     symbol_t *value = vm_stack_pop(vm);
