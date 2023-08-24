@@ -50,6 +50,8 @@ char *error_get_message(error_t code)
         return "Unknown unary operator";
     case RUNTIME_UNKNOWN_BINARY_OPERATOR:
         return "Unknown binary operator";
+    case RUNTIME_ASSIGN_TO_CONST:
+        return "Constant can't be changed";
     case RUNTIME_EXPECTED_VARIABLE:
         return "Variable expected";
     case RUNTIME_EXPECTED_NUMBER:

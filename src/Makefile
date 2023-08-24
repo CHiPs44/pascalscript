@@ -18,7 +18,7 @@ $(PROJECT): $(SOURCES)
 
 # *.y is built by a default rule as a call to yacc/bison that replace pascalscript.c...
 %.c: %.y
-# same for flex?
+# same for flex
 %.c: %.l
 
 pascalscript.tab.c: pascalscript.y

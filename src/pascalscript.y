@@ -39,9 +39,6 @@ extern int yylex (void);
 /* identifier */
 %token T_IDENTIFIER
 
-/* reserved / not implemented */
-/* %token T_RESERVED */
-
 /* boolean */
 %token T_BOOLEAN T_BOOLEAN_VALUE T_FALSE T_TRUE
 

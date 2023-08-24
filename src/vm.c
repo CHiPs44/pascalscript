@@ -141,6 +141,8 @@ error_t vm_exec_assign(vm_t *vm)
     symbol_t *variable = vm_stack_pop(vm);
     if (variable == NULL)
         return RUNTIME_STACK_EMPTY;
+    if (variable->kind == KIND_CONSTANT)
+        return RUNTIME_ASSIGN_TO_CONST;
     if (variable->kind != KIND_VARIABLE)
         return RUNTIME_EXPECTED_VARIABLE;
     if (variable->type != value->type)
