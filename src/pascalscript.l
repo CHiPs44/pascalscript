@@ -31,7 +31,7 @@ bool lexer_trace = 1;
 %x            COMMENT3
 
 /* regular expressions */
-identifier        [a-zA-Z][a-zA-Z0-9]*
+identifier        [a-zA-Z][a-zA-Z0-9_]*
 integer_value     [0-9]+
 real_value        [0-9+][\.][0-9]+
 /* cf. /usr/share/doc/flex/examples/manual/pascal.lex */
