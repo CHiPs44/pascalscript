@@ -55,4 +55,21 @@ error_t lexer_copy_integer_value()
     return ERROR_NONE;
 }
 
+/**
+ * @brief Parse current integer value into current yylval
+ *
+ * @param yytext
+ * @return error_t ERROR_NONE | LEXER_ERROR_OVERFLOW
+ */
+error_t lexer_copy_char_value()
+{
+    // "'X'" or "''''"
+    PS_CHAR val = yytext[1];
+    fprintf(stderr, " [lexer_copy_char_value %s %c]", yytext, val);
+    if (errno == ERANGE || val > INT_MAX)
+    yylval.type = CHAR_VAL;
+    yylval.value.char_val = val;
+    return ERROR_NONE;
+}
+
 /* EOF */

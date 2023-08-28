@@ -38,27 +38,27 @@ typedef enum _type_t
     TYPE_NONE = 0,
     TYPE_INTEGER,
     // TYPE_UNSIGNED_INTEGER,
-    // TYPE_CHAR,
-    // TYPE_STRING,
+    TYPE_CHAR,
+    TYPE_STRING,
     // TYPE_REAL,
     // TYPE_POINTER,
 } type_t;
 
 typedef union _value_t
 {
-    PS_INTEGER i;
+    PS_INTEGER          i;
     // PS_UNSIGNED_INTEGER u;
-    // PS_CHAR c;
-    // PS_STRING s;
-    // PS_REAL r;
+    PS_CHAR             c;
+    PS_CHAR             s[PS_STRING_MAX + 1];
+    // PS_REAL             r;
 } value_t;
 
 typedef struct _symbol_t
 {
-    char name[MAX_SYMBOL_NAME + 1];
-    kind_t kind;
-    type_t type;
-    size_t size;
+    char    name[MAX_SYMBOL_NAME + 1];
+    kind_t  kind;
+    type_t  type;
+    size_t  size;
     value_t value;
 } symbol_t;
 
@@ -69,4 +69,3 @@ extern void symbol_normalize_name(char *name);
 #endif
 
 #endif /* _SYMBOL_H */
-            

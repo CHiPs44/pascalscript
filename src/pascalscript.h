@@ -47,9 +47,9 @@ extern "C"
 #define PS_STRING_MAX 255
 #endif
 
-#ifndef PS_STRING
-#define PS_STRING PS_CHAR[PS_STRING_MAX]
-#endif
+// #ifndef PS_STRING
+// #define PS_STRING(__STRING__) PS_CHAR __STRING__[PS_STRING_MAX]
+// #endif
 
 #ifdef __cplusplus
 }
