@@ -36,7 +36,8 @@ integer_value     [0-9]+
 real_value        [0-9+][\.][0-9]+
 /* cf. /usr/share/doc/flex/examples/manual/pascal.lex */
 char_value        \'([^'\n|\'\'])\'
-string_value      \'([^'\n|\'\'])*\'
+string_value      \'([^'\n]|\'\')+\'
+empty_string_value \'\'
 bad_string_value  \'([^'\n]|\'\')+
 whitespace        [ \t]+
 eol               [\r\n|\r|\n]
@@ -137,6 +138,10 @@ Y                 [Yy]
 {char_value}            { // TODO
                           if (lexer_trace) fprintf(stderr, " ***TODO*** T_CHAR_VALUE:[%s]", yytext);
                           return T_CHAR_VALUE;
+                        }
+{empty_string_value}    { /* TODO */
+                          if (lexer_trace) fprintf(stderr, " ***TODO*** T_STRING_VALUE:[%s]", yytext);
+                          return T_STRING_VALUE;
                         }
 {string_value}          { /* TODO */
                           if (lexer_trace) fprintf(stderr, " ***TODO*** T_STRING_VALUE:[%s]", yytext);
