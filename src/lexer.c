@@ -38,7 +38,6 @@ error_t lexer_copy_identifier()
 /**
  * @brief Parse current integer value into current yylval
  *
- * @param yytext
  * @return error_t ERROR_NONE | LEXER_ERROR_OVERFLOW
  */
 error_t lexer_copy_integer_value()
@@ -56,19 +55,36 @@ error_t lexer_copy_integer_value()
 }
 
 /**
- * @brief Parse current integer value into current yylval
+ * @brief Parse current char value into current yylval
  *
- * @param yytext
- * @return error_t ERROR_NONE | LEXER_ERROR_OVERFLOW
+ * @return error_t ERROR_NONE
  */
 error_t lexer_copy_char_value()
 {
     // "'X'" or "''''"
     PS_CHAR val = yytext[1];
     fprintf(stderr, " [lexer_copy_char_value %s %c]", yytext, val);
-    if (errno == ERANGE || val > INT_MAX)
     yylval.type = CHAR_VAL;
     yylval.value.char_val = val;
+    return ERROR_NONE;
+}
+
+/**
+ * @brief Parse current string value into current yylval
+ *
+ * @return error_t ERROR_NONE | LEXER_ERROR_STRING_TOO_LONG
+ */
+error_t lexer_copy_string_value()
+{
+    size_t len = strlen(yytext) - 2;
+    fprintf(stderr, " [lexer_copy_string_value %s]", yytext);
+    if (len > PS_STRING_MAX)
+    {
+        fprintf(stderr, "LEXER_ERROR_STRING_TOO_LONG %s %ld", yytext, len);
+        return LEXER_ERROR_STRING_TOO_LONG;
+    }
+    yylval.type = STRING_VAL;
+    strncpy(yylval.value.string_val, &yytext[1],len - 1);
     return ERROR_NONE;
 }
 

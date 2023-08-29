@@ -17,6 +17,7 @@ typedef enum _error_t {
     /* lexer */
     LEXER_ERROR_IDENTIFIER_TOO_LONG = 1000,
     LEXER_ERROR_OVERFLOW,
+    LEXER_ERROR_STRING_TOO_LONG,
     /* parser */
     PARSER_ERROR_SYNTAX = 2000,
     PARSER_ERROR_UNEXPECTED,

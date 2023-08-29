@@ -26,6 +26,8 @@ char *error_get_message(error_t code)
         return "Identifier too long";
     case LEXER_ERROR_OVERFLOW:
         return "Overflow";
+    case LEXER_ERROR_STRING_TOO_LONG:
+        return "String too long";
     /*
      * PARSER ERRORS
      */

@@ -135,17 +135,29 @@ Y                 [Yy]
                           if (lexer_trace) fprintf(stderr, " ***TODO*** T_REAL_VALUE:[%s]", yytext);
                           return T_REAL_VALUE;
                         }
-{char_value}            { // TODO
-                          if (lexer_trace) fprintf(stderr, " ***TODO*** T_CHAR_VALUE:[%s]", yytext);
-                          return T_CHAR_VALUE;
+{char_value}            { int zzerror = lexer_copy_char_value(yytext);
+                          if (zzerror == ERROR_NONE)
+                          {
+                              if (lexer_trace) fprintf(stderr, " T_CHAR_VALUE:[%s]", yytext);
+                              return T_CHAR_VALUE;
+                          }
+                          yyerror("Invalid char value");
+                          yyterminate();
                         }
-{empty_string_value}    { /* TODO */
-                          if (lexer_trace) fprintf(stderr, " ***TODO*** T_STRING_VALUE:[%s]", yytext);
+{empty_string_value}    { yylval.type = STRING_VAL;
+                          strcpy(yylval.value.string_val, "");
+                          if (lexer_trace) fprintf(stderr, " T_STRING_VALUE:[%s]", yytext);
                           return T_STRING_VALUE;
+
                         }
-{string_value}          { /* TODO */
-                          if (lexer_trace) fprintf(stderr, " ***TODO*** T_STRING_VALUE:[%s]", yytext);
-                          return T_STRING_VALUE;
+{string_value}          { int zzerror = lexer_copy_string_value();
+                          if (zzerror == ERROR_NONE)
+                          {
+                              if (lexer_trace) fprintf(stderr, " T_STRING_VALUE:[%s]", yytext);
+                              return T_STRING_VALUE;
+                          }
+                          yyerror("Invalid string value");
+                          yyterminate();
                         }
 {bad_string_value}      { yyerror("Unterminated string");
                           yyterminate();
