@@ -76,15 +76,16 @@ error_t lexer_copy_char_value()
  */
 error_t lexer_copy_string_value()
 {
-    size_t len = strlen(yytext) - 2;
-    fprintf(stderr, " [lexer_copy_string_value %s]", yytext);
-    if (len > PS_STRING_MAX)
+    size_t len = strlen(yytext); // - 2;
+    fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]", len, yytext);
+    fprintf(stderr, " [lexer_copy_string_value]\n");
+    if (len - 2 > PS_STRING_MAX)
     {
-        fprintf(stderr, "LEXER_ERROR_STRING_TOO_LONG %s %ld", yytext, len);
+        fprintf(stderr, "LEXER_ERROR_STRING_TOO_LONG %ld |%s|", len, yytext);
         return LEXER_ERROR_STRING_TOO_LONG;
     }
     yylval.type = STRING_VAL;
-    strncpy(yylval.value.string_val, &yytext[1],len - 1);
+    strncpy(yylval.value.string_val, &yytext[1], len - 1);
     return ERROR_NONE;
 }
 
