@@ -1,4 +1,4 @@
-Program hello;
+Program hello(input, output);
 { Won't work with first versions }
 Const
   EMPTY_STRING = '';

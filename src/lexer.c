@@ -43,7 +43,7 @@ error_t lexer_copy_identifier()
 error_t lexer_copy_integer_value()
 {
     long val = strtoul(yytext, 0, 10);
-    fprintf(stderr, " [lexer_copy_integer_value %s %ld %d %d]", yytext, val, errno, INT_MAX);
+    // fprintf(stderr, " [lexer_copy_integer_value %s %ld %d %d]", yytext, val, errno, INT_MAX);
     if (errno == ERANGE || val > INT_MAX)
     {
         fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %ld", yytext, val);
@@ -63,7 +63,7 @@ error_t lexer_copy_char_value()
 {
     // "'X'" or "''''"
     PS_CHAR val = yytext[1];
-    fprintf(stderr, " [lexer_copy_char_value %s %c]", yytext, val);
+    // fprintf(stderr, " [lexer_copy_char_value %s %c]", yytext, val);
     yylval.type = CHAR_VAL;
     yylval.value.char_val = val;
     return ERROR_NONE;
@@ -76,6 +76,7 @@ error_t lexer_copy_char_value()
  */
 error_t lexer_copy_string_value()
 {
+    // TODO replace "''"" with "'"
     size_t len = strlen(yytext) - 2;
     // fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]\n", len, yytext);
     // fprintf(stderr, " [lexer_copy_string_value]\n");

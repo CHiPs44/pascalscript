@@ -21,7 +21,7 @@ extern "C"
 #define PS_VERSION_MINOR 0
 #endif
 #ifndef PS_VERSION_PATCH
-#define PS_VERSION_PATCH 1
+#define PS_VERSION_PATCH 0
 #endif
 #ifndef PS_VERSION_INDEX
 #define PS_VERSION_INDEX 0

@@ -10,10 +10,14 @@ SOURCES = \
 error.c lexer.c operator.c pascalscript.c \
 symbol.c symbol_stack.c symbol_table.c vm.c \
 pascalscript.lex.c pascalscript.tab.c
+INCLUDES = \
+error.h lexer.h operator.h pascalscript.h \
+symbol.h symbol_stack.h symbol_table.h vm.h \
+pascalscript.tab.h
 
 all: $(PROJECT)
 
-$(PROJECT): $(SOURCES)
+$(PROJECT): $(SOURCES) $(INCLUDES)
 	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES)
 
 # *.y is built by a default rule as a call to yacc/bison that replace pascalscript.c...
