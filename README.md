@@ -51,7 +51,8 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Flex (Fast Lexical Analyzer Generator)" <https://www.geeksforgeeks.org/flex-fast-lexical-analyzer-generator/>
 - "Introduction to YACC" <https://www.geeksforgeeks.org/introduction-to-yacc/>
 - "ANSI C grammar" <https://www.lysator.liu.se/c/ANSI-C-grammar-y.html>
-- "Examples from flex itself" `/usr/share/doc/flex/examples/` and `/usr/share/doc/flex/examples/manual/`
+- "yacc-flex-interpreter" <https://github.com/koniecznyp/yacc-flex-interpreter>
+- "Examples from flex itself" `/usr/share/doc/flex/examples/` and `/usr/share/doc/flex/examples/manual/` (at least on Debian based systems)
 - "Examples from GNU Bison itself" `/usr/share/doc/bison/examples/c/`
 
 ## Features
