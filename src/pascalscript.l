@@ -43,6 +43,7 @@ whitespace        [ \t]+
 eol               [\r\n|\r|\n]
 
 %%
+ /* NB: comments in this section are preceded by one space to not be interpreted as LEX rules */
 
  /* COMMENTS */
 "{"                     { BEGIN COMMENT1; }

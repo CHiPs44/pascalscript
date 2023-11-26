@@ -78,7 +78,7 @@ int symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol)
 {
     if (symbol_stack_full(stack))
     {
-        return SYMBOL_STACK_OVERFLOW;
+        return SYMBOL_STACK_ERROR_OVERFLOW;
     }
     stack->sp += 1;
     stack->symbols[stack->sp] = symbol;

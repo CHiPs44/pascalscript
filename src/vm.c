@@ -121,7 +121,7 @@ int vm_auto_free(vm_t *vm, char *name)
 int vm_auto_gc(vm_t *vm)
 {
     int count = symbol_table_gc(&vm->globals);
-    fprintf(stderr, "*** VM_AUTO_GC: %d\n", count);
+    fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     return count;
 }
 
@@ -130,7 +130,7 @@ int vm_auto_gc(vm_t *vm)
  *      POP value
  *      POP variable
  *      SET variable TO value
-*/
+ */
 error_t vm_exec_assign(vm_t *vm)
 {
     symbol_t *value = vm_stack_pop(vm);

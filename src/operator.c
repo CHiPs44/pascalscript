@@ -19,7 +19,7 @@
  */
 error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 {
-    int result;
+    value_t result;
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_STACK_EMPTY;
@@ -32,25 +32,25 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         {
             return RUNTIME_EXPECTED_NUMBER;
         }
-        result = a->value.i;
+        result.i = a->value.i;
         switch (op)
         {
         case OP_NEG:
-            result = -result;
+            result.i = -result.i;
             break;
         case OP_BOOL_NOT:
-            result = (int)(!(bool)result);
+            result.i = (int)(!(bool)result.i);
             break;
         case OP_BIT_NOT:
-            result = ~result;
+            result.i = ~result.i;
             break;
         default:
             break;
         }
-        symbol_t *b = vm_auto_add_int(vm, result);
+        symbol_t *b = vm_auto_add_int(vm, result.i);
         if (b == NULL)
             return RUNTIME_GLOBAL_TABLE_FULL;
-        if (vm_stack_push(vm, b) == SYMBOL_STACK_OVERFLOW)
+        if (vm_stack_push(vm, b) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, b->name);
             return RUNTIME_STACK_OVERFLOW;
@@ -127,7 +127,7 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         symbol_t *c = vm_auto_add_int(vm, result.i);
         if (c == NULL)
             return RUNTIME_GLOBAL_TABLE_FULL;
-        if (vm_stack_push(vm, c) == SYMBOL_STACK_OVERFLOW)
+        if (vm_stack_push(vm, c) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, c->name);
             return RUNTIME_STACK_OVERFLOW;

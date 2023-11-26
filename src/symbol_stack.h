@@ -20,7 +20,7 @@ extern "C"
 #define SYMBOL_STACK_SIZE 256
 #endif
 
-#define SYMBOL_STACK_OVERFLOW -2
+#define SYMBOL_STACK_ERROR_OVERFLOW -2
 
 typedef struct _symbol_stack_t
 {
