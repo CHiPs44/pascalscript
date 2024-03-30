@@ -32,8 +32,14 @@ bool lexer_trace = 1;
 
 /* regular expressions */
 identifier        [a-zA-Z][a-zA-Z0-9_]*
-integer_value     [0-9]+
-real_value        [0-9+][\.][0-9]+
+/* https://www.freepascal.org/docs-html/ref/refse6.html */
+/* %=bin, $=hex, &=oct */
+/* https://regex101.com/r/2Dvv4x/4 was [0-9]+ */
+integer_value     \d*|\%[0-1]+|&[0-7]*|\$[\dA-Fa-f]+
+/* no scientific notation for now? was [0-9+][\.][0-9]+ */
+/* https://regex101.com/r/GunyhZ/3 */
+/*                  1234.567 */
+real_value        \d+\.\d+[Ee]([-+])?\d+|\d+[Ee]([-+])?\d+|\d+\.\d+
 /* cf. /usr/share/doc/flex/examples/manual/pascal.lex */
 char_value        \'([^'\n|\'\'])\'
 string_value      \'([^'\n]|\'\')*\'
@@ -97,6 +103,15 @@ array                   { if (lexer_trace) fprintf(stderr,  " ARRAY"   ); return
 of                      { if (lexer_trace) fprintf(stderr,  " OF"      ); return T_OF;                }
 
  /* LITTERAL VALUES */
+{real_value}            { int err = lexer_copy_real_value(yytext);
+                          if (err == ERROR_NONE)
+                          {
+                            if (lexer_trace) fprintf(stderr, " T_REAL_VALUE:[%s]", yytext);
+                              return T_REAL_VALUE;
+                          }
+                          yyerror("Invalid real value");
+                          yyterminate();
+                        }
 {integer_value}         { int err = lexer_copy_integer_value(yytext);
                           if (err == ERROR_NONE)
                           {
@@ -105,10 +120,6 @@ of                      { if (lexer_trace) fprintf(stderr,  " OF"      ); return
                           }
                           yyerror("Invalid integer value");
                           yyterminate();
-                        }
-{real_value}            { /* TODO */
-                          if (lexer_trace) fprintf(stderr, " ***TODO*** T_REAL_VALUE:[%s]", yytext);
-                          return T_REAL_VALUE;
                         }
 {char_value}            { int err = lexer_copy_char_value(yytext);
                           if (err == ERROR_NONE)

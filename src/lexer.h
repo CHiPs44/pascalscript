@@ -20,9 +20,10 @@ extern "C"
 typedef enum _token_type_t
 {
     IDENTIFIER,
-    INT_VAL,
-    CHAR_VAL,
-    STRING_VAL,
+    INTEGER,
+    REAL,
+    CHAR,
+    STRING,
 } token_type_t;
 
 typedef struct _token_t
@@ -31,8 +32,9 @@ typedef struct _token_t
     union
     {
         char identifier[MAX_IDENTIFIER + 1];
-        int int_val;
-        char char_val;
+        PS_INTEGER int_val;
+        PS_REAL real_val;
+        PS_CHAR char_val;
         PS_CHAR string_val[PS_STRING_MAX + 1];
     } value;
 } token_t;
@@ -40,8 +42,12 @@ typedef struct _token_t
 extern token_t yylval;
 extern char *yytext;
 
+extern void zzzdump(void *p);
+extern void lexer_dump_token(token_t *token);
+
 extern error_t lexer_copy_identifier();
 extern error_t lexer_copy_integer_value();
+extern error_t lexer_copy_real_value();
 extern error_t lexer_copy_char_value();
 extern error_t lexer_copy_string_value();
 

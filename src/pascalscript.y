@@ -13,19 +13,28 @@ extern int yylex (void);
 
 %}
 
+
+/* %union
+{
+    char identifier[31 + 1];
+    int int_val;
+    char char_val;
+    char string_val[255 + 1];
+} */
+
 /*
 %define parse.error detailed
 */
 %define parse.trace
 %define api.value.type { token_t }
 
-/* operators */
+/* operators: + - * / div mod */
 %token T_PLUS T_MINUS T_STAR T_SLASH T_DIV T_MOD
-/* assignment */
+/* assignment: := */
 %token T_ASSIGN
-/* parenthesis */
+/* parenthesis: ( ) */
 %token T_LEFT_PARENTHESIS T_RIGHT_PARENTHESIS
-/* other punctuation */
+/* other punctuation: : ; . = ,  */
 %token T_COLON T_SEMICOLON T_DOT T_EQUALS T_COMMA
 /* "real" keywords */
 %token T_PROGRAM T_CONST T_VAR T_BEGIN T_END
@@ -52,6 +61,12 @@ extern int yylex (void);
 /* array */
 %token T_ARRAY T_OF T_DOT_DOT T_LEFT_BRACKET T_RIGHT_BRACKET
 
+%type<identifier> T_IDENTIFIER
+%type<int_val> T_INTEGER_VALUE
+%type<real_val> T_REAL_VALUE
+%type<char_val> T_CHAR_VALUE
+%type<string_val> T_STRING_VALUE
+
 %start program
 
 %%
@@ -66,12 +81,21 @@ program:
 ;
 
 program_declaration
-    : T_PROGRAM T_IDENTIFIER T_SEMICOLON
-    | T_PROGRAM T_IDENTIFIER T_LEFT_PARENTHESIS program_parameter_list T_RIGHT_PARENTHESIS T_SEMICOLON
+    : T_PROGRAM T_IDENTIFIER T_SEMICOLON {
+        fprintf(stderr, "BISON0: PROGRAM %s;\n", $<value.identifier>0);
+        fprintf(stderr, "BISON1: PROGRAM %s;\n", $<value.identifier>1);
+        // zzzdump($0);
+        // lexer_dump_token($<value>0);
+        // lexer_dump_token($<value>1);
+        // lexer_dump_token($<value>1);
+        // lexer_dump_token($<value>2);
+        // lexer_dump_token($<value>3);
+    }
+    /* | T_PROGRAM T_IDENTIFIER T_LEFT_PARENTHESIS program_parameter_list T_RIGHT_PARENTHESIS T_SEMICOLON */
 
-program_parameter_list
+/* program_parameter_list
     : T_IDENTIFIER
-    | T_IDENTIFIER T_COMMA program_parameter_list
+    | T_IDENTIFIER T_COMMA program_parameter_list */
 
 constant_declaration_block
     : T_CONST constant_declaration_list
@@ -90,6 +114,7 @@ constant_literal
     | T_FALSE
     | T_TRUE
     | T_REAL_VALUE
+    | T_MINUS T_REAL_VALUE
     | T_CHAR_VALUE
     | T_STRING_VALUE
 ;
