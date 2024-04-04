@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -38,8 +38,8 @@ typedef enum _type_t
     TYPE_NONE = 0,
     TYPE_INTEGER,
     // TYPE_UNSIGNED_INTEGER,
-    TYPE_CHAR,
-    TYPE_STRING,
+    // TYPE_CHAR,
+    // TYPE_STRING,
     // TYPE_REAL,
     // TYPE_POINTER,
 } type_t;
@@ -48,8 +48,8 @@ typedef union _value_t
 {
     PS_INTEGER          i;
     // PS_UNSIGNED_INTEGER u;
-    PS_CHAR             c;
-    PS_CHAR             s[PS_STRING_MAX + 1];
+    // PS_CHAR             c;
+    // PS_CHAR             s[PS_STRING_MAX + 1];
     // PS_REAL             r;
 } value_t;
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -22,7 +22,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
     value_t result;
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
-        return RUNTIME_STACK_EMPTY;
+        return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
@@ -30,7 +30,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
     {
         if (a->type != TYPE_INTEGER)
         {
-            return RUNTIME_EXPECTED_NUMBER;
+            return RUNTIME_ERROR_EXPECTED_NUMBER;
         }
         result.i = a->value.i;
         switch (op)
@@ -49,15 +49,15 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         }
         symbol_t *b = vm_auto_add_int(vm, result.i);
         if (b == NULL)
-            return RUNTIME_GLOBAL_TABLE_FULL;
+            return RUNTIME_ERROR_GLOBAL_TABLE_FULL;
         if (vm_stack_push(vm, b) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, b->name);
-            return RUNTIME_STACK_OVERFLOW;
+            return RUNTIME_ERROR_STACK_OVERFLOW;
         }
         return ERROR_NONE;
     }
-    return RUNTIME_UNKNOWN_UNARY_OPERATOR;
+    return RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
 }
 
 error_t vm_exec_op_binary(vm_t *vm, operator_t op)
@@ -65,13 +65,13 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
     value_t result;
     symbol_t *b = vm_stack_pop(vm);
     if (b == NULL)
-        return RUNTIME_STACK_EMPTY;
+        return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (b->kind == KIND_AUTO)
         vm_auto_free(vm, b->name);
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
-        return RUNTIME_STACK_EMPTY;
+        return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
@@ -82,9 +82,9 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
         if (a->type != TYPE_INTEGER)
-            return RUNTIME_EXPECTED_NUMBER;
+            return RUNTIME_ERROR_EXPECTED_NUMBER;
         if (b->type != TYPE_INTEGER)
-            return RUNTIME_EXPECTED_NUMBER;
+            return RUNTIME_ERROR_EXPECTED_NUMBER;
         switch (op)
         {
         case OP_ADD:
@@ -98,12 +98,12 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
             break;
         case OP_DIV:
             if (b->value.i == 0)
-                return RUNTIME_DIVISION_BY_ZERO;
+                return RUNTIME_ERROR_DIVISION_BY_ZERO;
             result.i = a->value.i / b->value.i;
             break;
         case OP_MOD:
             if (b->value.i == 0)
-                return RUNTIME_DIVISION_BY_ZERO;
+                return RUNTIME_ERROR_DIVISION_BY_ZERO;
             result.i = a->value.i % b->value.i;
             break;
         case OP_BIT_AND:
@@ -126,15 +126,15 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         }
         symbol_t *c = vm_auto_add_int(vm, result.i);
         if (c == NULL)
-            return RUNTIME_GLOBAL_TABLE_FULL;
+            return RUNTIME_ERROR_GLOBAL_TABLE_FULL;
         if (vm_stack_push(vm, c) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, c->name);
-            return RUNTIME_STACK_OVERFLOW;
+            return RUNTIME_ERROR_STACK_OVERFLOW;
         }
         return ERROR_NONE;
     }
-    return RUNTIME_UNKNOWN_BINARY_OPERATOR;
+    return RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR;
 }
 
 /* EOF */

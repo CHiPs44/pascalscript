@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -42,25 +42,25 @@ char *error_get_message(error_t code)
     /*
      * RUNTIME ERRORS
      */
-    case RUNTIME_STACK_EMPTY:
+    case RUNTIME_ERROR_STACK_EMPTY:
         return "Stack empty";
-    case RUNTIME_STACK_OVERFLOW:
+    case RUNTIME_ERROR_STACK_OVERFLOW:
         return "Stack overflow";
-    case RUNTIME_GLOBAL_TABLE_FULL:
+    case RUNTIME_ERROR_GLOBAL_TABLE_FULL:
         return "Global table full";
-    case RUNTIME_UNKNOWN_UNARY_OPERATOR:
+    case RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
         return "Unknown unary operator";
-    case RUNTIME_UNKNOWN_BINARY_OPERATOR:
+    case RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR:
         return "Unknown binary operator";
-    case RUNTIME_ASSIGN_TO_CONST:
+    case RUNTIME_ERROR_ASSIGN_TO_CONST:
         return "Constant can't be changed";
-    case RUNTIME_EXPECTED_VARIABLE:
+    case RUNTIME_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
-    case RUNTIME_EXPECTED_NUMBER:
+    case RUNTIME_ERROR_EXPECTED_NUMBER:
         return "Number expected";
-    case RUNTIME_TYPE_MISMATCH:
+    case RUNTIME_ERROR_TYPE_MISMATCH:
         return "Type mismatch";
-    case RUNTIME_DIVISION_BY_ZERO:
+    case RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
     default:
         snprintf(error_unknown, 31, "Unknown error code %d", code);

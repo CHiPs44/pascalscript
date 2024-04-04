@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -25,10 +25,9 @@ symbol_t default_globals[] = {
  */
 void vm_init(vm_t *vm)
 {
-    // VM itself
-    vm->program = NULL;
-    vm->line = -1;
-    vm->column = -1;
+    // Program source
+    vm->row = 0;
+    vm->col = 0;
     // Symbol table
     symbol_table_init(&vm->globals);
     default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);
@@ -43,10 +42,10 @@ void vm_init(vm_t *vm)
 }
 
 /**
- * @brief Get global
+ * @brief Get global symbol
  *
  * @param VM
- * @param Name normalized
+ * @param already normalized name
  * @return global or NULL if not found
  */
 symbol_t *vm_global_get(vm_t *vm, char *name)
@@ -55,7 +54,7 @@ symbol_t *vm_global_get(vm_t *vm, char *name)
 }
 
 /**
- * @brief Add global
+ * @brief Add global symbol
  *
  * @param VM
  * @param Symbol
@@ -67,7 +66,7 @@ int vm_global_add(vm_t *vm, symbol_t *symbol)
 }
 
 /**
- * @brief Delete global
+ * @brief Delete global symbol
  *
  * @param VM
  * @param Symbol name
@@ -135,18 +134,18 @@ error_t vm_exec_assign(vm_t *vm)
 {
     symbol_t *value = vm_stack_pop(vm);
     if (value == NULL)
-        return RUNTIME_STACK_EMPTY;
+        return RUNTIME_ERROR_STACK_EMPTY;
     if (value->kind == KIND_AUTO)
         vm_auto_free(vm, value->name);
     symbol_t *variable = vm_stack_pop(vm);
     if (variable == NULL)
-        return RUNTIME_STACK_EMPTY;
+        return RUNTIME_ERROR_STACK_EMPTY;
     if (variable->kind == KIND_CONSTANT)
-        return RUNTIME_ASSIGN_TO_CONST;
+        return RUNTIME_ERROR_ASSIGN_TO_CONST;
     if (variable->kind != KIND_VARIABLE)
-        return RUNTIME_EXPECTED_VARIABLE;
+        return RUNTIME_ERROR_EXPECTED_VARIABLE;
     if (variable->type != value->type)
-        return RUNTIME_TYPE_MISMATCH;
+        return RUNTIME_ERROR_TYPE_MISMATCH;
     variable->value = value->value;
     fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
     return ERROR_NONE;

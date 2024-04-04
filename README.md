@@ -2,7 +2,9 @@
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))) using `lex` and `yacc` (in fact `flex` and `bison`).
+`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))), with an handmade lexer and parser.
+
+First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
 At first, a simple CLI should be implemented (under GNU/Linux):
 
@@ -21,7 +23,7 @@ begin
 end.
 ```
 
-In the future, it should be embeddable in other projects, like lua is for example.
+In the future, it should be embeddable in other projects, like Lua is for example.
 
 Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an authoritative reference implementation.
 
@@ -38,6 +40,10 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
 - "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
 - "Simple Swift interpreter for the Pascal language" <https://github.com/igorkulman/SwiftPascalInterpreter>
+
+### Other sources about compilers and interpreters
+
+- " Let's Build a Compiler, by Jack Crenshaw " <https://compilers.iecc.com/crenshaw/>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
@@ -349,7 +355,7 @@ Each file should contains this header:
 ```c
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 ```

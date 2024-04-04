@@ -15,6 +15,7 @@
         "limits.h": "c",
         "string.h": "c",
         "lexer.h": "c",
-        "pascalscript.h": "c"
+        "pascalscript.h": "c",
+        "stdint.h": "c"
     }
 }

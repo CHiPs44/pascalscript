@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
@@ -8,8 +8,8 @@
 
 #include "../src/vm.h"
 
-vm_t vm_data;
-vm_t *vm = &vm_data;
+vm_t _vm;
+vm_t *vm = &_vm;
 
 #include "../src/symbol_table.c"
 #include "../src/symbol_stack.c"
@@ -53,7 +53,7 @@ int main(void)
     vm_auto_gc(vm);
     symbol_stack_dump(&vm->stack, "2 POP?");
     symbol_table_dump(&vm->globals, "K=1234?");
-    printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == RUNTIME_TYPE_MISMATCH ? "OK" : "KO", code);
+    printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == RUNTIME_ERROR_TYPE_MISMATCH ? "OK" : "KO", code);
 
     printf("TEST VM #01 ASSIGN: END\n");
     return 0;
