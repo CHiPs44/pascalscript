@@ -1,10 +1,13 @@
 program first;
+
 const
   FOO = 1000;
+
 var
   a: integer;
   b: integer;
   c: integer;
+
 begin
   a := 1;
   b := -2;

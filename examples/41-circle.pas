@@ -4,7 +4,7 @@ program const_circle(input,output);
 
 const PI = 3.141592654;
 
-var r, d, c : real;   {variable declaration: radius, dia, circumference}
+var r, d, c : real;   {variable declaration: radius, diameter, circumference}
 
 begin
    writeln('Enter the radius of the circle');
