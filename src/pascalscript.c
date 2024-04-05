@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
   if (vm_set_source(vm, hello, strlen(hello)))
+  // if (vm_load_file(vm,"../examples/00-hello.pas"))
   {
     printf("Loaded!\n");
     vm_list_source(vm, 0, vm->line_count);
