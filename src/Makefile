@@ -8,31 +8,17 @@ CFLAGS = -Wall
 PROJECT = pascalscript
 SOURCES = \
 error.c lexer.c operator.c pascalscript.c \
-symbol.c symbol_stack.c symbol_table.c vm.c \
-pascalscript.lex.c pascalscript.tab.c
+source.c symbol.c symbol_stack.c symbol_table.c vm.c
 INCLUDES = \
 error.h lexer.h operator.h pascalscript.h \
-symbol.h symbol_stack.h symbol_table.h vm.h \
-pascalscript.tab.h
+symbol.h symbol_stack.h symbol_table.h vm.h
 
 all: $(PROJECT)
 
 $(PROJECT): $(SOURCES) $(INCLUDES)
 	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES)
 
-# *.y is built by a default rule as a call to yacc/bison that replace pascalscript.c...
-%.c: %.y
-# same for flex
-%.c: %.l
-
-pascalscript.tab.c: pascalscript.y
-	# bison -rall --output=pascalscript.tab.c --header=pascalscript.tab.h pascalscript.y
-	LANG=C bison -rall --output=pascalscript.tab.c --defines=pascalscript.tab.h pascalscript.y
-
-pascalscript.lex.c: pascalscript.l pascalscript.tab.c
-	flex --outfile=pascalscript.lex.c pascalscript.l
-
-clean:
-	rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
+# clean:
+# 	rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
 
 # EOF

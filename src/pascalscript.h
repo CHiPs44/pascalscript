@@ -32,21 +32,21 @@ extern "C"
 #define PS_INTEGER int32_t
 #endif
 
-// #ifndef PS_UNSIGNED_INTEGER
-// #define PS_UNSIGNED_INTEGER uint32_t
-// #endif
+#ifndef PS_UNSIGNED_INTEGER
+#define PS_UNSIGNED_INTEGER uint32_t
+#endif
 
-// #ifndef PS_REAL
-// #define PS_REAL double
-// #endif
+#ifndef PS_REAL
+#define PS_REAL double
+#endif
 
-// #ifndef PS_CHAR
-// #define PS_CHAR char
-// #endif
+#ifndef PS_CHAR
+#define PS_CHAR char
+#endif
 
-// #ifndef PS_STRING_MAX
-// #define PS_STRING_MAX 255
-// #endif
+#ifndef PS_STRING_MAX
+#define PS_STRING_MAX 255
+#endif
 
 #ifdef __cplusplus
 }

@@ -14,35 +14,61 @@
 #include "vm.h"
 #include "lexer.h"
 
-bool vm_load_text(vm_t *vm, char *text)
+#define READALL_CHUNK 1024
+#include "readall.c"
+
+bool vm_scan_source(vm_t *vm)
 {
     bool ok = true;
-    int row, col;
-    for (row = 0; row < MAX_ROWS; row += 1)
-    {
-        strcpy(vm->source[row], "");
-    }
-    row = 0;
-    col = 0;
+    int line = 0;
+    int column = 0;
+    char *text = vm->source;
     char *start = text;
+    char c;
+    // Count lines
+    vm->line_count = 0;
+    c = *text++;
+    while (c)
+    {
+        if (c == '\n')
+            vm->line_count += 1;
+        c = *text++;
+    }
+    printf("VM: line_count=%d\n", vm->line_count);
+    // Allocate arrays for line starts and lengths
+    if (vm->line_starts != NULL)
+        free(vm->line_starts);
+    vm->line_starts = calloc(vm->line_count, sizeof(char *));
+    if (vm->line_starts == NULL)
+    {
+        return false;
+    }
+    if (vm->line_lengths != NULL)
+        free(vm->line_lengths);
+    vm->line_lengths = calloc(vm->line_count, sizeof(size_t));
+    if (vm->line_lengths == NULL)
+    {
+        return false;
+    }
+    // Find and memorize line starts
+    text = vm->source;
     bool stop = false;
     while (!stop)
     {
-        char c = *text;
+        c = *text;
         switch (c)
         {
         case '\n':
-            if (row == MAX_ROWS)
+            if (line == MAX_LINES)
             {
                 ok = false;
                 stop = true;
             }
             else
             {
-                strncpy(vm->source[row], start, text - start);
-                vm->max_col[row] = col;
-                row += 1;
-                col = 0;
+                vm->line_starts[line] = start;
+                line += 1;
+                column = 0;
                 text += 1;
                 start = text;
             }
@@ -51,73 +77,98 @@ bool vm_load_text(vm_t *vm, char *text)
             stop = true;
             break;
         default:
-            col += 1;
+            column += 1;
+            text += 1;
             break;
         }
     }
-    vm->max_row = row;
+    vm->line_count = line;
+    vm->current_line = 0;
+    vm->current_column = 0;
+    vm->current_char = '\0';
+    printf("vm_scan_source: %d", ok);
     return ok;
 }
 
-void vm_list_source(vm_t *vm, int from, int to)
+bool vm_load_file(vm_t *vm, char *filename)
 {
-    if (from < 0)
-        from = 0;
-    if (from > MAX_ROWS)
-        from = MAX_ROWS;
-    if (to < 0)
-        to = 0;
-    if (to > MAX_ROWS)
-        to = MAX_ROWS;
-    if (from > to)
+    FILE *input = fopen(filename, "r");
+    if (input == NULL)
     {
-        int temp = from;
-        from = to;
-        to = temp;
+        return false;
     }
-    for (int row = from; row < to; row++)
+    int result = readall(input, &(vm->source), &(vm->length));
+    if (result != READALL_OK)
+        return false;
+    return vm_scan_source(vm);
+}
+
+bool vm_set_source(vm_t *vm, char *source, size_t length)
+{
+    vm->source = source;
+    vm->length = length;
+    return vm_scan_source(vm);
+}
+
+void vm_list_source(vm_t *vm, int from_line, int to_line)
+{
+    if (from_line < 0)
+        from_line = 0;
+    if (from_line > vm->line_count)
+        from_line = vm->line_count;
+    if (to_line < 0)
+        to_line = 0;
+    if (to_line > vm->line_count)
+        to_line = vm->line_count;
+    if (from_line > to_line)
     {
-        printf("%03d %s\n", row, vm->source[row]);
+        int temp = from_line;
+        from_line = to_line;
+        to_line = temp;
+    }
+    for (int line = from_line; line < to_line; line += 1)
+    {
+        printf("%04d (%04ld) %s\n", line, vm->line_lengths[line], vm->line_starts[line]);
     }
 }
 
 void vm_reset_cursor(vm_t *vm)
 {
-    vm->row = 0;
-    vm->col = 0;
+    vm->current_line = 0;
+    vm->current_column = 0;
+    vm->current_char = '\0';
 }
 
 char vm_peek_char(vm_t *vm)
 {
-    if (vm->row >= 0 && vm->row < vm->max_row)
-        if (vm->col >= 0 && vm->col <= vm->max_col[vm->row])
-            return vm->source[vm->row][vm->col];
-    return '\0';
+    // if (vm->current_line >= 0 && vm->current_line < vm->line_count)
+    //     if (vm->current_column >= 0 && vm->current_column <= vm->line_lengths[vm->current_line])
+    //         return vm->line_starts[vm->current_line][vm->current_column];
+    // return '\0';
+    return vm->current_char;
 }
 
 char vm_read_char(vm_t *vm)
 {
-    char c;
-    if (vm->row >= 0 && vm->row < vm->max_row)
+    if (vm->current_line >= 0 && vm->current_line < vm->line_count)
     {
-        if (vm->col >= 0 && vm->col <= vm->max_col[vm->row])
+        if (vm->current_column >= 0 && vm->current_column <= vm->line_lengths[vm->current_line])
         {
-            c = vm->source[vm->row][vm->col];
-            vm->col += 1;
-            if (vm->col > vm->max_col[vm->row])
+            vm->current_char = vm->line_starts[vm->current_line][vm->current_column];
+            vm->current_column += 1;
+            if (vm->current_column > vm->line_lengths[vm->current_line])
             {
-                vm->row += 1;
-                vm->col = 0;
+                vm->current_line += 1;
+                vm->current_column = 0;
             }
-            return c;
         }
     }
-    return '\0';
+    return vm->current_char;
 }
 
 error_t vm_read_token(vm_t *vm, token_t *token)
 {
-    char buffer[MAX_COLS];
+    char buffer[MAX_COLUMNS];
     char c;
     int pos = 0;
 
@@ -141,7 +192,7 @@ error_t vm_read_token(vm_t *vm, token_t *token)
     {
         do
         {
-            buffer[pos] = to_upper(c);
+            buffer[pos] = toupper(c);
             pos += 1;
             if (pos > MAX_IDENTIFIER)
             {

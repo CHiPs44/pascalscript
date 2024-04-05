@@ -7,7 +7,6 @@
 #ifndef _VM_H
 #define _VM_H
 
-// #include "loader.h"
 #include "symbol_table.h"
 #include "symbol_stack.h"
 
@@ -16,30 +15,49 @@ extern "C"
 {
 #endif
 
-#ifndef MAX_ROWS
-#define MAX_ROWS 256
+#ifndef MAX_LINES
+#define MAX_LINES 65536
 #endif
 
-#ifndef MAX_COLS
-#define MAX_COLS 256
+#ifndef MAX_COLUMNS
+#define MAX_COLUMNS 256
 #endif
 
 typedef struct _vm_t
 {
-    char *source[MAX_ROWS][MAX_COLS];
-    unsigned int max_row;
-    unsigned int max_col[MAX_ROWS];
-    unsigned int row;
-    unsigned int col;
+    char *source;
+    size_t length;
+    unsigned int line_count;
+    char **line_starts;
+    size_t *line_lengths;
+    int current_line;
+    int current_column;
+    char current_char;
     symbol_table_t globals;
     symbol_stack_t stack;
 } vm_t;
 
+/**
+ * @brief Initialize VM: reset source, global table & stack
+ */
 extern void vm_init(vm_t *vm);
 
-// extern bool vm_load_file(vm_t *vm, char *filename);
+/**
+ * @brief Set source code from memory buffer
+ */
+bool vm_set_source(vm_t *vm, char *source, size_t length);
 
-extern bool vm_load_text(vm_t *vm, char *text);
+/**
+ * @brief Load file into VM
+ */
+extern bool vm_load_file(vm_t *vm, char *filename);
+
+/**
+ * @brief Scan source for lines
+ */
+extern bool vm_scan_source(vm_t *vm);
+
+void vm_list_source(vm_t *vm, int from_line, int to_line);
 
 extern bool vm_exec(vm_t *vm);
 

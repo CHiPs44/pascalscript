@@ -7,6 +7,8 @@
 #ifndef _LEXER_H
 #define _LEXER_H
 
+#include <stdbool.h>
+
 #include "pascalscript.h"
 #include "error.h"
 
@@ -20,22 +22,23 @@ extern "C"
     typedef enum _token_type_t
     {
         TOKEN_NONE = -1,
-        // Identifier
-        TOKEN_IDENTIFIER = 0,
-        // Number types                 Size in bytes
-        // TOKEN_SHORT_INTEGER = 1,     // 1   -128..127
-        // TOKEN_BYTE = 2,              // 1   0..255
-        // TOKEN_SMALL_INTEGER = 4,     // 2   -32,768..32,767
-        // TOKEN_WORD = 8,              // 2   0..65,535
-        TOKEN_INTEGER = 16, // 4   -2,147,483,648..2,147,483,647
-        // TOKEN_UNSIGNED_INTEGER = 32, // 4   0..4,294,967,295
-        // TOKEN_LONG_INTEGER = 64,     // 4   -2,147,483,648..2,147,483,647
-        // TOKEN_LONG_WORD = 128,       // 4   0..4,294,967,295
-        // TOKEN_REAL = 256,            // 8   5.0E-324..1.7E308
+        TOKEN_EOF = 0,
+        // Number types                       Size in bytes
+        TOKEN_SHORT_INTEGER_VALUE = 1,     // 1   -128..127
+        TOKEN_BYTE_VALUE = 2,              // 1   0..255
+        TOKEN_SMALL_INTEGER = 4,           // 2   -32,768..32,767
+        TOKEN_WORD_VALUE = 8,              // 2   0..65,535
+        TOKEN_INTEGER_VALUE = 16,          // 4   -2,147,483,648..2,147,483,647
+        TOKEN_UNSIGNED_INTEGER_VALUE = 32, // 4   0..4,294,967,295
+        TOKEN_LONG_INTEGER_VALUE = 64,     // 4   -2,147,483,648..2,147,483,647
+        TOKEN_LONG_WORD_VALUE = 128,       // 4   0..4,294,967,295
+        TOKEN_REAL_VALUE = 256,            // 8   5.0E-324..1.7E308
         // Other value types
-        TOKEN_BOOLEAN = 1024,
-        TOKEN_CHAR,
-        TOKEN_STRING,
+        TOKEN_BOOLEAN_VALUE = 1024,
+        TOKEN_CHAR_VALUE,
+        TOKEN_STRING_VALUE,
+        // Identifier
+        TOKEN_IDENTIFIER,
         // Reserved words
         TOKEN_RESERVED_WORDS = 2047,
         TOKEN_PROGRAM,
@@ -83,44 +86,6 @@ extern "C"
         bool symbolic;
     } keyword_t;
 
-    keyword_t keywords[] = {
-        {TOKEN_PROGRAM, "PROGRAM", false},
-        {TOKEN_CONST, "CONST", false},
-        {TOKEN_VAR, "VAR", false},
-        {TOKEN_TYPE, "TYPE", false},
-        {TOKEN_BEGIN, "BEGIN", false},
-        {TOKEN_END, "END", false},
-        {TOKEN_INTEGER, "INTEGER", false},
-        {TOKEN_BOOLEAN, "BOOLEAN", false},
-        {TOKEN_CHAR, "CHAR", false},
-        {TOKEN_STRING, "STRING", false},
-        {TOKEN_FALSE, "FALSE", false},
-        {TOKEN_TRUE, "TRUE", false},
-        {TOKEN_FUNCTION, "FUNCTION", false},
-        {TOKEN_PROCEDURE, "PROCEDURE", false},
-        // Operators
-        {TOKEN_ASSIGN, ":=", true},
-        {TOKEN_ADD, "+", true},
-        {TOKEN_SUB, "-", true},
-        {TOKEN_MUL, "*", true},
-        {TOKEN_DIV_REAL, "/", true},
-        {TOKEN_DIV, "DIV", false},
-        {TOKEN_MOD, "MOD", false},
-        // Comparison operators
-        {TOKEN_EQ, "=", true},
-        {TOKEN_NE, "<>", true},
-        {TOKEN_LT, "<", true},
-        {TOKEN_LE, "<=", true},
-        {TOKEN_GT, ">", true},
-        {TOKEN_GE, ">=", true},
-        // Logical/binary operators
-        {TOKEN_AND, "AND", false},
-        {TOKEN_OR, "OR", false},
-        {TOKEN_XOR, "XOR", false},
-        {TOKEN_NOT, "NOT", false},
-        {TOKEN_LSHIFT, "<<", true},
-        {TOKEN_RSHIFT, ">>", true}};
-
     typedef struct _token_t
     {
         token_type_t type;
@@ -128,9 +93,9 @@ extern "C"
         {
             char identifier[MAX_IDENTIFIER + 1];
             PS_INTEGER int_val;
-            // PS_REAL real_val;
-            // PS_CHAR char_val;
-            // PS_CHAR string_val[PS_STRING_MAX + 1];
+            PS_REAL real_val;
+            PS_CHAR char_val;
+            PS_CHAR string_val[PS_STRING_MAX + 1];
         } value;
     } token_t;
 

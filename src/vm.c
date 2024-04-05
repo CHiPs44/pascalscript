@@ -26,8 +26,14 @@ symbol_t default_globals[] = {
 void vm_init(vm_t *vm)
 {
     // Program source
-    vm->row = 0;
-    vm->col = 0;
+    vm->source = NULL;
+    vm->length = 0;
+    vm->line_count = 0;
+    vm->line_starts = NULL;
+    vm->line_lengths = NULL;
+    vm->current_line = 0;
+    vm->current_column = 0;
+    vm->current_char = '\0';
     // Symbol table
     symbol_table_init(&vm->globals);
     default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);

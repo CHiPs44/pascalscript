@@ -14,6 +14,44 @@
 #include "lexer.h"
 #include "symbol.h"
 
+keyword_t keywords[] = {
+    {TOKEN_PROGRAM, "PROGRAM", false},
+    {TOKEN_CONST, "CONST", false},
+    {TOKEN_VAR, "VAR", false},
+    {TOKEN_TYPE, "TYPE", false},
+    {TOKEN_BEGIN, "BEGIN", false},
+    {TOKEN_END, "END", false},
+    {TOKEN_INTEGER, "INTEGER", false},
+    {TOKEN_BOOLEAN, "BOOLEAN", false},
+    {TOKEN_CHAR, "CHAR", false},
+    {TOKEN_STRING, "STRING", false},
+    {TOKEN_FALSE, "FALSE", false},
+    {TOKEN_TRUE, "TRUE", false},
+    {TOKEN_FUNCTION, "FUNCTION", false},
+    {TOKEN_PROCEDURE, "PROCEDURE", false},
+    // Operators
+    {TOKEN_ASSIGN, ":=", true},
+    {TOKEN_ADD, "+", true},
+    {TOKEN_SUB, "-", true},
+    {TOKEN_MUL, "*", true},
+    {TOKEN_DIV_REAL, "/", true},
+    {TOKEN_DIV, "DIV", false},
+    {TOKEN_MOD, "MOD", false},
+    // Comparison operators
+    {TOKEN_EQ, "=", true},
+    {TOKEN_NE, "<>", true},
+    {TOKEN_LT, "<", true},
+    {TOKEN_LE, "<=", true},
+    {TOKEN_GT, ">", true},
+    {TOKEN_GE, ">=", true},
+    // Logical/binary operators
+    {TOKEN_AND, "AND", false},
+    {TOKEN_OR, "OR", false},
+    {TOKEN_XOR, "XOR", false},
+    {TOKEN_NOT, "NOT", false},
+    {TOKEN_LSHIFT, "<<", true},
+    {TOKEN_RSHIFT, ">>", true}};
+
 void zzzdump(void *p)
 {
     void *q = NULL;
@@ -28,25 +66,25 @@ void lexer_dump_token(token_t *token)
 
     switch (token->type)
     {
-    case IDENTIFIER:
+    case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
         snprintf(value, 255, "%s", token->value.identifier);
         break;
-    case INTEGER:
+    case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
         snprintf(value, 255, "%d", token->value.int_val);
         break;
-    case REAL:
+    case TOKEN_REAL_VALUE:
         type = "REAL";
         snprintf(value, 255, "%f", token->value.real_val);
         break;
-    case CHAR:
+    case TOKEN_CHAR_VALUE:
         type = "CHAR";
         snprintf(value, 255, "%c", token->value.char_val);
         break;
-    case STRING:
+    case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(value, 255, "%s", token->value.string_val);
+        snprintf(value, 256, "%s", token->value.string_val);
         break;
     default:
         break;
@@ -68,7 +106,7 @@ error_t lexer_copy_identifier(char *text, token_t *token)
     {
         return LEXER_ERROR_IDENTIFIER_TOO_LONG;
     }
-    token->type = IDENTIFIER;
+    token->type = TOKEN_IDENTIFIER;
     strcpy(identifier, text);
     symbol_normalize_name(identifier);
     strcpy(token->value.identifier, identifier);
@@ -90,7 +128,7 @@ error_t lexer_copy_integer_value(char *text, token_t *token)
         fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %ld", text, val);
         return LEXER_ERROR_OVERFLOW;
     }
-    token->type = INTEGER;
+    token->type = TOKEN_INTEGER_VALUE;
     token->value.int_val = (int)val;
     return ERROR_NONE;
 }
@@ -109,7 +147,7 @@ error_t lexer_copy_real_value(char *text, token_t *token)
         fprintf(stderr, "LEXER_ERROR_OVERFLOW %s %f", text, val);
         return LEXER_ERROR_OVERFLOW;
     }
-    token->type = REAL;
+    token->type = TOKEN_REAL_VALUE;
     token->value.real_val = val;
     return ERROR_NONE;
 }
@@ -124,7 +162,7 @@ error_t lexer_copy_char_value(char *text, token_t *token)
     // TODO? "'X'" or "''''"
     PS_CHAR val = text[1];
     // fprintf(stderr, " [lexer_copy_char_value %s %c]", text, val);
-    token->type = CHAR;
+    token->type = TOKEN_CHAR_VALUE;
     token->value.char_val = val;
     return ERROR_NONE;
 }
@@ -145,7 +183,7 @@ error_t lexer_copy_string_value(char *text, token_t *token)
         fprintf(stderr, "LEXER_ERROR_STRING_TOO_LONG %ld |%s|", len, text);
         return LEXER_ERROR_STRING_TOO_LONG;
     }
-    token->type = STRING;
+    token->type = TOKEN_STRING_VALUE;
     if (len == 0)
         strcpy(token->value.string_val, "");
     else
