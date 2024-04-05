@@ -11,7 +11,7 @@ error.c lexer.c operator.c pascalscript.c \
 source.c symbol.c symbol_stack.c symbol_table.c vm.c
 INCLUDES = \
 error.h lexer.h operator.h pascalscript.h \
-symbol.h symbol_stack.h symbol_table.h vm.h
+source.h symbol.h symbol_stack.h symbol_table.h vm.h
 
 all: $(PROJECT)
 

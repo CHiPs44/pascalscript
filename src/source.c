@@ -45,7 +45,7 @@ bool vm_scan_source(vm_t *vm)
     }
     if (vm->line_lengths != NULL)
         free(vm->line_lengths);
-    vm->line_lengths = calloc(vm->line_count, sizeof(size_t));
+    vm->line_lengths = calloc(vm->line_count, sizeof(uint16_t));
     if (vm->line_lengths == NULL)
     {
         return false;
@@ -67,6 +67,7 @@ bool vm_scan_source(vm_t *vm)
             else
             {
                 vm->line_starts[line] = start;
+                vm->line_lengths[line] = text - start;
                 line += 1;
                 column = 0;
                 text += 1;
@@ -86,7 +87,6 @@ bool vm_scan_source(vm_t *vm)
     vm->current_line = 0;
     vm->current_column = 0;
     vm->current_char = '\0';
-    printf("vm_scan_source: %d", ok);
     return ok;
 }
 
@@ -112,6 +112,8 @@ bool vm_set_source(vm_t *vm, char *source, size_t length)
 
 void vm_list_source(vm_t *vm, int from_line, int to_line)
 {
+    char buffer[MAX_COLUMNS + 1];
+
     if (from_line < 0)
         from_line = 0;
     if (from_line > vm->line_count)
@@ -128,7 +130,9 @@ void vm_list_source(vm_t *vm, int from_line, int to_line)
     }
     for (int line = from_line; line < to_line; line += 1)
     {
-        printf("%04d (%04ld) %s\n", line, vm->line_lengths[line], vm->line_starts[line]);
+        strncpy(buffer, vm->line_starts[line], vm->line_lengths[line]);
+        buffer[vm->line_lengths[line]] = '\0';
+        printf("%04d (%04d) %s\n", line, vm->line_lengths[line], buffer);
     }
 }
 

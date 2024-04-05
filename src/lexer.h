@@ -55,8 +55,15 @@ extern "C"
         TOKEN_TRUE,
         TOKEN_FUNCTION,
         TOKEN_PROCEDURE,
+        // Ponctuation
+        TOKEN_ASSIGN,     // :=
+        TOKEN_CARET,      // ^
+        TOKEN_COLON,      // :
+        TOKEN_COMMA,      // ,
+        TOKEN_DOT_DOT,    // ..
+        TOKEN_DOT,        // .
+        TOKEN_SEMI_COLON, // ;
         // Operators
-        TOKEN_ASSIGN,   // :=
         TOKEN_ADD,      // +
         TOKEN_SUB,      // -
         TOKEN_MUL,      // *

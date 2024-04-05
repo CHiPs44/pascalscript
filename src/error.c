@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "error.h"
 
-static char error_unknown[32];
+static char error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
 
 char *error_get_message(error_t code)
 {

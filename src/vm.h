@@ -29,7 +29,7 @@ typedef struct _vm_t
     size_t length;
     unsigned int line_count;
     char **line_starts;
-    size_t *line_lengths;
+    uint16_t *line_lengths;
     int current_line;
     int current_column;
     char current_char;

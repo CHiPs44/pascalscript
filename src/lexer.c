@@ -29,8 +29,15 @@ keyword_t keywords[] = {
     {TOKEN_TRUE, "TRUE", false},
     {TOKEN_FUNCTION, "FUNCTION", false},
     {TOKEN_PROCEDURE, "PROCEDURE", false},
+    // Ponctuation
+    {TOKEN_ASSIGN, ":=", false},
+    {TOKEN_CARET, "^", true},
+    {TOKEN_COLON, ":", true},
+    {TOKEN_COMMA, ","},
+    {TOKEN_DOT_DOT, "..", false},
+    {TOKEN_DOT, ".", true},
+    {TOKEN_SEMI_COLON, ";", true},
     // Operators
-    {TOKEN_ASSIGN, ":=", true},
     {TOKEN_ADD, "+", true},
     {TOKEN_SUB, "-", true},
     {TOKEN_MUL, "*", true},
@@ -51,13 +58,6 @@ keyword_t keywords[] = {
     {TOKEN_NOT, "NOT", false},
     {TOKEN_LSHIFT, "<<", true},
     {TOKEN_RSHIFT, ">>", true}};
-
-void zzzdump(void *p)
-{
-    void *q = NULL;
-    q = p;
-    fprintf(stderr, "%p\n", q);
-}
 
 void lexer_dump_token(token_t *token)
 {
