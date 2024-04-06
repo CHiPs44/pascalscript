@@ -8,6 +8,7 @@
 #define _SOURCE_H
 
 #include "vm.h"
+#include "error.h"
 #include "lexer.h"
 
 #ifdef __cplusplus
@@ -15,14 +16,28 @@ extern "C"
 {
 #endif
 
-bool vm_scan_source(vm_t *vm);
-bool vm_load_file(vm_t *vm, char *filename);
-bool vm_set_source(vm_t *vm, char *source, size_t length);
-void vm_list_source(vm_t *vm, int from_line, int to_line);
-void vm_reset_cursor(vm_t *vm);
-char vm_peek_char(vm_t *vm);
-char vm_read_char(vm_t *vm);
-error_t vm_read_token(vm_t *vm, token_t *token);
+    /**
+     * @brief Scan source for lines
+     */
+    error_t source_scan_text(vm_t *vm);
+
+    /**
+     * @brief Load file into source buffer
+     */
+    error_t source_load_file(vm_t *vm, char *filename);
+
+    /**
+     * @brief Set source code from memory buffer
+     */
+    error_t source_set_text(vm_t *vm, char *source, size_t length);
+
+    void source_list_text(vm_t *vm, int from_line, int to_line);
+
+    void source_reset_cursor(vm_t *vm);
+
+    char source_peek_char(vm_t *vm);
+
+    char source_read_char(vm_t *vm);
 
 #ifdef __cplusplus
 }

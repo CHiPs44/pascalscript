@@ -15,11 +15,14 @@ extern "C"
     typedef enum _error_t
     {
         ERROR_NONE = 0,
+        /* general */
+        ERROR_OUT_OF_MEMORY,
         /* lexer */
         LEXER_ERROR_UNEXPECTED_EOF = 1000,
         LEXER_ERROR_IDENTIFIER_TOO_LONG,
         LEXER_ERROR_OVERFLOW,
         LEXER_ERROR_STRING_TOO_LONG,
+        LEXER_ERROR_BUFFER_OVERFLOW,
         /* parser */
         PARSER_ERROR_SYNTAX = 2000,
         PARSER_ERROR_UNEXPECTED,

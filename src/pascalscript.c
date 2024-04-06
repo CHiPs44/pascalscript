@@ -10,23 +10,21 @@
 #include "pascalscript.h"
 #include "symbol_table.h"
 #include "vm.h"
-
-// #include "vm.c"
-// #include "source.c"
+#include "source.h"
 
 vm_t _vm;
 vm_t *vm = &_vm;
 
 char *hello =
-    "PROGRAM hello;\n"
-    "CONST\n"
-    "  PI = 3.14159265359;\n"
-    "VAR\n"
-    "  test: INTEGER;\n"
-    "BEGIN\n"
-    "  test := 1 + 2;\n"
-    "  WriteLn('test=', test);\n"
-    "END.\n";
+    "program hello;\n"
+    "const\n"
+    "  chips = 44;\n"
+    "var\n"
+    "  test: integer;\n"
+    "begin\n"
+    "  test := 1 + chips;\n"
+    "  writeln('test=', test);\n"
+    "end.\n";
 
 int main(int argc, char *argv[])
 {
@@ -37,11 +35,11 @@ int main(int argc, char *argv[])
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
-  if (vm_set_source(vm, hello, strlen(hello)))
-  // if (vm_load_file(vm,"../examples/00-hello.pas"))
+  if (ERROR_NONE == source_set_text(vm, hello, strlen(hello)))
+  // if (source_load_file(vm,"../examples/00-hello.pas"))
   {
     printf("Loaded!\n");
-    vm_list_source(vm, 0, vm->line_count);
+    source_list_text(vm, 0, vm->line_count);
     // vm_exec(vm);
   }
   return 0;

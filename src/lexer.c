@@ -4,14 +4,16 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <errno.h>
 
 #include "error.h"
 #include "lexer.h"
+#include "source.h"
 #include "symbol.h"
 
 keyword_t keywords[] = {
@@ -37,6 +39,15 @@ keyword_t keywords[] = {
     {TOKEN_DOT_DOT, "..", false},
     {TOKEN_DOT, ".", true},
     {TOKEN_SEMI_COLON, ";", true},
+    {TOKEN_LEFT_PARENTHESIS, "(", true},
+    {TOKEN_RIGHT_PARENTHESIS, ")", true},
+    {TOKEN_LEFT_BRACKET, "[", true},
+    {TOKEN_RIGHT_BRACKET, "]", true},
+    {TOKEN_LEFT_CURLY_BRACKET, "{", true},
+    {TOKEN_RIGHT_CURLY_BRACKET, "}", true},
+    {TOKEN_DOLLAR, "$", true},
+    {TOKEN_LEFT_COMMENT, "(*", false},
+    {TOKEN_RIGHT_COMMENT, "*)", false},
     // Operators
     {TOKEN_ADD, "+", true},
     {TOKEN_SUB, "-", true},
@@ -190,6 +201,90 @@ error_t lexer_copy_string_value(char *text, token_t *token)
         strncpy(token->value.string_val, &text[1], len);
     // fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]\n", strlen(token->value.string_val), token->value.string_val);
     return ERROR_NONE;
+}
+
+error_t vm_read_token(vm_t *vm, token_t *token)
+{
+    char buffer[MAX_COLUMNS];
+    char c;
+    int pos = 0;
+
+    c = source_read_char(vm);
+    if (c == '\0')
+    {
+        token->type = TOKEN_NONE;
+        return false;
+    }
+    // skip whitespace
+    while (isspace(c))
+    {
+        c = source_read_char(vm);
+        if (c == '\0')
+        {
+            token->type = TOKEN_NONE;
+            return LEXER_ERROR_UNEXPECTED_EOF;
+        }
+    }
+    if (isalpha(c))
+    {
+        do
+        {
+            buffer[pos] = toupper(c);
+            pos += 1;
+            if (pos > MAX_IDENTIFIER)
+            {
+                token->type = TOKEN_NONE;
+                return LEXER_ERROR_IDENTIFIER_TOO_LONG;
+            }
+            buffer[pos] = '\0';
+            c = source_read_char(vm);
+        } while (isalnum(c));
+        // TODO keywords
+        token->type = TOKEN_IDENTIFIER;
+        strcpy(token->value.identifier, buffer);
+        return ERROR_NONE;
+    }
+    else if (isdigit(c))
+    {
+        do
+        {
+            buffer[pos] = c;
+            pos += 1;
+            if (pos > 12)
+            {
+                token->type = TOKEN_NONE;
+                return LEXER_ERROR_OVERFLOW;
+            }
+            buffer[pos] = '\0';
+            c = source_read_char(vm);
+        } while (isdigit(c));
+        if (c == '\0')
+        {
+            token->type = TOKEN_NONE;
+            return LEXER_ERROR_UNEXPECTED_EOF;
+        }
+    }
+    else if (c == '+')
+    {
+        token->type = TOKEN_ADD;
+        return ERROR_NONE;
+    }
+    else if (c == '-')
+    {
+        token->type = TOKEN_SUB;
+        return ERROR_NONE;
+    }
+    else if (c == '*')
+    {
+        token->type = TOKEN_MUL;
+        return ERROR_NONE;
+    }
+    else if (c == '/')
+    {
+        token->type = TOKEN_DIV;
+        return ERROR_NONE;
+    }
+    return true;
 }
 
 /* EOF */

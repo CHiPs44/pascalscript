@@ -12,14 +12,11 @@
 #include <ctype.h>
 
 #include "vm.h"
-#include "lexer.h"
+#include "error.h"
+#include "readall.h"
 
-#define READALL_CHUNK 1024
-#include "readall.c"
-
-bool vm_scan_source(vm_t *vm)
+error_t source_scan_text(vm_t *vm)
 {
-    bool ok = true;
     int line = 0;
     int column = 0;
     char *text = vm->source;
@@ -34,21 +31,20 @@ bool vm_scan_source(vm_t *vm)
             vm->line_count += 1;
         c = *text++;
     }
-    printf("VM: line_count=%d\n", vm->line_count);
     // Allocate arrays for line starts and lengths
     if (vm->line_starts != NULL)
         free(vm->line_starts);
     vm->line_starts = calloc(vm->line_count, sizeof(char *));
     if (vm->line_starts == NULL)
     {
-        return false;
+        return ERROR_OUT_OF_MEMORY;
     }
     if (vm->line_lengths != NULL)
         free(vm->line_lengths);
     vm->line_lengths = calloc(vm->line_count, sizeof(uint16_t));
     if (vm->line_lengths == NULL)
     {
-        return false;
+        return ERROR_OUT_OF_MEMORY;
     }
     // Find and memorize line starts
     text = vm->source;
@@ -61,8 +57,7 @@ bool vm_scan_source(vm_t *vm)
         case '\n':
             if (line == MAX_LINES)
             {
-                ok = false;
-                stop = true;
+                return LEXER_ERROR_BUFFER_OVERFLOW;
             }
             else
             {
@@ -87,10 +82,10 @@ bool vm_scan_source(vm_t *vm)
     vm->current_line = 0;
     vm->current_column = 0;
     vm->current_char = '\0';
-    return ok;
+    return ERROR_NONE;
 }
 
-bool vm_load_file(vm_t *vm, char *filename)
+error_t source_load_file(vm_t *vm, char *filename)
 {
     FILE *input = fopen(filename, "r");
     if (input == NULL)
@@ -100,17 +95,17 @@ bool vm_load_file(vm_t *vm, char *filename)
     int result = readall(input, &(vm->source), &(vm->length));
     if (result != READALL_OK)
         return false;
-    return vm_scan_source(vm);
+    return source_scan_text(vm);
 }
 
-bool vm_set_source(vm_t *vm, char *source, size_t length)
+error_t source_set_text(vm_t *vm, char *source, size_t length)
 {
     vm->source = source;
     vm->length = length;
-    return vm_scan_source(vm);
+    return source_scan_text(vm);
 }
 
-void vm_list_source(vm_t *vm, int from_line, int to_line)
+void source_list_text(vm_t *vm, int from_line, int to_line)
 {
     char buffer[MAX_COLUMNS + 1];
 
@@ -128,31 +123,28 @@ void vm_list_source(vm_t *vm, int from_line, int to_line)
         from_line = to_line;
         to_line = temp;
     }
+    printf("1234 (1234) |12345687890123456878901234568789012345687890|\n");
     for (int line = from_line; line < to_line; line += 1)
     {
         strncpy(buffer, vm->line_starts[line], vm->line_lengths[line]);
         buffer[vm->line_lengths[line]] = '\0';
-        printf("%04d (%04d) %s\n", line, vm->line_lengths[line], buffer);
+        printf("%04d (%04d) |%s|\n", line + 1, vm->line_lengths[line], buffer);
     }
 }
 
-void vm_reset_cursor(vm_t *vm)
+void source_reset_cursor(vm_t *vm)
 {
     vm->current_line = 0;
     vm->current_column = 0;
     vm->current_char = '\0';
 }
 
-char vm_peek_char(vm_t *vm)
+char source_peek_char(vm_t *vm)
 {
-    // if (vm->current_line >= 0 && vm->current_line < vm->line_count)
-    //     if (vm->current_column >= 0 && vm->current_column <= vm->line_lengths[vm->current_line])
-    //         return vm->line_starts[vm->current_line][vm->current_column];
-    // return '\0';
     return vm->current_char;
 }
 
-char vm_read_char(vm_t *vm)
+char source_read_char(vm_t *vm)
 {
     if (vm->current_line >= 0 && vm->current_line < vm->line_count)
     {
@@ -168,88 +160,4 @@ char vm_read_char(vm_t *vm)
         }
     }
     return vm->current_char;
-}
-
-error_t vm_read_token(vm_t *vm, token_t *token)
-{
-    char buffer[MAX_COLUMNS];
-    char c;
-    int pos = 0;
-
-    c = vm_read_char(vm);
-    if (c == '\0')
-    {
-        token->type = TOKEN_NONE;
-        return false;
-    }
-    // skip whitespace
-    while (isspace(c))
-    {
-        c = vm_read_char(vm);
-        if (c == '\0')
-        {
-            token->type = TOKEN_NONE;
-            return LEXER_ERROR_UNEXPECTED_EOF;
-        }
-    }
-    if (isalpha(c))
-    {
-        do
-        {
-            buffer[pos] = toupper(c);
-            pos += 1;
-            if (pos > MAX_IDENTIFIER)
-            {
-                token->type = TOKEN_NONE;
-                return LEXER_ERROR_IDENTIFIER_TOO_LONG;
-            }
-            buffer[pos] = '\0';
-            c = vm_read_char(vm);
-        } while (isalnum(c));
-        // TODO keywords
-        token->type = TOKEN_IDENTIFIER;
-        strcpy(token->value.identifier, buffer);
-        return ERROR_NONE;
-    }
-    else if (isdigit(c))
-    {
-        do
-        {
-            buffer[pos] = c;
-            pos += 1;
-            if (pos > 12)
-            {
-                token->type = TOKEN_NONE;
-                return LEXER_ERROR_OVERFLOW;
-            }
-            buffer[pos] = '\0';
-            c = vm_read_char(vm);
-        } while (isdigit(c));
-        if (c == '\0')
-        {
-            token->type = TOKEN_NONE;
-            return LEXER_ERROR_UNEXPECTED_EOF;
-        }
-    }
-    else if (c == '+')
-    {
-        token->type = TOKEN_ADD;
-        return ERROR_NONE;
-    }
-    else if (c == '-')
-    {
-        token->type = TOKEN_SUB;
-        return ERROR_NONE;
-    }
-    else if (c == '*')
-    {
-        token->type = TOKEN_MUL;
-        return ERROR_NONE;
-    }
-    else if (c == '/')
-    {
-        token->type = TOKEN_DIV;
-        return ERROR_NONE;
-    }
-    return true;
 }

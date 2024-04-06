@@ -42,23 +42,6 @@ typedef struct _vm_t
  */
 extern void vm_init(vm_t *vm);
 
-/**
- * @brief Set source code from memory buffer
- */
-bool vm_set_source(vm_t *vm, char *source, size_t length);
-
-/**
- * @brief Load file into VM
- */
-extern bool vm_load_file(vm_t *vm, char *filename);
-
-/**
- * @brief Scan source for lines
- */
-extern bool vm_scan_source(vm_t *vm);
-
-void vm_list_source(vm_t *vm, int from_line, int to_line);
-
 extern bool vm_exec(vm_t *vm);
 
 extern symbol_t *vm_global_get(vm_t *vm, char *name);

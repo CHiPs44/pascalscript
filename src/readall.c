@@ -10,16 +10,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-/* Size of each input chunk to be read and allocate for. */
-#ifndef  READALL_CHUNK
-#define  READALL_CHUNK  262144
-#endif
-
-#define  READALL_OK          0  /* Success */
-#define  READALL_INVALID    -1  /* Invalid parameters */
-#define  READALL_ERROR      -2  /* Stream error */
-#define  READALL_TOOMUCH    -3  /* Too much input */
-#define  READALL_NOMEM      -4  /* Out of memory */
+#include "readall.h"
 
 /* This function returns one of the READALL_ constants above.
    If the return value is zero == READALL_OK, then:
@@ -31,7 +22,7 @@
 */
 int readall(FILE *in, char **dataptr, size_t *sizeptr)
 {
-    char  *data = NULL, *temp;
+    char *data = NULL, *temp;
     size_t size = 0;
     size_t used = 0;
     size_t n;
@@ -42,16 +33,20 @@ int readall(FILE *in, char **dataptr, size_t *sizeptr)
     /* A read error already occurred? */
     if (ferror(in))
         return READALL_ERROR;
-    while (1) {
-        if (used + READALL_CHUNK + 1 > size) {
+    while (1)
+    {
+        if (used + READALL_CHUNK + 1 > size)
+        {
             size = used + READALL_CHUNK + 1;
             /* Overflow check. Some ANSI C compilers may optimize this away, though. */
-            if (size <= used) {
+            if (size <= used)
+            {
                 free(data);
                 return READALL_TOOMUCH;
             }
             temp = realloc(data, size);
-            if (temp == NULL) {
+            if (temp == NULL)
+            {
                 free(data);
                 return READALL_NOMEM;
             }
@@ -62,12 +57,14 @@ int readall(FILE *in, char **dataptr, size_t *sizeptr)
             break;
         used += n;
     }
-    if (ferror(in)) {
+    if (ferror(in))
+    {
         free(data);
         return READALL_ERROR;
     }
     temp = realloc(data, used + 1);
-    if (temp == NULL) {
+    if (temp == NULL)
+    {
         free(data);
         return READALL_NOMEM;
     }

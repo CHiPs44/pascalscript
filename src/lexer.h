@@ -11,6 +11,7 @@
 
 #include "pascalscript.h"
 #include "error.h"
+#include "vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -22,8 +23,8 @@ extern "C"
     typedef enum _token_type_t
     {
         TOKEN_NONE = -1,
-        TOKEN_EOF = 0,
-        // Number types                       Size in bytes
+        TOKEN_END_OF_FILE = 0,
+        // Number values                      Size in bytes
         TOKEN_SHORT_INTEGER_VALUE = 1,     // 1   -128..127
         TOKEN_BYTE_VALUE = 2,              // 1   0..255
         TOKEN_SMALL_INTEGER = 4,           // 2   -32,768..32,767
@@ -56,13 +57,22 @@ extern "C"
         TOKEN_FUNCTION,
         TOKEN_PROCEDURE,
         // Ponctuation
-        TOKEN_ASSIGN,     // :=
-        TOKEN_CARET,      // ^
-        TOKEN_COLON,      // :
-        TOKEN_COMMA,      // ,
-        TOKEN_DOT_DOT,    // ..
-        TOKEN_DOT,        // .
-        TOKEN_SEMI_COLON, // ;
+        TOKEN_ASSIGN,              // :=
+        TOKEN_CARET,               // ^
+        TOKEN_COLON,               // :
+        TOKEN_COMMA,               // ,
+        TOKEN_DOT_DOT,             // ..
+        TOKEN_DOT,                 // .
+        TOKEN_SEMI_COLON,          // ;
+        TOKEN_LEFT_PARENTHESIS,    // (
+        TOKEN_RIGHT_PARENTHESIS,   // )
+        TOKEN_LEFT_BRACKET,        // [
+        TOKEN_RIGHT_BRACKET,       // ]
+        TOKEN_LEFT_CURLY_BRACKET,  // {
+        TOKEN_RIGHT_CURLY_BRACKET, // }
+        TOKEN_DOLLAR,              // $
+        TOKEN_LEFT_COMMENT,        // (*
+        TOKEN_RIGHT_COMMENT,       // *)
         // Operators
         TOKEN_ADD,      // +
         TOKEN_SUB,      // -
@@ -113,6 +123,8 @@ extern "C"
     extern error_t lexer_copy_real_value();
     extern error_t lexer_copy_char_value();
     extern error_t lexer_copy_string_value();
+
+    error_t vm_read_token(vm_t *vm, token_t *token);
 
 #ifdef __cplusplus
 }

@@ -16,8 +16,6 @@
         "string.h": "c",
         "lexer.h": "c",
         "pascalscript.h": "c",
-        "stdint.h": "c",
-        "system_error": "c",
-        "stdio.h": "c"
+        "stdint.h": "c"
     }
 }
