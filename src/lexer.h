@@ -118,13 +118,13 @@ extern "C"
 
     extern void lexer_dump_token(token_t *token);
 
-    extern error_t lexer_copy_identifier();
-    extern error_t lexer_copy_integer_value();
-    extern error_t lexer_copy_real_value();
-    extern error_t lexer_copy_char_value();
-    extern error_t lexer_copy_string_value();
+    // extern error_t lexer_copy_identifier();
+    // extern error_t lexer_copy_integer_value();
+    // extern error_t lexer_copy_real_value();
+    // extern error_t lexer_copy_char_value();
+    // extern error_t lexer_copy_string_value();
 
-    error_t vm_read_token(vm_t *vm, token_t *token);
+    error_t lexer_read_token(vm_t *vm, token_t *token);
 
 #ifdef __cplusplus
 }

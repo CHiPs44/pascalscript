@@ -16,6 +16,7 @@
         "string.h": "c",
         "lexer.h": "c",
         "pascalscript.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "source.h": "c"
     }
 }

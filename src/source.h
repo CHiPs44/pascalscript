@@ -9,7 +9,6 @@
 
 #include "vm.h"
 #include "error.h"
-#include "lexer.h"
 
 #ifdef __cplusplus
 extern "C"

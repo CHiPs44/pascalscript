@@ -10,6 +10,7 @@
 #include "pascalscript.h"
 #include "symbol_table.h"
 #include "vm.h"
+#include "lexer.h"
 #include "source.h"
 
 vm_t _vm;
@@ -17,11 +18,16 @@ vm_t *vm = &_vm;
 
 char *hello =
     "program hello;\n"
+    "{ comment with curly brackets }"
     "const\n"
     "  chips = 44;\n"
     "var\n"
     "  test: integer;\n"
     "begin\n"
+    "(*\n"
+    " multi-line comment enclosed in\n"
+    " parenthesis plus stars\n"
+    "*)\n"
     "  test := 1 + chips;\n"
     "  writeln('test=', test);\n"
     "end.\n";
@@ -41,6 +47,11 @@ int main(int argc, char *argv[])
     printf("Loaded!\n");
     source_list_text(vm, 0, vm->line_count);
     // vm_exec(vm);
+    token_t token;
+    do {
+      lexer_read_token(vm, &token);
+      lexer_dump_token(&token);
+    } while (true);
   }
   return 0;
 }
