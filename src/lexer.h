@@ -18,7 +18,9 @@ extern "C"
 {
 #endif
 
+#ifndef MAX_IDENTIFIER
 #define MAX_IDENTIFIER 31
+#endif
 
     typedef enum _token_type_t
     {
@@ -95,13 +97,6 @@ extern "C"
         TOKEN_LSHIFT, // <<
         TOKEN_RSHIFT, // >>
     } token_type_t;
-
-    typedef struct _keyword_t
-    {
-        int token;
-        char *keyword;
-        bool symbolic;
-    } keyword_t;
 
     typedef struct _token_t
     {
