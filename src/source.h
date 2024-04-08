@@ -36,7 +36,9 @@ extern "C"
 
     char source_peek_char(vm_t *vm);
 
-    char source_read_char(vm_t *vm);
+    char source_read_next_char(vm_t *vm);
+
+    char source_peek_next_char(vm_t *vm);
 
 #ifdef __cplusplus
 }

@@ -15,9 +15,10 @@
 #include "vm.h"
 
 symbol_t default_globals[] = {
-    {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {0}},
-    {"MAXINT", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), {2147483647L}},
-    //  { "PI", KIND_CONSTANT, TYPE_REAL, sizeof(double), {3.141592653589793} },
+    {"__PS_VERSION__"   , KIND_CONSTANT, TYPE_INTEGER           , sizeof(int    ), {0}},
+    {"MAXINT"           , KIND_CONSTANT, TYPE_INTEGER           , sizeof(int    ), {2147483647L}},
+    {"MAXUINT"          , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER  , sizeof(int    ), {0xffffffff}},
+    {"PI"               , KIND_CONSTANT, TYPE_REAL              , sizeof(double ), {3.141592653589793}},
 };
 
 /**

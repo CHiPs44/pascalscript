@@ -17,6 +17,7 @@ extern "C"
         ERROR_NONE = 0,
         /* general */
         ERROR_OUT_OF_MEMORY,
+        ERROR_NOT_IMPLEMENTED,
         /* lexer */
         LEXER_ERROR_UNEXPECTED_CHARACTER = 1000,
         LEXER_ERROR_UNEXPECTED_EOF,

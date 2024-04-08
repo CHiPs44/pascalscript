@@ -27,9 +27,9 @@ typedef enum _kind_t
     KIND_FREE,
     KIND_CONSTANT,
     KIND_VARIABLE,
-    // KIND_PROCEDURE,
-    // KIND_FUNCTION,
-    // KIND_TYPE,
+    KIND_PROCEDURE,
+    KIND_FUNCTION,
+    KIND_TYPE,
 } kind_t;
 
 typedef enum _type_t
@@ -37,20 +37,20 @@ typedef enum _type_t
     // for constants and variables
     TYPE_NONE = 0,
     TYPE_INTEGER,
-    // TYPE_UNSIGNED_INTEGER,
-    // TYPE_CHAR,
-    // TYPE_STRING,
-    // TYPE_REAL,
-    // TYPE_POINTER,
+    TYPE_UNSIGNED_INTEGER,
+    TYPE_CHAR,
+    TYPE_STRING,
+    TYPE_REAL,
+    TYPE_POINTER,
 } type_t;
 
 typedef union _value_t
 {
     PS_INTEGER          i;
-    // PS_UNSIGNED_INTEGER u;
-    // PS_CHAR             c;
-    // PS_CHAR             s[PS_STRING_MAX + 1];
-    // PS_REAL             r;
+    PS_UNSIGNED_INTEGER u;
+    PS_CHAR             c;
+    PS_CHAR             s[PS_STRING_MAX + 1];
+    PS_REAL             r;
 } value_t;
 
 typedef struct _symbol_t

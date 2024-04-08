@@ -144,7 +144,7 @@ char source_peek_char(vm_t *vm)
     return vm->current_char;
 }
 
-char source_read_char(vm_t *vm)
+char source_read_next_char(vm_t *vm)
 {
     if (vm->current_line >= 0 && vm->current_line < vm->line_count)
     {
@@ -160,4 +160,17 @@ char source_read_char(vm_t *vm)
         }
     }
     return vm->current_char;
+}
+
+char source_peek_next_char(vm_t *vm)
+{
+    char next_char = '\0';
+    if (vm->current_line >= 0 && vm->current_line < vm->line_count)
+    {
+        if (vm->current_column >= 0 && vm->current_column <= vm->line_lengths[vm->current_line])
+        {
+            next_char = vm->line_starts[vm->current_line][vm->current_column];
+        }
+    }
+    return next_char;
 }

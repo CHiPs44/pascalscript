@@ -16,94 +16,126 @@
 #include "source.h"
 #include "symbol.h"
 
-error_t lexer_read_token(vm_t *vm, token_t *token)
+error_t lexer_skip_whitespace(vm_t *vm, bool *changed)
+{
+    char c;
+    c = source_peek_char(vm);
+    *changed = false;
+    while (isspace(c))
+    {
+        c = source_read_next_char(vm);
+        *changed = true;
+    }
+    return ERROR_NONE;
+}
+
+error_t lexer_skip_comment1(vm_t *vm, bool *changed)
+{
+    char c;
+    c = source_peek_char(vm);
+    *changed = false;
+    if (c == '{')
+    {
+        while (c != '}')
+        {
+            c = source_read_next_char(vm);
+            *changed = true;
+            if (c == '\0')
+            {
+                return LEXER_ERROR_UNEXPECTED_EOF;
+            }
+        }
+    }
+    return ERROR_NONE;
+}
+
+error_t lexer_skip_comment2(vm_t *vm, bool *changed)
+{
+    char c1, c2;
+    c1 = source_peek_char(vm);
+    c2 = source_peek_next_char(vm);
+    *changed = false;
+    if (c1 == '(' && c2 == '*')
+    {
+        while (c1 != '*' && c2 != ')')
+        {
+            c1 = source_read_next_char(vm);
+            *changed = true;
+            if (c1 == '\0')
+            {
+                return LEXER_ERROR_UNEXPECTED_EOF;
+            }
+            c2 = source_peek_next_char(vm);
+        }
+    }
+    return ERROR_NONE;
+}
+
+error_t lexer_skip_whitespace_and_comments(cvm_t *vm)
+{
+    error_t error;
+    bool changed1, changed2, changed3 = true;
+    while (changed1 || changed2 || changed3)
+    {
+        error = lexer_skip_whitespace(vm, &changed1);
+        if (error != ERROR_NONE)
+            return error;
+        error = lexer_skip_comment1(vm, &changed2);
+        if (error != ERROR_NONE)
+            return error;
+        error = lexer_skip_comment2(vm, &changed3);
+        if (error != ERROR_NONE)
+            return error;
+    }
+}
+
+error_t lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
 {
     char buffer[MAX_COLUMNS];
     char c;
     int pos = 0;
 
     c = source_peek_char(vm);
-    if (c == '\0')
-    {
-        token->type = TOKEN_END_OF_FILE;
-        return ERROR_NONE;
-    }
-    // skip whitespace
-    while (isspace(c))
-    {
-        c = source_read_char(vm);
-        if (c == '\0')
-        {
-            token->type = TOKEN_NONE;
-            return LEXER_ERROR_UNEXPECTED_EOF;
-        }
-    }
     if (isalpha(c))
     {
         do
         {
             buffer[pos] = toupper(c);
-            pos += 1;
             if (pos > MAX_IDENTIFIER)
             {
                 token->type = TOKEN_NONE;
                 return LEXER_ERROR_IDENTIFIER_TOO_LONG;
             }
-            buffer[pos] = '\0';
-            c = source_read_char(vm);
-        } while (isalnum(c));
-        // TODO keywords
+            c = source_read_next_char(vm);
+        } while (isalnum(vm));
         token->type = TOKEN_IDENTIFIER;
         strcpy(token->value.identifier, buffer);
         return ERROR_NONE;
     }
-    else if (isdigit(c))
+    token->type = TOKEN_NONE;
+    return ERROR_NONE;
+}
+
+error_t lexer_read_number(vm_t *vm, token_t *token)
+{
+    char buffer[MAX_COLUMNS];
+    char c;
+    int pos = 0;
+
+    c = source_peek_char(vm);
+    if (!isalpha(c))
     {
-        do
-        {
-            buffer[pos] = c;
-            pos += 1;
-            if (pos > 12)
-            {
-                token->type = TOKEN_NONE;
-                return LEXER_ERROR_OVERFLOW;
-            }
-            buffer[pos] = '\0';
-            c = source_read_char(vm);
-        } while (isdigit(c));
-        if (c == '\0')
-        {
-            token->type = TOKEN_NONE;
-            return LEXER_ERROR_UNEXPECTED_EOF;
-        }
+        token->type = TOKEN_NONE;
+        return LEXER_ERROR_UNEXPECTED_CHARACTER;
     }
-    else if (c == '+')
-    {
-        token->type = TOKEN_ADD;
-        return ERROR_NONE;
-    }
-    else if (c == '-')
-    {
-        token->type = TOKEN_SUB;
-        return ERROR_NONE;
-    }
-    else if (c == '*')
-    {
-        token->type = TOKEN_MUL;
-        return ERROR_NONE;
-    }
-    else if (c == '/')
-    {
-        token->type = TOKEN_DIV;
-        return ERROR_NONE;
-    }
-    return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
 void lexer_dump_token(token_t *token)
 {
     char *type;
     char value[256];
+
+    fprintf(stderr, "TOKEN: %d\n", token->type);
 
     switch (token->type)
     {
@@ -128,6 +160,8 @@ void lexer_dump_token(token_t *token)
         snprintf(value, 256, "%s", token->value.string_val);
         break;
     default:
+        type = "UNKNOWN";
+        snprintf(value, 256, "%s", "?");
         break;
     }
     fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, value);
