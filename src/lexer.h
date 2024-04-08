@@ -119,7 +119,12 @@ extern "C"
     // extern error_t lexer_copy_char_value();
     // extern error_t lexer_copy_string_value();
 
-    error_t lexer_read_token(vm_t *vm, token_t *token);
+    // error_t lexer_read_token(vm_t *vm, token_t *token);
+    error_t lexer_read_identifier_or_keyword(vm_t *vm, token_t *token);
+    error_t lexer_read_number(vm_t *vm, token_t *token);
+
+    error_t lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type);
+    error_t lexer_expect_token_types(vm_t *vm, token_t token, size_t token_type_count, token_type_t token_type[]);
 
 #ifdef __cplusplus
 }

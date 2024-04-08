@@ -16,6 +16,43 @@
 #include "source.h"
 #include "symbol.h"
 
+void lexer_dump_token(token_t *token)
+{
+    char *type;
+    char value[256];
+
+    fprintf(stderr, "TOKEN: %d\n", token->type);
+
+    switch (token->type)
+    {
+    case TOKEN_IDENTIFIER:
+        type = "IDENTIFIER";
+        snprintf(value, 256, "%s", token->value.identifier);
+        break;
+    case TOKEN_INTEGER_VALUE:
+        type = "INTEGER";
+        snprintf(value, 256, "%d", token->value.int_val);
+        break;
+    case TOKEN_REAL_VALUE:
+        type = "REAL";
+        snprintf(value, 256, "%f", token->value.real_val);
+        break;
+    case TOKEN_CHAR_VALUE:
+        type = "CHAR";
+        snprintf(value, 256, "%c", token->value.char_val);
+        break;
+    case TOKEN_STRING_VALUE:
+        type = "STRING";
+        snprintf(value, 256, "%s", token->value.string_val);
+        break;
+    default:
+        type = "UNKNOWN";
+        snprintf(value, 256, "%s", "?");
+        break;
+    }
+    fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, value);
+}
+
 error_t lexer_skip_whitespace(vm_t *vm, bool *changed)
 {
     char c;
@@ -71,7 +108,7 @@ error_t lexer_skip_comment2(vm_t *vm, bool *changed)
     return ERROR_NONE;
 }
 
-error_t lexer_skip_whitespace_and_comments(cvm_t *vm)
+error_t lexer_skip_whitespace_and_comments(vm_t *vm)
 {
     error_t error;
     bool changed1, changed2, changed3 = true;
@@ -87,6 +124,7 @@ error_t lexer_skip_whitespace_and_comments(cvm_t *vm)
         if (error != ERROR_NONE)
             return error;
     }
+    return error;
 }
 
 error_t lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
@@ -123,48 +161,33 @@ error_t lexer_read_number(vm_t *vm, token_t *token)
     int pos = 0;
 
     c = source_peek_char(vm);
-    if (!isalpha(c))
+    if (isdigit(c))
     {
-        token->type = TOKEN_NONE;
-        return LEXER_ERROR_UNEXPECTED_CHARACTER;
+        do
+        {
+            buffer[pos] = toupper(c);
+            if (pos >= 9)
+            {
+                token->type = TOKEN_NONE;
+                return LEXER_ERROR_OVERFLOW;
+            }
+            c = source_read_next_char(vm);
+        } while (isdigit(vm));
+        token->type = TOKEN_INTEGER_VALUE;
+        // TODO use better conversion from string to integer
+        token->value.int_val = atoi(buffer);
+        return ERROR_NONE;
     }
+    token->type = TOKEN_NONE;
+    return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
-void lexer_dump_token(token_t *token)
+error_t lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type)
 {
-    char *type;
-    char value[256];
-
-    fprintf(stderr, "TOKEN: %d\n", token->type);
-
-    switch (token->type)
-    {
-    case TOKEN_IDENTIFIER:
-        type = "IDENTIFIER";
-        snprintf(value, 256, "%s", token->value.identifier);
-        break;
-    case TOKEN_INTEGER_VALUE:
-        type = "INTEGER";
-        snprintf(value, 256, "%d", token->value.int_val);
-        break;
-    case TOKEN_REAL_VALUE:
-        type = "REAL";
-        snprintf(value, 256, "%f", token->value.real_val);
-        break;
-    case TOKEN_CHAR_VALUE:
-        type = "CHAR";
-        snprintf(value, 256, "%c", token->value.char_val);
-        break;
-    case TOKEN_STRING_VALUE:
-        type = "STRING";
-        snprintf(value, 256, "%s", token->value.string_val);
-        break;
-    default:
-        type = "UNKNOWN";
-        snprintf(value, 256, "%s", "?");
-        break;
-    }
-    fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, value);
+    
+    return ERROR_NONE;
 }
+
+// error_t lexer_expect_token_types(vm_t *vm, size_t token_type_count, token_type_t token_type[])
 
 /* EOF */

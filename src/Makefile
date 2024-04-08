@@ -6,8 +6,8 @@ CC = LANG=C gcc
 # CFLAGS = -W -Wall -ansi -pedantic -std=c17 -g
 CFLAGS   = -Wall
 PROJECT  = pascalscript
-SOURCES  = error.c lexer.c operator.c pascalscript.c readall.c source.c symbol.c symbol_stack.c symbol_table.c vm.c
-INCLUDES = error.h lexer.h operator.h pascalscript.h readall.h source.h symbol.h symbol_stack.h symbol_table.h vm.h
+SOURCES  = error.c keywords.c lexer.c operator.c pascalscript.c readall.c source.c symbol.c symbol_stack.c symbol_table.c vm.c
+INCLUDES = error.h keywords.h lexer.h operator.h pascalscript.h readall.h source.h symbol.h symbol_stack.h symbol_table.h vm.h
 
 all: $(PROJECT)
 
