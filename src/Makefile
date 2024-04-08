@@ -6,15 +6,15 @@ CC = LANG=C gcc
 # CFLAGS = -W -Wall -ansi -pedantic -std=c17 -g
 CFLAGS   = -Wall
 PROJECT  = pascalscript
-SOURCES  = error.c keywords.c lexer.c operator.c pascalscript.c readall.c source.c symbol.c symbol_stack.c symbol_table.c vm.c
-INCLUDES = error.h keywords.h lexer.h operator.h pascalscript.h readall.h source.h symbol.h symbol_stack.h symbol_table.h vm.h
+SOURCES  = error.c lexer.c operator.c pascalscript.c readall.c source.c symbol.c symbol_stack.c symbol_table.c token.c vm.c
+INCLUDES = error.h lexer.h operator.h pascalscript.h readall.h source.h symbol.h symbol_stack.h symbol_table.h token.h vm.h
 
 all: $(PROJECT)
 
 $(PROJECT): $(SOURCES) $(INCLUDES)
 	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES)
 
-# clean:
-# 	rm -f $(PROJECT) pascalscript.lex.c pascalscript.tab.c pascalscript.tab.h pascalscript.output
+clean:
+	rm -f $(PROJECT)
 
 # EOF

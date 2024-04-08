@@ -54,11 +54,10 @@ int main(int argc, char *argv[])
     printf("Loaded!\n");
     source_list_text(vm, 0, vm->line_count);
     printf("Listed!\n");
-    token_t token;
     symbol_t program;
     do
     {
-      lexer_read_identifier_or_keyword(vm, &token);
+      lexer_read_identifier_or_keyword(vm);
       if (token.type != TOKEN_PROGRAM)
       {
         lexer_dump_token(&token);

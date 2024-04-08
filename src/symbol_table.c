@@ -135,7 +135,7 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
  * @param Normalized name
  * @return index of symbol or -1 if not found
  */
-int symbol_table_del(symbol_table_t *table, char *name)
+int symbol_table_delete(symbol_table_t *table, char *name)
 {
     int index = symbol_table_find(table, name);
     if (index >= 0)

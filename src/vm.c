@@ -79,9 +79,9 @@ int vm_global_add(vm_t *vm, symbol_t *symbol)
  * @param Symbol name
  * @return index of symbol or -1 if not found
  */
-int vm_global_del(vm_t *vm, char *name)
+int vm_global_delete(vm_t *vm, char *name)
 {
-    return symbol_table_del(&vm->globals, name);
+    return symbol_table_delete(&vm->globals, name);
 }
 
 int vm_stack_push(vm_t *vm, symbol_t *symbol)

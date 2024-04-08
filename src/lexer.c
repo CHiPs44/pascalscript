@@ -184,7 +184,10 @@ error_t lexer_read_number(vm_t *vm, token_t *token)
 
 error_t lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type)
 {
-    
+    if (vm->current_token.type != token_type)
+    {       
+        vm->error = LEXER_ERROR_BUFFER_OVERFLOW;
+    }
     return ERROR_NONE;
 }
 

@@ -33,7 +33,7 @@ extern void      symbol_table_dump(symbol_table_t *table, char *title);
 extern int       symbol_table_find(symbol_table_t *table, char *name);
 extern symbol_t *symbol_table_get (symbol_table_t *table, char *name);
 extern int       symbol_table_add (symbol_table_t *table, symbol_t *symbol);
-extern int       symbol_table_del (symbol_table_t *table, char *name);
+extern int       symbol_table_delete (symbol_table_t *table, char *name);
 extern int       symbol_table_free(symbol_table_t *table, char *name);
 extern int       symbol_table_gc  (symbol_table_t *table);
 /* clang-format on */
