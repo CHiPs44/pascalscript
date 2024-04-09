@@ -156,7 +156,7 @@ bool lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
     return false;
 }
 
-error_t lexer_read_number(vm_t *vm, token_t *token)
+bool lexer_read_number(vm_t *vm)
 {
     char buffer[MAX_COLUMNS];
     char c;
@@ -170,17 +170,19 @@ error_t lexer_read_number(vm_t *vm, token_t *token)
             buffer[pos] = toupper(c);
             if (pos >= 9)
             {
-                token->type = TOKEN_NONE;
-                return LEXER_ERROR_OVERFLOW;
+                vm->current_token.type = TOKEN_NONE;
+                vm->error= LEXER_ERROR_OVERFLOW;
+                return false;
             }
             c = source_read_next_char(vm);
         } while (isdigit(vm));
-        token->type = TOKEN_INTEGER_VALUE;
+        vm->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
-        token->value.int_val = atoi(buffer);
-        return ERROR_NONE;
+        vm->current_token.value.int_val = atoi(buffer);
+        vm->error=ERROR_NONE;
+        return true;
     }
-    token->type = TOKEN_NONE;
+    vm->current_token.type = TOKEN_NONE;
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
