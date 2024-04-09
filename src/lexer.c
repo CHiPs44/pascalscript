@@ -127,7 +127,7 @@ error_t lexer_skip_whitespace_and_comments(vm_t *vm)
     return error;
 }
 
-error_t lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
+bool lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
 {
     char buffer[MAX_COLUMNS];
     char c;
@@ -142,16 +142,18 @@ error_t lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
             if (pos > MAX_IDENTIFIER)
             {
                 token->type = TOKEN_NONE;
-                return LEXER_ERROR_IDENTIFIER_TOO_LONG;
+                vm->error= LEXER_ERROR_IDENTIFIER_TOO_LONG;
+                return false;
             }
             c = source_read_next_char(vm);
         } while (isalnum(vm));
         token->type = TOKEN_IDENTIFIER;
         strcpy(token->value.identifier, buffer);
-        return ERROR_NONE;
+        // TODO check for keyword
+        return true;
     }
     token->type = TOKEN_NONE;
-    return ERROR_NONE;
+    return false;
 }
 
 error_t lexer_read_number(vm_t *vm, token_t *token)
@@ -182,13 +184,14 @@ error_t lexer_read_number(vm_t *vm, token_t *token)
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
-error_t lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type)
+bool lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type)
 {
     if (vm->current_token.type != token_type)
     {       
-        vm->error = LEXER_ERROR_BUFFER_OVERFLOW;
+        vm->error = LEXER_ERROR_UNEXPECTED_TOKEN;
+        return false;
     }
-    return ERROR_NONE;
+    return true;
 }
 
 // error_t lexer_expect_token_types(vm_t *vm, size_t token_type_count, token_type_t token_type[])

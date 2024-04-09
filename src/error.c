@@ -22,6 +22,16 @@ char *error_get_message(error_t code)
     /*
      * LEXER ERRORS
      */
+    case LEXER_ERROR_UNEXPECTED_CHARACTER:
+        return "Unexpected character";
+    case LEXER_ERROR_UNEXPECTED_EOF:
+        return "Unexpected end of file";
+    case LEXER_ERROR_EXPECTED_TOKEN:
+        return "Expected token";
+    case LEXER_ERROR_UNEXPECTED_TOKEN:
+        return "Unexpected token";
+    case LEXER_ERROR_BUFFER_OVERFLOW:
+        return "Buffer overflow";
     case LEXER_ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case LEXER_ERROR_OVERFLOW:
