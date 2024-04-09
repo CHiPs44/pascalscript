@@ -31,19 +31,19 @@ void lexer_dump_token(token_t *token)
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(value, 256, "%d", token->value.int_val);
+        snprintf(value, 256, "%d", token->value.i);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(value, 256, "%f", token->value.real_val);
+        snprintf(value, 256, "%f", token->value.r);
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(value, 256, "%c", token->value.char_val);
+        snprintf(value, 256, "%c", token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(value, 256, "%s", token->value.string_val);
+        snprintf(value, 256, "%s", token->value.s);
         break;
     default:
         type = "UNKNOWN";
@@ -186,7 +186,7 @@ bool lexer_read_number(vm_t *vm)
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
-bool lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type)
+bool lexer_expect_token_type(vm_t *vm, token_type_t token_type)
 {
     if (vm->current_token.type != token_type)
     {       

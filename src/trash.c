@@ -35,7 +35,7 @@ error_t lexer_copy_integer_value(char *text, token_t *token)
         return LEXER_ERROR_OVERFLOW;
     }
     token->type = TOKEN_INTEGER_VALUE;
-    token->value.int_val = (int)val;
+    token->value.i = (int)val;
     return ERROR_NONE;
 }
 
@@ -54,7 +54,7 @@ error_t lexer_copy_real_value(char *text, token_t *token)
         return LEXER_ERROR_OVERFLOW;
     }
     token->type = TOKEN_REAL_VALUE;
-    token->value.real_val = val;
+    token->value.r = val;
     return ERROR_NONE;
 }
 
@@ -69,7 +69,7 @@ error_t lexer_copy_char_value(char *text, token_t *token)
     PS_CHAR val = text[1];
     // fprintf(stderr, " [lexer_copy_char_value %s %c]", text, val);
     token->type = TOKEN_CHAR_VALUE;
-    token->value.char_val = val;
+    token->value.c = val;
     return ERROR_NONE;
 }
 
@@ -91,10 +91,10 @@ error_t lexer_copy_string_value(char *text, token_t *token)
     }
     token->type = TOKEN_STRING_VALUE;
     if (len == 0)
-        strcpy(token->value.string_val, "");
+        strcpy(token->value.s, "");
     else
-        strncpy(token->value.string_val, &text[1], len);
-    // fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]\n", strlen(token->value.string_val), token->value.string_val);
+        strncpy(token->value.s, &text[1], len);
+    // fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]\n", strlen(token->value.s), token->value.s);
     return ERROR_NONE;
 }
 

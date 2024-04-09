@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
       strcpy(program.name, "PROGRAM");
       program.size = 0;
       program.type = TYPE_STRING;
-      strcpy(program.value.s, token.value.string_val);
+      strcpy(program.value.s, token.value.s);
       symbol_table_add(&vm->globals, &program);
       lexer_read_identifier_or_keyword(vm, &token);
       if (token.type != TOKEN_BEGIN)

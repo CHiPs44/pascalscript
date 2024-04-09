@@ -18,10 +18,6 @@ extern "C"
 {
 #endif
 
-#ifndef MAX_IDENTIFIER
-#define MAX_IDENTIFIER 31
-#endif
-
     extern void lexer_dump_token(token_t *token);
 
     // extern error_t lexer_copy_identifier();

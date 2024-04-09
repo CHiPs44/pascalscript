@@ -14,6 +14,20 @@ extern "C"
 {
 #endif
 
+#ifndef MAX_IDENTIFIER
+#define MAX_IDENTIFIER 31
+#endif
+
+/*
+    -absolute    +and         +array       -asm             +begin       +case        +const       -constructor
+    -destructor  +div         +do          +downto          +else        +end         -file        +for
+    +function    +goto        +if          -implementation  +in          -inherited   -inline      -interface
+    +label       +mod         -nil         +not             -object      +of          -operator    +or
+    -packed      +procedure   +program     -record          -reintroduce +repeat      -self        -set
+    +shl         +shr         +string      +then            +to          +type        -unit        +until
+    -uses        +var         +while       -with            +xor
+*/
+
     typedef enum _token_type_t
     {
         TOKEN_NONE = -1,
@@ -42,6 +56,7 @@ extern "C"
         TOKEN_TYPE,
         TOKEN_BEGIN,
         TOKEN_END,
+        TOKEN_ARRAY,
         TOKEN_INTEGER,
         TOKEN_BOOLEAN,
         TOKEN_CHAR,
@@ -57,6 +72,15 @@ extern "C"
         TOKEN_WHILE,
         TOKEN_REPEAT,
         TOKEN_UNTIL,
+        TOKEN_FOR,
+        TOKEN_TO,
+        TOKEN_DOWNTO,
+        TOKEN_IN,
+        TOKEN_CASE,
+        TOKEN_OF,
+        TOKEN_OTHERWISE,
+        TOKEN_GOTO,
+        TOKEN_LABEL,
         // Ponctuation
         TOKEN_ASSIGN,              // :=
         TOKEN_CARET,               // ^
@@ -89,12 +113,12 @@ extern "C"
         TOKEN_GREATER_THAN,          // >
         TOKEN_GREATER_OR_EQUAL_THAN, // >=
         // Logical operators
-        TOKEN_AND,         // AND
-        TOKEN_OR,          // OR
-        TOKEN_XOR,         // XOR
-        TOKEN_NOT,         // NOT
-        TOKEN_SHIFT_LEFT,  // SHL
-        TOKEN_SHIFT_RIGHT, // SHR
+        TOKEN_AND, // AND
+        TOKEN_OR,  // OR
+        TOKEN_XOR, // XOR
+        TOKEN_NOT, // NOT
+        TOKEN_SHL, // SHL
+        TOKEN_SHR, // SHR
     } token_type_t;
 
     typedef struct _token_t
@@ -103,10 +127,10 @@ extern "C"
         union
         {
             char identifier[MAX_IDENTIFIER + 1];
-            PS_INTEGER int_val;
-            PS_REAL real_val;
-            PS_CHAR char_val;
-            PS_CHAR string_val[PS_STRING_MAX + 1];
+            PS_INTEGER i;
+            PS_REAL r;
+            PS_CHAR c;
+            PS_CHAR s[PS_STRING_MAX + 1];
         } value;
     } token_t;
 

@@ -16,6 +16,8 @@ extern "C"
     {
         ERROR_NONE = 0,
         /* general */
+        ERROR_OPENING_FILE,
+        ERROR_READING_FILE,
         ERROR_OUT_OF_MEMORY,
         ERROR_NOT_IMPLEMENTED,
         /* lexer */

@@ -15,7 +15,7 @@
 #include "error.h"
 #include "readall.h"
 
-error_t source_scan_text(vm_t *vm)
+bool source_scan_text(vm_t *vm)
 {
     int line = 0;
     int column = 0;
@@ -37,14 +37,16 @@ error_t source_scan_text(vm_t *vm)
     vm->line_starts = calloc(vm->line_count, sizeof(char *));
     if (vm->line_starts == NULL)
     {
-        return ERROR_OUT_OF_MEMORY;
+        vm->error = ERROR_OUT_OF_MEMORY;
+        return false;
     }
     if (vm->line_lengths != NULL)
         free(vm->line_lengths);
     vm->line_lengths = calloc(vm->line_count, sizeof(uint16_t));
     if (vm->line_lengths == NULL)
     {
-        return ERROR_OUT_OF_MEMORY;
+        vm->error = ERROR_OUT_OF_MEMORY;
+        return false;
     }
     // Find and memorize line starts
     text = vm->source;
@@ -82,23 +84,28 @@ error_t source_scan_text(vm_t *vm)
     vm->current_line = 0;
     vm->current_column = 0;
     vm->current_char = '\0';
-    return ERROR_NONE;
+    vm->error = ERROR_NONE;
+    return true;
 }
 
-error_t source_load_file(vm_t *vm, char *filename)
+bool source_load_file(vm_t *vm, char *filename)
 {
     FILE *input = fopen(filename, "r");
     if (input == NULL)
     {
+        vm->error = ERROR_OPENING_FILE;
         return false;
     }
     int result = readall(input, &(vm->source), &(vm->length));
     if (result != READALL_OK)
+    {
+        vm->error = ERROR_READING_FILE;
         return false;
+    }
     return source_scan_text(vm);
 }
 
-error_t source_set_text(vm_t *vm, char *source, size_t length)
+bool source_set_text(vm_t *vm, char *source, size_t length)
 {
     vm->source = source;
     vm->length = length;
@@ -109,14 +116,12 @@ void source_list_text(vm_t *vm, int from_line, int to_line)
 {
     char buffer[MAX_COLUMNS + 1];
 
-    if (from_line < 0)
-        from_line = 0;
-    if (from_line > vm->line_count)
-        from_line = vm->line_count;
-    if (to_line < 0)
-        to_line = 0;
-    if (to_line > vm->line_count)
-        to_line = vm->line_count;
+    from_line =
+        from_line < 0 ? 0 : from_line > vm->line_count ? vm->line_count
+                                                       : from_line;
+    to_line =
+        to_line < 0 ? 0 : to_line > vm->line_count ? vm->line_count
+                                                   : to_line;
     if (from_line > to_line)
     {
         int temp = from_line;
