@@ -18,6 +18,7 @@
         "pascalscript.h": "c",
         "stdint.h": "c",
         "source.h": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "token.h": "c"
     }
 }

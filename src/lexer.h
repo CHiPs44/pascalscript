@@ -12,6 +12,7 @@
 #include "pascalscript.h"
 #include "error.h"
 #include "vm.h"
+#include "token.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -26,12 +27,12 @@ extern "C"
     // extern error_t lexer_copy_char_value();
     // extern error_t lexer_copy_string_value();
 
-    // error_t lexer_read_token(vm_t *vm, token_t *token);
-    bool lexer_read_identifier_or_keyword(vm_t *vm, token_t *token);
-    bool lexer_read_number(vm_t *vm, token_t *token);
+    // error_t lexer_read_token(vm_t *vm);
+    bool lexer_read_identifier_or_keyword(vm_t *vm);
+    bool lexer_read_number(vm_t *vm);
 
-    bool lexer_expect_token_type(vm_t *vm, token_t token, token_type_t token_type);
-    bool lexer_expect_token_types(vm_t *vm, token_t token, size_t token_type_count, token_type_t token_type[]);
+    bool lexer_expect_token_type(vm_t *vm, token_type_t token_type);
+    // bool lexer_expect_token_types(vm_t *vm, size_t token_type_count, token_type_t token_type[]);
 
 #ifdef __cplusplus
 }

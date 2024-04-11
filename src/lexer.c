@@ -127,7 +127,7 @@ error_t lexer_skip_whitespace_and_comments(vm_t *vm)
     return error;
 }
 
-bool lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
+bool lexer_read_identifier_or_keyword(vm_t *vm)
 {
     char buffer[MAX_COLUMNS];
     char c;
@@ -141,18 +141,18 @@ bool lexer_read_identifier_or_keyword(vm_t *vm, token_t *token)
             buffer[pos] = toupper(c);
             if (pos > MAX_IDENTIFIER)
             {
-                token->type = TOKEN_NONE;
+                vm->current_token.type = TOKEN_NONE;
                 vm->error= LEXER_ERROR_IDENTIFIER_TOO_LONG;
                 return false;
             }
             c = source_read_next_char(vm);
         } while (isalnum(vm));
-        token->type = TOKEN_IDENTIFIER;
-        strcpy(token->value.identifier, buffer);
+        vm->current_token.type = TOKEN_IDENTIFIER;
+        strcpy(vm->current_token.value.identifier, buffer);
         // TODO check for keyword
         return true;
     }
-    token->type = TOKEN_NONE;
+    vm->current_token.type = TOKEN_NONE;
     return false;
 }
 
@@ -178,7 +178,7 @@ bool lexer_read_number(vm_t *vm)
         } while (isdigit(vm));
         vm->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
-        vm->current_token.value.int_val = atoi(buffer);
+        vm->current_token.value.i = atoi(buffer);
         vm->error=ERROR_NONE;
         return true;
     }

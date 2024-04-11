@@ -4,8 +4,8 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _KEYWORDS_H
-#define _KEYWORDS_H
+#ifndef _TOKEN_H
+#define _TOKEN_H
 
 #include "lexer.h"
 
@@ -19,13 +19,21 @@ extern "C"
 #endif
 
 /*
-    -absolute    +and         +array       -asm             +begin       +case        +const       -constructor
-    -destructor  +div         +do          +downto          +else        +end         -file        +for
-    +function    +goto        +if          -implementation  +in          -inherited   -inline      -interface
-    +label       +mod         -nil         +not             -object      +of          -operator    +or
-    -packed      +procedure   +program     -record          -reintroduce +repeat      -self        -set
-    +shl         +shr         +string      +then            +to          +type        -unit        +until
-    -uses        +var         +while       -with            +xor
+    -file       -packed     -record -nil
+    -set -with
+    -absolute   -asm    -inline 
+    -operator 
+    -reintroduce    
+    -unit           -interface  -implementation -uses
+    -constructor    -destructor     -inherited  -object -self
+    
+    +and        +array      +begin      +case       +const       
+    +div        +do         +downto     +else       +end
+    +for        +function   +goto       +if         +in
+    +label      +mod        +not        +of         +or
+    +procedure  +program    +repeat     +shl        +shr       
+    +string     +then       +to         +type       +until
+    +var        +while      +xor
 */
 
     typedef enum _token_type_t
@@ -146,4 +154,4 @@ extern "C"
 }
 #endif
 
-#endif /* _KEYWORDS_H */
+#endif /* _TOKEN_H */
