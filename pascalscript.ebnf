@@ -1,0 +1,59 @@
+(* 
+    PascalScript EBNF
+*)
+
+(*
+    ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
+    << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
+*)
+
+uppercase_letter            =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' ;
+lowercase_letter            =   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' ;
+letter                      =   lowercase_letter | uppercase_letter ;
+digit                       =   '0' | '1' | '2' | '3' | '4' |'5' | '6' | '7' | '8' | '9' ;
+
+identifier                  =   letter | '_' , [ letter | digit | '_' ]* ;
+
+digit_sequence              =   digit , [ digit ]* ;
+unsigned_integer            =   digit_sequence ;
+sign                        =   '+' | '-' ;
+scale_factor                =   'E' | 'e' , [ sign ] , digit_sequence ;
+unsigned_real               =   digit_sequence [ '.' digit_sequence ] [ scale_factor ] ;
+unsigned_number             =   unsigned_real | unsigned_integer ;
+signed_number               =   sign unsigned_number ;
+
+label                       =   'LABEL' , digit_sequence | identifier ;
+
+character_string            =   quoted_string | control_string ;
+quoted_string               =   "'" , [ string_character ]* , "'" ;
+string_character            =   "''" | ? Any character except ' or CR ? ;
+control_string              =   '#' , unsigned_integer ;
+
+identifier_list             =   identifier , [ ',' identifier ]* ;
+type_declaration            =   identifier = type hint_directives ;
+type                        =   simple_type | string_type | structured_type | pointer_type | 
+                                procedural_type | generic_type | specialized_type | type_alias ;
+simple_type                 =   ordinal_type | real_type ;
+real_type                   =   'REAL' ;
+ordinal_type                =   'INTEGER' ;
+boolean_type                =   'BOOLEAN' ;
+enumerated_type             =   '(' , identifier_list , ')' ;
+string_type                 =   'STRING' ;
+
+program_instruction         =   'PROGRAM' , identifier ;
+constant_declaration        =   identifier , '=' , expression ;
+const_block                 =   'CONST' , constant_declaration , ';' , [ constant_declaration , ';' ]* ;
+var_block                   =   'VAR' , variable_declaration , ';' , [ variable_declaration , ';' ]* ;
+
+pascal_program              =   program_instruction , ';' , [ const_block ] , instruction_block , '.' ;
+instruction_block           =   'BEGIN' , [ instruction ]* , 'END' ;
+instruction                 =   assignment_instruction | procedure_call_instruction ;
+assignment_instruction      =   left_value , ':=' , right_value , ';' ;
+left_value                  =   identifier ;
+right_value                 =   expression ;
+procedure_call_instruction  =   identifier , [ '(' , parameters_list , ')' ] , ';' ;
+parameters_list             =   parameter , [ ',' , parameter ]* ;
+parameter                   =   expression ;
+
+
+```
