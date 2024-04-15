@@ -19,6 +19,7 @@ vm_t *vm = &_vm;
 
 char *minimal =
     "PROGRAM Minimal;\n"
+    "{ comment with curly brackets }\n"
     "BeGiN\n"
     "End.\n";
 
@@ -47,57 +48,59 @@ int main(int argc, char *argv[])
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
-  if (ERROR_ZERO == source_set_text(vm, minimal, strlen(minimal)))
-  // if (ERROR_ZERO == source_set_text(vm, hello, strlen(hello)))
-  // if (source_load_file(vm,"examples/00-hello.pas"))
+  if (!source_set_text(vm, minimal, strlen(minimal)))
+  // if (!source_set_text(vm, hello, strlen(hello)))
+  // if (!source_load_file(vm,"examples/00-hello.pas"))
   {
-    printf("Loaded!\n");
-    source_list_text(vm, 0, vm->line_count);
-    printf("Listed!\n");
-    symbol_t program;
-    do
-    {
-      lexer_read_identifier_or_keyword(vm);
-      if (vm->current_token.type != TOKEN_PROGRAM)
-      {
-        lexer_dump_token(&vm->current_token);
-        fprintf(stderr, "PROGRAM expected!");
-        return 1;
-      }
-      lexer_read_identifier_or_keyword(vm);
-      lexer_dump_token(&vm->current_token);
-      if (vm->current_token.type != TOKEN_IDENTIFIER)
-      {
-        fprintf(stderr, "IDENTIFIER expected!");
-        return 1;
-      }
-      program.kind = KIND_CONSTANT;
-      strcpy(program.name, "PROGRAM");
-      program.size = 0;
-      program.type = TYPE_STRING;
-      strcpy(program.value.s, vm->current_token.value.s);
-      symbol_table_add(&vm->symbols, &program);
-      symbol_table_dump(&vm->symbols, "Program");
-      lexer_read_identifier_or_keyword(vm);
-      if (vm->current_token.type != TOKEN_BEGIN)
-      {
-        fprintf(stderr, "BEGIN expected!");
-        return 1;
-      }
-      lexer_read_identifier_or_keyword(vm);
-      if (vm->current_token.type != TOKEN_END)
-      {
-        fprintf(stderr, "END expected!");
-        return 1;
-      }
-      // lexer_read_token(vm, &vm->current_token);
-      // if (vm->current_token.type != TOKEN_BEGIN)
-      // {
-      //   fprintf(stderr, ". expected!");
-      //   return 1;
-      // }
-    } while (false);
+    printf("Not loaded!\n");
+    return 1;
   }
+  printf("Loaded!\n");
+  source_list_text(vm, 0, vm->line_count);
+  printf("Listed!\n");
+  symbol_t program;
+  do
+  {
+    lexer_read_identifier_or_keyword(vm);
+    if (vm->current_token.type != TOKEN_PROGRAM)
+    {
+      lexer_dump_token(&vm->current_token);
+      fprintf(stderr, "PROGRAM expected!");
+      return 1;
+    }
+    lexer_read_identifier_or_keyword(vm);
+    lexer_dump_token(&vm->current_token);
+    if (vm->current_token.type != TOKEN_IDENTIFIER)
+    {
+      fprintf(stderr, "IDENTIFIER expected!");
+      return 1;
+    }
+    program.kind = KIND_CONSTANT;
+    strcpy(program.name, "PROGRAM");
+    program.size = 0;
+    program.type = TYPE_STRING;
+    strcpy(program.value.s, vm->current_token.value.s);
+    symbol_table_add(&vm->symbols, &program);
+    symbol_table_dump(&vm->symbols, "Program");
+    lexer_read_identifier_or_keyword(vm);
+    if (vm->current_token.type != TOKEN_BEGIN)
+    {
+      fprintf(stderr, "BEGIN expected!");
+      return 1;
+    }
+    lexer_read_identifier_or_keyword(vm);
+    if (vm->current_token.type != TOKEN_END)
+    {
+      fprintf(stderr, "END expected!");
+      return 1;
+    }
+    // lexer_read_token(vm, &vm->current_token);
+    // if (vm->current_token.type != TOKEN_BEGIN)
+    // {
+    //   fprintf(stderr, ". expected!");
+    //   return 1;
+    // }
+  } while (false);
   return 0;
 }
 

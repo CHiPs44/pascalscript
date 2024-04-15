@@ -86,29 +86,29 @@ char *symbol_get_type_name(type_t type)
 
 char *symbol_get_value(symbol_t *symbol)
 {
-    static char value[MAX_SYMBOL_NAME + 1];
+    static char value[255 + 1];
     switch (symbol->type)
     {
     case TYPE_NONE:
-        snprintf(value, MAX_SYMBOL_NAME, "?");
+        snprintf(value, 255, "?");
         break;
     case TYPE_INTEGER:
-        snprintf(value, MAX_SYMBOL_NAME, "%d / %08x", symbol->value.i, symbol->value.i);
+        snprintf(value, 255, "%d / %08x", symbol->value.i, symbol->value.i);
         break;
     case TYPE_UNSIGNED_INTEGER:
-        snprintf(value, MAX_SYMBOL_NAME, "%ud / %08x", symbol->value.u, symbol->value.u);
+        snprintf(value, 255, "%ud / %08x", symbol->value.u, symbol->value.u);
         break;
     case TYPE_REAL:
-        snprintf(value, MAX_SYMBOL_NAME, "%f", symbol->value.r);
+        snprintf(value, 255, "%f", symbol->value.r);
         break;
     case TYPE_CHAR:
-        snprintf(value, MAX_SYMBOL_NAME, "%c / %02x", symbol->value.c, symbol->value.c);
+        snprintf(value, 255, "%c / %02x", symbol->value.c, symbol->value.c);
         break;
     case TYPE_STRING:
-        snprintf(value, MAX_SYMBOL_NAME, "%s", symbol->value.s);
+        snprintf(value, 255, "%s", symbol->value.s);
         break;
     default:
-        snprintf(value, MAX_SYMBOL_NAME, "? %d ?", symbol->type);
+        snprintf(value, 255, "? %d ?", symbol->type);
         break;
     }
     return value;

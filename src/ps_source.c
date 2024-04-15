@@ -4,16 +4,16 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <errno.h>
-#include <ctype.h>
 
 #include "ps_error.h"
-#include "ps_vm.h"
 #include "ps_readall.h"
+#include "ps_vm.h"
 
 bool source_scan_text(vm_t *vm)
 {
@@ -133,7 +133,7 @@ void source_list_text(vm_t *vm, int from_line, int to_line)
     {
         strncpy(buffer, vm->line_starts[line], vm->line_lengths[line]);
         buffer[vm->line_lengths[line]] = '\0';
-        printf("%05d (%05d) |%40s|\n", line + 1, vm->line_lengths[line], buffer);
+        printf("%05d (%05d) |%-40s|\n", line + 1, vm->line_lengths[line], buffer);
     }
 }
 

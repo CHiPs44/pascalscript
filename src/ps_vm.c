@@ -17,6 +17,7 @@
 symbol_t default_globals[] = {
     // clang-format off
     {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_UNSIGNED_INTEGER), {.i=0}},
+    {"__PS_VERSTR__" , KIND_CONSTANT, TYPE_STRING          , PS_STRING_MAX +1           , {.s="PascalScript"}},
     {"MAXINT"        , KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
     {"MAXUINT"       , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER, sizeof(PS_UNSIGNED_INTEGER), {.u=0xffffffff}},
     {"PI"            , KIND_CONSTANT, TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
