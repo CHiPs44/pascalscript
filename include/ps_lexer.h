@@ -4,15 +4,15 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _LEXER_H
-#define _LEXER_H
+#ifndef _PS_LEXER_H
+#define _PS_LEXER_H
 
 #include <stdbool.h>
 
-#include "pascalscript.h"
-#include "error.h"
-#include "vm.h"
-#include "token.h"
+#include "ps_config.h"
+#include "ps_error.h"
+#include "ps_token.h"
+#include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -38,4 +38,4 @@ extern "C"
 }
 #endif
 
-#endif /* _LEXER_H */
+#endif /* _PS_LEXER_H */

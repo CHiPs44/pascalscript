@@ -4,12 +4,12 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _SYMBOL_H
-#define _SYMBOL_H
+#ifndef _PS_SYMBOL_H
+#define _PS_SYMBOL_H
 
 #include <stdlib.h>
 
-#include "pascalscript.h"
+#include "ps_config.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -22,9 +22,8 @@ extern "C"
 
 typedef enum _kind_t
 {
-    KIND_UNKNOWN = 0,
+    KIND_FREE = 0,
     KIND_AUTO,
-    KIND_FREE,
     KIND_CONSTANT,
     KIND_VARIABLE,
     KIND_PROCEDURE,
@@ -51,6 +50,7 @@ typedef union _value_t
     PS_CHAR             c;
     PS_CHAR             s[PS_STRING_MAX + 1];
     PS_REAL             r;
+    void               *p;
 } value_t;
 
 typedef struct _symbol_t
@@ -62,10 +62,14 @@ typedef struct _symbol_t
     value_t value;
 } symbol_t;
 
-extern void symbol_normalize_name(char *name);
+void symbol_normalize_name(char *name);
+char *symbol_get_kind_name(kind_t kind);
+char *symbol_get_type_name(type_t type);
+char *symbol_get_value(symbol_t *symbol);
+void symbol_dump(symbol_t *symbol);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _SYMBOL_H */
+#endif /* _PS_SYMBOL_H */

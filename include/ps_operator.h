@@ -4,11 +4,11 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _OPERATOR_H_
-#define _OPERATOR_H_
+#ifndef _PS_OPERATOR_H_
+#define _PS_OPERATOR_H_
 
-#include "error.h"
-#include "vm.h"
+#include "ps_error.h"
+#include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -39,4 +39,4 @@ extern error_t vm_exec_op_binary(vm_t *vm, operator_t op);
 }
 #endif
 
-#endif /* _OPERATOR_H_ */
+#endif /* _PS_OPERATOR_H_ */

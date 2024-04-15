@@ -4,10 +4,10 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _SYMBOL_TABLE_H
-#define _SYMBOL_TABLE_H
+#ifndef _PS_SYMBOL_TABLE_H
+#define _PS_SYMBOL_TABLE_H
 
-#include "symbol.h"
+#include "ps_symbol.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -42,4 +42,4 @@ extern int       symbol_table_gc  (symbol_table_t *table);
 }
 #endif
 
-#endif /* _SYMBOL_TABLE_H */
+#endif /* _PS_SYMBOL_TABLE_H */

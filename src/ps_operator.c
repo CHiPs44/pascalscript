@@ -4,11 +4,11 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#include "symbol.h"
-#include "vm.h"
-#include "symbol_stack.h"
-#include "error.h"
-#include "operator.h"
+#include "ps_error.h"
+#include "ps_operator.h"
+#include "ps_symbol_stack.h"
+#include "ps_symbol.h"
+#include "ps_vm.h"
 
 /**
  * @brief Execute unary operator
@@ -49,13 +49,13 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         }
         symbol_t *b = vm_auto_add_int(vm, result.i);
         if (b == NULL)
-            return RUNTIME_ERROR_GLOBAL_TABLE_FULL;
+            return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, b) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, b->name);
             return RUNTIME_ERROR_STACK_OVERFLOW;
         }
-        return ERROR_NONE;
+        return RUNTIME_ERROR_NONE;
     }
     return RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
 }
@@ -126,13 +126,13 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         }
         symbol_t *c = vm_auto_add_int(vm, result.i);
         if (c == NULL)
-            return RUNTIME_ERROR_GLOBAL_TABLE_FULL;
+            return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, c) == SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, c->name);
             return RUNTIME_ERROR_STACK_OVERFLOW;
         }
-        return ERROR_NONE;
+        return RUNTIME_ERROR_NONE;
     }
     return RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR;
 }

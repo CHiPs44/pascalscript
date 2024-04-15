@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/src/pascalscript",
+            "program": "${workspaceFolder}/pascalscript",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

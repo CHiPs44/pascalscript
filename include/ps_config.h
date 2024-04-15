@@ -4,8 +4,8 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _PASCALSCRIPT_H
-#define _PASCALSCRIPT_H
+#ifndef _PS_CONFIG_H
+#define _PS_CONFIG_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -52,4 +52,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PASCALSCRIPT_H */
+#endif /* _PS_CONFIG_H */

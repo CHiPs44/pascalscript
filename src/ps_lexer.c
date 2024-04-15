@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "error.h"
-#include "lexer.h"
-#include "source.h"
-#include "symbol.h"
+#include "ps_error.h"
+#include "ps_lexer.h"
+#include "ps_source.h"
+#include "ps_symbol.h"
 
 void lexer_dump_token(token_t *token)
 {
@@ -63,7 +63,7 @@ error_t lexer_skip_whitespace(vm_t *vm, bool *changed)
         c = source_read_next_char(vm);
         *changed = true;
     }
-    return ERROR_NONE;
+    return LEXER_ERROR_NONE;
 }
 
 error_t lexer_skip_comment1(vm_t *vm, bool *changed)
@@ -83,7 +83,7 @@ error_t lexer_skip_comment1(vm_t *vm, bool *changed)
             }
         }
     }
-    return ERROR_NONE;
+    return LEXER_ERROR_NONE;
 }
 
 error_t lexer_skip_comment2(vm_t *vm, bool *changed)
@@ -105,7 +105,7 @@ error_t lexer_skip_comment2(vm_t *vm, bool *changed)
             c2 = source_peek_next_char(vm);
         }
     }
-    return ERROR_NONE;
+    return LEXER_ERROR_NONE;
 }
 
 error_t lexer_skip_whitespace_and_comments(vm_t *vm)
@@ -115,13 +115,13 @@ error_t lexer_skip_whitespace_and_comments(vm_t *vm)
     while (changed1 || changed2 || changed3)
     {
         error = lexer_skip_whitespace(vm, &changed1);
-        if (error != ERROR_NONE)
+        if (error != LEXER_ERROR_NONE)
             return error;
         error = lexer_skip_comment1(vm, &changed2);
-        if (error != ERROR_NONE)
+        if (error != LEXER_ERROR_NONE)
             return error;
         error = lexer_skip_comment2(vm, &changed3);
-        if (error != ERROR_NONE)
+        if (error != LEXER_ERROR_NONE)
             return error;
     }
     return error;
@@ -142,7 +142,7 @@ bool lexer_read_identifier_or_keyword(vm_t *vm)
             if (pos > MAX_IDENTIFIER)
             {
                 vm->current_token.type = TOKEN_NONE;
-                vm->error= LEXER_ERROR_IDENTIFIER_TOO_LONG;
+                vm->error = LEXER_ERROR_IDENTIFIER_TOO_LONG;
                 return false;
             }
             c = source_read_next_char(vm);
@@ -171,7 +171,7 @@ bool lexer_read_number(vm_t *vm)
             if (pos >= 9)
             {
                 vm->current_token.type = TOKEN_NONE;
-                vm->error= LEXER_ERROR_OVERFLOW;
+                vm->error = LEXER_ERROR_OVERFLOW;
                 return false;
             }
             c = source_read_next_char(vm);
@@ -179,7 +179,7 @@ bool lexer_read_number(vm_t *vm)
         vm->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
         vm->current_token.value.i = atoi(buffer);
-        vm->error=ERROR_NONE;
+        vm->error = LEXER_ERROR_NONE;
         return true;
     }
     vm->current_token.type = TOKEN_NONE;
@@ -189,7 +189,7 @@ bool lexer_read_number(vm_t *vm)
 bool lexer_expect_token_type(vm_t *vm, token_type_t token_type)
 {
     if (vm->current_token.type != token_type)
-    {       
+    {
         vm->error = LEXER_ERROR_UNEXPECTED_TOKEN;
         return false;
     }

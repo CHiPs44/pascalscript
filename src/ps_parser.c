@@ -6,8 +6,8 @@
 
 #include <stdlib.h>
 
-#include "vm.h"
-#include "lexer.h"
+#include "ps_lexer.h"
+#include "ps_vm.h"
 
 bool parser_start(vm_t *vm)
 {
@@ -22,7 +22,7 @@ bool parser_start(vm_t *vm)
             program.size = 0;
             program.type = TYPE_STRING;
             strcpy(program.value.s, vm->current_token.value.s);
-            symbol_table_add(&vm->globals, &program);
+            symbol_table_add(&vm->symbols, &program);
         }
     }
 

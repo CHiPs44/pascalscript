@@ -4,12 +4,12 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "symbol_stack.h"
+#include "ps_symbol_stack.h"
 
 /**
  * @brief Initialize stack
@@ -54,14 +54,14 @@ void symbol_stack_dump(symbol_stack_t *stack, char *title)
             title,
             symbol_stack_size(stack),
             symbol_stack_full(stack) ? " (FULL)" : "");
-    fprintf(stderr, "#   name                            kind type value        value\n");
-    fprintf(stderr, "--- ------------------------------- ---- ---- ------------ --------\n");
+    fprintf(stderr, "|#  |name                           |kind|type|value       |value   |\n");
+    fprintf(stderr, "+---+-------------------------------+----+----+------------+--------+\n");
     for (int i = 0; i < SYMBOL_STACK_SIZE; i++)
     {
         if (stack->symbols[i] != NULL)
         {
             s = stack->symbols[i];
-            fprintf(stderr, "%03d %-*s %4d %4d %12d %08x\n",
+            fprintf(stderr, "|%03d|%-*s|%4d|%4d|%12d|%08x|\n",
                     i, MAX_SYMBOL_NAME, s->name, s->kind, s->type, s->value.i, s->value.i);
         }
     }

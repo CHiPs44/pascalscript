@@ -4,11 +4,11 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _SOURCE_H
-#define _SOURCE_H
+#ifndef _PS_SOURCE_H
+#define _PS_SOURCE_H
 
-#include "vm.h"
-#include "error.h"
+#include "ps_error.h"
+#include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -18,17 +18,17 @@ extern "C"
     /**
      * @brief Scan source for lines
      */
-    error_t source_scan_text(vm_t *vm);
+    bool source_scan_text(vm_t *vm);
 
     /**
      * @brief Load file into source buffer
      */
-    error_t source_load_file(vm_t *vm, char *filename);
+    bool source_load_file(vm_t *vm, char *filename);
 
     /**
      * @brief Set source code from memory buffer
      */
-    error_t source_set_text(vm_t *vm, char *source, size_t length);
+    bool source_set_text(vm_t *vm, char *source, size_t length);
 
     void source_list_text(vm_t *vm, int from_line, int to_line);
 
@@ -44,4 +44,4 @@ extern "C"
 }
 #endif
 
-#endif /* _SOURCE_H */
+#endif /* _PS_SOURCE_H */

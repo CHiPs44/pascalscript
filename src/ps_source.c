@@ -11,9 +11,9 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "vm.h"
-#include "error.h"
-#include "readall.h"
+#include "ps_error.h"
+#include "ps_vm.h"
+#include "ps_readall.h"
 
 bool source_scan_text(vm_t *vm)
 {
@@ -84,7 +84,7 @@ bool source_scan_text(vm_t *vm)
     vm->current_line = 0;
     vm->current_column = 0;
     vm->current_char = '\0';
-    vm->error = ERROR_NONE;
+    vm->error = ERROR_ZERO;
     return true;
 }
 
@@ -128,12 +128,12 @@ void source_list_text(vm_t *vm, int from_line, int to_line)
         from_line = to_line;
         to_line = temp;
     }
-    printf("1234 (1234) |12345687890123456878901234568789012345687890|\n");
+    printf("12345 (12345) |12345687890123456878901234568789012345687890|\n");
     for (int line = from_line; line < to_line; line += 1)
     {
         strncpy(buffer, vm->line_starts[line], vm->line_lengths[line]);
         buffer[vm->line_lengths[line]] = '\0';
-        printf("%04d (%04d) |%s|\n", line + 1, vm->line_lengths[line], buffer);
+        printf("%05d (%05d) |%40s|\n", line + 1, vm->line_lengths[line], buffer);
     }
 }
 

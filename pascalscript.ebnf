@@ -2,18 +2,13 @@
     PascalScript EBNF
 *)
 
-(*
-    ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
-    << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
-*)
-
+(* letters & digits *)
 uppercase_letter            =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' ;
 lowercase_letter            =   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' ;
 letter                      =   lowercase_letter | uppercase_letter ;
 digit                       =   '0' | '1' | '2' | '3' | '4' |'5' | '6' | '7' | '8' | '9' ;
 
-identifier                  =   letter | '_' , [ letter | digit | '_' ]* ;
-
+(* numbers *)
 digit_sequence              =   digit , [ digit ]* ;
 unsigned_integer            =   digit_sequence ;
 sign                        =   '+' | '-' ;
@@ -22,38 +17,63 @@ unsigned_real               =   digit_sequence [ '.' digit_sequence ] [ scale_fa
 unsigned_number             =   unsigned_real | unsigned_integer ;
 signed_number               =   sign unsigned_number ;
 
-label                       =   'LABEL' , digit_sequence | identifier ;
-
 character_string            =   quoted_string | control_string ;
 quoted_string               =   "'" , [ string_character ]* , "'" ;
 string_character            =   "''" | ? Any character except ' or CR ? ;
 control_string              =   '#' , unsigned_integer ;
 
+identifier                  =   letter | '_' , [ letter | digit | '_' ]* ;
 identifier_list             =   identifier , [ ',' identifier ]* ;
-type_declaration            =   identifier = type hint_directives ;
-type                        =   simple_type | string_type | structured_type | pointer_type | 
-                                procedural_type | generic_type | specialized_type | type_alias ;
-simple_type                 =   ordinal_type | real_type ;
-real_type                   =   'REAL' ;
+
+label                       =   digit_sequence | identifier ;
+label_list                  =   label , [ ',' , label ]* ;
+label_declaration           =   'LABEL' , digit_sequence | identifier ;
+
+type_declaration            =   identifier , '=' , type ;
+type                        =   simple_type | string_type ;
+simple_type                 =   ordinal_type | real_type | boolean_type ;
 ordinal_type                =   'INTEGER' ;
+real_type                   =   'REAL' ;
 boolean_type                =   'BOOLEAN' ;
-enumerated_type             =   '(' , identifier_list , ')' ;
-string_type                 =   'STRING' ;
+string_type                 =   'STRING' , [ '[' unsigned_integer ']' ] ;
 
 program_instruction         =   'PROGRAM' , identifier ;
 constant_declaration        =   identifier , '=' , expression ;
 const_block                 =   'CONST' , constant_declaration , ';' , [ constant_declaration , ';' ]* ;
 var_block                   =   'VAR' , variable_declaration , ';' , [ variable_declaration , ';' ]* ;
 
-pascal_program              =   program_instruction , ';' , [ const_block ] , instruction_block , '.' ;
+pascal_program              =   program_instruction , ';' , 
+                                [ const_block ] , 
+                                instruction_block , '.' ;
+
 instruction_block           =   'BEGIN' , [ instruction ]* , 'END' ;
 instruction                 =   assignment_instruction | procedure_call_instruction ;
+
 assignment_instruction      =   left_value , ':=' , right_value , ';' ;
 left_value                  =   identifier ;
 right_value                 =   expression ;
-procedure_call_instruction  =   identifier , [ '(' , parameters_list , ')' ] , ';' ;
+
+procedure_call_instruction  =   identifier | 'WRITE' | 'WRITELN' , [ '(' , parameters_list , ')' ] , ';' ;
 parameters_list             =   parameter , [ ',' , parameter ]* ;
 parameter                   =   expression ;
+
+addition_operator           =   '+' | '-' | 'or' | 'xor' ;
+multiplication_operator     =   '*' | '/' | 'div' | 'mod' | 'and' | 'shl' | 'shr' ;
+relational_operator         =   '<' | '<=' | '>' | '>=' | '=' | '<>' ;
+
+expression                  =   simple_expression , { relational_operator , simple_expression } ;
+simple_expression           =   term , { addition_operator , term } ;
+term                        =   factor , { multiplication_operator , factor } ;
+factor                      =   expression 
+                            |   variable_reference 
+                            |   function_call 
+                            |   unsigned_constant 
+                            |   'NOT' , factor 
+                            |   sign , factor ;
+
+unsigned_constant           =   unsigned_number | character_string | constant_identifier ;
+
+
 
 
 ```

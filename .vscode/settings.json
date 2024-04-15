@@ -1,24 +1,6 @@
 {
     "files.associations": {
-        "errno.h": "c",
-        "error.h": "c",
-        "err.h": "c",
-        "pascalscript.tab.h": "c",
-        "typeinfo": "c",
-        "algorithm": "c",
-        "stdbool.h": "c",
-        "symbol_table.h": "c",
-        "stdlib.h": "c",
-        "symbol_stack.h": "c",
-        "symbol.h": "c",
-        "vm.h": "c",
-        "limits.h": "c",
-        "string.h": "c",
-        "lexer.h": "c",
-        "pascalscript.h": "c",
-        "stdint.h": "c",
-        "source.h": "c",
-        "system_error": "c",
-        "token.h": "c"
+        "ps_error.h": "c",
+        "ps_symbol.h": "c"
     }
 }

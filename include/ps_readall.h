@@ -4,8 +4,8 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _READALL_H
-#define _READALL_H
+#ifndef _PS_READALL_H
+#define _PS_READALL_H
 
 #include <stdio.h>
 
@@ -31,4 +31,4 @@ int readall(FILE *in, char **dataptr, size_t *sizeptr);
 }
 #endif
 
-#endif /* _READALL_H */
+#endif /* _PS_READALL_H */

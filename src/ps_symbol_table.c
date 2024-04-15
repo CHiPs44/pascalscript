@@ -4,46 +4,51 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "symbol.h"
-#include "symbol_table.h"
+#include "ps_symbol.h"
+#include "ps_symbol_table.h"
 
 /**
  * @brief Initialize symbol table:
  *          - reset count
- *          - mark all symbols as unknown
- * 
- * @param table 
+ *          - mark all symbols as free
+ *
+ * @param table
  */
 void symbol_table_init(symbol_table_t *table)
 {
     table->count = 0;
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
-        table->symbols[i].kind = KIND_UNKNOWN;
+        table->symbols[i].kind = KIND_FREE;
     }
 }
 
 void symbol_table_dump(symbol_table_t *table, char *title)
 {
-    symbol_t *s;
+    symbol_t *symbol;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
-    fprintf(stderr, "#   name                            kind type value (dec)  value (hex)\n");
-    fprintf(stderr, "--- ------------------------------- ---- ---- ------------ -----------\n");
+    fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Type    ┃Value                          ┃\n");
+    fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
-        if (table->symbols[i].kind != KIND_UNKNOWN)
+        if (table->symbols[i].kind != KIND_FREE)
         {
-            s = &table->symbols[i];
-            fprintf(stderr, "%03d %-*s %4d %4d %12d 0x%08x\n",
-                    i, MAX_SYMBOL_NAME, s->name, s->kind, s->type, s->value.i, s->value.i);
+            symbol = &table->symbols[i];
+            char *kind_name = symbol_get_kind_name(symbol->kind);
+            char *type_name = symbol_get_type_name(symbol->type);
+            char *value = symbol_get_value(symbol);
+            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-*s┃\n",
+                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, type_name, MAX_SYMBOL_NAME, value);
         }
     }
-}
+    fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+ }
 
 /**
  * @brief Search symbol
@@ -105,7 +110,7 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     }
     // Find first free location
     index = 0;
-    while (table->symbols[index].kind != KIND_UNKNOWN)
+    while (table->symbols[index].kind != KIND_FREE)
     {
         index += 1;
     }
@@ -140,7 +145,7 @@ int symbol_table_delete(symbol_table_t *table, char *name)
     int index = symbol_table_find(table, name);
     if (index >= 0)
     {
-        table->symbols[index].kind = KIND_UNKNOWN;
+        table->symbols[index].kind = KIND_FREE;
         table->count -= 1;
     }
     return index;
@@ -167,8 +172,8 @@ int symbol_table_free(symbol_table_t *table, char *name)
  * @brief Garbage collect:
  *          change state of free symbols to unknown
  *          update table count
- * 
- * @param Table 
+ *
+ * @param Table
  * @return Count of garbage collected symbols
  */
 int symbol_table_gc(symbol_table_t *table)
@@ -178,7 +183,7 @@ int symbol_table_gc(symbol_table_t *table)
     {
         if (table->symbols[i].kind == KIND_FREE)
         {
-            table->symbols[i].kind = KIND_UNKNOWN;
+            table->symbols[i].kind = KIND_FREE;
             table->count -= 1;
             count += 1;
         }

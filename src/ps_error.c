@@ -5,23 +5,33 @@
 */
 
 #include <stdio.h>
-#include "error.h"
+
+#include "ps_error.h"
 
 static char error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
 
 char *error_get_message(error_t code)
 {
-    // char *from = error_is_from_lexer(code)     ? "LEXER"
-    //              : error_is_from_parser(code)  ? "PARSER"
-    //              : error_is_from_runtime(code) ? "RUNTIME"
-    //                                            : "???";
     switch (code)
     {
-    case ERROR_NONE:
+    /*
+     * GENERAL ERRORS
+     */
+    case ERROR_ZERO:
         return "None";
+    case ERROR_OPENING_FILE:
+        return "Opening file";
+    case ERROR_READING_FILE:
+        return "Reading file";
+    case ERROR_OUT_OF_MEMORY:
+        return "Out of memory";
+    case ERROR_NOT_IMPLEMENTED:
+        return "Not implemented";
     /*
      * LEXER ERRORS
      */
+    case LEXER_ERROR_NONE:
+        return "None";
     case LEXER_ERROR_UNEXPECTED_CHARACTER:
         return "Unexpected character";
     case LEXER_ERROR_UNEXPECTED_EOF:
@@ -41,6 +51,8 @@ char *error_get_message(error_t code)
     /*
      * PARSER ERRORS
      */
+    case PARSER_ERROR_NONE:
+        return "None";
     case PARSER_ERROR_SYNTAX:
         return "Syntax";
     case PARSER_ERROR_UNEXPECTED:
@@ -52,12 +64,16 @@ char *error_get_message(error_t code)
     /*
      * RUNTIME ERRORS
      */
+    case RUNTIME_ERROR_NONE:
+        return "None";
     case RUNTIME_ERROR_STACK_EMPTY:
         return "Stack empty";
     case RUNTIME_ERROR_STACK_OVERFLOW:
         return "Stack overflow";
-    case RUNTIME_ERROR_GLOBAL_TABLE_FULL:
+    case RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW:
         return "Global table full";
+    case RUNTIME_ERROR_GLOBAL_TABLE_NOT_FOUND:
+        return "Symbol not foun in global table";
     case RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
         return "Unknown unary operator";
     case RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR:
@@ -68,6 +84,16 @@ char *error_get_message(error_t code)
         return "Variable expected";
     case RUNTIME_ERROR_EXPECTED_NUMBER:
         return "Number expected";
+    case RUNTIME_ERROR_EXPECTED_INTEGER:
+        return "Integer expected";
+    case RUNTIME_ERROR_EXPECTED_REAL:
+        return "Real expected";
+    case RUNTIME_ERROR_EXPECTED_BOOLEAN:
+        return "Boolean expected";
+    case RUNTIME_ERROR_EXPECTED_CHAR:
+        return "Char expected";
+    case RUNTIME_ERROR_EXPECTED_STRING:
+        return "String expected";
     case RUNTIME_ERROR_TYPE_MISMATCH:
         return "Type mismatch";
     case RUNTIME_ERROR_DIVISION_BY_ZERO:

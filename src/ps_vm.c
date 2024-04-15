@@ -4,21 +4,23 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
-#include "pascalscript.h"
-#include "error.h"
-#include "symbol.h"
-#include "vm.h"
+#include "ps_config.h"
+#include "ps_error.h"
+#include "ps_symbol.h"
+#include "ps_vm.h"
 
 symbol_t default_globals[] = {
-    {"__PS_VERSION__"   , KIND_CONSTANT, TYPE_INTEGER           , sizeof(int    ), {0}},
-    {"MAXINT"           , KIND_CONSTANT, TYPE_INTEGER           , sizeof(int    ), {2147483647L}},
-    {"MAXUINT"          , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER  , sizeof(int    ), {0xffffffff}},
-    {"PI"               , KIND_CONSTANT, TYPE_REAL              , sizeof(double ), {3.141592653589793}},
+    // clang-format off
+    {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_UNSIGNED_INTEGER), {.i=0}},
+    {"MAXINT"        , KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
+    {"MAXUINT"       , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER, sizeof(PS_UNSIGNED_INTEGER), {.u=0xffffffff}},
+    {"PI"            , KIND_CONSTANT, TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
+    // clang-format on
 };
 
 /**
@@ -36,14 +38,14 @@ void vm_init(vm_t *vm)
     vm->current_column = 0;
     vm->current_char = '\0';
     // Symbol table
-    symbol_table_init(&vm->globals);
+    symbol_table_init(&vm->symbols);
     default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);
     for (int i = 0; i < sizeof(default_globals) / sizeof(default_globals[0]); i += 1)
     {
-        symbol_table_add(&vm->globals, &default_globals[i]);
+        symbol_table_add(&vm->symbols, &default_globals[i]);
     }
-    symbol_table_add(&vm->globals, &default_globals[0]);
-    symbol_table_add(&vm->globals, &default_globals[1]);
+    symbol_table_add(&vm->symbols, &default_globals[0]);
+    symbol_table_add(&vm->symbols, &default_globals[1]);
     // Stack
     symbol_stack_init(&vm->stack);
 }
@@ -57,7 +59,7 @@ void vm_init(vm_t *vm)
  */
 symbol_t *vm_global_get(vm_t *vm, char *name)
 {
-    return symbol_table_get(&vm->globals, name);
+    return symbol_table_get(&vm->symbols, name);
 }
 
 /**
@@ -69,7 +71,7 @@ symbol_t *vm_global_get(vm_t *vm, char *name)
  */
 int vm_global_add(vm_t *vm, symbol_t *symbol)
 {
-    return symbol_table_add(&vm->globals, symbol);
+    return symbol_table_add(&vm->symbols, symbol);
 }
 
 /**
@@ -81,7 +83,7 @@ int vm_global_add(vm_t *vm, symbol_t *symbol)
  */
 int vm_global_delete(vm_t *vm, char *name)
 {
-    return symbol_table_delete(&vm->globals, name);
+    return symbol_table_delete(&vm->symbols, name);
 }
 
 int vm_stack_push(vm_t *vm, symbol_t *symbol)
@@ -102,8 +104,8 @@ symbol_t *vm_auto_add_int(vm_t *vm, int value)
     symbol.type = TYPE_INTEGER;
     symbol.size = sizeof(int);
     symbol.value.i = value;
-    int index = symbol_table_add(&vm->globals, &symbol);
-    return index >= 0 ? &vm->globals.symbols[index] : NULL;
+    int index = symbol_table_add(&vm->symbols, &symbol);
+    return index >= 0 ? &vm->symbols.symbols[index] : NULL;
 }
 
 /**
@@ -115,7 +117,7 @@ symbol_t *vm_auto_add_int(vm_t *vm, int value)
  */
 int vm_auto_free(vm_t *vm, char *name)
 {
-    return symbol_table_free(&vm->globals, name);
+    return symbol_table_free(&vm->symbols, name);
 }
 
 /**
@@ -126,7 +128,7 @@ int vm_auto_free(vm_t *vm, char *name)
  */
 int vm_auto_gc(vm_t *vm)
 {
-    int count = symbol_table_gc(&vm->globals);
+    int count = symbol_table_gc(&vm->symbols);
     fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     return count;
 }
@@ -155,7 +157,7 @@ error_t vm_exec_assign(vm_t *vm)
         return RUNTIME_ERROR_TYPE_MISMATCH;
     variable->value = value->value;
     fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
-    return ERROR_NONE;
+    return ERROR_ZERO;
 }
 
 /* EOF */

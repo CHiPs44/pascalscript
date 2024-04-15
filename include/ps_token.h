@@ -4,10 +4,10 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _TOKEN_H
-#define _TOKEN_H
+#ifndef _PS_TOKEN_H
+#define _PS_TOKEN_H
 
-#include "lexer.h"
+#include "ps_config.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -18,23 +18,23 @@ extern "C"
 #define MAX_IDENTIFIER 31
 #endif
 
-/*
-    -file       -packed     -record -nil
-    -set -with
-    -absolute   -asm    -inline 
-    -operator 
-    -reintroduce    
-    -unit           -interface  -implementation -uses
-    -constructor    -destructor     -inherited  -object -self
-    
-    +and        +array      +begin      +case       +const       
-    +div        +do         +downto     +else       +end
-    +for        +function   +goto       +if         +in
-    +label      +mod        +not        +of         +or
-    +procedure  +program    +repeat     +shl        +shr       
-    +string     +then       +to         +type       +until
-    +var        +while      +xor
-*/
+    /*
+        -file       -packed     -record -nil
+        -set -with
+        -absolute   -asm    -inline
+        -operator
+        -reintroduce
+        -unit           -interface  -implementation -uses
+        -constructor    -destructor     -inherited  -object -self
+
+        +and        +array      +begin      +case       +const
+        +div        +do         +downto     +else       +end
+        +for        +function   +goto       +if         +in
+        +label      +mod        +not        +of         +or
+        +procedure  +program    +repeat     +shl        +shr
+        +string     +then       +to         +type       +until
+        +var        +while      +xor
+    */
 
     typedef enum _token_type_t
     {
@@ -154,4 +154,4 @@ extern "C"
 }
 #endif
 
-#endif /* _TOKEN_H */
+#endif /* _PS_TOKEN_H */

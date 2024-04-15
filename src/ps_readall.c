@@ -4,13 +4,13 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-// See https://stackoverflow.com/questions/14002954/c-programming-how-to-read-the-whole-file-contents-into-a-buffer
+// From https://stackoverflow.com/questions/14002954/c-programming-how-to-read-the-whole-file-contents-into-a-buffer
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "readall.h"
+#include "ps_readall.h"
 
 /* This function returns one of the READALL_ constants above.
    If the return value is zero == READALL_OK, then:
