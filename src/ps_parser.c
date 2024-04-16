@@ -14,11 +14,11 @@ bool parser_start(vm_t *vm)
 {
     symbol_t program;
 
-    if (!lexer_expect_token_type(vm, TOKEN_PROGRAM))
+    if (!parser_expect_token_type(vm, TOKEN_PROGRAM))
     {
         return false;
     }
-    if (!lexer_expect_token_type(vm, TOKEN_IDENTIFIER))
+    if (!parser_expect_token_type(vm, TOKEN_IDENTIFIER))
     {
         return false;
     }

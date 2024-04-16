@@ -12,7 +12,7 @@ SOURCES  = \
 	src/ps_symbol_table.c src/ps_token.c src/ps_vm.c
 INCLUDES = \
 	include/ps_config.h include/ps_error.h include/ps_lexer.h include/ps_operator.h \
-	include/ps_parser.h include/ps_readall.h include/ps_source.h include/ps_symbol.h include/ps_symbol_stack.h \
+	include/ps_parser.h include/ps_readall.h include/ps_buffer.h include/ps_symbol.h include/ps_symbol_stack.h \
 	include/ps_symbol_table.h include/ps_token.h include/ps_vm.h
 
 all: $(PROJECT)

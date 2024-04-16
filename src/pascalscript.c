@@ -9,7 +9,7 @@
 
 #include "ps_config.h"
 #include "ps_lexer.h"
-#include "ps_source.h"
+#include "ps_buffer.h"
 #include "ps_parser.h"
 #include "ps_symbol_table.h"
 #include "ps_symbol.h"
@@ -48,15 +48,15 @@ int main(int argc, char *argv[])
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
-  if (!source_set_text(vm, minimal, strlen(minimal)))
-  // if (!source_set_text(vm, hello, strlen(hello)))
-  // if (!source_load_file(vm,"examples/00-hello.pas"))
+  if (!buffer_set_text(vm, minimal, strlen(minimal)))
+  // if (!buffer_set_text(vm, hello, strlen(hello)))
+  // if (!buffer_load_file(vm,"examples/00-hello.pas"))
   {
     printf("Not loaded!\n");
     return 1;
   }
   printf("Loaded!\n");
-  source_list_text(vm, 0, vm->line_count);
+  buffer_list_text(vm, 0, vm->parser.lexer.buffer.line_count);
   printf("Listed!\n");
   parser_start(vm);
   return 0;

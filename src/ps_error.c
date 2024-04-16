@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "ps_error.h"
 
@@ -14,22 +15,19 @@ char *error_get_message(error_t code)
 {
     switch (code)
     {
-    /*
-     * GENERAL ERRORS
-     */
+    /* GENERAL ERRORS */
     case ERROR_ZERO:
         return "None";
-    case ERROR_OPENING_FILE:
-        return "Opening file";
-    case ERROR_READING_FILE:
-        return "Reading file";
-    case ERROR_OUT_OF_MEMORY:
-        return "Out of memory";
     case ERROR_NOT_IMPLEMENTED:
         return "Not implemented";
-    /*
-     * LEXER ERRORS
-     */
+    /* BUFFER ERRORS */
+    case BUFFER_ERROR_OPENING_FILE:
+        return "Opening file";
+    case BUFFER_ERROR_READING_FILE:
+        return "Reading file";
+    case BUFFER_ERROR_OUT_OF_MEMORY:
+        return "Out of memory";
+    /* LEXER ERRORS */
     case LEXER_ERROR_NONE:
         return "None";
     case LEXER_ERROR_UNEXPECTED_CHARACTER:
@@ -48,9 +46,7 @@ char *error_get_message(error_t code)
         return "Overflow";
     case LEXER_ERROR_STRING_TOO_LONG:
         return "String too long";
-    /*
-     * PARSER ERRORS
-     */
+    /* PARSER ERRORS */
     case PARSER_ERROR_NONE:
         return "None";
     case PARSER_ERROR_SYNTAX:
@@ -61,9 +57,7 @@ char *error_get_message(error_t code)
         return "Unknown identifier";
     case PARSER_ERROR_CONSTANT_VALUE:
         return "Constant value";
-    /*
-     * RUNTIME ERRORS
-     */
+    /* RUNTIME ERRORS */
     case RUNTIME_ERROR_NONE:
         return "None";
     case RUNTIME_ERROR_STACK_EMPTY:
@@ -99,9 +93,20 @@ char *error_get_message(error_t code)
     case RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
     default:
-        snprintf(error_unknown, 31, "Unknown error code %d", code);
+        snprintf(error_unknown, 31, "Unknown error %d", code);
         return error_unknown;
     }
+}
+
+void error_print_message(error_t code, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char *message = error_get_message(code);
+    fprintf(stderr, "ERROR: %s ", message);
+    vfprintf(stderr, format, args);
+    fprintf(stderr, "\n");
+    va_end(args);
 }
 
 /* EOF */

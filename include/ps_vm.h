@@ -17,28 +17,28 @@ extern "C"
 {
 #endif
 
-#ifndef MAX_LINES
-#define MAX_LINES 65536
-#endif
-
-#ifndef MAX_COLUMNS
-#define MAX_COLUMNS 256
-#endif
-
-    typedef struct _vm_t
+    typedef struct _lexer_t
     {
-        error_t error;
-        char *source;
-        size_t length;
-        unsigned int line_count;
-        char **line_starts;
-        uint16_t *line_lengths;
+        buffer_t buffer;
         int current_line;
         int current_column;
         char current_char;
+        error_t error;
+    } lexer_t;
+
+    typedef struct _parser_t
+    {
+        lexer_t lexer;
         token_t current_token;
+        error_t error;
+    } parser_t;
+
+    typedef struct _vm_t
+    {
+        parser_t parser;
         symbol_table_t symbols;
         symbol_stack_t stack;
+        error_t error;
     } vm_t;
 
     /**@brief Initialize VM: reset source, global table & stack */

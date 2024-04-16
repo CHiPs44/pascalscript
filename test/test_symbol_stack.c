@@ -6,12 +6,12 @@
 
 #include <stdio.h>
 
-#include "../src/symbol.h"
+#include "../include/ps_symbol.h"
 // #define SYMBOL_STACK_SIZE 3
-#include "../src/symbol_stack.h"
+#include "../include/ps_symbol_stack.h"
 
-#include "../src/symbol_stack.c"
-#include "../src/symbol.c"
+#include "../src/ps_symbol_stack.c"
+#include "../src/ps_symbol.c"
 
 symbol_stack_t stack;
 symbol_t constant1 = {"CONSTANT1", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x0000DEAD};

@@ -12,14 +12,16 @@
 #include "ps_config.h"
 #include "ps_error.h"
 #include "ps_token.h"
-#include "ps_vm.h"
+#include "ps_parser.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    bool parser_start(vm_t *vm);
+    bool parser_expect_token_type(parser_t *parser, token_type_t token_type);
+    bool parser_expect_token_types(parser_t *parser, size_t token_type_count, token_type_t token_type[]);
+    bool parser_start(parser_t *parser);
 
 #ifdef __cplusplus
 }

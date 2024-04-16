@@ -13,7 +13,7 @@
 
 #include "ps_error.h"
 #include "ps_lexer.h"
-#include "ps_source.h"
+#include "ps_buffer.h"
 #include "ps_symbol.h"
 
 void lexer_dump_token(token_t *token)
@@ -53,14 +53,59 @@ void lexer_dump_token(token_t *token)
     fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, value);
 }
 
+void lexer_reset_cursor(lexer_t *lexer)
+{
+    lexer->current_line = 0;
+    lexer->current_column = 0;
+    lexer->current_char = '\0';
+}
+
+char lexer_peek_char(lexer_t *lexer)
+{
+    return lexer->current_char;
+}
+
+char buffer_read_next_char(lexer_t *lexer)
+{
+    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
+    {
+        if (lexer->current_column >= 0 &&
+            lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
+        {
+            lexer->current_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
+            // Advance to next char
+            lexer->current_column += 1;
+            if (lexer->current_column > lexer->buffer.line_lengths[lexer->current_line])
+            {
+                lexer->current_line += 1;
+                lexer->current_column = 0;
+            }
+        }
+    }
+    return lexer->current_char;
+}
+
+char buffer_peek_next_char(lexer_t *lexer)
+{
+    char next_char = '\0';
+    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
+    {
+        if (lexer->current_column >= 0 && lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
+        {
+            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
+        }
+    }
+    return next_char;
+}
+
 error_t lexer_skip_whitespace(vm_t *vm, bool *changed)
 {
     char c;
-    c = source_peek_char(vm);
+    c = lexer_peek_char(vm);
     *changed = false;
     while (isspace(c))
     {
-        c = source_read_next_char(vm);
+        c = buffer_read_next_char(vm);
         *changed = true;
     }
     return LEXER_ERROR_NONE;
@@ -69,13 +114,13 @@ error_t lexer_skip_whitespace(vm_t *vm, bool *changed)
 error_t lexer_skip_comment1(vm_t *vm, bool *changed)
 {
     char c;
-    c = source_peek_char(vm);
+    c = lexer_peek_char(vm);
     *changed = false;
     if (c == '{')
     {
         while (c != '}')
         {
-            c = source_read_next_char(vm);
+            c = buffer_read_next_char(vm);
             *changed = true;
             if (c == '\0')
             {
@@ -89,20 +134,20 @@ error_t lexer_skip_comment1(vm_t *vm, bool *changed)
 error_t lexer_skip_comment2(vm_t *vm, bool *changed)
 {
     char c1, c2;
-    c1 = source_peek_char(vm);
-    c2 = source_peek_next_char(vm);
+    c1 = lexer_peek_char(vm);
+    c2 = buffer_peek_next_char(vm);
     *changed = false;
     if (c1 == '(' && c2 == '*')
     {
         while (c1 != '*' && c2 != ')')
         {
-            c1 = source_read_next_char(vm);
+            c1 = buffer_read_next_char(vm);
             *changed = true;
             if (c1 == '\0')
             {
                 return LEXER_ERROR_UNEXPECTED_EOF;
             }
-            c2 = source_peek_next_char(vm);
+            c2 = buffer_peek_next_char(vm);
         }
     }
     return LEXER_ERROR_NONE;
@@ -129,11 +174,11 @@ error_t lexer_skip_whitespace_and_comments(vm_t *vm)
 
 bool lexer_read_identifier_or_keyword(vm_t *vm)
 {
-    char buffer[MAX_COLUMNS];
+    char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
 
-    c = source_peek_char(vm);
+    c = lexer_peek_char(vm);
     if (isalpha(c))
     {
         do
@@ -145,7 +190,7 @@ bool lexer_read_identifier_or_keyword(vm_t *vm)
                 vm->error = LEXER_ERROR_IDENTIFIER_TOO_LONG;
                 return false;
             }
-            c = source_read_next_char(vm);
+            c = buffer_read_next_char(vm);
         } while (isalnum(vm));
         vm->current_token.type = TOKEN_IDENTIFIER;
         strcpy(vm->current_token.value.identifier, buffer);
@@ -158,11 +203,11 @@ bool lexer_read_identifier_or_keyword(vm_t *vm)
 
 bool lexer_read_number(vm_t *vm)
 {
-    char buffer[MAX_COLUMNS];
+    char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
 
-    c = source_peek_char(vm);
+    c = lexer_peek_char(vm);
     if (isdigit(c))
     {
         do
@@ -174,7 +219,7 @@ bool lexer_read_number(vm_t *vm)
                 vm->error = LEXER_ERROR_OVERFLOW;
                 return false;
             }
-            c = source_read_next_char(vm);
+            c = buffer_read_next_char(vm);
         } while (isdigit(vm));
         vm->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
@@ -186,7 +231,7 @@ bool lexer_read_number(vm_t *vm)
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
-bool lexer_expect_token_type(vm_t *vm, token_type_t token_type)
+bool parser_expect_token_type(vm_t *vm, token_type_t token_type)
 {
     if (vm->current_token.type != token_type)
     {
