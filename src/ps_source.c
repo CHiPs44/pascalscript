@@ -128,7 +128,7 @@ void source_list_text(vm_t *vm, int from_line, int to_line)
         from_line = to_line;
         to_line = temp;
     }
-    printf("12345 (12345) |12345687890123456878901234568789012345687890|\n");
+    printf("12345 (12345) |1234567890123456789012345678901234567890|\n");
     for (int line = from_line; line < to_line; line += 1)
     {
         strncpy(buffer, vm->line_starts[line], vm->line_lengths[line]);

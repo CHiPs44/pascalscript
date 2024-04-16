@@ -14,10 +14,13 @@
 #include "ps_symbol.h"
 #include "ps_vm.h"
 
+// #define JOIN_VERSION(TEXT, MAJOR, DOT1, MINOR, DOT2, PATCH, DOT3, INDEX) TEXT ## MAJOR ## DOT1 ## MINOR ## DOT2 ## PATCH ## DOT3 ## INDEX
+// #define __PS_VERTEXT__ JOIN_VERSION("PascalScript v", PS_VERSION_MAJOR, ".", PS_VERSION_MINOR, ".", PS_VERSION_PATCH, ".", PS_VERSION_INDEX)
+
 symbol_t default_globals[] = {
     // clang-format off
     {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_UNSIGNED_INTEGER), {.i=0}},
-    {"__PS_VERSTR__" , KIND_CONSTANT, TYPE_STRING          , PS_STRING_MAX +1           , {.s="PascalScript"}},
+    // {"__PS_VERTEXT__", KIND_CONSTANT, TYPE_STRING          , PS_STRING_MAX +1           , {.s=__PS_VERTEXT__}},
     {"MAXINT"        , KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
     {"MAXUINT"       , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER, sizeof(PS_UNSIGNED_INTEGER), {.u=0xffffffff}},
     {"PI"            , KIND_CONSTANT, TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},

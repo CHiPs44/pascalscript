@@ -5,6 +5,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "ps_lexer.h"
 #include "ps_vm.h"
@@ -13,18 +14,20 @@ bool parser_start(vm_t *vm)
 {
     symbol_t program;
 
-    if (lexer_expect_token_type(vm, TOKEN_PROGRAM))
+    if (!lexer_expect_token_type(vm, TOKEN_PROGRAM))
     {
-        if (lexer_expect_token_type(vm, TOKEN_IDENTIFIER))
-        {
-            program.kind = KIND_CONSTANT;
-            strcpy(program.name, "PROGRAM");
-            program.size = 0;
-            program.type = TYPE_STRING;
-            strcpy(program.value.s, vm->current_token.value.s);
-            symbol_table_add(&vm->symbols, &program);
-        }
+        return false;
     }
+    if (!lexer_expect_token_type(vm, TOKEN_IDENTIFIER))
+    {
+        return false;
+    }
+    program.kind = KIND_CONSTANT;
+    strcpy(program.name, "PROGRAM");
+    program.size = 0;
+    program.type = TYPE_STRING;
+    strcpy(program.value.s, vm->current_token.value.s);
+    symbol_table_add(&vm->symbols, &program);
 
-    return false;
+    return true;
 }

@@ -3,6 +3,7 @@
         "ps_error.h": "c",
         "ps_symbol.h": "c",
         "string.h": "c",
-        "ps_config.h": "c"
+        "ps_config.h": "c",
+        "ps_lexer.h": "c"
     }
 }

@@ -10,6 +10,7 @@
 #include "ps_config.h"
 #include "ps_lexer.h"
 #include "ps_source.h"
+#include "ps_parser.h"
 #include "ps_symbol_table.h"
 #include "ps_symbol.h"
 #include "ps_vm.h"
@@ -19,7 +20,6 @@ vm_t *vm = &_vm;
 
 char *minimal =
     "PROGRAM Minimal;\n"
-    "{ comment with curly brackets }\n"
     "BeGiN\n"
     "End.\n";
 
@@ -58,49 +58,7 @@ int main(int argc, char *argv[])
   printf("Loaded!\n");
   source_list_text(vm, 0, vm->line_count);
   printf("Listed!\n");
-  symbol_t program;
-  do
-  {
-    lexer_read_identifier_or_keyword(vm);
-    if (vm->current_token.type != TOKEN_PROGRAM)
-    {
-      lexer_dump_token(&vm->current_token);
-      fprintf(stderr, "PROGRAM expected!");
-      return 1;
-    }
-    lexer_read_identifier_or_keyword(vm);
-    lexer_dump_token(&vm->current_token);
-    if (vm->current_token.type != TOKEN_IDENTIFIER)
-    {
-      fprintf(stderr, "IDENTIFIER expected!");
-      return 1;
-    }
-    program.kind = KIND_CONSTANT;
-    strcpy(program.name, "PROGRAM");
-    program.size = 0;
-    program.type = TYPE_STRING;
-    strcpy(program.value.s, vm->current_token.value.s);
-    symbol_table_add(&vm->symbols, &program);
-    symbol_table_dump(&vm->symbols, "Program");
-    lexer_read_identifier_or_keyword(vm);
-    if (vm->current_token.type != TOKEN_BEGIN)
-    {
-      fprintf(stderr, "BEGIN expected!");
-      return 1;
-    }
-    lexer_read_identifier_or_keyword(vm);
-    if (vm->current_token.type != TOKEN_END)
-    {
-      fprintf(stderr, "END expected!");
-      return 1;
-    }
-    // lexer_read_token(vm, &vm->current_token);
-    // if (vm->current_token.type != TOKEN_BEGIN)
-    // {
-    //   fprintf(stderr, ". expected!");
-    //   return 1;
-    // }
-  } while (false);
+  parser_start(vm);
   return 0;
 }
 
