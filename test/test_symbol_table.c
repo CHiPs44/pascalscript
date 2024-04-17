@@ -7,18 +7,18 @@
 #include <stdio.h>
 
 // #define SYMBOL_TABLE_SIZE 3
+#include "../include/ps_symbol.h"
 #include "../include/ps_symbol_table.h"
-#include "../src/ps_symbol_table.c"
 
 symbol_table_t table;
-symbol_t constant1 = {"CONSTANT1", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x0000DEAD};
-symbol_t variable2 = {"VARIABLE2", KIND_VARIABLE, TYPE_INTEGER, sizeof(int), 0x0000BEEF};
-symbol_t auto_var3 = {"AUTO_VAR3", KIND_AUTO, TYPE_INTEGER, sizeof(int), 0x12345678};
-symbol_t constant4 = {"CONSTANT4", KIND_CONSTANT, TYPE_INTEGER, sizeof(int), 0x12345678};
+symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000DEAD};
+symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000BEEF};
+symbol_t auto_var3 = {.name = "AUTO_VAR3", .kind = KIND_AUTO, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x12345678};
+symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x87654321};
 
 // Poor man's Makefile ;-)
-#include "../src/ps_symbol_table.c"
 #include "../src/ps_symbol.c"
+#include "../src/ps_symbol_table.c"
 
 int main(void)
 {
