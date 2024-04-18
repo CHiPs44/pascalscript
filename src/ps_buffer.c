@@ -48,18 +48,30 @@ bool buffer_scan_text(buffer_t *buffer)
     }
     // Allocate arrays for line starts and lengths
     if (buffer->line_starts != NULL)
+    {
         free(buffer->line_starts);
+        buffer->line_starts = NULL;
+    }
+    if (buffer->line_lengths != NULL)
+    {
+        free(buffer->line_lengths);
+        buffer->line_lengths = NULL;
+    }
+    if (buffer->line_count == 0)
+    {
+        buffer->error = BUFFER_ERROR_NONE;
+        return true;
+    }
     buffer->line_starts = calloc(buffer->line_count, sizeof(char *));
     if (buffer->line_starts == NULL)
     {
         buffer->error = BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
     }
-    if (buffer->line_lengths != NULL)
-        free(buffer->line_lengths);
-    buffer->line_lengths = calloc(buffer->line_count, sizeof(BUFFER_LINE_LENGTH));
+    buffer->line_lengths = calloc(buffer->line_count, sizeof(uint16_t));
     if (buffer->line_lengths == NULL)
     {
+        free(buffer->line_starts);
         buffer->error = BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
     }
@@ -77,6 +89,7 @@ bool buffer_scan_text(buffer_t *buffer)
                 buffer->error = LEXER_ERROR_BUFFER_OVERFLOW;
                 return false;
             }
+
             else
             {
                 buffer->line_starts[line] = start;
@@ -96,7 +109,6 @@ bool buffer_scan_text(buffer_t *buffer)
             break;
         }
     }
-    buffer->line_count = line;
     buffer->error = BUFFER_ERROR_NONE;
     return true;
 }
@@ -145,7 +157,7 @@ bool buffer_set_text(buffer_t *buffer, char *text, size_t length)
     return buffer_scan_text(buffer);
 }
 
-void buffer_list_text(buffer_t *buffer, int from_line, int to_line)
+void buffer_list_text(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
 {
     char line_[BUFFER_MAX_COLUMNS + 1];
 
@@ -161,13 +173,16 @@ void buffer_list_text(buffer_t *buffer, int from_line, int to_line)
         from_line = to_line;
         to_line = temp;
     }
-    printf("12345 (12345) |1234567890123456789012345678901234567890|\n");
+    printf("\n");
+    printf("              |         1         2         3         4         5         6         7         8|\n");
+    printf("12345 (12345) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
     for (int line = from_line; line < to_line; line += 1)
     {
-        strncpy(line_, buffer->line_starts[line], buffer->line_lengths[line]);
+        strncpy(line_, buffer->line_starts[line], BUFFER_MAX_COLUMNS);
         line_[buffer->line_lengths[line]] = '\0';
-        printf("%05d (%05d) |%-40s|\n", line + 1, buffer->line_lengths[line], line_);
+        printf("%05d (%05d) |%-80s|\n", line + 1, buffer->line_lengths[line], line_);
     }
+    printf("\n");
 }
 
 /* EOF */
