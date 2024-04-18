@@ -7,10 +7,13 @@
 #ifndef _PS_VM_H
 #define _PS_VM_H
 
+#include "ps_buffer.h"
 #include "ps_error.h"
-#include "ps_token.h"
-#include "ps_symbol_table.h"
+#include "ps_lexer.h"
+#include "ps_parser.h"
 #include "ps_symbol_stack.h"
+#include "ps_symbol_table.h"
+#include "ps_token.h"
 
 #ifdef __cplusplus
 extern "C"

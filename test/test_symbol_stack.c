@@ -10,8 +10,8 @@
 // #define SYMBOL_STACK_SIZE 3
 #include "../include/ps_symbol_stack.h"
 
-#include "../src/ps_symbol_stack.c"
 #include "../src/ps_symbol.c"
+#include "../src/ps_symbol_stack.c"
 
 symbol_stack_t stack;
 symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000DEAD};

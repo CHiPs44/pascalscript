@@ -21,7 +21,11 @@ void buffer_init(buffer_t *buffer)
     buffer->error = BUFFER_ERROR_NONE;
     buffer->length = 0;
     buffer->line_count = 0;
+    if (buffer->line_lengths != NULL)
+        free(buffer->line_lengths);
     buffer->line_lengths = NULL;
+    if (buffer->line_starts != NULL)
+        free(buffer->line_starts);
     buffer->line_starts = NULL;
     buffer->text = NULL;
 }

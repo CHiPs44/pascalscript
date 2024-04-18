@@ -6,14 +6,16 @@
 
 #include <stdio.h>
 
-#include "../src/vm.h"
+#include "../include/ps_symbol_table.h"
+#include "../include/ps_symbol_stack.h"
+#include "../include/ps_vm.h"
 
 vm_t _vm;
 vm_t *vm = &_vm;
 
-#include "../src/symbol_table.c"
-#include "../src/symbol_stack.c"
-#include "../src/vm.c"
+#include "../src/ps_symbol_table.c"
+#include "../src/ps_symbol_stack.c"
+#include "../src/ps_vm.c"
 
 int main(void)
 {

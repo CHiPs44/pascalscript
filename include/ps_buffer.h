@@ -7,10 +7,10 @@
 #ifndef _PS_BUFFER_H
 #define _PS_BUFFER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "ps_error.h"
-#include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -38,10 +38,9 @@ extern "C"
         size_t length;
         unsigned int line_count;
         char **line_starts;
-        uint16_t *line_lengths;
+        BUFFER_LINE_LENGTH *line_lengths;
     } buffer_t;
 
-    
     /**
      * @brief Init / reset buffer 
      */
