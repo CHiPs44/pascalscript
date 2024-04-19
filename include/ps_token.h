@@ -19,21 +19,23 @@ extern "C"
 #endif
 
     /*
-        -file       -packed     -record -nil
-        -set -with
-        -absolute   -asm    -inline
-        -operator
-        -reintroduce
-        -unit           -interface  -implementation -uses
-        -constructor    -destructor     -inherited  -object -self
+        -file           -packed         -record             -nil        -set        -with
+        -absolute       -asm            -inline             -operator   -reintroduce
+        -unit           -interface      -implementation     -uses
+        -constructor    -destructor     -inherited          -object     -self
 
-        +and        +array      +begin      +case       +const
-        +div        +do         +downto     +else       +end
-        +for        +function   +goto       +if         +in
-        +label      +mod        +not        +of         +or
-        +procedure  +program    +repeat     +shl        +shr
-        +string     +then       +to         +type       +until
-        +var        +while      +xor
+        program         begin           end
+        const           type            var
+        array           string
+        function        procedure
+
+        if              then            else
+        case            of
+        for             downto          to          do          in
+        repeat          until           while
+        goto            label
+        
+        div     mod     and     not     or      shl     shr     xor
     */
 
     typedef enum _token_type_t

@@ -61,7 +61,7 @@ extern "C"
 
     char buffer_reset_cursor(buffer_t *buffer);
 
-    char buffer_read_next_char(buffer_t *buffer);
+    char lexer_read_next_char(buffer_t *buffer);
 
     char buffer_peek_next_char(buffer_t *buffer);
 

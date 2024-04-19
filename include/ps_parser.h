@@ -19,6 +19,13 @@ extern "C"
 {
 #endif
 
+    typedef struct _parser_t
+    {
+        lexer_t lexer;
+        token_t current_token;
+        error_t error;
+    } parser_t;
+
     bool parser_expect_token_type(parser_t *parser, token_type_t token_type);
     bool parser_expect_token_types(parser_t *parser, size_t token_type_count, token_type_t token_type[]);
     bool parser_start(parser_t *parser);

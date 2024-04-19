@@ -20,22 +20,6 @@ extern "C"
 {
 #endif
 
-    typedef struct _lexer_t
-    {
-        buffer_t buffer;
-        int current_line;
-        int current_column;
-        char current_char;
-        error_t error;
-    } lexer_t;
-
-    typedef struct _parser_t
-    {
-        lexer_t lexer;
-        token_t current_token;
-        error_t error;
-    } parser_t;
-
     typedef struct _vm_t
     {
         parser_t parser;

@@ -20,9 +20,19 @@ extern "C"
 {
 #endif
 
+    typedef struct _lexer_t
+    {
+        buffer_t buffer;
+        int current_line;
+        int current_column;
+        char current_char;
+        error_t error;
+    } lexer_t;
+
     extern void lexer_dump_token(token_t *token);
 
     // error_t lexer_read_token(lexer_t *lexer);
+    error_t lexer_skip_whitespace_and_comments(lexer_t *lexer);
     bool lexer_read_identifier_or_keyword(lexer_t *lexer);
     bool lexer_read_number(lexer_t *lexer);
 
