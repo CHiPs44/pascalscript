@@ -35,6 +35,7 @@ extern "C"
     error_t lexer_skip_whitespace_and_comments(lexer_t *lexer);
     bool lexer_read_identifier_or_keyword(lexer_t *lexer);
     bool lexer_read_number(lexer_t *lexer);
+    
 
 #ifdef __cplusplus
 }
