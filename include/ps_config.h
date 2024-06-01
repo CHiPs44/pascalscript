@@ -32,8 +32,8 @@ extern "C"
 #define PS_INTEGER int32_t
 #endif
 
-#ifndef PS_UNSIGNED_INTEGER
-#define PS_UNSIGNED_INTEGER uint32_t
+#ifndef PS_UNSIGNED
+#define PS_UNSIGNED uint32_t
 #endif
 
 #ifndef PS_BOOLEAN
@@ -41,7 +41,8 @@ extern "C"
 #endif
 
 #ifndef PS_REAL
-#define PS_REAL double
+// #define PS_REAL double
+#define PS_REAL float
 #endif
 
 #ifndef PS_CHAR

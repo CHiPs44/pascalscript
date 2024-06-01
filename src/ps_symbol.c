@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "ps_symbol.h"
+#include "ps_value.h"
 
 /**
  * @brief Normalize symbol (=> UPPERCASE) in place (no string copy)
@@ -51,43 +52,7 @@ char *symbol_get_kind_name(kind_t kind)
     return kind_name;
 }
 
-char *symbol_get_type_name(type_t type)
-{
-    char *type_name;
-    switch (type)
-    {
-    case TYPE_NONE:
-        type_name = "NONE";
-        break;
-    case TYPE_INTEGER:
-        type_name = "INTEGER";
-        break;
-    case TYPE_UNSIGNED_INTEGER:
-        type_name = "UNSIGNED";
-        break;
-    case TYPE_BOOLEAN:
-        type_name = "BOOLEAN";
-        break;
-    case TYPE_REAL:
-        type_name = "REAL";
-        break;
-    case TYPE_CHAR:
-        type_name = "CHAR";
-        break;
-    case TYPE_STRING:
-        type_name = "STRING";
-        break;
-    case TYPE_POINTER:
-        type_name = "POINTER";
-        break;
-    default:
-        type_name = "?";
-        break;
-    }
-    return type_name;
-}
-
-char *symbol_get_scope_name(scope_t scope)
+char *symbol_get_scope_name(ps_scope_t scope)
 {
     static char scope_name[8 + 1];
     if (scope == PS_SCOPE_GLOBAL)
@@ -97,44 +62,15 @@ char *symbol_get_scope_name(scope_t scope)
     return scope_name;
 }
 
-char *symbol_get_value(symbol_t *symbol)
-{
-    static char value[256 + 1];
-    switch (symbol->type)
-    {
-    case TYPE_NONE:
-        snprintf(value, 256, "?");
-        break;
-    case TYPE_INTEGER:
-        snprintf(value, 256, "%d / %08x", symbol->value.i, symbol->value.i);
-        break;
-    case TYPE_UNSIGNED_INTEGER:
-        snprintf(value, 256, "%ud / %08x", symbol->value.u, symbol->value.u);
-        break;
-    case TYPE_REAL:
-        snprintf(value, 256, "%f", symbol->value.r);
-        break;
-    case TYPE_CHAR:
-        snprintf(value, 256, "%c / %02x", symbol->value.c, symbol->value.c);
-        break;
-    case TYPE_STRING:
-        snprintf(value, 256, "%s", symbol->value.s);
-        break;
-    default:
-        snprintf(value, 256, "? %d ?", symbol->type);
-        break;
-    }
-    return value;
-}
-
 void symbol_dump(symbol_t *symbol)
 {
     char *kind_name = symbol_get_kind_name(symbol->kind);
-    char *type_name = symbol_get_type_name(symbol->type);
-    char *value = symbol_get_value(symbol);
+    char *scope_name = symbol_get_scope_name(symbol->scope);
+    char *type_name = value_get_type_name(symbol->value.type);
+    char *buffer = value_get_value(&symbol->value);
     fprintf(stderr,
-            "SYMBOL: name=%s, type=%s, kind=%s, size=%ld, value=%s\n",
-            symbol->name, kind_name, type_name, symbol->size, value);
+            "SYMBOL: name=%s, kind=%s, scope=%s, type=%s, size=%ld, value=%s\n",
+            symbol->name, kind_name, scope_name, type_name, symbol->value.size, buffer);
 }
 
 /* EOF */

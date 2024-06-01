@@ -7,10 +7,10 @@
 #ifndef _PS_VM_H
 #define _PS_VM_H
 
-#include "ps_buffer.h"
+// #include "ps_buffer.h"
 #include "ps_error.h"
-#include "ps_lexer.h"
-#include "ps_parser.h"
+// #include "ps_lexer.h"
+// #include "ps_parser.h"
 #include "ps_symbol_stack.h"
 #include "ps_symbol_table.h"
 #include "ps_token.h"
@@ -22,33 +22,34 @@ extern "C"
 
     typedef enum
     {
-        OPCODE_NOP = 0x00,
-        OPCODE_JUMP,
-        OPCODE_CALL,
-        OPCODE_PUSH,
-        OPCODE_POP,
-        OPCODE_TEST,
-        OPCODE_SYS,
+        OP_NOP = 0x00,
+        OP_JUMP,
+        OP_CALL,
+        OP_RETURN,
+        OP_PUSH,
+        OP_POP,
+        OP_TEST,
+        OP_SYS,
         // Unary operators
-        OPCODE_NEG,
+        OP_NEG,
         // Binary operators
-        OPCODE_ADD,
-        OPCODE_SUB,
-        OPCODE_MUL,
-        OPCODE_DIV,
-        OPCODE_MOD,
+        OP_ADD,
+        OP_SUB,
+        OP_MUL,
+        OP_DIV,
+        OP_MOD,
         // Bit operators
-        OPCODE_BIT_NOT,
-        OPCODE_BIT_AND,
-        OPCODE_BIT_OR,
-        OPCODE_BIT_XOR,
-        OPCODE_BIT_SHL,
-        OPCODE_BIT_SHR,
+        OP_BIT_NOT,
+        OP_BIT_AND,
+        OP_BIT_OR,
+        OP_BIT_XOR,
+        OP_BIT_SHL,
+        OP_BIT_SHR,
         // Boolean operators
-        OPCODE_BOOL_NOT,
-        OPCODE_BOOL_AND,
-        OPCODE_BOOL_OR,
-        OPCODE_BOOL_XOR,
+        OP_BOOL_NOT,
+        OP_BOOL_AND,
+        OP_BOOL_OR,
+        OP_BOOL_XOR,
     } ps_vm_opcode;
 
     typedef enum {
@@ -58,15 +59,21 @@ extern "C"
         SYS_CLOSE_FILE,
     } ps_vm_sys_command;
 
+    typedef struct _vm_instruction {
+        uint8_t opcode:8;
+        uint8_t param1_type:3;
+        uint8_t result_type:3;
+    } vm_instruction;
+
     typedef enum {
-        OPCODE_FLAG_ZERO,
-        // OPCODE_FLAG_,
+        OP_FLAG_ZERO,
+        // OP_FLAG_,
         // ???
     } ps_vm_flags;
 
     typedef struct _vm_t
     {
-        parser_t parser;
+        // parser_t parser;
         symbol_table_t symbols;
         symbol_stack_t stack;
         error_t error;

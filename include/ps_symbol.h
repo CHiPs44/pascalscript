@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "ps_config.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -32,48 +33,23 @@ typedef enum _kind_t
     KIND_TYPE,
 } kind_t;
 
-typedef enum _type_t
-{
-    // for constants and variables
-    TYPE_NONE = 0,
-    TYPE_INTEGER,
-    TYPE_UNSIGNED_INTEGER,
-    TYPE_CHAR,
-    TYPE_STRING,
-    TYPE_BOOLEAN,
-    TYPE_REAL,
-    TYPE_POINTER,
-} type_t;
-
 #define PS_SCOPE_GLOBAL 0
 
-typedef uint8_t  scope_t;
-typedef union _value_t
-{
-    PS_INTEGER          i;
-    PS_UNSIGNED_INTEGER u;
-    PS_BOOLEAN          b;
-    PS_CHAR             c;
-    PS_CHAR             s[PS_STRING_MAX + 1];
-    PS_REAL             r;
-    void               *p;
-} value_t;
+typedef uint8_t  ps_scope_t;
 
 typedef struct _symbol_t
 {
     char    name[MAX_SYMBOL_NAME + 1];
     kind_t  kind;
-    type_t  type;
-    scope_t scope;
-    size_t  size;
-    value_t value;
+    ps_scope_t scope;
+    ps_value_t value;
 } symbol_t;
 
 void symbol_normalize_name(char *name);
 char *symbol_get_kind_name(kind_t kind);
-char *symbol_get_type_name(type_t type);
-char *symbol_get_scope_name(scope_t scope);
-char *symbol_get_value(symbol_t *symbol);
+char *symbol_get_type_name(ps_type_t type);
+char *symbol_get_scope_name(ps_scope_t scope);
+// char *symbol_get_value(symbol_t *symbol);
 void symbol_dump(symbol_t *symbol);
 
 #ifdef __cplusplus

@@ -43,14 +43,16 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 
 ### Other sources about compilers and interpreters
 
-- " Let's Build a Compiler, by Jack Crenshaw " <https://compilers.iecc.com/crenshaw/>
+- "Let's Build a Compiler", by Jack Crenshaw, <https://compilers.iecc.com/crenshaw/>
+- "Crafting Interpreters", by Robert Nystrom, <https://craftinginterpreters.com/> / <https://github.com/munificent/craftinginterpreters>
+- "The Charly programming language", by Leonard Schütz, <https://leonardschuetz.ch/blog/charly-lang-interpreter/>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
 #### French
 
-- "lex et yacc" (french) <https://pageperso.lis-lab.fr/alexis.nasr/Ens/Compilation/cmX_lex_yacc.pdf>
-- "Mini manuel d'utilisation de Lex et Yacc" (french) <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
+- "lex et yacc" <https://pageperso.lis-lab.fr/alexis.nasr/Ens/Compilation/cmX_lex_yacc.pdf>
+- "Mini manuel d'utilisation de Lex et Yacc" <https://web.archive.org/web/20181009191604/http://www.linux-france.org/article/devl/lexyacc/minimanlexyacc.html#toc2>
 
 #### English
 
@@ -97,10 +99,11 @@ begin
         a := foo;
         b := 2;
         c := a + b;
+        { line below should print 3 }
         WriteLn(c);
-        { will throw an error "Undeclared identifier 'd' at line L, column C" and stop execution }
+        { line below will throw an error "Undeclared identifier 'd' at line L, column C" and stop execution }
         d := a * b div c;
-        { will throw an error "Constant 'foo' cannot be assigned at line L, column C" and stop execution }
+        { line below will throw an error "Constant 'foo' cannot be assigned at line L, column C" and stop execution }
         foo := 12;
 end. { . is mandatory }
 ```
@@ -316,9 +319,9 @@ This will wait until we have implemented range types.
 
 #### Mathematical functions and constant(s)
 
-- `sqrt`
+- `sqrt` `pow` or `^`?
 - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
-- `ln` `log`
+- `ln` `log` `exp`
 - ...
 
 ### Units

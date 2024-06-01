@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_value.h"
 #include "ps_symbol_stack.h"
 
 /**
@@ -49,22 +50,30 @@ extern bool symbol_stack_full(symbol_stack_t *stack)
 
 void symbol_stack_dump(symbol_stack_t *stack, char *title)
 {
-    symbol_t *s;
+    symbol_t *symbol;
     fprintf(stderr, "*** Symbol stack %s (%d)%s ***\n",
             title,
             symbol_stack_size(stack),
             symbol_stack_full(stack) ? " (FULL)" : "");
-    fprintf(stderr, "|#  |name                           |kind|type|value       |value   |\n");
-    fprintf(stderr, "+---+-------------------------------+----+----+------------+--------+\n");
+    fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Size    ┃Value                          ┃\n");
+    fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < SYMBOL_STACK_SIZE; i++)
     {
         if (stack->symbols[i] != NULL)
         {
-            s = stack->symbols[i];
-            fprintf(stderr, "|%03d|%-*s|%4d|%4d|%12d|%08x|\n",
-                    i, MAX_SYMBOL_NAME, s->name, s->kind, s->type, s->value.i, s->value.i);
+            symbol = stack->symbols[i];
+            // fprintf(stderr, "|%03d|%-*s|%4d|%4d|%12d|%08x|\n",
+            //         i, MAX_SYMBOL_NAME, symbol->name, symbol->kind, symbol->value.type, symbol->value.data.i, symbol->value.data.i);
+            char *kind_name = symbol_get_kind_name(symbol->kind);
+            char *scope_name = symbol_get_scope_name(symbol->scope);
+            char *type_name = value_get_type_name(symbol->value.type);
+            char *buffer = value_get_value(&symbol->value);
+            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
+                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, scope_name, type_name, symbol->value.size, MAX_SYMBOL_NAME, buffer);
         }
     }
+    fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 }
 
 /**

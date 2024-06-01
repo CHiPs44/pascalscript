@@ -19,7 +19,7 @@
  */
 error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 {
-    value_t result;
+    ps_value_t result;
     symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_ERROR_STACK_EMPTY;
@@ -28,7 +28,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         vm_auto_free(vm, a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
-        if (a->type != TYPE_INTEGER)
+        if (a->type != PS_TYPE_INTEGER)
         {
             return RUNTIME_ERROR_EXPECTED_NUMBER;
         }
@@ -62,7 +62,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
 
 error_t vm_exec_op_binary(vm_t *vm, operator_t op)
 {
-    value_t result;
+    ps_value_t result;
     symbol_t *b = vm_stack_pop(vm);
     if (b == NULL)
         return RUNTIME_ERROR_STACK_EMPTY;
@@ -81,9 +81,9 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         op == OP_BIT_OR || op == OP_BIT_XOR ||
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
-        if (a->type != TYPE_INTEGER)
+        if (a->type != PS_TYPE_INTEGER)
             return RUNTIME_ERROR_EXPECTED_NUMBER;
-        if (b->type != TYPE_INTEGER)
+        if (b->type != PS_TYPE_INTEGER)
             return RUNTIME_ERROR_EXPECTED_NUMBER;
         switch (op)
         {

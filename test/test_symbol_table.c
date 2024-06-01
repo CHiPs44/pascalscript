@@ -6,23 +6,30 @@
 
 #include <stdio.h>
 
-// #define SYMBOL_TABLE_SIZE 3
+#define SYMBOL_TABLE_SIZE 3
+#include "../include/ps_value.h"
 #include "../include/ps_symbol.h"
 #include "../include/ps_symbol_table.h"
 
 symbol_table_t table;
-symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000DEAD};
-symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000BEEF};
-symbol_t auto_var3 = {.name = "AUTO_VAR3", .kind = KIND_AUTO, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x12345678};
-symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x87654321};
+symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT}; //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 1234567890};
+symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE}; //, .type = PS_TYPE_UNSIGNED, .size = sizeof(PS_UNSIGNED), .value.i = 0xDEADBEEF};
+symbol_t auto_var3 = {.name = "AUTO_VAR3", .kind = KIND_AUTO};     //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 0x12345678};
+symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT}; //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 0x87654321};
 
 // Poor man's Makefile ;-)
+#include "../src/ps_value.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
 
 int main(void)
 {
     int result;
+
+    ps_value_integer(&constant1.value, 1234567890);
+    ps_value_unsigned(&variable2.value, 0xDEADBEEF);
+    ps_value_integer(&auto_var3.value, 0x12345678);
+    ps_value_integer(&constant4.value, 0x87654321);
 
     printf("TEST SYMBOL TABLE: BEGIN\n");
     symbol_table_init(&table);

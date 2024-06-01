@@ -6,23 +6,30 @@
 
 #include <stdio.h>
 
+#include "../include/ps_value.h"
 #include "../include/ps_symbol.h"
 // #define SYMBOL_STACK_SIZE 3
 #include "../include/ps_symbol_stack.h"
 
+#include "../src/ps_value.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_stack.c"
 
 symbol_stack_t stack;
-symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000DEAD};
-symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000BEEF};
-symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x12345678};
-symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT, .type = TYPE_INTEGER, .size = sizeof(int), .value.i = 0x87654321};
+symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};//, .type = PS_TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000DEAD};
+symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};//, .type = PS_TYPE_INTEGER, .size = sizeof(int), .value.i = 0x0000BEEF};
+symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};//, .type = PS_TYPE_INTEGER, .size = sizeof(int), .value.i = 0x12345678};
+symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};//, .type = PS_TYPE_INTEGER, .size = sizeof(int), .value.i = 0x87654321};
 
 int main(void)
 {
     symbol_t *symbol;
     int result;
+
+    ps_value_integer(&constant1.value, 1234567890);
+    ps_value_integer(&variable2.value, 0xDEADBEEF);
+    ps_value_integer(&constant3.value, 0x12345678);
+    ps_value_integer(&constant4.value, 0x87654321);
 
     printf("TEST SYMBOL STACK: BEGIN\n");
     symbol_stack_init(&stack);

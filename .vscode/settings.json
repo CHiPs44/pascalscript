@@ -17,6 +17,7 @@
         "istream": "c",
         "ostream": "c",
         "stdint.h": "c",
-        "ps_symbol_stack.h": "c"
+        "ps_symbol_stack.h": "c",
+        "ps_value.h": "c"
     }
 }

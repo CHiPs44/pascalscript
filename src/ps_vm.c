@@ -19,13 +19,13 @@
 
 symbol_t default_globals[] = {
     // clang-format off
-    {"__PS_VERSION__", KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_UNSIGNED_INTEGER), {.i=0}},
-    // {"__PS_VERTEXT__", KIND_CONSTANT, TYPE_STRING          , PS_STRING_MAX +1           , {.s=__PS_VERTEXT__}},
-    {"MAXINT"        , KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
-    {"MAXUINT"       , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER, sizeof(PS_UNSIGNED_INTEGER), {.u=0xffffffff}},
-    {"FALSE"         , KIND_CONSTANT, TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=false}},
-    {"TRUE"          , KIND_CONSTANT, TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=true}},
-    {"PI"            , KIND_CONSTANT, TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
+    {"__PS_VERSION__", KIND_CONSTANT, PS_TYPE_INTEGER         , sizeof(PS_UNSIGNED), {.i=0}},
+    // {"__PS_VERTEXT__", KIND_CONSTANT, PS_TYPE_STRING          , PS_STRING_MAX +1           , {.s=__PS_VERTEXT__}},
+    {"MAXINT"        , KIND_CONSTANT, PS_TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
+    {"MAXUINT"       , KIND_CONSTANT, PS_TYPE_UNSIGNED, sizeof(PS_UNSIGNED), {.u=0xffffffff}},
+    {"FALSE"         , KIND_CONSTANT, PS_TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=false}},
+    {"TRUE"          , KIND_CONSTANT, PS_TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=true}},
+    {"PI"            , KIND_CONSTANT, PS_TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
     // clang-format on
 };
 
@@ -108,7 +108,7 @@ symbol_t *vm_auto_add_int(vm_t *vm, int value)
     symbol_t symbol;
     strcpy(symbol.name, "");
     symbol.kind = KIND_AUTO;
-    symbol.type = TYPE_INTEGER;
+    symbol.type = PS_TYPE_INTEGER;
     symbol.size = sizeof(int);
     symbol.value.i = value;
     int index = symbol_table_add(&vm->symbols, &symbol);

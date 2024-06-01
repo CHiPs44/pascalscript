@@ -25,7 +25,7 @@ bool parser_start(vm_t *vm)
     program.kind = KIND_CONSTANT;
     strcpy(program.name, "PROGRAM");
     program.size = 0;
-    program.type = TYPE_STRING;
+    program.type = PS_TYPE_STRING;
     strcpy(program.value.s, vm->current_token.value.s);
     symbol_table_add(&vm->symbols, &program);
 

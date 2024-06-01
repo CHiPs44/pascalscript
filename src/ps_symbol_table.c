@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_value.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
@@ -33,7 +34,7 @@ void symbol_table_dump(symbol_table_t *table, char *title)
     symbol_t *symbol;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Type    ┃Scope   ┃Size    ┃Value                          ┃\n");
+    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Size    ┃Value                          ┃\n");
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
@@ -41,11 +42,11 @@ void symbol_table_dump(symbol_table_t *table, char *title)
         {
             symbol = &table->symbols[i];
             char *kind_name = symbol_get_kind_name(symbol->kind);
-            char *type_name = symbol_get_type_name(symbol->type);
             char *scope_name = symbol_get_scope_name(symbol->scope);
-            char *value = symbol_get_value(symbol);
+            char *type_name = value_get_type_name(symbol->value.type);
+            char *buffer = value_get_value(&symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, type_name, scope_name, symbol->size, MAX_SYMBOL_NAME, value);
+                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, scope_name, type_name, symbol->value.size, MAX_SYMBOL_NAME, buffer);
         }
     }
     fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
@@ -127,9 +128,9 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
         strncpy(table->symbols[index].name, symbol->name, MAX_SYMBOL_NAME);
     }
     table->symbols[index].kind = symbol->kind;
-    table->symbols[index].type = symbol->type;
-    table->symbols[index].size = symbol->size;
-    table->symbols[index].value = symbol->value;
+    table->symbols[index].value.type = symbol->value.type;
+    table->symbols[index].value.size = symbol->value.size;
+    table->symbols[index].value.data = symbol->value.data;
     table->count += 1;
     return index;
 }
