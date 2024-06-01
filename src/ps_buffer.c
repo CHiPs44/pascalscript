@@ -18,7 +18,7 @@
 
 void buffer_init(buffer_t *buffer)
 {
-    buffer->error = BUFFER_ERROR_NONE;
+    buffer->text = NULL;
     buffer->length = 0;
     buffer->line_count = 0;
     if (buffer->line_lengths != NULL)
@@ -27,7 +27,7 @@ void buffer_init(buffer_t *buffer)
     if (buffer->line_starts != NULL)
         free(buffer->line_starts);
     buffer->line_starts = NULL;
-    buffer->text = NULL;
+    buffer->error = BUFFER_ERROR_NONE;
 }
 
 bool buffer_scan_text(buffer_t *buffer)
@@ -72,6 +72,7 @@ bool buffer_scan_text(buffer_t *buffer)
     if (buffer->line_lengths == NULL)
     {
         free(buffer->line_starts);
+        buffer->line_starts = NULL;
         buffer->error = BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
     }
@@ -157,7 +158,7 @@ bool buffer_set_text(buffer_t *buffer, char *text, size_t length)
     return buffer_scan_text(buffer);
 }
 
-void buffer_list_text(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
+void buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
 {
     char line_[BUFFER_MAX_COLUMNS + 1];
 

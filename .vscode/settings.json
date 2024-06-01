@@ -6,6 +6,17 @@
         "ps_config.h": "c",
         "ps_lexer.h": "c",
         "ps_buffer.h": "c",
-        "strings.h": "c"
+        "strings.h": "c",
+        "optional": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "istream": "c",
+        "ostream": "c",
+        "stdint.h": "c",
+        "ps_symbol_stack.h": "c"
     }
 }

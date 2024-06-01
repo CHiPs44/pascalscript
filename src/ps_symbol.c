@@ -65,6 +65,9 @@ char *symbol_get_type_name(type_t type)
     case TYPE_UNSIGNED_INTEGER:
         type_name = "UNSIGNED";
         break;
+    case TYPE_BOOLEAN:
+        type_name = "BOOLEAN";
+        break;
     case TYPE_REAL:
         type_name = "REAL";
         break;
@@ -82,6 +85,16 @@ char *symbol_get_type_name(type_t type)
         break;
     }
     return type_name;
+}
+
+char *symbol_get_scope_name(scope_t scope)
+{
+    static char scope_name[8 + 1];
+    if (scope == PS_SCOPE_GLOBAL)
+        snprintf(scope_name, 15, "GLOBAL");
+    else
+        snprintf(scope_name, 15, "LOCAL%03d", scope);
+    return scope_name;
 }
 
 char *symbol_get_value(symbol_t *symbol)

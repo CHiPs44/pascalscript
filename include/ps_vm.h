@@ -20,6 +20,50 @@ extern "C"
 {
 #endif
 
+    typedef enum
+    {
+        OPCODE_NOP = 0x00,
+        OPCODE_JUMP,
+        OPCODE_CALL,
+        OPCODE_PUSH,
+        OPCODE_POP,
+        OPCODE_TEST,
+        OPCODE_SYS,
+        // Unary operators
+        OPCODE_NEG,
+        // Binary operators
+        OPCODE_ADD,
+        OPCODE_SUB,
+        OPCODE_MUL,
+        OPCODE_DIV,
+        OPCODE_MOD,
+        // Bit operators
+        OPCODE_BIT_NOT,
+        OPCODE_BIT_AND,
+        OPCODE_BIT_OR,
+        OPCODE_BIT_XOR,
+        OPCODE_BIT_SHL,
+        OPCODE_BIT_SHR,
+        // Boolean operators
+        OPCODE_BOOL_NOT,
+        OPCODE_BOOL_AND,
+        OPCODE_BOOL_OR,
+        OPCODE_BOOL_XOR,
+    } ps_vm_opcode;
+
+    typedef enum {
+        SYS_PUT_CHAR,
+        SYS_GET_CHAR,
+        SYS_OPEN_FILE,
+        SYS_CLOSE_FILE,
+    } ps_vm_sys_command;
+
+    typedef enum {
+        OPCODE_FLAG_ZERO,
+        // OPCODE_FLAG_,
+        // ???
+    } ps_vm_flags;
+
     typedef struct _vm_t
     {
         parser_t parser;

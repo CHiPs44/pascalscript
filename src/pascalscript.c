@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  buffer_list_text(vm, 0, BUFFER_MAX_LINES);
+  buffer_dump(vm, 0, BUFFER_MAX_LINES);
   printf("Listed!\n");
   parser_start(vm);
   return 0;

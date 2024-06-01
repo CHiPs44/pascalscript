@@ -27,12 +27,14 @@ extern "C"
 
     typedef struct _buffer_t
     {
-        char *text;
-        size_t length;
-        uint16_t line_count;
-        char **line_starts;
-        uint16_t *line_lengths;
-        error_t error;
+        // clang-format off
+        char       *text;
+        size_t      length;
+        uint16_t    line_count;
+        char      **line_starts;
+        uint8_t    *line_lengths;
+        error_t     error;
+        // clang-format off
     } buffer_t;
 
     /**
@@ -55,7 +57,7 @@ extern "C"
      */
     bool buffer_set_text(buffer_t *buffer, char *source, size_t length);
 
-    void buffer_list_text(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
+    void buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
 
     void lexer_reset_cursor(buffer_t *buffer);
 

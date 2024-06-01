@@ -8,6 +8,7 @@
 #define _PS_SYMBOL_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "ps_config.h"
 
@@ -39,14 +40,19 @@ typedef enum _type_t
     TYPE_UNSIGNED_INTEGER,
     TYPE_CHAR,
     TYPE_STRING,
+    TYPE_BOOLEAN,
     TYPE_REAL,
     TYPE_POINTER,
 } type_t;
 
+#define PS_SCOPE_GLOBAL 0
+
+typedef uint8_t  scope_t;
 typedef union _value_t
 {
     PS_INTEGER          i;
     PS_UNSIGNED_INTEGER u;
+    PS_BOOLEAN          b;
     PS_CHAR             c;
     PS_CHAR             s[PS_STRING_MAX + 1];
     PS_REAL             r;
@@ -58,6 +64,7 @@ typedef struct _symbol_t
     char    name[MAX_SYMBOL_NAME + 1];
     kind_t  kind;
     type_t  type;
+    scope_t scope;
     size_t  size;
     value_t value;
 } symbol_t;
@@ -65,6 +72,7 @@ typedef struct _symbol_t
 void symbol_normalize_name(char *name);
 char *symbol_get_kind_name(kind_t kind);
 char *symbol_get_type_name(type_t type);
+char *symbol_get_scope_name(scope_t scope);
 char *symbol_get_value(symbol_t *symbol);
 void symbol_dump(symbol_t *symbol);
 

@@ -36,6 +36,10 @@ extern "C"
 #define PS_UNSIGNED_INTEGER uint32_t
 #endif
 
+#ifndef PS_BOOLEAN
+#define PS_BOOLEAN bool
+#endif
+
 #ifndef PS_REAL
 #define PS_REAL double
 #endif

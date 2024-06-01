@@ -32,9 +32,9 @@ void symbol_table_dump(symbol_table_t *table, char *title)
 {
     symbol_t *symbol;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
-    fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Type    ┃Size    ┃Value                          ┃\n");
-    fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Type    ┃Scope   ┃Size    ┃Value                          ┃\n");
+    fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
     {
         if (table->symbols[i].kind != KIND_FREE)
@@ -42,12 +42,13 @@ void symbol_table_dump(symbol_table_t *table, char *title)
             symbol = &table->symbols[i];
             char *kind_name = symbol_get_kind_name(symbol->kind);
             char *type_name = symbol_get_type_name(symbol->type);
+            char *scope_name = symbol_get_scope_name(symbol->scope);
             char *value = symbol_get_value(symbol);
-            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, type_name, symbol->size, MAX_SYMBOL_NAME, value);
+            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
+                    i, MAX_SYMBOL_NAME, symbol->name, kind_name, type_name, scope_name, symbol->size, MAX_SYMBOL_NAME, value);
         }
     }
-    fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 }
 
 /**

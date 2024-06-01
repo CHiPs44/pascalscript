@@ -23,6 +23,8 @@ symbol_t default_globals[] = {
     // {"__PS_VERTEXT__", KIND_CONSTANT, TYPE_STRING          , PS_STRING_MAX +1           , {.s=__PS_VERTEXT__}},
     {"MAXINT"        , KIND_CONSTANT, TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
     {"MAXUINT"       , KIND_CONSTANT, TYPE_UNSIGNED_INTEGER, sizeof(PS_UNSIGNED_INTEGER), {.u=0xffffffff}},
+    {"FALSE"         , KIND_CONSTANT, TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=false}},
+    {"TRUE"          , KIND_CONSTANT, TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=true}},
     {"PI"            , KIND_CONSTANT, TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
     // clang-format on
 };
@@ -33,14 +35,15 @@ symbol_t default_globals[] = {
 void vm_init(vm_t *vm)
 {
     // Program source
-    vm->source = NULL;
-    vm->length = 0;
-    vm->line_count = 0;
-    vm->line_starts = NULL;
-    vm->line_lengths = NULL;
-    vm->current_line = 0;
-    vm->current_column = 0;
-    vm->current_char = '\0';
+    parser_init();
+    // vm->source = NULL;
+    // vm->length = 0;
+    // vm->line_count = 0;
+    // vm->line_starts = NULL;
+    // vm->line_lengths = NULL;
+    // vm->current_line = 0;
+    // vm->current_column = 0;
+    // vm->current_char = '\0';
     // Symbol table
     symbol_table_init(&vm->symbols);
     default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);
@@ -162,6 +165,22 @@ error_t vm_exec_assign(vm_t *vm)
     variable->value = value->value;
     fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
     return ERROR_ZERO;
+}
+
+error_t vm_exec_sys(vm_t *vm)
+{
+    symbol_t *command = vm_stack_pop(vm);
+    if (command == NULL)
+        return RUNTIME_ERROR_STACK_EMPTY;
+    if (command->kind == KIND_AUTO)
+        vm_auto_free(vm, command->name);
+
+    return ERROR_NOT_IMPLEMENTED;
+}
+
+error_t vm_exec_xxx(vm_t *vm)
+{
+    return ERROR_NOT_IMPLEMENTED;
 }
 
 /* EOF */
