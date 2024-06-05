@@ -62,10 +62,14 @@ extern "C"
     } ps_vm_opcode;
 
     typedef enum {
-        SYS_FILE_OPEN_FILE,
+        SYS_FILE_OPEN,
         SYS_FILE_CLOSE,
-        SYS_PUT_CHAR,
-        SYS_GET_CHAR,
+        SYS_FILE_SEEK,
+        SYS_FILE_TRUNCATE,
+        SYS_FILE_PUT_BYTE,
+        SYS_FILE_GET_BYTE,
+        SYS_FILE_PUT_BYTES,
+        SYS_FILE_GET_BYTES,
     } ps_vm_sys_command;
 
     typedef struct _vm_instruction {
