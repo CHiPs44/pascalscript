@@ -50,13 +50,23 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
+        // Test operators => boolean
+        OP_TEST_EQ, // =
+        OP_TEST_NE, // <>
+        OP_TEST_GT, // >
+        OP_TEST_GE, // >=
+        OP_TEST_LT, // <
+        OP_TEST_LE, // <=
+        // Jump
+        OP_JUMP_TRUE,
+        OP_JUMP_FALSE,
     } ps_vm_opcode;
 
     typedef enum {
+        SYS_FILE_OPEN_FILE,
+        SYS_FILE_CLOSE,
         SYS_PUT_CHAR,
         SYS_GET_CHAR,
-        SYS_OPEN_FILE,
-        SYS_CLOSE_FILE,
     } ps_vm_sys_command;
 
     typedef struct _vm_instruction {
