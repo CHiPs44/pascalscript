@@ -23,13 +23,22 @@ extern "C"
     typedef enum
     {
         OP_NOP = 0x00,
-        OP_JUMP,
-        OP_CALL,
-        OP_RETURN,
         OP_PUSH,
         OP_POP,
-        OP_TEST,
+        OP_CALL,
+        OP_RETURN,
         OP_SYS,
+        // Test operators => boolean
+        OP_TEST_EQ, // =
+        OP_TEST_NE, // <>
+        OP_TEST_GT, // >
+        OP_TEST_GE, // >=
+        OP_TEST_LT, // <
+        OP_TEST_LE, // <=
+        // Jump
+        OP_JUMP,       // Inconditionnally
+        OP_JUMP_TRUE,  // Top of stack is strictly boolean true
+        OP_JUMP_FALSE, // Top of stack is strictly boolean false
         // Unary operators
         OP_NEG,
         // Binary operators
@@ -50,16 +59,6 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
-        // Test operators => boolean
-        OP_TEST_EQ, // =
-        OP_TEST_NE, // <>
-        OP_TEST_GT, // >
-        OP_TEST_GE, // >=
-        OP_TEST_LT, // <
-        OP_TEST_LE, // <=
-        // Jump
-        OP_JUMP_TRUE,
-        OP_JUMP_FALSE,
     } ps_vm_opcode;
 
     typedef enum {
