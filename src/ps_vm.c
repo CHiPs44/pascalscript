@@ -157,9 +157,9 @@ int vm_auto_gc(vm_t *vm)
 
 /**
  * @brief Execute ASSIGN statement
- *      POP value
- *      POP variable
- *      SET variable TO value
+ *      1. POP value
+ *      2. POP variable
+ *      3. SET variable TO value
  */
 error_t vm_exec_assign(vm_t *vm)
 {
@@ -179,7 +179,7 @@ error_t vm_exec_assign(vm_t *vm)
         return RUNTIME_ERROR_TYPE_MISMATCH;
     variable->value = value->value;
     fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
-    return ERROR_ZERO;
+    return RUNTIME_ERROR_NONE;
 }
 
 error_t vm_exec_sys(vm_t *vm)
