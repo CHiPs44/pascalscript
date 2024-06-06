@@ -30,8 +30,8 @@ int main(void)
     symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
     printf("TEST VM #03 BINARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     vm_stack_push(vm, vm_global_get(vm, "I"));
-    symbol_t *n1234 = vm_auto_add_int(vm, 1234);
-    symbol_t *n5678 = vm_auto_add_int(vm, 5678);
+    symbol_t *n1234 = vm_auto_add_integer(vm, 1234);
+    symbol_t *n5678 = vm_auto_add_integer(vm, 5678);
     vm_stack_push(vm, n1234);
     vm_stack_push(vm, n5678);
     symbol_stack_dump(&vm->stack, "3 PUSH?");

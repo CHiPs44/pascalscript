@@ -12,10 +12,10 @@
 #include "../include/ps_symbol_table.h"
 
 symbol_table_t table;
-symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT}; //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 1234567890};
-symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE}; //, .type = PS_TYPE_UNSIGNED, .size = sizeof(PS_UNSIGNED), .value.i = 0xDEADBEEF};
-symbol_t auto_var3 = {.name = "AUTO_VAR3", .kind = KIND_AUTO};     //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 0x12345678};
-symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT}; //, .type = PS_TYPE_INTEGER , .size = sizeof(PS_INTEGER ), .value.i = 0x87654321};
+symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
+symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
+symbol_t auto_var3 = {.name = "AUTO_VAR3", .kind = KIND_AUTO};    
+symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
 
 // Poor man's Makefile ;-)
 #include "../src/ps_value.c"

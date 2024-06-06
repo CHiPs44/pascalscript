@@ -30,10 +30,20 @@ extern "C"
 
 #ifndef PS_INTEGER
 #define PS_INTEGER int32_t
+#define PS_INTEGER_MAX 0x7fffffff
+#endif
+
+#ifndef PS_INTEGER_MAX
+#error PS_INTEGER_MAX must be defined.
 #endif
 
 #ifndef PS_UNSIGNED
 #define PS_UNSIGNED uint32_t
+#define PS_UNSIGNED_MAX 0xffffffff
+#endif
+
+#ifndef PS_UNSIGNED_MAX
+#error PS_UNSIGNED_MAX must be defined.
 #endif
 
 #ifndef PS_BOOLEAN

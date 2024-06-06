@@ -29,7 +29,7 @@ int main(void)
     result = vm_global_add(vm, &symbol);
     symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
     printf("TEST VM #02 UNARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
-    symbol_t *three = vm_auto_add_int(vm, 3);
+    symbol_t *three = vm_auto_add_integer(vm, 3);
     vm_stack_push(vm, vm_global_get(vm, "I"));
     vm_stack_push(vm, three);
     code = vm_exec_op_unary(vm, OP_NEG);

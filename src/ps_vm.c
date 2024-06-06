@@ -14,46 +14,60 @@
 #include "ps_symbol.h"
 #include "ps_vm.h"
 
-// #define JOIN_VERSION(TEXT, MAJOR, DOT1, MINOR, DOT2, PATCH, DOT3, INDEX) TEXT ## MAJOR ## DOT1 ## MINOR ## DOT2 ## PATCH ## DOT3 ## INDEX
-// #define __PS_VERTEXT__ JOIN_VERSION("PascalScript v", PS_VERSION_MAJOR, ".", PS_VERSION_MINOR, ".", PS_VERSION_PATCH, ".", PS_VERSION_INDEX)
-
-symbol_t default_globals[] = {
-    // clang-format off
-    {"__PS_VERSION__", KIND_CONSTANT, PS_TYPE_INTEGER         , sizeof(PS_UNSIGNED), {.i=0}},
-    // {"__PS_VERTEXT__", KIND_CONSTANT, PS_TYPE_STRING          , PS_STRING_MAX +1           , {.s=__PS_VERTEXT__}},
-    {"MAXINT"        , KIND_CONSTANT, PS_TYPE_INTEGER         , sizeof(PS_INTEGER         ), {.i=2147483647L}},
-    {"MAXUINT"       , KIND_CONSTANT, PS_TYPE_UNSIGNED, sizeof(PS_UNSIGNED), {.u=0xffffffff}},
-    {"FALSE"         , KIND_CONSTANT, PS_TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=false}},
-    {"TRUE"          , KIND_CONSTANT, PS_TYPE_BOOLEAN         , sizeof(PS_BOOLEAN         ), {.b=true}},
-    {"PI"            , KIND_CONSTANT, PS_TYPE_REAL            , sizeof(PS_REAL            ), {.r=3.141592653589793}},
-    // clang-format on
-};
-
 /**
  * @brief Initialize VM
  */
 void vm_init(vm_t *vm)
 {
-    // Program source
-    parser_init();
-    // vm->source = NULL;
-    // vm->length = 0;
-    // vm->line_count = 0;
-    // vm->line_starts = NULL;
-    // vm->line_lengths = NULL;
-    // vm->current_line = 0;
-    // vm->current_column = 0;
-    // vm->current_char = '\0';
-    // Symbol table
+    symbol_t symbol;
     symbol_table_init(&vm->symbols);
-    default_globals[0].value.i = (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff);
-    for (int i = 0; i < sizeof(default_globals) / sizeof(default_globals[0]); i += 1)
-    {
-        symbol_table_add(&vm->symbols, &default_globals[i]);
-    }
-    symbol_table_add(&vm->symbols, &default_globals[0]);
-    symbol_table_add(&vm->symbols, &default_globals[1]);
-    // Stack
+    /*******************************************/
+    strcpy(symbol.name, "__PS_VERSION__");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_unsigned(&symbol.value,
+                      (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff));
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "__PS_VERTEXT__");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    symbol.value.type = PS_TYPE_STRING;
+    symbol.value.size = PS_STRING_MAX + 1;
+    snprintf(&symbol.value.data.s, PS_STRING_MAX, "%d.%d.%d.%d",
+             PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "MAXINT");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_integer(&symbol.value, PS_INTEGER_MAX);
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "MAXUINT");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_integer(&symbol.value, PS_UNSIGNED_MAX);
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "FALSE");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_boolean(&symbol.value, false);
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "TRUE");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_boolean(&symbol.value, true);
+    symbol_table_add(&vm->symbols, &symbol);
+    /*******************************************/
+    strcpy(symbol.name, "PI");
+    symbol.kind = KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    ps_value_real(&symbol.value, 3.141592653589793);
+    symbol_table_add(&vm->symbols, &symbol);
+    /* Stack */
     symbol_stack_init(&vm->stack);
 }
 
@@ -66,7 +80,7 @@ void vm_init(vm_t *vm)
  */
 symbol_t *vm_global_get(vm_t *vm, char *name)
 {
-    return symbol_table_get(&vm->symbols, name);
+    symbol_t *symbol = symbol_table_get(&vm->symbols, name);
 }
 
 /**
@@ -103,14 +117,15 @@ symbol_t *vm_stack_pop(vm_t *vm)
     return symbol_stack_pop(&vm->stack);
 }
 
-symbol_t *vm_auto_add_int(vm_t *vm, int value)
+symbol_t *vm_auto_add_integer(vm_t *vm, PS_INTEGER value)
 {
     symbol_t symbol;
     strcpy(symbol.name, "");
     symbol.kind = KIND_AUTO;
-    symbol.type = PS_TYPE_INTEGER;
-    symbol.size = sizeof(int);
-    symbol.value.i = value;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    symbol.value.type = PS_TYPE_INTEGER;
+    symbol.value.size = sizeof(PS_INTEGER);
+    symbol.value.data.i = value;
     int index = symbol_table_add(&vm->symbols, &symbol);
     return index >= 0 ? &vm->symbols.symbols[index] : NULL;
 }

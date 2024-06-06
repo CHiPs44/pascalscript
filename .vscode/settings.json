@@ -18,6 +18,8 @@
         "ostream": "c",
         "stdint.h": "c",
         "ps_symbol_stack.h": "c",
-        "ps_value.h": "c"
+        "ps_value.h": "c",
+        "ps_vm.h": "c",
+        "typesizes.h": "c"
     }
 }

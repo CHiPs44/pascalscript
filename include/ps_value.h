@@ -47,7 +47,7 @@ extern "C"
     typedef struct _ps_value_t
     {
         ps_type_t type;
-        size_t  size;
+        size_t size;
         ps_data_t data;
     } ps_value_t;
 
@@ -61,9 +61,9 @@ extern "C"
     ps_value_t *ps_value_pointer (ps_value_t *value, void       *data);
     // clang-format on
 
-char *value_get_type_name(ps_type_t type);
-char *value_get_value(ps_value_t *value);
-void value_dump(ps_value_t *value);
+    char *value_get_type_name(ps_type_t type);
+    char *value_get_value(ps_value_t *value);
+    void value_dump(ps_value_t *value);
 
 #ifdef __cplusplus
 }

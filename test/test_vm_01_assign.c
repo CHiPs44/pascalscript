@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "../include/ps_value.h"
 #include "../include/ps_symbol_table.h"
 #include "../include/ps_symbol_stack.h"
 #include "../include/ps_vm.h"
@@ -13,6 +14,7 @@
 vm_t _vm;
 vm_t *vm = &_vm;
 
+#include "../src/ps_value.c"
 #include "../src/ps_symbol_table.c"
 #include "../src/ps_symbol_stack.c"
 #include "../src/ps_vm.c"
@@ -32,7 +34,7 @@ int main(void)
     printf("TEST VM #01 ASSIGN: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
 
-    symbol_t *three = vm_auto_add_int(vm, 3);
+    symbol_t *three = vm_auto_add_integer(vm, 3);
     vm_stack_push(vm, vm_global_get(vm, "I"));
     vm_stack_push(vm, three);
     symbol_stack_dump(&vm->stack, "2 PUSH?");
@@ -47,7 +49,7 @@ int main(void)
     printf("TEST VM #01 ASSIGN: CONST K = 1234; %s %d\n", result == 0 ? "OK" : "KO", result);
     symbol_table_dump(&vm->symbols, "CONST K = 1234;");
 
-    symbol_t *_5678 = vm_auto_add_int(vm, 5678);
+    symbol_t *_5678 = vm_auto_add_integer(vm, 5678);
     vm_stack_push(vm, vm_global_get(vm, "K"));
     vm_stack_push(vm, _5678);
     symbol_stack_dump(&vm->stack, "2 PUSH?");

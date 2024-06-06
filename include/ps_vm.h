@@ -109,7 +109,7 @@ extern "C"
     /** @brief Pop symbol from top of stack */
     symbol_t *vm_stack_pop(vm_t *vm);
 
-    symbol_t *vm_auto_add_int(vm_t *vm, int value);
+    symbol_t *vm_auto_add_integer(vm_t *vm, int value);
     int vm_auto_free(vm_t *vm, char *name);
     int vm_auto_gc(vm_t *vm);
 

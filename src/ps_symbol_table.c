@@ -116,7 +116,7 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     {
         index += 1;
     }
-    if (symbol->kind == KIND_AUTO) // strlen(symbol->name) == 0)
+    if (symbol->kind == KIND_AUTO)
     {
         snprintf(table->symbols[index].name,
                  MAX_SYMBOL_NAME,
@@ -130,7 +130,16 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     table->symbols[index].kind = symbol->kind;
     table->symbols[index].value.type = symbol->value.type;
     table->symbols[index].value.size = symbol->value.size;
-    table->symbols[index].value.data = symbol->value.data;
+    if (symbol->value.type == PS_TYPE_STRING)
+    {
+        strncpy(&(table->symbols[index].value.data),
+                &symbol->value.data,
+                PS_STRING_MAX);
+    }
+    else
+    {
+        table->symbols[index].value.data = symbol->value.data;
+    }
     table->count += 1;
     return index;
 }

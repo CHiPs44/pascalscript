@@ -47,7 +47,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         default:
             break;
         }
-        symbol_t *b = vm_auto_add_int(vm, result.i);
+        symbol_t *b = vm_auto_add_integer(vm, result.i);
         if (b == NULL)
             return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, b) == SYMBOL_STACK_ERROR_OVERFLOW)
@@ -124,7 +124,7 @@ error_t vm_exec_op_binary(vm_t *vm, operator_t op)
         default:
             break;
         }
-        symbol_t *c = vm_auto_add_int(vm, result.i);
+        symbol_t *c = vm_auto_add_integer(vm, result.i);
         if (c == NULL)
             return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, c) == SYMBOL_STACK_ERROR_OVERFLOW)
