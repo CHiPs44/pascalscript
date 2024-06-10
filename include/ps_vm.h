@@ -29,12 +29,12 @@ extern "C"
         OP_RETURN,
         OP_SYS,
         // Test operators => boolean
-        OP_TEST_EQ, // =
-        OP_TEST_NE, // <>
-        OP_TEST_GT, // >
-        OP_TEST_GE, // >=
-        OP_TEST_LT, // <
-        OP_TEST_LE, // <=
+        OP_TEST_EQ, // "="
+        OP_TEST_NE, // "<>"
+        OP_TEST_GT, // ">"
+        OP_TEST_GE, // ">="
+        OP_TEST_LT, // "<"
+        OP_TEST_LE, // "<="
         // Jump
         OP_JUMP,       // Inconditionnally
         OP_JUMP_TRUE,  // Top of stack is strictly boolean true
@@ -45,8 +45,9 @@ extern "C"
         OP_ADD,
         OP_SUB,
         OP_MUL,
-        OP_DIV,
+        OP_DIV, // "div"
         OP_MOD,
+        OP_REAL_DIV, // "/"
         // Bit operators
         OP_BIT_NOT,
         OP_BIT_AND,
@@ -59,9 +60,10 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
-    } ps_vm_opcode;
+    } ps_vm_opcode_t;
 
-    typedef enum {
+    typedef enum
+    {
         SYS_FILE_OPEN,
         SYS_FILE_CLOSE,
         SYS_FILE_SEEK,
@@ -72,13 +74,15 @@ extern "C"
         SYS_FILE_GET_BYTES,
     } ps_vm_sys_command;
 
-    typedef struct _vm_instruction {
-        uint8_t opcode:8;
-        uint8_t param1_type:3;
-        uint8_t result_type:3;
+    typedef struct _vm_instruction
+    {
+        uint8_t opcode : 8;
+        uint8_t param1_type : 3;
+        uint8_t result_type : 3;
     } vm_instruction;
 
-    typedef enum {
+    typedef enum
+    {
         OP_FLAG_ZERO,
         // OP_FLAG_,
         // ???

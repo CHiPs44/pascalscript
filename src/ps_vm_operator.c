@@ -5,10 +5,66 @@
 */
 
 #include "ps_error.h"
-#include "ps_operator.h"
+#include "ps_vm_operator.h"
 #include "ps_symbol_stack.h"
 #include "ps_symbol.h"
 #include "ps_vm.h"
+
+bool vm_is_op_test(ps_vm_opcode_t op)
+{
+    return op == OP_TEST_EQ ||
+           op == OP_TEST_NE ||
+           op == OP_TEST_GT ||
+           op == OP_TEST_GE ||
+           op == OP_TEST_LT ||
+           op == OP_TEST_LE;
+}
+
+bool vm_is_op_arithmetic(ps_vm_opcode_t op)
+{
+    return op == OP_ADD ||
+           op == OP_SUB ||
+           op == OP_MUL ||
+           op == OP_DIV ||
+           op == OP_MOD;
+}
+
+bool vm_is_op_bit(ps_vm_opcode_t op)
+{
+    return op == OP_BIT_NOT ||
+           op == OP_BIT_AND ||
+           op == OP_BIT_OR ||
+           op == OP_BIT_XOR ||
+           op == OP_BIT_SHL ||
+           op == OP_BIT_SHR;
+}
+
+bool vm_is_op_boolean(ps_vm_opcode_t op)
+{
+    return op == OP_BOOL_NOT ||
+           op == OP_BOOL_AND ||
+           op == OP_BOOL_OR ||
+           op == OP_BOOL_XOR;
+}
+
+ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
+{
+    if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
+        return PS_TYPE_ERROR;
+    // X <EQ|NE|GT|GE|LT|LE> X => B
+    if (vm_is_op_test(op))
+        return PS_TYPE_BOOLEAN;
+    // X <op> X => X
+    if (a == b)
+        return a;
+    // U <op> I => I / I <op> U => I
+    if ((a == PS_TYPE_UNSIGNED && b == PS_TYPE_INTEGER) || (a == PS_TYPE_INTEGER && b == PS_TYPE_UNSIGNED))
+        return PS_TYPE_INTEGER;
+    // X <op> R => R / R <op> X => R
+    if (a == PS_TYPE_REAL || b == PS_TYPE_REAL)
+        return PS_TYPE_REAL;
+    return PS_TYPE_ERROR;
+}
 
 /**
  * @brief Execute unary operator
@@ -17,7 +73,7 @@
  * @param operator_t operator
  * @return error_t
  */
-error_t vm_exec_op_unary(vm_t *vm, operator_t op)
+error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
 {
     ps_value_t result;
     symbol_t *a = vm_stack_pop(vm);
@@ -28,7 +84,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
         vm_auto_free(vm, a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
-        if (a->type != PS_TYPE_INTEGER)
+        if (a->value.type != PS_TYPE_INTEGER)
         {
             return RUNTIME_ERROR_EXPECTED_NUMBER;
         }
@@ -60,7 +116,7 @@ error_t vm_exec_op_unary(vm_t *vm, operator_t op)
     return RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
 }
 
-error_t vm_exec_op_binary(vm_t *vm, operator_t op)
+error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
 {
     ps_value_t result;
     symbol_t *b = vm_stack_pop(vm);

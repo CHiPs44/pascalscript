@@ -38,6 +38,7 @@ extern "C"
     typedef enum _ps_type_t
     {
         // clang-format off
+        PS_TYPE_ERROR    = -1,
         PS_TYPE_NONE     = 0,
         // Numbers
         PS_TYPE_INTEGER  = 1,
