@@ -33,8 +33,8 @@ void vm_init(vm_t *vm)
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_STRING;
-    symbol.value.size = PS_STRING_MAX + 1;
-    snprintf(&symbol.value.data.s, PS_STRING_MAX, "%d.%d.%d.%d",
+    symbol.value.size = ps_string_max + 1;
+    snprintf(&symbol.value.data.s, ps_string_max, "%d.%d.%d.%d",
              PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
     symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
@@ -117,14 +117,14 @@ symbol_t *vm_stack_pop(vm_t *vm)
     return symbol_stack_pop(&vm->stack);
 }
 
-symbol_t *vm_auto_add_integer(vm_t *vm, PS_INTEGER value)
+symbol_t *vm_auto_add_integer(vm_t *vm, ps_integer_t value)
 {
     symbol_t symbol;
     strcpy(symbol.name, "");
     symbol.kind = KIND_AUTO;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_INTEGER;
-    symbol.value.size = sizeof(PS_INTEGER);
+    symbol.value.size = sizeof(ps_integer_t);
     symbol.value.data.i = value;
     int index = symbol_table_add(&vm->symbols, &symbol);
     return index >= 0 ? &vm->symbols.symbols[index] : NULL;

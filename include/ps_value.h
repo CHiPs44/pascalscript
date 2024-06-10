@@ -17,28 +17,48 @@ extern "C"
 {
 #endif
 
+    typedef PS_INTEGER ps_integer_t;
+    const ps_integer_t ps_integer_max = PS_INTEGER_MAX;
+
+    typedef PS_UNSIGNED ps_unsigned_t;
+    const ps_unsigned_t ps_unsigned_max = PS_UNSIGNED_MAX;
+
+    typedef PS_BOOLEAN ps_boolean_t;
+
+    typedef PS_CHAR ps_char_t;
+
+    typedef PS_STRING_LEN_TYPE ps_string_len_t;
+    const ps_string_len_t ps_string_max = PS_STRING_MAX;
+    typedef struct
+    {
+        ps_string_len_t len;
+        ps_char_t str[PS_STRING_MAX]; // TODO replace by a pointer
+    } ps_string_t;
+
     typedef enum _ps_type_t
     {
         // clang-format off
         PS_TYPE_NONE     = 0,
+        // Numbers
         PS_TYPE_INTEGER  = 1,
         PS_TYPE_UNSIGNED = 2,
-        PS_TYPE_CHAR     = 3,
-        PS_TYPE_STRING   = 4,
-        PS_TYPE_BOOLEAN  = 5,
-        PS_TYPE_REAL     = 6,
+        PS_TYPE_REAL     = 3,
+        // Others
+        PS_TYPE_BOOLEAN  = 4,
+        PS_TYPE_CHAR     = 5,
+        PS_TYPE_STRING   = 6,
         PS_TYPE_POINTER  = 7,
         // clang-format on
     } ps_type_t;
 
-    typedef union _ps_ps_data_t
+    typedef union _ps_data_t
     {
         // clang-format off
-        PS_INTEGER  i;
-        PS_UNSIGNED u;
-        PS_BOOLEAN  b;
-        PS_CHAR     c;
-        PS_CHAR     s[PS_STRING_MAX + 1]; // TODO replace by a pointer
+        ps_integer_t  i;
+        ps_unsigned_t u;
+        ps_boolean_t  b;
+        ps_char_t     c;
+        ps_string_t   s;
         PS_REAL     r;
         void       *p;
         // clang-format on
@@ -52,11 +72,11 @@ extern "C"
     } ps_value_t;
 
     // clang-format off
-    ps_value_t *ps_value_integer (ps_value_t *value, PS_INTEGER  data);
-    ps_value_t *ps_value_unsigned(ps_value_t *value, PS_UNSIGNED data);
-    ps_value_t *ps_value_boolean (ps_value_t *value, PS_BOOLEAN  data);
-    ps_value_t *ps_value_char    (ps_value_t *value, PS_CHAR     data);
-    ps_value_t *ps_value_string  (ps_value_t *value, PS_CHAR    *data);
+    ps_value_t *ps_value_integer (ps_value_t *value, ps_integer_t  data);
+    ps_value_t *ps_value_unsigned(ps_value_t *value, ps_unsigned_t data);
+    ps_value_t *ps_value_boolean (ps_value_t *value, ps_boolean_t  data);
+    ps_value_t *ps_value_char    (ps_value_t *value, ps_char_t     data);
+    ps_value_t *ps_value_string  (ps_value_t *value, ps_char_t    *data);
     ps_value_t *ps_value_real    (ps_value_t *value, PS_REAL     data);
     ps_value_t *ps_value_pointer (ps_value_t *value, void       *data);
     // clang-format on

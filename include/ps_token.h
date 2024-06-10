@@ -137,10 +137,10 @@ extern "C"
         union
         {
             char identifier[MAX_IDENTIFIER + 1];
-            PS_INTEGER i;
+            ps_integer_t i;
             PS_REAL r;
-            PS_CHAR c;
-            PS_CHAR s[PS_STRING_MAX + 1];
+            ps_char_t c;
+            ps_char_t s[ps_string_max + 1];
         } value;
     } token_t;
 

@@ -66,7 +66,7 @@ error_t lexer_copy_real_value(char *text, token_t *token)
 error_t lexer_copy_char_value(char *text, token_t *token)
 {
     // TODO? "'X'" or "''''"
-    PS_CHAR val = text[1];
+    ps_char_t val = text[1];
     // fprintf(stderr, " [lexer_copy_char_value %s %c]", text, val);
     token->type = TOKEN_CHAR_VALUE;
     token->value.c = val;
@@ -84,7 +84,7 @@ error_t lexer_copy_string_value(char *text, token_t *token)
     size_t len = strlen(text) - 2;
     // fprintf(stderr, " [lexer_copy_string_value l=%ld s=|%s|]\n", len, text);
     // fprintf(stderr, " [lexer_copy_string_value]\n");
-    if (len > PS_STRING_MAX)
+    if (len > ps_string_max)
     {
         fprintf(stderr, "LEXER_ERROR_STRING_TOO_LONG %ld |%s|", len, text);
         return LEXER_ERROR_STRING_TOO_LONG;

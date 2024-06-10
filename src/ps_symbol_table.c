@@ -134,7 +134,7 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     {
         strncpy(&(table->symbols[index].value.data),
                 &symbol->value.data,
-                PS_STRING_MAX);
+                ps_string_max);
     }
     else
     {

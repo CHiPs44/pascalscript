@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+// #include <limits.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -29,8 +31,16 @@ extern "C"
 #endif
 
 #ifndef PS_INTEGER
-#define PS_INTEGER int32_t
-#define PS_INTEGER_MAX 0x7fffffff
+#define PS_INTEGER int16_t
+#define PS_INTEGER_MIN -32768
+#define PS_INTEGER_MAX 32767
+// #define PS_INTEGER int32_t
+// #define PS_INTEGER_MIN -2147483648L
+// #define PS_INTEGER_MAX 2147483647L
+#endif
+
+#ifndef PS_INTEGER_MIN
+#error PS_INTEGER_MIN must be defined.
 #endif
 
 #ifndef PS_INTEGER_MAX
@@ -38,8 +48,10 @@ extern "C"
 #endif
 
 #ifndef PS_UNSIGNED
-#define PS_UNSIGNED uint32_t
-#define PS_UNSIGNED_MAX 0xffffffff
+#define PS_UNSIGNED uint16_t
+#define PS_UNSIGNED_MAX 0xffff
+// #define PS_UNSIGNED uint32_t
+// #define PS_UNSIGNED_MAX 0xffffffff
 #endif
 
 #ifndef PS_UNSIGNED_MAX
@@ -51,8 +63,12 @@ extern "C"
 #endif
 
 #ifndef PS_REAL
-// #define PS_REAL double
 #define PS_REAL float
+#define PS_REAL_MIN FLT_MIN
+#define PS_REAL_MAX FLT_MAX
+// #define PS_REAL double
+// #define PS_REAL_MIN DBL_MIN
+// #define PS_REAL_MAX DBL_MAX
 #endif
 
 #ifndef PS_CHAR
@@ -60,7 +76,14 @@ extern "C"
 #endif
 
 #ifndef PS_STRING_MAX
+#define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX 255
+// #define PS_STRING_LEN_TYPE uint16_t
+// #define PS_STRING_MAX 65534
+#endif
+
+#ifndef PS_STRING_LEN_TYPE
+#error PS_STRING_LEN_TYPE must be defined.
 #endif
 
 #ifdef __cplusplus

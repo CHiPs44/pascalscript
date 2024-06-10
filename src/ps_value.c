@@ -9,43 +9,43 @@
 
 #include "ps_value.h"
 
-ps_value_t *ps_value_integer(ps_value_t *value, PS_INTEGER data)
+ps_value_t *ps_value_integer(ps_value_t *value, ps_integer_t data)
 {
     value->type = PS_TYPE_INTEGER;
-    value->size = sizeof(PS_INTEGER);
+    value->size = sizeof(ps_integer_t);
     value->data.i = data;
     return value;
 }
 
-ps_value_t *ps_value_unsigned(ps_value_t *value, PS_UNSIGNED data)
+ps_value_t *ps_value_unsigned(ps_value_t *value, ps_unsigned_t data)
 {
     value->type = PS_TYPE_UNSIGNED;
-    value->size = sizeof(PS_UNSIGNED);
+    value->size = sizeof(ps_unsigned_t);
     value->data.u = data;
     return value;
 }
 
-ps_value_t *ps_value_boolean(ps_value_t *value, PS_BOOLEAN data)
+ps_value_t *ps_value_boolean(ps_value_t *value, ps_boolean_t data)
 {
     value->type = PS_TYPE_BOOLEAN;
-    value->size = sizeof(PS_BOOLEAN);
+    value->size = sizeof(ps_boolean_t);
     value->data.b = data;
     return value;
 }
 
-ps_value_t *ps_value_char(ps_value_t *value, PS_CHAR data)
+ps_value_t *ps_value_char(ps_value_t *value, ps_char_t data)
 {
     value->type = PS_TYPE_CHAR;
-    value->size = sizeof(PS_CHAR);
+    value->size = sizeof(ps_char_t);
     value->data.c = data;
     return value;
 }
 
-ps_value_t *ps_value_string(ps_value_t *value, PS_CHAR *data)
+ps_value_t *ps_value_string(ps_value_t *value, ps_char_t *data)
 {
     value->type = PS_TYPE_STRING;
-    value->size = PS_STRING_MAX + 1;
-    strncpy(value->data.s, data, PS_STRING_MAX);
+    value->size = ps_string_max + 1;
+    strncpy(value->data.s, data, ps_string_max);
     return value;
 }
 
