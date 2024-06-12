@@ -70,6 +70,9 @@ char *value_get_type_name(ps_type_t type)
     char *type_name;
     switch (type)
     {
+    case PS_TYPE_ERROR:
+        type_name = "ERROR";
+        break;
     case PS_TYPE_NONE:
         type_name = "NONE";
         break;
@@ -94,9 +97,9 @@ char *value_get_type_name(ps_type_t type)
     case PS_TYPE_POINTER:
         type_name = "POINTER";
         break;
-    default:
-        type_name = "?";
-        break;
+    // default:
+    //     type_name = "?";
+    //     break;
     }
     return type_name;
 }
