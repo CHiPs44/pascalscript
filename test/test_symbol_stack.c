@@ -20,16 +20,19 @@ symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
 symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
 symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};
 symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
+symbol_t constant5 = {.name = "CONSTANT5", .kind = KIND_CONSTANT};
 
 int main(void)
 {
     symbol_t *symbol;
     int result;
+    ps_string_t string5 = {.str = "ABCDEF123456", .len = 12};
 
     ps_value_integer(&constant1.value, 1234567890);
     ps_value_integer(&variable2.value, 0xDEADBEEF);
     ps_value_integer(&constant3.value, 0x12345678);
     ps_value_integer(&constant4.value, 0x87654321);
+    ps_value_string(&constant5.value, string5);
 
     printf("TEST SYMBOL STACK: BEGIN\n");
     symbol_stack_init(&stack);
@@ -51,6 +54,8 @@ int main(void)
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 2 ? "OK" : "KO", result);
     result = symbol_stack_push(&stack, &constant4);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 3 ? "OK" : "KO", result);
+    result = symbol_stack_push(&stack, &constant5);
+    printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 4 ? "OK" : "KO", result);
     symbol_stack_dump(&stack, "Test");
     printf("TEST SYMBOL STACK: DUMP OK\n");
     // Pop 2 values => constant4 & constant3

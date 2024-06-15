@@ -28,7 +28,7 @@ char *hello_utf8 =
 //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
     "Program Hello;\n"
     "Const\n"
-    "  K = 'pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
+    "  K = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
     "Begin\n"
     "  WriteLn('Hello, World!');\n"
     "  WriteLn('k=', k);\n"

@@ -67,8 +67,8 @@ void symbol_stack_dump(symbol_stack_t *stack, char *title)
             //         i, MAX_SYMBOL_NAME, symbol->name, symbol->kind, symbol->value.type, symbol->value.data.i, symbol->value.data.i);
             char *kind_name = symbol_get_kind_name(symbol->kind);
             char *scope_name = symbol_get_scope_name(symbol->scope);
-            char *type_name = value_get_type_name(symbol->value.type);
-            char *buffer = value_get_value(&symbol->value);
+            char *type_name = ps_value_get_type_name(symbol->value.type);
+            char *buffer = ps_value_get_value(&symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
                     i, MAX_SYMBOL_NAME, symbol->name, kind_name, scope_name, type_name, symbol->value.size, MAX_SYMBOL_NAME, buffer);
         }
@@ -118,16 +118,16 @@ symbol_t *symbol_stack_pop(symbol_stack_t *stack)
  *
  * @param Stack
  * @param Symbol
- * @return SP (-1 if stack is empty)
+ * @return true (false if stack is empty)
  */
-int symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol)
+bool symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol)
 {
     if (symbol_stack_size(stack) == 0)
     {
-        return stack->sp;
+        return false;
     }
     stack->symbols[stack->sp] = symbol;
-    return stack->sp;
+    return true;
 }
 
 /**

@@ -31,6 +31,10 @@ void lexer_dump_token(token_t *token)
         type = "INTEGER";
         snprintf(value, 256, "%d", token->value.i);
         break;
+    case TOKEN_CARDINAL_VALUE:
+        type = "UNSIGNED";
+        snprintf(value, 256, "%u", token->value.u);
+        break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
         snprintf(value, 256, "%f", token->value.r);
@@ -151,10 +155,12 @@ error_t lexer_skip_comment2(lexer_t *lexer, bool *changed)
     return LEXER_ERROR_NONE;
 }
 
-bool lexer_skip_whitespace_and_comments(lexer_t *lexer)
+error_t lexer_skip_whitespace_and_comments(lexer_t *lexer)
 {
     error_t error;
-    bool changed1, changed2, changed3 = true;
+    bool changed1 = true;
+    bool changed2 = true;
+    bool changed3 = true;
     while (changed1 || changed2 || changed3)
     {
         error = lexer_skip_whitespace(lexer, &changed1);
@@ -167,7 +173,7 @@ bool lexer_skip_whitespace_and_comments(lexer_t *lexer)
         if (error != LEXER_ERROR_NONE)
             return error;
     }
-    return true;
+    return LEXER_ERROR_NONE;
 }
 
 bool lexer_read_identifier_or_keyword(lexer_t *lexer)

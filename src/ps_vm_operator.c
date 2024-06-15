@@ -49,8 +49,8 @@ bool vm_is_op_boolean(ps_vm_opcode_t op)
 
 ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
 {
-    if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
-        return PS_TYPE_ERROR;
+    if (a == PS_TYPE_NIL || b == PS_TYPE_NIL)
+        return PS_TYPE_NIL;
     // X <EQ|NE|GT|GE|LT|LE> X => B
     if (vm_is_op_test(op))
         return PS_TYPE_BOOLEAN;
@@ -63,7 +63,7 @@ ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
     // X <op> R => R / R <op> X => R
     if (a == PS_TYPE_REAL || b == PS_TYPE_REAL)
         return PS_TYPE_REAL;
-    return PS_TYPE_ERROR;
+    return PS_TYPE_NIL;
 }
 
 /**
@@ -84,21 +84,29 @@ error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
         vm_auto_free(vm, a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
-        if (a->value.type != PS_TYPE_INTEGER)
-        {
-            return RUNTIME_ERROR_EXPECTED_NUMBER;
-        }
-        result.i = a->value.i;
         switch (op)
         {
         case OP_NEG:
-            result.i = -result.i;
+            if (a->value.type == PS_TYPE_INTEGER)
+                result.data.i = -a->value.data.i;
+            else if (a->value.type == PS_TYPE_REAL)
+                result.data.r = -a->value.data.r;
+            else
+                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
             break;
         case OP_BOOL_NOT:
-            result.i = (int)(!(bool)result.i);
+            if (a->value.type == PS_TYPE_BOOLEAN)
+                result.data.b = !(a->value.data.b);
+            else
+                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
             break;
         case OP_BIT_NOT:
-            result.i = ~result.i;
+            if (a->value.type == PS_TYPE_INTEGER)
+                result.data.i = ~a->value.data.i;
+            else if (a->value.type == PS_TYPE_UNSIGNED)
+                result.data.u = ~a->value.data.u;
+            else
+                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
             break;
         default:
             break;
@@ -138,9 +146,9 @@ error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
         if (a->type != PS_TYPE_INTEGER)
-            return RUNTIME_ERROR_EXPECTED_NUMBER;
+            return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
         if (b->type != PS_TYPE_INTEGER)
-            return RUNTIME_ERROR_EXPECTED_NUMBER;
+            return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
         switch (op)
         {
         case OP_ADD:

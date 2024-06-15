@@ -31,12 +31,12 @@ extern "C"
 #endif
 
 #ifndef PS_INTEGER
-#define PS_INTEGER int16_t
-#define PS_INTEGER_MIN -32768
-#define PS_INTEGER_MAX 32767
-// #define PS_INTEGER int32_t
-// #define PS_INTEGER_MIN -2147483648L
-// #define PS_INTEGER_MAX 2147483647L
+// #define PS_INTEGER int16_t
+// #define PS_INTEGER_MIN -32768
+// #define PS_INTEGER_MAX 32767
+#define PS_INTEGER int32_t
+#define PS_INTEGER_MIN -2147483648L
+#define PS_INTEGER_MAX 2147483647L
 #endif
 
 #ifndef PS_INTEGER_MIN
@@ -48,10 +48,10 @@ extern "C"
 #endif
 
 #ifndef PS_UNSIGNED
-#define PS_UNSIGNED uint16_t
-#define PS_UNSIGNED_MAX 0xffff
-// #define PS_UNSIGNED uint32_t
-// #define PS_UNSIGNED_MAX 0xffffffff
+// #define PS_UNSIGNED uint16_t
+// #define PS_UNSIGNED_MAX 0xffff
+#define PS_UNSIGNED uint32_t
+#define PS_UNSIGNED_MAX 0xffffffff
 #endif
 
 #ifndef PS_UNSIGNED_MAX

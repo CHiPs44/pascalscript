@@ -66,8 +66,8 @@ void symbol_dump(symbol_t *symbol)
 {
     char *kind_name = symbol_get_kind_name(symbol->kind);
     char *scope_name = symbol_get_scope_name(symbol->scope);
-    char *type_name = value_get_type_name(symbol->value.type);
-    char *buffer = value_get_value(&symbol->value);
+    char *type_name = ps_value_get_type_name(symbol->value.type);
+    char *buffer = ps_value_get_value(&symbol->value);
     fprintf(stderr,
             "SYMBOL: name=%s, kind=%s, scope=%s, type=%s, size=%ld, value=%s\n",
             symbol->name, kind_name, scope_name, type_name, symbol->value.size, buffer);

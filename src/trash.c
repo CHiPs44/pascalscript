@@ -46,7 +46,7 @@ error_t lexer_copy_integer_value(char *text, token_t *token)
  */
 error_t lexer_copy_real_value(char *text, token_t *token)
 {
-    PS_REAL val = strtod(text, NULL);
+    ps_real_t val = strtod(text, NULL);
     fprintf(stderr, " [lexer_copy_real_value %s %f %d]", text, val, errno);
     if (errno == ERANGE)
     {

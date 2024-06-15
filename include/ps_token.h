@@ -34,101 +34,102 @@ extern "C"
         for             downto          to          do          in
         repeat          until           while
         goto            label
-        
+
         div     mod     and     not     or      shl     shr     xor
     */
 
     typedef enum _token_type_t
     {
-        TOKEN_NONE = -1,
-        TOKEN_END_OF_FILE = 0,
-        // Number values                      Size in bytes
-        TOKEN_SHORT_INTEGER_VALUE = 1,     // 1   -128..127
-        TOKEN_BYTE_VALUE = 2,              // 1   0..255
-        TOKEN_SMALL_INTEGER = 4,           // 2   -32,768..32,767
-        TOKEN_WORD_VALUE = 8,              // 2   0..65,535
-        TOKEN_INTEGER_VALUE = 16,          // 4   -2,147,483,648..2,147,483,647
-        TOKEN_UNSIGNED_INTEGER_VALUE = 32, // 4   0..4,294,967,295
-        TOKEN_LONG_INTEGER_VALUE = 64,     // 4   -2,147,483,648..2,147,483,647
-        TOKEN_LONG_WORD_VALUE = 128,       // 4   0..4,294,967,295
-        TOKEN_REAL_VALUE = 256,            // 8   5.0E-324..1.7E308
+        TOKEN_NONE = 0,
+        TOKEN_END_OF_FILE,
+        // Number values                   Size     Mini / maxi
+        TOKEN_INTEGER_VALUE,          // 2 / 4    -32768..32767 / -2,147,483,648..2,147,483,647
+        TOKEN_CARDINAL_VALUE, // 2 / 4    0..65,535 / 0..4,294,967,295
+        TOKEN_REAL_VALUE,             // 4 / 8    +/- 1.5E-45 .. 3.4E38 / 5.0E-324..1.7E308
         // Other value types
-        TOKEN_BOOLEAN_VALUE = 1024,
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
         TOKEN_IDENTIFIER,
         // Reserved words
+        // ==============================
         TOKEN_RESERVED_WORDS = 2047,
         TOKEN_PROGRAM,
         TOKEN_CONST,
+        // TOKEN_TYPE,
         TOKEN_VAR,
-        TOKEN_TYPE,
+        // TOKEN_FUNCTION,
+        // TOKEN_PROCEDURE,
         TOKEN_BEGIN,
         TOKEN_END,
-        TOKEN_ARRAY,
+        // TOKEN_ARRAY,
+        // TOKEN_SET,
+        // TOKEN_RECORD,
+        // TOKEN_OF,
         TOKEN_INTEGER,
+        TOKEN_CARDINAL,
         TOKEN_BOOLEAN,
         TOKEN_CHAR,
         TOKEN_STRING,
         TOKEN_FALSE,
         TOKEN_TRUE,
-        TOKEN_FUNCTION,
-        TOKEN_PROCEDURE,
-        TOKEN_IF,
-        TOKEN_THEN,
-        TOKEN_ELSE,
-        TOKEN_DO,
-        TOKEN_WHILE,
-        TOKEN_REPEAT,
-        TOKEN_UNTIL,
-        TOKEN_FOR,
-        TOKEN_TO,
-        TOKEN_DOWNTO,
-        TOKEN_IN,
-        TOKEN_CASE,
-        TOKEN_OF,
-        TOKEN_OTHERWISE,
-        TOKEN_GOTO,
-        TOKEN_LABEL,
+        // TOKEN_WITH,
+        // TOKEN_IF,
+        // TOKEN_THEN,
+        // TOKEN_ELSE,
+        // TOKEN_DO,
+        // TOKEN_WHILE,
+        // TOKEN_REPEAT,
+        // TOKEN_UNTIL,
+        // TOKEN_FOR,
+        // TOKEN_TO,
+        // TOKEN_DOWNTO,
+        // TOKEN_IN,
+        // TOKEN_CASE,
+        // TOKEN_OTHERWISE,
+        // TOKEN_GOTO,
+        // TOKEN_LABEL,
+        // TOKEN_UNIT,
+        // TOKEN_USES,
+        // TOKEN_INTERFACE,
+        // TOKEN_IMPLEMENTATION,
+        TOKEN_OP_DIV_INT,
+        TOKEN_OP_MOD,
+        TOKEN_OP_AND,
+        TOKEN_OP_OR,
+        TOKEN_OP_XOR,
+        TOKEN_OP_NOT,
+        TOKEN_OP_SHL,
+        TOKEN_OP_SHR,
+        // ===========================================================
+        // // Commments
+        // TOKEN_LEFT_COMMENT,        // (*
+        // TOKEN_LEFT_CURLY_BRACKET,  // {
+        // TOKEN_RIGHT_COMMENT,       // *)
+        // TOKEN_RIGHT_CURLY_BRACKET, // }
         // Ponctuation
-        TOKEN_ASSIGN,              // :=
-        TOKEN_CARET,               // ^
-        TOKEN_COLON,               // :
-        TOKEN_COMMA,               // ,
-        TOKEN_DOT_DOT,             // ..
-        TOKEN_DOT,                 // .
-        TOKEN_SEMI_COLON,          // ;
-        TOKEN_LEFT_PARENTHESIS,    // (
-        TOKEN_RIGHT_PARENTHESIS,   // )
-        TOKEN_LEFT_BRACKET,        // [
-        TOKEN_RIGHT_BRACKET,       // ]
-        TOKEN_LEFT_CURLY_BRACKET,  // {
-        TOKEN_RIGHT_CURLY_BRACKET, // }
-        TOKEN_DOLLAR,              // $
-        TOKEN_LEFT_COMMENT,        // (*
-        TOKEN_RIGHT_COMMENT,       // *)
-        // Operators
-        TOKEN_ADD,      // +
-        TOKEN_SUB,      // -
-        TOKEN_MUL,      // *
-        TOKEN_DIV_REAL, // /
-        TOKEN_DIV,      // DIV
-        TOKEN_MOD,      // MOD
-        // Comparison operators
-        TOKEN_EQUALS,                // =
-        TOKEN_NOT_EQUALS,            // <>
-        TOKEN_LESS_THAN,             // <
-        TOKEN_LESS_OR_EQUAL_THAN,    // <=
-        TOKEN_GREATER_THAN,          // >
-        TOKEN_GREATER_OR_EQUAL_THAN, // >=
-        // Logical operators
-        TOKEN_AND, // AND
-        TOKEN_OR,  // OR
-        TOKEN_XOR, // XOR
-        TOKEN_NOT, // NOT
-        TOKEN_SHL, // SHL
-        TOKEN_SHR, // SHR
+        TOKEN_ASSIGN,            // :=
+        TOKEN_CARET,             // ^
+        TOKEN_COLON,             // :
+        TOKEN_COMMA,             // ,
+        TOKEN_DOLLAR,            // $
+        TOKEN_DOT_DOT,           // ..
+        TOKEN_DOT,               // .
+        TOKEN_LEFT_BRACKET,      // [
+        TOKEN_LEFT_PARENTHESIS,  // (
+        TOKEN_RIGHT_BRACKET,     // ]
+        TOKEN_RIGHT_PARENTHESIS, // )
+        TOKEN_SEMI_COLON,        // ;
+        TOKEN_OP_ADD,            // +
+        TOKEN_OP_SUB,            // -
+        TOKEN_OP_MUL,            // *
+        TOKEN_OP_DIV_REAL,       // /
+        TOKEN_OP_EQ,             // =
+        TOKEN_OP_NE,             // <>
+        TOKEN_OP_LT,             // <
+        TOKEN_OP_LE,             // <=
+        TOKEN_OP_GT,             // >
+        TOKEN_OP_GE,             // >=
     } token_type_t;
 
     typedef struct _token_t
@@ -138,7 +139,8 @@ extern "C"
         {
             char identifier[MAX_IDENTIFIER + 1];
             ps_integer_t i;
-            PS_REAL r;
+            ps_unsigned_t u;
+            ps_real_t r;
             ps_char_t c;
             ps_char_t s[ps_string_max + 1];
         } value;
@@ -151,6 +153,8 @@ extern "C"
     } keyword_t;
 
     extern keyword_t keywords[];
+
+    token_type_t ps_token_is_keyword(char *text);
 
 #ifdef __cplusplus
 }

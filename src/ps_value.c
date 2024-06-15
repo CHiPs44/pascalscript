@@ -41,18 +41,21 @@ ps_value_t *ps_value_char(ps_value_t *value, ps_char_t data)
     return value;
 }
 
-ps_value_t *ps_value_string(ps_value_t *value, ps_char_t *data)
+ps_value_t *ps_value_string(ps_value_t *value, ps_string_t data)
 {
     value->type = PS_TYPE_STRING;
     value->size = ps_string_max + 1;
-    strncpy(value->data.s, data, ps_string_max);
+    if (data.len > ps_string_max)
+        return NULL;
+    value->data.s.len = data.len;
+    strncpy(value->data.s.str, data.str, data.len);
     return value;
 }
 
-ps_value_t *ps_value_real(ps_value_t *value, PS_REAL data)
+ps_value_t *ps_value_real(ps_value_t *value, ps_real_t data)
 {
     value->type = PS_TYPE_REAL;
-    value->size = sizeof(PS_REAL);
+    value->size = sizeof(ps_real_t);
     value->data.r = data;
     return value;
 }
@@ -65,15 +68,15 @@ ps_value_t *ps_value_pointer(ps_value_t *value, void *data)
     return value;
 }
 
-char *value_get_type_name(ps_type_t type)
+char *ps_value_get_type_name(ps_type_t type)
 {
     char *type_name;
     switch (type)
     {
-    case PS_TYPE_ERROR:
-        type_name = "ERROR";
-        break;
-    case PS_TYPE_NONE:
+    // case PS_TYPE_ERROR:
+    //     type_name = "ERROR";
+    //     break;
+    case PS_TYPE_NIL:
         type_name = "NONE";
         break;
     case PS_TYPE_INTEGER:
@@ -97,19 +100,19 @@ char *value_get_type_name(ps_type_t type)
     case PS_TYPE_POINTER:
         type_name = "POINTER";
         break;
-    // default:
-    //     type_name = "?";
-    //     break;
+        // default:
+        //     type_name = "?";
+        //     break;
     }
     return type_name;
 }
 
-char *value_get_value(ps_value_t *value)
+char *ps_value_get_value(ps_value_t *value)
 {
     static char buffer[258 + 1];
     switch (value->type)
     {
-    case PS_TYPE_NONE:
+    case PS_TYPE_NIL:
         snprintf(buffer, 258, "[none]");
         break;
     case PS_TYPE_INTEGER:
@@ -128,7 +131,7 @@ char *value_get_value(ps_value_t *value)
         snprintf(buffer, 258, "'%c' / 0x%02x", value->data.c, value->data.c);
         break;
     case PS_TYPE_STRING:
-        snprintf(buffer, 258, "\"%s\"", value->data.s);
+        snprintf(buffer, 258, "\"%s\"", value->data.s.str);
         break;
     case PS_TYPE_POINTER:
         snprintf(buffer, 258, "%p", value->data.p);
@@ -140,10 +143,10 @@ char *value_get_value(ps_value_t *value)
     return buffer;
 }
 
-void value_dump(ps_value_t *value)
+void ps_value_dump(ps_value_t *value)
 {
-    char *type_name = value_get_type_name(value->type);
-    char *buffer = value_get_value(value);
+    char *type_name = ps_value_get_type_name(value->type);
+    char *buffer = ps_value_get_value(value);
     fprintf(stderr,
             "VALUE: type=%s, size=%ld, value=%s\n",
             type_name, value->size, buffer);

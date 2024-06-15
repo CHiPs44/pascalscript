@@ -76,7 +76,7 @@ char *error_get_message(error_t code)
         return "Constant can't be changed";
     case RUNTIME_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
-    case RUNTIME_ERROR_EXPECTED_NUMBER:
+    case RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL:
         return "Number expected";
     case RUNTIME_ERROR_EXPECTED_INTEGER:
         return "Integer expected";

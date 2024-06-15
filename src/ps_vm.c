@@ -117,6 +117,19 @@ symbol_t *vm_stack_pop(vm_t *vm)
     return symbol_stack_pop(&vm->stack);
 }
 
+symbol_t *vm_auto_add_value(vm_t *vm, ps_value_t *value)
+{
+    symbol_t symbol;
+    strcpy(symbol.name, "");
+    symbol.kind = KIND_AUTO;
+    symbol.scope = PS_SCOPE_GLOBAL;
+    symbol.value.type = PS_TYPE_INTEGER;
+    symbol.value.size = sizeof(ps_integer_t);
+    symbol.value.data.i = value;
+    int index = symbol_table_add(&vm->symbols, &symbol);
+    return index >= 0 ? &vm->symbols.symbols[index] : NULL;
+}
+
 symbol_t *vm_auto_add_integer(vm_t *vm, ps_integer_t value)
 {
     symbol_t symbol;
@@ -175,10 +188,10 @@ error_t vm_exec_assign(vm_t *vm)
         return RUNTIME_ERROR_ASSIGN_TO_CONST;
     if (variable->kind != KIND_VARIABLE)
         return RUNTIME_ERROR_EXPECTED_VARIABLE;
-    if (variable->type != value->type)
+    if (variable->value.type != value->value.type)
         return RUNTIME_ERROR_TYPE_MISMATCH;
     variable->value = value->value;
-    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.i);
+    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.data.i);
     return RUNTIME_ERROR_NONE;
 }
 
