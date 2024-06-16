@@ -21,6 +21,9 @@
         "ps_value.h": "c",
         "ps_vm.h": "c",
         "typesizes.h": "c",
-        "ps_vm_operator.h": "c"
+        "ps_vm_operator.h": "c",
+        "stdlib.h": "c",
+        "ps_token.h": "c",
+        "ps_parser.h": "c"
     }
 }

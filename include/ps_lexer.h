@@ -11,9 +11,9 @@
 
 #include "ps_config.h"
 #include "ps_error.h"
-#include "ps_lexer.h"
+#include "ps_buffer.h"
 #include "ps_token.h"
-#include "ps_vm.h"
+// #include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -29,9 +29,9 @@ extern "C"
         error_t error;
     } lexer_t;
 
-    void lexer_init(lexer_t *lexer);
-    extern void lexer_dump_token(token_t *token);
-    // error_t lexer_read_token(lexer_t *lexer);
+    void ps_lexer_init(lexer_t *lexer);
+    void ps_token_dump(token_t *token);
+    error_t lexer_read_token(lexer_t *lexer);
     error_t lexer_skip_whitespace_and_comments(lexer_t *lexer);
     bool lexer_read_identifier_or_keyword(lexer_t *lexer);
     bool lexer_read_number(lexer_t *lexer);

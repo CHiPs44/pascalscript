@@ -34,12 +34,12 @@ int main(void)
     symbol_t *n5678 = vm_auto_add_integer(vm, 5678);
     vm_stack_push(vm, n1234);
     vm_stack_push(vm, n5678);
-    symbol_stack_dump(&vm->stack, "3 PUSH?");
+    ps_symbol_stack_dump(&vm->stack, "3 PUSH?");
     code = vm_exec_op_binary(vm, OP_ADD);
     printf("TEST VM #03 BINARY: 6912; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
     code = vm_exec_assign(vm);
     vm_auto_gc(vm);
-    symbol_stack_dump(&vm->stack, "3 POP?");
+    ps_symbol_stack_dump(&vm->stack, "3 POP?");
     symbol_table_dump(&vm->symbols, "I=6912?");
     printf("TEST VM #03 BINARY: I := 1234 + 5678 = 6912; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
     printf("TEST VM #03 BINARY: END\n");

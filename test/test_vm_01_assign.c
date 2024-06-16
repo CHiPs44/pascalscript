@@ -37,10 +37,10 @@ int main(void)
     symbol_t *three = vm_auto_add_integer(vm, 3);
     vm_stack_push(vm, vm_global_get(vm, "I"));
     vm_stack_push(vm, three);
-    symbol_stack_dump(&vm->stack, "2 PUSH?");
+    ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
     vm_auto_gc(vm);
-    symbol_stack_dump(&vm->stack, "2 POP?");
+    ps_symbol_stack_dump(&vm->stack, "2 POP?");
     symbol_table_dump(&vm->symbols, "I=3?");
     printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
 
@@ -52,10 +52,10 @@ int main(void)
     symbol_t *_5678 = vm_auto_add_integer(vm, 5678);
     vm_stack_push(vm, vm_global_get(vm, "K"));
     vm_stack_push(vm, _5678);
-    symbol_stack_dump(&vm->stack, "2 PUSH?");
+    ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
     vm_auto_gc(vm);
-    symbol_stack_dump(&vm->stack, "2 POP?");
+    ps_symbol_stack_dump(&vm->stack, "2 POP?");
     symbol_table_dump(&vm->symbols, "K=1234?");
     printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == RUNTIME_ERROR_TYPE_MISMATCH ? "OK" : "KO", code);
 

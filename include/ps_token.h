@@ -8,6 +8,7 @@
 #define _PS_TOKEN_H
 
 #include "ps_config.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -42,30 +43,26 @@ extern "C"
     {
         TOKEN_NONE = 0,
         TOKEN_END_OF_FILE,
-        // Number values                   Size     Mini / maxi
-        TOKEN_INTEGER_VALUE,          // 2 / 4    -32768..32767 / -2,147,483,648..2,147,483,647
-        TOKEN_CARDINAL_VALUE, // 2 / 4    0..65,535 / 0..4,294,967,295
-        TOKEN_REAL_VALUE,             // 4 / 8    +/- 1.5E-45 .. 3.4E38 / 5.0E-324..1.7E308
+        // Numeric values         size  mini / maxi
+        //                       ----- ---------------------------------------------
+        TOKEN_INTEGER_VALUE,  // 2 / 4 -32768..32767 / -2,147,483,648..2,147,483,647
+        TOKEN_CARDINAL_VALUE, // 2 / 4 0..65,535 / 0..4,294,967,295
+        TOKEN_REAL_VALUE,     // 4 / 8 +/- 1.5E-45 .. 3.4E38 / 5.0E-324..1.7E308
         // Other value types
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
-        // Identifier
+        // Identifier2047
         TOKEN_IDENTIFIER,
         // Reserved words
         // ==============================
-        TOKEN_RESERVED_WORDS = 2047,
+        TOKEN_RESERVED_WORDS = 127,
         TOKEN_PROGRAM,
         TOKEN_CONST,
         // TOKEN_TYPE,
         TOKEN_VAR,
-        // TOKEN_FUNCTION,
-        // TOKEN_PROCEDURE,
+        // TOKEN_FUNCTION / TOKEN_PROCEDURE
         TOKEN_BEGIN,
         TOKEN_END,
-        // TOKEN_ARRAY,
-        // TOKEN_SET,
-        // TOKEN_RECORD,
-        // TOKEN_OF,
         TOKEN_INTEGER,
         TOKEN_CARDINAL,
         TOKEN_BOOLEAN,
@@ -73,26 +70,14 @@ extern "C"
         TOKEN_STRING,
         TOKEN_FALSE,
         TOKEN_TRUE,
-        // TOKEN_WITH,
-        // TOKEN_IF,
-        // TOKEN_THEN,
-        // TOKEN_ELSE,
-        // TOKEN_DO,
-        // TOKEN_WHILE,
-        // TOKEN_REPEAT,
-        // TOKEN_UNTIL,
-        // TOKEN_FOR,
-        // TOKEN_TO,
-        // TOKEN_DOWNTO,
-        // TOKEN_IN,
-        // TOKEN_CASE,
-        // TOKEN_OTHERWISE,
-        // TOKEN_GOTO,
-        // TOKEN_LABEL,
-        // TOKEN_UNIT,
-        // TOKEN_USES,
-        // TOKEN_INTERFACE,
-        // TOKEN_IMPLEMENTATION,
+        // TOKEN_NIL,
+        // TOKEN_ARRAY / TOKEN_OF / TOKEN_SET / TOKEN_RECORD / TOKEN_WITH / TOKEN_FILE
+        // TOKEN_IF / TOKEN_THEN / TOKEN_ELSE
+        // TOKEN_DO / TOKEN_WHILE
+        // TOKEN_REPEAT / TOKEN_UNTIL
+        // TOKEN_FOR / TOKEN_TO / TOKEN_DOWNTO / TOKEN_IN
+        // TOKEN_CASE / TOKEN_GOTO / TOKEN_LABEL
+        // TOKEN_UNIT / TOKEN_USES / TOKEN_INTERFACE / TOKEN_IMPLEMENTATION
         TOKEN_OP_DIV_INT,
         TOKEN_OP_MOD,
         TOKEN_OP_AND,
@@ -108,11 +93,13 @@ extern "C"
         // TOKEN_RIGHT_COMMENT,       // *)
         // TOKEN_RIGHT_CURLY_BRACKET, // }
         // Ponctuation
+        // TOKEN_AMPERSAND,         // & => Octal
+        // TOKEN_AMPERSAND,         // & => Octal
+        // TOKEN_DOLLAR,            // $ => Hexadecimal
         TOKEN_ASSIGN,            // :=
         TOKEN_CARET,             // ^
         TOKEN_COLON,             // :
         TOKEN_COMMA,             // ,
-        TOKEN_DOLLAR,            // $
         TOKEN_DOT_DOT,           // ..
         TOKEN_DOT,               // .
         TOKEN_LEFT_BRACKET,      // [
@@ -120,16 +107,18 @@ extern "C"
         TOKEN_RIGHT_BRACKET,     // ]
         TOKEN_RIGHT_PARENTHESIS, // )
         TOKEN_SEMI_COLON,        // ;
-        TOKEN_OP_ADD,            // +
-        TOKEN_OP_SUB,            // -
-        TOKEN_OP_MUL,            // *
-        TOKEN_OP_DIV_REAL,       // /
-        TOKEN_OP_EQ,             // =
-        TOKEN_OP_NE,             // <>
-        TOKEN_OP_LT,             // <
-        TOKEN_OP_LE,             // <=
-        TOKEN_OP_GT,             // >
-        TOKEN_OP_GE,             // >=
+        // Arithmetic operators
+        TOKEN_OP_ADD,      // +
+        TOKEN_OP_SUB,      // -
+        TOKEN_OP_MUL,      // *
+        TOKEN_OP_DIV_REAL, // /
+        // Comparison operators
+        TOKEN_OP_EQ, // =
+        TOKEN_OP_NE, // <>
+        TOKEN_OP_LT, // <
+        TOKEN_OP_LE, // <=
+        TOKEN_OP_GT, // >
+        TOKEN_OP_GE, // >=
     } token_type_t;
 
     typedef struct _token_t

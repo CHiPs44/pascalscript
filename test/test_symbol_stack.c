@@ -35,36 +35,36 @@ int main(void)
     ps_value_string(&constant5.value, string5);
 
     printf("TEST SYMBOL STACK: BEGIN\n");
-    symbol_stack_init(&stack);
+    ps_symbol_stack_init(&stack);
     printf("TEST SYMBOL STACK: INIT OK\n");
-    symbol_stack_dump(&stack, "Test");
+    ps_symbol_stack_dump(&stack, "Test");
     printf("TEST SYMBOL STACK: DUMP OK\n");
     // Pop from empty stack => NULL
-    symbol = symbol_stack_pop(&stack);
+    symbol = ps_symbol_stack_pop(&stack);
     printf("TEST SYMBOL STACK: POP %s %p\n", symbol == NULL ? "OK" : "KO", symbol);
     // Push value => index 0
-    result = symbol_stack_push(&stack, &constant1);
+    result = ps_symbol_stack_push(&stack, &constant1);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 0 ? "OK" : "KO", result);
-    symbol_stack_dump(&stack, "Test");
+    ps_symbol_stack_dump(&stack, "Test");
     printf("TEST SYMBOL STACK: DUMP OK\n");
     // Push 3 values => indexes 1, 2 & 3
-    result = symbol_stack_push(&stack, &variable2);
+    result = ps_symbol_stack_push(&stack, &variable2);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 1 ? "OK" : "KO", result);
-    result = symbol_stack_push(&stack, &constant3);
+    result = ps_symbol_stack_push(&stack, &constant3);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 2 ? "OK" : "KO", result);
-    result = symbol_stack_push(&stack, &constant4);
+    result = ps_symbol_stack_push(&stack, &constant4);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 3 ? "OK" : "KO", result);
-    result = symbol_stack_push(&stack, &constant5);
+    result = ps_symbol_stack_push(&stack, &constant5);
     printf("TEST SYMBOL STACK: PUSH %s %d\n", result == 4 ? "OK" : "KO", result);
-    symbol_stack_dump(&stack, "Test");
+    ps_symbol_stack_dump(&stack, "Test");
     printf("TEST SYMBOL STACK: DUMP OK\n");
     // Pop 2 values => constant4 & constant3
-    symbol = symbol_stack_pop(&stack);
+    symbol = ps_symbol_stack_pop(&stack);
     printf("TEST SYMBOL STACK: POP %s %p\n", symbol == &constant4 ? "OK" : "KO", symbol);
-    symbol = symbol_stack_pop(&stack);
+    symbol = ps_symbol_stack_pop(&stack);
     printf("TEST SYMBOL STACK: POP %s %p\n", symbol == &constant3 ? "OK" : "KO", symbol);
     // This is the end
-    symbol_stack_dump(&stack, "Test");
+    ps_symbol_stack_dump(&stack, "Test");
     printf("TEST SYMBOL STACK: DUMP OK\n");
     printf("TEST SYMBOL STACK: END\n");
 

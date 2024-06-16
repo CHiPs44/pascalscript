@@ -28,14 +28,14 @@ typedef struct _symbol_stack_t
     symbol_t *symbols[SYMBOL_STACK_SIZE];
 } symbol_stack_t;
 
-void      symbol_stack_init(symbol_stack_t *stack);
-int       symbol_stack_size(symbol_stack_t *stack);
-bool      symbol_stack_full(symbol_stack_t *stack);
-void      symbol_stack_dump(symbol_stack_t *stack, char *title);
-int       symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol);
-symbol_t *symbol_stack_pop (symbol_stack_t *stack);
-int       symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol);
-symbol_t *symbol_stack_peek(symbol_stack_t *stack);
+void      ps_symbol_stack_init(symbol_stack_t *stack);
+int       ps_symbol_stack_size(symbol_stack_t *stack);
+bool      ps_symbol_stack_full(symbol_stack_t *stack);
+void      ps_symbol_stack_dump(symbol_stack_t *stack, char *title);
+int       ps_symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol);
+symbol_t *ps_symbol_stack_pop (symbol_stack_t *stack);
+bool      ps_symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol);
+symbol_t *ps_symbol_stack_peek(symbol_stack_t *stack);
 
 #ifdef __cplusplus
 }

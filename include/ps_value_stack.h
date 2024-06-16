@@ -16,8 +16,8 @@ extern "C"
 {
 #endif
 
-#ifndef VALUE_STACKSIZE
-#define VALUE_STACKSIZE 256
+#ifndef VALUE_STACK_SIZE
+#define VALUE_STACK_SIZE 256
 #endif
 
 #define VALUE_STACKERROR_OVERFLOW -2
@@ -25,7 +25,7 @@ extern "C"
     typedef struct _value_stack_t
     {
         int sp;
-        ps_value_t *values[VALUE_STACKSIZE];
+        ps_value_t *values[VALUE_STACK_SIZE];
     } ps_value_stack_t;
 
     void ps_value_stack_init(ps_value_stack_t *stack);

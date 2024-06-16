@@ -12,7 +12,7 @@
 #include "ps_config.h"
 #include "ps_error.h"
 #include "ps_token.h"
-#include "ps_parser.h"
+#include "ps_lexer.h"
 
 #ifdef __cplusplus
 extern "C"

@@ -13,10 +13,10 @@
 #include "ps_parser.h"
 #include "ps_symbol_table.h"
 #include "ps_symbol.h"
-#include "ps_vm.h"
+// #include "ps_vm.h"
 
-vm_t _vm;
-vm_t *vm = &_vm;
+// vm_t _vm;
+// vm_t *vm = &_vm;
 
 char *minimal =
     "PROGRAM Minimal;\n"
@@ -42,7 +42,7 @@ char *hello =
 int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
-  vm_init(vm);
+  // vm_init(vm);
   symbol_table_dump(&vm->symbols, "Init");
   symbol_t *ps_version = vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",

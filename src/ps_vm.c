@@ -68,7 +68,7 @@ void vm_init(vm_t *vm)
     ps_value_real(&symbol.value, 3.141592653589793);
     symbol_table_add(&vm->symbols, &symbol);
     /* Stack */
-    symbol_stack_init(&vm->stack);
+    ps_symbol_stack_init(&vm->stack);
 }
 
 /**
@@ -109,12 +109,12 @@ int vm_global_delete(vm_t *vm, char *name)
 
 int vm_stack_push(vm_t *vm, symbol_t *symbol)
 {
-    return symbol_stack_push(&vm->stack, symbol);
+    return ps_symbol_stack_push(&vm->stack, symbol);
 }
 
 symbol_t *vm_stack_pop(vm_t *vm)
 {
-    return symbol_stack_pop(&vm->stack);
+    return ps_symbol_stack_pop(&vm->stack);
 }
 
 symbol_t *vm_auto_add_value(vm_t *vm, ps_value_t *value)

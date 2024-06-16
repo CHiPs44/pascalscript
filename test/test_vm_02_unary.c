@@ -34,11 +34,11 @@ int main(void)
     vm_stack_push(vm, three);
     code = vm_exec_op_unary(vm, OP_NEG);
     printf("TEST VM #02 UNARY: -3; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
-    symbol_stack_dump(&vm->stack, "2 PUSH?");
+    ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
     // int count = 
     vm_auto_gc(vm);
-    symbol_stack_dump(&vm->stack, "2 POP?");
+    ps_symbol_stack_dump(&vm->stack, "2 POP?");
     symbol_table_dump(&vm->symbols, "I=-3?");
     printf("TEST VM #02 UNARY: I := -3; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
     printf("TEST VM #02 UNARY: END\n");

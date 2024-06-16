@@ -16,43 +16,43 @@
 #include "ps_buffer.h"
 #include "ps_token.h"
 
-void lexer_dump_token(token_t *token)
+void ps_token_dump(token_t *token)
 {
     char *type;
-    char value[256];
+    char buffer[256];
 
     switch (token->type)
     {
     case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(value, 256, "%s", token->value.identifier);
+        snprintf(buffer, 256, "%s", token->value.identifier);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(value, 256, "%d", token->value.i);
+        snprintf(buffer, 256, "%d", token->value.i);
         break;
     case TOKEN_CARDINAL_VALUE:
-        type = "UNSIGNED";
-        snprintf(value, 256, "%u", token->value.u);
+        type = "CARDINAL";
+        snprintf(buffer, 256, "%u", token->value.u);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(value, 256, "%f", token->value.r);
+        snprintf(buffer, 256, "%f", token->value.r);
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(value, 256, "%c", token->value.c);
+        snprintf(buffer, 256, "%c", token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(value, 256, "%s", token->value.s);
+        snprintf(buffer, 256, "%s", token->value.s);
         break;
     default:
         type = "UNKNOWN";
-        snprintf(value, 256, "%s", "?");
+        snprintf(buffer, 256, "%s", "?");
         break;
     }
-    fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, value);
+    fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, buffer);
 }
 
 void lexer_reset_cursor(lexer_t *lexer)
@@ -232,16 +232,6 @@ bool lexer_read_number(lexer_t *lexer)
     }
     lexer->current_token.type = TOKEN_NONE;
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
-}
-
-bool parser_expect_token_type(lexer_t *lexer, token_type_t token_type)
-{
-    if (lexer->current_token.type != token_type)
-    {
-        lexer->error = LEXER_ERROR_UNEXPECTED_TOKEN;
-        return false;
-    }
-    return true;
 }
 
 // error_t lexer_expect_token_types(lexer_t *lexer, size_t token_type_count, token_type_t token_type[])
