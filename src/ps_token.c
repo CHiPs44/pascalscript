@@ -56,5 +56,5 @@ token_type_t ps_token_is_keyword(char *text)
             return keywords[i].token;
         }
     }
-    return TOKEN_NONE;
+    return TOKEN_IDENTIFIER;
 }

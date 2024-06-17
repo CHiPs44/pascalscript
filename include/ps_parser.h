@@ -22,7 +22,6 @@ extern "C"
     typedef struct _parser_t
     {
         lexer_t lexer;
-        token_t current_token;
         error_t error;
     } parser_t;
 

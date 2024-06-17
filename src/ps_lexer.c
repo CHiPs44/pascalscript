@@ -12,9 +12,9 @@
 #include <string.h>
 
 #include "ps_error.h"
-#include "ps_lexer.h"
 #include "ps_buffer.h"
 #include "ps_token.h"
+#include "ps_lexer.h"
 
 void ps_token_dump(token_t *token)
 {
@@ -207,6 +207,7 @@ bool lexer_read_identifier_or_keyword(lexer_t *lexer)
 
 bool lexer_read_number(lexer_t *lexer)
 {
+    char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
 
@@ -232,6 +233,60 @@ bool lexer_read_number(lexer_t *lexer)
     }
     lexer->current_token.type = TOKEN_NONE;
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
+}
+
+error_t lexer_read_token(lexer_t *lexer)
+{
+
+    error_t error;
+    char c;
+
+    error = lexer_skip_whitespace_and_comments(lexer);
+    if (error != LEXER_ERROR_NONE)
+        return error;
+
+    c = lexer_peek_char(lexer);
+    if (isdigit(c))
+        error = lexer_read_number(lexer);
+    else if (isalnum(c))
+    {
+        if (lexer_read_identifier_or_keyword(lexer))
+        {
+            lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
+        }
+    }
+    else
+    {
+        switch (c)
+        {
+        case ':':
+            lexer->current_token.type = TOKEN_COLON;
+            break;
+        case ',':
+            lexer->current_token.type = TOKEN_COMMA;
+            break;
+        case '.':
+            lexer->current_token.type = TOKEN_DOT;
+            break;
+        case '(':
+            lexer->current_token.type = TOKEN_LEFT_PARENTHESIS;
+            break;
+        case ')':
+            lexer->current_token.type = TOKEN_RIGHT_PARENTHESIS;
+            break;
+        case ';':
+            lexer->current_token.type = TOKEN_SEMI_COLON;
+            break;
+        default:
+            error = LEXER_ERROR_UNEXPECTED_CHARACTER;
+            break;
+        }
+    }
+    if (error != LEXER_ERROR_NONE)
+    {
+        lexer->error = error;
+        return error;
+    }
 }
 
 // error_t lexer_expect_token_types(lexer_t *lexer, size_t token_type_count, token_type_t token_type[])

@@ -59,14 +59,6 @@ extern "C"
 
     void buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
 
-    void lexer_reset_cursor(buffer_t *buffer);
-
-    char buffer_reset_cursor(buffer_t *buffer);
-
-    char lexer_read_next_char(buffer_t *buffer);
-
-    char buffer_peek_next_char(buffer_t *buffer);
-
 #ifdef __cplusplus
 }
 #endif

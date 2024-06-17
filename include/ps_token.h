@@ -96,15 +96,15 @@ extern "C"
         // TOKEN_AMPERSAND,         // & => Octal
         // TOKEN_AMPERSAND,         // & => Octal
         // TOKEN_DOLLAR,            // $ => Hexadecimal
-        TOKEN_ASSIGN,            // :=
-        TOKEN_CARET,             // ^
-        TOKEN_COLON,             // :
-        TOKEN_COMMA,             // ,
-        TOKEN_DOT_DOT,           // ..
-        TOKEN_DOT,               // .
-        TOKEN_LEFT_BRACKET,      // [
-        TOKEN_LEFT_PARENTHESIS,  // (
-        TOKEN_RIGHT_BRACKET,     // ]
+        TOKEN_ASSIGN, // :=
+        // TOKEN_CARET,             // ^
+        TOKEN_COLON, // :
+        TOKEN_COMMA, // ,
+        // TOKEN_DOT_DOT,           // ..
+        TOKEN_DOT, // .
+        // TOKEN_LEFT_BRACKET,      // [
+        TOKEN_LEFT_PARENTHESIS, // (
+        // TOKEN_RIGHT_BRACKET,     // ]
         TOKEN_RIGHT_PARENTHESIS, // )
         TOKEN_SEMI_COLON,        // ;
         // Arithmetic operators
@@ -131,7 +131,7 @@ extern "C"
             ps_unsigned_t u;
             ps_real_t r;
             ps_char_t c;
-            ps_char_t s[ps_string_max + 1];
+            ps_char_t s[PS_STRING_MAX + 1];
         } value;
     } token_t;
 
@@ -141,8 +141,9 @@ extern "C"
         char *keyword;
     } keyword_t;
 
-    extern keyword_t keywords[];
+    void ps_token_dump(token_t *token);
 
+    extern keyword_t keywords[];
     token_type_t ps_token_is_keyword(char *text);
 
 #ifdef __cplusplus
