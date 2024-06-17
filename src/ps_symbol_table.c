@@ -132,8 +132,8 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
     table->symbols[index].value.size = symbol->value.size;
     if (symbol->value.type == PS_TYPE_STRING)
     {
-        strncpy(&(table->symbols[index].value.data),
-                &symbol->value.data,
+        strncpy(table->symbols[index].value.data.s.str,
+                symbol->value.data.s.str,
                 ps_string_max);
     }
     else

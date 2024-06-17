@@ -47,6 +47,9 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Crafting Interpreters", by Robert Nystrom, <https://craftinginterpreters.com/> / <https://github.com/munificent/craftinginterpreters>
 - "The Charly programming language", by Leonard Schütz, <https://leonardschuetz.ch/blog/charly-lang-interpreter/>
 - "Let’s Build A Simple Interpreter", by Ruslan Spivak, <https://ruslanspivak.com/lsbasi-part1/>
+- AST in C:
+  - <https://keleshev.com/abstract-syntax-tree-an-example-in-c/>
+  - <>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 
