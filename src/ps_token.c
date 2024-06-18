@@ -51,6 +51,7 @@ token_type_t ps_token_is_keyword(char *text)
     // TODO? dichotomic search instead of sequential one
     for (int i = 0; i < sizeof(keywords) / sizeof(keyword_t); i += 1)
     {
+        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", text, keywords[i].keyword);
         if (strcmp(text, keywords[i].keyword) == 0)
         {
             return keywords[i].token;

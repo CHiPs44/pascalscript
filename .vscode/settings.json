@@ -24,6 +24,7 @@
         "ps_vm_operator.h": "c",
         "stdlib.h": "c",
         "ps_token.h": "c",
-        "ps_parser.h": "c"
+        "ps_parser.h": "c",
+        "limits.h": "c"
     }
 }

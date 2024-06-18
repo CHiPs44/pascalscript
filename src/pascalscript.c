@@ -48,15 +48,15 @@ int main(int argc, char *argv[])
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
-  if (!buffer_set_text(vm, minimal, strlen(minimal)))
-  // if (!buffer_set_text(vm, hello, strlen(hello)))
-  // if (!buffer_load_file(vm,"examples/00-hello.pas"))
+  if (!ps_buffer_set_text(vm, minimal, strlen(minimal)))
+  // if (!ps_buffer_set_text(vm, hello, strlen(hello)))
+  // if (!ps_buffer_load_file(vm,"examples/00-hello.pas"))
   {
     printf("Not loaded!\n");
     return 1;
   }
   printf("Loaded!\n");
-  buffer_dump(vm, 0, BUFFER_MAX_LINES);
+  ps_buffer_dump(vm, 0, BUFFER_MAX_LINES);
   printf("Listed!\n");
   parser_start(vm);
   return 0;

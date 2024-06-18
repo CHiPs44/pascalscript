@@ -31,13 +31,13 @@ extern "C"
     } lexer_t;
 
     void ps_lexer_init(lexer_t *lexer);
-    void lexer_reset_cursor(buffer_t *buffer);
-    char lexer_read_next_char(buffer_t *buffer);
-    char lexer_peek_next_char(buffer_t *buffer);
-    error_t lexer_read_token(lexer_t *lexer);
-    error_t lexer_skip_whitespace_and_comments(lexer_t *lexer);
-    bool lexer_read_identifier_or_keyword(lexer_t *lexer);
-    bool lexer_read_number(lexer_t *lexer);
+    void ps_lexer_reset_cursor(lexer_t *lexer);
+    char ps_lexer_read_next_char(lexer_t *lexer);
+    char lexer_peek_next_char(lexer_t *lexer);
+    error_t ps_lexer_read_next_token(lexer_t *lexer);
+    error_t ps_lexer_skip_whitespace_and_comments(lexer_t *lexer);
+    bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer);
+    bool ps_lexer_read_number(lexer_t *lexer);
 
 #ifdef __cplusplus
 }

@@ -16,6 +16,14 @@
 #include "ps_token.h"
 #include "ps_lexer.h"
 
+void ps_lexer_init(lexer_t *lexer)
+{
+    ps_buffer_init(&lexer->buffer);
+    ps_lexer_reset_cursor(lexer);
+    lexer->error = LEXER_ERROR_NONE;
+    lexer->current_token.type = TOKEN_NONE;
+}
+
 void ps_token_dump(token_t *token)
 {
     char *type;
@@ -55,20 +63,35 @@ void ps_token_dump(token_t *token)
     fprintf(stderr, "TOKEN: type=%s, value=%s\n", type, buffer);
 }
 
-void lexer_reset_cursor(lexer_t *lexer)
+void ps_lexer_reset_cursor(lexer_t *lexer)
 {
     lexer->current_line = 0;
     lexer->current_column = 0;
     lexer->current_char = '\0';
 }
 
-char lexer_peek_char(lexer_t *lexer)
+char ps_lexer_peek_char(lexer_t *lexer)
 {
+    // printf("lexer_peek_char: char=%c alpha=%d, alnum=%d, digit=%d\n", lexer->current_char, isalpha(lexer->current_char), isalnum(lexer->current_char), isdigit(lexer->current_char));
     return lexer->current_char;
 }
 
-char lexer_read_next_char(lexer_t *lexer)
+char ps_lexer_peek_next_char(lexer_t *lexer)
 {
+    char next_char = '\0';
+    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
+    {
+        if (lexer->current_column >= 0 && lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
+        {
+            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
+        }
+    }
+    return next_char;
+}
+
+char ps_lexer_read_next_char(lexer_t *lexer)
+{
+    // printf("ps_lexer_read_next_char: line=%d, col=%d\n", lexer->current_line, lexer->current_column);
     if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
     {
         if (lexer->current_column >= 0 &&
@@ -84,105 +107,104 @@ char lexer_read_next_char(lexer_t *lexer)
             }
         }
     }
+    // printf("ps_lexer_read_next_char: char=%c\n", lexer->current_char);
     return lexer->current_char;
 }
 
-char buffer_peek_next_char(lexer_t *lexer)
-{
-    char next_char = '\0';
-    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
-    {
-        if (lexer->current_column >= 0 && lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
-        {
-            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
-        }
-    }
-    return next_char;
-}
-
-error_t lexer_skip_whitespace(lexer_t *lexer, bool *changed)
+error_t ps_lexer_skip_whitespace(lexer_t *lexer, bool *changed)
 {
     char c;
-    c = lexer_peek_char(lexer);
+    c = ps_lexer_peek_char(lexer);
     *changed = false;
     while (isspace(c))
     {
-        c = lexer_read_next_char(lexer);
+        c = ps_lexer_read_next_char(lexer);
         *changed = true;
     }
     return LEXER_ERROR_NONE;
 }
 
-error_t lexer_skip_comment1(lexer_t *lexer, bool *changed)
+error_t ps_lexer_skip_comment1(lexer_t *lexer, bool *changed)
 {
     char c;
-    c = lexer_peek_char(lexer);
+    c = ps_lexer_peek_char(lexer);
     *changed = false;
     if (c == '{')
     {
+        *changed = true;
         while (c != '}')
         {
-            c = lexer_read_next_char(lexer);
-            *changed = true;
+            c = ps_lexer_read_next_char(lexer);
             if (c == '\0')
             {
                 return LEXER_ERROR_UNEXPECTED_EOF;
             }
         }
+        ps_lexer_read_next_char(lexer);
     }
     return LEXER_ERROR_NONE;
 }
 
-error_t lexer_skip_comment2(lexer_t *lexer, bool *changed)
+error_t ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
 {
     char c1, c2;
-    c1 = lexer_peek_char(lexer);
-    c2 = buffer_peek_next_char(lexer);
+    c1 = ps_lexer_peek_char(lexer);
+    c2 = ps_lexer_peek_next_char(lexer);
     *changed = false;
     if (c1 == '(' && c2 == '*')
     {
-        while (c1 != '*' && c2 != ')')
+        // printf("ps_lexer_skip_comment2: BEGIN c1=%c, c2=%c\n", c1, c2);
+        *changed = true;
+        do
         {
-            c1 = lexer_read_next_char(lexer);
-            *changed = true;
-            if (c1 == '\0')
+            c1 = ps_lexer_read_next_char(lexer);
+            c2 = ps_lexer_peek_next_char(lexer);
+            if (c1 == '\0' || c2 == '\0')
             {
                 return LEXER_ERROR_UNEXPECTED_EOF;
             }
-            c2 = buffer_peek_next_char(lexer);
-        }
+            if (c1 == '*' && c2 == ')')
+            {
+                // printf("ps_lexer_skip_comment2: END c1='%c', c2='%c' %d %d\n", c1, c2, c1 == '*', c2 == ')');
+                break;
+            }
+        } while (true);
+        // Skip )
+        ps_lexer_read_next_char(lexer);
+        ps_lexer_read_next_char(lexer);
     }
     return LEXER_ERROR_NONE;
 }
 
-error_t lexer_skip_whitespace_and_comments(lexer_t *lexer)
+error_t ps_lexer_skip_whitespace_and_comments(lexer_t *lexer)
 {
-    error_t error;
     bool changed1 = true;
     bool changed2 = true;
     bool changed3 = true;
     while (changed1 || changed2 || changed3)
     {
-        error = lexer_skip_whitespace(lexer, &changed1);
-        if (error != LEXER_ERROR_NONE)
-            return error;
-        error = lexer_skip_comment1(lexer, &changed2);
-        if (error != LEXER_ERROR_NONE)
-            return error;
-        error = lexer_skip_comment2(lexer, &changed3);
-        if (error != LEXER_ERROR_NONE)
-            return error;
+        lexer->error = ps_lexer_skip_whitespace(lexer, &changed1);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return lexer->error;
+        lexer->error = ps_lexer_skip_comment1(lexer, &changed2);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return lexer->error;
+        lexer->error = ps_lexer_skip_comment2(lexer, &changed3);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return lexer->error;
     }
-    return LEXER_ERROR_NONE;
+    lexer->error = LEXER_ERROR_NONE;
+    return lexer->error;
 }
 
-bool lexer_read_identifier_or_keyword(lexer_t *lexer)
+bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
 {
+    // printf("ps_lexer_read_identifier_or_keyword\n");
     char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
 
-    c = lexer_peek_char(lexer);
+    c = ps_lexer_peek_char(lexer);
     if (isalpha(c))
     {
         do
@@ -194,24 +216,26 @@ bool lexer_read_identifier_or_keyword(lexer_t *lexer)
                 lexer->error = LEXER_ERROR_IDENTIFIER_TOO_LONG;
                 return false;
             }
-            c = lexer_read_next_char(lexer);
-        } while (isalnum(lexer));
-        // lexer->current_token.type = TOKEN_IDENTIFIER;
+            c = ps_lexer_read_next_char(lexer);
+            pos += 1;
+        } while (isalnum(c));
+        buffer[pos] = '\0';
+        // printf("ps_lexer_read_identifier_or_keyword: \"%s\" ('%c')\n", buffer, c);
+        lexer->current_token.type = ps_token_is_keyword(buffer);
         strcpy(lexer->current_token.value.identifier, buffer);
-        // TODO check for keyword
         return true;
     }
     lexer->current_token.type = TOKEN_NONE;
     return false;
 }
 
-bool lexer_read_number(lexer_t *lexer)
+bool ps_lexer_read_number(lexer_t *lexer)
 {
     char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
 
-    c = lexer_peek_char(lexer);
+    c = ps_lexer_peek_char(lexer);
     if (isdigit(c))
     {
         do
@@ -223,7 +247,7 @@ bool lexer_read_number(lexer_t *lexer)
                 lexer->error = LEXER_ERROR_OVERFLOW;
                 return false;
             }
-            c = lexer_read_next_char(lexer);
+            c = ps_lexer_read_next_char(lexer);
         } while (isdigit(lexer));
         lexer->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
@@ -235,60 +259,70 @@ bool lexer_read_number(lexer_t *lexer)
     return LEXER_ERROR_UNEXPECTED_CHARACTER;
 }
 
-error_t lexer_read_token(lexer_t *lexer)
+error_t ps_lexer_read_next_token(lexer_t *lexer)
 {
 
     error_t error;
     char c;
 
-    error = lexer_skip_whitespace_and_comments(lexer);
+    error = ps_lexer_skip_whitespace_and_comments(lexer);
     if (error != LEXER_ERROR_NONE)
         return error;
 
-    c = lexer_peek_char(lexer);
+    c = ps_lexer_peek_char(lexer);
     if (isdigit(c))
-        error = lexer_read_number(lexer);
+        error = ps_lexer_read_number(lexer);
     else if (isalnum(c))
     {
-        if (lexer_read_identifier_or_keyword(lexer))
+        if (ps_lexer_read_identifier_or_keyword(lexer))
         {
             lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
         }
     }
     else
     {
+        // printf("%c\n", c);
+        sprintf(lexer->current_token.value.identifier, "%c", c);
         switch (c)
         {
         case ':':
             lexer->current_token.type = TOKEN_COLON;
+            ps_lexer_read_next_char(lexer);
             break;
         case ',':
             lexer->current_token.type = TOKEN_COMMA;
+            ps_lexer_read_next_char(lexer);
             break;
         case '.':
             lexer->current_token.type = TOKEN_DOT;
+            ps_lexer_read_next_char(lexer);
             break;
         case '(':
             lexer->current_token.type = TOKEN_LEFT_PARENTHESIS;
+            ps_lexer_read_next_char(lexer);
             break;
         case ')':
             lexer->current_token.type = TOKEN_RIGHT_PARENTHESIS;
+            ps_lexer_read_next_char(lexer);
             break;
         case ';':
             lexer->current_token.type = TOKEN_SEMI_COLON;
+            ps_lexer_read_next_char(lexer);
             break;
+        case '=':
+            lexer->current_token.type = TOKEN_OP_EQ;
+            ps_lexer_read_next_char(lexer);
+            break;
+
         default:
             error = LEXER_ERROR_UNEXPECTED_CHARACTER;
             break;
         }
     }
-    if (error != LEXER_ERROR_NONE)
-    {
-        lexer->error = error;
-        return error;
-    }
+    lexer->error = error;
+    return error;
 }
 
-// error_t lexer_expect_token_types(lexer_t *lexer, size_t token_type_count, token_type_t token_type[])
+// error_t ps_lexer_expect_token_types(lexer_t *lexer, size_t token_type_count, token_type_t token_type[])
 
 /* EOF */

@@ -16,7 +16,7 @@
 #include "ps_readall.h"
 #include "ps_buffer.h"
 
-void buffer_init(buffer_t *buffer)
+void ps_buffer_init(buffer_t *buffer)
 {
     buffer->text = NULL;
     buffer->length = 0;
@@ -30,7 +30,7 @@ void buffer_init(buffer_t *buffer)
     buffer->error = BUFFER_ERROR_NONE;
 }
 
-bool buffer_scan_text(buffer_t *buffer)
+bool ps_buffer_scan_text(buffer_t *buffer)
 {
     int line = 0;
     int column = 0;
@@ -114,7 +114,7 @@ bool buffer_scan_text(buffer_t *buffer)
     return true;
 }
 
-bool buffer_load_file(buffer_t *buffer, char *filename)
+bool ps_buffer_load_file(buffer_t *buffer, char *filename)
 {
     FILE *input = fopen(filename, "r");
     if (input == NULL)
@@ -134,14 +134,14 @@ bool buffer_load_file(buffer_t *buffer, char *filename)
         return false;
     case READALL_OK:
         buffer->error = BUFFER_ERROR_NONE;
-        return buffer_scan_text(buffer);
+        return ps_buffer_scan_text(buffer);
     default:
         buffer->error = BUFFER_ERROR_READING_FILE;
         return false;
     }
 }
 
-bool buffer_set_text(buffer_t *buffer, char *text, size_t length)
+bool ps_buffer_set_text(buffer_t *buffer, char *text, size_t length)
 {
     buffer->text = text;
     buffer->length = length;
@@ -155,10 +155,10 @@ bool buffer_set_text(buffer_t *buffer, char *text, size_t length)
         free(buffer->line_lengths);
         buffer->line_lengths = NULL;
     }
-    return buffer_scan_text(buffer);
+    return ps_buffer_scan_text(buffer);
 }
 
-void buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
+void ps_buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
 {
     char line_[BUFFER_MAX_COLUMNS + 1];
 

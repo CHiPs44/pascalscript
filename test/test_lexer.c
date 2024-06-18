@@ -22,52 +22,88 @@ lexer_t _lexer;
 lexer_t *lexer = &_lexer;
 
 char *minimal =
-    "PROGRAM MINIMAL;\n"
-    // "{ Comment made with curly brackets }\n"
-    "BEGIN\n"
-    "END.\n";
+    "Program Minimal;\n"
+    "{ Comment made with curly brackets }   \n"
+    "Begin\n"
+    "  (* Comment with parenthesis & stars *)\n"
+    "End.\n";
 
+token_type_t token_types_minimal[] = {
+    // PROGRAM MINIMAL;
+    TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
+    // BEGIN
+    TOKEN_BEGIN,
+    // END.
+    TOKEN_END, TOKEN_DOT};
+
+// "  K = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
 char *hello =
     //  |         1         2         3         4         5         6         7         8|
     //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
     "Program Hello;\n"
     "Const\n"
-    "  K = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
+    "  K = 1234;\n"
     "Begin\n"
     "  WriteLn('Hello, World!');\n"
-    "  WriteLn('K=', k);\n"
+    "  WriteLn(k);\n"
     "End.\n";
 
-int main(void)
+token_type_t expected_hello[] = {
+    // PROGRAM HELLO;
+    TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
+    // CONST
+    TOKEN_CONST,
+    // K = '...';
+    TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_INTEGER_VALUE, TOKEN_SEMI_COLON,
+    // BEGIN
+    TOKEN_BEGIN,
+    // WRITELN('...');
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS,
+    // WRITELN(K);
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS,
+    // END.
+    TOKEN_END, TOKEN_DOT};
+
+void test(char *name, char *source, token_type_t *expected, size_t count)
 {
-    token_type_t token_types_minimal[] = {TOKEN_PROGRAM, TOKEN_SEMI_COLON, TOKEN_BEGIN, TOKEN_END, TOKEN_DOT};
     int index;
     error_t error;
 
-    printf("TEST LEXER: BEGIN\n");
+    printf("TEST LEXER: INIT %s\n", name);
+    ps_lexer_init(lexer);
+    ps_buffer_set_text(&lexer->buffer, source, strlen(source));
+    ps_buffer_dump(&lexer->buffer, 0, BUFFER_MAX_LINES - 1);
 
-    printf("TEST LEXER: INIT\n");
-    lexer_init(lexer);
-    buffer_set_text(&lexer->buffer, minimal, strlen(minimal));
-    buffer_dump(&lexer->buffer, 0, BUFFER_MAX_LINES - 1);
-
-    printf("TEST LEXER: LOOP ON MINIMAL\n");
+    printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
+    ps_lexer_read_next_char(lexer);
     do
     {
-        error = lexer_read_token(lexer);
+        error = ps_lexer_read_next_token(lexer);
         if (error != LEXER_ERROR_NONE)
         {
             printf("TEST LEXER: ERROR %d\n", error);
             break;
         }
-        else if (lexer->current_token.type != token_types_minimal[index])
+        else if (lexer->current_token.type != expected[index])
         {
-            printf("TEST LEXER: ERROR EXPECTED TOKEN %d, GOT %d\n", token_types_minimal[index], lexer->current_token.type);
+            printf("TEST LEXER: ERROR EXPECTED TOKEN %4d, GOT %4d, %s\n", expected[index], lexer->current_token.type, lexer->current_token.value.identifier);
             break;
         }
+        else
+        {
+            printf("TEST LEXER: OK EXPECTED TOKEN %4d, GOT %4d, %s\n", expected[index], lexer->current_token.type, lexer->current_token.value.identifier);
+        }
         index += 1;
-    } while (index < sizeof(token_types_minimal) / sizeof(token_type_t));
+    } while (index < count);
+}
+
+int main(void)
+{
+    printf("TEST LEXER: BEGIN\n");
+
+    // test("MINIMAL", minimal, token_types_minimal, sizeof(token_types_minimal) / sizeof(token_type_t));
+    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;

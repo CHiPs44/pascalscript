@@ -40,24 +40,24 @@ extern "C"
     /**
      * @brief Init / reset buffer 
      */
-    void buffer_init(buffer_t *buffer);
+    void ps_buffer_init(buffer_t *buffer);
 
     /**
      * @brief Scan source for line starts & lengths
      */
-    bool buffer_scan_text(buffer_t *buffer);
+    bool ps_buffer_scan_text(buffer_t *buffer);
 
     /**
      * @brief Load file into source buffer
      */
-    bool buffer_load_file(buffer_t *buffer, char *filename);
+    bool ps_buffer_load_file(buffer_t *buffer, char *filename);
 
     /**
      * @brief Set source code from memory buffer
      */
-    bool buffer_set_text(buffer_t *buffer, char *source, size_t length);
+    bool ps_buffer_set_text(buffer_t *buffer, char *source, size_t length);
 
-    void buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
+    void ps_buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
 
 #ifdef __cplusplus
 }
