@@ -104,6 +104,11 @@ char ps_lexer_read_next_char(lexer_t *lexer)
             {
                 lexer->current_line += 1;
                 lexer->current_column = 0;
+                if (lexer->current_line > lexer->buffer.line_count)
+                {
+                    lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
+                    lexer->current_char = '\0';
+                }
             }
         }
     }
@@ -111,20 +116,24 @@ char ps_lexer_read_next_char(lexer_t *lexer)
     return lexer->current_char;
 }
 
-error_t ps_lexer_skip_whitespace(lexer_t *lexer, bool *changed)
+bool ps_lexer_skip_whitespace(lexer_t *lexer, bool *changed)
 {
     char c;
     c = ps_lexer_peek_char(lexer);
+    printf("ps_lexer_skip_whitespace: c='%c'\n", c);
     *changed = false;
     while (isspace(c))
     {
         c = ps_lexer_read_next_char(lexer);
+        printf("ps_lexer_skip_whitespace: c='%c'\n", c);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return false;
         *changed = true;
     }
-    return LEXER_ERROR_NONE;
+    return true;
 }
 
-error_t ps_lexer_skip_comment1(lexer_t *lexer, bool *changed)
+bool ps_lexer_skip_comment1(lexer_t *lexer, bool *changed)
 {
     char c;
     c = ps_lexer_peek_char(lexer);
@@ -135,21 +144,29 @@ error_t ps_lexer_skip_comment1(lexer_t *lexer, bool *changed)
         while (c != '}')
         {
             c = ps_lexer_read_next_char(lexer);
+            if (lexer->error != LEXER_ERROR_NONE)
+                return false;
             if (c == '\0')
             {
-                return LEXER_ERROR_UNEXPECTED_EOF;
+                lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
+                return false;
             }
+            printf("ps_lexer_skip_comment1: c='%c'\n", c);
         }
         ps_lexer_read_next_char(lexer);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return false;
     }
-    return LEXER_ERROR_NONE;
+    return true;
 }
 
-error_t ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
+bool ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
 {
     char c1, c2;
     c1 = ps_lexer_peek_char(lexer);
     c2 = ps_lexer_peek_next_char(lexer);
+    if (lexer->error != LEXER_ERROR_NONE)
+        return false;
     *changed = false;
     if (c1 == '(' && c2 == '*')
     {
@@ -161,8 +178,10 @@ error_t ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
             c2 = ps_lexer_peek_next_char(lexer);
             if (c1 == '\0' || c2 == '\0')
             {
-                return LEXER_ERROR_UNEXPECTED_EOF;
+                lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
+                return false;
             }
+            printf("ps_lexer_skip_comment2: c1='%c', c2='%c'\n", c1, c2);
             if (c1 == '*' && c2 == ')')
             {
                 // printf("ps_lexer_skip_comment2: END c1='%c', c2='%c' %d %d\n", c1, c2, c1 == '*', c2 == ')');
@@ -171,30 +190,39 @@ error_t ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
         } while (true);
         // Skip )
         ps_lexer_read_next_char(lexer);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return false;
+        // Advance after )
         ps_lexer_read_next_char(lexer);
+        if (lexer->error != LEXER_ERROR_NONE)
+            return false;
     }
-    return LEXER_ERROR_NONE;
+    return true;
 }
 
-error_t ps_lexer_skip_whitespace_and_comments(lexer_t *lexer)
+bool ps_lexer_skip_whitespace_and_comments(lexer_t *lexer)
 {
     bool changed1 = true;
     bool changed2 = true;
     bool changed3 = true;
+    printf("ps_lexer_skip_whitespace_and_comments: BEGIN\n");
     while (changed1 || changed2 || changed3)
     {
-        lexer->error = ps_lexer_skip_whitespace(lexer, &changed1);
+        printf("ps_lexer_skip_whitespace_and_comments: 1\n");
+        ps_lexer_skip_whitespace(lexer, &changed1);
         if (lexer->error != LEXER_ERROR_NONE)
-            return lexer->error;
-        lexer->error = ps_lexer_skip_comment1(lexer, &changed2);
+            return false;
+        printf("ps_lexer_skip_whitespace_and_comments: 2\n");
+        ps_lexer_skip_comment1(lexer, &changed2);
         if (lexer->error != LEXER_ERROR_NONE)
-            return lexer->error;
-        lexer->error = ps_lexer_skip_comment2(lexer, &changed3);
+            return false;
+        printf("ps_lexer_skip_whitespace_and_comments: 3\n");
+        ps_lexer_skip_comment2(lexer, &changed3);
         if (lexer->error != LEXER_ERROR_NONE)
-            return lexer->error;
+            return false;
     }
-    lexer->error = LEXER_ERROR_NONE;
-    return lexer->error;
+    printf("ps_lexer_skip_whitespace_and_comments: END\n");
+    return true;
 }
 
 bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
@@ -205,10 +233,13 @@ bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
     int pos = 0;
 
     c = ps_lexer_peek_char(lexer);
+    if (lexer->error != LEXER_ERROR_NONE)
+        return false;
     if (isalpha(c))
     {
         do
         {
+            printf("%c\n", c);
             buffer[pos] = toupper(c);
             if (pos > MAX_IDENTIFIER)
             {
@@ -217,10 +248,12 @@ bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
                 return false;
             }
             c = ps_lexer_read_next_char(lexer);
+            if (lexer->error != LEXER_ERROR_NONE)
+                return false;
             pos += 1;
         } while (isalnum(c));
         buffer[pos] = '\0';
-        // printf("ps_lexer_read_identifier_or_keyword: \"%s\" ('%c')\n", buffer, c);
+        printf("ps_lexer_read_identifier_or_keyword: \"%s\" ('%c')\n", buffer, c);
         lexer->current_token.type = ps_token_is_keyword(buffer);
         strcpy(lexer->current_token.value.identifier, buffer);
         return true;
@@ -262,39 +295,31 @@ bool ps_lexer_read_number(lexer_t *lexer)
     return false;
 }
 
-error_t ps_lexer_read_next_token(lexer_t *lexer)
+bool ps_lexer_read_next_token(lexer_t *lexer)
 {
-
-    error_t error;
     char c;
 
-    error = ps_lexer_skip_whitespace_and_comments(lexer);
-    if (error != LEXER_ERROR_NONE)
+    if (!ps_lexer_skip_whitespace_and_comments(lexer))
     {
-        printf("ps_lexer_skip_whitespace_and_comments: error=%d", error);
+        printf("ps_lexer_skip_whitespace_and_comments: error=%d\n", lexer->error);
+        return false;
     }
     else
     {
         c = ps_lexer_peek_char(lexer);
         if (isdigit(c))
         {
-            // printf("digit!\n");
+            printf("digit!\n");
             if (!ps_lexer_read_number(lexer))
-            {
-                // printf("ps_lexer_read_number: error=%d\n", error);
-            }
-            else
-            {
-                // printf("ps_lexer_read_number: number=%d\n", lexer->current_token.value.i);
-            }
+                return false;
         }
         else if (isalnum(c))
         {
-            // printf("alnum!\n");
-            if (ps_lexer_read_identifier_or_keyword(lexer))
-            {
-                lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
-            }
+            printf("alnum!\n");
+            if (!ps_lexer_read_identifier_or_keyword(lexer))
+                return false;
+            lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
+            printf("identifier: \"%s\" %d\n", lexer->current_token.value.identifier, lexer->current_token.type);
         }
         else
         {
@@ -331,13 +356,11 @@ error_t ps_lexer_read_next_token(lexer_t *lexer)
                 ps_lexer_read_next_char(lexer);
                 break;
             default:
-                error = LEXER_ERROR_UNEXPECTED_CHARACTER;
-                break;
+                lexer->error = LEXER_ERROR_UNEXPECTED_CHARACTER;
             }
         }
     }
-    lexer->error = error;
-    return error;
+    return true;
 }
 
 // error_t ps_lexer_expect_token_types(lexer_t *lexer, size_t token_type_count, token_type_t token_type[])

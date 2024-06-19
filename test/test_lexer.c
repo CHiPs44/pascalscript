@@ -64,10 +64,9 @@ token_type_t expected_hello[] = {
     // END.
     TOKEN_END, TOKEN_DOT};
 
-void test(char *name, char *source, token_type_t *expected, size_t count)
+void test(char *name, char *source, token_type_t *expected, int count)
 {
     int index;
-    error_t error;
 
     printf("TEST LEXER: INIT %s\n", name);
     ps_lexer_init(lexer);
@@ -77,14 +76,19 @@ void test(char *name, char *source, token_type_t *expected, size_t count)
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
     ps_lexer_read_next_char(lexer);
+    if (lexer->error != LEXER_ERROR_NONE)
+    {
+        printf("TEST LEXER: BEGIN ERROR %d\n",
+               lexer->error);
+        return;
+    }
     do
     {
-        error = ps_lexer_read_next_token(lexer);
-        if (error != LEXER_ERROR_NONE)
+        if (!ps_lexer_read_next_token(lexer))
         {
             printf("TEST LEXER: %02d/%02d ERROR %d\n",
                    index, count,
-                   error);
+                   lexer->error);
             break;
         }
         else if (lexer->current_token.type != expected[index])
