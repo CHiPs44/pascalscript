@@ -199,7 +199,7 @@ error_t ps_lexer_skip_whitespace_and_comments(lexer_t *lexer)
 
 bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
 {
-    // printf("ps_lexer_read_identifier_or_keyword\n");
+    printf("ps_lexer_read_identifier_or_keyword\n");
     char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
@@ -240,15 +240,17 @@ bool ps_lexer_read_number(lexer_t *lexer)
     {
         do
         {
-            buffer[pos] = toupper(c);
-            if (pos >= 9)
+            buffer[pos] = c;
+            if (pos > 9)
             {
                 lexer->current_token.type = TOKEN_NONE;
                 lexer->error = LEXER_ERROR_OVERFLOW;
                 return false;
             }
             c = ps_lexer_read_next_char(lexer);
-        } while (isdigit(lexer));
+            pos += 1;
+        } while (isdigit(c));
+        buffer[pos] = '\0';
         lexer->current_token.type = TOKEN_INTEGER_VALUE;
         // TODO use better conversion from string to integer
         lexer->current_token.value.i = atoi(buffer);
@@ -256,7 +258,8 @@ bool ps_lexer_read_number(lexer_t *lexer)
         return true;
     }
     lexer->current_token.type = TOKEN_NONE;
-    return LEXER_ERROR_UNEXPECTED_CHARACTER;
+    lexer->error = LEXER_ERROR_UNEXPECTED_CHARACTER;
+    return false;
 }
 
 error_t ps_lexer_read_next_token(lexer_t *lexer)
@@ -267,56 +270,70 @@ error_t ps_lexer_read_next_token(lexer_t *lexer)
 
     error = ps_lexer_skip_whitespace_and_comments(lexer);
     if (error != LEXER_ERROR_NONE)
-        return error;
-
-    c = ps_lexer_peek_char(lexer);
-    if (isdigit(c))
-        error = ps_lexer_read_number(lexer);
-    else if (isalnum(c))
     {
-        if (ps_lexer_read_identifier_or_keyword(lexer))
-        {
-            lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
-        }
+        printf("ps_lexer_skip_whitespace_and_comments: error=%d", error);
     }
     else
     {
-        // printf("%c\n", c);
-        sprintf(lexer->current_token.value.identifier, "%c", c);
-        switch (c)
+        c = ps_lexer_peek_char(lexer);
+        if (isdigit(c))
         {
-        case ':':
-            lexer->current_token.type = TOKEN_COLON;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case ',':
-            lexer->current_token.type = TOKEN_COMMA;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case '.':
-            lexer->current_token.type = TOKEN_DOT;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case '(':
-            lexer->current_token.type = TOKEN_LEFT_PARENTHESIS;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case ')':
-            lexer->current_token.type = TOKEN_RIGHT_PARENTHESIS;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case ';':
-            lexer->current_token.type = TOKEN_SEMI_COLON;
-            ps_lexer_read_next_char(lexer);
-            break;
-        case '=':
-            lexer->current_token.type = TOKEN_OP_EQ;
-            ps_lexer_read_next_char(lexer);
-            break;
-
-        default:
-            error = LEXER_ERROR_UNEXPECTED_CHARACTER;
-            break;
+            // printf("digit!\n");
+            if (!ps_lexer_read_number(lexer))
+            {
+                // printf("ps_lexer_read_number: error=%d\n", error);
+            }
+            else
+            {
+                // printf("ps_lexer_read_number: number=%d\n", lexer->current_token.value.i);
+            }
+        }
+        else if (isalnum(c))
+        {
+            // printf("alnum!\n");
+            if (ps_lexer_read_identifier_or_keyword(lexer))
+            {
+                lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
+            }
+        }
+        else
+        {
+            printf("%c\n", c);
+            sprintf(lexer->current_token.value.identifier, "%c", c);
+            switch (c)
+            {
+            case ':':
+                lexer->current_token.type = TOKEN_COLON;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case ',':
+                lexer->current_token.type = TOKEN_COMMA;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case '.':
+                lexer->current_token.type = TOKEN_DOT;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case '(':
+                lexer->current_token.type = TOKEN_LEFT_PARENTHESIS;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case ')':
+                lexer->current_token.type = TOKEN_RIGHT_PARENTHESIS;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case ';':
+                lexer->current_token.type = TOKEN_SEMI_COLON;
+                ps_lexer_read_next_char(lexer);
+                break;
+            case '=':
+                lexer->current_token.type = TOKEN_OP_EQ;
+                ps_lexer_read_next_char(lexer);
+                break;
+            default:
+                error = LEXER_ERROR_UNEXPECTED_CHARACTER;
+                break;
+            }
         }
     }
     lexer->error = error;

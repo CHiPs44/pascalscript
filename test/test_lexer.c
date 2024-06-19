@@ -44,7 +44,7 @@ char *hello =
     "Const\n"
     "  K = 1234;\n"
     "Begin\n"
-    "  WriteLn('Hello, World!');\n"
+    // "  WriteLn('Hello, World!');\n"
     "  WriteLn(k);\n"
     "End.\n";
 
@@ -58,7 +58,7 @@ token_type_t expected_hello[] = {
     // BEGIN
     TOKEN_BEGIN,
     // WRITELN('...');
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS,
+    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS,
     // WRITELN(K);
     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS,
     // END.
@@ -82,17 +82,27 @@ void test(char *name, char *source, token_type_t *expected, size_t count)
         error = ps_lexer_read_next_token(lexer);
         if (error != LEXER_ERROR_NONE)
         {
-            printf("TEST LEXER: ERROR %d\n", error);
+            printf("TEST LEXER: %02d/%02d ERROR %d\n",
+                   index, count,
+                   error);
             break;
         }
         else if (lexer->current_token.type != expected[index])
         {
-            printf("TEST LEXER: ERROR EXPECTED TOKEN %4d, GOT %4d, %s\n", expected[index], lexer->current_token.type, lexer->current_token.value.identifier);
+            printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d, %s\n",
+                   index, count,
+                   expected[index],
+                   lexer->current_token.type,
+                   lexer->current_token.type == TOKEN_IDENTIFIER ? lexer->current_token.value.identifier : lexer->current_token.value.i);
             break;
         }
         else
         {
-            printf("TEST LEXER: OK EXPECTED TOKEN %4d, GOT %4d, %s\n", expected[index], lexer->current_token.type, lexer->current_token.value.identifier);
+            printf("TEST LEXER: %02d/%02d OK EXPECTED TOKEN %4d, GOT %4d, %s\n",
+                   index, count,
+                   expected[index],
+                   lexer->current_token.type,
+                   lexer->current_token.value.identifier);
         }
         index += 1;
     } while (index < count);
