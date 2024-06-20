@@ -360,6 +360,7 @@ bool ps_lexer_read_next_token(lexer_t *lexer)
             }
         }
     }
+    printf("ps_lexer_read_next_token: END\n");
     return true;
 }
 

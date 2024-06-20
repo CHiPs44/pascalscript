@@ -84,17 +84,18 @@ void test(char *name, char *source, token_type_t *expected, int count)
     }
     do
     {
+        printf("TEST LEXER: %02d/%02d BEGIN\n", index+1, count);
         if (!ps_lexer_read_next_token(lexer))
         {
             printf("TEST LEXER: %02d/%02d ERROR %d\n",
-                   index, count,
+                   index+1, count,
                    lexer->error);
             break;
         }
         else if (lexer->current_token.type != expected[index])
         {
             printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d, %s\n",
-                   index, count,
+                   index+1, count,
                    expected[index],
                    lexer->current_token.type,
                    lexer->current_token.type == TOKEN_IDENTIFIER ? lexer->current_token.value.identifier : lexer->current_token.value.i);
@@ -103,11 +104,12 @@ void test(char *name, char *source, token_type_t *expected, int count)
         else
         {
             printf("TEST LEXER: %02d/%02d OK EXPECTED TOKEN %4d, GOT %4d, %s\n",
-                   index, count,
+                   index+1, count,
                    expected[index],
                    lexer->current_token.type,
                    lexer->current_token.value.identifier);
         }
+        printf("TEST LEXER: %02d/%02d END\n", index+1, count);
         index += 1;
     } while (index < count);
 }
@@ -116,8 +118,8 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    // test("MINIMAL", minimal, token_types_minimal, sizeof(token_types_minimal) / sizeof(token_type_t));
-    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    test("MINIMAL", minimal, token_types_minimal, sizeof(token_types_minimal) / sizeof(token_type_t));
+    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;
