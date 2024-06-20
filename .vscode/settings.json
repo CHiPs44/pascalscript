@@ -25,6 +25,9 @@
         "stdlib.h": "c",
         "ps_token.h": "c",
         "ps_parser.h": "c",
-        "limits.h": "c"
+        "limits.h": "c",
+        "random": "c",
+        "compare": "c",
+        "ranges": "c"
     }
 }

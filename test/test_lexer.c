@@ -26,9 +26,10 @@ char *minimal =
     "{ Comment made with curly brackets }   \n"
     "Begin\n"
     "  (* Comment with parenthesis & stars *)\n"
-    "End.\n";
+    "End.\n"
+    "";
 
-token_type_t token_types_minimal[] = {
+token_type_t expected_minimal[] = {
     // PROGRAM MINIMAL;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // BEGIN
@@ -38,29 +39,31 @@ token_type_t token_types_minimal[] = {
 
 // "  K = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
 char *hello =
-    //  |         1         2         3         4         5         6         7         8|
-    //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
     "Program Hello;\n"
     "Const\n"
-    "  K = 1234;\n"
+    "  K1 = 1234;\n"
+    "  K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
     "Begin\n"
-    // "  WriteLn('Hello, World!');\n"
-    "  WriteLn(k);\n"
-    "End.\n";
+    "  WriteLn('Hello, World!');\n"
+    "  WriteLn(K1, K2);\n"
+    "End.\n"
+    "";
 
 token_type_t expected_hello[] = {
     // PROGRAM HELLO;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST
     TOKEN_CONST,
-    // K = '...';
+    // K1 = 1234;
     TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_INTEGER_VALUE, TOKEN_SEMI_COLON,
+    // K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
+    TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
-    // WRITELN('...');
-    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS,
-    // WRITELN(K);
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS,
+    // WRITELN('Hello, World!');
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    // WRITELN(K1, K2);
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // END.
     TOKEN_END, TOKEN_DOT};
 
@@ -84,32 +87,32 @@ void test(char *name, char *source, token_type_t *expected, int count)
     }
     do
     {
-        printf("TEST LEXER: %02d/%02d BEGIN\n", index+1, count);
+        // printf("TEST LEXER: %02d/%02d BEGIN\n", index + 1, count);
         if (!ps_lexer_read_next_token(lexer))
         {
             printf("TEST LEXER: %02d/%02d ERROR %d\n",
-                   index+1, count,
+                   index + 1, count,
                    lexer->error);
             break;
         }
         else if (lexer->current_token.type != expected[index])
         {
-            printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d, %s\n",
-                   index+1, count,
+            printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d ",
+                   index + 1, count,
                    expected[index],
-                   lexer->current_token.type,
-                   lexer->current_token.type == TOKEN_IDENTIFIER ? lexer->current_token.value.identifier : lexer->current_token.value.i);
+                   lexer->current_token.type);
+            ps_token_dump(&lexer->current_token);
             break;
         }
         else
         {
-            printf("TEST LEXER: %02d/%02d OK EXPECTED TOKEN %4d, GOT %4d, %s\n",
-                   index+1, count,
+            printf("TEST LEXER: %02d/%02d OK    EXPECTED TOKEN %4d, GOT %4d ",
+                   index + 1, count,
                    expected[index],
-                   lexer->current_token.type,
-                   lexer->current_token.value.identifier);
+                   lexer->current_token.type);
+            ps_token_dump(&lexer->current_token);
         }
-        printf("TEST LEXER: %02d/%02d END\n", index+1, count);
+        // printf("TEST LEXER: %02d/%02d END\n", index + 1, count);
         index += 1;
     } while (index < count);
 }
@@ -118,8 +121,8 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    test("MINIMAL", minimal, token_types_minimal, sizeof(token_types_minimal) / sizeof(token_type_t));
-    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
+    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;

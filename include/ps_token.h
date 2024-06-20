@@ -51,16 +51,17 @@ extern "C"
         // Other value types
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
-        // Identifier2047
+        // Identifier
         TOKEN_IDENTIFIER,
         // Reserved words
         // ==============================
         TOKEN_RESERVED_WORDS = 127,
         TOKEN_PROGRAM,
         TOKEN_CONST,
-        // TOKEN_TYPE,
+        TOKEN_TYPE,
         TOKEN_VAR,
-        // TOKEN_FUNCTION / TOKEN_PROCEDURE
+        TOKEN_FUNCTION,
+        TOKEN_PROCEDURE,
         TOKEN_BEGIN,
         TOKEN_END,
         TOKEN_INTEGER,
@@ -70,14 +71,32 @@ extern "C"
         TOKEN_STRING,
         TOKEN_FALSE,
         TOKEN_TRUE,
-        // TOKEN_NIL,
-        // TOKEN_ARRAY / TOKEN_OF / TOKEN_SET / TOKEN_RECORD / TOKEN_WITH / TOKEN_FILE
-        // TOKEN_IF / TOKEN_THEN / TOKEN_ELSE
-        // TOKEN_DO / TOKEN_WHILE
-        // TOKEN_REPEAT / TOKEN_UNTIL
-        // TOKEN_FOR / TOKEN_TO / TOKEN_DOWNTO / TOKEN_IN
-        // TOKEN_CASE / TOKEN_GOTO / TOKEN_LABEL
-        // TOKEN_UNIT / TOKEN_USES / TOKEN_INTERFACE / TOKEN_IMPLEMENTATION
+        TOKEN_NIL,
+        TOKEN_ARRAY,
+        TOKEN_OF,
+        TOKEN_SET,
+        TOKEN_RECORD,
+        TOKEN_WITH,
+        TOKEN_FILE,
+        TOKEN_IF,
+        TOKEN_THEN,
+        TOKEN_ELSE,
+        TOKEN_DO,
+        TOKEN_WHILE,
+        TOKEN_REPEAT,
+        TOKEN_UNTIL,
+        TOKEN_FOR,
+        TOKEN_TO,
+        TOKEN_DOWNTO,
+        TOKEN_IN,
+        TOKEN_CASE,
+        TOKEN_GOTO,
+        TOKEN_LABEL,
+        TOKEN_UNIT,
+        TOKEN_USES,
+        TOKEN_INTERFACE,
+        TOKEN_IMPLEMENTATION,
+        // Operators
         TOKEN_OP_DIV_INT,
         TOKEN_OP_MOD,
         TOKEN_OP_AND,
@@ -94,17 +113,18 @@ extern "C"
         // TOKEN_RIGHT_CURLY_BRACKET, // }
         // Ponctuation
         // TOKEN_AMPERSAND,         // & => Octal
-        // TOKEN_AMPERSAND,         // & => Octal
+        // TOKEN_PERCENT,           // % => Binary
         // TOKEN_DOLLAR,            // $ => Hexadecimal
-        TOKEN_ASSIGN, // :=
-        // TOKEN_CARET,             // ^
-        TOKEN_COLON, // :
-        TOKEN_COMMA, // ,
-        // TOKEN_DOT_DOT,           // ..
-        TOKEN_DOT, // .
-        // TOKEN_LEFT_BRACKET,      // [
-        TOKEN_LEFT_PARENTHESIS, // (
-        // TOKEN_RIGHT_BRACKET,     // ]
+        TOKEN_ASSIGN,            // :=
+        TOKEN_AT_SIGN,           // @
+        TOKEN_CARET,             // ^
+        TOKEN_COLON,             // :
+        TOKEN_COMMA,             // ,
+        TOKEN_DOT_DOT,           // ..
+        TOKEN_DOT,               // .
+        TOKEN_LEFT_BRACKET,      // [
+        TOKEN_LEFT_PARENTHESIS,  // (
+        TOKEN_RIGHT_BRACKET,     // ]
         TOKEN_RIGHT_PARENTHESIS, // )
         TOKEN_SEMI_COLON,        // ;
         // Arithmetic operators
@@ -137,7 +157,7 @@ extern "C"
 
     typedef struct _keyword_t
     {
-        int token;
+    int token;
         char *keyword;
     } keyword_t;
 
