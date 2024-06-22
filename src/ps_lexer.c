@@ -42,9 +42,9 @@ char ps_lexer_peek_next_char(lexer_t *lexer)
     char next_char = '\0';
     if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
     {
-        if (lexer->current_column >= 0 && lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
+        if (lexer->current_column + 1 >= 0 && lexer->current_column + 1 <= lexer->buffer.line_lengths[lexer->current_line])
         {
-            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
+            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column + 1];
         }
     }
     return next_char;
@@ -280,7 +280,7 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
             if (c == '\'' && c2 == '\'')
             {
                 printf("ps_lexer_read_char_or_string_value: quote!\n");
-                quote=true;
+                quote = true;
                 ps_lexer_read_next_char(lexer);
             }
             if (pos > ps_string_max)
@@ -289,12 +289,24 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
                 lexer->error = LEXER_ERROR_STRING_TOO_LONG;
                 return false;
             }
-            buffer[pos] = c;
+            if (quote)
+            {
+                buffer[pos] = '\'';
+            }
+            else
+            {
+                buffer[pos] = c;
+            }
             pos += 1;
             c = ps_lexer_read_next_char(lexer);
             if (lexer->error != LEXER_ERROR_NONE)
                 return false;
-        } while (true);
+            if (quote)
+            {
+                quote = false;
+                continue;
+            }
+        } while (c != '\'' && ps_lexer_peek_next_char(lexer) != '\'');
         buffer[pos] = '\0';
         ps_lexer_read_next_char(lexer);
         if (lexer->error != LEXER_ERROR_NONE)
