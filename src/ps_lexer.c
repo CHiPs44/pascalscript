@@ -258,6 +258,7 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
     char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
+    bool quote = false;
 
     c = ps_lexer_peek_char(lexer);
     if (c == '\'')
@@ -267,15 +268,20 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
             return false;
         do
         {
+            char c2 = ps_lexer_peek_next_char(lexer);
+            printf("ps_lexer_read_char_or_string_value: c=%d, peek=%d, quote=%s\n",
+                   c, c2, quote ? "Y" : "N");
             if (c == '\n')
             {
                 lexer->current_token.type = TOKEN_NONE;
                 lexer->error = LEXER_ERROR_STRING_NOT_MULTI_LINE;
                 return false;
             }
-            if (c == '\'' && ps_lexer_peek_next_char(lexer) == '\'')
+            if (c == '\'' && c2 == '\'')
             {
-                c = ps_lexer_read_next_char(lexer);
+                printf("ps_lexer_read_char_or_string_value: quote!\n");
+                quote=true;
+                ps_lexer_read_next_char(lexer);
             }
             if (pos > ps_string_max)
             {
@@ -288,7 +294,7 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
             c = ps_lexer_read_next_char(lexer);
             if (lexer->error != LEXER_ERROR_NONE)
                 return false;
-        } while (c != '\'');
+        } while (true);
         buffer[pos] = '\0';
         ps_lexer_read_next_char(lexer);
         if (lexer->error != LEXER_ERROR_NONE)
@@ -308,7 +314,6 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
     }
     lexer->current_token.type = TOKEN_NONE;
     lexer->error = LEXER_ERROR_UNEXPECTED_CHARACTER;
-
     return false;
 }
 

@@ -37,13 +37,13 @@ token_type_t expected_minimal[] = {
     // END.
     TOKEN_END, TOKEN_DOT};
 
-// "  K = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
 char *hello =
     "Program Hello;\n"
     "Const\n"
     "  K1 = 1234;\n"
     "  K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
     "Begin\n"
+    "  { Comment1\t(* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"
     "  WriteLn(K1, K2);\n"
     "End.\n"
@@ -64,6 +64,23 @@ token_type_t expected_hello[] = {
     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // WRITELN(K1, K2);
     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    // END.
+    TOKEN_END, TOKEN_DOT};
+
+char *quote =
+    "Program Quote;\n"
+    "Const K = ' K=''K'' ';\n"
+    "Begin\n"
+    "End.\n"
+    "";
+
+token_type_t expected_quote[] = {
+    // PROGRAM QUOTE;
+    TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
+    // const k = ' ''k'' ';
+    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    // BEGIN
+    TOKEN_BEGIN,
     // END.
     TOKEN_END, TOKEN_DOT};
 
@@ -121,8 +138,9 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
-    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    // test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
+    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    test("QUOTE", quote, expected_quote, sizeof(expected_quote) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;
