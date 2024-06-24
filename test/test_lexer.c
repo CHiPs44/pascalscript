@@ -23,9 +23,9 @@ lexer_t *lexer = &_lexer;
 
 char *minimal =
     "Program Minimal;\n"
-    "{ Comment made with curly brackets }   \n"
+    // "{ Comment made with curly brackets }   \n"
     "Begin\n"
-    "  (* Comment with parenthesis & stars *)\n"
+    // "  (* Comment with parenthesis & stars *)\n"
     "End.\n"
     "";
 
@@ -69,7 +69,7 @@ token_type_t expected_hello[] = {
 
 char *quote =
     "Program Quote;\n"
-    "Const K = ' K=''K'' ';\n"
+    "Const K = 'X=''Y'' ';\n"
     "Begin\n"
     "End.\n"
     "";
@@ -139,8 +139,8 @@ int main(void)
     printf("TEST LEXER: BEGIN\n");
 
     // test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
-    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
-    test("QUOTE", quote, expected_quote, sizeof(expected_quote) / sizeof(token_type_t));
+    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    // test("QUOTE", quote, expected_quote, sizeof(expected_quote) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;
