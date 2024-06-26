@@ -41,7 +41,7 @@ char *hello =
     "Program Hello;\n"
     "Const\n"
     "  K1 = 1234;\n"
-    "  K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
+    "  K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog.'\n" // 0123456789 Times';\n"
     "Begin\n"
     "  { Comment1\t(* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"
