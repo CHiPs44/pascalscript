@@ -19,52 +19,52 @@ void ps_token_dump(token_t *token)
     {
     case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(buffer, 256 + 2, "'%s'", token->value.identifier);
+        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(buffer, 256 + 2, "%d", token->value.i);
+        snprintf(buffer, 256 + 2, "%04d: %d", token->type, token->value.i);
         break;
     case TOKEN_CARDINAL_VALUE:
         type = "CARDINAL";
-        snprintf(buffer, 256 + 2, "%u", token->value.u);
+        snprintf(buffer, 256 + 2, "%04d: %u", token->type, token->value.u);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(buffer, 256 + 2, "%f", token->value.r);
+        snprintf(buffer, 256 + 2, "%04d: %f", token->type, token->value.r);
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(buffer, 256 + 2, "'%c'", token->value.c);
+        snprintf(buffer, 256 + 2, "%04d: '%c'", token->type, token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(buffer, 256 + 2, "'%s'", token->value.s);
+        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.s);
         break;
-    case TOKEN_ASSIGN:            // :=
     case TOKEN_AT_SIGN:           // @
     case TOKEN_CARET:             // ^
     case TOKEN_COLON:             // :
     case TOKEN_COMMA:             // ,
+    case TOKEN_DOT_COLON:         // :=
     case TOKEN_DOT_DOT:           // ..
     case TOKEN_DOT:               // .
+    case TOKEN_EQUAL:             // =
+    case TOKEN_GREATER_OR_EQUAL:  // >=
+    case TOKEN_GREATER_THAN:      // >
     case TOKEN_LEFT_BRACKET:      // [
     case TOKEN_LEFT_PARENTHESIS:  // (
+    case TOKEN_LESS_OR_EQUAL:     // <=
+    case TOKEN_LESS_THAN:         // <
+    case TOKEN_MINUS:             // -
+    case TOKEN_NOT_EQUAL:         // <>
+    case TOKEN_PLUS:              // +
     case TOKEN_RIGHT_BRACKET:     // ]
     case TOKEN_RIGHT_PARENTHESIS: // )
     case TOKEN_SEMI_COLON:        // ;
-    case TOKEN_OP_ADD:            // +
-    case TOKEN_OP_SUB:            // -
-    case TOKEN_OP_MUL:            // *
-    case TOKEN_OP_DIV_REAL:       // /
-    case TOKEN_OP_EQ:             // =
-    case TOKEN_OP_NE:             // <>
-    case TOKEN_OP_LT:             // <
-    case TOKEN_OP_LE:             // <=
-    case TOKEN_OP_GT:             // >
-    case TOKEN_OP_GE:             // >=
+    case TOKEN_SLASH:             // /
+    case TOKEN_STAR:              // *
         type = "RESERVED";
-        snprintf(buffer, 256 + 2, "'%s'", token->value.identifier);
+        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
         break;
     default:
         token_type = ps_token_is_keyword(token->value.identifier);
@@ -76,7 +76,7 @@ void ps_token_dump(token_t *token)
         else
         {
             type = "KEYWORD";
-            snprintf(buffer, 256 + 2, "'%s'", token->value.identifier);
+            snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }

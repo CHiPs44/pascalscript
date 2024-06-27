@@ -55,9 +55,9 @@ token_type_t expected_hello[] = {
     // CONST
     TOKEN_CONST,
     // K1 = 1234;
-    TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_INTEGER_VALUE, TOKEN_SEMI_COLON,
+    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_INTEGER_VALUE, TOKEN_SEMI_COLON,
     // K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
-    TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
     // WRITELN('Hello, World!');
@@ -78,7 +78,7 @@ token_type_t expected_quote[] = {
     // PROGRAM QUOTE;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // const k = ' ''k'' ';
-    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_OP_EQ, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
     // END.
@@ -138,8 +138,8 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    // test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
-    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
+    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
     // test("QUOTE", quote, expected_quote, sizeof(expected_quote) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");

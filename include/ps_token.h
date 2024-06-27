@@ -20,24 +20,49 @@ extern "C"
 #endif
 
     /*
-        -file           -packed         -record             -nil        -set        -with
+        1. Mimimalistic
+            program         begin           end
+            const           var
+            integer         cardinal        string
+        2. Expressions
+            div             mod
+        3. Decision making
+            boolean         true            false
+            if              then            else
+            and             not             or
+        4. Loops
+            repeat          until           while       do
+        5. User types
+            type            set
+        6. Arrays
+            array
+        6. "Modularity"
+            function        procedure
+        7. More control
+            case            of
+            for             downto          to          in
+        8. Mother of all evil?
+            goto            label
+        9. More operators
+            shl             shr             xor
+
+        -file           -packed         -record             -nil        -with
         -absolute       -asm            -inline             -operator   -reintroduce
         -unit           -interface      -implementation     -uses
         -constructor    -destructor     -inherited          -object     -self
-
-        program         begin           end
-        const           type            var
-        array           string
-        function        procedure
-
-        if              then            else
-        case            of
-        for             downto          to          do          in
-        repeat          until           while
-        goto            label
-
-        div     mod     and     not     or      shl     shr     xor
     */
+
+    /* THESE ARE NOT TOKENS
+        Comments
+            TOKEN_LEFT_COMMENT,        (*
+            TOKEN_LEFT_CURLY_BRACKET,  {
+            TOKEN_RIGHT_COMMENT,       *)
+            TOKEN_RIGHT_CURLY_BRACKET, }
+        Numerical base prefixes
+            TOKEN_AMPERSAND,         & => Octal
+            TOKEN_DOLLAR,            $ => Hexadecimal
+            TOKEN_PERCENT,           % => Binary
+     */
 
     typedef enum _token_type_t
     {
@@ -106,39 +131,31 @@ extern "C"
         TOKEN_OP_SHL,
         TOKEN_OP_SHR,
         // ===========================================================
-        // // Commments
-        // TOKEN_LEFT_COMMENT,        // (*
-        // TOKEN_LEFT_CURLY_BRACKET,  // {
-        // TOKEN_RIGHT_COMMENT,       // *)
-        // TOKEN_RIGHT_CURLY_BRACKET, // }
-        // Ponctuation
-        // TOKEN_AMPERSAND,         // & => Octal
-        // TOKEN_PERCENT,           // % => Binary
-        // TOKEN_DOLLAR,            // $ => Hexadecimal
-        TOKEN_ASSIGN,            // :=
-        TOKEN_AT_SIGN,           // @
-        TOKEN_CARET,             // ^
-        TOKEN_COLON,             // :
-        TOKEN_COMMA,             // ,
-        TOKEN_DOT_DOT,           // ..
-        TOKEN_DOT,               // .
-        TOKEN_LEFT_BRACKET,      // [
-        TOKEN_LEFT_PARENTHESIS,  // (
-        TOKEN_RIGHT_BRACKET,     // ]
-        TOKEN_RIGHT_PARENTHESIS, // )
-        TOKEN_SEMI_COLON,        // ;
+        // Symbols
+        TOKEN_DOT_COLON,         // :=  assign
+        TOKEN_AT_SIGN,           // @   address of
+        TOKEN_CARET,             // ^   pointer to
+        TOKEN_COLON,             // :   various uses
+        TOKEN_COMMA,             // ,   various uses
+        TOKEN_DOT_DOT,           // ..  ranges
+        TOKEN_DOT,               // .   various uses
+        TOKEN_LEFT_BRACKET,      // [   array access
+        TOKEN_LEFT_PARENTHESIS,  // (   various uses
+        TOKEN_RIGHT_BRACKET,     // ]   array access
+        TOKEN_RIGHT_PARENTHESIS, // )   various uses
+        TOKEN_SEMI_COLON,        // ;   various uses
         // Arithmetic operators
-        TOKEN_OP_ADD,      // +
-        TOKEN_OP_SUB,      // -
-        TOKEN_OP_MUL,      // *
-        TOKEN_OP_DIV_REAL, // /
+        TOKEN_PLUS,  // +   addition
+        TOKEN_MINUS, // -   substraction / negation
+        TOKEN_STAR,  // *   multiplication
+        TOKEN_SLASH, // /   division (real)
         // Comparison operators
-        TOKEN_OP_EQ, // =
-        TOKEN_OP_NE, // <>
-        TOKEN_OP_LT, // <
-        TOKEN_OP_LE, // <=
-        TOKEN_OP_GT, // >
-        TOKEN_OP_GE, // >=
+        TOKEN_EQUAL,            // =
+        TOKEN_NOT_EQUAL,        // <>
+        TOKEN_LESS_THAN,        // <
+        TOKEN_LESS_OR_EQUAL,    // <=
+        TOKEN_GREATER_THAN,     // >
+        TOKEN_GREATER_OR_EQUAL, // >=
     } token_type_t;
 
     typedef struct _token_t
@@ -157,7 +174,7 @@ extern "C"
 
     typedef struct _keyword_t
     {
-    int token;
+        int token;
         char *keyword;
     } keyword_t;
 

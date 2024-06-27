@@ -78,6 +78,13 @@ char ps_lexer_read_next_char(lexer_t *lexer)
     return lexer->current_char;
 }
 
+bool ps_lexer_return_error(lexer_t *lexer, error_t error)
+{
+    lexer->current_token.type = TOKEN_NONE;
+    lexer->error = error;
+    return false;
+}
+
 bool ps_lexer_skip_whitespace(lexer_t *lexer, bool *changed)
 {
     char c;
@@ -109,10 +116,7 @@ bool ps_lexer_skip_comment1(lexer_t *lexer, bool *changed)
             if (lexer->error != LEXER_ERROR_NONE)
                 return false;
             if (c == '\0')
-            {
-                lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
-                return false;
-            }
+                return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_EOF);
             // printf("ps_lexer_skip_comment1: c='%c'\n", c);
         }
         ps_lexer_read_next_char(lexer);
@@ -138,10 +142,7 @@ bool ps_lexer_skip_comment2(lexer_t *lexer, bool *changed)
             c1 = ps_lexer_read_next_char(lexer);
             c2 = ps_lexer_peek_next_char(lexer);
             if (c1 == '\0' || c2 == '\0')
-            {
-                lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
-                return false;
-            }
+                return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_EOF);
             if (c1 == '*' && c2 == ')')
             {
                 break;
@@ -199,9 +200,7 @@ bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
             buffer[pos] = toupper(c);
             if (pos > MAX_IDENTIFIER)
             {
-                // lexer->current_token.type = TOKEN_NONE;
-                lexer->error = LEXER_ERROR_IDENTIFIER_TOO_LONG;
-                return false;
+                return ps_lexer_return_error(lexer, LEXER_ERROR_IDENTIFIER_TOO_LONG);
             }
             c = ps_lexer_read_next_char(lexer);
             if (lexer->error != LEXER_ERROR_NONE)
@@ -211,7 +210,7 @@ bool ps_lexer_read_identifier_or_keyword(lexer_t *lexer)
         buffer[pos] = '\0';
         // printf("ps_lexer_read_identifier_or_keyword: \"%s\" ('%c')\n", buffer, c);
         lexer->current_token.type = ps_token_is_keyword(buffer);
-        strcpy(lexer->current_token.value.identifier, buffer);
+        strncpy(lexer->current_token.value.identifier, buffer, MAX_IDENTIFIER);
         return true;
     }
     lexer->current_token.type = TOKEN_NONE;
@@ -223,6 +222,7 @@ bool ps_lexer_read_number(lexer_t *lexer)
     char buffer[BUFFER_MAX_COLUMNS];
     char c;
     int pos = 0;
+    int base = 10;
 
     c = ps_lexer_peek_char(lexer);
     if (isdigit(c))
@@ -231,26 +231,20 @@ bool ps_lexer_read_number(lexer_t *lexer)
         {
             buffer[pos] = c;
             if (pos > 9)
-            {
-                lexer->current_token.type = TOKEN_NONE;
-                lexer->error = LEXER_ERROR_OVERFLOW;
-                return false;
-            }
+                return ps_lexer_return_error(lexer, LEXER_ERROR_OVERFLOW);
             c = ps_lexer_read_next_char(lexer);
             if (lexer->error != LEXER_ERROR_NONE)
                 return false;
             pos += 1;
         } while (isdigit(c));
         buffer[pos] = '\0';
-        lexer->current_token.type = TOKEN_INTEGER_VALUE;
-        // TODO use better conversion from string to integer
-        lexer->current_token.value.i = atoi(buffer);
+        lexer->current_token.type = TOKEN_CARDINAL_VALUE;
+        // TODO use better conversion from string to unsigned integer
+        lexer->current_token.value.u = strtoul(buffer, NULL, base);
         lexer->error = LEXER_ERROR_NONE;
         return true;
     }
-    lexer->current_token.type = TOKEN_NONE;
-    lexer->error = LEXER_ERROR_UNEXPECTED_CHARACTER;
-    return false;
+    return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_CHARACTER);
 }
 
 bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
@@ -268,15 +262,10 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
             return false;
         do
         {
-            char c2 = ps_lexer_peek_next_char(lexer);
-            printf("ps_lexer_read_char_or_string_value: c=%d, peek=%d, quote=%s\n",
-                   c, c2, quote ? "Y" : "N");
             if (c == '\n')
-            {
-                lexer->current_token.type = TOKEN_NONE;
-                lexer->error = LEXER_ERROR_STRING_NOT_MULTI_LINE;
-                return false;
-            }
+                return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_NOT_MULTI_LINE);
+            char c2 = ps_lexer_peek_next_char(lexer);
+            printf("ps_lexer_read_char_or_string_value: c=%d, peek=%d, quote=%s\n", c, c2, quote ? "Y" : "N");
             if (c == '\'' && c2 == '\'')
             {
                 printf("ps_lexer_read_char_or_string_value: quote!\n");
@@ -284,11 +273,7 @@ bool ps_lexer_read_char_or_string_value(lexer_t *lexer)
                 ps_lexer_read_next_char(lexer);
             }
             if (pos > ps_string_max)
-            {
-                lexer->current_token.type = TOKEN_NONE;
-                lexer->error = LEXER_ERROR_STRING_TOO_LONG;
-                return false;
-            }
+                return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_TOO_LONG);
             if (quote)
             {
                 buffer[pos] = '\'';
@@ -369,7 +354,7 @@ bool ps_lexer_read_next_token(lexer_t *lexer)
             case ':':
                 if (ps_lexer_peek_next_char(lexer) == '=')
                 {
-                    lexer->current_token.type = TOKEN_ASSIGN;
+                    lexer->current_token.type = TOKEN_DOT_COLON;
                     ps_lexer_read_next_char(lexer);
                 }
                 else
@@ -419,48 +404,48 @@ bool ps_lexer_read_next_token(lexer_t *lexer)
                 ps_lexer_read_next_char(lexer);
                 break;
             case '+':
-                lexer->current_token.type = TOKEN_OP_ADD;
+                lexer->current_token.type = TOKEN_PLUS;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '-':
-                lexer->current_token.type = TOKEN_OP_SUB;
+                lexer->current_token.type = TOKEN_MINUS;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '*':
-                lexer->current_token.type = TOKEN_OP_MUL;
+                lexer->current_token.type = TOKEN_STAR;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '/':
-                lexer->current_token.type = TOKEN_OP_DIV_REAL;
+                lexer->current_token.type = TOKEN_SLASH;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '=':
-                lexer->current_token.type = TOKEN_OP_EQ;
+                lexer->current_token.type = TOKEN_EQUAL;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '<':
                 if (ps_lexer_peek_next_char(lexer) == '>')
                 {
-                    lexer->current_token.type = TOKEN_OP_NE;
+                    lexer->current_token.type = TOKEN_NOT_EQUAL;
                     ps_lexer_read_next_char(lexer);
                 }
                 else if (ps_lexer_peek_next_char(lexer) == '=')
                 {
-                    lexer->current_token.type = TOKEN_OP_LE;
+                    lexer->current_token.type = TOKEN_LESS_OR_EQUAL;
                     ps_lexer_read_next_char(lexer);
                 }
                 else
-                    lexer->current_token.type = TOKEN_OP_LT;
+                    lexer->current_token.type = TOKEN_LESS_THAN;
                 ps_lexer_read_next_char(lexer);
                 break;
             case '>':
                 if (ps_lexer_peek_next_char(lexer) == '=')
                 {
-                    lexer->current_token.type = TOKEN_OP_GE;
+                    lexer->current_token.type = TOKEN_GREATER_OR_EQUAL;
                     ps_lexer_read_next_char(lexer);
                 }
                 else
-                    lexer->current_token.type = TOKEN_OP_GT;
+                    lexer->current_token.type = TOKEN_GREATER_THAN;
                 ps_lexer_read_next_char(lexer);
                 break;
             default:
