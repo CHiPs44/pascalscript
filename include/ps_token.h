@@ -68,18 +68,18 @@ extern "C"
     {
         TOKEN_NONE = 0,
         TOKEN_END_OF_FILE,
-        // Numeric values         size  mini / maxi
+        // Numeric values        bytes mini / maxi
         //                       ----- ---------------------------------------------
         TOKEN_INTEGER_VALUE,  // 2 / 4 -32768..32767 / -2,147,483,648..2,147,483,647
         TOKEN_CARDINAL_VALUE, // 2 / 4 0..65,535 / 0..4,294,967,295
-        TOKEN_REAL_VALUE,     // 4 / 8 +/- 1.5E-45 .. 3.4E38 / 5.0E-324..1.7E308
+        TOKEN_REAL_VALUE,     // 4 / 8 +/- 1.5E-45 .. 3.4E38 / +/- 5.0E-324..1.7E308
         // Other value types
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
         TOKEN_IDENTIFIER,
         // Reserved words
-        // ==============================
+        // ==============
         TOKEN_RESERVED_WORDS = 127,
         TOKEN_PROGRAM,
         TOKEN_CONST,
@@ -122,16 +122,17 @@ extern "C"
         TOKEN_INTERFACE,
         TOKEN_IMPLEMENTATION,
         // Operators
-        TOKEN_OP_DIV_INT,
-        TOKEN_OP_MOD,
-        TOKEN_OP_AND,
-        TOKEN_OP_OR,
-        TOKEN_OP_XOR,
-        TOKEN_OP_NOT,
-        TOKEN_OP_SHL,
-        TOKEN_OP_SHR,
-        // ===========================================================
+        // =========
+        TOKEN_DIV,
+        TOKEN_MOD,
+        TOKEN_AND,
+        TOKEN_OR,
+        TOKEN_XOR,
+        TOKEN_NOT,
+        TOKEN_SHL,
+        TOKEN_SHR,
         // Symbols
+        // =======
         TOKEN_DOT_COLON,         // :=  assign
         TOKEN_AT_SIGN,           // @   address of
         TOKEN_CARET,             // ^   pointer to
