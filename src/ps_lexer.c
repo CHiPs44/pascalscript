@@ -50,7 +50,7 @@ char ps_lexer_peek_next_char(lexer_t *lexer)
     return next_char;
 }
 
-char ps_lexer_read_next_char(lexer_t *lexer)
+bool ps_lexer_read_next_char(lexer_t *lexer)
 {
     // printf("ps_lexer_read_next_char: line=%d, col=%d\n", lexer->current_line, lexer->current_column);
     lexer->current_char = '\0';
@@ -75,7 +75,7 @@ char ps_lexer_read_next_char(lexer_t *lexer)
         }
     }
     // printf("ps_lexer_read_next_char: line=%05d col=%03d char=%c\n", lexer->current_line, lexer->current_column, lexer->current_char);
-    return lexer->current_char;
+    return true;
 }
 
 bool ps_lexer_return_error(lexer_t *lexer, error_t error)

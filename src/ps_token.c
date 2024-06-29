@@ -13,33 +13,33 @@ void ps_token_dump(token_t *token)
 {
     token_type_t token_type;
     char *type;
-    char buffer[256 + 2];
+    char buffer[256 + 16];
 
     switch (token->type)
     {
     case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(buffer, 256 + 2, "%04d: %d", token->type, token->value.i);
+        snprintf(buffer, 256 + 16, "%04d: %d", token->type, token->value.i);
         break;
     case TOKEN_CARDINAL_VALUE:
         type = "CARDINAL";
-        snprintf(buffer, 256 + 2, "%04d: %u", token->type, token->value.u);
+        snprintf(buffer, 256 + 16, "%04d: %u", token->type, token->value.u);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(buffer, 256 + 2, "%04d: %f", token->type, token->value.r);
+        snprintf(buffer, 256 + 16, "%04d: %f", token->type, token->value.r);
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(buffer, 256 + 2, "%04d: '%c'", token->type, token->value.c);
+        snprintf(buffer, 256 + 16, "%04d: '%c'", token->type, token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.s);
+        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.s);
         break;
     case TOKEN_AT_SIGN:           // @
     case TOKEN_CARET:             // ^
@@ -64,19 +64,19 @@ void ps_token_dump(token_t *token)
     case TOKEN_SLASH:             // /
     case TOKEN_STAR:              // *
         type = "RESERVED";
-        snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
         break;
     default:
         token_type = ps_token_is_keyword(token->value.identifier);
         if (token_type == TOKEN_IDENTIFIER)
         {
             type = "UNKNOWN";
-            snprintf(buffer, 256 + 2, "'%s'", "?");
+            snprintf(buffer, 256 + 16, "'%s'", "?");
         }
         else
         {
             type = "KEYWORD";
-            snprintf(buffer, 256 + 2, "%04d: '%s'", token->type, token->value.identifier);
+            snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }
@@ -109,14 +109,14 @@ keyword_t keywords[] = {
     { .token = TOKEN_LABEL          , .keyword = "LABEL"            },
     { .token = TOKEN_NIL            , .keyword = "NIL"              },
     { .token = TOKEN_OF             , .keyword = "OF"               },
-    { .token = TOKEN_AND         , .keyword = "AND"              },
-    { .token = TOKEN_DIV     , .keyword = "DIV"              },
-    { .token = TOKEN_MOD         , .keyword = "MOD"              },
-    { .token = TOKEN_NOT         , .keyword = "NOT"              },
-    { .token = TOKEN_OR          , .keyword = "OR"               },
-    { .token = TOKEN_SHL         , .keyword = "SHL"              },
-    { .token = TOKEN_SHR         , .keyword = "SHR"              },
-    { .token = TOKEN_XOR         , .keyword = "XOR"              },
+    { .token = TOKEN_AND            , .keyword = "AND"              },
+    { .token = TOKEN_DIV            , .keyword = "DIV"              },
+    { .token = TOKEN_MOD            , .keyword = "MOD"              },
+    { .token = TOKEN_NOT            , .keyword = "NOT"              },
+    { .token = TOKEN_OR             , .keyword = "OR"               },
+    { .token = TOKEN_SHL            , .keyword = "SHL"              },
+    { .token = TOKEN_SHR            , .keyword = "SHR"              },
+    { .token = TOKEN_XOR            , .keyword = "XOR"              },
     { .token = TOKEN_PROCEDURE      , .keyword = "PROCEDURE"        },
     { .token = TOKEN_PROGRAM        , .keyword = "PROGRAM"          },
     { .token = TOKEN_RECORD         , .keyword = "RECORD"           },

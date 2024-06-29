@@ -38,25 +38,25 @@ token_type_t expected_minimal[] = {
     TOKEN_END, TOKEN_DOT};
 
 char *hello =
-    "Program Hello;\n"
+    "Program HelloWolrd;\n"
     "Const\n"
     "  K1 = 1234;\n"
-    "  K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog.'\n" // 0123456789 Times';\n"
+    "  K2 = 'Hello, World!';\n"
     "Begin\n"
-    "  { Comment1\t(* Comment2 *) }\n"
+    "  { Comment1 (* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"
     "  WriteLn(K1, K2);\n"
     "End.\n"
     "";
 
 token_type_t expected_hello[] = {
-    // PROGRAM HELLO;
+    // PROGRAM HELLOWORLD;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST
     TOKEN_CONST,
     // K1 = 1234;
-    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_INTEGER_VALUE, TOKEN_SEMI_COLON,
-    // K2 = 'The Quick Brown Fox Jumps Over The Lazy Dog. 0123456789 Times!';\n"
+    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
+    // K2 = 'Hello, World!';\n"
     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
@@ -67,17 +67,17 @@ token_type_t expected_hello[] = {
     // END.
     TOKEN_END, TOKEN_DOT};
 
-char *quote =
-    "Program Quote;\n"
-    "Const K = 'X=''Y'' ';\n"
+char *quotes =
+    "Program Quotes;\n"
+    "Const K = '''X''=''Y'' ';\n"
     "Begin\n"
     "End.\n"
     "";
 
-token_type_t expected_quote[] = {
+token_type_t expected_quotes[] = {
     // PROGRAM QUOTE;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
-    // const k = ' ''k'' ';
+    // CONST K = '''X1''=''Y1'' ';
     TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
@@ -138,9 +138,9 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
-    // test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
-    // test("QUOTE", quote, expected_quote, sizeof(expected_quote) / sizeof(token_type_t));
+    // test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
+    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
+    // test("QUOTES", quotes, expected_quotes, sizeof(expected_quotes) / sizeof(token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;
