@@ -33,14 +33,27 @@ extern "C"
         uint16_t    line_count;
         char      **line_starts;
         uint8_t    *line_lengths;
-        ps_error_t     error;
+        int         current_line;
+        int         current_column;
+        char        current_char;
+        ps_error_t  error;
         // clang-format off
     } ps_buffer_t;
 
     /**
-     * @brief Init / reset buffer 
+     * @brief Init / reset buffer
      */
-    void ps_buffer_init(ps_buffer_t *buffer);
+    bool ps_buffer_init(ps_buffer_t *buffer);
+
+    /**
+     * @brief Release buffer
+     */
+    bool ps_buffer_done(ps_buffer_t *buffer);
+
+    /**
+     * @brief Reset buffer
+     */
+    void ps_buffer_reset(ps_buffer_t *buffer);
 
     /**
      * @brief Scan source for line starts & lengths

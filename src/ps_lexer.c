@@ -11,71 +11,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ps_error.h"
 #include "ps_buffer.h"
-#include "ps_token.h"
+#include "ps_error.h"
 #include "ps_lexer.h"
+#include "ps_token.h"
 
-void ps_lexer_init(ps_lexer_t *lexer)
+bool ps_lexer_init(ps_lexer_t *lexer)
 {
-    ps_buffer_init(&lexer->buffer);
-    ps_lexer_reset_cursor(lexer);
+    if (!ps_buffer_init(&lexer->buffer))
+        return false;
+    ps_lexer_reset(lexer);
+    return true;
+}
+
+bool ps_lexer_done(ps_lexer_t *lexer)
+{
+    if (!ps_buffer_done(&lexer->buffer))
+        return false;
+    memset(lexer, 0, sizeof(ps_lexer_t));
+    return true;
+}
+
+void ps_lexer_reset(ps_lexer_t *lexer)
+{
+    ps_buffer_reset(&lexer->buffer);
     lexer->error = LEXER_ERROR_NONE;
     lexer->current_token.type = TOKEN_NONE;
-}
-
-void ps_lexer_reset_cursor(ps_lexer_t *lexer)
-{
-    lexer->current_line = 0;
-    lexer->current_column = 0;
-    lexer->current_char = '\0';
-}
-
-char ps_lexer_peek_char(ps_lexer_t *lexer)
-{
-    // printf("lexer_peek_char: char=%c alpha=%d, alnum=%d, digit=%d\n", lexer->current_char, isalpha(lexer->current_char), isalnum(lexer->current_char), isdigit(lexer->current_char));
-    return lexer->current_char;
-}
-
-char ps_lexer_peek_next_char(ps_lexer_t *lexer)
-{
-    char next_char = '\0';
-    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
-    {
-        if (lexer->current_column + 1 >= 0 && lexer->current_column + 1 <= lexer->buffer.line_lengths[lexer->current_line])
-        {
-            next_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column + 1];
-        }
-    }
-    return next_char;
-}
-
-bool ps_lexer_read_next_char(ps_lexer_t *lexer)
-{
-    // printf("ps_lexer_read_next_char: line=%d, col=%d\n", lexer->current_line, lexer->current_column);
-    lexer->current_char = '\0';
-    if (lexer->current_line >= 0 && lexer->current_line < lexer->buffer.line_count)
-    {
-        if (lexer->current_column >= 0 &&
-            lexer->current_column <= lexer->buffer.line_lengths[lexer->current_line])
-        {
-            lexer->current_char = lexer->buffer.line_starts[lexer->current_line][lexer->current_column];
-            // Advance to next char
-            lexer->current_column += 1;
-            if (lexer->current_column > lexer->buffer.line_lengths[lexer->current_line])
-            {
-                lexer->current_line += 1;
-                lexer->current_column = 0;
-                if (lexer->current_line > lexer->buffer.line_count)
-                {
-                    lexer->error = LEXER_ERROR_UNEXPECTED_EOF;
-                    lexer->current_char = '\0';
-                }
-            }
-        }
-    }
-    // printf("ps_lexer_read_next_char: line=%05d col=%03d char=%c\n", lexer->current_line, lexer->current_column, lexer->current_char);
-    return true;
 }
 
 bool ps_lexer_return_error(ps_lexer_t *lexer, ps_error_t error)
@@ -93,7 +54,7 @@ bool ps_lexer_skip_whitespace(ps_lexer_t *lexer, bool *changed)
     *changed = false;
     while (isspace(c) || c == '\n')
     {
-        c = ps_lexer_read_next_char(lexer);
+        ps_lexer_read_next_char(lexer);
         // printf("ps_lexer_skip_whitespace: c='%c' / %d %d\n", c, c, '\n');
         if (lexer->error != LEXER_ERROR_NONE)
             return false;
@@ -112,9 +73,9 @@ bool ps_lexer_skip_comment1(ps_lexer_t *lexer, bool *changed)
         *changed = true;
         while (c != '}')
         {
-            c = ps_lexer_read_next_char(lexer);
-            if (lexer->error != LEXER_ERROR_NONE)
+            if (!ps_lexer_read_next_char(lexer))
                 return false;
+            c = lexer->current_char;
             if (c == '\0')
                 return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_EOF);
             // printf("ps_lexer_skip_comment1: c='%c'\n", c);
@@ -139,7 +100,9 @@ bool ps_lexer_skip_comment2(ps_lexer_t *lexer, bool *changed)
         *changed = true;
         do
         {
-            c1 = ps_lexer_read_next_char(lexer);
+            if (!ps_lexer_read_next_char(lexer))
+                return false;
+            c1 = lexer->current_char;
             c2 = ps_lexer_peek_next_char(lexer);
             if (c1 == '\0' || c2 == '\0')
                 return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_EOF);

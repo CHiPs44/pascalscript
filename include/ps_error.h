@@ -16,24 +16,26 @@ extern "C"
 
     typedef enum _ps_error_t
     {
-        /* general */
+        /* GENERAL */
         ERROR_ZERO = 0,
         ERROR_NOT_IMPLEMENTED,
-        /* buffer*/
+        /* BUFFER */
         BUFFER_ERROR_NONE = 1000,
         BUFFER_ERROR_OPENING_FILE,
         BUFFER_ERROR_READING_FILE,
         BUFFER_ERROR_OUT_OF_MEMORY,
-        /* lexer */
+        BUFFER_ERROR_OVERFLOW_COLUMNS,
+        BUFFER_ERROR_OVERFLOW_LINES,
+        BUFFER_ERROR_UNEXPECTED_EOF,
+        /* LEXER */
         LEXER_ERROR_NONE = 2000,
         LEXER_ERROR_UNEXPECTED_CHARACTER,
         LEXER_ERROR_UNEXPECTED_EOF,
-        LEXER_ERROR_BUFFER_OVERFLOW,
         LEXER_ERROR_IDENTIFIER_TOO_LONG,
         LEXER_ERROR_OVERFLOW,
         LEXER_ERROR_STRING_TOO_LONG,
         LEXER_ERROR_STRING_NOT_MULTI_LINE,
-        /* parser */
+        /* PARSER */
         PARSER_ERROR_NONE = 3000,
         PARSER_ERROR_SYNTAX,
         PARSER_ERROR_UNEXPECTED,
@@ -41,7 +43,7 @@ extern "C"
         LEXER_ERROR_UNEXPECTED_TOKEN,
         PARSER_ERROR_UNKOWN_IDENTIFIER,
         PARSER_ERROR_CONSTANT_VALUE,
-        /* runtime */
+        /* RUNTIME */
         RUNTIME_ERROR_NONE = 4000,
         RUNTIME_ERROR_STACK_EMPTY,
         RUNTIME_ERROR_STACK_OVERFLOW,
@@ -72,7 +74,7 @@ extern "C"
 
     char *ps_error_get_message(ps_error_t code);
 
-    void ps_error_print_message(ps_error_t code, const char *format, ...);
+    void ps_error_printf(ps_error_t code, const char *format, ...);
 
 #ifdef __cplusplus
 }

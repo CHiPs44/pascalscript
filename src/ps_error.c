@@ -9,25 +9,31 @@
 
 #include "ps_error.h"
 
-static char error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
+static char ps_error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
 
 char *ps_error_get_message(ps_error_t code)
 {
     switch (code)
     {
-    /* GENERAL ERRORS */
+    /* ==================== GENERAL  ==================== */
     case ERROR_ZERO:
         return "None";
     case ERROR_NOT_IMPLEMENTED:
         return "Not implemented";
-    /* BUFFER ERRORS */
+    /* ==================== BUFFER  ==================== */
     case BUFFER_ERROR_OPENING_FILE:
         return "Opening file";
     case BUFFER_ERROR_READING_FILE:
         return "Reading file";
     case BUFFER_ERROR_OUT_OF_MEMORY:
         return "Out of memory";
-    /* LEXER ERRORS */
+    case BUFFER_ERROR_OVERFLOW_COLUMNS:
+        return "Overflow: line too long";
+    case BUFFER_ERROR_OVERFLOW_LINES:
+        return "Overflow: too much lines";
+    case BUFFER_ERROR_UNEXPECTED_EOF:
+        return "Unexpected end of file";
+    /* ====================LEXER  ==================== */
     case LEXER_ERROR_NONE:
         return "None";
     case LEXER_ERROR_UNEXPECTED_CHARACTER:
@@ -38,15 +44,13 @@ char *ps_error_get_message(ps_error_t code)
         return "Expected token";
     case LEXER_ERROR_UNEXPECTED_TOKEN:
         return "Unexpected token";
-    case LEXER_ERROR_BUFFER_OVERFLOW:
-        return "Buffer overflow";
     case LEXER_ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case LEXER_ERROR_OVERFLOW:
         return "Overflow";
     case LEXER_ERROR_STRING_TOO_LONG:
         return "String too long";
-    /* PARSER ERRORS */
+    /* ==================== PARSER  ==================== */
     case PARSER_ERROR_NONE:
         return "None";
     case PARSER_ERROR_SYNTAX:
@@ -57,7 +61,7 @@ char *ps_error_get_message(ps_error_t code)
         return "Unknown identifier";
     case PARSER_ERROR_CONSTANT_VALUE:
         return "Constant value";
-    /* RUNTIME ERRORS */
+    /* ==================== RUNTIME  ==================== */
     case RUNTIME_ERROR_NONE:
         return "None";
     case RUNTIME_ERROR_STACK_EMPTY:
@@ -92,13 +96,13 @@ char *ps_error_get_message(ps_error_t code)
         return "Type mismatch";
     case RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
-    default:
-        snprintf(error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
-        return error_unknown;
+    // default:
+    //     snprintf(ps_error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
+    //     return ps_error_unknown;
     }
 }
 
-void ps_error_print_message(ps_error_t code, const char *format, ...)
+void ps_error_printf(ps_error_t code, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
