@@ -17,15 +17,15 @@ extern "C"
 {
 #endif
 
-#ifndef BUFFER_MAX_LINES
-#define BUFFER_MAX_LINES 1000
+#ifndef PS_BUFFER_MAX_LINES
+#define PS_BUFFER_MAX_LINES 1000
 #endif
 
-#ifndef BUFFER_MAX_COLUMNS
-#define BUFFER_MAX_COLUMNS 255
+#ifndef PS_BUFFER_MAX_COLUMNS
+#define PS_BUFFER_MAX_COLUMNS 255
 #endif
 
-    typedef struct _buffer_t
+    typedef struct _ps_buffer_t
     {
         // clang-format off
         char       *text;
@@ -33,31 +33,34 @@ extern "C"
         uint16_t    line_count;
         char      **line_starts;
         uint8_t    *line_lengths;
-        error_t     error;
+        ps_error_t     error;
         // clang-format off
-    } buffer_t;
+    } ps_buffer_t;
 
     /**
      * @brief Init / reset buffer 
      */
-    void ps_buffer_init(buffer_t *buffer);
+    void ps_buffer_init(ps_buffer_t *buffer);
 
     /**
      * @brief Scan source for line starts & lengths
      */
-    bool ps_buffer_scan_text(buffer_t *buffer);
+    bool ps_buffer_scan_text(ps_buffer_t *buffer);
 
     /**
      * @brief Load file into source buffer
      */
-    bool ps_buffer_load_file(buffer_t *buffer, char *filename);
+    bool ps_buffer_load_file(ps_buffer_t *buffer, char *filename);
 
     /**
      * @brief Set source code from memory buffer
      */
-    bool ps_buffer_set_text(buffer_t *buffer, char *source, size_t length);
+    bool ps_buffer_set_text(ps_buffer_t *buffer, char *source, size_t length);
 
-    void ps_buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line);
+    /**
+     * @brief Dump content from one line for one "page"
+     */
+    void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size);
 
 #ifdef __cplusplus
 }

@@ -15,7 +15,7 @@ int main(void)
     ps_value_t value;
 
     printf("TEST VALUE: BEGIN\n");
-    value.type = PS_TYPE_NIL;
+    value.type = PS_TYPE_NONE;
     value.size = 0;
     value.data.i = 0;
     ps_value_dump(&value);

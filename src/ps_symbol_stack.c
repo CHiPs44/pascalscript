@@ -17,10 +17,10 @@
  *
  * @param stack
  */
-void ps_symbol_stack_init(symbol_stack_t *stack)
+void ps_symbol_stack_init(ps_symbol_stack_t *stack)
 {
     stack->sp = -1;
-    for (int i = 0; i < SYMBOL_STACK_SIZE; i++)
+    for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
     {
         stack->symbols[i] = NULL;
     }
@@ -32,7 +32,7 @@ void ps_symbol_stack_init(symbol_stack_t *stack)
  * @param stack
  * @return int
  */
-int ps_symbol_stack_size(symbol_stack_t *stack)
+int ps_symbol_stack_size(ps_symbol_stack_t *stack)
 {
     return stack->sp + 1;
 }
@@ -43,14 +43,14 @@ int ps_symbol_stack_size(symbol_stack_t *stack)
  * @param Stack
  * @return true if stack is full
  */
-extern bool ps_symbol_stack_full(symbol_stack_t *stack)
+extern bool ps_symbol_stack_full(ps_symbol_stack_t *stack)
 {
-    return ps_symbol_stack_size(stack) >= SYMBOL_STACK_SIZE;
+    return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
 }
 
-void ps_symbol_stack_dump(symbol_stack_t *stack, char *title)
+void ps_symbol_stack_dump(ps_symbol_stack_t *stack, char *title)
 {
-    symbol_t *symbol;
+    ps_symbol_t *symbol;
     fprintf(stderr, "*** Symbol stack %s (%d)%s ***\n",
             title,
             ps_symbol_stack_size(stack),
@@ -58,14 +58,14 @@ void ps_symbol_stack_dump(symbol_stack_t *stack, char *title)
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Size    ┃Value                          ┃\n");
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    for (int i = 0; i < SYMBOL_STACK_SIZE; i++)
+    for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
     {
         if (stack->symbols[i] != NULL)
         {
             symbol = stack->symbols[i];
             // fprintf(stderr, "|%03d|%-*s|%4d|%4d|%12d|%08x|\n",
             //         i, MAX_SYMBOL_NAME, symbol->name, symbol->kind, symbol->value.type, symbol->value.data.i, symbol->value.data.i);
-            char *kind_name = symbol_get_kind_name(symbol->kind);
+            char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
@@ -83,11 +83,11 @@ void ps_symbol_stack_dump(symbol_stack_t *stack, char *title)
  * @param symbol
  * @return int
  */
-int ps_symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol)
+int ps_symbol_stack_push(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
 {
     if (ps_symbol_stack_full(stack))
     {
-        return SYMBOL_STACK_ERROR_OVERFLOW;
+        return PS_SYMBOL_STACK_ERROR_OVERFLOW;
     }
     stack->sp += 1;
     stack->symbols[stack->sp] = symbol;
@@ -98,11 +98,11 @@ int ps_symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol)
  * @brief Pop symbol from top of stack
  *
  * @param stack
- * @return symbol_t* NULL if stack is empty
+ * @return ps_symbol_t* NULL if stack is empty
  */
-symbol_t *ps_symbol_stack_pop(symbol_stack_t *stack)
+ps_symbol_t *ps_symbol_stack_pop(ps_symbol_stack_t *stack)
 {
-    symbol_t *symbol;
+    ps_symbol_t *symbol;
     if (ps_symbol_stack_size(stack) == 0)
     {
         return NULL;
@@ -120,7 +120,7 @@ symbol_t *ps_symbol_stack_pop(symbol_stack_t *stack)
  * @param Symbol
  * @return true (false if stack is empty)
  */
-bool ps_symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol)
+bool ps_symbol_stack_poke(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
 {
     if (ps_symbol_stack_size(stack) == 0)
     {
@@ -136,7 +136,7 @@ bool ps_symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol)
  * @param Stack
  * @return Top or NULL if stack is empty
  */
-symbol_t *ps_symbol_stack_peek(symbol_stack_t *stack)
+ps_symbol_t *ps_symbol_stack_peek(ps_symbol_stack_t *stack)
 {
     if (ps_symbol_stack_size(stack) == 0)
     {

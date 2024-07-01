@@ -15,17 +15,17 @@ extern "C"
 #endif
 
 /* Size of each input chunk to be read and allocate for. */
-#ifndef READALL_CHUNK
-#define READALL_CHUNK 1024
+#ifndef PS_READALL_CHUNK
+#define PS_READALL_CHUNK 1024
 #endif
 
-#define  READALL_OK          0  /* Success */
-#define  READALL_INVALID    -1  /* Invalid parameters */
-#define  READALL_ERROR      -2  /* Stream error */
-#define  READALL_TOOMUCH    -3  /* Too much input */
-#define  READALL_NOMEM      -4  /* Out of memory */
+#define PS_READALL_OK 0       /* Success */
+#define PS_READALL_INVALID -1 /* Invalid parameters */
+#define PS_READALL_ERROR -2   /* Stream error */
+#define PS_READALL_TOOMUCH -3 /* Too much input */
+#define PS_READALL_NOMEM -4   /* Out of memory */
 
-int readall(FILE *in, char **dataptr, size_t *sizeptr);
+    int ps_readall(FILE *in, char **dataptr, size_t *sizeptr);
 
 #ifdef __cplusplus
 }

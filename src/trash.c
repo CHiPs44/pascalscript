@@ -4,7 +4,7 @@
  * @param text
  * @return int ERROR_ZERO | LEXER_ERROR_IDENTIFIER_TOO_LONG
  */
-error_t lexer_copy_identifier(char *text, token_t *token)
+ps_error_t lexer_copy_identifier(char *text, token_t *token)
 {
     char identifier[MAX_IDENTIFIER + 1];
     size_t length = strlen(text);
@@ -14,7 +14,7 @@ error_t lexer_copy_identifier(char *text, token_t *token)
     }
     token->type = TOKEN_IDENTIFIER;
     strcpy(identifier, text);
-    symbol_normalize_name(identifier);
+    ps_symbol_normalize_name(identifier);
     strcpy(token->value.identifier, identifier);
     fprintf(stderr, "\tlexer_copy_identifier: %s\n", token->value.identifier);
     return ERROR_ZERO;
@@ -23,9 +23,9 @@ error_t lexer_copy_identifier(char *text, token_t *token)
 /**
  * @brief Parse current integer value into current token
  *
- * @return error_t ERROR_ZERO | LEXER_ERROR_OVERFLOW
+ * @return ps_error_t ERROR_ZERO | LEXER_ERROR_OVERFLOW
  */
-error_t lexer_copy_integer_value(char *text, token_t *token)
+ps_error_t lexer_copy_integer_value(char *text, token_t *token)
 {
     long val = strtoul(text, 0, 10);
     fprintf(stderr, " [lexer_copy_integer_value %s %ld %d %d]", text, val, errno, INT_MAX);
@@ -42,9 +42,9 @@ error_t lexer_copy_integer_value(char *text, token_t *token)
 /**
  * @brief Parse current real value into current token
  *
- * @return error_t ERROR_ZERO | LEXER_ERROR_OVERFLOW
+ * @return ps_error_t ERROR_ZERO | LEXER_ERROR_OVERFLOW
  */
-error_t lexer_copy_real_value(char *text, token_t *token)
+ps_error_t lexer_copy_real_value(char *text, token_t *token)
 {
     ps_real_t val = strtod(text, NULL);
     fprintf(stderr, " [lexer_copy_real_value %s %f %d]", text, val, errno);
@@ -61,9 +61,9 @@ error_t lexer_copy_real_value(char *text, token_t *token)
 /**
  * @brief Parse current char value into current token
  *
- * @return error_t ERROR_ZERO
+ * @return ps_error_t ERROR_ZERO
  */
-error_t lexer_copy_char_value(char *text, token_t *token)
+ps_error_t lexer_copy_char_value(char *text, token_t *token)
 {
     // TODO? "'X'" or "''''"
     ps_char_t val = text[1];
@@ -76,9 +76,9 @@ error_t lexer_copy_char_value(char *text, token_t *token)
 /**
  * @brief Parse current string value into current token
  *
- * @return error_t ERROR_ZERO | LEXER_ERROR_STRING_TOO_LONG
+ * @return ps_error_t ERROR_ZERO | LEXER_ERROR_STRING_TOO_LONG
  */
-error_t lexer_copy_string_value(char *text, token_t *token)
+ps_error_t lexer_copy_string_value(char *text, token_t *token)
 {
     // TODO replace "''" with "'"
     size_t len = strlen(text) - 2;

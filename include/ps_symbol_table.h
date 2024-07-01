@@ -14,29 +14,29 @@ extern "C"
 {
 #endif
 
-#ifndef SYMBOL_TABLE_SIZE
-#define SYMBOL_TABLE_SIZE (256)
+#ifndef PS_SYMBOL_TABLE_SIZE
+#define PS_SYMBOL_TABLE_SIZE (256)
 #endif
 
-#define SYMBOL_TABLE_ERROR_FULL (-1)
-#define SYMBOL_TABLE_ERROR_EXISTS (-2)
+#define SYMBOL_TABLE_ERROR_EXISTS (-1)
+#define SYMBOL_TABLE_ERROR_FULL (-2)
 
-typedef struct _symbol_table_t
-{
-    int count;
-    symbol_t symbols[SYMBOL_TABLE_SIZE];
-} symbol_table_t;
+    typedef struct _ps_symbol_table_t
+    {
+        int count;
+        ps_symbol_t symbols[PS_SYMBOL_TABLE_SIZE];
+    } ps_symbol_table_t;
 
-/* clang-format off */
-extern void      symbol_table_init(symbol_table_t *table);
-extern void      symbol_table_dump(symbol_table_t *table, char *title);
-extern int       symbol_table_find(symbol_table_t *table, char *name);
-extern symbol_t *symbol_table_get (symbol_table_t *table, char *name);
-extern int       symbol_table_add (symbol_table_t *table, symbol_t *symbol);
-extern int       symbol_table_delete (symbol_table_t *table, char *name);
-extern int       symbol_table_free(symbol_table_t *table, char *name);
-extern int       symbol_table_gc  (symbol_table_t *table);
-/* clang-format on */
+    /* clang-format off */
+extern void      ps_symbol_table_init(ps_symbol_table_t *table);
+extern void      ps_symbol_table_dump(ps_symbol_table_t *table, char *title);
+extern int       ps_symbol_table_find(ps_symbol_table_t *table, char *name);
+extern ps_symbol_t *ps_symbol_table_get (ps_symbol_table_t *table, char *name);
+extern int       ps_symbol_table_add (ps_symbol_table_t *table, ps_symbol_t *symbol);
+extern int       ps_symbol_table_delete(ps_symbol_table_t *table, char *name);
+extern int       ps_symbol_table_free(ps_symbol_table_t *table, char *name);
+extern int       ps_symbol_table_gc  (ps_symbol_table_t *table);
+    /* clang-format on */
 
 #ifdef __cplusplus
 }

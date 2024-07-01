@@ -16,7 +16,7 @@
 #include "ps_readall.h"
 #include "ps_buffer.h"
 
-void ps_buffer_init(buffer_t *buffer)
+void ps_buffer_init(ps_buffer_t *buffer)
 {
     buffer->text = NULL;
     buffer->length = 0;
@@ -30,7 +30,7 @@ void ps_buffer_init(buffer_t *buffer)
     buffer->error = BUFFER_ERROR_NONE;
 }
 
-bool ps_buffer_scan_text(buffer_t *buffer)
+bool ps_buffer_scan_text(ps_buffer_t *buffer)
 {
     int line = 0;
     int column = 0;
@@ -85,7 +85,7 @@ bool ps_buffer_scan_text(buffer_t *buffer)
         switch (c)
         {
         case '\n':
-            if (line == BUFFER_MAX_LINES)
+            if (line == PS_BUFFER_MAX_LINES)
             {
                 buffer->error = LEXER_ERROR_BUFFER_OVERFLOW;
                 return false;
@@ -114,7 +114,7 @@ bool ps_buffer_scan_text(buffer_t *buffer)
     return true;
 }
 
-bool ps_buffer_load_file(buffer_t *buffer, char *filename)
+bool ps_buffer_load_file(ps_buffer_t *buffer, char *filename)
 {
     FILE *input = fopen(filename, "r");
     if (input == NULL)
@@ -122,17 +122,17 @@ bool ps_buffer_load_file(buffer_t *buffer, char *filename)
         buffer->error = BUFFER_ERROR_OPENING_FILE;
         return false;
     }
-    int result = readall(input, &(buffer->text), &(buffer->length));
+    int result = ps_readall(input, &(buffer->text), &(buffer->length));
     fclose(input);
     switch (result)
     {
-    case READALL_ERROR:
+    case PS_READALL_ERROR:
         buffer->error = BUFFER_ERROR_READING_FILE;
         return false;
-    case READALL_NOMEM:
+    case PS_READALL_NOMEM:
         buffer->error = BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
-    case READALL_OK:
+    case PS_READALL_OK:
         buffer->error = BUFFER_ERROR_NONE;
         return ps_buffer_scan_text(buffer);
     default:
@@ -141,7 +141,7 @@ bool ps_buffer_load_file(buffer_t *buffer, char *filename)
     }
 }
 
-bool ps_buffer_set_text(buffer_t *buffer, char *text, size_t length)
+bool ps_buffer_set_text(ps_buffer_t *buffer, char *text, size_t length)
 {
     buffer->text = text;
     buffer->length = length;
@@ -158,30 +158,22 @@ bool ps_buffer_set_text(buffer_t *buffer, char *text, size_t length)
     return ps_buffer_scan_text(buffer);
 }
 
-void ps_buffer_dump(buffer_t *buffer, uint16_t from_line, uint16_t to_line)
+void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size)
 {
-    char line_[BUFFER_MAX_COLUMNS + 1];
+    char line[PS_BUFFER_MAX_COLUMNS + 1];
 
-    from_line =
-        from_line < 0 ? 0 : from_line > buffer->line_count ? buffer->line_count
-                                                           : from_line;
-    to_line =
-        to_line < 0 ? 0 : to_line > buffer->line_count ? buffer->line_count
-                                                       : to_line;
-    if (from_line > to_line)
+    if (buffer->line_count == 0)
+        return;
+    // printf("%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
+    printf("            |         1         2         3         4         5         6         7         8|\n");
+    printf("12345 (123) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
+    for (int line_number = from_line; line_number < from_line + page_size - 1; line_number += 1)
     {
-        int temp = from_line;
-        from_line = to_line;
-        to_line = temp;
-    }
-    printf("\n");
-    printf("              |         1         2         3         4         5         6         7         8|\n");
-    printf("12345 (12345) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
-    for (int line = from_line; line < to_line; line += 1)
-    {
-        strncpy(line_, buffer->line_starts[line], BUFFER_MAX_COLUMNS);
-        line_[buffer->line_lengths[line]] = '\0';
-        printf("%05d (%05d) |%-80s|\n", line + 1, buffer->line_lengths[line], line_);
+        if (line_number >= buffer->line_count)
+            return;
+        strncpy(line, buffer->line_starts[line_number], PS_BUFFER_MAX_COLUMNS);
+        line[buffer->line_lengths[line_number]] = '\0';
+        printf("%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     printf("\n");
 }

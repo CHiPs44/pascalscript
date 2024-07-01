@@ -17,23 +17,12 @@ extern "C"
 {
 #endif
 
-#ifndef PS_VERSION_MAJOR
-#define PS_VERSION_MAJOR 0
-#endif
-#ifndef PS_VERSION_MINOR
-#define PS_VERSION_MINOR 0
-#endif
-#ifndef PS_VERSION_PATCH
-#define PS_VERSION_PATCH 0
-#endif
-#ifndef PS_VERSION_INDEX
-#define PS_VERSION_INDEX 0
-#endif
-
 #ifndef PS_INTEGER
+// 16 bits
 // #define PS_INTEGER int16_t
 // #define PS_INTEGER_MIN -32768
 // #define PS_INTEGER_MAX 32767
+// 32 bits
 #define PS_INTEGER int32_t
 #define PS_INTEGER_MIN -2147483648L
 #define PS_INTEGER_MAX 2147483647L
@@ -48,8 +37,10 @@ extern "C"
 #endif
 
 #ifndef PS_UNSIGNED
+// 16 bits
 // #define PS_UNSIGNED uint16_t
 // #define PS_UNSIGNED_MAX 0xffff
+// 32 bits
 #define PS_UNSIGNED uint32_t
 #define PS_UNSIGNED_MAX 0xffffffff
 #endif
@@ -79,7 +70,7 @@ extern "C"
 #define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX 255
 // #define PS_STRING_LEN_TYPE uint16_t
-// #define PS_STRING_MAX 65534
+// #define PS_STRING_MAX 65535
 #endif
 
 #ifndef PS_STRING_LEN_TYPE

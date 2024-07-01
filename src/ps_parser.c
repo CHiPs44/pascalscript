@@ -20,7 +20,7 @@ bool parser_init(parser_t *parser)
     return true;
 }
 
-bool parser_expect_token_type(parser_t *parser, token_type_t token_type)
+bool parser_expect_token_type(parser_t *parser, ps_token_type_t token_type)
 {
     if (parser->current_token.type != token_type)
     {
@@ -32,7 +32,7 @@ bool parser_expect_token_type(parser_t *parser, token_type_t token_type)
 
 bool parser_start(parser_t *parser)
 {
-    symbol_t program;
+    ps_symbol_t program;
 
     // if (!parser_expect_token_type(vm, TOKEN_PROGRAM))
     // {
@@ -47,7 +47,7 @@ bool parser_start(parser_t *parser)
     // program.size = 0;
     // program.type = PS_TYPE_STRING;
     // strcpy(program.value.s, vm->current_token.value.s);
-    // symbol_table_add(&vm->symbols, &program);
+    // ps_symbol_table_add(&vm->symbols, &program);
 
     return true;
 }

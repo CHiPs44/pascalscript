@@ -14,7 +14,7 @@ extern "C"
 {
 #endif
 
-    typedef enum _error_t
+    typedef enum _ps_error_t
     {
         /* general */
         ERROR_ZERO = 0,
@@ -61,18 +61,18 @@ extern "C"
         RUNTIME_ERROR_EXPECTED_VARIABLE,
         RUNTIME_ERROR_TYPE_MISMATCH,
         RUNTIME_ERROR_DIVISION_BY_ZERO,
-    } error_t;
+    } ps_error_t;
 
-#define error_is_from_buffer(code) (code >= 1000 && code <= 1999)
-#define error_is_from_lexer(code) (code >= 2000 && code <= 2999)
-#define error_is_from_parser(code) (code >= 3000 && code <= 3999)
-#define error_is_from_runtime(code) (code >= 4000 && code <= 4999)
+#define ps_error_is_from_buffer(code) (code >= 1000 && code <= 1999)
+#define ps_error_is_from_lexer(code) (code >= 2000 && code <= 2999)
+#define ps_error_is_from_parser(code) (code >= 3000 && code <= 3999)
+#define ps_error_is_from_runtime(code) (code >= 4000 && code <= 4999)
 
 #define ERROR_UNKNOWN_MESSAGE_LENGTH 31
 
-    char *error_get_message(error_t code);
+    char *ps_error_get_message(ps_error_t code);
 
-    void error_print_message(error_t code, const char *format, ...);
+    void ps_error_print_message(ps_error_t code, const char *format, ...);
 
 #ifdef __cplusplus
 }

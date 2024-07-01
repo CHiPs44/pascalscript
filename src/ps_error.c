@@ -11,7 +11,7 @@
 
 static char error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
 
-char *error_get_message(error_t code)
+char *ps_error_get_message(ps_error_t code)
 {
     switch (code)
     {
@@ -93,16 +93,16 @@ char *error_get_message(error_t code)
     case RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
     default:
-        snprintf(error_unknown, 31, "Unknown error %d", code);
+        snprintf(error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
         return error_unknown;
     }
 }
 
-void error_print_message(error_t code, const char *format, ...)
+void ps_error_print_message(ps_error_t code, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    char *message = error_get_message(code);
+    char *message = ps_error_get_message(code);
     fprintf(stderr, "ERROR: %s ", message);
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");

@@ -157,11 +157,11 @@ extern "C"
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
-    } token_type_t;
+    } ps_token_type_t;
 
     typedef struct _token_t
     {
-        token_type_t type;
+        ps_token_type_t type;
         union
         {
             char identifier[MAX_IDENTIFIER + 1];
@@ -173,16 +173,16 @@ extern "C"
         } value;
     } token_t;
 
-    typedef struct _keyword_t
+    typedef struct _ps_keyword_t
     {
         int token;
         char *keyword;
-    } keyword_t;
+    } ps_keyword_t;
 
     void ps_token_dump(token_t *token);
 
-    extern keyword_t keywords[];
-    token_type_t ps_token_is_keyword(char *text);
+    extern ps_keyword_t ps_keywords[];
+    ps_token_type_t ps_token_is_keyword(char *text);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ps_version.h"
 #include "ps_config.h"
 #include "ps_lexer.h"
 #include "ps_buffer.h"
@@ -18,12 +19,12 @@
 // vm_t _vm;
 // vm_t *vm = &_vm;
 
-char *minimal =
+char *minimal_source =
     "PROGRAM Minimal;\n"
     "BeGiN\n"
     "End.\n";
 
-char *hello =
+char *hello_source =
     "program hello;\n"
     "{ comment with curly brackets }\n"
     "const\n"
@@ -43,12 +44,12 @@ int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
   // vm_init(vm);
-  symbol_table_dump(&vm->symbols, "Init");
-  symbol_t *ps_version = vm_global_get(vm, "__PS_VERSION__");
+  ps_symbol_table_dump(&vm->symbols, "Init");
+  ps_symbol_t *ps_version = vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
-  if (!ps_buffer_set_text(vm, minimal, strlen(minimal)))
+  if (!ps_buffer_set_text(vm, minimal_source, strlen(minimal_source)))
   // if (!ps_buffer_set_text(vm, hello, strlen(hello)))
   // if (!ps_buffer_load_file(vm,"examples/00-hello.pas"))
   {
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_buffer_dump(vm, 0, BUFFER_MAX_LINES);
+  ps_buffer_dump(vm, 0, PS_BUFFER_MAX_LINES-1);
   printf("Listed!\n");
   parser_start(vm);
   return 0;

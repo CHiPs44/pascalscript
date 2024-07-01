@@ -16,26 +16,26 @@ extern "C"
 {
 #endif
 
-#ifndef SYMBOL_STACK_SIZE
-#define SYMBOL_STACK_SIZE 256
+#ifndef PS_SYMBOL_STACK_SIZE
+#define PS_SYMBOL_STACK_SIZE (256)
 #endif
 
-#define SYMBOL_STACK_ERROR_OVERFLOW -2
+#define PS_SYMBOL_STACK_ERROR_OVERFLOW (-1)
 
-typedef struct _symbol_stack_t
+typedef struct _ps_symbol_stack_t
 {
     int sp;
-    symbol_t *symbols[SYMBOL_STACK_SIZE];
-} symbol_stack_t;
+    ps_symbol_t *symbols[PS_SYMBOL_STACK_SIZE];
+} ps_symbol_stack_t;
 
-void      ps_symbol_stack_init(symbol_stack_t *stack);
-int       ps_symbol_stack_size(symbol_stack_t *stack);
-bool      ps_symbol_stack_full(symbol_stack_t *stack);
-void      ps_symbol_stack_dump(symbol_stack_t *stack, char *title);
-int       ps_symbol_stack_push(symbol_stack_t *stack, symbol_t *symbol);
-symbol_t *ps_symbol_stack_pop (symbol_stack_t *stack);
-bool      ps_symbol_stack_poke(symbol_stack_t *stack, symbol_t *symbol);
-symbol_t *ps_symbol_stack_peek(symbol_stack_t *stack);
+void      ps_symbol_stack_init(ps_symbol_stack_t *stack);
+int       ps_symbol_stack_size(ps_symbol_stack_t *stack);
+bool      ps_symbol_stack_full(ps_symbol_stack_t *stack);
+void      ps_symbol_stack_dump(ps_symbol_stack_t *stack, char *title);
+int       ps_symbol_stack_push(ps_symbol_stack_t *stack, ps_symbol_t *symbol);
+ps_symbol_t *ps_symbol_stack_pop (ps_symbol_stack_t *stack);
+bool      ps_symbol_stack_poke(ps_symbol_stack_t *stack, ps_symbol_t *symbol);
+ps_symbol_t *ps_symbol_stack_peek(ps_symbol_stack_t *stack);
 
 #ifdef __cplusplus
 }

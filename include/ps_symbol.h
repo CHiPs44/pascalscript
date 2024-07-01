@@ -7,9 +7,6 @@
 #ifndef _PS_SYMBOL_H
 #define _PS_SYMBOL_H
 
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "ps_config.h"
 #include "ps_value.h"
 
@@ -22,35 +19,40 @@ extern "C"
 #define MAX_SYMBOL_NAME 31
 #endif
 
-typedef enum _kind_t
-{
-    KIND_FREE = 0,
-    KIND_AUTO,
-    KIND_CONSTANT,
-    KIND_VARIABLE,
-    KIND_PROCEDURE,
-    KIND_FUNCTION,
-    KIND_TYPE,
-} kind_t;
+    typedef enum _ps_kind_t
+    {
+        KIND_FREE = 0,
+        KIND_AUTO,
+        KIND_CONSTANT,
+        KIND_VARIABLE,
+        KIND_PROCEDURE,
+        KIND_FUNCTION,
+        KIND_TYPE,
+        KIND_POINTER,
+        KIND_SET,
+        KIND_RECORD,
+        // ...
+    } ps_kind_t;
 
 #define PS_SCOPE_GLOBAL 0
 
-typedef uint8_t  ps_scope_t;
+    typedef uint8_t ps_scope_t;
+    const ps_scope_max = 255;
 
-typedef struct _symbol_t
-{
-    char    name[MAX_SYMBOL_NAME + 1];
-    kind_t  kind;
-    ps_scope_t scope;
-    ps_value_t value;
-} symbol_t;
+    typedef struct _ps_symbol_t
+    {
+        char name[MAX_SYMBOL_NAME + 1];
+        ps_kind_t kind;
+        ps_scope_t scope;
+        ps_value_t value;
+    } ps_symbol_t;
 
-void symbol_normalize_name(char *name);
-char *symbol_get_kind_name(kind_t kind);
-char *symbol_get_type_name(ps_type_t type);
-char *symbol_get_scope_name(ps_scope_t scope);
-// char *symbol_get_value(symbol_t *symbol);
-void symbol_dump(symbol_t *symbol);
+    void ps_symbol_normalize_name(char *name);
+    char *ps_symbol_get_kind_name(ps_kind_t kind);
+    char *ps_symbol_get_type_name(ps_type_t type);
+    char *symbol_get_scope_name(ps_scope_t scope);
+    // char *ps_symbol_get_value(ps_symbol_t *symbol);
+    void ps_symbol_dump(ps_symbol_t *symbol);
 
 #ifdef __cplusplus
 }

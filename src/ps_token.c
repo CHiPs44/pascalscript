@@ -11,7 +11,7 @@
 
 void ps_token_dump(token_t *token)
 {
-    token_type_t token_type;
+    ps_token_type_t token_type;
     char *type;
     char buffer[256 + 16];
 
@@ -83,7 +83,7 @@ void ps_token_dump(token_t *token)
     printf("TOKEN: type=%-16s, value=%s\n", type, buffer);
 }
 
-keyword_t keywords[] = {
+ps_keyword_t ps_keywords[] = {
     // clang-format off
     { .token = TOKEN_ARRAY          , .keyword = "ARRAY"            },
     { .token = TOKEN_BEGIN          , .keyword = "BEGIN"            },
@@ -136,16 +136,16 @@ keyword_t keywords[] = {
     // clang-format on
 };
 
-token_type_t ps_token_is_keyword(char *text)
+ps_token_type_t ps_token_is_keyword(char *text)
 {
     // NB: text should already be normalized to uppercase
     // TODO? dichotomic search instead of sequential one
-    for (int i = 0; i < sizeof(keywords) / sizeof(keyword_t); i += 1)
+    for (int i = 0; i < sizeof(ps_keywords) / sizeof(ps_keyword_t); i += 1)
     {
-        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", text, keywords[i].keyword);
-        if (strcmp(text, keywords[i].keyword) == 0)
+        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", text, ps_keywords[i].keyword);
+        if (strcmp(text, ps_keywords[i].keyword) == 0)
         {
-            return keywords[i].token;
+            return ps_keywords[i].token;
         }
     }
     return TOKEN_IDENTIFIER;

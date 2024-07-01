@@ -8,23 +8,23 @@
 
 #include "../include/ps_value.h"
 #include "../include/ps_symbol.h"
-// #define SYMBOL_STACK_SIZE 3
+// #define PS_SYMBOL_STACK_SIZE 3
 #include "../include/ps_symbol_stack.h"
 
 #include "../src/ps_value.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_stack.c"
 
-symbol_stack_t stack;
-symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
-symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
-symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};
-symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
-symbol_t constant5 = {.name = "CONSTANT5", .kind = KIND_CONSTANT};
+ps_symbol_stack_t stack;
+ps_symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
+ps_symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
+ps_symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};
+ps_symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
+ps_symbol_t constant5 = {.name = "CONSTANT5", .kind = KIND_CONSTANT};
 
 int main(void)
 {
-    symbol_t *symbol;
+    ps_symbol_t *symbol;
     int result;
     ps_string_t string5 = {.str = "ABCDEF123456", .len = 12};
 

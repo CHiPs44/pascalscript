@@ -18,10 +18,10 @@
 #include "../src/ps_token.c"
 #include "../src/ps_lexer.c"
 
-lexer_t _lexer;
-lexer_t *lexer = &_lexer;
+ps_lexer_t _lexer;
+ps_lexer_t *lexer = &_lexer;
 
-char *minimal =
+char *minimal_source =
     "Program Minimal;\n"
     // "{ Comment made with curly brackets }   \n"
     "Begin\n"
@@ -29,16 +29,18 @@ char *minimal =
     "End.\n"
     "";
 
-token_type_t expected_minimal[] = {
+ps_token_type_t minimal_expected[] = {
     // PROGRAM MINIMAL;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
     // END.
-    TOKEN_END, TOKEN_DOT};
+    TOKEN_END, TOKEN_DOT
+    //
+};
 
-char *hello =
-    "Program HelloWolrd;\n"
+char *hello_source =
+    "Program HelloWorld;\n"
     "Const\n"
     "  K1 = 1234;\n"
     "  K2 = 'Hello, World!';\n"
@@ -49,7 +51,7 @@ char *hello =
     "End.\n"
     "";
 
-token_type_t expected_hello[] = {
+ps_token_type_t hello_expected[] = {
     // PROGRAM HELLOWORLD;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST
@@ -65,16 +67,18 @@ token_type_t expected_hello[] = {
     // WRITELN(K1, K2);
     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // END.
-    TOKEN_END, TOKEN_DOT};
+    TOKEN_END, TOKEN_DOT
+    //
+};
 
-char *quotes =
+char *quotes_source =
     "Program Quotes;\n"
     "Const K = '''X''=''Y'' ';\n"
     "Begin\n"
     "End.\n"
     "";
 
-token_type_t expected_quotes[] = {
+ps_token_type_t quotes_expected[] = {
     // PROGRAM QUOTE;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST K = '''X1''=''Y1'' ';
@@ -82,16 +86,18 @@ token_type_t expected_quotes[] = {
     // BEGIN
     TOKEN_BEGIN,
     // END.
-    TOKEN_END, TOKEN_DOT};
+    TOKEN_END, TOKEN_DOT
+    //
+};
 
-void test(char *name, char *source, token_type_t *expected, int count)
+void test(char *name, char *source, ps_token_type_t *expected, int count)
 {
     int index;
 
     printf("TEST LEXER: INIT %s\n", name);
     ps_lexer_init(lexer);
     ps_buffer_set_text(&lexer->buffer, source, strlen(source));
-    ps_buffer_dump(&lexer->buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(&lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
@@ -138,9 +144,9 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    // test("MINIMAL", minimal, expected_minimal, sizeof(expected_minimal) / sizeof(token_type_t));
-    test("HELLO", hello, expected_hello, sizeof(expected_hello) / sizeof(token_type_t));
-    // test("QUOTES", quotes, expected_quotes, sizeof(expected_quotes) / sizeof(token_type_t));
+    // test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
+    test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
+    // test("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type_t));
 
     printf("TEST LEXER: END\n");
     return 0;

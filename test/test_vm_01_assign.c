@@ -22,41 +22,41 @@ vm_t *vm = &_vm;
 int main(void)
 {
     int result;
-    error_t code;
+    ps_error_t code;
 
     printf("TEST VM #01 ASSIGN: BEGIN\n");
     vm_init(vm);
-    symbol_table_dump(&vm->symbols, "Init");
+    ps_symbol_table_dump(&vm->symbols, "Init");
     printf("TEST VM #01 ASSIGN: INIT OK\n");
 
-    symbol_t variable_i = {"I", KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer_t), {0}};
+    ps_symbol_t variable_i = {"I", KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer_t), {0}};
     result = vm_global_add(vm, &variable_i);
     printf("TEST VM #01 ASSIGN: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
-    symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
+    ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
 
-    symbol_t *three = vm_auto_add_integer(vm, 3);
+    ps_symbol_t *three = vm_auto_add_integer(vm, 3);
     vm_stack_push(vm, vm_global_get(vm, "I"));
     vm_stack_push(vm, three);
     ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
     vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "2 POP?");
-    symbol_table_dump(&vm->symbols, "I=3?");
+    ps_symbol_table_dump(&vm->symbols, "I=3?");
     printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == ERROR_ZERO ? "OK" : "KO", code);
 
-    symbol_t constant_k = {"K", KIND_CONSTANT, PS_TYPE_INTEGER, sizeof(ps_integer_t), {1234}};
+    ps_symbol_t constant_k = {"K", KIND_CONSTANT, PS_TYPE_INTEGER, sizeof(ps_integer_t), {1234}};
     result = vm_global_add(vm, &constant_k);
     printf("TEST VM #01 ASSIGN: CONST K = 1234; %s %d\n", result == 0 ? "OK" : "KO", result);
-    symbol_table_dump(&vm->symbols, "CONST K = 1234;");
+    ps_symbol_table_dump(&vm->symbols, "CONST K = 1234;");
 
-    symbol_t *_5678 = vm_auto_add_integer(vm, 5678);
+    ps_symbol_t *_5678 = vm_auto_add_integer(vm, 5678);
     vm_stack_push(vm, vm_global_get(vm, "K"));
     vm_stack_push(vm, _5678);
     ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = vm_exec_assign(vm);
     vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "2 POP?");
-    symbol_table_dump(&vm->symbols, "K=1234?");
+    ps_symbol_table_dump(&vm->symbols, "K=1234?");
     printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == RUNTIME_ERROR_TYPE_MISMATCH ? "OK" : "KO", code);
 
     printf("TEST VM #01 ASSIGN: END\n");

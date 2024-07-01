@@ -49,8 +49,8 @@ bool vm_is_op_boolean(ps_vm_opcode_t op)
 
 ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
 {
-    if (a == PS_TYPE_NIL || b == PS_TYPE_NIL)
-        return PS_TYPE_NIL;
+    if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
+        return PS_TYPE_NONE;
     // X <EQ|NE|GT|GE|LT|LE> X => B
     if (vm_is_op_test(op))
         return PS_TYPE_BOOLEAN;
@@ -63,7 +63,7 @@ ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
     // X <op> R => R / R <op> X => R
     if (a == PS_TYPE_REAL || b == PS_TYPE_REAL)
         return PS_TYPE_REAL;
-    return PS_TYPE_NIL;
+    return PS_TYPE_NONE;
 }
 
 /**
@@ -71,12 +71,12 @@ ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
  *
  * @param vm_t *vm
  * @param operator_t operator
- * @return error_t
+ * @return ps_error_t
  */
-error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
+ps_error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
 {
     ps_value_t result;
-    symbol_t *a = vm_stack_pop(vm);
+    ps_symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
@@ -111,10 +111,10 @@ error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
         default:
             break;
         }
-        symbol_t *b = vm_auto_add_integer(vm, result.i);
+        ps_symbol_t *b = vm_auto_add_integer(vm, result.i);
         if (b == NULL)
             return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (vm_stack_push(vm, b) == SYMBOL_STACK_ERROR_OVERFLOW)
+        if (vm_stack_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, b->name);
             return RUNTIME_ERROR_STACK_OVERFLOW;
@@ -124,16 +124,16 @@ error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
     return RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
 }
 
-error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
+ps_error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
 {
     ps_value_t result;
-    symbol_t *b = vm_stack_pop(vm);
+    ps_symbol_t *b = vm_stack_pop(vm);
     if (b == NULL)
         return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (b->kind == KIND_AUTO)
         vm_auto_free(vm, b->name);
-    symbol_t *a = vm_stack_pop(vm);
+    ps_symbol_t *a = vm_stack_pop(vm);
     if (a == NULL)
         return RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
@@ -188,10 +188,10 @@ error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
         default:
             break;
         }
-        symbol_t *c = vm_auto_add_integer(vm, result.i);
+        ps_symbol_t *c = vm_auto_add_integer(vm, result.i);
         if (c == NULL)
             return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (vm_stack_push(vm, c) == SYMBOL_STACK_ERROR_OVERFLOW)
+        if (vm_stack_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, c->name);
             return RUNTIME_ERROR_STACK_OVERFLOW;

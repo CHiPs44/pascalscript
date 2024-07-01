@@ -25,6 +25,14 @@ ps_value_t *ps_value_unsigned(ps_value_t *value, ps_unsigned_t data)
     return value;
 }
 
+ps_value_t *ps_value_real(ps_value_t *value, ps_real_t data)
+{
+    value->type = PS_TYPE_REAL;
+    value->size = sizeof(ps_real_t);
+    value->data.r = data;
+    return value;
+}
+
 ps_value_t *ps_value_boolean(ps_value_t *value, ps_boolean_t data)
 {
     value->type = PS_TYPE_BOOLEAN;
@@ -52,14 +60,6 @@ ps_value_t *ps_value_string(ps_value_t *value, ps_string_t data)
     return value;
 }
 
-ps_value_t *ps_value_real(ps_value_t *value, ps_real_t data)
-{
-    value->type = PS_TYPE_REAL;
-    value->size = sizeof(ps_real_t);
-    value->data.r = data;
-    return value;
-}
-
 ps_value_t *ps_value_pointer(ps_value_t *value, void *data)
 {
     value->type = PS_TYPE_POINTER;
@@ -68,76 +68,46 @@ ps_value_t *ps_value_pointer(ps_value_t *value, void *data)
     return value;
 }
 
+const char *ps_type_names[] = {"NONE", "INTEGER", "UNSIGNED", "REAL", "BOOLEAN", "CHAR", "STRING", "POINTER"};
+
 char *ps_value_get_type_name(ps_type_t type)
 {
-    char *type_name;
-    switch (type)
-    {
-    // case PS_TYPE_ERROR:
-    //     type_name = "ERROR";
-    //     break;
-    case PS_TYPE_NIL:
-        type_name = "NONE";
-        break;
-    case PS_TYPE_INTEGER:
-        type_name = "INTEGER";
-        break;
-    case PS_TYPE_UNSIGNED:
-        type_name = "UNSIGNED";
-        break;
-    case PS_TYPE_BOOLEAN:
-        type_name = "BOOLEAN";
-        break;
-    case PS_TYPE_REAL:
-        type_name = "REAL";
-        break;
-    case PS_TYPE_CHAR:
-        type_name = "CHAR";
-        break;
-    case PS_TYPE_STRING:
-        type_name = "STRING";
-        break;
-    case PS_TYPE_POINTER:
-        type_name = "POINTER";
-        break;
-        // default:
-        //     type_name = "?";
-        //     break;
-    }
-    return type_name;
+    if (type >= PS_TYPE_NONE && type <= PS_TYPE_POINTER)
+        return ps_type_names[type];
+    return "UNKNOWN";
 }
 
 char *ps_value_get_value(ps_value_t *value)
 {
-    static char buffer[258 + 1];
+    static char buffer[256 + 2 + 1];
     switch (value->type)
     {
-    case PS_TYPE_NIL:
-        snprintf(buffer, 258, "[none]");
+    case PS_TYPE_NONE:
+        snprintf(buffer, 256 + 2, "[none]");
         break;
     case PS_TYPE_INTEGER:
-        snprintf(buffer, 258, "%d / 0x%08x", value->data.i, value->data.i);
+        snprintf(buffer, 256 + 2, "%d / 0x%08x", value->data.i, value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
-        snprintf(buffer, 258, "%u / 0x%08x", value->data.u, value->data.u);
-        break;
-    case PS_TYPE_BOOLEAN:
-        snprintf(buffer, 258, "%s", value->data.b ? "[true]" : "[false]");
+        snprintf(buffer, 256 + 2, "%u / 0x%08x", value->data.u, value->data.u);
         break;
     case PS_TYPE_REAL:
-        snprintf(buffer, 258, "%.20f", value->data.r);
+        snprintf(buffer, 256 + 2, "%.20f", value->data.r);
+        break;
+    case PS_TYPE_BOOLEAN:
+        snprintf(buffer, 256 + 2, "%s", value->data.b ? "[true]" : "[false]");
         break;
     case PS_TYPE_CHAR:
-        snprintf(buffer, 258, "'%c' / 0x%02x", value->data.c, value->data.c);
+        snprintf(buffer, 256 + 2, "'%c' / 0x%02x", value->data.c, value->data.c);
         break;
     case PS_TYPE_STRING:
-        snprintf(buffer, 258, "\"%s\"", value->data.s.str);
+        snprintf(buffer, 256 + 2, "\"%s\"", value->data.s.str);
         break;
     case PS_TYPE_POINTER:
-        snprintf(buffer, 258, "%p", value->data.p);
+        snprintf(buffer, 256 + 2, "%p", value->data.p);
         break;
     default:
-        snprintf(buffer, 258, "[? %d ?]", value->type);
+        snprintf(buffer, 256 + 2, "[? %d ?]", value->type);
         break;
     }
     return buffer;

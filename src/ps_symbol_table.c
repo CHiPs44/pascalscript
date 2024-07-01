@@ -20,28 +20,28 @@
  *
  * @param table
  */
-void symbol_table_init(symbol_table_t *table)
+void ps_symbol_table_init(ps_symbol_table_t *table)
 {
     table->count = 0;
-    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
         table->symbols[i].kind = KIND_FREE;
     }
 }
 
-void symbol_table_dump(symbol_table_t *table, char *title)
+void ps_symbol_table_dump(ps_symbol_table_t *table, char *title)
 {
-    symbol_t *symbol;
+    ps_symbol_t *symbol;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Size    ┃Value                          ┃\n");
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
         if (table->symbols[i].kind != KIND_FREE)
         {
             symbol = &table->symbols[i];
-            char *kind_name = symbol_get_kind_name(symbol->kind);
+            char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
@@ -58,10 +58,10 @@ void symbol_table_dump(symbol_table_t *table, char *title)
  * @param name normalized
  * @return int index of symbol or -1 if not found
  */
-int symbol_table_find(symbol_table_t *table, char *name)
+int ps_symbol_table_find(ps_symbol_table_t *table, char *name)
 {
     int index = 0;
-    // symbol_normalize_name(name);
+    // ps_symbol_normalize_name(name);
     while (index < table->count)
     {
         if (strcmp(name, table->symbols[index].name) == 0)
@@ -79,10 +79,10 @@ int symbol_table_find(symbol_table_t *table, char *name)
  * @param name normalized
  * @return symbol or NULL if not found
  */
-symbol_t *symbol_table_get(symbol_table_t *table, char *name)
+ps_symbol_t *ps_symbol_table_get(ps_symbol_table_t *table, char *name)
 {
-    symbol_t *symbol = NULL;
-    int index = symbol_table_find(table, name);
+    ps_symbol_t *symbol = NULL;
+    int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
         symbol = &table->symbols[index];
@@ -99,13 +99,13 @@ symbol_t *symbol_table_get(symbol_table_t *table, char *name)
  * @param Symbol
  * @return Index of added symbol (>=0) or error (<0)
  */
-int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
+int ps_symbol_table_add(ps_symbol_table_t *table, ps_symbol_t *symbol)
 {
-    if (table->count >= SYMBOL_TABLE_SIZE)
+    if (table->count >= PS_SYMBOL_TABLE_SIZE)
     {
         return SYMBOL_TABLE_ERROR_FULL;
     }
-    int index = symbol_table_find(table, symbol->name);
+    int index = ps_symbol_table_find(table, symbol->name);
     if (index >= 0)
     {
         return SYMBOL_TABLE_ERROR_EXISTS;
@@ -151,9 +151,9 @@ int symbol_table_add(symbol_table_t *table, symbol_t *symbol)
  * @param Normalized name
  * @return index of symbol or -1 if not found
  */
-int symbol_table_delete(symbol_table_t *table, char *name)
+int ps_symbol_table_delete(ps_symbol_table_t *table, char *name)
 {
-    int index = symbol_table_find(table, name);
+    int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
         table->symbols[index].kind = KIND_FREE;
@@ -169,9 +169,9 @@ int symbol_table_delete(symbol_table_t *table, char *name)
  * @param Normalized name
  * @return index of symbol or -1 if not found
  */
-int symbol_table_free(symbol_table_t *table, char *name)
+int ps_symbol_table_free(ps_symbol_table_t *table, char *name)
 {
-    int index = symbol_table_find(table, name);
+    int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
         table->symbols[index].kind = KIND_FREE;
@@ -187,10 +187,10 @@ int symbol_table_free(symbol_table_t *table, char *name)
  * @param Table
  * @return Count of garbage collected symbols
  */
-int symbol_table_gc(symbol_table_t *table)
+int ps_symbol_table_gc(ps_symbol_table_t *table)
 {
     int count = 0;
-    for (int i = 0; i < SYMBOL_TABLE_SIZE; i++)
+    for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
         if (table->symbols[i].kind == KIND_FREE)
         {

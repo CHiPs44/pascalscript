@@ -37,6 +37,7 @@ extern "C"
 
     typedef struct _ps_string_t
     {
+        ps_string_len_t size;
         ps_string_len_t len;
         ps_char_t str[PS_STRING_MAX + 1]; // TODO? replace by a pointer
     } ps_string_t;

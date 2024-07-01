@@ -15,10 +15,10 @@
 #include "../src/ps_readall.c"
 #include "../src/ps_buffer.c"
 
-buffer_t _buffer;
-buffer_t *buffer = &_buffer;
+ps_buffer_t _buffer;
+ps_buffer_t *buffer = &_buffer;
 
-char *minimal =
+char *minimal_source =
     "PROGRAM MINIMAL;\n"
     "BEGIN\n"
     "END.\n";
@@ -41,28 +41,28 @@ int main(void)
     printf("TEST BUFFER: INIT\n");
     ps_buffer_init(buffer);
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: SET TEXT EMPTY\n");
     ps_buffer_set_text(buffer, "", 0);
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: SET TEXT MINIMAL\n");
-    ps_buffer_set_text(buffer, minimal, strlen(minimal));
+    ps_buffer_set_text(buffer, minimal_source, strlen(minimal_source));
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: SET TEXT HELLO\n");
     ps_buffer_set_text(buffer, hello_utf8, strlen(hello_utf8));
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: LOAD FILE\n");
     ps_buffer_init(buffer);
     ps_buffer_load_file(buffer, "../examples/00-hello.pas");
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(buffer, 0, BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: END\n");
     return 0;

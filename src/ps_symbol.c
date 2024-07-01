@@ -15,7 +15,7 @@
  *
  * @param name
  */
-void symbol_normalize_name(char *name)
+void ps_symbol_normalize_name(char *name)
 {
     while (*name)
     {
@@ -28,7 +28,7 @@ void symbol_normalize_name(char *name)
     }
 }
 
-char *symbol_get_kind_name(kind_t kind)
+char *ps_symbol_get_kind_name(ps_kind_t kind)
 {
     char *kind_name;
     switch (kind)
@@ -62,9 +62,9 @@ char *symbol_get_scope_name(ps_scope_t scope)
     return scope_name;
 }
 
-void symbol_dump(symbol_t *symbol)
+void ps_symbol_dump(ps_symbol_t *symbol)
 {
-    char *kind_name = symbol_get_kind_name(symbol->kind);
+    char *kind_name = ps_symbol_get_kind_name(symbol->kind);
     char *scope_name = symbol_get_scope_name(symbol->scope);
     char *type_name = ps_value_get_type_name(symbol->value.type);
     char *buffer = ps_value_get_value(&symbol->value);

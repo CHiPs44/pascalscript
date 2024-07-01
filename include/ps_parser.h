@@ -21,13 +21,13 @@ extern "C"
 
     typedef struct _parser_t
     {
-        lexer_t lexer;
-        error_t error;
+        ps_lexer_t lexer;
+        ps_error_t error;
     } parser_t;
 
     bool parser_init(parser_t *parser);
-    bool parser_expect_token_type(parser_t *parser, token_type_t token_type);
-    bool parser_expect_token_types(parser_t *parser, size_t token_type_count, token_type_t token_type[]);
+    bool parser_expect_token_type(parser_t *parser, ps_token_type_t token_type);
+    bool parser_expect_token_types(parser_t *parser, size_t token_type_count, ps_token_type_t token_type[]);
     bool parser_start(parser_t *parser);
 
 #ifdef __cplusplus
