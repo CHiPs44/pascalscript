@@ -135,13 +135,14 @@ bool ps_buffer_scan_text(ps_buffer_t *buffer)
 
 bool ps_buffer_load_file(ps_buffer_t *buffer, char *filename)
 {
+    size_t length;
     FILE *input = fopen(filename, "r");
     if (input == NULL)
     {
         buffer->error = BUFFER_ERROR_OPENING_FILE;
         return false;
     }
-    int result = ps_readall(input, &(buffer->text), &(buffer->length));
+    int result = ps_readall(input, &(buffer->text), &length);
     fclose(input);
     switch (result)
     {
@@ -152,6 +153,13 @@ bool ps_buffer_load_file(ps_buffer_t *buffer, char *filename)
         buffer->error = BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
     case PS_READALL_OK:
+        if (length > UINT16_MAX)
+        {
+            free(buffer->text);
+            buffer->error = BUFFER_ERROR_OVERFLOW;
+            return false;
+        }
+        buffer->length = length;
         buffer->error = BUFFER_ERROR_NONE;
         return ps_buffer_scan_text(buffer);
     default:
@@ -205,25 +213,24 @@ char ps_buffer_peek_char(ps_buffer_t *buffer)
 
 bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char)
 {
-    char next_char = '\0';
     if (buffer->current_line >= 0 && buffer->current_line < buffer->line_count)
     {
         if (buffer->current_column + 1 >= 0 && buffer->current_column + 1 <= buffer->line_lengths[buffer->current_line])
         {
-            next_char = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
+            *next_char = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
+            return true;
         }
     }
-    return next_char;
+    return false;
 }
 
 bool ps_buffer_read_next_char(ps_buffer_t *buffer)
 {
     // printf("ps_buffer_read_next_char: line=%d, col=%d\n", buffer->current_line, buffer->current_column);
     buffer->current_char = '\0';
-    if (buffer->current_line >= 0 && buffer->current_line < buffer->line_count)
+    if (buffer->current_line < buffer->line_count)
     {
-        if (buffer->current_column >= 0 &&
-            buffer->current_column <= buffer->line_lengths[buffer->current_line])
+        if (buffer->current_column <= buffer->line_lengths[buffer->current_line])
         {
             buffer->current_char = buffer->line_starts[buffer->current_line][buffer->current_column];
             // Advance to next char

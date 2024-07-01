@@ -29,12 +29,12 @@ extern "C"
     {
         // clang-format off
         char       *text;
-        size_t      length;
+        uint32_t    length;
         uint16_t    line_count;
         char      **line_starts;
         uint8_t    *line_lengths;
-        int         current_line;
-        int         current_column;
+        uint16_t    current_line;
+        uint8_t     current_column;
         char        current_char;
         ps_error_t  error;
         // clang-format off
@@ -74,6 +74,21 @@ extern "C"
      * @brief Dump content from one line for one "page"
      */
     void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size);
+
+    /**
+     * Read next char of buffer
+     */
+    bool ps_buffer_read_next_char(ps_buffer_t *buffer);
+
+    /**
+     * Get current char of buffer
+     */
+    char ps_buffer_peek_char(ps_buffer_t *buffer);
+
+    /**
+     * Peek next char of buffer
+     */
+    bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char);
 
 #ifdef __cplusplus
 }

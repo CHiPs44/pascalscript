@@ -36,29 +36,14 @@ extern "C"
     /**
      * Release a lexer
      */
-    void ps_lexer_done(ps_lexer_t *lexer);
+    bool ps_lexer_done(ps_lexer_t *lexer);
 
     /**
      * Reset rexer:
-     *  - rewind cursor to (0, 0)
+     *  - reset buffer position
      *  - clear current token and error
      */
     void ps_lexer_reset(ps_lexer_t *lexer);
-
-    /**
-     * Read next char of buffer
-     */
-    bool ps_lexer_read_next_char(ps_lexer_t *lexer);
-
-    /**
-     * Get current char
-     */
-    char ps_lexer_peek_char(ps_lexer_t *lexer);
-
-    /**
-     * Peek next char of buffer
-     */
-    bool ps_lexer_peek_next_char(ps_lexer_t *lexer, char *next_char);
 
     /**
      * Read next token

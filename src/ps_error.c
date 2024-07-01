@@ -21,12 +21,16 @@ char *ps_error_get_message(ps_error_t code)
     case ERROR_NOT_IMPLEMENTED:
         return "Not implemented";
     /* ==================== BUFFER  ==================== */
+    case BUFFER_ERROR_NONE:
+        return "None";
     case BUFFER_ERROR_OPENING_FILE:
         return "Opening file";
     case BUFFER_ERROR_READING_FILE:
         return "Reading file";
     case BUFFER_ERROR_OUT_OF_MEMORY:
         return "Out of memory";
+    case BUFFER_ERROR_OVERFLOW:
+        return "Overflow: too much text";
     case BUFFER_ERROR_OVERFLOW_COLUMNS:
         return "Overflow: line too long";
     case BUFFER_ERROR_OVERFLOW_LINES:
@@ -50,6 +54,8 @@ char *ps_error_get_message(ps_error_t code)
         return "Overflow";
     case LEXER_ERROR_STRING_TOO_LONG:
         return "String too long";
+    case LEXER_ERROR_STRING_NOT_MULTI_LINE:
+        return "String not multiline";
     /* ==================== PARSER  ==================== */
     case PARSER_ERROR_NONE:
         return "None";
@@ -84,6 +90,10 @@ char *ps_error_get_message(ps_error_t code)
         return "Number expected";
     case RUNTIME_ERROR_EXPECTED_INTEGER:
         return "Integer expected";
+    case RUNTIME_ERROR_EXPECTED_UNSIGNED:
+        return "Unsigned expected";
+    case RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED:
+        return "Integer or unsigned expected";
     case RUNTIME_ERROR_EXPECTED_REAL:
         return "Real expected";
     case RUNTIME_ERROR_EXPECTED_BOOLEAN:
@@ -96,9 +106,9 @@ char *ps_error_get_message(ps_error_t code)
         return "Type mismatch";
     case RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
-    // default:
-    //     snprintf(ps_error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
-    //     return ps_error_unknown;
+        // default:
+        //     snprintf(ps_error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
+        //     return ps_error_unknown;
     }
 }
 

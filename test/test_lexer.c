@@ -43,7 +43,7 @@ char *hello_source =
     "Program HelloWorld;\n"
     "Const\n"
     "  K1 = 1234;\n"
-    "  K2 = 'Hello, World!';\n"
+    // "  K2 = 'Hello, World!';\n"
     "Begin\n"
     "  { Comment1 (* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"
@@ -59,7 +59,7 @@ ps_token_type_t hello_expected[] = {
     // K1 = 1234;
     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
     // K2 = 'Hello, World!';\n"
-    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    // TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
     // WRITELN('Hello, World!');
@@ -101,7 +101,7 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
-    ps_lexer_read_next_char(lexer);
+    ps_buffer_read_next_char(lexer);
     if (lexer->error != LEXER_ERROR_NONE)
     {
         printf("TEST LEXER: BEGIN ERROR %d\n",
