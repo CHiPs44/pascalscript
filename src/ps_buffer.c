@@ -205,10 +205,16 @@ void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size)
     printf("\n");
 }
 
-char ps_buffer_peek_char(ps_buffer_t *buffer)
+bool ps_buffer_peek_char(ps_buffer_t *buffer, char *current_char)
 {
     // printf("buffer_peek_char: char=%c alpha=%d, alnum=%d, digit=%d\n", buffer->current_char, isalpha(buffer->current_char), isalnum(buffer->current_char), isdigit(buffer->current_char));
-    return buffer->current_char;
+    if (buffer->error != BUFFER_ERROR_NONE)
+    {
+        *current_char = '\0';
+        return false;
+    }
+    *current_char = buffer->current_char;
+    return true;
 }
 
 bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char)
@@ -243,11 +249,12 @@ bool ps_buffer_read_next_char(ps_buffer_t *buffer)
                 {
                     buffer->error = BUFFER_ERROR_UNEXPECTED_EOF;
                     buffer->current_char = '\0';
+                    return false;
                 }
             }
         }
     }
-    printf("ps_buffer_read_next_char: line=%05d col=%03d char=%c\n", buffer->current_line, buffer->current_column, buffer->current_char);
+    // printf("ps_buffer_read_next_char: line=%05d col=%03d char=%c\n", buffer->current_line, buffer->current_column, buffer->current_char);
     return true;
 }
 

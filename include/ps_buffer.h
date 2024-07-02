@@ -83,7 +83,7 @@ extern "C"
     /**
      * Get current char of buffer
      */
-    char ps_buffer_peek_char(ps_buffer_t *buffer);
+    bool ps_buffer_peek_char(ps_buffer_t *buffer, char *current_char);
 
     /**
      * Peek next char of buffer

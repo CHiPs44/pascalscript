@@ -19,6 +19,9 @@ extern "C"
 {
 #endif
 
+    /**
+     * @brief Lexer state
+     */
     typedef struct _ps_lexer_t
     {
         // clang-format off
@@ -29,36 +32,40 @@ extern "C"
     } ps_lexer_t;
 
     /**
-     * Initialize a lexer
+     * @brief Initialize a lexer
      */
     bool ps_lexer_init(ps_lexer_t *lexer);
 
     /**
-     * Release a lexer
+     * @brief Release a lexer
      */
     bool ps_lexer_done(ps_lexer_t *lexer);
 
     /**
-     * Reset rexer:
+     * @brief Reset lexer:
      *  - reset buffer position
      *  - clear current token and error
      */
     void ps_lexer_reset(ps_lexer_t *lexer);
 
     /**
-     * Read next token
+     * @brief Read next token
      */
     bool ps_lexer_read_next_token(ps_lexer_t *lexer);
 
     /**
-     * Skip whitespace and comments
+     * @brief Skip whitespace and comments
      */
     bool ps_lexer_skip_whitespace_and_comments(ps_lexer_t *lexer);
 
     /**
-     *
+     * @brief 
      */
     bool ps_lexer_read_identifier_or_keyword(ps_lexer_t *lexer);
+
+    /**
+     * @brief 
+     */
     bool ps_lexer_read_number(ps_lexer_t *lexer);
 
 #ifdef __cplusplus
