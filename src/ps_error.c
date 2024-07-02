@@ -9,7 +9,7 @@
 
 #include "ps_error.h"
 
-static char ps_error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
+// static char ps_error_unknown[ERROR_UNKNOWN_MESSAGE_LENGTH + 1];
 
 char *ps_error_get_message(ps_error_t code)
 {
@@ -110,6 +110,7 @@ char *ps_error_get_message(ps_error_t code)
         //     snprintf(ps_error_unknown, ERROR_UNKNOWN_MESSAGE_LENGTH, "Unknown error %d", code);
         //     return ps_error_unknown;
     }
+    return "Unknown";
 }
 
 void ps_error_printf(ps_error_t code, const char *format, ...)

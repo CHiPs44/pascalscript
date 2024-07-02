@@ -101,7 +101,7 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
-    ps_buffer_read_next_char(lexer);
+    ps_buffer_read_next_char(&lexer->buffer);
     if (lexer->error != LEXER_ERROR_NONE)
     {
         printf("TEST LEXER: BEGIN ERROR %d\n",
@@ -143,11 +143,13 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
-
+    printf("================================================================================\n");
     test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
+    // printf("================================================================================\n");
     // test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
+    // printf("================================================================================\n");
     // test("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type_t));
-
+    printf("================================================================================\n");
     printf("TEST LEXER: END\n");
     return 0;
 }
