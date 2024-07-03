@@ -68,6 +68,8 @@ extern "C"
      */
     bool ps_lexer_read_number(ps_lexer_t *lexer);
 
+    void ps_lexer_dump(ps_lexer_t *lexer);
+
 #ifdef __cplusplus
 }
 #endif

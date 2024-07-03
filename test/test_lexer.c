@@ -23,9 +23,9 @@ ps_lexer_t *lexer = &_lexer;
 
 char *minimal_source =
     "Program Minimal;\n"
-    // "{ Comment made with curly brackets }   \n"
+    "{ Comment made with curly brackets }   \n"
     "Begin\n"
-    // "  (* Comment with parenthesis & stars *)\n"
+    "  (* Comment with parenthesis & stars *)\n"
     "End.\n"
     "";
 

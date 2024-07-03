@@ -190,14 +190,17 @@ void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size)
     char line[PS_BUFFER_MAX_COLUMNS + 1];
 
     if (buffer->line_count == 0)
+    {
+        printf("EMPTY!\n");
         return;
-    // printf("%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
+    }
+    printf("%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
     printf("            |         1         2         3         4         5         6         7         8|\n");
     printf("12345 (123) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
     for (int line_number = from_line; line_number < from_line + page_size - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
-            return;
+            break;
         strncpy(line, buffer->line_starts[line_number], PS_BUFFER_MAX_COLUMNS);
         line[buffer->line_lengths[line_number]] = '\0';
         printf("%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
@@ -219,20 +222,27 @@ bool ps_buffer_peek_char(ps_buffer_t *buffer, char *current_char)
 
 bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char)
 {
-    if (buffer->current_line >= 0 && buffer->current_line < buffer->line_count)
+    if (buffer->current_line <= buffer->line_count)
     {
-        if (buffer->current_column + 1 >= 0 && buffer->current_column + 1 <= buffer->line_lengths[buffer->current_line])
+        if (buffer->current_column + 1 < buffer->line_lengths[buffer->current_line])
         {
-            *next_char = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
+            char c = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
+            printf("ps_buffer_peek_next_char: c=%d\n", c);
+            *next_char = c;
             return true;
         }
+        /* else if (buffer->current_line+1<=buffer->line_count) {
+            *next_char = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
+            return true;
+        }*/
     }
-    return false;
+    *next_char = '\0';
+    return true;
 }
 
 bool ps_buffer_read_next_char(ps_buffer_t *buffer)
 {
-    // printf("ps_buffer_read_next_char: line=%d, col=%d\n", buffer->current_line, buffer->current_column);
+    // printf("ps_buffer_read_next_char: line=%d, col=%d err=%d\n", buffer->current_line, buffer->current_column, buffer->error);
     buffer->current_char = '\0';
     if (buffer->current_line < buffer->line_count)
     {
@@ -241,14 +251,16 @@ bool ps_buffer_read_next_char(ps_buffer_t *buffer)
             buffer->current_char = buffer->line_starts[buffer->current_line][buffer->current_column];
             // Advance to next char
             buffer->current_column += 1;
-            if (buffer->current_column >= buffer->line_lengths[buffer->current_line])
+            if (buffer->current_column > buffer->line_lengths[buffer->current_line])
             {
                 buffer->current_line += 1;
                 buffer->current_column = 0;
-                if (buffer->current_line >= buffer->line_count)
+                if (buffer->current_line > buffer->line_count)
                 {
                     buffer->error = BUFFER_ERROR_UNEXPECTED_EOF;
                     buffer->current_char = '\0';
+                    // printf("ps_buffer_read_next_char: line=%d/%d, col=%d err=%d\n",
+                    //        buffer->current_line, buffer->line_count, buffer->current_column, buffer->error);
                     return false;
                 }
             }
