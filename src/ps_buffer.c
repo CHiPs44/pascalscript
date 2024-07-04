@@ -224,10 +224,10 @@ bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char)
 {
     if (buffer->current_line <= buffer->line_count)
     {
-        if (buffer->current_column + 1 < buffer->line_lengths[buffer->current_line])
+        if (buffer->current_column < buffer->line_lengths[buffer->current_line])
         {
-            char c = buffer->line_starts[buffer->current_line][buffer->current_column + 1];
-            printf("ps_buffer_peek_next_char: c=%d\n", c);
+            char c = buffer->line_starts[buffer->current_line][buffer->current_column];
+            // printf("ps_buffer_peek_next_char: c=%d\n", c);
             *next_char = c;
             return true;
         }
