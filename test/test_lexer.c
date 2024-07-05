@@ -44,7 +44,7 @@ char *hello_source =
     "Program HelloWorld;\n"
     "Const\n"
     "  K1 = 1234;\n"
-    "  K2 = 'Hello, World!';\n"
+    "  K2 = 'Cho\nose ''A'' or ''B''';\n"
     "Begin\n"
     "  { Comment1 (* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"

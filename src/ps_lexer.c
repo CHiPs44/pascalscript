@@ -249,55 +249,61 @@ bool ps_lexer_read_char_or_string_value(ps_lexer_t *lexer)
     char buffer[PS_BUFFER_MAX_COLUMNS + 1];
     char c1, c2;
     int pos = 0;
-    bool quote = false;
+    // bool quote = false;
 
     if (!ps_buffer_peek_char(&lexer->buffer, &c1))
         return false;
     if (c1 == '\'')
     {
-        if (!ps_buffer_read_next_char(&lexer->buffer))
-            return false;
+        // if (!ps_buffer_read_next_char(&lexer->buffer))
+        //     return false;
+        // if (!ps_buffer_peek_char(&lexer->buffer, &c1))
+        //     return false;
         do
         {
-            if (c1 == '\n')
-                return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_NOT_MULTI_LINE);
             if (!ps_buffer_peek_next_char(&lexer->buffer, &c2))
                 return false;
-            printf("ps_lexer_read_char_or_string_value: c=%d, peek=%d, quote=%s\n", c1, c2, quote ? "Y" : "N");
+            if (c2 == '\n')
+                return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_NOT_MULTI_LINE);
+            printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
             if (c1 == '\'' && c2 == '\'')
             {
-                // printf("ps_lexer_read_char_or_string_value: quote!\n");
-                quote = true;
+                printf("ps_lexer_read_char_or_string_value: quote!\n");
+                // quote = true;
+                buffer[pos] = '\'';
+                pos += 1;
                 if (!ps_buffer_read_next_char(&lexer->buffer))
                     return false;
+                if (!ps_buffer_peek_char(&lexer->buffer, &c1))
+                    return false;
+                continue;
             }
             if (pos > ps_string_max)
                 return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_TOO_LONG);
-            if (quote)
-            {
-                buffer[pos] = '\'';
-            }
-            else
-            {
-                buffer[pos] = c1;
-            }
+            // if (quote)
+            // {
+            //     buffer[pos] = '\'';
+            // }
+            // else
+            // {
+            buffer[pos] = c1;
+            // }
             pos += 1;
             if (!ps_buffer_read_next_char(&lexer->buffer))
                 return false;
             if (!ps_buffer_peek_char(&lexer->buffer, &c1))
                 return false;
-            if (quote)
-            {
-                quote = false;
-                continue;
-            }
+            // if (quote)
+            // {
+            //     quote = false;
+            //     continue;
+            // }
             if (!ps_buffer_peek_next_char(&lexer->buffer, &c2))
                 return false;
+            printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
         } while (c1 != '\'' && c2 != '\'');
         buffer[pos] = '\0';
         if (!ps_buffer_read_next_char(&lexer->buffer))
-            return false;
-        if (lexer->error != LEXER_ERROR_NONE)
             return false;
         if (pos == 1)
         {
@@ -355,7 +361,7 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
     {
         if (!ps_lexer_read_char_or_string_value(lexer))
         {
-            printf("ps_lexer_read_char_or_string_value: error=%d\n", lexer->error);
+            printf("AFTER ps_lexer_read_char_or_string_value: error=%d\n", lexer->error);
             return false;
         }
     }
