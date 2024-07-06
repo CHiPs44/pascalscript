@@ -36,6 +36,7 @@ extern "C"
         uint16_t    current_line;
         uint8_t     current_column;
         char        current_char;
+        char        next_char;
         ps_error_t  error;
         // clang-format off
     } ps_buffer_t;
@@ -76,19 +77,19 @@ extern "C"
     void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size);
 
     /**
-     * Read next char of buffer
+     * @brief Read next char of buffer
      */
     bool ps_buffer_read_next_char(ps_buffer_t *buffer);
 
     /**
-     * Get current char of buffer
+     * @brief Get current char of buffer
      */
-    bool ps_buffer_peek_char(ps_buffer_t *buffer, char *current_char);
+    char ps_buffer_peek_char(ps_buffer_t *buffer);
 
     /**
-     * Peek next char of buffer
+     * @brief Peek next char of buffer
      */
-    bool ps_buffer_peek_next_char(ps_buffer_t *buffer, char *next_char);
+    char ps_buffer_peek_next_char(ps_buffer_t *buffer);
 
 #ifdef __cplusplus
 }

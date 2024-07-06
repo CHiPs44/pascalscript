@@ -35,7 +35,7 @@ char *ps_error_get_message(ps_error_t code)
         return "Overflow: line too long";
     case BUFFER_ERROR_OVERFLOW_LINES:
         return "Overflow: too much lines";
-    case BUFFER_ERROR_UNEXPECTED_EOF:
+    case BUFFER_ERROR_EOF:
         return "Unexpected end of file";
     /* ====================LEXER  ==================== */
     case LEXER_ERROR_NONE:
