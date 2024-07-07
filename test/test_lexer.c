@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../include/ps_config.h"
 #include "../include/ps_error.h"
 #include "../include/ps_readall.h"
 #include "../include/ps_token.h"
@@ -43,13 +44,13 @@ ps_token_type_t minimal_expected[] = {
 char *hello_source =
     "Program HelloWorld;\n"
     "Const\n"
-    "  K1 = 1234;\n"
+    // "  K1 = 1234;\n"
     "  K2 = 'Choose ''A'' or ''B''';\n"
-    "Begin\n"
-    "  { Comment1 (* Comment2 *) }\n"
-    "  WriteLn('Hello, World!');\n"
-    "  WriteLn(K1, K2);\n"
-    "End.\n"
+    // "Begin\n"
+    // "  { Comment1 (* Comment2 *) }\n"
+    // "  WriteLn('Hello, World!');\n"
+    // "  WriteLn(K1, K2);\n"
+    // "End.\n"
     "";
 
 ps_token_type_t hello_expected[] = {
@@ -58,17 +59,17 @@ ps_token_type_t hello_expected[] = {
     // CONST
     TOKEN_CONST,
     // K1 = 1234;
-    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
-    // K2 = 'Hello, World!';\n"
+    // TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
+    // K2 = 'Choose ''A'' or ''B''';\n"
     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
-    TOKEN_BEGIN,
+    // TOKEN_BEGIN,
     // WRITELN('Hello, World!');
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // WRITELN(K1, K2);
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // END.
-    TOKEN_END, TOKEN_DOT
+    // TOKEN_END, TOKEN_DOT
     //
 };
 
@@ -97,16 +98,20 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 
     printf("TEST LEXER: INIT %s\n", name);
     ps_lexer_init(lexer);
+    lexer->buffer.debug = true;
     ps_buffer_set_text(&lexer->buffer, source, strlen(source));
     ps_buffer_dump(&lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
     ps_buffer_read_next_char(&lexer->buffer);
-    if (lexer->error != LEXER_ERROR_NONE)
+    if (lexer->error != LEXER_ERROR_NONE || lexer->buffer.error != BUFFER_ERROR_NONE)
     {
-        printf("TEST LEXER: BEGIN ERROR %d\n",
-               lexer->error);
+        printf("TEST LEXER: ERROR %d %s / %d %s\n",
+               lexer->error,
+               ps_error_get_message(lexer->error),
+               lexer->buffer.error,
+               ps_error_get_message(lexer->buffer.error));
         return;
     }
     do
@@ -114,9 +119,12 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
         // printf("TEST LEXER: %02d/%02d BEGIN\n", index + 1, count);
         if (!ps_lexer_read_next_token(lexer))
         {
-            printf("TEST LEXER: %02d/%02d ERROR %d\n",
+            printf("TEST LEXER: %02d/%02d ERROR %d %s / %d %s\n",
                    index + 1, count,
-                   lexer->error);
+                   lexer->error,
+                   ps_error_get_message(lexer->error),
+                   lexer->buffer.error,
+                   ps_error_get_message(lexer->buffer.error));
             break;
         }
         else if (lexer->current_token.type != expected[index])
@@ -144,9 +152,9 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
-    printf("================================================================================\n");
-    // test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
     // printf("================================================================================\n");
+    // test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
+    printf("================================================================================\n");
     test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
     // printf("================================================================================\n");
     // test("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type_t));

@@ -39,6 +39,15 @@ void ps_lexer_reset(ps_lexer_t *lexer)
     lexer->current_token.type = TOKEN_NONE;
 }
 
+char *ps_lexer_show_error(ps_lexer_t *lexer)
+{
+    static char ps_lexer_error_message[256];
+    snprintf(ps_lexer_error_message, 255, "LEXER: %d %s, line %d, column %d",
+             lexer->error, ps_error_get_message(lexer->error),
+             lexer->buffer.current_line, lexer->buffer.current_column);
+    return ps_lexer_error_message;
+}
+
 bool ps_lexer_return_error(ps_lexer_t *lexer, ps_error_t error)
 {
     lexer->current_token.type = TOKEN_NONE;
@@ -53,26 +62,10 @@ bool ps_lexer_read_next_char(ps_lexer_t *lexer)
     return ps_lexer_return_error(lexer, lexer->buffer.error);
 }
 
-bool ps_lexer_peek_char(ps_lexer_t *lexer, char *c)
-{
-    if (ps_buffer_peek_char(&lexer->buffer, c))
-        return true;
-    return ps_lexer_return_error(lexer, lexer->buffer.error);
-}
-
-bool ps_lexer_peek_next_char(ps_lexer_t *lexer, char *c)
-{
-    if (ps_buffer_peek_next_char(&lexer->buffer, c))
-        return true;
-    return ps_lexer_return_error(lexer, lexer->buffer.error);
-}
-
 bool ps_lexer_skip_whitespace(ps_lexer_t *lexer, bool *changed)
 {
-    char c;
+    char c = ps_buffer_peek_char(&lexer->buffer);
     *changed = false;
-    if (!ps_lexer_peek_char(lexer, &c))
-        return false;
     // printf("ps_lexer_skip_whitespace: c='%c' / %d\n", c, c);
     while (isspace(c) || c == '\n')
     {
@@ -80,18 +73,15 @@ bool ps_lexer_skip_whitespace(ps_lexer_t *lexer, bool *changed)
             return false;
         // printf("ps_lexer_skip_whitespace: c='%c' / %d pos=%d,%d\n", c, c, lexer->buffer.current_line, lexer->buffer.current_column);
         *changed = true;
-        if (!ps_lexer_peek_char(lexer, &c))
-            return false;
+        c = ps_buffer_peek_char(&lexer->buffer);
     }
     return true;
 }
 
 bool ps_lexer_skip_comment1(ps_lexer_t *lexer, bool *changed)
 {
-    char c;
+    char c = ps_buffer_peek_char(&lexer->buffer);
     *changed = false;
-    if (!ps_lexer_peek_char(lexer, &c))
-        return false;
     if (c == '{')
     {
         *changed = true;
@@ -112,19 +102,9 @@ bool ps_lexer_skip_comment1(ps_lexer_t *lexer, bool *changed)
 
 bool ps_lexer_skip_comment2(ps_lexer_t *lexer, bool *changed)
 {
-    char c1, c2;
+    char c1 = ps_buffer_peek_char(&lexer->buffer);
+    char c2 = ps_buffer_peek_next_char(&lexer->buffer);
     *changed = false;
-    if (!ps_lexer_peek_char(lexer, &c1))
-    {
-        printf("ps_lexer_skip_comment2: PEEK!\n");
-        return false;
-    }
-    if (!ps_lexer_peek_next_char(lexer, &c2))
-    {
-        printf("ps_lexer_skip_comment2: NEXT! ('%c' %d)\n", c1, c2);
-        return false;
-    }
-    // printf("ps_lexer_skip_comment2: BEGIN c1=%d/%d, c2=%d/%d\n", c1, '(', c2, '*');
     if (c1 == '(' && c2 == '*')
     {
         *changed = true;
@@ -132,11 +112,8 @@ bool ps_lexer_skip_comment2(ps_lexer_t *lexer, bool *changed)
         {
             if (!ps_lexer_read_next_char(lexer))
                 return false;
-            if (!ps_lexer_peek_char(lexer, &c1))
-                return false;
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            // printf("ps_lexer_skip_comment2: LOOP c1=%d/%d, c2=%d/%d\n", c1, '(', c2, '*');
+            c1 = ps_buffer_peek_char(&lexer->buffer);
+            c2 = ps_buffer_peek_next_char(&lexer->buffer);
             if (c1 == '\0' || c2 == '\0')
                 return ps_lexer_return_error(lexer, LEXER_ERROR_UNEXPECTED_EOF);
             if (c1 == '*' && c2 == ')')
@@ -186,41 +163,31 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer_t *lexer)
 bool ps_lexer_read_identifier_or_keyword(ps_lexer_t *lexer)
 {
     char buffer[PS_BUFFER_MAX_COLUMNS];
-    char c;
+    char c = ps_buffer_peek_char(&lexer->buffer);
     int pos = 0;
 
-    if (!ps_lexer_peek_char(lexer, &c))
-    {
-        printf("ps_lexer_read_identifier_or_keyword/ps_buffer_peek_char: error=%d buffer.error=%d\n", lexer->error, lexer->buffer.error);
-        return false;
-    }
-    // printf("ps_lexer_read_identifier_or_keyword: '%c' / %d / %0x\n", c, c, c);
+    printf("ps_lexer_read_identifier_or_keyword: '%c' / %d / %0x\n", c, c, c);
     if (isalpha(c))
     {
         do
         {
-            // printf("%c\n", c);
-            buffer[pos] = toupper(c);
+            printf("%c\n", c);
             if (pos > MAX_IDENTIFIER)
             {
                 return ps_lexer_return_error(lexer, LEXER_ERROR_IDENTIFIER_TOO_LONG);
             }
+            buffer[pos] = toupper(c);
             if (!ps_lexer_read_next_char(lexer))
             {
                 printf("ps_lexer_read_identifier_or_keyword/ps_buffer_read_next_char: error=%d buffer.error=%d\n", lexer->error, lexer->buffer.error);
                 return false;
             }
-            if (!ps_lexer_peek_char(lexer, &c))
-            {
-                printf("ps_lexer_read_identifier_or_keyword/ps_buffer_peek_char: error=%d buffer.error=%d\n", lexer->error, lexer->buffer.error);
-                return false;
-            }
+            c = ps_buffer_peek_char(&lexer->buffer);
             pos += 1;
             buffer[pos] = '\0';
-            // printf("ps_lexer_read_identifier_or_keyword: LOOP \"%s\" ('%c')\n", buffer, c);
+            printf("ps_lexer_read_identifier_or_keyword: LOOP \"%s\" ('%c')\n", buffer, c);
         } while (isalnum(c) || c == '_');
-        buffer[pos] = '\0';
-        // printf("ps_lexer_read_identifier_or_keyword: END  \"%s\" ('%c')\n", buffer, c);
+        printf("ps_lexer_read_identifier_or_keyword: END  \"%s\" ('%c')\n", buffer, c);
         lexer->current_token.type = ps_token_is_keyword(buffer);
         strncpy(lexer->current_token.value.identifier, buffer, MAX_IDENTIFIER);
         return true;
@@ -233,12 +200,10 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer_t *lexer)
 bool ps_lexer_read_number(ps_lexer_t *lexer)
 {
     char buffer[PS_BUFFER_MAX_COLUMNS];
-    char c;
+    char c = ps_buffer_peek_char(&lexer->buffer);
     int pos = 0;
     int base = 10;
 
-    if (!ps_lexer_peek_char(lexer, &c))
-        return false;
     printf("ps_lexer_read_number: c=%d, isdigit=%s\n", c, isdigit(c) ? "Y" : "N");
     if (isdigit(c))
     {
@@ -251,14 +216,17 @@ bool ps_lexer_read_number(ps_lexer_t *lexer)
             {
                 return false;
             }
-            if (!ps_lexer_peek_char(lexer, &c))
-                return false;
+            c = ps_buffer_peek_char(&lexer->buffer);
             pos += 1;
         } while (isdigit(c));
         buffer[pos] = '\0';
         lexer->current_token.type = TOKEN_CARDINAL_VALUE;
-        // TODO use better conversion from string to unsigned integer
-        lexer->current_token.value.u = strtoul(buffer, NULL, base);
+        // TODO? use even better conversion from string to unsigned integer
+        char *end;
+        unsigned long u = strtoul(buffer, &end, base);
+        if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
+            return ps_lexer_return_error(lexer, LEXER_ERROR_OVERFLOW);
+        lexer->current_token.value.u = u;
         lexer->error = LEXER_ERROR_NONE;
         return true;
     }
@@ -268,48 +236,52 @@ bool ps_lexer_read_number(ps_lexer_t *lexer)
 bool ps_lexer_read_char_or_string_value(ps_lexer_t *lexer)
 {
     char buffer[PS_BUFFER_MAX_COLUMNS + 1];
-    char c1, c2;
+    char c1 = ps_buffer_peek_char(&lexer->buffer);
+    char c2 = ps_buffer_peek_next_char(&lexer->buffer);
     int pos = 0;
 
-    if (!ps_lexer_peek_char(lexer, &c1))
-        return false;
     if (c1 == '\'')
     {
-        // if (!ps_lexer_read_next_char(lexer))
-        //     return false;
-        // if (!ps_lexer_peek_char(lexer, &c1))
-        //     return false;
-        do
+        if (!ps_lexer_read_next_char(lexer))
+            return false;
+        c1 = ps_buffer_peek_char(&lexer->buffer);
+        c2 = ps_buffer_peek_next_char(&lexer->buffer);
+        while (true)
         {
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            if (c2 == '\n')
+            if (c1 == '\n' || c2 == '\n')
                 return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_NOT_MULTI_LINE);
-            printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
-            if (c1 == '\'' && c2 == '\'')
-            {
-                printf("ps_lexer_read_char_or_string_value: quote!\n");
-                buffer[pos] = '\'';
-                pos += 1;
-                // TODO check pos
-                if (!ps_lexer_read_next_char(lexer))
-                    return false;
-                if (!ps_lexer_peek_char(lexer, &c1))
-                    return false;
-                continue;
-            }
+            // printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
             if (pos > ps_string_max)
                 return ps_lexer_return_error(lexer, LEXER_ERROR_STRING_TOO_LONG);
+            if (c1 == '\'' && c2 == '\'')
+            {
+                printf("ps_lexer_read_char_or_string_value: quote1!\n");
+                buffer[pos] = '\'';
+                pos += 1;
+                if (!ps_lexer_read_next_char(lexer))
+                    return false;
+                c1 = ps_buffer_peek_char(&lexer->buffer);
+                c2 = ps_buffer_peek_next_char(&lexer->buffer);
+                continue;
+            }
             buffer[pos] = c1;
             pos += 1;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
-            if (!ps_lexer_peek_char(lexer, &c1))
-                return false;
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
-        } while (c1 != '\'' && c2 != '\'');
+            c1 = ps_buffer_peek_char(&lexer->buffer);
+            c2 = ps_buffer_peek_next_char(&lexer->buffer);
+            // printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
+            if (c1 == '\'' && c2 == '\'')
+            {
+                printf("ps_lexer_read_char_or_string_value: quote2!\n");
+                continue;
+            }
+            else if (c1 == '\'')
+            {
+                printf("ps_lexer_read_char_or_string_value: done!\n");
+                break;
+            }
+        }
         buffer[pos] = '\0';
         if (!ps_lexer_read_next_char(lexer))
             return false;
@@ -333,19 +305,14 @@ bool ps_lexer_read_char_or_string_value(ps_lexer_t *lexer)
 
 bool ps_lexer_read_next_token(ps_lexer_t *lexer)
 {
-    char c1, c2;
-
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
     {
         printf("ps_lexer_skip_whitespace_and_comments: error=%d\n", lexer->error);
         return false;
     }
-    if (!ps_lexer_peek_char(lexer, &c1))
-    {
-        printf("ps_buffer_peek_char: error=%d\n", lexer->error);
-        return false;
-    }
-    if (isdigit(c1))
+    char current_char = ps_buffer_peek_char(&lexer->buffer);
+    char next_char = ps_buffer_peek_next_char(&lexer->buffer);
+    if (isdigit(current_char))
     {
         // printf("digit!\n");
         if (!ps_lexer_read_number(lexer))
@@ -354,7 +321,7 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
             return false;
         }
     }
-    else if (isalnum(c1))
+    else if (isalnum(current_char))
     {
         // printf("alnum!\n");
         if (!ps_lexer_read_identifier_or_keyword(lexer))
@@ -365,7 +332,7 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
         lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
         // printf("identifier: \"%s\" %d\n", lexer->current_token.value.identifier, lexer->current_token.type);
     }
-    else if (c1 == '\'')
+    else if (current_char == '\'')
     {
         if (!ps_lexer_read_char_or_string_value(lexer))
         {
@@ -376,13 +343,12 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
     else
     {
         // printf("%c\n", c);
-        sprintf(lexer->current_token.value.identifier, "%c", c1);
-        switch (c1)
+        sprintf(lexer->current_token.value.identifier, "%c", current_char);
+        switch (current_char)
         {
         case ':':
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            if (c2 == '=')
+            next_char = ps_buffer_peek_next_char(&lexer->buffer);
+            if (next_char == '=')
             {
                 sprintf(lexer->current_token.value.identifier, ":=");
                 lexer->current_token.type = TOKEN_DOT_COLON;
@@ -409,9 +375,8 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
                 return false;
             break;
         case '.':
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            if (c2 == '.')
+            next_char = ps_buffer_peek_next_char(&lexer->buffer);
+            if (next_char == '.')
             {
                 sprintf(lexer->current_token.value.identifier, "..");
                 lexer->current_token.type = TOKEN_DOT_DOT;
@@ -476,16 +441,15 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
                 return false;
             break;
         case '<':
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            if (c2 == '>')
+            next_char = ps_buffer_peek_next_char(&lexer->buffer);
+            if (next_char == '>')
             {
                 sprintf(lexer->current_token.value.identifier, "<>");
                 lexer->current_token.type = TOKEN_NOT_EQUAL;
                 if (!ps_lexer_read_next_char(lexer))
                     return false;
             }
-            else if (c2 == '=')
+            else if (next_char == '=')
             {
                 sprintf(lexer->current_token.value.identifier, "<=");
                 lexer->current_token.type = TOKEN_LESS_OR_EQUAL;
@@ -498,9 +462,8 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
                 return false;
             break;
         case '>':
-            if (!ps_lexer_peek_next_char(lexer, &c2))
-                return false;
-            if (c2 == '=')
+            next_char = ps_buffer_peek_next_char(&lexer->buffer);
+            if (next_char == '=')
             {
                 sprintf(lexer->current_token.value.identifier, ">=");
                 lexer->current_token.type = TOKEN_GREATER_OR_EQUAL;
@@ -512,6 +475,7 @@ bool ps_lexer_read_next_token(ps_lexer_t *lexer)
             ps_lexer_read_next_char(lexer);
             break;
         default:
+            printf("DEFAULT! %c %d\n", current_char, current_char);
             lexer->error = LEXER_ERROR_UNEXPECTED_CHARACTER;
             return false;
         }

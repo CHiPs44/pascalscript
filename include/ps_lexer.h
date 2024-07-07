@@ -49,6 +49,11 @@ extern "C"
     void ps_lexer_reset(ps_lexer_t *lexer);
 
     /**
+     * @brief Get error message
+     */
+    char *ps_lexer_show_error(ps_lexer_t *lexer);
+
+    /**
      * @brief Read next token
      */
     bool ps_lexer_read_next_token(ps_lexer_t *lexer);
@@ -59,12 +64,12 @@ extern "C"
     bool ps_lexer_skip_whitespace_and_comments(ps_lexer_t *lexer);
 
     /**
-     * @brief 
+     * @brief
      */
     bool ps_lexer_read_identifier_or_keyword(ps_lexer_t *lexer);
 
     /**
-     * @brief 
+     * @brief
      */
     bool ps_lexer_read_number(ps_lexer_t *lexer);
 

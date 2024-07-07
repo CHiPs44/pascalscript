@@ -38,7 +38,8 @@ extern "C"
         char        current_char;
         char        next_char;
         ps_error_t  error;
-        // clang-format off
+        uint8_t     debug; // 0=OFF, 1=debug, 2=verbose
+        // clang-format on
     } ps_buffer_t;
 
     /**
@@ -55,6 +56,11 @@ extern "C"
      * @brief Reset buffer
      */
     void ps_buffer_reset(ps_buffer_t *buffer);
+
+    /**
+     * @brief Get error message
+     */
+    char *ps_buffer_show_error(ps_buffer_t *buffer);
 
     /**
      * @brief Scan source for line starts & lengths
