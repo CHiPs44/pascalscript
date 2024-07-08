@@ -298,7 +298,7 @@ bool ps_buffer_read_next_char(ps_buffer_t *buffer)
     }
     if (buffer->debug > 0)
         printf("ps_buffer_read_next_char: END   counter=%06d line=%05d col=%03d char=%s, next=%s\n",
-        ps_buffer_counter,
+               ps_buffer_counter,
                buffer->current_line, buffer->current_column,
                ps_buffer_debug_char(buffer->current_char),
                ps_buffer_debug_char(buffer->next_char));
