@@ -44,13 +44,13 @@ ps_token_type_t minimal_expected[] = {
 char *hello_source =
     "Program HelloWorld;\n"
     "Const\n"
-    // "  K1 = 1234;\n"
-    "  K2 = 'Choose ''A'' or ''B''';\n"
-    // "Begin\n"
-    // "  { Comment1 (* Comment2 *) }\n"
-    // "  WriteLn('Hello, World!');\n"
-    // "  WriteLn(K1, K2);\n"
-    // "End.\n"
+    "  K1 = 1234;\n"
+    "  K2 = 'Choose ''A'' or ''B''.';\n"
+    "Begin\n"
+    "  { Comment1 (* Comment2 *) }\n"
+    "  WriteLn('Hello, World!');\n"
+    "  WriteLn(K1, K2);\n"
+    "End.\n"
     "";
 
 ps_token_type_t hello_expected[] = {
@@ -59,17 +59,17 @@ ps_token_type_t hello_expected[] = {
     // CONST
     TOKEN_CONST,
     // K1 = 1234;
-    // TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
-    // K2 = 'Choose ''A'' or ''B''';\n"
+    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
+    // K2 = 'Choose ''A'' or ''B''.';\n"
     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
-    // TOKEN_BEGIN,
+    TOKEN_BEGIN,
     // WRITELN('Hello, World!');
-    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // WRITELN(K1, K2);
-    // TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // END.
-    // TOKEN_END, TOKEN_DOT
+    TOKEN_END, TOKEN_DOT
     //
 };
 
@@ -98,7 +98,7 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 
     printf("TEST LEXER: INIT %s\n", name);
     ps_lexer_init(lexer);
-    lexer->buffer.debug = true;
+    lexer->buffer.debug = 0;
     ps_buffer_set_text(&lexer->buffer, source, strlen(source));
     ps_buffer_dump(&lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 

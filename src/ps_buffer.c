@@ -232,17 +232,30 @@ char ps_buffer_peek_next_char(ps_buffer_t *buffer)
 char *ps_buffer_debug_char(char c)
 {
     static char tmp[16];
+    static char *ctrl[32] = {
+        "NUL", "SOH", "STX", "ETX",
+        "EOT", "ENQ", "ACK", "BEL",
+        "BS ", "TAB", "LF ", "VT ",
+        "FF ", "CR ", "SO ", "SI ",
+        "DLE", "DC1", "DC2", "DC3",
+        "DC4", "NAK", "SYN", "ETB",
+        "CAN", "EM ", "SUB", "ESC",
+        "FS ", "GS ", "RS ", "US "};
     if (c >= ' ')
-        sprintf(tmp, " '%c' (%03d)", c, c);
+        sprintf(tmp, " '%c' (0x%02x)", c, c);
     else
-        sprintf(tmp, "'^%c' (%03d)", c + 'A', c);
+        sprintf(tmp, " %s (0x%02x)", ctrl[c + 0], c);
     return tmp;
 }
 
+static uint32_t ps_buffer_counter = 0;
+
 bool ps_buffer_read_next_char(ps_buffer_t *buffer)
 {
+    ps_buffer_counter += 1;
     if (buffer->debug >= 2)
-        printf("ps_buffer_read_next_char: BEGIN line=%05d col=%03d char=%s, next=%s\n",
+        printf("ps_buffer_read_next_char: BEGIN counter=%06d line=%05d col=%03d char=%s, next=%s\n",
+               ps_buffer_counter,
                buffer->current_line, buffer->current_column,
                ps_buffer_debug_char(buffer->current_char),
                ps_buffer_debug_char(buffer->next_char));
@@ -278,17 +291,14 @@ bool ps_buffer_read_next_char(ps_buffer_t *buffer)
         // printf("NEXT: Line %d/%d\n", buffer->current_line, buffer->line_count);
         // printf("NEXT: Col  %d/%d\n", buffer->current_column, buffer->line_lengths[buffer->current_line]);
         if (buffer->line_lengths[buffer->current_line] == 0)
-        {
             buffer->next_char = '\0';
-        }
         else
-        {
             buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
-        }
-        // printf("NEXT: End\n");
+        // printf("NEXT: End %s\n", ps_buffer_debug_char(buffer->next_char));
     }
     if (buffer->debug > 0)
-        printf("ps_buffer_read_next_char: END   line=%05d col=%03d char=%s, next=%s\n",
+        printf("ps_buffer_read_next_char: END   counter=%06d line=%05d col=%03d char=%s, next=%s\n",
+        ps_buffer_counter,
                buffer->current_line, buffer->current_column,
                ps_buffer_debug_char(buffer->current_char),
                ps_buffer_debug_char(buffer->next_char));
