@@ -24,10 +24,11 @@ ps_lexer_t *lexer = &_lexer;
 
 char *minimal_source =
     "Program Minimal;\n"
-    // "{ Comment made with curly brackets }   \n"
+    "{ Comment made with curly brackets }   \n"
     "Begin\n"
-    // "  (* Comment with parenthesis & stars *)\n"
-    // "  { (* Comment within comment *) }\n"
+    "  (* Comment with parenthesis & stars *)\n"
+    "  { (* Comment within comment *) }\n"
+    "  (* { Comment within comment } *)\n"
     "End.\n"
     "";
 
@@ -45,7 +46,8 @@ char *hello_source =
     "Program HelloWorld;\n"
     "Const\n"
     "  K1 = 1234;\n"
-    "  K2 = 'Choose ''A'' or ''B''.';\n"
+    "  K2 = 'Select ''A'' or ''B''.';\n"
+    "  { K3 = '''Doesn''t work yet!'''; }\n"
     "Begin\n"
     "  { Comment1 (* Comment2 *) }\n"
     "  WriteLn('Hello, World!');\n"
@@ -152,10 +154,10 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
 int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
-    // printf("================================================================================\n");
-    // test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
     printf("================================================================================\n");
-    test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
+    test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
+    // printf("================================================================================\n");
+    // test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
     // printf("================================================================================\n");
     // test("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type_t));
     printf("================================================================================\n");

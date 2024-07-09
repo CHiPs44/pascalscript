@@ -207,7 +207,7 @@ void ps_buffer_dump(ps_buffer_t *buffer, uint16_t from_line, uint16_t page_size)
         return;
     }
     printf("            |         1         2         3         4         5         6         7         8|\n");
-    printf("12345 (123) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
+    printf("Line  (Len) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
     for (int line_number = from_line; line_number < from_line + page_size - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
