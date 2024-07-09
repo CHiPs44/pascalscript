@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-    typedef enum _ps_type_t
+    typedef enum _ps_type
     {
         PS_TYPE_NONE = 0,
         PS_TYPE_INTEGER = 1,
@@ -28,39 +28,39 @@ extern "C"
         PS_TYPE_CHAR = 5,
         PS_TYPE_STRING = 6,
         PS_TYPE_POINTER = 7,
-    } ps_type_t;
+    } ps_type;
 
-    typedef union _ps_data_t
+    typedef union _ps_data
     {
-        ps_integer_t i;
-        ps_unsigned_t u;
-        ps_real_t r;
-        ps_boolean_t b;
-        ps_char_t c;
-        ps_string_t s;
-        ps_pointer_t p;
-    } ps_data_t;
+        ps_integer i;
+        ps_unsigned u;
+        ps_real r;
+        ps_boolean b;
+        ps_char c;
+        ps_string s;
+        ps_pointer p;
+    } ps_data;
 
-    typedef struct _ps_value_t
+    typedef struct _ps_value
     {
-        ps_type_t type;
+        ps_type type;
         size_t size;
-        ps_data_t data;
-    } ps_value_t;
+        ps_data data;
+    } ps_value;
 
     // clang-format off
-    ps_value_t *ps_value_integer (ps_value_t *value, ps_integer_t  data);
-    ps_value_t *ps_value_unsigned(ps_value_t *value, ps_unsigned_t data);
-    ps_value_t *ps_value_boolean (ps_value_t *value, ps_boolean_t  data);
-    ps_value_t *ps_value_char    (ps_value_t *value, ps_char_t     data);
-    ps_value_t *ps_value_string  (ps_value_t *value, ps_string_t   data);
-    ps_value_t *ps_value_real    (ps_value_t *value, ps_real_t     data);
-    ps_value_t *ps_value_pointer (ps_value_t *value, ps_pointer_t  data);
+    ps_value *ps_value_integer (ps_value *value, ps_integer  data);
+    ps_value *ps_value_unsigned(ps_value *value, ps_unsigned data);
+    ps_value *ps_value_boolean (ps_value *value, ps_boolean  data);
+    ps_value *ps_value_char    (ps_value *value, ps_char     data);
+    ps_value *ps_value_string  (ps_value *value, ps_string   data);
+    ps_value *ps_value_real    (ps_value *value, ps_real     data);
+    ps_value *ps_value_pointer (ps_value *value, ps_pointer  data);
     // clang-format on
 
-    char *ps_value_get_type_name(ps_type_t type);
-    char *ps_value_get_value(ps_value_t *value);
-    void ps_value_dump(ps_value_t *value);
+    char *ps_value_get_type_name(ps_type type);
+    char *ps_value_get_value(ps_value *value);
+    void ps_value_dump(ps_value *value);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@
  *
  * @param stack
  */
-void ps_symbol_stack_init(ps_symbol_stack_t *stack)
+void ps_symbol_stack_init(ps_symbol_stack *stack)
 {
     stack->sp = -1;
     for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
@@ -32,7 +32,7 @@ void ps_symbol_stack_init(ps_symbol_stack_t *stack)
  * @param stack
  * @return int
  */
-int ps_symbol_stack_size(ps_symbol_stack_t *stack)
+int ps_symbol_stack_size(ps_symbol_stack *stack)
 {
     return stack->sp + 1;
 }
@@ -43,14 +43,14 @@ int ps_symbol_stack_size(ps_symbol_stack_t *stack)
  * @param Stack
  * @return true if stack is full
  */
-extern bool ps_symbol_stack_full(ps_symbol_stack_t *stack)
+extern bool ps_symbol_stack_full(ps_symbol_stack *stack)
 {
     return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
 }
 
-void ps_symbol_stack_dump(ps_symbol_stack_t *stack, char *title)
+void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
 {
-    ps_symbol_t *symbol;
+    ps_symbol *symbol;
     fprintf(stderr, "*** Symbol stack %s (%d)%s ***\n",
             title,
             ps_symbol_stack_size(stack),
@@ -83,7 +83,7 @@ void ps_symbol_stack_dump(ps_symbol_stack_t *stack, char *title)
  * @param symbol
  * @return int
  */
-int ps_symbol_stack_push(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
+int ps_symbol_stack_push(ps_symbol_stack *stack, ps_symbol *symbol)
 {
     if (ps_symbol_stack_full(stack))
     {
@@ -98,11 +98,11 @@ int ps_symbol_stack_push(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
  * @brief Pop symbol from top of stack
  *
  * @param stack
- * @return ps_symbol_t* NULL if stack is empty
+ * @return ps_symbol* NULL if stack is empty
  */
-ps_symbol_t *ps_symbol_stack_pop(ps_symbol_stack_t *stack)
+ps_symbol *ps_symbol_stack_pop(ps_symbol_stack *stack)
 {
-    ps_symbol_t *symbol;
+    ps_symbol *symbol;
     if (ps_symbol_stack_size(stack) == 0)
     {
         return NULL;
@@ -120,7 +120,7 @@ ps_symbol_t *ps_symbol_stack_pop(ps_symbol_stack_t *stack)
  * @param Symbol
  * @return true (false if stack is empty)
  */
-bool ps_symbol_stack_poke(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
+bool ps_symbol_stack_poke(ps_symbol_stack *stack, ps_symbol *symbol)
 {
     if (ps_symbol_stack_size(stack) == 0)
     {
@@ -136,7 +136,7 @@ bool ps_symbol_stack_poke(ps_symbol_stack_t *stack, ps_symbol_t *symbol)
  * @param Stack
  * @return Top or NULL if stack is empty
  */
-ps_symbol_t *ps_symbol_stack_peek(ps_symbol_stack_t *stack)
+ps_symbol *ps_symbol_stack_peek(ps_symbol_stack *stack)
 {
     if (ps_symbol_stack_size(stack) == 0)
     {

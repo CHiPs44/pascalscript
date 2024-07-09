@@ -28,6 +28,7 @@
         "limits.h": "c",
         "random": "c",
         "compare": "c",
-        "ranges": "c"
+        "ranges": "c",
+        "stdarg.h": "c"
     }
 }

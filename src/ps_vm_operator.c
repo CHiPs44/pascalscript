@@ -10,7 +10,7 @@
 #include "ps_symbol.h"
 #include "ps_vm.h"
 
-bool vm_is_op_test(ps_vm_opcode_t op)
+bool vm_is_op_test(ps_vm_opcode op)
 {
     return op == OP_TEST_EQ ||
            op == OP_TEST_NE ||
@@ -20,7 +20,7 @@ bool vm_is_op_test(ps_vm_opcode_t op)
            op == OP_TEST_LE;
 }
 
-bool vm_is_op_arithmetic(ps_vm_opcode_t op)
+bool vm_is_op_arithmetic(ps_vm_opcode op)
 {
     return op == OP_ADD ||
            op == OP_SUB ||
@@ -29,7 +29,7 @@ bool vm_is_op_arithmetic(ps_vm_opcode_t op)
            op == OP_MOD;
 }
 
-bool vm_is_op_bit(ps_vm_opcode_t op)
+bool vm_is_op_bit(ps_vm_opcode op)
 {
     return op == OP_BIT_NOT ||
            op == OP_BIT_AND ||
@@ -39,7 +39,7 @@ bool vm_is_op_bit(ps_vm_opcode_t op)
            op == OP_BIT_SHR;
 }
 
-bool vm_is_op_boolean(ps_vm_opcode_t op)
+bool vm_is_op_boolean(ps_vm_opcode op)
 {
     return op == OP_BOOL_NOT ||
            op == OP_BOOL_AND ||
@@ -47,7 +47,7 @@ bool vm_is_op_boolean(ps_vm_opcode_t op)
            op == OP_BOOL_XOR;
 }
 
-ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
+ps_type vm_get_op_binary_type(ps_vm_opcode op, ps_type a, ps_type b)
 {
     if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
         return PS_TYPE_NONE;
@@ -69,16 +69,16 @@ ps_type_t vm_get_op_binary_type(ps_vm_opcode_t op, ps_type_t a, ps_type_t b)
 /**
  * @brief Execute unary operator
  *
- * @param vm_t *vm
+ * @param ps_vm *vm
  * @param operator_t operator
- * @return ps_error_t
+ * @return ps_error
  */
-ps_error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
+ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
 {
-    ps_value_t result;
-    ps_symbol_t *a = vm_stack_pop(vm);
+    ps_value result;
+    ps_symbol *a = vm_stack_pop(vm);
     if (a == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
@@ -92,13 +92,13 @@ ps_error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
             else if (a->value.type == PS_TYPE_REAL)
                 result.data.r = -a->value.data.r;
             else
-                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+                return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
             break;
         case OP_BOOL_NOT:
             if (a->value.type == PS_TYPE_BOOLEAN)
                 result.data.b = !(a->value.data.b);
             else
-                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+                return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
             break;
         case OP_BIT_NOT:
             if (a->value.type == PS_TYPE_INTEGER)
@@ -106,36 +106,36 @@ ps_error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op)
             else if (a->value.type == PS_TYPE_UNSIGNED)
                 result.data.u = ~a->value.data.u;
             else
-                return RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
+                return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
             break;
         default:
             break;
         }
-        ps_symbol_t *b = vm_auto_add_integer(vm, result.i);
+        ps_symbol *b = vm_auto_add_integer(vm, result.i);
         if (b == NULL)
-            return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
+            return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, b->name);
-            return RUNTIME_ERROR_STACK_OVERFLOW;
+            return PS_RUNTIME_ERROR_STACK_OVERFLOW;
         }
-        return RUNTIME_ERROR_NONE;
+        return PS_RUNTIME_ERROR_NONE;
     }
-    return RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
+    return PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR;
 }
 
-ps_error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
+ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
 {
-    ps_value_t result;
-    ps_symbol_t *b = vm_stack_pop(vm);
+    ps_value result;
+    ps_symbol *b = vm_stack_pop(vm);
     if (b == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (b->kind == KIND_AUTO)
         vm_auto_free(vm, b->name);
-    ps_symbol_t *a = vm_stack_pop(vm);
+    ps_symbol *a = vm_stack_pop(vm);
     if (a == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == KIND_AUTO)
         vm_auto_free(vm, a->name);
@@ -145,60 +145,60 @@ ps_error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op)
         op == OP_BIT_OR || op == OP_BIT_XOR ||
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
-        if (a->type != PS_TYPE_INTEGER)
-            return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
-        if (b->type != PS_TYPE_INTEGER)
-            return RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+        if (a->value.type != PS_TYPE_INTEGER)
+            return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+        if (b->value.type != PS_TYPE_INTEGER)
+            return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
         switch (op)
         {
         case OP_ADD:
-            result.i = a->value.i + b->value.i;
+            result.data.i = a->value.data.i + b->value.data.i;
             break;
         case OP_SUB:
-            result.i = a->value.i - b->value.i;
+            result.data.i = a->value.data.i - b->value.data.i;
             break;
         case OP_MUL:
-            result.i = a->value.i * b->value.i;
+            result.data.i = a->value.data.i * b->value.data.i;
             break;
         case OP_DIV:
-            if (b->value.i == 0)
-                return RUNTIME_ERROR_DIVISION_BY_ZERO;
-            result.i = a->value.i / b->value.i;
+            if (b->value.data.i == 0)
+                return PS_RUNTIME_ERROR_DIVISION_BY_ZERO;
+            result.data.i = a->value.data.i / b->value.data.i;
             break;
         case OP_MOD:
-            if (b->value.i == 0)
-                return RUNTIME_ERROR_DIVISION_BY_ZERO;
-            result.i = a->value.i % b->value.i;
+            if (b->value.data.i == 0)
+                return PS_RUNTIME_ERROR_DIVISION_BY_ZERO;
+            result.data.i = a->value.data.i % b->value.data.i;
             break;
         case OP_BIT_AND:
-            result.i = a->value.i & b->value.i;
+            result.data.u = a->value.data.u & b->value.data.u;
             break;
         case OP_BIT_OR:
-            result.i = a->value.i | b->value.i;
+            result.data.u = a->value.data.u | b->value.data.u;
             break;
         case OP_BIT_XOR:
-            result.i = a->value.i ^ b->value.i;
+            result.data.u = a->value.data.u ^ b->value.data.u;
             break;
         case OP_BOOL_AND:
-            result.i = (int)((bool)(a->value.i) && (bool)(b->value.i));
+            result.data.b = a->value.data.b && b->value.data.b;
             break;
         case OP_BOOL_OR:
-            result.i = (int)((bool)(a->value.i) || (bool)(b->value.i));
+            result.data.b = a->value.data.b || b->value.data.b;
             break;
         default:
             break;
         }
-        ps_symbol_t *c = vm_auto_add_integer(vm, result.i);
+        ps_symbol *c = vm_auto_add_integer(vm, result.data.i);
         if (c == NULL)
-            return RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
+            return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
         if (vm_stack_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             vm_auto_free(vm, c->name);
-            return RUNTIME_ERROR_STACK_OVERFLOW;
+            return PS_RUNTIME_ERROR_STACK_OVERFLOW;
         }
-        return RUNTIME_ERROR_NONE;
+        return PS_RUNTIME_ERROR_NONE;
     }
-    return RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR;
+    return PS_RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR;
 }
 
 /* EOF */

@@ -16,8 +16,8 @@
 #include "ps_symbol.h"
 // #include "ps_vm.h"
 
-// vm_t _vm;
-// vm_t *vm = &_vm;
+// ps_vm _vm;
+// ps_vm *vm = &_vm;
 
 char *minimal_source =
     "PROGRAM Minimal;\n"
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
   /* Initialize VM and display banner on stdout */
   // vm_init(vm);
   ps_symbol_table_dump(&vm->symbols, "Init");
-  ps_symbol_t *ps_version = vm_global_get(vm, "__PS_VERSION__");
+  ps_symbol *ps_version = vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
          ps_version->value.i, ps_version->value.i);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   printf("Loaded!\n");
   ps_buffer_dump(vm, 0, PS_BUFFER_MAX_LINES-1);
   printf("Listed!\n");
-  parser_start(vm);
+  ps_parser_start(vm);
   return 0;
 }
 

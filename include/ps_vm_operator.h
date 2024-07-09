@@ -15,8 +15,8 @@ extern "C"
 {
 #endif
 
-extern ps_error_t vm_exec_op_unary(vm_t *vm, ps_vm_opcode_t op);
-extern ps_error_t vm_exec_op_binary(vm_t *vm, ps_vm_opcode_t op);
+extern ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op);
+extern ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op);
 
 #ifdef __cplusplus
 }

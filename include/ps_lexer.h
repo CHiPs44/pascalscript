@@ -22,58 +22,58 @@ extern "C"
     /**
      * @brief Lexer state
      */
-    typedef struct _ps_lexer_t
+    typedef struct _ps_lexer
     {
         // clang-format off
-        ps_buffer_t buffer;
-        ps_error_t  error;
-        token_t     current_token;
+        ps_buffer buffer;
+        ps_error  error;
+        ps_token     current_token;
         // clang-format on
-    } ps_lexer_t;
+    } ps_lexer;
 
     /**
      * @brief Initialize a lexer
      */
-    bool ps_lexer_init(ps_lexer_t *lexer);
+    bool ps_lexer_init(ps_lexer *lexer);
 
     /**
      * @brief Release a lexer
      */
-    bool ps_lexer_done(ps_lexer_t *lexer);
+    bool ps_lexer_done(ps_lexer *lexer);
 
     /**
      * @brief Reset lexer:
      *  - reset buffer position
      *  - clear current token and error
      */
-    void ps_lexer_reset(ps_lexer_t *lexer);
+    void ps_lexer_reset(ps_lexer *lexer);
 
     /**
      * @brief Get error message
      */
-    char *ps_lexer_show_error(ps_lexer_t *lexer);
+    char *ps_lexer_show_error(ps_lexer *lexer);
 
     /**
      * @brief Read next token
      */
-    bool ps_lexer_read_next_token(ps_lexer_t *lexer);
+    bool ps_lexer_read_next_token(ps_lexer *lexer);
 
     /**
      * @brief Skip whitespace and comments
      */
-    bool ps_lexer_skip_whitespace_and_comments(ps_lexer_t *lexer);
+    bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
 
     /**
      * @brief
      */
-    bool ps_lexer_read_identifier_or_keyword(ps_lexer_t *lexer);
+    bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
 
     /**
      * @brief
      */
-    bool ps_lexer_read_number(ps_lexer_t *lexer);
+    bool ps_lexer_read_number(ps_lexer *lexer);
 
-    void ps_lexer_dump(ps_lexer_t *lexer);
+    void ps_lexer_dump(ps_lexer *lexer);
 
 #ifdef __cplusplus
 }

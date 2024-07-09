@@ -28,7 +28,7 @@ void ps_symbol_normalize_name(char *name)
     }
 }
 
-char *ps_symbol_get_kind_name(ps_kind_t kind)
+char *ps_symbol_get_kind_name(ps_kind kind)
 {
     char *kind_name;
     switch (kind)
@@ -52,7 +52,7 @@ char *ps_symbol_get_kind_name(ps_kind_t kind)
     return kind_name;
 }
 
-char *symbol_get_scope_name(ps_scope_t scope)
+char *symbol_get_scope_name(ps_scope scope)
 {
     static char scope_name[8 + 1];
     if (scope == PS_SCOPE_GLOBAL)
@@ -62,7 +62,7 @@ char *symbol_get_scope_name(ps_scope_t scope)
     return scope_name;
 }
 
-void ps_symbol_dump(ps_symbol_t *symbol)
+void ps_symbol_dump(ps_symbol *symbol)
 {
     char *kind_name = ps_symbol_get_kind_name(symbol->kind);
     char *scope_name = symbol_get_scope_name(symbol->scope);

@@ -20,7 +20,7 @@
  *
  * @param table
  */
-void ps_symbol_table_init(ps_symbol_table_t *table)
+void ps_symbol_table_init(ps_symbol_table *table)
 {
     table->count = 0;
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
@@ -29,9 +29,9 @@ void ps_symbol_table_init(ps_symbol_table_t *table)
     }
 }
 
-void ps_symbol_table_dump(ps_symbol_table_t *table, char *title)
+void ps_symbol_table_dump(ps_symbol_table *table, char *title)
 {
-    ps_symbol_t *symbol;
+    ps_symbol *symbol;
     fprintf(stderr, "*** Symbol table %s (%d) ***\n", title, table->count);
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Size    ┃Value                          ┃\n");
@@ -58,7 +58,7 @@ void ps_symbol_table_dump(ps_symbol_table_t *table, char *title)
  * @param name normalized
  * @return int index of symbol or -1 if not found
  */
-int ps_symbol_table_find(ps_symbol_table_t *table, char *name)
+int ps_symbol_table_find(ps_symbol_table *table, char *name)
 {
     int index = 0;
     // ps_symbol_normalize_name(name);
@@ -79,9 +79,9 @@ int ps_symbol_table_find(ps_symbol_table_t *table, char *name)
  * @param name normalized
  * @return symbol or NULL if not found
  */
-ps_symbol_t *ps_symbol_table_get(ps_symbol_table_t *table, char *name)
+ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
 {
-    ps_symbol_t *symbol = NULL;
+    ps_symbol *symbol = NULL;
     int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
@@ -99,16 +99,16 @@ ps_symbol_t *ps_symbol_table_get(ps_symbol_table_t *table, char *name)
  * @param Symbol
  * @return Index of added symbol (>=0) or error (<0)
  */
-int ps_symbol_table_add(ps_symbol_table_t *table, ps_symbol_t *symbol)
+int ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->count >= PS_SYMBOL_TABLE_SIZE)
     {
-        return SYMBOL_TABLE_ERROR_FULL;
+        return PS_SYMBOL_TABLE_ERROR_FULL;
     }
     int index = ps_symbol_table_find(table, symbol->name);
     if (index >= 0)
     {
-        return SYMBOL_TABLE_ERROR_EXISTS;
+        return PS_SYMBOL_TABLE_ERROR_EXISTS;
     }
     // Find first free location
     index = 0;
@@ -151,7 +151,7 @@ int ps_symbol_table_add(ps_symbol_table_t *table, ps_symbol_t *symbol)
  * @param Normalized name
  * @return index of symbol or -1 if not found
  */
-int ps_symbol_table_delete(ps_symbol_table_t *table, char *name)
+int ps_symbol_table_delete(ps_symbol_table *table, char *name)
 {
     int index = ps_symbol_table_find(table, name);
     if (index >= 0)
@@ -169,7 +169,7 @@ int ps_symbol_table_delete(ps_symbol_table_t *table, char *name)
  * @param Normalized name
  * @return index of symbol or -1 if not found
  */
-int ps_symbol_table_free(ps_symbol_table_t *table, char *name)
+int ps_symbol_table_free(ps_symbol_table *table, char *name)
 {
     int index = ps_symbol_table_find(table, name);
     if (index >= 0)
@@ -187,7 +187,7 @@ int ps_symbol_table_free(ps_symbol_table_t *table, char *name)
  * @param Table
  * @return Count of garbage collected symbols
  */
-int ps_symbol_table_gc(ps_symbol_table_t *table)
+int ps_symbol_table_gc(ps_symbol_table *table)
 {
     int count = 0;
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)

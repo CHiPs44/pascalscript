@@ -9,47 +9,47 @@
 
 #include "ps_value.h"
 
-ps_value_t *ps_value_integer(ps_value_t *value, ps_integer_t data)
+ps_value *ps_value_integer(ps_value *value, ps_integer data)
 {
     value->type = PS_TYPE_INTEGER;
-    value->size = sizeof(ps_integer_t);
+    value->size = sizeof(ps_integer);
     value->data.i = data;
     return value;
 }
 
-ps_value_t *ps_value_unsigned(ps_value_t *value, ps_unsigned_t data)
+ps_value *ps_value_unsigned(ps_value *value, ps_unsigned data)
 {
     value->type = PS_TYPE_UNSIGNED;
-    value->size = sizeof(ps_unsigned_t);
+    value->size = sizeof(ps_unsigned);
     value->data.u = data;
     return value;
 }
 
-ps_value_t *ps_value_real(ps_value_t *value, ps_real_t data)
+ps_value *ps_value_real(ps_value *value, ps_real data)
 {
     value->type = PS_TYPE_REAL;
-    value->size = sizeof(ps_real_t);
+    value->size = sizeof(ps_real);
     value->data.r = data;
     return value;
 }
 
-ps_value_t *ps_value_boolean(ps_value_t *value, ps_boolean_t data)
+ps_value *ps_value_boolean(ps_value *value, ps_boolean data)
 {
     value->type = PS_TYPE_BOOLEAN;
-    value->size = sizeof(ps_boolean_t);
+    value->size = sizeof(ps_boolean);
     value->data.b = data;
     return value;
 }
 
-ps_value_t *ps_value_char(ps_value_t *value, ps_char_t data)
+ps_value *ps_value_char(ps_value *value, ps_char data)
 {
     value->type = PS_TYPE_CHAR;
-    value->size = sizeof(ps_char_t);
+    value->size = sizeof(ps_char);
     value->data.c = data;
     return value;
 }
 
-ps_value_t *ps_value_string(ps_value_t *value, ps_string_t data)
+ps_value *ps_value_string(ps_value *value, ps_string data)
 {
     value->type = PS_TYPE_STRING;
     value->size = ps_string_max + 1;
@@ -60,7 +60,7 @@ ps_value_t *ps_value_string(ps_value_t *value, ps_string_t data)
     return value;
 }
 
-ps_value_t *ps_value_pointer(ps_value_t *value, void *data)
+ps_value *ps_value_pointer(ps_value *value, void *data)
 {
     value->type = PS_TYPE_POINTER;
     value->size = sizeof(void *);
@@ -70,14 +70,14 @@ ps_value_t *ps_value_pointer(ps_value_t *value, void *data)
 
 const char *ps_type_names[] = {"NONE", "INTEGER", "UNSIGNED", "REAL", "BOOLEAN", "CHAR", "STRING", "POINTER"};
 
-char *ps_value_get_type_name(ps_type_t type)
+char *ps_value_get_type_name(ps_type type)
 {
     if (type >= PS_TYPE_NONE && type <= PS_TYPE_POINTER)
         return ps_type_names[type];
     return "UNKNOWN";
 }
 
-char *ps_value_get_value(ps_value_t *value)
+char *ps_value_get_value(ps_value *value)
 {
     static char buffer[256 + 2 + 1];
     switch (value->type)
@@ -113,7 +113,7 @@ char *ps_value_get_value(ps_value_t *value)
     return buffer;
 }
 
-void ps_value_dump(ps_value_t *value)
+void ps_value_dump(ps_value *value)
 {
     char *type_name = ps_value_get_type_name(value->type);
     char *buffer = ps_value_get_value(value);

@@ -15,8 +15,8 @@
 #include "../src/ps_readall.c"
 #include "../src/ps_buffer.c"
 
-ps_buffer_t _buffer;
-ps_buffer_t *buffer = &_buffer;
+ps_buffer _buffer;
+ps_buffer *buffer = &_buffer;
 
 char *minimal_source =
     "PROGRAM MINIMAL;\n"

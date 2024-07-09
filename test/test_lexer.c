@@ -19,8 +19,8 @@
 #include "../src/ps_token.c"
 #include "../src/ps_lexer.c"
 
-ps_lexer_t _lexer;
-ps_lexer_t *lexer = &_lexer;
+ps_lexer _lexer;
+ps_lexer *lexer = &_lexer;
 
 char *minimal_source =
     "Program Minimal;\n"
@@ -32,7 +32,7 @@ char *minimal_source =
     "End.\n"
     "";
 
-ps_token_type_t minimal_expected[] = {
+ps_token_type minimal_expected[] = {
     // PROGRAM MINIMAL;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // BEGIN
@@ -55,7 +55,7 @@ char *hello_source =
     "End.\n"
     "";
 
-ps_token_type_t hello_expected[] = {
+ps_token_type hello_expected[] = {
     // PROGRAM HELLOWORLD;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST
@@ -82,7 +82,7 @@ char *quotes_source =
     "End.\n"
     "";
 
-ps_token_type_t quotes_expected[] = {
+ps_token_type quotes_expected[] = {
     // PROGRAM QUOTE;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // CONST K = '''X1''=''Y1'' ';
@@ -94,7 +94,7 @@ ps_token_type_t quotes_expected[] = {
     //
 };
 
-void test(char *name, char *source, ps_token_type_t *expected, int count)
+void test(char *name, char *source, ps_token_type *expected, int count)
 {
     int index;
 
@@ -107,7 +107,7 @@ void test(char *name, char *source, ps_token_type_t *expected, int count)
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
     ps_buffer_read_next_char(&lexer->buffer);
-    if (lexer->error != LEXER_ERROR_NONE || lexer->buffer.error != BUFFER_ERROR_NONE)
+    if (lexer->error != PS_LEXER_ERROR_NONE || lexer->buffer.error != PS_BUFFER_ERROR_NONE)
     {
         printf("TEST LEXER: ERROR %d %s / %d %s\n",
                lexer->error,
@@ -155,7 +155,7 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
     printf("================================================================================\n");
-    test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type_t));
+    test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type));
     // printf("================================================================================\n");
     // test("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
     // printf("================================================================================\n");

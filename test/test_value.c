@@ -12,7 +12,7 @@
 #include "../src/ps_value.c"
 int main(void)
 {
-    ps_value_t value;
+    ps_value value;
 
     printf("TEST VALUE: BEGIN\n");
     value.type = PS_TYPE_NONE;

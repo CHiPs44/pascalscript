@@ -11,43 +11,48 @@
 #include "ps_symbol.h"
 #include "ps_parser.h"
 
-bool parser_init(parser_t *parser)
+bool ps_parser_init(ps_parser *parser)
 {
     ps_lexer_init(&parser->lexer);
-    memset(&parser->current_token, 0, sizeof(token_t));
-    parser->current_token.type = TOKEN_NONE;
-    parser->error = PARSER_ERROR_NONE;
+    ps_symbol_table_init(&parser->symbol_table);
+    parser->error = PS_PARSER_ERROR_NONE;
     return true;
 }
 
-bool parser_expect_token_type(parser_t *parser, ps_token_type_t token_type)
+bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
 {
-    if (parser->current_token.type != token_type)
+    if (parser->lexer.current_token.type != token_type)
     {
-        parser->error = PARSER_ERROR_UNEXPECTED;
+        parser->error = PS_PARSER_ERROR_UNEXPECTED;
         return false;
     }
     return true;
 }
 
-bool parser_start(parser_t *parser)
+bool ps_parser_start(ps_parser *parser)
 {
-    ps_symbol_t program;
+    ps_symbol program;
 
-    // if (!parser_expect_token_type(vm, TOKEN_PROGRAM))
-    // {
-    //     return false;
-    // }
-    // if (!parser_expect_token_type(vm, TOKEN_IDENTIFIER))
-    // {
-    //     return false;
-    // }
-    // program.kind = KIND_CONSTANT;
-    // strcpy(program.name, "PROGRAM");
-    // program.size = 0;
-    // program.type = PS_TYPE_STRING;
-    // strcpy(program.value.s, vm->current_token.value.s);
-    // ps_symbol_table_add(&vm->symbols, &program);
+    if (!ps_parser_expect_token_type(parser, TOKEN_PROGRAM))
+    {
+        return false;
+    }
+    if (!ps_parser_expect_token_type(parser, TOKEN_IDENTIFIER))
+    {
+        return false;
+    }
+    program.kind = KIND_CONSTANT;
+    strcpy(program.name, "PROGRAM");
+    program.value.size = 0;
+    program.value.type = PS_TYPE_STRING;
+    program.value.data.s.len = strlen(parser->lexer.current_token.value.s);
+    strcpy(program.value.data.s.str, parser->lexer.current_token.value.s);
+    ps_symbol_table_add(&vm->symbols, &program);
 
     return true;
+}
+
+void ps_parser_set_program(ps_parser *parser, char *name)
+{
+
 }

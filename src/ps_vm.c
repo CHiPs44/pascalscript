@@ -18,9 +18,9 @@
 /**
  * @brief Initialize VM
  */
-void vm_init(vm_t *vm)
+void vm_init(ps_vm *vm)
 {
-    ps_symbol_t symbol;
+    ps_symbol symbol;
     ps_symbol_table_init(&vm->symbols);
     /*******************************************/
     strcpy(symbol.name, "__PS_VERSION__");
@@ -79,9 +79,9 @@ void vm_init(vm_t *vm)
  * @param already normalized name
  * @return global or NULL if not found
  */
-ps_symbol_t *vm_global_get(vm_t *vm, char *name)
+ps_symbol *vm_global_get(ps_vm *vm, char *name)
 {
-    ps_symbol_t *symbol = ps_symbol_table_get(&vm->symbols, name);
+    ps_symbol *symbol = ps_symbol_table_get(&vm->symbols, name);
 }
 
 /**
@@ -91,7 +91,7 @@ ps_symbol_t *vm_global_get(vm_t *vm, char *name)
  * @param Symbol
  * @return Index of added symbol (>=0) or error (<0)
  */
-int vm_global_add(vm_t *vm, ps_symbol_t *symbol)
+int vm_global_add(ps_vm *vm, ps_symbol *symbol)
 {
     return ps_symbol_table_add(&vm->symbols, symbol);
 }
@@ -103,42 +103,42 @@ int vm_global_add(vm_t *vm, ps_symbol_t *symbol)
  * @param Symbol name
  * @return index of symbol or -1 if not found
  */
-int vm_global_delete(vm_t *vm, char *name)
+int vm_global_delete(ps_vm *vm, char *name)
 {
     return ps_symbol_table_delete(&vm->symbols, name);
 }
 
-int vm_stack_push(vm_t *vm, ps_symbol_t *symbol)
+int vm_stack_push(ps_vm *vm, ps_symbol *symbol)
 {
     return ps_symbol_stack_push(&vm->stack, symbol);
 }
 
-ps_symbol_t *vm_stack_pop(vm_t *vm)
+ps_symbol *vm_stack_pop(ps_vm *vm)
 {
     return ps_symbol_stack_pop(&vm->stack);
 }
 
-ps_symbol_t *vm_auto_add_value(vm_t *vm, ps_value_t *value)
+ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value *value)
 {
-    ps_symbol_t symbol;
+    ps_symbol symbol;
     strcpy(symbol.name, "");
     symbol.kind = KIND_AUTO;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_INTEGER;
-    symbol.value.size = sizeof(ps_integer_t);
+    symbol.value.size = sizeof(ps_integer);
     symbol.value.data.i = value;
     int index = ps_symbol_table_add(&vm->symbols, &symbol);
     return index >= 0 ? &vm->symbols.symbols[index] : NULL;
 }
 
-ps_symbol_t *vm_auto_add_integer(vm_t *vm, ps_integer_t value)
+ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value value)
 {
-    ps_symbol_t symbol;
+    ps_symbol symbol;
     strcpy(symbol.name, "");
     symbol.kind = KIND_AUTO;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_INTEGER;
-    symbol.value.size = sizeof(ps_integer_t);
+    symbol.value.size = sizeof(ps_integer);
     symbol.value.data.i = value;
     int index = ps_symbol_table_add(&vm->symbols, &symbol);
     return index >= 0 ? &vm->symbols.symbols[index] : NULL;
@@ -151,7 +151,7 @@ ps_symbol_t *vm_auto_add_integer(vm_t *vm, ps_integer_t value)
  * @param string Normalized name
  * @return index of symbol or -1 if not found
  */
-int vm_auto_free(vm_t *vm, char *name)
+int vm_auto_free(ps_vm *vm, char *name)
 {
     return ps_symbol_table_free(&vm->symbols, name);
 }
@@ -162,7 +162,7 @@ int vm_auto_free(vm_t *vm, char *name)
  * @param VM
  * @return Count of garbage collected symbols
  */
-int vm_auto_gc(vm_t *vm)
+int vm_auto_gc(ps_vm *vm)
 {
     int count = ps_symbol_table_gc(&vm->symbols);
     fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
@@ -175,41 +175,41 @@ int vm_auto_gc(vm_t *vm)
  *      2. POP variable
  *      3. SET variable TO value
  */
-ps_error_t vm_exec_assign(vm_t *vm)
+ps_error vm_exec_assign(ps_vm *vm)
 {
-    ps_symbol_t *value = vm_stack_pop(vm);
+    ps_symbol *value = vm_stack_pop(vm);
     if (value == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (value->kind == KIND_AUTO)
         vm_auto_free(vm, value->name);
-    ps_symbol_t *variable = vm_stack_pop(vm);
+    ps_symbol *variable = vm_stack_pop(vm);
     if (variable == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (variable->kind == KIND_CONSTANT)
-        return RUNTIME_ERROR_ASSIGN_TO_CONST;
+        return PS_RUNTIME_ERROR_ASSIGN_TO_CONST;
     if (variable->kind != KIND_VARIABLE)
-        return RUNTIME_ERROR_EXPECTED_VARIABLE;
+        return PS_RUNTIME_ERROR_EXPECTED_VARIABLE;
     if (variable->value.type != value->value.type)
-        return RUNTIME_ERROR_TYPE_MISMATCH;
+        return PS_RUNTIME_ERROR_TYPE_MISMATCH;
     variable->value = value->value;
     fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.data.i);
-    return RUNTIME_ERROR_NONE;
+    return PS_RUNTIME_ERROR_NONE;
 }
 
-ps_error_t vm_exec_sys(vm_t *vm)
+ps_error vm_exec_sys(ps_vm *vm)
 {
-    ps_symbol_t *command = vm_stack_pop(vm);
+    ps_symbol *command = vm_stack_pop(vm);
     if (command == NULL)
-        return RUNTIME_ERROR_STACK_EMPTY;
+        return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (command->kind == KIND_AUTO)
         vm_auto_free(vm, command->name);
 
-    return ERROR_NOT_IMPLEMENTED;
+    return PS_ERROR_NOT_IMPLEMENTED;
 }
 
-ps_error_t vm_exec_xxx(vm_t *vm)
+ps_error vm_exec_xxx(ps_vm *vm)
 {
-    return ERROR_NOT_IMPLEMENTED;
+    return PS_ERROR_NOT_IMPLEMENTED;
 }
 
 /* EOF */

@@ -15,18 +15,18 @@
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_stack.c"
 
-ps_symbol_stack_t stack;
-ps_symbol_t constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
-ps_symbol_t variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
-ps_symbol_t constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};
-ps_symbol_t constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
-ps_symbol_t constant5 = {.name = "CONSTANT5", .kind = KIND_CONSTANT};
+ps_symbol_stack stack;
+ps_symbol constant1 = {.name = "CONSTANT1", .kind = KIND_CONSTANT};
+ps_symbol variable2 = {.name = "VARIABLE2", .kind = KIND_VARIABLE};
+ps_symbol constant3 = {.name = "CONSTANT3", .kind = KIND_CONSTANT};
+ps_symbol constant4 = {.name = "CONSTANT4", .kind = KIND_CONSTANT};
+ps_symbol constant5 = {.name = "CONSTANT5", .kind = KIND_CONSTANT};
 
 int main(void)
 {
-    ps_symbol_t *symbol;
+    ps_symbol *symbol;
     int result;
-    ps_string_t string5 = {.str = "ABCDEF123456", .len = 12};
+    ps_string string5 = {.str = "ABCDEF123456", .len = 12};
 
     ps_value_integer(&constant1.value, 1234567890);
     ps_value_integer(&variable2.value, 0xDEADBEEF);

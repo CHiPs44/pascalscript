@@ -19,38 +19,39 @@ extern "C"
 #define MAX_IDENTIFIER 31
 #endif
 
-    /*
-        1. Mimimalistic
-            program         begin           end
-            const           var
-            integer         cardinal        string
-        2. Expressions
-            div             mod
-        3. Decision making
-            boolean         true            false
-            if              then            else
-            and             not             or
-        4. Loops
-            repeat          until           while       do
-        5. User types
-            type            set
-        6. Arrays
-            array
-        6. "Modularity"
-            function        procedure
-        7. More control
-            case            of
-            for             downto          to          in
-        8. Mother of all evil?
-            goto            label
-        9. More operators
-            shl             shr             xor
+/*
+    1. Mimimalistic
+        program         begin           end
+        const           var
+        integer         cardinal        real
+        char            string
+    2. Expressions
+        div             mod
+    3. Decision making
+        boolean         true            false
+        if              then            else
+        and             not             or
+    4. Loops
+        repeat          until           while       do
+    5. User types
+        type            set
+    6. Arrays
+        array
+    6. "Modularity"
+        function        procedure
+    7. More control
+        case            of
+        for             downto          to          in
+    8. Mother of all evil?
+        goto            label
+    9. More operators
+        shl             shr             xor
 
-        -file           -packed         -record             -nil        -with
-        -absolute       -asm            -inline             -operator   -reintroduce
-        -unit           -interface      -implementation     -uses
-        -constructor    -destructor     -inherited          -object     -self
-    */
+    -file           -packed         -record             -nil        -with
+    -absolute       -asm            -inline             -operator   -reintroduce
+    -unit           -interface      -implementation     -uses
+    -constructor    -destructor     -inherited          -object     -self
+*/
 
     /* THESE ARE NOT TOKENS
         Comments
@@ -157,32 +158,32 @@ extern "C"
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
-    } ps_token_type_t;
+    } ps_token_type;
 
     typedef struct _token_t
     {
-        ps_token_type_t type;
+        ps_token_type type;
         union
         {
             char identifier[MAX_IDENTIFIER + 1];
-            ps_integer_t i;
-            ps_unsigned_t u;
-            ps_real_t r;
-            ps_char_t c;
-            ps_char_t s[PS_STRING_MAX + 1];
+            ps_integer i;
+            ps_unsigned u;
+            ps_real r;
+            ps_char c;
+            ps_char s[PS_STRING_MAX + 1];
         } value;
-    } token_t;
+    } ps_token;
 
-    typedef struct _ps_keyword_t
+    typedef struct _ps_keyword
     {
-        int token;
+        ps_token_type token_type;
         char *keyword;
-    } ps_keyword_t;
+    } ps_keyword;
 
-    void ps_token_dump(token_t *token);
+    void ps_token_dump(ps_token *token);
 
-    extern ps_keyword_t ps_keywords[];
-    ps_token_type_t ps_token_is_keyword(char *text);
+    extern ps_keyword ps_keywords[];
+    ps_token_type ps_token_is_keyword(char *text);
 
 #ifdef __cplusplus
 }

@@ -9,9 +9,9 @@
 #include "ps_error.h"
 #include "ps_token.h"
 
-void ps_token_dump(token_t *token)
+void ps_token_dump(ps_token *token)
 {
-    ps_token_type_t token_type;
+    ps_token_type token_type;
     char *type;
     char buffer[256 + 16];
 
@@ -83,69 +83,69 @@ void ps_token_dump(token_t *token)
     printf("TOKEN: type=%-16s, value=%s\n", type, buffer);
 }
 
-ps_keyword_t ps_keywords[] = {
+ps_keyword ps_keywords[] = {
     // clang-format off
-    { .token = TOKEN_ARRAY          , .keyword = "ARRAY"            },
-    { .token = TOKEN_BEGIN          , .keyword = "BEGIN"            },
-    { .token = TOKEN_BOOLEAN        , .keyword = "BOOLEAN"          },
-    { .token = TOKEN_CARDINAL       , .keyword = "CARDINAL"         },
-    { .token = TOKEN_CASE           , .keyword = "CASE"             },
-    { .token = TOKEN_CHAR           , .keyword = "CHAR"             },
-    { .token = TOKEN_CONST          , .keyword = "CONST"            },
-    { .token = TOKEN_DO             , .keyword = "DO"               },
-    { .token = TOKEN_DOWNTO         , .keyword = "DOWNTO"           },
-    { .token = TOKEN_ELSE           , .keyword = "ELSE"             },
-    { .token = TOKEN_END            , .keyword = "END"              },
-    { .token = TOKEN_FALSE          , .keyword = "FALSE"            },
-    { .token = TOKEN_FILE           , .keyword = "FILE"             },
-    { .token = TOKEN_FOR            , .keyword = "FOR"              },
-    { .token = TOKEN_FUNCTION       , .keyword = "FUNCTION"         },
-    { .token = TOKEN_GOTO           , .keyword = "GOTO"             },
-    { .token = TOKEN_IF             , .keyword = "IF"               },
-    { .token = TOKEN_IMPLEMENTATION , .keyword = "IMPLEMENTATION"   },
-    { .token = TOKEN_IN             , .keyword = "IN"               },
-    { .token = TOKEN_INTEGER        , .keyword = "INTEGER"          },
-    { .token = TOKEN_INTERFACE      , .keyword = "INTERFACE"        },
-    { .token = TOKEN_LABEL          , .keyword = "LABEL"            },
-    { .token = TOKEN_NIL            , .keyword = "NIL"              },
-    { .token = TOKEN_OF             , .keyword = "OF"               },
-    { .token = TOKEN_AND            , .keyword = "AND"              },
-    { .token = TOKEN_DIV            , .keyword = "DIV"              },
-    { .token = TOKEN_MOD            , .keyword = "MOD"              },
-    { .token = TOKEN_NOT            , .keyword = "NOT"              },
-    { .token = TOKEN_OR             , .keyword = "OR"               },
-    { .token = TOKEN_SHL            , .keyword = "SHL"              },
-    { .token = TOKEN_SHR            , .keyword = "SHR"              },
-    { .token = TOKEN_XOR            , .keyword = "XOR"              },
-    { .token = TOKEN_PROCEDURE      , .keyword = "PROCEDURE"        },
-    { .token = TOKEN_PROGRAM        , .keyword = "PROGRAM"          },
-    { .token = TOKEN_RECORD         , .keyword = "RECORD"           },
-    { .token = TOKEN_REPEAT         , .keyword = "REPEAT"           },
-    { .token = TOKEN_SET            , .keyword = "SET"              },
-    { .token = TOKEN_STRING         , .keyword = "STRING"           },
-    { .token = TOKEN_THEN           , .keyword = "THEN"             },
-    { .token = TOKEN_TO             , .keyword = "TO"               },
-    { .token = TOKEN_TRUE           , .keyword = "TRUE"             },
-    { .token = TOKEN_TYPE           , .keyword = "TYPE"             },
-    { .token = TOKEN_UNIT           , .keyword = "UNIT"             },
-    { .token = TOKEN_UNTIL          , .keyword = "UNTIL"            },
-    { .token = TOKEN_USES           , .keyword = "USES"             },
-    { .token = TOKEN_VAR            , .keyword = "VAR"              },
-    { .token = TOKEN_WHILE          , .keyword = "WHILE"            },
-    { .token = TOKEN_WITH           , .keyword = "WITH"             },
+    { .token_type = TOKEN_AND           , .keyword = "AND"              },
+    { .token_type = TOKEN_ARRAY         , .keyword = "ARRAY"            },
+    { .token_type = TOKEN_BEGIN         , .keyword = "BEGIN"            },
+    { .token_type = TOKEN_BOOLEAN       , .keyword = "BOOLEAN"          },
+    { .token_type = TOKEN_CARDINAL      , .keyword = "CARDINAL"         },
+    { .token_type = TOKEN_CASE          , .keyword = "CASE"             },
+    { .token_type = TOKEN_CHAR          , .keyword = "CHAR"             },
+    { .token_type = TOKEN_CONST         , .keyword = "CONST"            },
+    { .token_type = TOKEN_DIV           , .keyword = "DIV"              },
+    { .token_type = TOKEN_DO            , .keyword = "DO"               },
+    { .token_type = TOKEN_DOWNTO        , .keyword = "DOWNTO"           },
+    { .token_type = TOKEN_ELSE          , .keyword = "ELSE"             },
+    { .token_type = TOKEN_END           , .keyword = "END"              },
+    { .token_type = TOKEN_FALSE         , .keyword = "FALSE"            },
+    { .token_type = TOKEN_FILE          , .keyword = "FILE"             },
+    { .token_type = TOKEN_FOR           , .keyword = "FOR"              },
+    { .token_type = TOKEN_FUNCTION      , .keyword = "FUNCTION"         },
+    { .token_type = TOKEN_GOTO          , .keyword = "GOTO"             },
+    { .token_type = TOKEN_IF            , .keyword = "IF"               },
+    { .token_type = TOKEN_IMPLEMENTATION, .keyword = "IMPLEMENTATION"   },
+    { .token_type = TOKEN_IN            , .keyword = "IN"               },
+    { .token_type = TOKEN_INTEGER       , .keyword = "INTEGER"          },
+    { .token_type = TOKEN_INTERFACE     , .keyword = "INTERFACE"        },
+    { .token_type = TOKEN_LABEL         , .keyword = "LABEL"            },
+    { .token_type = TOKEN_MOD           , .keyword = "MOD"              },
+    { .token_type = TOKEN_NIL           , .keyword = "NIL"              },
+    { .token_type = TOKEN_NOT           , .keyword = "NOT"              },
+    { .token_type = TOKEN_OF            , .keyword = "OF"               },
+    { .token_type = TOKEN_OR            , .keyword = "OR"               },
+    { .token_type = TOKEN_PROCEDURE     , .keyword = "PROCEDURE"        },
+    { .token_type = TOKEN_PROGRAM       , .keyword = "PROGRAM"          },
+    { .token_type = TOKEN_RECORD        , .keyword = "RECORD"           },
+    { .token_type = TOKEN_REPEAT        , .keyword = "REPEAT"           },
+    { .token_type = TOKEN_SET           , .keyword = "SET"              },
+    { .token_type = TOKEN_SHL           , .keyword = "SHL"              },
+    { .token_type = TOKEN_SHR           , .keyword = "SHR"              },
+    { .token_type = TOKEN_STRING        , .keyword = "STRING"           },
+    { .token_type = TOKEN_THEN          , .keyword = "THEN"             },
+    { .token_type = TOKEN_TO            , .keyword = "TO"               },
+    { .token_type = TOKEN_TRUE          , .keyword = "TRUE"             },
+    { .token_type = TOKEN_TYPE          , .keyword = "TYPE"             },
+    { .token_type = TOKEN_UNIT          , .keyword = "UNIT"             },
+    { .token_type = TOKEN_UNTIL         , .keyword = "UNTIL"            },
+    { .token_type = TOKEN_USES          , .keyword = "USES"             },
+    { .token_type = TOKEN_VAR           , .keyword = "VAR"              },
+    { .token_type = TOKEN_WHILE         , .keyword = "WHILE"            },
+    { .token_type = TOKEN_WITH          , .keyword = "WITH"             },
+    { .token_type = TOKEN_XOR           , .keyword = "XOR"              },
     // clang-format on
 };
 
-ps_token_type_t ps_token_is_keyword(char *text)
+ps_token_type ps_token_is_keyword(char *text)
 {
     // NB: text should already be normalized to uppercase
     // TODO? dichotomic search instead of sequential one
-    for (int i = 0; i < sizeof(ps_keywords) / sizeof(ps_keyword_t); i += 1)
+    for (int i = 0; i < sizeof(ps_keywords) / sizeof(ps_keyword); i += 1)
     {
         // printf("ps_token_is_keyword: test=%s, keyword=%s\n", text, ps_keywords[i].keyword);
         if (strcmp(text, ps_keywords[i].keyword) == 0)
         {
-            return ps_keywords[i].token;
+            return ps_keywords[i].token_type;
         }
     }
     return TOKEN_IDENTIFIER;

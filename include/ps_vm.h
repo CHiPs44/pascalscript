@@ -60,7 +60,7 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
-    } ps_vm_opcode_t;
+    } ps_vm_opcode;
 
     typedef enum
     {
@@ -79,7 +79,7 @@ extern "C"
         uint8_t opcode : 8;
         uint8_t param1_type : 3;
         uint8_t result_type : 3;
-    } vm_instruction;
+    } ps_vm_instruction;
 
     typedef enum
     {
@@ -90,32 +90,32 @@ extern "C"
 
     typedef struct _vm_t
     {
-        // parser_t parser;
-        ps_symbol_table_t symbols;
-        ps_symbol_stack_t stack;
-        ps_error_t error;
-    } vm_t;
+        // ps_parser parser;
+        ps_symbol_table symbols;
+        ps_symbol_stack stack;
+        ps_error error;
+    } ps_vm;
 
     /**@brief Initialize VM: reset source, global table & stack */
-    void vm_init(vm_t *vm);
+    void vm_init(ps_vm *vm);
 
-    // extern bool vm_exec(vm_t *vm);
+    // extern bool vm_exec(ps_vm *vm);
 
     /** @brief Get global symbol */
-    ps_symbol_t *vm_global_get(vm_t *vm, char *name);
+    ps_symbol *vm_global_get(ps_vm *vm, char *name);
     /** @brief Add global symbol */
-    int vm_global_add(vm_t *vm, ps_symbol_t *symbol);
+    int vm_global_add(ps_vm *vm, ps_symbol *symbol);
     /** @brief Delete global symbol */
-    int vm_global_delete(vm_t *vm, char *name);
+    int vm_global_delete(ps_vm *vm, char *name);
 
     /** @brief Push symbol on top of stack */
-    int vm_stack_push(vm_t *vm, ps_symbol_t *symbol);
+    int vm_stack_push(ps_vm *vm, ps_symbol *symbol);
     /** @brief Pop symbol from top of stack */
-    ps_symbol_t *vm_stack_pop(vm_t *vm);
+    ps_symbol *vm_stack_pop(ps_vm *vm);
 
-    ps_symbol_t *vm_auto_add_integer(vm_t *vm, int value);
-    int vm_auto_free(vm_t *vm, char *name);
-    int vm_auto_gc(vm_t *vm);
+    ps_symbol *vm_auto_add_integer(ps_vm *vm, int value);
+    int vm_auto_free(ps_vm *vm, char *name);
+    int vm_auto_gc(ps_vm *vm);
 
 #ifdef __cplusplus
 }

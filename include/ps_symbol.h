@@ -32,27 +32,27 @@ extern "C"
         KIND_SET,
         KIND_RECORD,
         // ...
-    } ps_kind_t;
+    } ps_kind;
 
 #define PS_SCOPE_GLOBAL 0
 
-    typedef uint8_t ps_scope_t;
+    typedef uint8_t ps_scope;
     const ps_scope_max = 255;
 
-    typedef struct _ps_symbol_t
+    typedef struct _ps_symbol
     {
         char name[MAX_SYMBOL_NAME + 1];
-        ps_kind_t kind;
-        ps_scope_t scope;
-        ps_value_t value;
-    } ps_symbol_t;
+        ps_kind kind;
+        ps_scope scope;
+        ps_value value;
+    } ps_symbol;
 
     void ps_symbol_normalize_name(char *name);
-    char *ps_symbol_get_kind_name(ps_kind_t kind);
-    char *ps_symbol_get_type_name(ps_type_t type);
-    char *symbol_get_scope_name(ps_scope_t scope);
-    // char *ps_symbol_get_value(ps_symbol_t *symbol);
-    void ps_symbol_dump(ps_symbol_t *symbol);
+    char *ps_symbol_get_kind_name(ps_kind kind);
+    char *ps_symbol_get_type_name(ps_type type);
+    char *symbol_get_scope_name(ps_scope scope);
+    // char *ps_symbol_get_value(ps_symbol *symbol);
+    void ps_symbol_dump(ps_symbol *symbol);
 
 #ifdef __cplusplus
 }
