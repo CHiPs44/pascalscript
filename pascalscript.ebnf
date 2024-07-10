@@ -44,6 +44,7 @@ var_block                   =   'VAR' , variable_declaration , ';' , [ variable_
 
 pascal_program              =   program_instruction , ';' , 
                                 [ const_block ] , 
+                                [ var_block ] , 
                                 instruction_block , '.' ;
 
 instruction_block           =   'BEGIN' , [ instruction ]* , 'END' ;
