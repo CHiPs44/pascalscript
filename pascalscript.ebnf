@@ -1,6 +1,4 @@
-(* 
-    PascalScript EBNF
-*)
+(* PascalScript EBNF *)
 
 (* letters & digits *)
 uppercase_letter            =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' ;
@@ -14,8 +12,6 @@ unsigned_integer            =   digit_sequence ;
 sign                        =   '+' | '-' ;
 scale_factor                =   'E' | 'e' , [ sign ] , digit_sequence ;
 unsigned_real               =   digit_sequence [ '.' digit_sequence ] [ scale_factor ] ;
-unsigned_number             =   unsigned_real | unsigned_integer ;
-signed_number               =   sign unsigned_number ;
 
 character_string            =   quoted_string | control_string ;
 quoted_string               =   "'" , [ string_character ]* , "'" ;
@@ -62,19 +58,20 @@ addition_operator           =   '+' | '-' | 'or' | 'xor' ;
 multiplication_operator     =   '*' | '/' | 'div' | 'mod' | 'and' | 'shl' | 'shr' ;
 relational_operator         =   '<' | '<=' | '>' | '>=' | '=' | '<>' ;
 
-expression                  =   simple_expression , { relational_operator , simple_expression } ;
-simple_expression           =   term , { addition_operator , term } ;
+variable_reference          =   identifier ;
+                            |   identifier '[' expression , [  ',' expression ]* ']' ;
+
+relational_expression       =   expression , relational_operator , expression ;
+expression                  =   term , { addition_operator , term  } ;
 term                        =   factor , { multiplication_operator , factor } ;
 factor                      =   expression 
                             |   variable_reference 
                             |   function_call 
-                            |   unsigned_constant 
+                            |   unsigned_integer
+                            |   unsigned_real
+                            |   character_string
+                            |   constant_identifier
                             |   'NOT' , factor 
                             |   sign , factor ;
-
-unsigned_constant           =   unsigned_number | character_string | constant_identifier ;
-
-
-
 
 ```

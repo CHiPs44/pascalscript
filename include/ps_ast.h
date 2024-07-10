@@ -16,7 +16,7 @@ extern "C"
 
     typedef enum
     {
-        PS_AST_VOID = 0,
+        PS_AST_NONE = 0,
         PS_AST_PROGRAM,
         PS_AST_CONST,
         // PS_AST_TYPE,
@@ -74,7 +74,7 @@ extern "C"
         ps_ast_statement *next;
         ps_symbol *var;
         ps_ast_expression *expression;
-    } ps_ast_assign;
+    } ps_ast_assignment;
 
     typedef struct
     {
