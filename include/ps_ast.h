@@ -8,6 +8,7 @@
 #define _PS_AST_H
 
 #include "ps_symbol.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -24,6 +25,7 @@ extern "C"
         PS_AST_STATEMENT,
         PS_AST_ASSIGN,
         PS_AST_EXPRESSION,
+        PS_AST_NODE_FACTOR,
     } ps_ast_node_type;
 
     typedef struct
@@ -79,7 +81,51 @@ extern "C"
     typedef struct
     {
         ps_ast_node_type type;
+        ps_ast_node_statement *next;
     } ps_ast_node_expression;
+
+    typedef enum  {
+        PS_AST_OP_NEG,
+        PS_AST_OP_NOT,
+    } ps_ast_node_unary_operator;
+
+    typedef struct {
+        ps_ast_node_type type;
+        ps_ast_node_statement *next;
+        ps_ast_node_unary_operator op;
+        ps_ast_node_factor arg;
+    } ps_ast_node_unary_operation;
+
+    typedef enum  {
+        PS_AST_OP_ADD,
+        PS_AST_OP_SUB,
+        PS_AST_OP_OR,
+        PS_AST_OP_XOR,
+        PS_AST_OP_MUL,
+        PS_AST_OP_DIV,
+        PS_AST_OP_DIV_REAL,
+        PS_AST_OP_MOD,
+        PS_AST_OP_AND,
+        PS_AST_OP_SHL,
+        PS_AST_OP_SHR,
+    } ps_ast_node_binary_operator;
+
+    typedef struct {
+        ps_ast_node_type type;
+        ps_ast_node_statement *next;
+        ps_ast_node_binary_operator op;
+        ps_ast_node_factor arg1;
+        ps_ast_node_factor arg2;
+    } ps_ast_node_unary_operation;
+
+    typedef struct {
+        ps_ast_node_type type;
+        ps_ast_node_statement *next;
+        // unsigned_integer, unsigned_real, character_value, character_string
+        ps_value value;
+        // variable_reference, constant_reference
+        ps_symbol *symbol;
+    } ps_ast_node_factor;
 
 #ifdef __cplusplus
 }
