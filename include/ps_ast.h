@@ -29,57 +29,57 @@ extern "C"
     typedef struct
     {
         ps_ast_node_type type;
-    } ps_ast_node;
+    } ps_ast_node_none;
 
     typedef struct
     {
         ps_ast_node_type type;
         ps_symbol *name;
-        ps_ast_const *constants;
-        // ps_ast_type *types;
-        ps_ast_var *vars;
-        ps_ast_statement *statements;
-    } ps_ast_program;
+        ps_ast_node_const *constants;
+        // ps_ast_node_type *types;
+        ps_ast_node_var *vars;
+        ps_ast_node_statement *statements;
+    } ps_ast_node_program;
 
     typedef struct
     {
         ps_ast_node_type type;
-        ps_ast_const *next;
+        ps_ast_node_const *next;
         ps_symbol *symbol;
-    } ps_ast_const;
+    } ps_ast_node_const;
 
     // typedef struct
     // {
     //     ps_ast_node_type type;
-    //     ps_ast_type *next;
+    //     ps_ast_node_type *next;
     //     // TODO
-    // } ps_ast_type;
+    // } ps_ast_node_type;
 
     typedef struct
     {
         ps_ast_node_type type;
-        ps_ast_var *next;
+        ps_ast_node_var *next;
         ps_symbol *symbol;
-    } ps_ast_var;
+    } ps_ast_node_var;
 
     typedef struct
     {
         ps_ast_node_type type;
-        ps_ast_statement *next;
-    } ps_ast_statement;
+        ps_ast_node_statement *next;
+    } ps_ast_node_statement;
 
     typedef struct
     {
         ps_ast_node_type type;
-        ps_ast_statement *next;
+        ps_ast_node_statement *next;
         ps_symbol *var;
-        ps_ast_expression *expression;
-    } ps_ast_assignment;
+        ps_ast_node_expression *expression;
+    } ps_ast_node_assignment;
 
     typedef struct
     {
         ps_ast_node_type type;
-    } ps_ast_expression;
+    } ps_ast_node_expression;
 
 #ifdef __cplusplus
 }
