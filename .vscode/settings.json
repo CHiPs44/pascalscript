@@ -29,6 +29,7 @@
         "random": "c",
         "compare": "c",
         "ranges": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "ps_ast.h": "c"
     }
 }
