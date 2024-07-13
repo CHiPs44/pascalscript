@@ -79,47 +79,53 @@ char *ps_value_get_type_name(ps_type type)
 
 char *ps_value_get_value(ps_value *value)
 {
-    static char buffer[256 + 2 + 1];
+    static char buffer[512];
     switch (value->type)
     {
     case PS_TYPE_NONE:
-        snprintf(buffer, 256 + 2, "[none]");
+        snprintf(buffer, sizeof(buffer) - 1, "[none]");
         break;
     case PS_TYPE_INTEGER:
-        snprintf(buffer, 256 + 2, "%d / 0x%08x", value->data.i, value->data.i);
+        snprintf(buffer, sizeof(buffer) - 1, "%d / 0x%08x", value->data.i, value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
-        snprintf(buffer, 256 + 2, "%u / 0x%08x", value->data.u, value->data.u);
+        snprintf(buffer, sizeof(buffer) - 1, "%u / 0x%08x", value->data.u, value->data.u);
         break;
     case PS_TYPE_REAL:
-        snprintf(buffer, 256 + 2, "%.20f", value->data.r);
+        snprintf(buffer, sizeof(buffer) - 1, "%.20f", value->data.r);
         break;
     case PS_TYPE_BOOLEAN:
-        snprintf(buffer, 256 + 2, "%s", value->data.b ? "[true]" : "[false]");
+        snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "[true]" : "[false]");
         break;
     case PS_TYPE_CHAR:
-        snprintf(buffer, 256 + 2, "'%c' / 0x%02x", value->data.c, value->data.c);
+        snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", value->data.c, value->data.c);
         break;
     case PS_TYPE_STRING:
-        snprintf(buffer, 256 + 2, "\"%s\"", value->data.s.str);
+        snprintf(buffer, sizeof(buffer) - 1, "\"%s\"", value->data.s.str);
         break;
     case PS_TYPE_POINTER:
-        snprintf(buffer, 256 + 2, "%p", value->data.p);
+        snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
         break;
     default:
-        snprintf(buffer, 256 + 2, "[? %d ?]", value->type);
+        snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type);
         break;
     }
     return buffer;
 }
 
-void ps_value_dump(ps_value *value)
+char *ps_value_dump(ps_value *value)
 {
-    char *type_name = ps_value_get_type_name(value->type);
-    char *buffer = ps_value_get_value(value);
-    fprintf(stderr,
-            "VALUE: type=%s, size=%ld, value=%s\n",
-            type_name, value->size, buffer);
+    static char buffer[512];
+    snprintf(buffer, sizeof(buffer) - 1,
+             "VALUE: type=%s, size=%ld, value=%s",
+             ps_value_get_type_name(value->type),
+             value->size,
+             ps_value_get_value(value));
+}
+
+void ps_value_debug(ps_value *value)
+{
+    fprintf(stderr, "DEBUG\t%s\n", ps_value_dump(value));
 }
 
 /* EOF */

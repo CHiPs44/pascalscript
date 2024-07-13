@@ -60,7 +60,7 @@ extern "C"
 
     char *ps_value_get_type_name(ps_type type);
     char *ps_value_get_value(ps_value *value);
-    void ps_value_dump(ps_value *value);
+    void ps_value_debug(ps_value *value);
 
 #ifdef __cplusplus
 }

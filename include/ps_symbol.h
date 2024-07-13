@@ -51,8 +51,8 @@ extern "C"
     char *ps_symbol_get_kind_name(ps_kind kind);
     char *ps_symbol_get_type_name(ps_type type);
     char *symbol_get_scope_name(ps_scope scope);
-    // char *ps_symbol_get_value(ps_symbol *symbol);
-    void ps_symbol_dump(ps_symbol *symbol);
+    char *ps_symbol_dump(ps_symbol *symbol);
+    void ps_symbol_debug(ps_symbol *symbol);
 
 #ifdef __cplusplus
 }

@@ -23,59 +23,52 @@ extern "C"
         PS_AST_TYPE,
         PS_AST_VAR,
         PS_AST_STATEMENT,
-        PS_AST_ASSIGN,
+        PS_AST_ASSIGNMENT,
         PS_AST_EXPRESSION,
-        PS_AST_NODE_FACTOR,
+        PS_AST_UNARY_OPERATION,
+        PS_AST_BINARY_OPERATION,
+        PS_AST_VALUE,
     } ps_ast_node_kind;
 
-    typedef struct
+    typedef struct ps_ast_node
     {
         ps_ast_node_kind kind;
     } ps_ast_node;
 
     ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind);
 
-    typedef struct
+    typedef struct ps_ast_node_program
     {
-        ps_ast_node_kind kind;
-        ps_symbol *name;
-        ps_ast_node_const *constants;
-        ps_ast_node_type *types;
-        ps_ast_node_var *vars;
+        // clang-format off
+        ps_ast_node_kind       kind;
+        ps_symbol             *name;
+        size_t                 n_consts;
+        ps_symbol             *consts;
+        size_t                 n_types;
+        ps_ast_node_type      *types;
+        size_t                 n_vars;
+        ps_symbol             *vars;
+        size_t                 n_statements;
         ps_ast_node_statement *statements;
+        // clang-format on
     } ps_ast_node_program;
 
     typedef struct
     {
-        ps_ast_node_kind kind;
-        ps_ast_node_const *next;
-        ps_symbol *symbol;
-    } ps_ast_node_const;
-
-    typedef struct
-    {
-        ps_ast_node_kind kind;
-        ps_ast_node_type *next;
+        // clang-format off
+        ps_ast_node_kind       kind;
+        // clang-format off
         // TODO
     } ps_ast_node_type;
 
     typedef struct
     {
         ps_ast_node_kind kind;
-        ps_ast_node_var *next;
-        ps_symbol *symbol;
-    } ps_ast_node_var;
-
-    typedef struct
-    {
-        ps_ast_node_kind kind;
-        ps_ast_node_statement *next;
     } ps_ast_node_statement;
 
     typedef struct
     {
         ps_ast_node_kind kind;
-        ps_ast_node_statement *next;
         ps_symbol *var;
         ps_ast_node_expression *expression;
     } ps_ast_node_assignment;
@@ -97,15 +90,17 @@ extern "C"
         ps_ast_node_kind kind;
         ps_ast_node_statement *next;
         ps_ast_node_unary_operator op;
-        ps_ast_node_factor arg;
+        ps_ast_node_value arg;
     } ps_ast_node_unary_operation;
 
     typedef enum
     {
+        // additive / terms
         PS_AST_OP_ADD,
         PS_AST_OP_SUB,
         PS_AST_OP_OR,
         PS_AST_OP_XOR,
+        // multiply / factors
         PS_AST_OP_MUL,
         PS_AST_OP_DIV,
         PS_AST_OP_DIV_REAL,
@@ -118,21 +113,19 @@ extern "C"
     typedef struct
     {
         ps_ast_node_kind kind;
-        ps_ast_node_statement *next;
-        ps_ast_node_binary_operator op;
-        ps_ast_node_factor arg1;
-        ps_ast_node_factor arg2;
-    } ps_ast_node_unary_operation;
+        ps_ast_node_value *left;
+        ps_ast_node_binary_operator operator;
+        ps_ast_node_value *right;
+    } ps_ast_node_binary_operation;
 
     typedef struct
     {
         ps_ast_node_kind kind;
-        ps_ast_node_statement *next;
         // unsigned_integer, unsigned_real, character_value, character_string
         ps_value value;
         // variable_reference, constant_reference
         ps_symbol *symbol;
-    } ps_ast_node_factor;
+    } ps_ast_node_value;
 
 #ifdef __cplusplus
 }
