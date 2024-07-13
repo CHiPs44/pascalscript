@@ -121,14 +121,14 @@ bool ps_ast_visit_program(ps_ast_node_program *node)
     // TODO types
     if (node->n_vars > 0)
     {
-        printf("\VAR\n");
+        printf("\nVAR\n");
         for (size_t i = 0; i < node->n_vars; i++)
             printf("\t%s\n", ps_symbol_dump(&node->vars[i]));
         printf("\n");
     }
     printf("\nBEGIN\n");
     for (size_t i = 0; i < node->n_statements; i++)
-        ps_ast_visit_node(node->statements[i]);
+        ps_ast_visit_node(&node->statements[i]);
     printf("\nEND.\n");
 
     return false;

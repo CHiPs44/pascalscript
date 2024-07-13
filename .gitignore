@@ -60,3 +60,8 @@ GTAGS
 # Project
 pascalscript
 test/test_lexer
+
+pascalscript*.interp
+pascalscript*.cs
+pascalscript*.tokens
+.antlr*
