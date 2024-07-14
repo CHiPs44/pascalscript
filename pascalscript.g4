@@ -8,6 +8,7 @@ options {
 
 /* Lexer rules begin with / are uppercase */
 
+// Keywords
 IF:         'IF';
 THEN:       'THEN';
 ELSE:       'ELSE';
@@ -50,34 +51,40 @@ PROGRAM:    'PROGRAM';
 BEGIN:      'BEGIN';
 END:        'END';
 
-EQUALS:         '=';
-DOT_DOT:        '..';
-LEFT_BRACKET:   '[';
-RIGHT_BRACKET:  '[';
-// ':'
-// '*'
-// '/'
-// '<>';
-// '<';
-// '<=';
-// '>';
-// '>=';
-/*
-		"LEFT_PARENTHESIS", "RIGHT_PARENTHESIS", "COMMA", "'0'", "'1'", "'2'", "'3'", "'4'", "'5'", "'6'", 
-		"'7'", "'8'", "'9'", "'a'", "'b'", "'c'", "'d'", "'e'", "'f'", "'A'", 
-		"'B'", "'C'", "'D'", "'E'", "'F'", "'%'", "'&'", "'$'", "'+'", "'-'", 
-		"'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'", "'N'", "'O'", "'P'", 
-		"'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'", "'X'", "'Y'", "'Z'", 
-		"'g'", "'h'", "'i'", "'j'", "'k'", "'l'", "'m'", "'n'", "'o'", "'p'", 
-		"'q'", "'r'", "'s'", "'t'", "'u'", "'v'", "'w'", "'x'", "'y'", "'z'", 
-		"UNDERSCORE", "''''", "'#'", "'''", "
-*/
-ASSIGN:     ':=';
+// Symbols
+DOT_COLON: ':='; // assign
+AT_SIGN: '@'; //   address of
+CARET: '^'; // pointer to
+COLON: ':'; // various uses
+COMMA: ','; // various uses
+DOT_DOT: '..'; // ranges
+DOT: '.'; // various uses
+LEFT_BRACKET: '['; // array access
+LEFT_PARENTHESIS: '('; // various uses
+RIGHT_BRACKET: ']'; // array access
+RIGHT_PARENTHESIS: ')'; // various uses
+SEMI_COLON: ';'; // various uses
+UNDERSCORE: '_';
+QUOTE: '\'';
+
+// Arithmetic operators
+PLUS: '+'; // addition
+MINUS: '-'; // substraction / negation
+STAR: '*'; // multiplication
+SLASH: '/'; // division (real)
+
+// Comparison operators
+EQUAL: '=';
+NOT_EQUAL: '<>';
+LESS_THAN: '<';
+LESS_OR_EQUAL: '<=';
+GREATER_THAN: '>';
+GREATER_OR_EQUAL: '>=';
 
 /* ******************** PROGRAM ******************** */
 
 pascalProgram
-    : PROGRAM identifier SEMI_COLON programHeader instructionBlock '.'
+    : PROGRAM identifier SEMI_COLON programHeader instructionBlock DOT
     ;
 
 programHeader
@@ -98,7 +105,7 @@ instruction
     ;
 
 assignment
-    : variableReference ASSIGN expression SEMI_COLON
+    : variableReference DOT_COLON expression SEMI_COLON
     ;
 
 ifBlock
@@ -113,7 +120,7 @@ whileBlock
     : WHILE expression DO instruction | instructionBlock SEMI_COLON
     ;
 forBlock
-    : FOR variableReference ASSIGN expression ( TO | DOWNTO ) expression
+    : FOR variableReference DOT_COLON expression ( TO | DOWNTO ) expression
         instruction | instructionBlock SEMI_COLON
     ;
 procedureCall
@@ -131,36 +138,36 @@ parameter
 
 /* ******************** NUMBERS ******************** */
 
-binaryDigit
+BINARY_DIGIT
     : '0' | '1'
     ;
 
-octalDigit
-    : binaryDigit | ['2'..'7']
+OCTAL_DIGIT
+    : '0'..'7'
     ;
 
-decimalDigit
-    : octalDigit | '8' | '9'
+DECIMAL_DIGIT
+    : '0' | '9'
     ;
 
-hexadecimalDigit
-    : decimalDigit | ['a'..'f'] | ['A'..'F']
+HEXADECIMAL_DIGIT
+    : DECIMAL_DIGIT | 'a'..'f' | 'A'..'F'
     ;
 
 binaryDigitSequence
-    : binaryDigit ( binaryDigit )*
+    : (BINARY_DIGIT )+
     ;
 
 octalDigitSequence
-    : octalDigit ( octalDigit )*
+    : ( OCTAL_DIGIT )+
     ;
 
 decimalDigitSequence
-    : decimalDigit ( decimalDigit )*
+    : ( DECIMAL_DIGIT )+
     ;
 
 hexadecimalDigitSequence
-    : hexadecimalDigit ( hexadecimalDigit )*
+    : ( HEXADECIMAL_DIGIT )+
     ;
 
 unsignedInteger
@@ -171,8 +178,8 @@ unsignedInteger
     ;
 
 sign
-    : '+' 
-    | '-'
+    : PLUS 
+    | MINUS
     ;
 
 signedInteger
@@ -184,7 +191,7 @@ scaleFactor
     ;
 
 unsignedReal
-    : decimalDigitSequence (: '.' decimalDigitSequence )? (: scaleFactor )?
+    : decimalDigitSequence (: DOT decimalDigitSequence )? (: scaleFactor )?
     ;
 
 signedReal
@@ -193,22 +200,19 @@ signedReal
 
 /* ******************** IDENTIFIERS ******************** */
 
-uppercaseLetter
+UPPERCASE_LETTER
     : 'A'..'Z'
     ;
-
-lowercaseLetter
+LOWERCASE_LETTER
     : 'a'..'z'
     ;
 letter
-    : lowercaseLetter 
-    | uppercaseLetter 
+    : LOWERCASE_LETTER 
+    | UPPERCASE_LETTER 
     ;
-
 identifier
-    : letter | UNDERSCORE ( letter | decimalDigit | UNDERSCORE )*
+    : letter | UNDERSCORE ( letter | DECIMAL_DIGIT | UNDERSCORE )*
     ;
-
 identifierList
     : identifier ( COMMA identifier )*
     ;
@@ -216,18 +220,18 @@ identifierList
 /* ******************** CHARS & STRINGS ******************** */
 
 charValue
-    : '\'\'' 
+    : QUOTE 
     // Any character except ', CR or LF
-    | uppercaseLetter
-    | lowercaseLetter
-    | decimalDigit
+    | UPPERCASE_LETTER
+    | LOWERCASE_LETTER
+    | DECIMAL_DIGIT
     // TODO other chars
     ;
 controlChar
     : '#' unsignedInteger
     ;
 quotedChar
-    : '\'' charValue '\''
+    : QUOTE charValue QUOTE
     ;
 characterValue
     : quotedChar
@@ -237,7 +241,7 @@ characterString
     : quotedString | controlChar ( quotedString | controlChar )*
     ;
 quotedString
-    : '\'' ( charValue )* '\''
+    : QUOTE ( charValue )* QUOTE
     ;
 
 /* ******************** BOOLEANS ******************** */
@@ -275,7 +279,7 @@ constantValue
     | quotedString
     ;
 constantDeclaration
-    : constantIdentifier EQUALS constantValue SEMI_COLON
+    : constantIdentifier EQUAL constantValue SEMI_COLON
     ;
 constBlock
     : CONST constantDeclaration SEMI_COLON ( constantDeclaration SEMI_COLON )*
@@ -334,7 +338,7 @@ typeIdentifier
     : identifier
     ;
 typeDeclaration
-    : typeIdentifier EQUALS typeDefinition
+    : typeIdentifier EQUAL typeDefinition
     ;
 typeBlock
     : TYPE typeDeclaration SEMI_COLON (: typeDeclaration SEMI_COLON )*
@@ -376,16 +380,16 @@ procedureFunctionBlock
 
 /* ******************** EXPRESSIONS ******************** */
 unaryOperator
-    : '+' | '-' | NOT
+    : PLUS | MINUS | NOT
     ;
 additiveOperator
-    : '+' | '-' | OR | XOR
+    : PLUS | MINUS | OR | XOR
     ;
 multiplicativeOperator
-    : '*' | '/' | DIV | MOD | AND | SHL | SHR
+    : STAR | SLASH | DIV | MOD | AND | SHL | SHR
     ;
 relationalOperator
-    : EQUALS | '<>' | '<' | '<=' | '>' | '>=';
+    : EQUAL | NOT_EQUAL | LESS_THAN | LESS_OR_EQUAL | GREATER_THAN | GREATER_OR_EQUAL;
 variableReference
     : identifier
     | identifier LEFT_BRACKET expression (:  COMMA expression )* RIGHT_BRACKET
