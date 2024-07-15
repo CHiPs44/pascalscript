@@ -99,12 +99,18 @@ GREATER_OR_EQUAL: '>=';
 
 pascalProgram
     : PROGRAM identifier SEMI_COLON 
-      programHeader
+      pascalHeader
       instructionBlock DOT
     ;
 
-programHeader
-    : ( constBlock | typeBlock | varBlock | procedureFunctionBlock )*
+pascalBlock
+    : constBlock
+    | typeBlock
+    | varBlock
+    | procedureFunctionBlock
+    ;
+pascalHeader
+    : pascalBlock*
     ;
 
 instructionBlock
@@ -295,7 +301,7 @@ constantValue
     | quotedString
     ;
 constBlock
-    : CONST constantDeclaration SEMI_COLON ( constantDeclaration SEMI_COLON )
+    : CONST ( constantDeclaration SEMI_COLON )+
     ;
 constantDeclaration
     : constantIdentifier EQUAL constantValue SEMI_COLON
@@ -367,7 +373,7 @@ recordType
 /* ******************** VARIABLES ******************** */
 
 varBlock
-    : VAR variableDeclaration SEMI_COLON (: variableDeclaration SEMI_COLON )*
+    : VAR (: variableDeclaration SEMI_COLON )+
     ;
 variableDeclaration
     : identifierList COLON typeReference
@@ -376,7 +382,7 @@ variableDeclaration
 /* ******************** PROCEDURES & FUNCTIONS ******************** */
 
 procedureFunctionBlock
-    : (: procedureDeclaration | functionDeclaration )*
+    : (: procedureDeclaration | functionDeclaration )+
     ;
 procedureDeclaration
     : PROCEDURE identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? SEMI_COLON
@@ -387,13 +393,13 @@ functionDeclaration
       procedureOrFunctionBody SEMI_COLON
     ;
 parameterDeclaration
-    : ( VAR )? identifierList COLON typeReference
+    : VAR? identifierList COLON typeReference
     ;
 parameterDeclarationList
     : (: parameterDeclaration (: COMMA parameterDeclaration )* )?
     ;
 procedureOrFunctionBody
-    : (: constBlock )? (: typeBlock )? (: varBlock )? (: procedureFunctionBlock )? instructionBlock
+    : pascalHeader instructionBlock
     ;
 
 /* ******************** EXPRESSIONS ******************** */
