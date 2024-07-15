@@ -9,36 +9,53 @@ options {
 /* Lexer rules begin with / are uppercase */
 
 // Keywords
+
+PROGRAM:    'PROGRAM';
+BEGIN:      'BEGIN';
+END:        'END';
+
 IF:         'IF';
 THEN:       'THEN';
 ELSE:       'ELSE';
+
 REPEAT:     'REPEAT';
 UNTIL:      'UNTIL';
+
 WHILE:      'WHILE';
 DO:         'DO';
+
 FOR:        'FOR';
 TO:         'TO';
 DOWNTO:     'DOWNTO';
+
 WRITE:      'WRITE';
 WRITELN:    'WRITELN';
+
 FALSE:      'FALSE';
 TRUE:       'TRUE';
+
 LABEL:      'LABEL';
 GOTO:       'GOTO';
-CONST:      'CONST';
+
 INTEGER:    'INTEGER';
 CARDINAL:   'CARDINAL';
 BOOLEAN:    'BOOLEAN';
 CHAR:       'CHAR';
+STRING:     'STRING';
 REAL:       'REAL';
+
 ARRAY:      'ARRAY';
 OF:         'OF';
-STRING:     'STRING';
+
 RECORD:     'RECORD';
+
+CONST:      'CONST';
 TYPE:       'TYPE';
 VAR:        'VAR';
+
 PROCEDURE:  'PROCEDURE';
 FUNCTION:   'FUNCTION';
+
 NOT:        'NOT';
 OR:         'OR';
 XOR:        'XOR';
@@ -47,9 +64,6 @@ MOD:        'MOD';
 AND:        'AND';
 SHL:        'SHL';
 SHR:        'SHR';
-PROGRAM:    'PROGRAM';
-BEGIN:      'BEGIN';
-END:        'END';
 
 // Symbols
 DOT_COLON: ':='; // assign
@@ -84,11 +98,13 @@ GREATER_OR_EQUAL: '>=';
 /* ******************** PROGRAM ******************** */
 
 pascalProgram
-    : PROGRAM identifier SEMI_COLON programHeader instructionBlock DOT
+    : PROGRAM identifier SEMI_COLON 
+      programHeader
+      instructionBlock DOT
     ;
 
 programHeader
-    : ( constBlock typeBlock varBlock )
+    : ( constBlock | typeBlock | varBlock | procedureFunctionBlock )*
     ;
 
 instructionBlock
@@ -278,15 +294,40 @@ constantValue
     | quotedChar
     | quotedString
     ;
+constBlock
+    : CONST constantDeclaration SEMI_COLON ( constantDeclaration SEMI_COLON )
+    ;
 constantDeclaration
     : constantIdentifier EQUAL constantValue SEMI_COLON
-    ;
-constBlock
-    : CONST constantDeclaration SEMI_COLON ( constantDeclaration SEMI_COLON )*
     ;
 
 /* ******************** TYPES ******************** */
 
+typeBlock
+    : TYPE typeDeclaration+
+    ;
+typeDeclaration
+    : typeIdentifier EQUAL typeDefinition SEMI_COLON
+    ;
+typeIdentifier
+    : identifier
+    ;
+typeReference
+    : typeIdentifier
+    | typeDefinition
+    ;
+typeDefinition
+    : scalarType
+    | stringType
+    | realType
+    | arrayType
+    | recordType
+    ;
+scalarType
+    : ordinalType
+    | enumType
+    | subrangeType
+    ;
 ordinalType
     : INTEGER | CARDINAL | BOOLEAN | CHAR
     ;
@@ -300,10 +341,11 @@ subrangeLimit
 subrangeType
     : subrangeLimit DOT_DOT subrangeLimit
     ;
-scalarType
-    : ordinalType
-    | enumType
-    | subrangeType
+stringSize
+    : unsignedInteger | constantIdentifier
+    ;
+stringType
+    : STRING (: LEFT_BRACKET stringSize RIGHT_BRACKET )?
     ;
 realType
     : REAL
@@ -318,64 +360,40 @@ arrayLimits
 arrayType
     : ARRAY LEFT_BRACKET arrayLimits RIGHT_BRACKET OF typeDefinition
     ;
-stringSize
-    : unsignedInteger | constantIdentifier
-    ;
-stringType
-    : STRING (: LEFT_BRACKET stringSize RIGHT_BRACKET )?
-    ;
 recordType
-    : RECORD ( identifierList ':' typeDefinition SEMI_COLON )* END
-    ;
-typeDefinition
-    : scalarType
-    | realType
-    | arrayType
-    | stringType
-    | recordType
-    ;
-typeIdentifier
-    : identifier
-    ;
-typeDeclaration
-    : typeIdentifier EQUAL typeDefinition
-    ;
-typeBlock
-    : TYPE typeDeclaration SEMI_COLON (: typeDeclaration SEMI_COLON )*
-    ;
-typeReference
-    : typeIdentifier
-    | typeDefinition
+    : RECORD ( identifierList COLON typeDefinition SEMI_COLON )* END
     ;
 
 /* ******************** VARIABLES ******************** */
-variableDeclaration
-    : identifier (: COMMA identifier )* ':' typeReference
-    ;
+
 varBlock
     : VAR variableDeclaration SEMI_COLON (: variableDeclaration SEMI_COLON )*
     ;
+variableDeclaration
+    : identifierList COLON typeReference
+    ;
 
 /* ******************** PROCEDURES & FUNCTIONS ******************** */
-parameterDeclaration
-    : identifierList ':' typeReference
-    ;
-parameterDeclarationList
-    : (: parameterDeclaration (: COMMA parameterDeclaration )* )?
-    ;
-procedureOrFunctionBody
-    : (: constBlock )? (: typeBlock )? (: varBlock )? (: procedureFunctionBlock )? instructionBlock
+
+procedureFunctionBlock
+    : (: procedureDeclaration | functionDeclaration )*
     ;
 procedureDeclaration
     : PROCEDURE identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? SEMI_COLON
       procedureOrFunctionBody SEMI_COLON
     ;
 functionDeclaration
-    : FUNCTION identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? ':' typeReference SEMI_COLON
+    : FUNCTION identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? COLON typeReference SEMI_COLON
       procedureOrFunctionBody SEMI_COLON
     ;
-procedureFunctionBlock
-    : (: procedureDeclaration | functionDeclaration )*
+parameterDeclaration
+    : ( VAR )? identifierList COLON typeReference
+    ;
+parameterDeclarationList
+    : (: parameterDeclaration (: COMMA parameterDeclaration )* )?
+    ;
+procedureOrFunctionBody
+    : (: constBlock )? (: typeBlock )? (: varBlock )? (: procedureFunctionBlock )? instructionBlock
     ;
 
 /* ******************** EXPRESSIONS ******************** */
