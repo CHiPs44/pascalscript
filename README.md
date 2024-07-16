@@ -9,23 +9,48 @@ First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fa
 At first, a simple CLI should be implemented (under GNU/Linux):
 
 ```bash
+# source as standard input
 pascalscript < hello.pas
 # with UUOC (useless use of cat ;-))
 cat hello.pas | pascalscript
+# source file as argument
+pascalscript hello.pas
 ```
 
-And the traditional `hello.pas` should be like:
+And the traditional `hello.pas` and `factorial.pas` should be like:
 
-```pascal
-program Hello;
-begin
+```text
+Program Hello;
+Begin
   WriteLn('Hello, world!');
-end.
+End.
+```
+
+```text
+Program Example;
+
+Function Factorial(N: Integer): Integer
+Begin
+  If N <= 0 Then
+    Fact := 0
+  Else
+    Fact := N * Factorial(N -1);
+End;
+
+Var
+  N: Integer;
+Begin
+  Repeat
+    Write('N=');
+    ReadLn(N);
+  Until N > 0;
+  WriteLn(N, '! = ', Factorial(N));
+End.
 ```
 
 In the future, it should be embeddable in other projects, like Lua is for example.
 
-Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an authoritative reference implementation.
+Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 
 ## Links to seemingly useful documentations
 
@@ -47,9 +72,8 @@ Examples __must__ be compilable with Free Pascal `fpc`, so we have sort of an au
 - "Crafting Interpreters", by Robert Nystrom, <https://craftinginterpreters.com/> / <https://github.com/munificent/craftinginterpreters>
 - "The Charly programming language", by Leonard Schütz, <https://leonardschuetz.ch/blog/charly-lang-interpreter/>
 - "Let’s Build A Simple Interpreter", by Ruslan Spivak, <https://ruslanspivak.com/lsbasi-part1/>
-- AST in C:
-  - <https://keleshev.com/abstract-syntax-tree-an-example-in-c/>
-  - <>
+- "Abstract Syntax Tree: an Example in C", by Vladimir Keleshev, <https://keleshev.com/abstract-syntax-tree-an-example-in-c/>
+- "AntLR4 example of Pascal grammar", <https://github.com/antlr/grammars-v4/blob/master/pascal/pascal.g4>
 
 ### `lex` / `flex` and `yacc` / `bison` stuff
 

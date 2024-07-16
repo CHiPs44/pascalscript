@@ -1,61 +1,58 @@
 /* ******************** PascalScript ANTLR4 ******************** */
 
+// $antlr-format alignTrailingComments true, columnLimit 150, minEmptyLines 1, maxEmptyLinesToKeep 1, reflowComments false, useTab false
+// $antlr-format allowShortRulesOnASingleLine false, allowShortBlocksOnASingleLine true, alignSemicolons hanging, alignColons hanging
+
 grammar pascalscript;
 
 options {
+    // needs antlr4 >= 4.10, Unbuntu 22.04 has 4.7
     // caseInsensitive = true;
 }
 
-/* Lexer rules begin with / are uppercase */
+// NB: lexer rules begin with / are uppercase
 
 // Keywords
-
-PROGRAM:    'PROGRAM';
-BEGIN:      'BEGIN';
-END:        'END';
-
-IF:         'IF';
-THEN:       'THEN';
-ELSE:       'ELSE';
-
-REPEAT:     'REPEAT';
-UNTIL:      'UNTIL';
-
-WHILE:      'WHILE';
-DO:         'DO';
-
-FOR:        'FOR';
-TO:         'TO';
-DOWNTO:     'DOWNTO';
-
-WRITE:      'WRITE';
-WRITELN:    'WRITELN';
-
-FALSE:      'FALSE';
-TRUE:       'TRUE';
-
-LABEL:      'LABEL';
-GOTO:       'GOTO';
-
-INTEGER:    'INTEGER';
-CARDINAL:   'CARDINAL';
-BOOLEAN:    'BOOLEAN';
-CHAR:       'CHAR';
-STRING:     'STRING';
-REAL:       'REAL';
-
-ARRAY:      'ARRAY';
-OF:         'OF';
-
-RECORD:     'RECORD';
-
-CONST:      'CONST';
-TYPE:       'TYPE';
-VAR:        'VAR';
-
-PROCEDURE:  'PROCEDURE';
-FUNCTION:   'FUNCTION';
-
+PROGRAM:        'PROGRAM';
+UNIT:           'UNIT';
+USES:           'USES';
+INTERFACE:      'INTERFACE';
+IMPLEMENTATION: 'IMPLEMENTfATION';
+INITIALIZATION: 'INITIALIZATION';
+FINALIZATION:   'FINALIZATION';
+BEGIN:          'BEGIN';
+END:            'END';
+IF:             'IF';
+THEN:           'THEN';
+ELSE:           'ELSE';
+REPEAT:         'REPEAT';
+UNTIL:          'UNTIL';
+WHILE:          'WHILE';
+DO:             'DO';
+FOR:            'FOR';
+TO:             'TO';
+DOWNTO:         'DOWNTO';
+WRITE:          'WRITE';
+WRITELN:        'WRITELN';
+FALSE:          'FALSE';
+TRUE:           'TRUE';
+LABEL:          'LABEL';
+GOTO:           'GOTO';
+INTEGER:        'INTEGER';
+CARDINAL:       'CARDINAL';
+BOOLEAN:        'BOOLEAN';
+CHAR:           'CHAR';
+STRING:         'STRING';
+REAL:           'REAL';
+ARRAY:          'ARRAY';
+OF:             'OF';
+RECORD:         'RECORD';
+CONST:          'CONST';
+TYPE:           'TYPE';
+VAR:            'VAR';
+PROCEDURE:      'PROCEDURE';
+FUNCTION:       'FUNCTION';
+// Operators
 NOT:        'NOT';
 OR:         'OR';
 XOR:        'XOR';
@@ -64,45 +61,115 @@ MOD:        'MOD';
 AND:        'AND';
 SHL:        'SHL';
 SHR:        'SHR';
-
 // Symbols
-DOT_COLON: ':='; // assign
-AT_SIGN: '@'; //   address of
-CARET: '^'; // pointer to
-COLON: ':'; // various uses
-COMMA: ','; // various uses
-DOT_DOT: '..'; // ranges
-DOT: '.'; // various uses
-LEFT_BRACKET: '['; // array access
-LEFT_PARENTHESIS: '('; // various uses
-RIGHT_BRACKET: ']'; // array access
-RIGHT_PARENTHESIS: ')'; // various uses
-SEMI_COLON: ';'; // various uses
-UNDERSCORE: '_';
-QUOTE: '\'';
-
+DOT_COLON:          ':=';   // assignment
+AT_SIGN:            '@';    // address of
+CARET:              '^';    // pointer to
+COLON:              ':';    // various uses
+COMMA:              ',';    // various uses
+DOT_DOT:            '..';   // ranges
+DOT:                '.';    // various uses
+LEFT_BRACKET:       '[';    // array access
+LEFT_PARENTHESIS:   '(';    // various uses
+RIGHT_BRACKET:      ']';    // array access
+RIGHT_PARENTHESIS:  ')';    // various uses
+SEMI_COLON:         ';';    // various uses
+UNDERSCORE:         '_';    // identifier part
+QUOTE:              '\'';   // char/string delimiter
+PERCENT:            '%';    // binary prefix
+AMPERSAND:          '&';    // octal prefix
+DOLLAR:             '$';    // hexadecimal prefix
 // Arithmetic operators
-PLUS: '+'; // addition
-MINUS: '-'; // substraction / negation
-STAR: '*'; // multiplication
-SLASH: '/'; // division (real)
-
+PLUS:               '+';    // addition
+MINUS:              '-';    // substraction / negation
+STAR:               '*';    // multiplication
+SLASH:              '/';    // division (real)
 // Comparison operators
-EQUAL: '=';
-NOT_EQUAL: '<>';
-LESS_THAN: '<';
-LESS_OR_EQUAL: '<=';
-GREATER_THAN: '>';
-GREATER_OR_EQUAL: '>=';
+EQUAL:              '=';
+NOT_EQUAL:          '<>';
+LESS_THAN:          '<';
+LESS_OR_EQUAL:      '<=';
+GREATER_THAN:       '>';
+GREATER_OR_EQUAL:   '>=';
+// Numbers
+BINARY_DIGIT:       '0'..'1';
+OCTAL_DIGIT:        '0'..'7';
+DECIMAL_DIGIT:      '0'..'9';
+HEXADECIMAL_DIGIT:  DECIMAL_DIGIT | 'a'..'f' | 'A'..'F';
+
+/* ******************** CHARS & STRINGS ******************** */
+
+// Any printable character from C0 & C1 Unicode blocks except ' (\u0027)
+CHAR_VALUE
+    : '\u0020'..'\u0026'
+    | '\u0028'..'\u007e'
+    | '\u00a0'..'\u00ff'
+    | '\'\''
+    ;
+// #13 as CR, #10 as LF, #$1B as ESC, ...
+CONTROL_CHAR
+    : '#' UNSIGNED_INTEGER
+    ;
+// Single character
+QUOTED_CHAR
+    : QUOTE CHAR_VALUE QUOTE
+    ;
+CHARACTER_VALUE
+    : QUOTED_CHAR
+    | CONTROL_CHAR
+    ;
+QUOTED_STRING
+    : QUOTE ( CHAR_VALUE )* QUOTE
+    ;
+CHARACTER_STRING
+    : ( QUOTED_STRING | CONTROL_CHAR )*
+    ;
 
 /* ******************** PROGRAM ******************** */
 
+pascalFile
+    : pascalProgram
+    | pascalUnit
+    ;
 pascalProgram
-    : PROGRAM identifier SEMI_COLON 
+    : PROGRAM IDENTIFIER SEMI_COLON
+      usesBlock?
       pascalHeader
       instructionBlock DOT
     ;
-
+pascalUnit
+    : UNIT IDENTIFIER SEMI_COLON
+      INTERFACE
+        usesBlock?
+        interfaceBlock*
+      IMPLEMENTATION
+        usesBlock?
+        implementationBlock
+      END DOT
+    ;
+usesBlock
+    : USES identifierList SEMI_COLON
+    ;
+interfaceBlock
+    : constBlock 
+    | typeBlock 
+    | varBlock 
+    | procedureDeclarationHeader 
+    | functionDeclarationHeader
+    ;
+implementationBlock
+    : pascalBlock
+      initializationBlock?
+      implementationBlock?
+    ;
+initializationBlock
+    : INITIALIZATION 
+    | (instruction | instructionBlock SEMI_COLON)
+    ;
+finalizationBlock
+    : FINALIZATION 
+    | (instruction | instructionBlock SEMI_COLON)
+    ;
 pascalBlock
     : constBlock
     | typeBlock
@@ -112,11 +179,9 @@ pascalBlock
 pascalHeader
     : pascalBlock*
     ;
-
 instructionBlock
     : BEGIN ( instruction )* END
     ;
-
 instruction
     : assignment
     | ifBlock
@@ -125,11 +190,9 @@ instruction
     | forBlock
     | procedureCall
     ;
-
 assignment
     : variableReference DOT_COLON expression SEMI_COLON
     ;
-
 ifBlock
     :  IF expression THEN
         ( instruction | instructionBlock ) SEMI_COLON
@@ -139,17 +202,17 @@ repeatBlock
     : REPEAT ( instruction )* UNTIL expression SEMI_COLON
     ;
 whileBlock
-    : WHILE expression DO instruction | instructionBlock SEMI_COLON
+    : WHILE expression DO (instruction | instructionBlock SEMI_COLON)
     ;
 forBlock
     : FOR variableReference DOT_COLON expression ( TO | DOWNTO ) expression
         instruction | instructionBlock SEMI_COLON
     ;
 procedureCall
-    : ( identifier | WRITE | WRITELN ) (: LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )? SEMI_COLON
+    : ( IDENTIFIER | WRITE | WRITELN ) (: LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )? SEMI_COLON
     ;
 functionCall
-    : identifier (: LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )?
+    : IDENTIFIER (: LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )?
     ;
 parametersList
     : parameter ( COMMA parameter )*
@@ -160,64 +223,48 @@ parameter
 
 /* ******************** NUMBERS ******************** */
 
-BINARY_DIGIT
-    : '0' | '1'
-    ;
-
-OCTAL_DIGIT
-    : '0'..'7'
-    ;
-
-DECIMAL_DIGIT
-    : '0' | '9'
-    ;
-
-HEXADECIMAL_DIGIT
-    : DECIMAL_DIGIT | 'a'..'f' | 'A'..'F'
-    ;
-
-binaryDigitSequence
+BINARY_DIGIT_SEQUENCE
     : (BINARY_DIGIT )+
     ;
 
-octalDigitSequence
+OCTAL_DIGIT_SEQUENCE
     : ( OCTAL_DIGIT )+
     ;
 
-decimalDigitSequence
+DECIMAL_DIGIT_SEQUENCE
     : ( DECIMAL_DIGIT )+
     ;
 
-hexadecimalDigitSequence
+HEXADECIMAL_DIGIT_SEQUENCE
     : ( HEXADECIMAL_DIGIT )+
     ;
 
-unsignedInteger
-    : decimalDigitSequence 
-    | '%' binaryDigitSequence 
-    | '&' octalDigitSequence 
-    | '$' hexadecimalDigitSequence
+UNSIGNED_INTEGER
+    : DECIMAL_DIGIT_SEQUENCE 
+    | PERCENT BINARY_DIGIT_SEQUENCE 
+    | AMPERSAND OCTAL_DIGIT_SEQUENCE 
+    | DOLLAR HEXADECIMAL_DIGIT_SEQUENCE
     ;
 
-sign
+SIGN
     : PLUS 
     | MINUS
     ;
 
-signedInteger
-    : (: sign )? unsignedInteger
+SIGNED_INTEGER
+    : (: SIGN )? UNSIGNED_INTEGER
     ;
 
-scaleFactor
-    : ( 'E' | 'e' ) (: sign )? decimalDigitSequence
+SCALE_FACTOR
+    : ( 'E' | 'e' ) (: SIGN )? DECIMAL_DIGIT_SEQUENCE
     ;
 
-unsignedReal
-    : decimalDigitSequence (: DOT decimalDigitSequence )? (: scaleFactor )?
+UNSIGNED_REAL
+    : DECIMAL_DIGIT_SEQUENCE (: DOT DECIMAL_DIGIT_SEQUENCE )? (: SCALE_FACTOR )?
     ;
 
-signedReal
-    : (: sign )? unsignedReal
+SIGNED_REAL
+    : SIGN? UNSIGNED_REAL
     ;
 
 /* ******************** IDENTIFIERS ******************** */
@@ -228,54 +275,27 @@ UPPERCASE_LETTER
 LOWERCASE_LETTER
     : 'a'..'z'
     ;
-letter
+LETTER
     : LOWERCASE_LETTER 
     | UPPERCASE_LETTER 
     ;
-identifier
-    : letter | UNDERSCORE ( letter | DECIMAL_DIGIT | UNDERSCORE )*
+IDENTIFIER
+    : LETTER | UNDERSCORE ( LETTER | DECIMAL_DIGIT | UNDERSCORE )*
     ;
 identifierList
-    : identifier ( COMMA identifier )*
-    ;
-
-/* ******************** CHARS & STRINGS ******************** */
-
-charValue
-    : QUOTE 
-    // Any character except ', CR or LF
-    | UPPERCASE_LETTER
-    | LOWERCASE_LETTER
-    | DECIMAL_DIGIT
-    // TODO other chars
-    ;
-controlChar
-    : '#' unsignedInteger
-    ;
-quotedChar
-    : QUOTE charValue QUOTE
-    ;
-characterValue
-    : quotedChar
-    | controlChar
-    ;
-characterString
-    : quotedString | controlChar ( quotedString | controlChar )*
-    ;
-quotedString
-    : QUOTE ( charValue )* QUOTE
+    : IDENTIFIER ( COMMA IDENTIFIER )*
     ;
 
 /* ******************** BOOLEANS ******************** */
-booleanValue
+BOOLEAN_VALUE
     : FALSE
     | TRUE
     ;
 
 /* ******************** LABEL & GOTO ******************** */
 label
-    : decimalDigitSequence 
-    | identifier
+    : DECIMAL_DIGIT_SEQUENCE 
+    | IDENTIFIER
     ;
 labelList
     : label (: COMMA label )*
@@ -290,15 +310,15 @@ gotoBlock
 /* ******************** CONSTANTS ******************** */
 
 constantIdentifier
-    : identifier
+    : IDENTIFIER
     ;
 constantValue
-    : unsignedInteger
-    | signedInteger
-    | unsignedReal 
-    | signedReal
-    | quotedChar
-    | quotedString
+    : UNSIGNED_INTEGER
+    | SIGNED_INTEGER
+    | UNSIGNED_REAL 
+    | SIGNED_REAL
+    | QUOTED_CHAR
+    | QUOTED_STRING
     ;
 constBlock
     : CONST ( constantDeclaration SEMI_COLON )+
@@ -316,7 +336,7 @@ typeDeclaration
     : typeIdentifier EQUAL typeDefinition SEMI_COLON
     ;
 typeIdentifier
-    : identifier
+    : IDENTIFIER
     ;
 typeReference
     : typeIdentifier
@@ -338,17 +358,17 @@ ordinalType
     : INTEGER | CARDINAL | BOOLEAN | CHAR
     ;
 enumType
-    : LEFT_PARENTHESIS identifier ( COMMA identifier )* RIGHT_PARENTHESIS
+    : LEFT_PARENTHESIS IDENTIFIER ( COMMA IDENTIFIER )* RIGHT_PARENTHESIS
     ;
 subrangeLimit
-    : (: sign )? unsignedInteger
-    | (: sign )? constantIdentifier
+    : (: SIGN )? UNSIGNED_INTEGER
+    | (: SIGN )? constantIdentifier
     ;
 subrangeType
     : subrangeLimit DOT_DOT subrangeLimit
     ;
 stringSize
-    : unsignedInteger | constantIdentifier
+    : UNSIGNED_INTEGER | constantIdentifier
     ;
 stringType
     : STRING (: LEFT_BRACKET stringSize RIGHT_BRACKET )?
@@ -385,12 +405,18 @@ procedureFunctionBlock
     : (: procedureDeclaration | functionDeclaration )+
     ;
 procedureDeclaration
-    : PROCEDURE identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? SEMI_COLON
+    : procedureDeclarationHeader
       procedureOrFunctionBody SEMI_COLON
     ;
+procedureDeclarationHeader
+    : PROCEDURE IDENTIFIER (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? SEMI_COLON
+    ;
 functionDeclaration
-    : FUNCTION identifier (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? COLON typeReference SEMI_COLON
-      procedureOrFunctionBody SEMI_COLON
+    : functionDeclarationHeader
+    procedureOrFunctionBody SEMI_COLON
+    ;
+functionDeclarationHeader
+    : FUNCTION IDENTIFIER (: LEFT_PARENTHESIS parameterDeclarationList RIGHT_PARENTHESIS )? COLON typeReference SEMI_COLON
     ;
 parameterDeclaration
     : VAR? identifierList COLON typeReference
@@ -415,11 +441,11 @@ multiplicativeOperator
 relationalOperator
     : EQUAL | NOT_EQUAL | LESS_THAN | LESS_OR_EQUAL | GREATER_THAN | GREATER_OR_EQUAL;
 variableReference
-    : identifier
-    | identifier LEFT_BRACKET expression (:  COMMA expression )* RIGHT_BRACKET
+    : IDENTIFIER
+    | IDENTIFIER LEFT_BRACKET expression (:  COMMA expression )* RIGHT_BRACKET
     ;
 constantReference
-    : identifier
+    : IDENTIFIER
     ;
 expression
     : unaryOperator expression
@@ -430,13 +456,13 @@ expression
     | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
     ;
 term
-    : unsignedInteger
-    | unsignedReal
-    | characterValue
-    | booleanValue
-    | characterString
+    : UNSIGNED_INTEGER
+    | UNSIGNED_REAL
+    | CHARACTER_VALUE
+    | BOOLEAN_VALUE
+    | CHARACTER_STRING
     | variableReference 
     | constantIdentifier
-    | sign expression
+    | SIGN expression
     | functionCall
     ;
