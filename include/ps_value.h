@@ -34,7 +34,7 @@ extern "C"
         PS_TYPE_SET = 10, // => unsigned value as a bit field
         PS_TYPE_ARRAY = 11,
         PS_TYPE_RECORD = 12,
-    } ps_type;
+    } __attribute__ ((__packed__)) ps_type;
 
     typedef union u_ps_data
     {
@@ -43,7 +43,7 @@ extern "C"
         ps_real r;
         ps_boolean b;
         ps_char c;
-        ps_string s;
+        ps_string_ptr s;
         ps_pointer p;
     } ps_data;
 

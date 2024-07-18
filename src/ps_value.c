@@ -9,7 +9,7 @@
 
 #include "ps_value.h"
 
-ps_value *ps_value_make_integer(ps_value *value, ps_integer data)
+ps_value *ps_value_set_integer(ps_value *value, ps_integer data)
 {
     if (value == NULL)
     {
@@ -23,7 +23,7 @@ ps_value *ps_value_make_integer(ps_value *value, ps_integer data)
     return value;
 }
 
-ps_value *ps_value_make_unsigned(ps_value *value, ps_unsigned data)
+ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned data)
 {
     if (value == NULL)
     {
@@ -37,7 +37,7 @@ ps_value *ps_value_make_unsigned(ps_value *value, ps_unsigned data)
     return value;
 }
 
-ps_value *ps_value_make_real(ps_value *value, ps_real data)
+ps_value *ps_value_set_real(ps_value *value, ps_real data)
 {
     if (value == NULL)
     {
@@ -51,7 +51,7 @@ ps_value *ps_value_make_real(ps_value *value, ps_real data)
     return value;
 }
 
-ps_value *ps_value_make_boolean(ps_value *value, ps_boolean data)
+ps_value *ps_value_set_boolean(ps_value *value, ps_boolean data)
 {
     if (value == NULL)
     {
@@ -65,7 +65,7 @@ ps_value *ps_value_make_boolean(ps_value *value, ps_boolean data)
     return value;
 }
 
-ps_value *ps_value_make_char(ps_value *value, ps_char data)
+ps_value *ps_value_set_char(ps_value *value, ps_char data)
 {
     if (value == NULL)
     {
@@ -79,7 +79,7 @@ ps_value *ps_value_make_char(ps_value *value, ps_char data)
     return value;
 }
 
-ps_value *ps_value_make_string(ps_value *value, ps_string data)
+ps_value *ps_value_set_string(ps_value *value, ps_string data)
 {
     bool allocated = false;
     if (value == NULL)
@@ -93,8 +93,8 @@ ps_value *ps_value_make_string(ps_value *value, ps_string data)
         return NULL;
     value->type = PS_TYPE_STRING;
     value->size = ps_string_max + 1;
-    value->data.s.len = data.len;
-    value->data.s.str = malloc(data.s.len + 1);
+    value->data.s->len = data.len;
+    value->data.s->str = malloc(data.s->len + 1);
     if (value->data.s.str == NULL)
     {
         if (allocated)
@@ -105,7 +105,7 @@ ps_value *ps_value_make_string(ps_value *value, ps_string data)
     return value;
 }
 
-ps_value *ps_value_make_pointer(ps_value *value, void *data)
+ps_value *ps_value_set_pointer(ps_value *value, void *data)
 {
     if (value == NULL)
     {

@@ -35,12 +35,13 @@ extern "C"
     typedef PS_STRING_LEN_TYPE ps_string_len;
     const ps_string_len ps_string_max = PS_STRING_MAX;
 
-    typedef struct _ps_string
+    typedef struct s_ps_string
     {
-        ps_string_len size;
+        ps_string_len max;
         ps_string_len len;
-        ps_string_num num;
+        ps_char *str;
     } ps_string;
+    typedef ps_string *ps_string_ptr;
 
     typedef void *ps_pointer;
 

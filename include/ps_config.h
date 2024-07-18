@@ -76,19 +76,17 @@ extern "C"
 #endif
 
 #ifndef PS_STRING_MAX
-#define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX UINT8_MAX
-#define PS_STRING_NUM_TYPE uint16_t
-// #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX UINT16_MAX
 #endif
 
 #ifndef PS_STRING_LEN_TYPE
-#error PS_STRING_LEN_TYPE must be defined.
+#define PS_STRING_LEN_TYPE uint8_t
+// #define PS_STRING_LEN_TYPE uint16_t
 #endif
 
-#ifndef PS_STRING_NUM_TYPE
-#error PS_STRING_NUM_TYPE must be defined.
+#ifndef PS_STRING_LEN_TYPE
+#error PS_STRING_LEN_TYPE must be defined.
 #endif
 
 #ifdef __cplusplus
