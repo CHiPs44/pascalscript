@@ -26,7 +26,7 @@ void vm_init(ps_vm *vm)
     strcpy(symbol.name, "__PS_VERSION__");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_unsigned(&symbol.value,
+    ps_value_set_unsigned(&symbol.value,
                       (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff));
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
@@ -42,31 +42,31 @@ void vm_init(ps_vm *vm)
     strcpy(symbol.name, "MAXINT");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_integer(&symbol.value, PS_INTEGER_MAX);
+    ps_value_set_integer(&symbol.value, PS_INTEGER_MAX);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "MAXUINT");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_unsigned(&symbol.value, PS_UNSIGNED_MAX);
+    ps_value_set_unsigned(&symbol.value, PS_UNSIGNED_MAX);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "FALSE");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_boolean(&symbol.value, false);
+    ps_value_set_boolean(&symbol.value, false);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "TRUE");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_boolean(&symbol.value, true);
+    ps_value_set_boolean(&symbol.value, true);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "PI");
     symbol.kind = KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_real(&symbol.value, 3.141592653589793);
+    ps_value_set_real(&symbol.value, 3.141592653589793);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /* Stack */
     ps_symbol_stack_init(&vm->stack);

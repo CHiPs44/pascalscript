@@ -21,33 +21,33 @@ int main(void)
     ps_value_debug(&value);
 
     printf("TEST VALUE: INTEGER\n");
-    ps_value_integer(&value, -1234567890);
+    ps_value_set_integer(&value, -1234567890);
     ps_value_debug(&value);
 
     printf("TEST VALUE: UNSIGNED\n");
-    ps_value_unsigned(&value, 0xDEADBEEF);
+    ps_value_set_unsigned(&value, 0xDEADBEEF);
     ps_value_debug(&value);
 
     printf("TEST VALUE: BOOLEAN\n");
-    ps_value_boolean(&value, true);
+    ps_value_set_boolean(&value, true);
     ps_value_debug(&value);
-    ps_value_boolean(&value, false);
+    ps_value_set_boolean(&value, false);
     ps_value_debug(&value);
 
     printf("TEST VALUE: CHAR\n");
-    ps_value_char(&value, 'A');
+    ps_value_set_char(&value, 'A');
     ps_value_debug(&value);
 
     printf("TEST VALUE: STRING\n");
-    ps_value_string(&value, "This is a test.");
+    ps_value_set_string(&value, "This is a test.");
     ps_value_debug(&value);
 
     printf("TEST VALUE: REAL\n");
-    ps_value_real(&value, 3.141592653589793);
+    ps_value_set_real(&value, 3.141592653589793);
     ps_value_debug(&value);
 
     printf("TEST VALUE: POINTER\n");
-    ps_value_pointer(&value, (void *)&value);
+    ps_value_set_pointer(&value, (void *)&value);
     ps_value_debug(&value);
 
     printf("TEST VALUE: END\n");

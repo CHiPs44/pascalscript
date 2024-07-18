@@ -26,10 +26,10 @@ int main(void)
 {
     int result;
 
-    ps_value_integer(&constant1.value, 1234567890);
-    ps_value_unsigned(&variable2.value, 0xDEADBEEF);
-    ps_value_integer(&auto_var3.value, 0x12345678);
-    ps_value_integer(&constant4.value, 0x87654321);
+    ps_value_set_integer(&constant1.value, 1234567890);
+    ps_value_set_unsigned(&variable2.value, 0xDEADBEEF);
+    ps_value_set_integer(&auto_var3.value, 0x12345678);
+    ps_value_set_integer(&constant4.value, 0x87654321);
 
     printf("TEST SYMBOL TABLE: BEGIN\n");
     ps_symbol_table_init(&table);

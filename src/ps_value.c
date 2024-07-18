@@ -9,71 +9,142 @@
 
 #include "ps_value.h"
 
-ps_value *ps_value_integer(ps_value *value, ps_integer data)
+ps_value *ps_value_make_integer(ps_value *value, ps_integer data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_INTEGER;
     value->size = sizeof(ps_integer);
     value->data.i = data;
     return value;
 }
 
-ps_value *ps_value_unsigned(ps_value *value, ps_unsigned data)
+ps_value *ps_value_make_unsigned(ps_value *value, ps_unsigned data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_UNSIGNED;
     value->size = sizeof(ps_unsigned);
     value->data.u = data;
     return value;
 }
 
-ps_value *ps_value_real(ps_value *value, ps_real data)
+ps_value *ps_value_make_real(ps_value *value, ps_real data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_REAL;
     value->size = sizeof(ps_real);
     value->data.r = data;
     return value;
 }
 
-ps_value *ps_value_boolean(ps_value *value, ps_boolean data)
+ps_value *ps_value_make_boolean(ps_value *value, ps_boolean data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_BOOLEAN;
     value->size = sizeof(ps_boolean);
     value->data.b = data;
     return value;
 }
 
-ps_value *ps_value_char(ps_value *value, ps_char data)
+ps_value *ps_value_make_char(ps_value *value, ps_char data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_CHAR;
     value->size = sizeof(ps_char);
     value->data.c = data;
     return value;
 }
 
-ps_value *ps_value_string(ps_value *value, ps_string data)
+ps_value *ps_value_make_string(ps_value *value, ps_string data)
 {
-    value->type = PS_TYPE_STRING;
-    value->size = ps_string_max + 1;
+    bool allocated = false;
+    if (value == NULL)
+    {
+        allocated = true;
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     if (data.len > ps_string_max)
         return NULL;
+    value->type = PS_TYPE_STRING;
+    value->size = ps_string_max + 1;
     value->data.s.len = data.len;
+    value->data.s.str = malloc(data.s.len + 1);
+    if (value->data.s.str == NULL)
+    {
+        if (allocated)
+            free(value);
+        return NULL;
+    }
     strncpy(value->data.s.str, data.str, data.len);
     return value;
 }
 
-ps_value *ps_value_pointer(ps_value *value, void *data)
+ps_value *ps_value_make_pointer(ps_value *value, void *data)
 {
+    if (value == NULL)
+    {
+        value = calloc(1, sizeof(ps_value));
+        if (value == NULL)
+            return NULL;
+    }
     value->type = PS_TYPE_POINTER;
     value->size = sizeof(void *);
     value->data.p = data;
     return value;
 }
 
-const char *ps_type_names[] = {"NONE", "INTEGER", "UNSIGNED", "REAL", "BOOLEAN", "CHAR", "STRING", "POINTER"};
+const struct ps_type_name
+{
+    ps_type type;
+    char *name;
+} ps_type_names[] = {
+    {PS_TYPE_NONE, "NONE"},
+    {PS_TYPE_INTEGER, "INTEGER"},
+    {PS_TYPE_UNSIGNED, "UNSIGNED"},
+    {PS_TYPE_REAL, "REAL"},
+    {PS_TYPE_BOOLEAN, "BOOLEAN"},
+    {PS_TYPE_CHAR, "CHAR"},
+    {PS_TYPE_STRING, "STRING"},
+    {PS_TYPE_POINTER, "POINTER"},
+    {PS_TYPE_ENUM, "ENUM"},
+    {PS_TYPE_SUBRANGE, "SUBRANGE"},
+    {PS_TYPE_ARRAY, "ARRAY"},
+    {PS_TYPE_RECORD, "RECORD"},
+};
 
 char *ps_value_get_type_name(ps_type type)
 {
-    if (type >= PS_TYPE_NONE && type <= PS_TYPE_POINTER)
-        return ps_type_names[type];
+    for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(struct ps_type_name); i++)
+    {
+        if (type == ps_type_names[i].type)
+            return ps_type_names[i].name;
+    }
     return "UNKNOWN";
 }
 

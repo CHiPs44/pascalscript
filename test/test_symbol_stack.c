@@ -28,11 +28,11 @@ int main(void)
     int result;
     ps_string string5 = {.str = "ABCDEF123456", .len = 12};
 
-    ps_value_integer(&constant1.value, 1234567890);
-    ps_value_integer(&variable2.value, 0xDEADBEEF);
-    ps_value_integer(&constant3.value, 0x12345678);
-    ps_value_integer(&constant4.value, 0x87654321);
-    ps_value_string(&constant5.value, string5);
+    ps_value_set_integer(&constant1.value, 1234567890);
+    ps_value_set_integer(&variable2.value, 0xDEADBEEF);
+    ps_value_set_integer(&constant3.value, 0x12345678);
+    ps_value_set_integer(&constant4.value, 0x87654321);
+    ps_value_set_string(&constant5.value, string5);
 
     printf("TEST SYMBOL STACK: BEGIN\n");
     ps_symbol_stack_init(&stack);

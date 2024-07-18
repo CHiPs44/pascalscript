@@ -39,7 +39,7 @@ extern "C"
     {
         ps_string_len size;
         ps_string_len len;
-        ps_char   str[PS_STRING_MAX + 1]; // TODO? replace by a pointer
+        ps_string_num num;
     } ps_string;
 
     typedef void *ps_pointer;

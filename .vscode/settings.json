@@ -30,6 +30,7 @@
         "compare": "c",
         "ranges": "c",
         "stdarg.h": "c",
-        "ps_ast.h": "c"
+        "ps_ast.h": "c",
+        "stdbool.h": "c"
     }
 }

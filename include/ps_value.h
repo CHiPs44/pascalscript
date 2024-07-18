@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-    typedef enum _ps_type
+    typedef enum e_ps_type
     {
         PS_TYPE_NONE = 0,
         PS_TYPE_INTEGER = 1,
@@ -28,9 +28,15 @@ extern "C"
         PS_TYPE_CHAR = 5,
         PS_TYPE_STRING = 6,
         PS_TYPE_POINTER = 7,
+        PS_TYPE_ENUM = 8, // => unsigned value (first=0, second=1, ...)
+        PS_TYPE_SUBRANGE = 9, // => integer value (-10..15)
+        // future types
+        PS_TYPE_SET = 10, // => unsigned value as a bit field
+        PS_TYPE_ARRAY = 11,
+        PS_TYPE_RECORD = 12,
     } ps_type;
 
-    typedef union _ps_data
+    typedef union u_ps_data
     {
         ps_integer i;
         ps_unsigned u;
@@ -41,7 +47,7 @@ extern "C"
         ps_pointer p;
     } ps_data;
 
-    typedef struct _ps_value
+    typedef struct s_ps_value
     {
         ps_type type;
         size_t size;
@@ -49,13 +55,13 @@ extern "C"
     } ps_value;
 
     // clang-format off
-    ps_value *ps_value_integer (ps_value *value, ps_integer  data);
-    ps_value *ps_value_unsigned(ps_value *value, ps_unsigned data);
-    ps_value *ps_value_boolean (ps_value *value, ps_boolean  data);
-    ps_value *ps_value_char    (ps_value *value, ps_char     data);
-    ps_value *ps_value_string  (ps_value *value, ps_string   data);
-    ps_value *ps_value_real    (ps_value *value, ps_real     data);
-    ps_value *ps_value_pointer (ps_value *value, ps_pointer  data);
+    ps_value *ps_value_set_integer (ps_value *value, ps_integer  data);
+    ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned data);
+    ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  data);
+    ps_value *ps_value_set_char    (ps_value *value, ps_char     data);
+    ps_value *ps_value_set_string  (ps_value *value, ps_string   data);
+    ps_value *ps_value_set_real    (ps_value *value, ps_real     data);
+    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  data);
     // clang-format on
 
     char *ps_value_get_type_name(ps_type type);

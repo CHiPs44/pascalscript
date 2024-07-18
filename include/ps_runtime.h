@@ -17,16 +17,32 @@ extern "C"
 {
 #endif
 
-    static ps_error ps_errno = PS_ERROR_ZERO;
+    static ps_error ps_runtime_errno = PS_ERROR_ZERO;
 
-    inline ps_value *ps_abs(ps_value *value)
+    inline ps_value *ps_runtime_alloc_value()
     {
-        ps_value *result = (ps_value *)calloc(1, sizeof(ps_value));
-        if (result == NULL)
+        if (ps_runtime_errno != PS_RUNTIME_ERROR_NONE)
+            return NULL;
+        ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
+        if (value == NULL)
         {
-            ps_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+            ps_runtime_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
             return NULL;
         }
+        return value;
+    }
+
+    inline void ps_runtime_free_value(ps_value *value)
+    {
+        free(value);
+    }
+
+    /** @brief Get absolute value of integer / unsigned / real */
+    inline ps_value *ps_runtime_func_abs(ps_value *value)
+    {
+        ps_value *result = ps_runtime_alloc_value();
+        if (result == NULL)
+            return NULL;
         memcpy(result, value, sizeof(ps_value));
         switch (value->type)
         {
@@ -40,47 +56,49 @@ extern "C"
             return result;
         default:
             free(result);
-            ps_errno = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+            ps_runtime_errno = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
             return NULL;
         }
     }
 
-    inline ps_value *ps_odd(ps_value *value)
+    /** @brief true if integer/unsigned value is odd, false if even */
+    inline ps_value *ps_runtime_func_odd(ps_value *value)
     {
-        ps_value *result = (ps_value *)calloc(1, sizeof(ps_value));
+        ps_value *result = ps_runtime_alloc_value();
         if (result == NULL)
-        {
-            ps_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
             return NULL;
-        }
         result->type = PS_TYPE_BOOLEAN;
         result->size = sizeof(ps_boolean);
         switch (value->type)
         {
         case PS_TYPE_UNSIGNED:
-            result->data.b = (ps_boolean)(value->data.u & 1u);
+            result->data.b = (ps_boolean)(value->data.u % 2 == 1);
             return result;
         case PS_TYPE_INTEGER:
-            result->data.b = (ps_boolean)(value->data.i & 1u);
+            result->data.b = (ps_boolean)(value->data.i % 2 == 1);
             return result;
         default:
             free(result);
-            ps_errno = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
+            ps_runtime_errno = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
             return NULL;
         }
     }
 
-    inline ps_value *ps_even(ps_value *value)
+    /** @brief true if integer/unsigned value is even, false if odd */
+    inline ps_value *ps_runtime_func_even(ps_value *value)
     {
-        ps_value *result = ps_odd(value);
+        ps_value *result = ps_runtime_func_odd(value);
         if (result == NULL)
             return NULL;
         result->data.b = !result->data.b;
         return result;
     }
 
-    // ps_ord
-    // ps_chr
+    // ps_runtime_func_ord
+    // ps_runtime_func_chr
+    // ps_runtime_func_pred
+    // ps_runtime_func_succ
+    // ps_runtime_func_sizeof
 
 #ifdef __cplusplus
 }

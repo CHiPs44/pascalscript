@@ -17,15 +17,21 @@ extern "C"
 {
 #endif
 
+// NB: 32 bits by default, as our far target is RP2040 / ARM M0+
+
 #ifndef PS_INTEGER
 // 16 bits
 // #define PS_INTEGER int16_t
-// #define PS_INTEGER_MIN -32768
-// #define PS_INTEGER_MAX 32767
+// #define PS_INTEGER_MIN INT16_MIN
+// #define PS_INTEGER_MAX INT32_MAX
 // 32 bits
 #define PS_INTEGER int32_t
-#define PS_INTEGER_MIN -2147483648L
-#define PS_INTEGER_MAX 2147483647L
+#define PS_INTEGER_MIN INT32_MIN
+#define PS_INTEGER_MAX INT32_MAX
+// 64 bits
+// #define PS_INTEGER int64_t
+// #define PS_INTEGER_MIN INT64_MIN
+// #define PS_INTEGER_MAX INT64_MAX
 #endif
 
 #ifndef PS_INTEGER_MIN
@@ -42,7 +48,10 @@ extern "C"
 // #define PS_UNSIGNED_MAX 0xffff
 // 32 bits
 #define PS_UNSIGNED uint32_t
-#define PS_UNSIGNED_MAX 0xffffffff
+#define PS_UNSIGNED_MAX UINT32_MAX
+// 64 bits
+// #define PS_UNSIGNED uint64_t
+// #define PS_UNSIGNED_MAX UINT64_MAX
 #endif
 
 #ifndef PS_UNSIGNED_MAX
@@ -68,13 +77,18 @@ extern "C"
 
 #ifndef PS_STRING_MAX
 #define PS_STRING_LEN_TYPE uint8_t
-#define PS_STRING_MAX 255
+#define PS_STRING_MAX UINT8_MAX
+#define PS_STRING_NUM_TYPE uint16_t
 // #define PS_STRING_LEN_TYPE uint16_t
-// #define PS_STRING_MAX 65535
+// #define PS_STRING_MAX UINT16_MAX
 #endif
 
 #ifndef PS_STRING_LEN_TYPE
 #error PS_STRING_LEN_TYPE must be defined.
+#endif
+
+#ifndef PS_STRING_NUM_TYPE
+#error PS_STRING_NUM_TYPE must be defined.
 #endif
 
 #ifdef __cplusplus
