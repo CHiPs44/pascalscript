@@ -72,7 +72,7 @@ extern "C"
 #endif
 
 #ifndef PS_CHAR
-#define PS_CHAR char
+#define PS_CHAR unsigned char
 #endif
 
 #ifndef PS_STRING_MAX

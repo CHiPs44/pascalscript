@@ -32,6 +32,7 @@
         "stdarg.h": "c",
         "ps_ast.h": "c",
         "stdbool.h": "c",
-        "ps_string_heap.h": "c"
+        "ps_string_heap.h": "c",
+        "stdio.h": "c"
     }
 }

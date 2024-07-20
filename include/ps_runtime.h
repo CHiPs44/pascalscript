@@ -17,30 +17,35 @@ extern "C"
 {
 #endif
 
-    static ps_error ps_runtime_errno = PS_ERROR_ZERO;
+    // static ps_error runtime->errno = PS_ERROR_ZERO;
 
-    inline ps_value *ps_runtime_alloc_value()
+    typedef struct s_ps_runtime
     {
-        if (ps_runtime_errno != PS_RUNTIME_ERROR_NONE)
+        ps_error errno;
+    } ps_runtime;
+
+    inline ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
+    {
+        if (runtime->errno != PS_RUNTIME_ERROR_NONE)
             return NULL;
         ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
         if (value == NULL)
         {
-            ps_runtime_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
             return NULL;
         }
         return value;
     }
 
-    inline void ps_runtime_free_value(ps_value *value)
+    inline void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
     {
         free(value);
     }
 
     /** @brief Get absolute value of integer / unsigned / real */
-    inline ps_value *ps_runtime_func_abs(ps_value *value)
+    inline ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value)
     {
-        ps_value *result = ps_runtime_alloc_value();
+        ps_value *result = ps_runtime_alloc_value(runtime);
         if (result == NULL)
             return NULL;
         memcpy(result, value, sizeof(ps_value));
@@ -56,15 +61,15 @@ extern "C"
             return result;
         default:
             free(result);
-            ps_runtime_errno = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+            runtime->errno = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
             return NULL;
         }
     }
 
     /** @brief true if integer/unsigned value is odd, false if even */
-    inline ps_value *ps_runtime_func_odd(ps_value *value)
+    inline ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value)
     {
-        ps_value *result = ps_runtime_alloc_value();
+        ps_value *result = ps_runtime_alloc_value(runtime);
         if (result == NULL)
             return NULL;
         result->type = PS_TYPE_BOOLEAN;
@@ -79,26 +84,51 @@ extern "C"
             return result;
         default:
             free(result);
-            ps_runtime_errno = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
+            runtime->errno = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
             return NULL;
         }
     }
 
     /** @brief true if integer/unsigned value is even, false if odd */
-    inline ps_value *ps_runtime_func_even(ps_value *value)
+    inline ps_value *ps_runtime_func_even(ps_runtime *runtime, ps_value *value)
     {
-        ps_value *result = ps_runtime_func_odd(value);
+        ps_value *result = ps_runtime_func_odd(runtime, value);
         if (result == NULL)
             return NULL;
         result->data.b = !result->data.b;
         return result;
     }
 
-    // ps_runtime_func_ord
+    /** @brief Get ordinal value */
+    inline ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
+    {
+        ps_value *result = ps_runtime_alloc_value(runtime);
+        if (result == NULL)
+            return NULL;
+        switch (value->type)
+        {
+        case PS_TYPE_UNSIGNED:
+        case PS_TYPE_INTEGER:
+        case PS_TYPE_ENUM:
+        case PS_TYPE_SUBRANGE:
+            memcpy(result, value, sizeof(ps_value));
+            return result;
+        case PS_TYPE_CHAR:
+            result->type = PS_TYPE_UNSIGNED;
+            result->size = sizeof(ps_unsigned);
+            result->data.u = (ps_unsigned)(value->data.c);
+            return result;
+        default:
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+            return NULL;
+        }
+    }
+
     // ps_runtime_func_chr
     // ps_runtime_func_pred
     // ps_runtime_func_succ
-    // ps_runtime_func_sizeof
+    // ps_runtime_func_sizeof?
 
 #ifdef __cplusplus
 }
