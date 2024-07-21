@@ -45,6 +45,20 @@ extern "C"
 
     typedef void *ps_pointer;
 
+    /*typedef struct s_ps_enum_type
+    {
+        size_t size;
+        char *name;
+        char **symbols;
+    } ps_enum_type;*/
+
+    /*
+    typedef struct s_ps_file
+    {
+        bool is_text;
+        FILE *handle;
+    } ps_file;*/
+
 #ifdef __cplusplus
 }
 #endif

@@ -99,7 +99,7 @@ extern "C"
         return result;
     }
 
-    /** @brief Get ordinal value */
+    /** @brief Get ordinal value of boolean / char */
     inline ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
     {
         ps_value *result = ps_runtime_alloc_value(runtime);
@@ -111,11 +111,19 @@ extern "C"
         case PS_TYPE_INTEGER:
         case PS_TYPE_ENUM:
         case PS_TYPE_SUBRANGE:
+            // just copy: ord(x) => x
             memcpy(result, value, sizeof(ps_value));
+            return result;
+        case PS_TYPE_BOOLEAN:
+            result->type = PS_TYPE_UNSIGNED;
+            result->size = sizeof(ps_unsigned);
+            // ord(true) => 1 / ord(false) => 0
+            result->data.u = value->data.b ? 1u : 0u;
             return result;
         case PS_TYPE_CHAR:
             result->type = PS_TYPE_UNSIGNED;
             result->size = sizeof(ps_unsigned);
+            // ord('0') => 48 / ord('A') => 65 / ...
             result->data.u = (ps_unsigned)(value->data.c);
             return result;
         default:
@@ -125,8 +133,67 @@ extern "C"
         }
     }
 
-    // ps_runtime_func_chr
-    // ps_runtime_func_pred
+    /** @brief Get char value of unsigned / integer or subrange value */
+    inline ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
+    {
+        ps_value *result = ps_runtime_alloc_value(runtime);
+        if (result == NULL)
+            return NULL;
+        result->type = PS_TYPE_CHAR;
+        result->size = sizeof(ps_char);
+        switch (value->type)
+        {
+        case PS_TYPE_UNSIGNED:
+            result->data.c = (ps_unsigned)(value->data.u);
+            return result;
+        case PS_TYPE_INTEGER:
+        case PS_TYPE_SUBRANGE:
+            result->data.c = (ps_integer)(value->data.i);
+            return result;
+        default:
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+            return NULL;
+        }
+    }
+
+    /** @brief Get previous value of ordinal value */
+    inline ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
+    {
+        ps_value *result = ps_runtime_alloc_value(runtime);
+        if (result == NULL)
+            return NULL;
+        memcpy(result, value, sizeof(ps_value));
+        switch (value->type)
+        {
+        case PS_TYPE_UNSIGNED:
+            result->data.u = value->data.u - 1;
+            return result;
+        // case PS_TYPE_ENUM:
+        //   TODO needs low()
+        case PS_TYPE_INTEGER:
+            result->data.u = value->data.u - 1;
+            return result;
+        case PS_TYPE_SUBRANGE:
+        case PS_TYPE_BOOLEAN:
+            result->type = PS_TYPE_UNSIGNED;
+            result->size = sizeof(ps_unsigned);
+            // ord(true) => 1 / ord(false) => 0
+            result->data.u = value->data.b ? 1u : 0u;
+            return result;
+        case PS_TYPE_CHAR:
+            result->type = PS_TYPE_UNSIGNED;
+            result->size = sizeof(ps_unsigned);
+            // ord('0') => 48 / ord('A') => 65 / ...
+            result->data.u = (ps_unsigned)(value->data.c);
+            return result;
+        default:
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+            return NULL;
+        }
+    }
+
     // ps_runtime_func_succ
     // ps_runtime_func_sizeof?
 
