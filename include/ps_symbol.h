@@ -8,6 +8,7 @@
 #define _PS_SYMBOL_H
 
 #include "ps_config.h"
+#include "ps_error.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -19,7 +20,7 @@ extern "C"
 #define MAX_SYMBOL_NAME 31
 #endif
 
-    typedef enum _ps_kind_t
+    typedef enum e_ps_symbol_type
     {
         KIND_FREE = 0,
         KIND_AUTO,
@@ -32,27 +33,30 @@ extern "C"
         KIND_SET,
         KIND_RECORD,
         // ...
-    } ps_kind;
+    } __attribute__((__packed__)) ps_symbol_type;
 
 #define PS_SCOPE_GLOBAL 0
 
     typedef uint8_t ps_scope;
-    const ps_scope_max = 255;
+    const ps_scope_max = UINT8_MAX;
 
     typedef struct _ps_symbol
     {
         char name[MAX_SYMBOL_NAME + 1];
-        ps_kind kind;
+        ps_symbol_type type;
         ps_scope scope;
         ps_value value;
     } ps_symbol;
 
-    void ps_symbol_normalize_name(char *name);
-    char *ps_symbol_get_kind_name(ps_kind kind);
-    char *ps_symbol_get_type_name(ps_type type);
+    typedef uint16_t ps_symbol_key_hash;
+
+    char *ps_symbol_get_type_name(ps_symbol_type type);
     char *symbol_get_scope_name(ps_scope scope);
     char *ps_symbol_dump(ps_symbol *symbol);
     void ps_symbol_debug(ps_symbol *symbol);
+
+    void ps_symbol_normalize_name(ps_symbol *symbol);
+    ps_symbol_key_hash ps_symbol_get_hash_key(ps_symbol *symbol);
 
 #ifdef __cplusplus
 }

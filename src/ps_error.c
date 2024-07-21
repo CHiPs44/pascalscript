@@ -9,9 +9,9 @@
 
 #include "ps_error.h"
 
-char *ps_error_get_message(ps_error code)
+char *ps_error_get_message(ps_error error)
 {
-    switch (code)
+    switch (error)
     {
     /* ==================== GENERAL  ==================== */
     case PS_ERROR_ZERO:
@@ -108,11 +108,11 @@ char *ps_error_get_message(ps_error code)
     return "Unknown";
 }
 
-void ps_error_printf(ps_error code, const char *format, ...)
+void ps_error_printf(ps_error error, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    char *message = ps_error_get_message(code);
+    char *message = ps_error_get_message(error);
     fprintf(stderr, "ERROR: %s ", message);
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");

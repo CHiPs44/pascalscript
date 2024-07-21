@@ -56,11 +56,11 @@ void ps_buffer_reset(ps_buffer *buffer)
 
 char *ps_buffer_show_error(ps_buffer *buffer)
 {
-    static char ps_buffer_error_message[256];
-    snprintf(ps_buffer_error_message, 255, "LEXER: %d %s, line %d, column %d",
+    static char PS_BUFFER_ERROR_message[256];
+    snprintf(PS_BUFFER_ERROR_message, 255, "LEXER: %d %s, line %d, column %d",
              buffer->error, ps_error_get_message(buffer->error),
              buffer->current_line, buffer->current_column);
-    return ps_buffer_error_message;
+    return PS_BUFFER_ERROR_message;
 }
 
 bool ps_buffer_scan_text(ps_buffer *buffer)

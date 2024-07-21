@@ -8,7 +8,7 @@ Type
   TEnum = (Zero, One, Two, Three, Four);
 
 Var 
-  X : Integer { was: Longint };
+  X : Integer; { was: Longint }
   Y : TEnum;
 
 Begin

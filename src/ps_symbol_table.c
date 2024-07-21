@@ -41,7 +41,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
         if (table->symbols[i].kind != KIND_FREE)
         {
             symbol = &table->symbols[i];
-            char *kind_name = ps_symbol_get_kind_name(symbol->kind);
+            char *kind_name = ps_symbol_get_type_name(symbol->kind);
             char *scope_name = symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
