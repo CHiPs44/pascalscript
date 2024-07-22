@@ -6,9 +6,73 @@
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
+Another test/validation is made using AntLR4 (which lacks C output) but can help for lexer, parser & AST structures.
+
+The traditional `hello.pas` will be like:
+
+```pascal
+Program HelloWorld;
+Begin
+  WriteLn('Hello, world!');
+End.
+```
+
+And `factorial.pas` should be like:
+
+```pascal
+Program Factorial;
+
+Function RecursiveFactorial(N: Integer): Integer;
+Begin
+  If N <= 1 Then
+    Begin
+      RecursiveFactorial := 1;
+      (*WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);*)
+    End
+  Else
+    Begin
+      RecursiveFactorial := N * RecursiveFactorial(N -1);
+      (*WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);*)
+    End;
+End;
+
+Function IterativeFactorial(N: Integer): Integer;
+
+Var 
+  I, F: Integer;
+Begin
+  If N <= 1 Then
+    Begin
+      (*WriteLn('IterativeFactorial: I=', I, ', F=', F);*)
+        F := 1;
+    End
+  Else
+    Begin
+      F := 1;
+      For I := 2 To N Do
+      Begin
+        (*WriteLn('IterativeFactorial: I=', I, ', F=', F);*)
+        F := F * I;
+      End;
+    End;
+  IterativeFactorial := F;
+End;
+
+Var 
+  N: Integer;
+Begin
+  Repeat
+    Write('N=');
+    ReadLn(N);
+  Until N > 0;
+  WriteLn('Recursive: ', N, '! = ', RecursiveFactorial(N));
+  WriteLn('Iterative: ', N, '! = ', IterativeFactorial(N));
+End.
+```
+
 At first, a simple CLI should be implemented (under GNU/Linux):
 
-```bash
+```text
 # source as standard input
 pascalscript < hello.pas
 # with UUOC (useless use of cat ;-))
@@ -17,38 +81,13 @@ cat hello.pas | pascalscript
 pascalscript hello.pas
 ```
 
-And the traditional `hello.pas` and `factorial.pas` should be like:
+All three will output:
 
 ```text
-Program Hello;
-Begin
-  WriteLn('Hello, world!');
-End.
+Hello, world!
 ```
 
-```text
-Program Example;
-
-Function Factorial(N: Integer): Integer
-Begin
-  If N <= 0 Then
-    Fact := 0
-  Else
-    Fact := N * Factorial(N -1);
-End;
-
-Var
-  N: Integer;
-Begin
-  Repeat
-    Write('N=');
-    ReadLn(N);
-  Until N > 0;
-  WriteLn(N, '! = ', Factorial(N));
-End.
-```
-
-In the future, it should be embeddable in other projects, like Lua is for example.
+In the future, it should be embeddable in other projects, like (Lua)[https://lua.org/] is for example.
 
 Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 

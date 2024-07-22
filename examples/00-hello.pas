@@ -13,14 +13,14 @@ Const
   HelloWorld1 = 12345678;
   HelloWorld2 = 123456789023457890123456789023457890;
   HelloWorld3 = 4294967295;
-  HelloWorld3 = 2147483648;
+  // HelloWorld3 = 2147483648;
   PI = 3.14159265359;
   E = 2.71828182846;
 var
   test: integer;
 Begin
-  test := 1 + 2;
+  // test := 1 + 2;
   (*Write(HELLO_WORLD_0);
-  WriteLn(HELLO_WORLD_1);
-  WriteLn('Hello, world!');*)
+  WriteLn(HELLO_WORLD_1);*)
+  WriteLn('Hello, world!');
 End.
