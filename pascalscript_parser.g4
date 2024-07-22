@@ -158,12 +158,12 @@ constantDeclaration
     ;
 
 constantValue
-    : SIGN? UNSIGNED_INTEGER
+    : SIGN? UNSIGNED_INTEGER_VALUE
     // | SIGNED_INTEGER
-    | SIGN? UNSIGNED_REAL
+    | SIGN? UNSIGNED_REAL_VALUE
     // | SIGNED_REAL
     | CHARACTER_VALUE
-    | COMPOSED_STRING
+    | COMPOSED_STRING_VALUE
     ;
 
 /* ******************** TYPES ******************** */
@@ -201,9 +201,9 @@ typeDefinition
 */
 scalarType
     : INTEGER
-    // | CARDINAL 
-    // | BOOLEAN 
-    // | CHAR
+    | CARDINAL 
+    | BOOLEAN 
+    | CHAR
     // | enumType
     // | subrangeType
     ;
@@ -296,19 +296,20 @@ procedureOrFunctionBody
 /* ******************** EXPRESSIONS ******************** */
 
 expression
-    // : unaryOperator expression
-    : expression relationalOperator expression
-    | expression additiveOperator expression
+    : unaryOperator expression
+    // : expression relationalOperator expression
     | expression multiplicativeOperator expression
-    | UNSIGNED_INTEGER
-    | UNSIGNED_REAL
+    | expression additiveOperator expression
+    | expression relationalOperator expression
+    | UNSIGNED_INTEGER_VALUE
+    | UNSIGNED_REAL_VALUE
     | CHARACTER_VALUE
     | BOOLEAN_VALUE
-    | COMPOSED_STRING
+    | COMPOSED_STRING_VALUE
     | variableReference
     | constantReference
     // | functionCall
-    | unaryOperator expression
+    // | unaryOperator expression
     | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
     ;
 

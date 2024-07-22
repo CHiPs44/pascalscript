@@ -104,23 +104,26 @@ PERCENT:            '%';    // binary prefix
 AMPERSAND:          '&';    // octal prefix
 DOLLAR:             '$';    // hexadecimal prefix
 
+/* ******************** IDENTIFIER ******************** */
+
+LETTER
+    : 'A'..'Z'
+    ;
+IDENTIFIER
+    : ( LETTER | UNDERSCORE ) ( LETTER | DECIMAL_DIGIT | UNDERSCORE )*
+    ;
+
 /* ******************** NUMBERS ******************** */
 
-UNSIGNED_INTEGER
+UNSIGNED_INTEGER_VALUE
     : DECIMAL_DIGIT_SEQUENCE 
     | PERCENT BINARY_DIGIT_SEQUENCE 
     | AMPERSAND OCTAL_DIGIT_SEQUENCE 
     | DOLLAR HEXADECIMAL_DIGIT_SEQUENCE
     ;
-// SIGNED_INTEGER
-//     : SIGN? UNSIGNED_INTEGER
-//     ;
-UNSIGNED_REAL
+UNSIGNED_REAL_VALUE
     : DECIMAL_DIGIT_SEQUENCE DOT DECIMAL_DIGIT_SEQUENCE ( 'E'? SIGN? DECIMAL_DIGIT_SEQUENCE )?
     ;
-// SIGNED_REAL
-//     : SIGN? UNSIGNED_REAL
-//     ;
 DECIMAL_DIGIT_SEQUENCE
     : DECIMAL_DIGIT+
     ;
@@ -155,7 +158,7 @@ CHAR_VALUE
     ;
 // #13 as CR, #10 as LF, #$1B as ESC, ...
 CONTROL_CHAR
-    : '#' UNSIGNED_INTEGER
+    : '#' UNSIGNED_INTEGER_VALUE
     ;
 // Single character
 QUOTED_CHAR
@@ -168,17 +171,8 @@ CHARACTER_VALUE
 QUOTED_STRING
     : QUOTE ( CHAR_VALUE )* QUOTE
     ;
-COMPOSED_STRING
+COMPOSED_STRING_VALUE
     : ( QUOTED_STRING | CONTROL_CHAR )+
-    ;
-
-/* ******************** IDENTIFIER ******************** */
-
-LETTER
-    : 'A'..'Z'
-    ;
-IDENTIFIER
-    : LETTER /*| UNDERSCORE*/ ( LETTER | DECIMAL_DIGIT | UNDERSCORE )*
     ;
 
 /* ******************** BOOLEANS ******************** */
