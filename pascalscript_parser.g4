@@ -17,13 +17,13 @@ pascalFile
     : pascalProgram
     // | pascalUnit
     ;
+
 pascalProgram
     : PROGRAM IDENTIFIER SEMI_COLON
     //   usesBlock?
-      pascalHeader
-      instructionBlock DOT
-      EOF
+    pascalHeader instructionBlock DOT EOF
     ;
+
 /* NB: units disabled for now
 pascalUnit
     : UNIT IDENTIFIER SEMI_COLON
@@ -62,15 +62,18 @@ finalizationBlock
 pascalHeader
     : pascalBlock*
     ;
+
 pascalBlock
     : constBlock
     // | typeBlock
     | varBlock
     // | procedureFunctionBlock
     ;
+
 instructionBlock
-    : BEGIN ( instruction )* END
+    : BEGIN (instruction)* END
     ;
+
 instruction
     : assignment
     // | ifBlock
@@ -79,9 +82,11 @@ instruction
     // | forBlock
     // | procedureCall
     ;
+
 assignment
     : variableReference DOT_COLON expression SEMI_COLON
     ;
+
 // ifBlock
 //     :  IF expression THEN
 //         ( instruction | instructionBlock ) SEMI_COLON
@@ -147,14 +152,16 @@ gotoBlock
 constBlock
     : CONST constantDeclaration+
     ;
+
 constantDeclaration
     : IDENTIFIER EQUAL constantValue SEMI_COLON
     ;
+
 constantValue
-    : UNSIGNED_INTEGER
-    | SIGNED_INTEGER
-    | UNSIGNED_REAL 
-    | SIGNED_REAL
+    : SIGN? UNSIGNED_INTEGER
+    // | SIGNED_INTEGER
+    | SIGN? UNSIGNED_REAL
+    // | SIGNED_REAL
     | CHARACTER_VALUE
     | COMPOSED_STRING
     ;
@@ -182,6 +189,7 @@ typeReference
     // : IDENTIFIER
     // | typeDefinition
     ;
+
 /*
 typeDefinition
     : REAL
@@ -192,13 +200,14 @@ typeDefinition
     ;
 */
 scalarType
-    : INTEGER 
+    : INTEGER
     // | CARDINAL 
     // | BOOLEAN 
     // | CHAR
     // | enumType
     // | subrangeType
     ;
+
 /*
 enumType
     : LEFT_PARENTHESIS IDENTIFIER ( COMMA IDENTIFIER )* RIGHT_PARENTHESIS
@@ -244,11 +253,13 @@ recordType
 varBlock
     : VAR variableDeclaration+
     ;
+
 variableDeclaration
     : identifierList COLON typeReference SEMI_COLON
     ;
+
 identifierList
-    : IDENTIFIER ( COMMA IDENTIFIER )*
+    : IDENTIFIER (COMMA IDENTIFIER)*
     ;
 
 /* ******************** PROCEDURES & FUNCTIONS ******************** */
@@ -285,9 +296,9 @@ procedureOrFunctionBody
 /* ******************** EXPRESSIONS ******************** */
 
 expression
-    : unaryOperator expression
-    | expression relationalOperator     expression
-    | expression additiveOperator       expression
+    // : unaryOperator expression
+    : expression relationalOperator expression
+    | expression additiveOperator expression
     | expression multiplicativeOperator expression
     | UNSIGNED_INTEGER
     | UNSIGNED_REAL
@@ -297,29 +308,47 @@ expression
     | variableReference
     | constantReference
     // | functionCall
+    | unaryOperator expression
     | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
     ;
+
 unaryOperator
-    : PLUS | MINUS
+    : PLUS
+    | MINUS
     | NOT
     ;
+
 relationalOperator
-    : EQUAL | NOT_EQUAL
-    | LESS_THAN | LESS_OR_EQUAL
-    | GREATER_THAN | GREATER_OR_EQUAL
+    : EQUAL
+    | NOT_EQUAL
+    | LESS_THAN
+    | LESS_OR_EQUAL
+    | GREATER_THAN
+    | GREATER_OR_EQUAL
     ;
+
 additiveOperator
-    : PLUS | MINUS 
-    | OR | XOR
+    : PLUS
+    | MINUS
+    | OR
+    | XOR
     ;
+
 multiplicativeOperator
-    : STAR | SLASH | DIV | MOD
-    | AND | SHL | SHR
+    : STAR
+    | SLASH
+    | DIV
+    | MOD
+    | AND
+    | SHL
+    | SHR
     ;
+
 variableReference
     : IDENTIFIER
     // | IDENTIFIER LEFT_BRACKET expression ( COMMA expression )* RIGHT_BRACKET
     ;
+
 constantReference
     : IDENTIFIER
     ;
