@@ -6,7 +6,7 @@
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
-Another test/validation is made using AntLR4 (which lacks C output) but can help for lexer, parser & AST structures.
+As of july 2024, another test/validation is made using AntLR4 (which lacks C output) but can help for lexer, parser & AST structures.
 
 The traditional `hello.pas` will be like:
 
@@ -17,7 +17,7 @@ Begin
 End.
 ```
 
-And `factorial.pas` should be like:
+And `factorial.pas` (see [examples/60-Factorial.pas](examples/60-Factorial.pas)) should be like:
 
 ```pascal
 Program Factorial;

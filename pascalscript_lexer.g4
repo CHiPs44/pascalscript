@@ -147,6 +147,13 @@ HEXADECIMAL_DIGIT:  '0'..'9' | 'A'..'F';
 
 /* ******************** CHARS & STRINGS ******************** */
 
+CHARACTER_VALUE
+    : QUOTED_CHAR
+    | CONTROL_CHAR
+    ;
+COMPOSED_STRING_VALUE
+    : ( QUOTED_STRING | CONTROL_CHAR )+
+    ;
 // Any printable character from C0 & C1 Unicode blocks except ' (#39 / \u0027)
 CHAR_VALUE
     // C0 / ASCII
@@ -164,17 +171,9 @@ CONTROL_CHAR
 QUOTED_CHAR
     : QUOTE CHAR_VALUE QUOTE
     ;
-CHARACTER_VALUE
-    : QUOTED_CHAR
-    | CONTROL_CHAR
-    ;
 QUOTED_STRING
     : QUOTE ( CHAR_VALUE )* QUOTE
     ;
-COMPOSED_STRING_VALUE
-    : ( QUOTED_STRING | CONTROL_CHAR )+
-    ;
-
 /* ******************** BOOLEANS ******************** */
 
 BOOLEAN_VALUE
@@ -184,7 +183,7 @@ BOOLEAN_VALUE
 
 /* ******************** WHITESPACE / COMMENTS ******************** */
 
-ANY_CHAR: '\u0001'..'\uffff';
+ANY_CHAR: .;
 COMMENT1: '(*' ANY_CHAR* '*)' -> skip;
 COMMENT2: '{' ANY_CHAR* '}' -> skip;
 COMMENT3: '//' ANY_CHAR* '\n' -> skip;

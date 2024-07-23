@@ -80,7 +80,7 @@ instruction
     // | repeatBlock
     // | whileBlock
     // | forBlock
-    // | procedureCall
+    | procedureCall
     ;
 
 assignment
@@ -102,19 +102,20 @@ assignment
 //     : FOR variableReference DOT_COLON expression ( TO | DOWNTO ) expression
 //         instruction | instructionBlock SEMI_COLON
 //     ;
-// procedureCall
-//     : ( /*IDENTIFIER | */WRITE | WRITELN ) ( LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )? SEMI_COLON
-//     ;
+procedureCall
+    : ( /*IDENTIFIER | */WRITE | WRITELN ) ( LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS )? SEMI_COLON
+    ;
 // functionCall
-//     : IDENTIFIER ( LEFT_PARENTHESIS parametersList RIGHT_PARENTHESIS )?
+//     : IDENTIFIER ( LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS )?
 //     ;
-// parametersList
-//     : parameter ( COMMA parameter )*
-//     ;
-// parameter
-//     : expression
-//     | variableReference
-//     ;
+parameterList
+    : parameter ( COMMA parameter )*
+    ;
+parameter
+    : expression
+    | variableReference
+    | constantReference
+    ;
 
 /* ******************** LABELS & GOTO ******************** */
 
@@ -154,25 +155,27 @@ constBlock
     ;
 
 constantDeclaration
-    : IDENTIFIER EQUAL constantValue SEMI_COLON
+    // : IDENTIFIER EQUAL constantValue SEMI_COLON
+    : IDENTIFIER EQUAL expression SEMI_COLON
     ;
 
+/*
 constantValue
-    : SIGN? UNSIGNED_INTEGER_VALUE
-    // | SIGNED_INTEGER
-    | SIGN? UNSIGNED_REAL_VALUE
-    // | SIGNED_REAL
+    : SIGN UNSIGNED_INTEGER_VALUE
+    | UNSIGNED_INTEGER_VALUE
+    | SIGN UNSIGNED_REAL_VALUE
+    | UNSIGNED_REAL_VALUE
     | CHARACTER_VALUE
     | COMPOSED_STRING_VALUE
+    | IDENTIFIER
     ;
+*/
 
 /* ******************** TYPES ******************** */
 
 /*
-    Const
-        MaxLineLength = 80;
     Type
-        TextLine = String[MaxLineLength];
+        TextLine = String[80];
 */
 
 /*
