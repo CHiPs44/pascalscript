@@ -4,7 +4,7 @@ Const
   BBB = -2345;
   CCC = AAA;
   BIN = %01010101;
-  OCT = &777;
+  OCT = &77777777;
   HEX = $5555AAAA;
 Var 
   Test1, Test2: Integer;
@@ -17,4 +17,3 @@ Begin
   Test4 := (1 * 2 + 3 * 4) * _HEX_;
   WriteLn(Test1, Test2, Test3, Test4);
 End.
-{msfkldfskfdsm}

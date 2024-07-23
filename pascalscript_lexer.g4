@@ -106,11 +106,16 @@ DOLLAR:             '$';    // hexadecimal prefix
 
 /* ******************** IDENTIFIER ******************** */
 
+IDENTIFIER
+    : IDENTIFIER_PREFIX
+    | IDENTIFIER_PREFIX ( LETTER | DECIMAL_DIGIT | UNDERSCORE )+
+    ;
+IDENTIFIER_PREFIX
+    : LETTER
+    | UNDERSCORE
+    ;
 LETTER
     : 'A'..'Z'
-    ;
-IDENTIFIER
-    : ( LETTER | UNDERSCORE ) ( LETTER | DECIMAL_DIGIT | UNDERSCORE )*
     ;
 
 /* ******************** NUMBERS ******************** */
