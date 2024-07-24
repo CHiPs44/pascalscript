@@ -1,6 +1,6 @@
 { from https://rosettacode.org/wiki/Least_common_multiple#Pascal }
 
-Program RosettaLCM;
+Program RosettaLeastCommonMultiple;
 
 Function LCM(A, B: Cardinal):   Cardinal;
 Var

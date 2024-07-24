@@ -1,6 +1,6 @@
 { from https://rosettacode.org/wiki/Greatest_common_divisor#Pascal_/_Delphi_/_Free_Pascal }
 
-Program RosettaGCD;
+Program RosettaGreatestCommonDivisor;
 
 Function RecursiveGCD(U, V: Cardinal):   Cardinal;
 Begin
