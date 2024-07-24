@@ -1,5 +1,7 @@
 /* ******************** PascalScript ANTLR4 ******************** */
 
+// npm i -g --save-dev antlr-format-cli
+//  antlr-format -v pascalscript_parser.g4
 // $antlr-format alignTrailingComments true, columnLimit 150, minEmptyLines 1, maxEmptyLinesToKeep 1, reflowComments false, useTab false
 // $antlr-format allowShortRulesOnASingleLine false, allowShortBlocksOnASingleLine true, alignSemicolons hanging, alignColons hanging
 
@@ -103,14 +105,16 @@ assignment
 //         instruction | instructionBlock SEMI_COLON
 //     ;
 procedureCall
-    : ( /*IDENTIFIER | */WRITE | WRITELN ) ( LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS )? SEMI_COLON
+    : ( /*IDENTIFIER | */ WRITE | WRITELN) (LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS)? SEMI_COLON
     ;
+
 // functionCall
 //     : IDENTIFIER ( LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS )?
 //     ;
 parameterList
-    : parameter ( COMMA parameter )*
+    : parameter (COMMA parameter)*
     ;
+
 parameter
     : expression
     | variableReference
@@ -204,8 +208,8 @@ typeDefinition
 */
 scalarType
     : INTEGER
-    | CARDINAL 
-    | BOOLEAN 
+    | CARDINAL
+    | BOOLEAN
     | CHAR
     // | enumType
     // | subrangeType
