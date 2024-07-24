@@ -18,7 +18,7 @@ const char *ps_symbol_kind_names[] = {
 char *ps_symbol_get_type_name(ps_symbol_type kind)
 {
     static char kind_name[16];
-    if (kind >= KIND_FREE && kind <= KIND_RECORD)
+    if (kind >= SYMBOL_TYPE_FREE && kind <= SYMBOL_TYPE_RECORD)
         return ps_symbol_kind_names[kind];
     snprintf(kind_name, 15, "? Unknown %d ?", kind);
     return kind_name;

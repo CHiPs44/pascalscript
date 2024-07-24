@@ -51,7 +51,7 @@ char *ps_lexer_show_error(ps_lexer *lexer)
 bool ps_lexer_return_error(ps_lexer *lexer, ps_error error, char *message)
 {
     if (message != NULL)
-        printf("ps_lexer_return_error: %s / %d %s\n", message, error, ps_error_get_message(error));
+        fprintf(stderr, "ps_lexer_return_error: %s / %d %s\n", message, error, ps_error_get_message(error));
     lexer->current_token.type = TOKEN_NONE;
     lexer->error = error;
     return false;
@@ -68,12 +68,10 @@ bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 {
     char c = ps_buffer_peek_char(&lexer->buffer);
     *changed = false;
-    // printf("ps_lexer_skip_whitespace: c='%c' / %d\n", c, c);
     while (isspace(c) || c == '\n')
     {
         if (!ps_lexer_read_next_char(lexer))
             return false;
-        // printf("ps_lexer_skip_whitespace: c='%c' / %d pos=%d,%d\n", c, c, lexer->buffer.current_line, lexer->buffer.current_column);
         *changed = true;
         c = ps_buffer_peek_char(&lexer->buffer);
     }
@@ -94,7 +92,6 @@ bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
             c = lexer->buffer.current_char;
             if (c == '\0')
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment1");
-            // printf("ps_lexer_skip_comment1: c='%c'\n", c);
         }
         if (!ps_lexer_read_next_char(lexer))
             return false;
@@ -138,10 +135,8 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
     bool changed1 = true;
     bool changed2 = true;
     bool changed3 = true;
-    // printf("ps_lexer_skip_whitespace_and_comments: BEGIN\n");
     while (changed1 || changed2 || changed3)
     {
-        // printf("ps_lexer_skip_whitespace_and_comments: LOOP %s %s %s\n", changed1 ? "1" : "_", changed2 ? "2" : "_", changed3 ? "3" : "_");
         if (!ps_lexer_skip_whitespace(lexer, &changed1))
         {
             printf("ps_lexer_skip_whitespace: error=%d\n", lexer->error);
@@ -158,7 +153,6 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
             return false;
         }
     }
-    // printf("ps_lexer_skip_whitespace_and_comments: END\n");
     return true;
 }
 
@@ -168,12 +162,10 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
     char c = ps_buffer_peek_char(&lexer->buffer);
     int pos = 0;
 
-    // printf("ps_lexer_read_identifier_or_keyword: '%c' / %d / %0x\n", c, c, c);
     if (isalpha(c))
     {
         do
         {
-            // printf("%c\n", c);
             if (pos > MAX_IDENTIFIER)
             {
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_IDENTIFIER_TOO_LONG, "ps_lexer_read_identifier_or_keyword");
@@ -181,7 +173,9 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             buffer[pos] = toupper(c);
             if (!ps_lexer_read_next_char(lexer))
             {
-                printf("ps_lexer_read_identifier_or_keyword/ps_buffer_read_next_char: error=%d buffer.error=%d\n", lexer->error, lexer->buffer.error);
+                printf(
+                    "ps_lexer_read_identifier_or_keyword/ps_buffer_read_next_char: error=%d buffer.error=%d\n",
+                    lexer->error, lexer->buffer.error);
                 return false;
             }
             c = ps_buffer_peek_char(&lexer->buffer);

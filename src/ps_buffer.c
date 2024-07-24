@@ -56,11 +56,39 @@ void ps_buffer_reset(ps_buffer *buffer)
 
 char *ps_buffer_show_error(ps_buffer *buffer)
 {
-    static char PS_BUFFER_ERROR_message[256];
-    snprintf(PS_BUFFER_ERROR_message, 255, "LEXER: %d %s, line %d, column %d",
+    static char error_message[256];
+    snprintf(error_message, 255, "LEXER: %d %s, line %d, column %d",
              buffer->error, ps_error_get_message(buffer->error),
              buffer->current_line, buffer->current_column);
-    return PS_BUFFER_ERROR_message;
+    return error_message;
+}
+
+char *ps_buffer_debug_char(char c)
+{
+    static char tmp[16];
+    static char *ctrl[32] = {
+        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
+        "BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
+        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+        "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
+    if (c >= ' ')
+        sprintf(tmp, " '%c' (0x%02x)", c, c);
+    else
+        sprintf(tmp, " %s (0x%02x)", ctrl[c + 0], c);
+    return tmp;
+}
+
+void ps_buffer_debug(ps_buffer *buffer, int level, char *message)
+{
+    if (buffer->debug < level)
+        return;
+    fprintf(stderr,
+            "%s line=%05d col=%03d char=%s, next=%s, error=%d %s\n",
+            message,
+            buffer->current_line, buffer->current_column,
+            ps_buffer_debug_char(buffer->current_char),
+            ps_buffer_debug_char(buffer->next_char),
+            buffer->error, ps_error_get_message(buffer->error));
 }
 
 bool ps_buffer_scan_text(ps_buffer *buffer)
@@ -150,6 +178,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     if (input == NULL)
     {
         buffer->error = PS_BUFFER_ERROR_OPENING_FILE;
+        buffer->file_errno = errno;
         return false;
     }
     int result = ps_readall(input, &(buffer->text), &length);
@@ -158,6 +187,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     {
     case PS_READALL_ERROR:
         buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        buffer->file_errno = errno;
         return false;
     case PS_READALL_NOMEM:
         buffer->error = PS_BUFFER_ERROR_OUT_OF_MEMORY;
@@ -171,6 +201,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
         }
         buffer->length = length;
         buffer->error = PS_BUFFER_ERROR_NONE;
+        buffer->file_errno = 0;
         return ps_buffer_scan_text(buffer);
     default:
         buffer->error = PS_BUFFER_ERROR_READING_FILE;
@@ -199,24 +230,24 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size)
 {
     char line[PS_BUFFER_MAX_COLUMNS + 1];
 
-    printf("\n");
-    printf("%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
+    fprintf(stderr, "\n");
+    fprintf(stderr, "%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
     if (buffer->line_count == 0)
     {
-        printf("Buffer is EMPTY!\n");
+        fprintf(stderr, "Buffer is EMPTY!\n");
         return;
     }
-    printf("            |         1         2         3         4         5         6         7         8|\n");
-    printf("Line  (Len) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
+    fprintf(stderr, "            |         1         2         3         4         5         6         7         8|\n");
+    fprintf(stderr, "Line  (Len) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
     for (int line_number = from_line; line_number < from_line + page_size - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
             break;
         strncpy(line, buffer->line_starts[line_number], buffer->line_lengths[line_number]);
         line[buffer->line_lengths[line_number]] = '\0';
-        printf("%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
+        fprintf(stderr, "%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
-    printf("\n");
+    fprintf(stderr, "\n");
 }
 
 char ps_buffer_peek_char(ps_buffer *buffer)
@@ -229,28 +260,9 @@ char ps_buffer_peek_next_char(ps_buffer *buffer)
     return buffer->error == PS_BUFFER_ERROR_NONE ? buffer->next_char : '\0';
 }
 
-char *ps_buffer_debug_char(char c)
-{
-    static char tmp[16];
-    static char *ctrl[32] = {
-        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
-        "BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
-        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
-        "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
-    if (c >= ' ')
-        sprintf(tmp, " '%c' (0x%02x)", c, c);
-    else
-        sprintf(tmp, " %s (0x%02x)", ctrl[c + 0], c);
-    return tmp;
-}
-
 bool ps_buffer_read_next_char(ps_buffer *buffer)
 {
-    if (buffer->debug >= 2)
-        printf("ps_buffer_read_next_char: BEGIN line=%05d col=%03d char=%s, next=%s\n",
-               buffer->current_line, buffer->current_column,
-               ps_buffer_debug_char(buffer->current_char),
-               ps_buffer_debug_char(buffer->next_char));
+    ps_buffer_debug(buffer, 2, "ps_buffer_read_next_char: BEGIN");
     buffer->current_char = '\0';
     buffer->next_char = '\0';
     // already at end of buffer?
@@ -259,7 +271,6 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     // already after end of buffer?
     if (buffer->current_line >= buffer->line_count)
     {
-        // printf("EOF!\n");
         buffer->error = PS_BUFFER_ERROR_EOF;
         return false;
     }
@@ -280,19 +291,12 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     }
     else
     {
-        // printf("NEXT: Line %d/%d\n", buffer->current_line, buffer->line_count);
-        // printf("NEXT: Col  %d/%d\n", buffer->current_column, buffer->line_lengths[buffer->current_line]);
         if (buffer->line_lengths[buffer->current_line] == 0)
             buffer->next_char = '\0';
         else
             buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
-        // printf("NEXT: End %s\n", ps_buffer_debug_char(buffer->next_char));
     }
-    if (buffer->debug > 0)
-        printf("ps_buffer_read_next_char: END   line=%05d col=%03d char=%s, next=%s\n",
-               buffer->current_line, buffer->current_column,
-               ps_buffer_debug_char(buffer->current_char),
-               ps_buffer_debug_char(buffer->next_char));
+    ps_buffer_debug(buffer, 0, "ps_buffer_read_next_char: END  ");
     return true;
 }
 

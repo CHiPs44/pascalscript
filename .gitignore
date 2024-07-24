@@ -60,3 +60,4 @@ GTAGS
 # Project
 pascalscript
 test/test_lexer
+tmp*

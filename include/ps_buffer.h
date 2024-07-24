@@ -25,7 +25,7 @@ extern "C"
 #define PS_BUFFER_MAX_COLUMNS 255
 #endif
 
-    typedef struct _ps_buffer
+    typedef struct s_ps_buffer
     {
         // clang-format off
         char       *text;
@@ -37,7 +37,8 @@ extern "C"
         uint8_t     current_column;
         char        current_char;
         char        next_char;
-        ps_error  error;
+        ps_error    error;
+        int         file_errno;
         uint8_t     debug; // 0=OFF, 1=debug, 2=verbose
         // clang-format on
     } ps_buffer;

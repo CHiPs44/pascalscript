@@ -16,22 +16,22 @@ extern "C"
 {
 #endif
 
-#ifndef MAX_SYMBOL_NAME
-#define MAX_SYMBOL_NAME 31
+#ifndef PS_SYMBOL_NAME_MAX
+#define PS_SYMBOL_NAME_MAX 31
 #endif
 
     typedef enum e_ps_symbol_type
     {
-        KIND_FREE = 0,
-        KIND_AUTO,
-        KIND_CONSTANT,
-        KIND_VARIABLE,
-        KIND_PROCEDURE,
-        KIND_FUNCTION,
-        KIND_TYPE,
-        KIND_POINTER,
-        KIND_SET,
-        KIND_RECORD,
+        SYMBOL_TYPE_FREE = 0,
+        SYMBOL_TYPE_AUTO,
+        SYMBOL_TYPE_CONSTANT,
+        SYMBOL_TYPE_VARIABLE,
+        SYMBOL_TYPE_PROCEDURE,
+        SYMBOL_TYPE_FUNCTION,
+        SYMBOL_TYPE_TYPE,
+        SYMBOL_TYPE_POINTER,
+        SYMBOL_TYPE_SET,
+        SYMBOL_TYPE_RECORD,
         // ...
     } __attribute__((__packed__)) ps_symbol_type;
 
@@ -40,9 +40,9 @@ extern "C"
     typedef uint8_t ps_scope;
     const ps_scope_max = UINT8_MAX;
 
-    typedef struct _ps_symbol
+    typedef struct s_ps_symbol
     {
-        char name[MAX_SYMBOL_NAME + 1];
+        char name[PS_SYMBOL_NAME_MAX + 1];
         ps_symbol_type type;
         ps_scope scope;
         ps_value value;

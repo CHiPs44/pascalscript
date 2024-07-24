@@ -22,7 +22,7 @@ extern "C"
 
 #define PS_SYMBOL_STACK_ERROR_OVERFLOW (-1)
 
-    typedef struct _ps_symbol_stack
+    typedef struct s_ps_symbol_stack
     {
         int sp;
         ps_symbol *symbols[PS_SYMBOL_STACK_SIZE];

@@ -174,7 +174,7 @@ extern "C"
         } value;
     } ps_token;
 
-    typedef struct _ps_keyword
+    typedef struct s_ps_keyword
     {
         ps_token_type token_type;
         char *keyword;

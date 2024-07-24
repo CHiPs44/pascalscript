@@ -25,7 +25,7 @@ int main(void)
     vm_init(vm);
     ps_symbol_table_dump(&vm->symbols, "Init");
     printf("TEST VM #03 BINARY: INIT OK\n");
-    ps_symbol symbol = {"I", KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};
+    ps_symbol symbol = {"I", SYMBOL_TYPE_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};
     result = vm_global_add(vm, &symbol);
     ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
     printf("TEST VM #03 BINARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);

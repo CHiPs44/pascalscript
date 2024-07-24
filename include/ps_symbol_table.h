@@ -23,7 +23,7 @@ extern "C"
 
     /* clang-format off */
 
-    typedef struct _ps_symbol_table
+    typedef struct s_ps_symbol_table
     {
         int         count;
         ps_symbol symbols[PS_SYMBOL_TABLE_SIZE];

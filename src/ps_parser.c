@@ -23,7 +23,7 @@ bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
 {
     if (parser->lexer.current_token.type != token_type)
     {
-        parser->error = PS_PARSER_ERROR_UNEXPECTED;
+        parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
         return false;
     }
     return true;
@@ -41,7 +41,7 @@ bool ps_parser_start(ps_parser *parser)
     {
         return false;
     }
-    program.kind = KIND_CONSTANT;
+    program.type = SYMBOL_TYPE_CONSTANT;
     strcpy(program.name, "PROGRAM");
     program.value.size = 0;
     program.value.type = PS_TYPE_STRING;

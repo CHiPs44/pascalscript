@@ -53,11 +53,11 @@ extern "C"
 
     typedef struct s_ps_value
     {
-        // clang-format off
+        /* clang-format off */
         ps_type type;
         size_t  size;
         ps_data data;
-        // clang-format on
+        /* clang-format on */
     } ps_value;
 
     // clang-format off

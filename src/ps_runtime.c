@@ -145,7 +145,7 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     }
 }
 
-/** @brief Get previous value of ordinal value */
+/** @brief Get previous value (predecessor) of ordinal value */
 ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
 {
     ps_value *result = ps_runtime_alloc_value(runtime);
@@ -155,12 +155,69 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
+        if (value->data.u == 0)
+        {
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
         result->data.u = value->data.u - 1;
         return result;
     // case PS_TYPE_ENUM:
     //   TODO needs low()
     case PS_TYPE_INTEGER:
+        if (value->data.u == ps_integer_min)
+        {
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
         result->data.u = value->data.u - 1;
+        return result;
+    // case PS_TYPE_SUBRANGE:
+    //   TODO needs low()
+    case PS_TYPE_BOOLEAN:
+        // pred(true) => false / pred(false) => error
+        if (value->data.b == false)
+        {
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.b = false;
+        return result;
+    case PS_TYPE_CHAR:
+        if (value->data.c == 0)
+        {
+            free(result);
+            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.c = value->data.c - 1;
+        return result;
+    default:
+        free(result);
+        runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        return NULL;
+    }
+}
+
+/** @brief Get next value (successor) of ordinal value */
+ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
+{
+    ps_value *result = ps_runtime_alloc_value(runtime);
+    if (result == NULL)
+        return NULL;
+    memcpy(result, value, sizeof(ps_value));
+    switch (value->type)
+    {
+    case PS_TYPE_UNSIGNED:
+        result->data.u = value->data.u + 1;
+        return result;
+    // case PS_TYPE_ENUM:
+    //   TODO needs high()
+    case PS_TYPE_INTEGER:
+        result->data.u = value->data.u + 1;
         return result;
     case PS_TYPE_SUBRANGE:
     case PS_TYPE_BOOLEAN:
@@ -182,5 +239,4 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     }
 }
 
-// ps_runtime_func_succ
 // ps_runtime_func_sizeof?

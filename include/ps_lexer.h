@@ -22,7 +22,7 @@ extern "C"
     /**
      * @brief Lexer state
      */
-    typedef struct _ps_lexer
+    typedef struct s_ps_lexer
     {
         // clang-format off
         ps_buffer buffer;

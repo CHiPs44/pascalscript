@@ -42,10 +42,6 @@ char *ps_error_get_message(ps_error error)
         return "Unexpected character";
     case PS_LEXER_ERROR_UNEXPECTED_EOF:
         return "Unexpected end of file";
-    case PS_LEXER_ERROR_EXPECTED_TOKEN:
-        return "Expected token";
-    case PS_LEXER_ERROR_UNEXPECTED_TOKEN:
-        return "Unexpected token";
     case PS_LEXER_ERROR_IDENTIFIER_TOO_LONG:
         return "Identifier too long";
     case PS_LEXER_ERROR_OVERFLOW:
@@ -59,7 +55,7 @@ char *ps_error_get_message(ps_error error)
         return "None";
     case PS_PARSER_ERROR_SYNTAX:
         return "Syntax";
-    case PS_PARSER_ERROR_UNEXPECTED:
+    case PS_PARSER_ERROR_UNEXPECTED_TOKEN:
         return "Unexpected";
     case PS_PARSER_ERROR_UNKOWN_IDENTIFIER:
         return "Unknown identifier";
@@ -104,6 +100,8 @@ char *ps_error_get_message(ps_error error)
         return "Type mismatch";
     case PS_RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
+    case PS_RUNTIME_ERROR_OUT_OF_RANGE:
+        return "Out of range";
     }
     return "Unknown";
 }
@@ -112,8 +110,7 @@ void ps_error_printf(ps_error error, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    char *message = ps_error_get_message(error);
-    fprintf(stderr, "ERROR: %s ", message);
+    fprintf(stderr, "ERROR: %s ", ps_error_get_message(error));
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");
     va_end(args);
