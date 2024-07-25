@@ -82,12 +82,15 @@ extern "C"
 
 #ifndef PS_CHAR
 #define PS_CHAR unsigned char
+#define PS_CHAR_MAX 255
 #endif
 
 #ifndef PS_STRING_MAX
 // "Short" strings
 #define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX UINT8_MAX
+/*#define PS_STRING_NUM uint16_t
+#define PS_STRING_NUM_MAX UINT16_MAX*/
 // "Wide" strings
 // #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX UINT16_MAX

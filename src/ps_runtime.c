@@ -13,12 +13,12 @@
 
 ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
 {
-    if (runtime->errno != PS_RUNTIME_ERROR_NONE)
+    if (runtime->error != PS_RUNTIME_ERROR_NONE)
         return NULL;
     ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
     if (value == NULL)
     {
-        runtime->errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+        runtime->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
         return NULL;
     }
     return value;
@@ -49,7 +49,7 @@ ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value)
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+        runtime->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
         return NULL;
     }
 }
@@ -72,7 +72,7 @@ ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value)
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
+        runtime->error = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
         return NULL;
     }
 }
@@ -103,20 +103,20 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
         memcpy(result, value, sizeof(ps_value));
         return result;
     case PS_TYPE_BOOLEAN:
+        // ord(true) => 1 / ord(false) => 0
         result->type = PS_TYPE_UNSIGNED;
         result->size = sizeof(ps_unsigned);
-        // ord(true) => 1 / ord(false) => 0
         result->data.u = value->data.b ? 1u : 0u;
         return result;
     case PS_TYPE_CHAR:
+        // ord('0') => 48 / ord('A') => 65 / ...
         result->type = PS_TYPE_UNSIGNED;
         result->size = sizeof(ps_unsigned);
-        // ord('0') => 48 / ord('A') => 65 / ...
         result->data.u = (ps_unsigned)(value->data.c);
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return NULL;
     }
 }
@@ -132,15 +132,16 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
-        result->data.c = (ps_unsigned)(value->data.u);
+    case PS_TYPE_ENUM:
+        result->data.c = (ps_char)(value->data.u);
         return result;
     case PS_TYPE_INTEGER:
     case PS_TYPE_SUBRANGE:
-        result->data.c = (ps_integer)(value->data.i);
+        result->data.c = (ps_char)(value->data.i);
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return NULL;
     }
 }
@@ -155,10 +156,11 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
+        // succ(0) => error / succ(u) => u - 1
         if (value->data.u == 0)
         {
             free(result);
-            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return NULL;
         }
         result->data.u = value->data.u - 1;
@@ -166,38 +168,40 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     // case PS_TYPE_ENUM:
     //   TODO needs low()
     case PS_TYPE_INTEGER:
+        // succ(min) => error / succ(i) => i - 1
         if (value->data.u == ps_integer_min)
         {
             free(result);
-            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return NULL;
         }
-        result->data.u = value->data.u - 1;
+        result->data.i = value->data.i - 1;
         return result;
     // case PS_TYPE_SUBRANGE:
     //   TODO needs low()
     case PS_TYPE_BOOLEAN:
-        // pred(true) => false / pred(false) => error
+        // succ(true) => false / succ(false) => error
         if (value->data.b == false)
         {
             free(result);
-            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return NULL;
         }
         result->data.b = false;
         return result;
     case PS_TYPE_CHAR:
+        // succ(NUL) => error / succ(c) => c - 1
         if (value->data.c == 0)
         {
             free(result);
-            runtime->errno = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return NULL;
         }
         result->data.c = value->data.c - 1;
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return NULL;
     }
 }
@@ -212,31 +216,55 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
+        // succ(max) => error / succ(u) => u + 1
+        if (value->data.u == ps_unsigned_max)
+        {
+            free(result);
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
         result->data.u = value->data.u + 1;
         return result;
     // case PS_TYPE_ENUM:
     //   TODO needs high()
     case PS_TYPE_INTEGER:
-        result->data.u = value->data.u + 1;
+        // succ(max) => error / succ(i) => i + 1
+        if (value->data.u == ps_integer_max)
+        {
+            free(result);
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.i = value->data.i + 1;
         return result;
-    case PS_TYPE_SUBRANGE:
+    // case PS_TYPE_SUBRANGE:
+    //   TODO needs high()
     case PS_TYPE_BOOLEAN:
-        result->type = PS_TYPE_UNSIGNED;
-        result->size = sizeof(ps_unsigned);
-        // ord(true) => 1 / ord(false) => 0
-        result->data.u = value->data.b ? 1u : 0u;
+        // succ(true) => error / succ(false) => true
+        if (value->data.b == true)
+        {
+            free(result);
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.b = true;
         return result;
     case PS_TYPE_CHAR:
-        result->type = PS_TYPE_UNSIGNED;
-        result->size = sizeof(ps_unsigned);
-        // ord('0') => 48 / ord('A') => 65 / ...
-        result->data.u = (ps_unsigned)(value->data.c);
+        // succ(char_max) => error / succ(c) => c + 1
+        if (value->data.c == ps_char_max)
+        {
+            free(result);
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.c = value->data.c + 1;
         return result;
     default:
         free(result);
-        runtime->errno = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return NULL;
     }
 }
 
 // ps_runtime_func_sizeof?
+

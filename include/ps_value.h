@@ -41,13 +41,13 @@ extern "C"
     typedef union u_ps_data
     {
         // clang-format off
-        ps_integer    i;
-        ps_unsigned   u;
-        ps_real       r;
-        ps_boolean    b;
-        ps_char       c;
-        ps_pointer    p;
-        ps_string_ptr s;
+        ps_integer  i;
+        ps_unsigned u;
+        ps_real     r;
+        ps_boolean  b;
+        ps_char     c;
+        ps_pointer  p;
+        ps_string   s;
         // clang-format on
     } ps_data;
 

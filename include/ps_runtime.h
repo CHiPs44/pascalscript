@@ -21,7 +21,8 @@ extern "C"
 
     typedef struct s_ps_runtime
     {
-        ps_error errno;
+        ps_error error;
+        bool range_check;
     } ps_runtime;
 
     ps_value *ps_runtime_alloc_value(ps_runtime *runtime);

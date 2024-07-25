@@ -45,8 +45,12 @@ bool ps_parser_start(ps_parser *parser)
     strcpy(program.name, "PROGRAM");
     program.value.size = 0;
     program.value.type = PS_TYPE_STRING;
-    program.value.data.s.len = strlen(parser->lexer.current_token.value.s);
-    strcpy(program.value.data.s.str, parser->lexer.current_token.value.s);
+    program.value.data.s = calloc(1, sizeof(ps_string));
+    size_t len = strlen(parser->lexer.current_token.value.s);
+    program.value.data.s->max = len;
+    program.value.data.s->len = len;
+    program.value.data.s->str = calloc(len+1,sizeof(ps_char));
+    strcpy(program.value.data.s->str, parser->lexer.current_token.value.s);
     ps_symbol_table_add(&vm->symbols, &program);
 
     return true;

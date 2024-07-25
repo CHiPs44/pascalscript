@@ -20,14 +20,14 @@ extern "C"
 {
 #endif
 
-    typedef enum
+    typedef enum e_ps_vm_opcode
     {
-        OP_NOP = 0x00,
-        OP_PUSH,
-        OP_POP,
-        OP_CALL,
-        OP_RETURN,
-        OP_SYS,
+        OP_NOP = 0x00, // do nothing
+        OP_PUSH,       // push value to stack
+        OP_POP,        // pop value from stack
+        OP_CALL,       // call procedure or function
+        OP_RETURN,     // return from procedure or function
+        OP_SYS,        // system call
         // Test operators => boolean
         OP_TEST_EQ, // "="
         OP_TEST_NE, // "<>"
@@ -42,11 +42,11 @@ extern "C"
         // Unary operators
         OP_NEG,
         // Binary operators
-        OP_ADD,
-        OP_SUB,
-        OP_MUL,
-        OP_DIV, // "div"
-        OP_MOD,
+        OP_ADD,      // +
+        OP_SUB,      // -
+        OP_MUL,      // *
+        OP_DIV,      // "div"
+        OP_MOD,      // %
         OP_REAL_DIV, // "/"
         // Bit operators
         OP_BIT_NOT,
@@ -60,9 +60,9 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
-    } ps_vm_opcode;
+    } __attribute__((__packed__)) ps_vm_opcode;
 
-    typedef enum
+    typedef enum e_ps_vm_sys_command
     {
         SYS_FILE_OPEN,
         SYS_FILE_CLOSE,
@@ -72,23 +72,9 @@ extern "C"
         SYS_FILE_GET_BYTE,
         SYS_FILE_PUT_BYTES,
         SYS_FILE_GET_BYTES,
-    } ps_vm_sys_command;
+    } __attribute__((__packed__)) ps_vm_sys_command;
 
-    typedef struct _vm_instruction
-    {
-        uint8_t opcode : 8;
-        uint8_t param1_type : 3;
-        uint8_t result_type : 3;
-    } ps_vm_instruction;
-
-    typedef enum
-    {
-        OP_FLAG_ZERO,
-        // OP_FLAG_,
-        // ???
-    } ps_vm_flags;
-
-    typedef struct _vm_t
+    typedef struct s_ps_vm_t
     {
         // ps_parser parser;
         ps_symbol_table symbols;

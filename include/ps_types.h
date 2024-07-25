@@ -31,17 +31,19 @@ extern "C"
     typedef PS_BOOLEAN ps_boolean;
 
     typedef PS_CHAR ps_char;
+    const ps_char ps_char_max = PS_CHAR_MAX;
 
     typedef PS_STRING_LEN_TYPE ps_string_len;
     const ps_string_len ps_string_max = PS_STRING_MAX;
 
+    typedef PS_STRING_NUM ps_string_num;
     typedef struct s_ps_string
     {
         ps_string_len max;
         ps_string_len len;
-        ps_char *str;
+        // ps_char *str;
+        ps_string_num num;
     } ps_string;
-    typedef ps_string *ps_string_ptr;
 
     typedef void *ps_pointer;
 
