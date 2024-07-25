@@ -80,7 +80,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     if (a == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
-    if (a->kind == SYMBOL_TYPE_AUTO)
+    if (a->kind == PS_SYMBOL_TYPE_AUTO)
         vm_auto_free(vm, a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
@@ -131,13 +131,13 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
     if (b == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
-    if (b->kind == SYMBOL_TYPE_AUTO)
+    if (b->kind == PS_SYMBOL_TYPE_AUTO)
         vm_auto_free(vm, b->name);
     ps_symbol *a = vm_stack_pop(vm);
     if (a == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
-    if (a->kind == SYMBOL_TYPE_AUTO)
+    if (a->kind == PS_SYMBOL_TYPE_AUTO)
         vm_auto_free(vm, a->name);
     if (op == OP_ADD || op == OP_SUB ||
         op == OP_MUL || op == OP_DIV ||

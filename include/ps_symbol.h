@@ -7,7 +7,7 @@
 #ifndef _PS_SYMBOL_H
 #define _PS_SYMBOL_H
 
-#include "ps_config.h"
+#include "ps_types.h"
 #include "ps_error.h"
 #include "ps_value.h"
 
@@ -16,22 +16,18 @@ extern "C"
 {
 #endif
 
-#ifndef PS_SYMBOL_NAME_MAX
-#define PS_SYMBOL_NAME_MAX 31
-#endif
-
     typedef enum e_ps_symbol_type
     {
-        SYMBOL_TYPE_FREE = 0,
-        SYMBOL_TYPE_AUTO,
-        SYMBOL_TYPE_CONSTANT,
-        SYMBOL_TYPE_VARIABLE,
-        SYMBOL_TYPE_PROCEDURE,
-        SYMBOL_TYPE_FUNCTION,
-        SYMBOL_TYPE_TYPE,
-        SYMBOL_TYPE_POINTER,
-        SYMBOL_TYPE_SET,
-        SYMBOL_TYPE_RECORD,
+        PS_SYMBOL_TYPE_FREE = 0,
+        PS_SYMBOL_TYPE_AUTO,
+        PS_SYMBOL_TYPE_CONSTANT,
+        PS_SYMBOL_TYPE_VARIABLE,
+        PS_SYMBOL_TYPE_PROCEDURE,
+        PS_SYMBOL_TYPE_FUNCTION,
+        PS_SYMBOL_TYPE_TYPE,
+        PS_SYMBOL_TYPE_POINTER,
+        PS_SYMBOL_TYPE_SET,
+        PS_SYMBOL_TYPE_RECORD,
         // ...
     } __attribute__((__packed__)) ps_symbol_type;
 
@@ -42,9 +38,9 @@ extern "C"
 
     typedef struct s_ps_symbol
     {
-        char name[PS_SYMBOL_NAME_MAX + 1];
         ps_symbol_type type;
         ps_scope scope;
+        char name[PS_IDENTIFIER_MAX + 1];
         ps_value value;
     } ps_symbol;
 

@@ -16,11 +16,11 @@
 #include "../src/ps_symbol_stack.c"
 
 ps_symbol_stack stack;
-ps_symbol constant1 = {.name = "CONSTANT1", .kind = SYMBOL_TYPE_CONSTANT};
-ps_symbol variable2 = {.name = "VARIABLE2", .kind = SYMBOL_TYPE_VARIABLE};
-ps_symbol constant3 = {.name = "CONSTANT3", .kind = SYMBOL_TYPE_CONSTANT};
-ps_symbol constant4 = {.name = "CONSTANT4", .kind = SYMBOL_TYPE_CONSTANT};
-ps_symbol constant5 = {.name = "CONSTANT5", .kind = SYMBOL_TYPE_CONSTANT};
+ps_symbol constant1 = {.name = "CONSTANT1", .kind = PS_SYMBOL_TYPE_CONSTANT};
+ps_symbol variable2 = {.name = "VARIABLE2", .kind = PS_SYMBOL_TYPE_VARIABLE};
+ps_symbol constant3 = {.name = "CONSTANT3", .kind = PS_SYMBOL_TYPE_CONSTANT};
+ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_TYPE_CONSTANT};
+ps_symbol constant5 = {.name = "CONSTANT5", .kind = PS_SYMBOL_TYPE_CONSTANT};
 
 int main(void)
 {

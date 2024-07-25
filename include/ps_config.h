@@ -17,6 +17,10 @@ extern "C"
 {
 #endif
 
+#ifndef PS_IDENTIFIER_MAX
+#define PS_IDENTIFIER_MAX 31
+#endif
+
     /*
         NB: 32 bits by default, as our far target is RP2040 which has ARM M0+ cores
     */
@@ -77,7 +81,7 @@ extern "C"
 #endif
 
 #ifndef PS_CHAR
-#define PS_CHAR char
+#define PS_CHAR unsigned char
 #endif
 
 #ifndef PS_STRING_MAX
@@ -87,6 +91,9 @@ extern "C"
 // "Wide" strings
 // #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX UINT16_MAX
+// "Ultra-wide" strings
+// #define PS_STRING_LEN_TYPE uint32_t
+// #define PS_STRING_MAX UINT32_MAX
 #endif
 
 #ifndef PS_STRING_LEN_TYPE

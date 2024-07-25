@@ -25,7 +25,7 @@ void ps_symbol_table_init(ps_symbol_table *table)
     table->count = 0;
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
-        table->symbols[i].kind = SYMBOL_TYPE_FREE;
+        table->symbols[i].kind = PS_SYMBOL_TYPE_FREE;
     }
 }
 
@@ -38,7 +38,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
-        if (table->symbols[i].kind != SYMBOL_TYPE_FREE)
+        if (table->symbols[i].kind != PS_SYMBOL_TYPE_FREE)
         {
             symbol = &table->symbols[i];
             char *kind_name = ps_symbol_get_type_name(symbol->kind);
@@ -46,7 +46,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, PS_SYMBOL_NAME_MAX, symbol->name, kind_name, scope_name, type_name, symbol->value.size, PS_SYMBOL_NAME_MAX, buffer);
+                    i, PS_IDENTIFIER_MAX, symbol->name, kind_name, scope_name, type_name, symbol->value.size, PS_IDENTIFIER_MAX, buffer);
         }
     }
     fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
@@ -112,20 +112,20 @@ int ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     }
     // Find first free location
     index = 0;
-    while (table->symbols[index].kind != SYMBOL_TYPE_FREE)
+    while (table->symbols[index].kind != PS_SYMBOL_TYPE_FREE)
     {
         index += 1;
     }
-    if (symbol->kind == SYMBOL_TYPE_AUTO)
+    if (symbol->kind == PS_SYMBOL_TYPE_AUTO)
     {
         snprintf(table->symbols[index].name,
-                 PS_SYMBOL_NAME_MAX,
+                 PS_IDENTIFIER_MAX,
                  "#PS_AUTO_%04x",
                  index);
     }
     else
     {
-        strncpy(table->symbols[index].name, symbol->name, PS_SYMBOL_NAME_MAX);
+        strncpy(table->symbols[index].name, symbol->name, PS_IDENTIFIER_MAX);
     }
     table->symbols[index].kind = symbol->kind;
     table->symbols[index].value.type = symbol->value.type;
@@ -156,7 +156,7 @@ int ps_symbol_table_delete(ps_symbol_table *table, char *name)
     int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
-        table->symbols[index].kind = SYMBOL_TYPE_FREE;
+        table->symbols[index].kind = PS_SYMBOL_TYPE_FREE;
         table->count -= 1;
     }
     return index;
@@ -174,7 +174,7 @@ int ps_symbol_table_free(ps_symbol_table *table, char *name)
     int index = ps_symbol_table_find(table, name);
     if (index >= 0)
     {
-        table->symbols[index].kind = SYMBOL_TYPE_FREE;
+        table->symbols[index].kind = PS_SYMBOL_TYPE_FREE;
     }
     return index;
 }
@@ -192,9 +192,9 @@ int ps_symbol_table_gc(ps_symbol_table *table)
     int count = 0;
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
-        if (table->symbols[i].kind == SYMBOL_TYPE_FREE)
+        if (table->symbols[i].kind == PS_SYMBOL_TYPE_FREE)
         {
-            table->symbols[i].kind = SYMBOL_TYPE_FREE;
+            table->symbols[i].kind = PS_SYMBOL_TYPE_FREE;
             table->count -= 1;
             count += 1;
         }

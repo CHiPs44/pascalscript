@@ -18,7 +18,7 @@ const char *ps_symbol_kind_names[] = {
 char *ps_symbol_get_type_name(ps_symbol_type kind)
 {
     static char kind_name[16];
-    if (kind >= SYMBOL_TYPE_FREE && kind <= SYMBOL_TYPE_RECORD)
+    if (kind >= PS_SYMBOL_TYPE_FREE && kind <= PS_SYMBOL_TYPE_RECORD)
         return ps_symbol_kind_names[kind];
     snprintf(kind_name, 15, "? Unknown %d ?", kind);
     return kind_name;
@@ -38,9 +38,10 @@ char *ps_symbol_dump(ps_symbol *symbol)
 {
     static char buffer[512];
     snprintf(buffer, sizeof(buffer) - 1,
-             "SYMBOL: name=%-32s, kind=%-16s, scope=%-8s, type=%-16s, size=%ld, value=%s",
+             "SYMBOL: name=%-*s, kind=%-16s, scope=%-8s, type=%-16s, size=%ld, value=%s",
+             PS_IDENTIFIER_MAX + 1,
              symbol->name,
-             ps_symbol_get_type_name(symbol->kind),
+             ps_symbol_get_type_name(symbol->type),
              symbol_get_scope_name(symbol->scope),
              ps_value_get_type_name(symbol->value.type),
              symbol->value.size,
@@ -70,7 +71,7 @@ ps_symbol_key_hash ps_symbol_get_hash_key(ps_symbol *symbol)
     char *name = symbol->name;
     while (*name)
     {
-        // 33 * x => x << 5 + x
+        // 33 * x => 32 * x + x => x << 5 + x
         hash = (hash << 5) + hash + *name;
     }
     return hash;

@@ -52,8 +52,7 @@ extern "C"
         char **symbols;
     } ps_enum_type;*/
 
-    /*
-    typedef struct s_ps_file
+    /*typedef struct s_ps_file
     {
         bool is_text;
         FILE *handle;
