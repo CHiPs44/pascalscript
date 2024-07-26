@@ -35,6 +35,8 @@
         "ps_string_heap.h": "c",
         "stdio.h": "c",
         "ctype.h": "c",
-        "ps_string.h": "c"
+        "ps_string.h": "c",
+        "cerrno": "c",
+        "errno.h": "c"
     }
 }

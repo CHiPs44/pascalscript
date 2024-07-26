@@ -37,6 +37,8 @@ extern "C"
     const ps_string_len ps_string_max = PS_STRING_MAX;
 
     // typedef PS_STRING_NUM ps_string_num;
+
+    // will be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
     typedef struct s_ps_string
     {
         ps_string_len max;

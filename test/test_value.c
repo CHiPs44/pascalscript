@@ -10,6 +10,7 @@
 #include "../include/ps_value.h"
 
 #include "../src/ps_value.c"
+
 int main(void)
 {
     ps_value value;

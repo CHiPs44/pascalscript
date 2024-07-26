@@ -81,7 +81,8 @@ extern "C"
 #endif
 
 #ifndef PS_CHAR
-#define PS_CHAR unsigned char
+// #define PS_CHAR unsigned char
+#define PS_CHAR char
 #define PS_CHAR_MAX 255
 #endif
 
