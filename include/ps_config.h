@@ -77,7 +77,7 @@ extern "C"
 #define PS_REAL_MAX FLT_MAX
 // #define PS_REAL double
 // #define PS_REAL_MIN DBL_MIN
-// #define PS_REAL_MAX DBL_MAX
+// #define PS_REAL_MAX DBL_MA
 #endif
 
 #ifndef PS_CHAR
@@ -89,8 +89,6 @@ extern "C"
 // "Short" strings
 #define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX UINT8_MAX
-/*#define PS_STRING_NUM uint16_t
-#define PS_STRING_NUM_MAX UINT16_MAX*/
 // "Wide" strings
 // #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX UINT16_MAX
@@ -102,6 +100,9 @@ extern "C"
 #ifndef PS_STRING_LEN_TYPE
 #error PS_STRING_LEN_TYPE must be defined.
 #endif
+
+// #define PS_STRING_NUM uint16_t
+// #define PS_STRING_NUM_MAX UINT16_MAX
 
 #ifdef __cplusplus
 }
