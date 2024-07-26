@@ -14,8 +14,12 @@ extern "C"
 {
 #endif
 
-    ps_string *ps_string_new(ps_string_len max, ps_char *str);
+    ps_string *ps_string_new(ps_string_len max);
     void ps_string_free(ps_string *str);
+    bool ps_string_set(ps_string *ptr, ps_char *zstr);
+    // bool ps_string_copy(ps_string *ptr, ps_char *zstr);
+    ps_string *ps_string_concat(ps_string *a, ps_string *b);
+    ps_string *ps_string_get_slice(ps_string *a, ps_string_len from, ps_string_len to);
 
 #ifdef __cplusplus
 }
