@@ -59,5 +59,5 @@ GTAGS
 
 # Project
 pascalscript
-test/test_lexer
+test/test_value
 tmp*

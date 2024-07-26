@@ -32,7 +32,7 @@ extern "C"
         PS_TYPE_SET,      // future => unsigned value as a bit field
         PS_TYPE_POINTER,  // future
         /* reference types (pointer to value(s)) */
-        PS_TYPE_STRING, // TODO
+        PS_TYPE_STRING, // 
         PS_TYPE_ARRAY,  // future
         PS_TYPE_RECORD, // future
         PS_TYPE_FILE,   // future
@@ -41,13 +41,13 @@ extern "C"
     typedef union u_ps_data
     {
         // clang-format off
-        ps_integer  i;
-        ps_unsigned u;
-        ps_real     r;
-        ps_boolean  b;
-        ps_char     c;
-        ps_pointer  p;
-        ps_string   s;
+        ps_integer   i;
+        ps_unsigned  u;
+        ps_real      r;
+        ps_boolean   b;
+        ps_char      c;
+        ps_pointer   p;
+        ps_string   *s;
         // clang-format on
     } ps_data;
 

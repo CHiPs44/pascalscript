@@ -27,22 +27,32 @@ static ps_error ps_value_errno = PS_ERROR_ZERO;
     else if (value->type != PS_TYPE_X)                       \
         return NULL;                                         \
     value->data.x = x;                                       \
-    return value;
+    return value
 
-ps_value *ps_value_set_integer(ps_value *value, ps_integer i){
-    PS_VALUE_SET_XXX(PS_TYPE_INTEGER, ps_integer, i)}
+ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_INTEGER, ps_integer, i);
+}
 
-ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u){
-    PS_VALUE_SET_XXX(PS_TYPE_UNSIGNED, ps_unsigned, u)}
+ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_UNSIGNED, ps_unsigned, u);
+}
 
-ps_value *ps_value_set_real(ps_value *value, ps_real r){
-    PS_VALUE_SET_XXX(PS_TYPE_REAL, ps_real, r)}
+ps_value *ps_value_set_real(ps_value *value, ps_real r)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_REAL, ps_real, r);
+}
 
-ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b){
-    PS_VALUE_SET_XXX(PS_TYPE_BOOLEAN, ps_boolean, b)}
+ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_BOOLEAN, ps_boolean, b);
+}
 
-ps_value *ps_value_set_char(ps_value *value, ps_char c){
-    PS_VALUE_SET_XXX(PS_TYPE_CHAR, ps_char, c)}
+ps_value *ps_value_set_char(ps_value *value, ps_char c)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_CHAR, ps_char, c);
+}
 
 ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
 {
@@ -90,15 +100,19 @@ ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
     */
 }
 
-ps_value *ps_value_set_pointer(ps_value *value, void *p){
-    PS_VALUE_SET_XXX(PS_TYPE_POINTER, ps_pointer, p)}
+ps_value *ps_value_set_pointer(ps_value *value, void *p)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_POINTER, ps_pointer, p);
+}
 
-ps_value *ps_value_set_enum(ps_value *value, ps_unsigned u){
-    PS_VALUE_SET_XXX(PS_TYPE_ENUM, ps_unsigned, u)}
+ps_value *ps_value_set_enum(ps_value *value, ps_unsigned u)
+{
+    PS_VALUE_SET_XXX(PS_TYPE_ENUM, ps_unsigned, u);
+}
 
 ps_value *ps_value_set_subrange(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_SUBRANGE, ps_pointer, i)
+    PS_VALUE_SET_XXX(PS_TYPE_SUBRANGE, ps_integer, i);
 }
 
 const struct s_ps_type_name
@@ -172,10 +186,11 @@ char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
     snprintf(buffer, sizeof(buffer) - 1,
-             "VALUE: type=%s, size=%ld, value=%s",
-             ps_value_get_type_name(value->type),
+             "VALUE: type=%d/%s, size=%ld, value=%s",
+             value->type, ps_value_get_type_name(value->type),
              value->size,
              ps_value_get_value(value));
+    return buffer;
 }
 
 void ps_value_debug(ps_value *value)

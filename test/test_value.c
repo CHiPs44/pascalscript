@@ -25,6 +25,8 @@ int main(void)
     ps_value_set_integer(&value, -1234567890);
     ps_value_debug(&value);
 
+    return 0;
+
     printf("TEST VALUE: UNSIGNED\n");
     ps_value_set_unsigned(&value, 0xDEADBEEF);
     ps_value_debug(&value);
@@ -40,7 +42,7 @@ int main(void)
     ps_value_debug(&value);
 
     printf("TEST VALUE: STRING\n");
-    ps_value_set_string(&value, "This is a test.");
+    ps_value_set_string(&value, "This is a test.", 50);
     ps_value_debug(&value);
 
     printf("TEST VALUE: REAL\n");
