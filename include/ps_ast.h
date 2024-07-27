@@ -30,12 +30,12 @@ extern "C"
         PS_AST_VALUE,
     } ps_ast_node_kind;
 
-    typedef struct ps_ast_node
+    typedef struct s_ps_ast_node
     {
         ps_ast_node_kind kind;
     } ps_ast_node;
 
-    ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind);
+    ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind, size_t count);
 
     typedef struct ps_ast_node_program
     {

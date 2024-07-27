@@ -1,10 +1,24 @@
+/*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 /* ******************** PascalScript ANTLR4 ******************** */
 
 // npm i -g --save-dev antlr-format-cli
 //  antlr-format -v pascalscript_parser.g4
-// $antlr-format alignTrailingComments true, columnLimit 150, minEmptyLines 1, maxEmptyLinesToKeep 1, reflowComments false, useTab false
-// $antlr-format allowShortRulesOnASingleLine false, allowShortBlocksOnASingleLine true, alignSemicolons hanging, alignColons hanging
 
+// $antlr-format alignTrailingComments true
+// $antlr-format columnLimit 150
+// $antlr-format minEmptyLines 1
+// $antlr-format maxEmptyLinesToKeep 1
+// $antlr-format reflowComments false
+// $antlr-format useTab false
+// $antlr-format allowShortRulesOnASingleLine true
+// $antlr-format allowShortBlocksOnASingleLine true
+// $antlr-format alignSemicolons ownLine
+// $antlr-format alignColons hanging
 grammar pascalscript_parser;
 
 options {
@@ -18,13 +32,13 @@ options {
 pascalFile
     : pascalProgram
     // | pascalUnit
-    ;
+;
 
 pascalProgram
     : PROGRAM IDENTIFIER SEMI_COLON
     //   usesBlock?
     pascalHeader instructionBlock DOT EOF
-    ;
+;
 
 /* NB: units disabled for now
 pascalUnit
@@ -61,20 +75,17 @@ finalizationBlock
     | (instruction | instructionBlock SEMI_COLON)
     ;
 */
-pascalHeader
-    : pascalBlock*
-    ;
+
+pascalHeader: pascalBlock*;
 
 pascalBlock
     : constBlock
     // | typeBlock
     | varBlock
     // | procedureFunctionBlock
-    ;
+;
 
-instructionBlock
-    : BEGIN (instruction)* END
-    ;
+instructionBlock: BEGIN (instruction)* END;
 
 instruction
     : assignment
@@ -83,11 +94,9 @@ instruction
     // | whileBlock
     // | forBlock
     | procedureCall
-    ;
+;
 
-assignment
-    : variableReference DOT_COLON expression SEMI_COLON
-    ;
+assignment: variableReference DOT_COLON expression SEMI_COLON;
 
 // ifBlock
 //     :  IF expression THEN
@@ -106,20 +115,14 @@ assignment
 //     ;
 procedureCall
     : ( /*IDENTIFIER | */ WRITE | WRITELN) (LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS)? SEMI_COLON
-    ;
+;
 
 // functionCall
 //     : IDENTIFIER ( LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS )?
 //     ;
-parameterList
-    : parameter (COMMA parameter)*
-    ;
+parameterList: parameter (COMMA parameter)*;
 
-parameter
-    : expression
-    | variableReference
-    | constantReference
-    ;
+parameter: expression | variableReference | constantReference;
 
 /* ******************** LABELS & GOTO ******************** */
 
@@ -154,14 +157,11 @@ gotoBlock
         HelloWorld = 'Hello, world!';
 */
 
-constBlock
-    : CONST constantDeclaration+
-    ;
+constBlock: CONST constantDeclaration+;
 
 constantDeclaration
-    // : IDENTIFIER EQUAL constantValue SEMI_COLON
     : IDENTIFIER EQUAL expression SEMI_COLON
-    ;
+; // : IDENTIFIER EQUAL constantValue SEMI_COLON
 
 /*
 constantValue
@@ -195,7 +195,7 @@ typeReference
     // | stringType
     // : IDENTIFIER
     // | typeDefinition
-    ;
+;
 
 /*
 typeDefinition
@@ -206,6 +206,7 @@ typeDefinition
     // | recordType
     ;
 */
+
 scalarType
     : INTEGER
     | CARDINAL
@@ -213,7 +214,7 @@ scalarType
     | CHAR
     // | enumType
     // | subrangeType
-    ;
+;
 
 /*
 enumType
@@ -227,15 +228,19 @@ subrangeLimit
     | SIGN? IDENTIFIER
     ;
 */
+
 /*
 stringSize
     : UNSIGNED_INTEGER | IDENTIFIER
     ;
 */
-// stringType
-//     : STRING
-//     // | STRING ( LEFT_BRACKET stringSize RIGHT_BRACKET )?
-//     ;
+
+/*
+stringType
+     : STRING
+     // | STRING ( LEFT_BRACKET stringSize RIGHT_BRACKET )?
+     ;
+*/
 
 /* ******************** ARRAYS ******************** */
 
@@ -250,6 +255,11 @@ arrayLimit
     : scalarType
     | IDENTIFIER
     ;
+*/
+
+/* ******************** RECORDS ******************** */
+
+/*
 recordType
     : RECORD ( identifierList COLON typeDefinition SEMI_COLON )* END
     ;
@@ -257,17 +267,11 @@ recordType
 
 /* ******************** VARIABLES ******************** */
 
-varBlock
-    : VAR variableDeclaration+
-    ;
+varBlock: VAR variableDeclaration+;
 
-variableDeclaration
-    : identifierList COLON typeReference SEMI_COLON
-    ;
+variableDeclaration: identifierList COLON typeReference SEMI_COLON;
 
-identifierList
-    : IDENTIFIER (COMMA IDENTIFIER)*
-    ;
+identifierList: IDENTIFIER (COMMA IDENTIFIER)*;
 
 /* ******************** PROCEDURES & FUNCTIONS ******************** */
 
@@ -318,13 +322,9 @@ expression
     // | functionCall
     // | unaryOperator expression
     | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
-    ;
+;
 
-unaryOperator
-    : PLUS
-    | MINUS
-    | NOT
-    ;
+unaryOperator: PLUS | MINUS | NOT;
 
 relationalOperator
     : EQUAL
@@ -333,32 +333,17 @@ relationalOperator
     | LESS_OR_EQUAL
     | GREATER_THAN
     | GREATER_OR_EQUAL
-    ;
+;
 
-additiveOperator
-    : PLUS
-    | MINUS
-    | OR
-    | XOR
-    ;
+additiveOperator: PLUS | MINUS | OR | XOR;
 
-multiplicativeOperator
-    : STAR
-    | SLASH
-    | DIV
-    | MOD
-    | AND
-    | SHL
-    | SHR
-    ;
+multiplicativeOperator: STAR | SLASH | DIV | MOD | AND | SHL | SHR;
 
 variableReference
     : IDENTIFIER
     // | IDENTIFIER LEFT_BRACKET expression ( COMMA expression )* RIGHT_BRACKET
-    ;
+;
 
-constantReference
-    : IDENTIFIER
-    ;
+constantReference: IDENTIFIER;
 
 // EOF
