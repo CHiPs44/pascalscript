@@ -16,7 +16,6 @@ Begin
 End;
 
 Function IterativeFactorial(N: Integer): Integer;
-
 Var 
   I, F: Integer;
 Begin

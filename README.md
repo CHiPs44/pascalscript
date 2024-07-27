@@ -6,7 +6,7 @@
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
-As of july 2024, another test/validation is made using AntLR4 (which lacks C output) but can help for lexer, parser & AST structures.
+As of july 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
 
 The traditional `hello.pas` will be like:
 
@@ -37,7 +37,6 @@ Begin
 End;
 
 Function IterativeFactorial(N: Integer): Integer;
-
 Var 
   I, F: Integer;
 Begin
@@ -87,7 +86,7 @@ All three will output:
 Hello, world!
 ```
 
-In the future, it should be embeddable in other projects, like (Lua)[https://lua.org/] is for example.
+In the future, it should be embeddable in other projects, like [Lua](https://lua.org/) is for example.
 
 Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 
