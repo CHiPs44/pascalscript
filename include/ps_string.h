@@ -28,13 +28,13 @@ extern "C"
     void ps_string_free(ps_string *str);
 
     /// @brief Set existing string to new value if length fits
-    /// @return NULL if KO (len > max, errno = EINVAL)
+    /// @return string NULL if KO (len > max, errno = EINVAL)
     ps_string *ps_string_set(ps_string *ptr, ps_char *z_str);
 
     // TODO? bool ps_string_copy(ps_string *ptr, ps_string *s);
 
     /// @brief Allocate and set a new string
-    /// @return NULL (check errno for ENOMEM or EINVAL)
+    /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_create(ps_string_len max, ps_char *z);
 
     /// @brief Concatenate two strings into another one if lengths are OK

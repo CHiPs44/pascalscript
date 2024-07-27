@@ -6,62 +6,63 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "ps_error.h"
+#include "ps_string.h"
 #include "ps_value.h"
 
-static ps_error ps_value_errno = PS_ERROR_ZERO;
+static ps_error ps_value_error = PS_ERROR_ZERO;
 
-#define PS_VALUE_SET_XXX(PS_TYPE_X, ps_xxx, x)               \
-    if (value == NULL)                                       \
-    {                                                        \
-        value = calloc(1, sizeof(ps_value));                 \
-        if (value == NULL)                                   \
-        {                                                    \
-            ps_value_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY; \
-            return NULL;                                     \
-        }                                                    \
-        value->type = PS_TYPE_X;                             \
-        value->size = sizeof(ps_xxx);                        \
-    }                                                        \
-    else if (value->type != PS_TYPE_X)                       \
-        return NULL;                                         \
-    value->data.x = x;                                       \
+#define PS_VALUE_SET_XXXXXXXX(PS_TYPE_XXXXXXXX, ps_xxxxxxxx, x) \
+    if (value == NULL)                                          \
+    {                                                           \
+        value = calloc(1, sizeof(ps_value));                    \
+        if (value == NULL)                                      \
+        {                                                       \
+            ps_value_error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;    \
+            return NULL;                                        \
+        }                                                       \
+    }                                                           \
+    value->type = PS_TYPE_XXXXXXXX;                             \
+    value->size = sizeof(ps_xxxxxxxx);                          \
+    value->data.x = x;                                          \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_INTEGER, ps_integer, i);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_INTEGER, ps_integer, i);
 }
 
 ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_UNSIGNED, ps_unsigned, u);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_UNSIGNED, ps_unsigned, u);
 }
 
 ps_value *ps_value_set_real(ps_value *value, ps_real r)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_REAL, ps_real, r);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_REAL, ps_real, r);
 }
 
 ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_BOOLEAN, ps_boolean, b);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_BOOLEAN, ps_boolean, b);
 }
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_CHAR, ps_char, c);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_CHAR, ps_char, c);
 }
 
 ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
 {
-    ps_value_errno = PS_ERROR_NOT_IMPLEMENTED;
-    return NULL;
-    /*
-    size_t len = strlen(s);
-    if ((max > 0 && len > max) || (len > ps_string_max))
+    // ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
+    // return NULL;
+    if (value == NULL && max == 0)
+    {
+        ps_value_error = PS_RUNTIME_ERROR_INVALID_PARAMETERS;
         return NULL;
+    }
     bool is_new = false;
     if (value == NULL)
     {
@@ -69,50 +70,61 @@ ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
         value = calloc(1, sizeof(ps_value));
         if (value == NULL)
         {
-            ps_value_errno = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+            ps_value_error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
             return NULL;
         }
-        value->data.s->str = calloc(max + 1, sizeof(ps_char));
-        value->type = PS_TYPE_STRING;
-        value->size = sizeof(ps_string);
     }
-    else if (value->type != PS_TYPE_STRING)
-        return NULL;
-    else
+    value->type = PS_TYPE_STRING;
+    value->size = sizeof(ps_string);
+    if (max > 0 || is_new)
     {
-        if (len > value->data.s->max)
+        // (Re)allocate to new max length
+        if (!is_new)
+            ps_string_free(value->data.s);
+        value->data.s = ps_string_create(max, s);
+        if (value->data.s == NULL)
         {
+            ps_value_error = errno == ENOMEM
+                                 ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
+                                 : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            if (is_new)
+                free(value);
+            return NULL;
         }
     }
-    = max;
-    value->data.s->len = (ps_string_len)len;
-    if (!is_new && value->data.s->str != NULL)
-        free(value->data.s->str);
-    value->data.s->str = calloc(data.s->len + 1);
-    if (value->data->s.str == NULL)
+    else
     {
-        if (is_new)
-            free(value);
-        return NULL;
+        // Try to put new value in existing one
+        ps_string *p = ps_string_set(value->data.s, s);
+        if (p == NULL)
+        {
+            ps_value_error = errno == ENOMEM
+                                 ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
+                                 : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            if (is_new)
+            {
+                ps_string_free(value->data.s);
+                free(value);
+            }
+            return NULL;
+        }
     }
-    strncpy(value->data.s.str, data.str, data.len);
     return value;
-    */
 }
 
 ps_value *ps_value_set_pointer(ps_value *value, void *p)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_POINTER, ps_pointer, p);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_POINTER, ps_pointer, p);
 }
 
 ps_value *ps_value_set_enum(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_ENUM, ps_unsigned, u);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_ENUM, ps_unsigned, u);
 }
 
 ps_value *ps_value_set_subrange(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET_XXX(PS_TYPE_SUBRANGE, ps_integer, i);
+    PS_VALUE_SET_XXXXXXXX(PS_TYPE_SUBRANGE, ps_integer, i);
 }
 
 const struct s_ps_type_name
@@ -148,29 +160,29 @@ char *ps_value_get_type_name(ps_type type)
 
 char *ps_value_get_value(ps_value *value)
 {
-    static char buffer[512];
+    static char buffer[128];
     switch (value->type)
     {
     case PS_TYPE_NONE:
         snprintf(buffer, sizeof(buffer) - 1, "[none]");
         break;
     case PS_TYPE_INTEGER:
-        snprintf(buffer, sizeof(buffer) - 1, "%d", value->data.i);
+        snprintf(buffer, sizeof(buffer) - 1, "%d / 0x%x", value->data.i, value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
-        snprintf(buffer, sizeof(buffer) - 1, "%u", value->data.u);
+        snprintf(buffer, sizeof(buffer) - 1, "%u / 0x%x", value->data.u, value->data.u);
         break;
     case PS_TYPE_REAL:
-        snprintf(buffer, sizeof(buffer) - 1, "%.20f", value->data.r);
+        snprintf(buffer, sizeof(buffer) - 1, "%G", value->data.r);
         break;
     case PS_TYPE_BOOLEAN:
-        snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "[true]" : "[false]");
+        snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "true" : "false");
         break;
     case PS_TYPE_CHAR:
         snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", value->data.c, value->data.c);
         break;
     case PS_TYPE_STRING:
-        snprintf(buffer, sizeof(buffer) - 1, "\"%s\"", value->data.s->str);
+        snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", 100, value->data.s->str, value->data.s->len, value->data.s->max);
         break;
     case PS_TYPE_POINTER:
         snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
@@ -186,16 +198,20 @@ char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
     snprintf(buffer, sizeof(buffer) - 1,
-             "VALUE: type=%d/%s, size=%ld, value=%s",
-             value->type, ps_value_get_type_name(value->type),
+             "VALUE: type=%d/%s, size=%zu, value=%s",
+             value->type,
+             ps_value_get_type_name(value->type),
              value->size,
              ps_value_get_value(value));
     return buffer;
 }
 
-void ps_value_debug(ps_value *value)
+void ps_value_debug(ps_value *value, char *message)
 {
-    fprintf(stderr, "DEBUG\t%s\n", ps_value_dump(value));
+    fprintf(stderr,
+            "DEBUG\t%s%s\n",
+            message == NULL ? "" : message,
+            ps_value_dump(value));
 }
 
 /* EOF */

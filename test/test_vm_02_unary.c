@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
 #include "../src/vm.h"
 #include "../src/operator.h"
@@ -19,6 +20,9 @@ ps_vm *vm = &_vm;
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     int result;
     ps_error_t code;
     printf("TEST VM #02 UNARY: BEGIN\n");

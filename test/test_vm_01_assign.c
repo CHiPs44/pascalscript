@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
 #include "../include/ps_value.h"
 #include "../include/ps_symbol_table.h"
@@ -21,6 +22,9 @@ ps_vm *vm = &_vm;
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     int result;
     ps_error code;
 

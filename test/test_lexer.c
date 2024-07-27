@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/resource.h>
 
 #include "../include/ps_config.h"
 #include "../include/ps_error.h"
@@ -153,6 +154,9 @@ void test(char *name, char *source, ps_token_type *expected, int count)
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     printf("TEST LEXER: BEGIN\n");
     printf("================================================================================\n");
     test("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type));

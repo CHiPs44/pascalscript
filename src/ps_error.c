@@ -64,6 +64,8 @@ char *ps_error_get_message(ps_error error)
     /* ==================== RUNTIME  ==================== */
     case PS_RUNTIME_ERROR_NONE:
         return "None";
+    case PS_RUNTIME_ERROR_OUT_OF_MEMORY:
+        return "Out of memory";
     case PS_RUNTIME_ERROR_STACK_EMPTY:
         return "Stack empty";
     case PS_RUNTIME_ERROR_STACK_OVERFLOW:
@@ -76,10 +78,12 @@ char *ps_error_get_message(ps_error error)
         return "Unknown unary operator";
     case PS_RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR:
         return "Unknown binary operator";
-    case PS_RUNTIME_ERROR_ASSIGN_TO_CONST:
-        return "Constant can't be changed";
+    case PS_RUNTIME_ERROR_UNEXPECTED_TYPE:
+        return "Unexpected type";
     case PS_RUNTIME_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
+    case PS_RUNTIME_ERROR_EXPECTED_NUMBER:
+        return "Number expected";
     case PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL:
         return "Number expected";
     case PS_RUNTIME_ERROR_EXPECTED_INTEGER:
@@ -96,12 +100,16 @@ char *ps_error_get_message(ps_error error)
         return "Char expected";
     case PS_RUNTIME_ERROR_EXPECTED_STRING:
         return "String expected";
+    case PS_RUNTIME_ERROR_ASSIGN_TO_CONST:
+        return "Constant can't be changed";
     case PS_RUNTIME_ERROR_TYPE_MISMATCH:
         return "Type mismatch";
     case PS_RUNTIME_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
     case PS_RUNTIME_ERROR_OUT_OF_RANGE:
         return "Out of range";
+    case PS_RUNTIME_ERROR_INVALID_PARAMETERS:
+        return "Invalid parameters";
     }
     return "Unknown";
 }

@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
 #define PS_SYMBOL_TABLE_SIZE 3
 #include "../include/ps_value.h"
@@ -24,6 +25,9 @@ ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_TYPE_CONSTANT};
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     int result;
 
     ps_value_set_integer(&constant1.value, 1234567890);

@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/resource.h>
 
 #include "../include/ps_error.h"
 #include "../include/ps_readall.h"
@@ -33,11 +34,14 @@ char *hello_utf8 =
     "\tK = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
     "Begin\n"
     "\tWriteLn('Hello, World!');\n"
-    "\tWriteLn('k=', k);\n"
+    "\tWriteLn('K=', K);\n"
     "End."; //\n";
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     printf("TEST BUFFER: BEGIN\n");
 
     printf("TEST BUFFER: INIT\n");
@@ -54,14 +58,14 @@ int main(void)
     ps_buffer_set_text(buffer, minimal_source, strlen(minimal_source));
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
-    buffer->debug = 2;
+    buffer->debug = 0;
     int count = 0;
     while (ps_buffer_read_next_char(buffer))
     {
         count += 1;
     }
     printf(" => count=%d, strlen=%d\n", count, strlen(minimal_source));
-    buffer->debug = false;
+    buffer->debug = 0;
 
     printf("TEST BUFFER: SET TEXT HELLO\n");
     ps_buffer_set_text(buffer, hello_utf8, strlen(hello_utf8));
@@ -70,7 +74,7 @@ int main(void)
 
     printf("TEST BUFFER: LOAD FILE\n");
     ps_buffer_init(buffer);
-    ps_buffer_load_file(buffer, "../examples/00-hello.pas");
+    ps_buffer_load_file(buffer, "../examples/00-minimal.pas");
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 

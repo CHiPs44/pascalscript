@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
 #include "../include/ps_value.h"
 #include "../include/ps_symbol.h"
@@ -24,6 +25,9 @@ ps_symbol constant5 = {.name = "CONSTANT5", .kind = PS_SYMBOL_TYPE_CONSTANT};
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     ps_symbol *symbol;
     int result;
     ps_string string5 = {.str = "ABCDEF123456", .len = 12};

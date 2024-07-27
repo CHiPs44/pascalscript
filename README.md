@@ -416,6 +416,38 @@ Or should we have a simpler "runtime status" like:
   - other value types (real, boolean, string, function, procedure, ...) should come at their own time
   - ...
 
+## Other notes
+
+### Tests in 32 bits mode and 3M of RAM
+
+Tests (folder `test`) are now intended to compile as 32 bits executable so we're not too far of our RP2040 target.
+
+To install a 32 bits capable GCC on our modern 64 bits machines, you need to install multilib version of it:
+
+```bash
+sudo apt install gcc-multilib g++-multilib
+```
+
+To compile a 32 bits executable, use `-m32`:
+
+``` bash
+cd test/
+gcc -m32 -std=c17 -Wall -I../include test_value.c
+```
+
+Programs "core dump" with 256K of RAM, I had to go up to 3M to make them running.
+
+Extract of `test/test_value.c`:
+
+```c
+#include <sys/resource.h>
+
+int main(void)
+{
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+```
+
 ## License
 
 This project is licensed under GNU General Public License 3.0 or later, see file `LICENSE`.

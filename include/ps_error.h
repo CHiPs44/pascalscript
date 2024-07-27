@@ -66,6 +66,7 @@ extern "C"
         PS_RUNTIME_ERROR_TYPE_MISMATCH,
         PS_RUNTIME_ERROR_DIVISION_BY_ZERO,
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
+        PS_RUNTIME_ERROR_INVALID_PARAMETERS,
     } __attribute__((__packed__)) ps_error;
 
 #define ps_error_is_from_buffer (error) (error >= PS_BUFFER_ERROR_NONE  && error <= PS_BUFFER_ERROR_NONE  + 0xf)

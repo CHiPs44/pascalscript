@@ -5,20 +5,24 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
-#include "../src/vm.h"
-#include "../src/operator.h"
+#include "../src/ps_vm.h"
+#include "../src/ps_operator.h"
 
 ps_vm _vm;
 ps_vm *vm = &_vm;
 
-#include "../src/symbol_table.c"
-#include "../src/symbol_stack.c"
-#include "../src/vm.c"
-#include "../src/operator.c"
+#include "../src/ps_symbol_table.c"
+#include "../src/ps_symbol_stack.c"
+#include "../src/ps_vm.c"
+#include "../src/ps_operator.c"
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     int result;
     ps_error_t code;
     printf("TEST VM #03 BINARY: BEGIN\n");

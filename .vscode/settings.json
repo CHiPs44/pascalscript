@@ -37,6 +37,7 @@
         "ctype.h": "c",
         "ps_string.h": "c",
         "cerrno": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "resource.h": "c"
     }
 }

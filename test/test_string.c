@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <sys/resource.h>
 
 #include "../include/ps_string.h"
 
@@ -12,6 +13,9 @@
 
 int main(void)
 {
+    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    setrlimit(RLIMIT_AS, &rl);
+
     printf("TEST STRINGS: BEGIN\n\n");
 
     bool ok;
