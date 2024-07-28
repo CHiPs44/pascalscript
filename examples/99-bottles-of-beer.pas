@@ -1,6 +1,7 @@
 { from https://rosettacode.org/wiki/99_Bottles_of_Beer/Pascal }
+{ see also https://www.99-bottles-of-beer.net/language-pascal-1067.html }
 
-Program BottlesOfBeer;
+Program _99BottlesOfBeer;
 
 Var 
   i: Integer;
