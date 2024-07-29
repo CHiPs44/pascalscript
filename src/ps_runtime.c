@@ -5,11 +5,18 @@
 */
 
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
 #include "ps_error.h"
 #include "ps_value.h"
 #include "ps_runtime.h"
+
+void ps_runtime_init(ps_runtime *runtime, bool range_check)
+{
+    runtime->error = PS_RUNTIME_ERROR_NONE;
+    runtime->range_check = range_check;
+}
 
 ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
 {
@@ -45,7 +52,7 @@ ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value)
         result->data.i = abs(value->data.i);
         return result;
     case PS_TYPE_REAL:
-        result->data.r = abs(value->data.r);
+        result->data.r = fabs(value->data.r);
         return result;
     default:
         free(result);
@@ -157,7 +164,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     {
     case PS_TYPE_UNSIGNED:
         // succ(0) => error / succ(u) => u - 1
-        if (value->data.u == 0)
+        if (runtime->range_check && value->data.u == 0)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -169,7 +176,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     //   TODO needs low()
     case PS_TYPE_INTEGER:
         // succ(min) => error / succ(i) => i - 1
-        if (value->data.u == ps_integer_min)
+        if (runtime->range_check && value->data.u == ps_integer_min)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -181,7 +188,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     //   TODO needs low()
     case PS_TYPE_BOOLEAN:
         // succ(true) => false / succ(false) => error
-        if (value->data.b == false)
+        if (runtime->range_check && value->data.b == false)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -191,7 +198,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
         return result;
     case PS_TYPE_CHAR:
         // succ(NUL) => error / succ(c) => c - 1
-        if (value->data.c == 0)
+        if (runtime->range_check && value->data.c == 0)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -217,7 +224,7 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
     {
     case PS_TYPE_UNSIGNED:
         // succ(max) => error / succ(u) => u + 1
-        if (value->data.u == ps_unsigned_max)
+        if (runtime->range_check && value->data.u == ps_unsigned_max)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -229,7 +236,7 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
     //   TODO needs high()
     case PS_TYPE_INTEGER:
         // succ(max) => error / succ(i) => i + 1
-        if (value->data.u == ps_integer_max)
+        if (runtime->range_check && value->data.u == ps_integer_max)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -241,7 +248,7 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
     //   TODO needs high()
     case PS_TYPE_BOOLEAN:
         // succ(true) => error / succ(false) => true
-        if (value->data.b == true)
+        if (runtime->range_check && value->data.b == true)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -251,7 +258,7 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
         return result;
     case PS_TYPE_CHAR:
         // succ(char_max) => error / succ(c) => c + 1
-        if (value->data.c == ps_char_max)
+        if (runtime->range_check && value->data.c == ps_char_max)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -267,4 +274,3 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
 }
 
 // ps_runtime_func_sizeof?
-

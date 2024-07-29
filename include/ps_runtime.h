@@ -25,7 +25,13 @@ extern "C"
         bool range_check;
     } ps_runtime;
 
+    /**
+     * @brief Allocate new value
+     * @return New value or NULL if no free memory (errno = ENOMEM)
+     */
     ps_value *ps_runtime_alloc_value(ps_runtime *runtime);
+
+    /** @brief Free existing value */
     void ps_runtime_free_value(ps_runtime *runtime, ps_value *value);
 
     /** @brief Get absolute value of integer / unsigned / real */
