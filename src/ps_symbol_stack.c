@@ -65,8 +65,8 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
             symbol = stack->symbols[i];
             // fprintf(stderr, "|%03d|%-*s|%4d|%4d|%12d|%08x|\n",
             //         i, PS_IDENTIFIER_MAX, symbol->name, symbol->kind, symbol->value.type, symbol->value.data.i, symbol->value.data.i);
-            char *kind_name = ps_symbol_get_type_name(symbol->kind);
-            char *scope_name = symbol_get_scope_name(symbol->scope);
+            char *kind_name = ps_symbol_get_kind_name(symbol->kind);
+            char *scope_name = ps_symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",

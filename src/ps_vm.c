@@ -24,14 +24,14 @@ void vm_init(ps_vm *vm)
     ps_symbol_table_init(&vm->symbols);
     /*******************************************/
     strcpy(symbol.name, "__PS_VERSION__");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_unsigned(&symbol.value,
                       (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff));
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "__PS_VERTEXT__");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_STRING;
     symbol.value.size = ps_string_max + 1;
@@ -40,31 +40,31 @@ void vm_init(ps_vm *vm)
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "MAXINT");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_integer(&symbol.value, PS_INTEGER_MAX);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "MAXUINT");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_unsigned(&symbol.value, PS_UNSIGNED_MAX);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "FALSE");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_boolean(&symbol.value, false);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "TRUE");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_boolean(&symbol.value, true);
     ps_symbol_table_add(&vm->symbols, &symbol);
     /*******************************************/
     strcpy(symbol.name, "PI");
-    symbol.kind = PS_SYMBOL_TYPE_CONSTANT;
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
     symbol.scope = PS_SCOPE_GLOBAL;
     ps_value_set_real(&symbol.value, 3.141592653589793);
     ps_symbol_table_add(&vm->symbols, &symbol);
@@ -122,7 +122,7 @@ ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value *value)
 {
     ps_symbol symbol;
     strcpy(symbol.name, "");
-    symbol.kind = PS_SYMBOL_TYPE_AUTO;
+    symbol.kind = PS_SYMBOL_KIND_AUTO;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_INTEGER;
     symbol.value.size = sizeof(ps_integer);
@@ -135,7 +135,7 @@ ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value value)
 {
     ps_symbol symbol;
     strcpy(symbol.name, "");
-    symbol.kind = PS_SYMBOL_TYPE_AUTO;
+    symbol.kind = PS_SYMBOL_KIND_AUTO;
     symbol.scope = PS_SCOPE_GLOBAL;
     symbol.value.type = PS_TYPE_INTEGER;
     symbol.value.size = sizeof(ps_integer);
@@ -180,14 +180,14 @@ ps_error vm_exec_assign(ps_vm *vm)
     ps_symbol *value = vm_stack_pop(vm);
     if (value == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (value->kind == PS_SYMBOL_TYPE_AUTO)
+    if (value->kind == PS_SYMBOL_KIND_AUTO)
         vm_auto_free(vm, value->name);
     ps_symbol *variable = vm_stack_pop(vm);
     if (variable == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (variable->kind == PS_SYMBOL_TYPE_CONSTANT)
+    if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
         return PS_RUNTIME_ERROR_ASSIGN_TO_CONST;
-    if (variable->kind != PS_SYMBOL_TYPE_VARIABLE)
+    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
         return PS_RUNTIME_ERROR_EXPECTED_VARIABLE;
     if (variable->value.type != value->value.type)
         return PS_RUNTIME_ERROR_TYPE_MISMATCH;
@@ -201,7 +201,7 @@ ps_error vm_exec_sys(ps_vm *vm)
     ps_symbol *command = vm_stack_pop(vm);
     if (command == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (command->kind == PS_SYMBOL_TYPE_AUTO)
+    if (command->kind == PS_SYMBOL_KIND_AUTO)
         vm_auto_free(vm, command->name);
 
     return PS_ERROR_NOT_IMPLEMENTED;

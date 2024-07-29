@@ -41,7 +41,7 @@ bool ps_parser_start(ps_parser *parser)
     {
         return false;
     }
-    program.type = PS_SYMBOL_TYPE_CONSTANT;
+    program.kind = PS_SYMBOL_KIND_CONSTANT;
     strcpy(program.name, "PROGRAM");
     program.value.size = 0;
     program.value.type = PS_TYPE_STRING;

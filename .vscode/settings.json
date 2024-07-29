@@ -38,6 +38,7 @@
         "ps_string.h": "c",
         "cerrno": "c",
         "errno.h": "c",
-        "resource.h": "c"
+        "resource.h": "c",
+        "ps_symbol_table.h": "c"
     }
 }

@@ -10,7 +10,7 @@
 #include "ps_symbol.h"
 
 #ifdef __cplusplus
-extern "C"
+"C"
 {
 #endif
 
@@ -20,25 +20,45 @@ extern "C"
 
 #define PS_SYMBOL_TABLE_ERROR_EXISTS (-1)
 #define PS_SYMBOL_TABLE_ERROR_FULL (-2)
+#define PS_SYMBOL_TABLE_ERROR_TODO (-3)
+
+    typedef int16_t ps_symbol_size;
 
     /* clang-format off */
-
     typedef struct s_ps_symbol_table
     {
-        int         count;
-        ps_symbol symbols[PS_SYMBOL_TABLE_SIZE];
+        ps_symbol_size size;
+        ps_symbol_size used;
+        ps_symbol      symbols[PS_SYMBOL_TABLE_SIZE];
     } ps_symbol_table;
-
-    extern void      ps_symbol_table_init(ps_symbol_table *table);
-    extern void      ps_symbol_table_dump(ps_symbol_table *table, char *title);
-    extern int       ps_symbol_table_find(ps_symbol_table *table, char *name);
-    extern ps_symbol *ps_symbol_table_get (ps_symbol_table *table, char *name);
-    extern int       ps_symbol_table_add (ps_symbol_table *table, ps_symbol *symbol);
-    extern int       ps_symbol_table_delete(ps_symbol_table *table, char *name);
-    extern int       ps_symbol_table_free(ps_symbol_table *table, char *name);
-    extern int       ps_symbol_table_gc  (ps_symbol_table *table);
-
     /* clang-format on */
+
+    /** @brief Allocate and initialize symbol table (reset count & mark all symbols as free) */
+    ps_symbol_table *ps_symbol_table_init();
+
+    /** @brief Deallocate symbol table */
+    void ps_symbol_table_done(ps_symbol_table * table);
+
+    /** @brief Dump symbol table to stderr */
+    void ps_symbol_table_dump(ps_symbol_table * table, char *title);
+
+    /** @brief Find symbol's index in table by name */
+    ps_symbol_size ps_symbol_table_find(ps_symbol_table * table, char *name);
+
+    /** @brief Find symbol in table by name */
+    ps_symbol *ps_symbol_table_get(ps_symbol_table * table, char *name);
+
+    /**
+     * @brief Add symbol, returning an error if table is full or symbol already exists
+     * @return Index of added symbol (>=0) or error (<0)
+     */
+    ps_symbol_size ps_symbol_table_add(ps_symbol_table * table, ps_symbol * symbol);
+
+    ps_symbol_size ps_symbol_table_delete(ps_symbol_table * table, char *name);
+
+    ps_symbol_size ps_symbol_table_free(ps_symbol_table * table, char *name);
+
+    ps_symbol_size ps_symbol_table_gc(ps_symbol_table * table);
 
 #ifdef __cplusplus
 }

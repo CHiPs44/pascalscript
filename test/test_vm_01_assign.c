@@ -33,7 +33,7 @@ int main(void)
     ps_symbol_table_dump(&vm->symbols, "Init");
     printf("TEST VM #01 ASSIGN: INIT OK\n");
 
-    ps_symbol variable_i = {"I", PS_SYMBOL_TYPE_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};
+    ps_symbol variable_i = {"I", PS_SYMBOL_KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};
     result = vm_global_add(vm, &variable_i);
     printf("TEST VM #01 ASSIGN: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
@@ -48,7 +48,7 @@ int main(void)
     ps_symbol_table_dump(&vm->symbols, "I=3?");
     printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
 
-    ps_symbol constant_k = {"K", PS_SYMBOL_TYPE_CONSTANT, PS_TYPE_INTEGER, sizeof(ps_integer), {1234}};
+    ps_symbol constant_k = {"K", PS_SYMBOL_KIND_CONSTANT, PS_TYPE_INTEGER, sizeof(ps_integer), {1234}};
     result = vm_global_add(vm, &constant_k);
     printf("TEST VM #01 ASSIGN: CONST K = 1234; %s %d\n", result == 0 ? "OK" : "KO", result);
     ps_symbol_table_dump(&vm->symbols, "CONST K = 1234;");
