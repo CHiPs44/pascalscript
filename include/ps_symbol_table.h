@@ -18,18 +18,22 @@
 #define PS_SYMBOL_TABLE_SIZE (256)
 #endif
 
-#define PS_SYMBOL_TABLE_ERROR_EXISTS (-1)
-#define PS_SYMBOL_TABLE_ERROR_FULL (-2)
-#define PS_SYMBOL_TABLE_ERROR_TODO (-3)
+#define PS_SYMBOL_TABLE_ERROR_NOT_FOUND (-1)
+#define PS_SYMBOL_TABLE_ERROR_EXISTS (-2)
+#define PS_SYMBOL_TABLE_ERROR_FULL (-3)
+#define PS_SYMBOL_TABLE_ERROR_KIND (-4)
+#define PS_SYMBOL_TABLE_ERROR_TODO (-5)
 
-    typedef int16_t ps_symbol_size;
+#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04x"
+
+    typedef int16_t ps_symbol_table_size;
 
     /* clang-format off */
     typedef struct s_ps_symbol_table
     {
-        ps_symbol_size size;
-        ps_symbol_size used;
-        ps_symbol      symbols[PS_SYMBOL_TABLE_SIZE];
+        ps_symbol_table_size size;
+        ps_symbol_table_size used;
+        ps_symbol            symbols[PS_SYMBOL_TABLE_SIZE];
     } ps_symbol_table;
     /* clang-format on */
 
@@ -43,7 +47,7 @@
     void ps_symbol_table_dump(ps_symbol_table * table, char *title);
 
     /** @brief Find symbol's index in table by name */
-    ps_symbol_size ps_symbol_table_find(ps_symbol_table * table, char *name);
+    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, char *name);
 
     /** @brief Find symbol in table by name */
     ps_symbol *ps_symbol_table_get(ps_symbol_table * table, char *name);
@@ -52,13 +56,13 @@
      * @brief Add symbol, returning an error if table is full or symbol already exists
      * @return Index of added symbol (>=0) or error (<0)
      */
-    ps_symbol_size ps_symbol_table_add(ps_symbol_table * table, ps_symbol * symbol);
+    ps_symbol_table_size ps_symbol_table_add(ps_symbol_table * table, ps_symbol * symbol);
 
-    ps_symbol_size ps_symbol_table_delete(ps_symbol_table * table, char *name);
+    ps_symbol_table_size ps_symbol_table_delete(ps_symbol_table * table, char *name);
 
-    ps_symbol_size ps_symbol_table_free(ps_symbol_table * table, char *name);
+    ps_symbol_table_size ps_symbol_table_free(ps_symbol_table * table, char *name);
 
-    ps_symbol_size ps_symbol_table_gc(ps_symbol_table * table);
+    ps_symbol_table_size ps_symbol_table_gc(ps_symbol_table * table);
 
 #ifdef __cplusplus
 }

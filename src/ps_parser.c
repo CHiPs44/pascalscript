@@ -9,14 +9,19 @@
 
 #include "ps_lexer.h"
 #include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_parser.h"
 
 bool ps_parser_init(ps_parser *parser)
 {
     ps_lexer_init(&parser->lexer);
-    ps_symbol_table_init(&parser->symbol_table);
+    parser->symbol_table=ps_symbol_table_init();
     parser->error = PS_PARSER_ERROR_NONE;
     return true;
+}
+
+void ps_parser_done(ps_parser *parser)
+{
 }
 
 bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)

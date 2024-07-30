@@ -16,8 +16,9 @@
 #include "ps_lexer.h"
 #include "ps_token.h"
 
-bool ps_lexer_init(ps_lexer *lexer)
+ps_lexer *ps_lexer_init()
 {
+    ps_lexer *lexer = calloc(1,sizeof(ps_lexer));
     if (!ps_buffer_init(&lexer->buffer))
         return false;
     ps_lexer_reset(lexer);

@@ -24,7 +24,7 @@ extern "C"
     {
         ps_lexer lexer;
         ps_error error;
-        ps_symbol_table symbol_table;
+        ps_symbol_table *symbol_table;
     } ps_parser;
 
     bool ps_parser_init(ps_parser *parser);
