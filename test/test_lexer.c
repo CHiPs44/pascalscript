@@ -30,6 +30,7 @@ char *minimal_source =
     "  (* Comment with parenthesis & stars *)\n"
     "  { (* Comment within comment *) }\n"
     "  (* { Comment within comment } *)\n"
+    "  // Comment with 2 slashes\n"
     "End.\n"
     "";
 

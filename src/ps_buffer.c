@@ -291,7 +291,7 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
         else
             buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
     }
-    ps_buffer_debug(buffer, 0, "ps_buffer_read_next_char: END  ");
+    ps_buffer_debug(buffer, 1, "ps_buffer_read_next_char: END  ");
     return true;
 }
 

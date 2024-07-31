@@ -135,12 +135,35 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
     return true;
 }
 
+bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
+{
+    char c1 = ps_buffer_peek_char(lexer->buffer);
+    char c2 = ps_buffer_peek_next_char(lexer->buffer);
+    *changed = false;
+    if (c1 == '/' && c2 == '/')
+    {
+        *changed = true;
+        while (c1 != '\n')
+        {
+            if (!ps_lexer_read_next_char(lexer))
+                return false;
+            c1 = lexer->buffer->current_char;
+            if (c1 == '\0')
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment3");
+        }
+        if (!ps_lexer_read_next_char(lexer))
+            return false;
+    }
+    return true;
+}
+
 bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
 {
     bool changed1 = true;
     bool changed2 = true;
     bool changed3 = true;
-    while (changed1 || changed2 || changed3)
+    bool changed4 = true;
+    while (changed1 || changed2 || changed3 || changed4)
     {
         if (!ps_lexer_skip_whitespace(lexer, &changed1))
         {
@@ -155,6 +178,11 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
         if (!ps_lexer_skip_comment2(lexer, &changed3))
         {
             printf("ps_lexer_skip_comment2: error=%d\n", lexer->error);
+            return false;
+        }
+        if (!ps_lexer_skip_comment3(lexer, &changed4))
+        {
+            printf("ps_lexer_skip_comment3: error=%d\n", lexer->error);
             return false;
         }
     }
@@ -234,6 +262,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
 }
 
+/*
 bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     char buffer[PS_BUFFER_MAX_COLUMNS + 1];
@@ -251,7 +280,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         {
             if (c1 == '\n' || c2 == '\n')
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_or_string_value #2");
-            // printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
+            // printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n", c1, c2); //, quote ? "Y" : "N");
             if (pos > ps_string_max)
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_TOO_LONG, "ps_lexer_read_char_or_string_value #3");
             if (c1 == '\'' && c2 == '\'')
@@ -271,7 +300,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
                 return false;
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
-            // printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n" /*, quote=%s\n"*/, c1, c2); //, quote ? "Y" : "N");
+            // printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n", c1, c2); //, quote ? "Y" : "N");
             if (c1 == '\'' && c2 == '\'')
             {
                 // printf("ps_lexer_read_char_or_string_value: quote2!\n");
@@ -306,6 +335,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
     return false;
 }
+*/
 
 bool ps_lexer_read_next_token(ps_lexer *lexer)
 {
@@ -336,14 +366,14 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
         lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
         // printf("identifier: \"%s\" %d\n", lexer->current_token.value.identifier, lexer->current_token.type);
     }
-    else if (current_char == '\'')
-    {
-        if (!ps_lexer_read_char_or_string_value(lexer))
-        {
-            printf("AFTER ps_lexer_read_char_or_string_value: error=%d %s\n", lexer->error, ps_error_get_message(lexer->error));
-            return false;
-        }
-    }
+    // else if (current_char == '\'')
+    // {
+    //     if (!ps_lexer_read_char_or_string_value(lexer))
+    //     {
+    //         printf("AFTER ps_lexer_read_char_or_string_value: error=%d %s\n", lexer->error, ps_error_get_message(lexer->error));
+    //         return false;
+    //     }
+    // }
     else
     {
         // printf("%c\n", c);
@@ -363,16 +393,16 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             break;
-        case '@':
-            lexer->current_token.type = TOKEN_AT_SIGN;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            break;
-        case '^':
-            lexer->current_token.type = TOKEN_CARET;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            break;
+        // case '@':
+        //     lexer->current_token.type = TOKEN_AT_SIGN;
+        //     if (!ps_lexer_read_next_char(lexer))
+        //         return false;
+        //     break;
+        // case '^':
+        //     lexer->current_token.type = TOKEN_CARET;
+        //     if (!ps_lexer_read_next_char(lexer))
+        //         return false;
+        //     break;
         case ',':
             lexer->current_token.type = TOKEN_COMMA;
             if (!ps_lexer_read_next_char(lexer))
@@ -390,21 +420,21 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 lexer->current_token.type = TOKEN_DOT;
             ps_lexer_read_next_char(lexer);
             break;
-        case '[':
-            lexer->current_token.type = TOKEN_LEFT_BRACKET;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            break;
+        // case '[':
+        //     lexer->current_token.type = TOKEN_LEFT_BRACKET;
+        //     if (!ps_lexer_read_next_char(lexer))
+        //         return false;
+        //     break;
         case '(':
             lexer->current_token.type = TOKEN_LEFT_PARENTHESIS;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             break;
-        case ']':
-            lexer->current_token.type = TOKEN_RIGHT_BRACKET;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            break;
+        // case ']':
+        //     lexer->current_token.type = TOKEN_RIGHT_BRACKET;
+        //     if (!ps_lexer_read_next_char(lexer))
+        //         return false;
+        //     break;
         case ')':
             lexer->current_token.type = TOKEN_RIGHT_PARENTHESIS;
             if (!ps_lexer_read_next_char(lexer))
@@ -444,40 +474,40 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             break;
-        case '<':
-            next_char = ps_buffer_peek_next_char(lexer->buffer);
-            if (next_char == '>')
-            {
-                sprintf(lexer->current_token.value.identifier, "<>");
-                lexer->current_token.type = TOKEN_NOT_EQUAL;
-                if (!ps_lexer_read_next_char(lexer))
-                    return false;
-            }
-            else if (next_char == '=')
-            {
-                sprintf(lexer->current_token.value.identifier, "<=");
-                lexer->current_token.type = TOKEN_LESS_OR_EQUAL;
-                if (!ps_lexer_read_next_char(lexer))
-                    return false;
-            }
-            else
-                lexer->current_token.type = TOKEN_LESS_THAN;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            break;
-        case '>':
-            next_char = ps_buffer_peek_next_char(lexer->buffer);
-            if (next_char == '=')
-            {
-                sprintf(lexer->current_token.value.identifier, ">=");
-                lexer->current_token.type = TOKEN_GREATER_OR_EQUAL;
-                if (!ps_lexer_read_next_char(lexer))
-                    return false;
-            }
-            else
-                lexer->current_token.type = TOKEN_GREATER_THAN;
-            ps_lexer_read_next_char(lexer);
-            break;
+        // case '<':
+        //     next_char = ps_buffer_peek_next_char(lexer->buffer);
+        //     if (next_char == '>')
+        //     {
+        //         sprintf(lexer->current_token.value.identifier, "<>");
+        //         lexer->current_token.type = TOKEN_NOT_EQUAL;
+        //         if (!ps_lexer_read_next_char(lexer))
+        //             return false;
+        //     }
+        //     else if (next_char == '=')
+        //     {
+        //         sprintf(lexer->current_token.value.identifier, "<=");
+        //         lexer->current_token.type = TOKEN_LESS_OR_EQUAL;
+        //         if (!ps_lexer_read_next_char(lexer))
+        //             return false;
+        //     }
+        //     else
+        //         lexer->current_token.type = TOKEN_LESS_THAN;
+        //     if (!ps_lexer_read_next_char(lexer))
+        //         return false;
+        //     break;
+        // case '>':
+        //     next_char = ps_buffer_peek_next_char(lexer->buffer);
+        //     if (next_char == '=')
+        //     {
+        //         sprintf(lexer->current_token.value.identifier, ">=");
+        //         lexer->current_token.type = TOKEN_GREATER_OR_EQUAL;
+        //         if (!ps_lexer_read_next_char(lexer))
+        //             return false;
+        //     }
+        //     else
+        //         lexer->current_token.type = TOKEN_GREATER_THAN;
+        //     ps_lexer_read_next_char(lexer);
+        //     break;
         default:
             printf("DEFAULT! %c %d\n", current_char, current_char);
             lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
