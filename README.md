@@ -103,6 +103,7 @@ Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fp
 - "Free Pascal Reference guide" <https://www.freepascal.org/docs-html/ref/ref.html>
 - "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
 - "Simple Swift interpreter for the Pascal language" <https://github.com/igorkulman/SwiftPascalInterpreter>
+- "Turbo Pascal Archive" <https://github.com/romiras/turbo-pascal-archive>
 
 ### Other sources about compilers and interpreters
 
