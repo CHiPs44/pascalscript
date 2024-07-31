@@ -25,21 +25,21 @@ extern "C"
     typedef struct s_ps_lexer
     {
         // clang-format off
-        ps_buffer buffer;
-        ps_error  error;
-        ps_token     current_token;
+        ps_buffer *buffer;
+        ps_error   error;
+        ps_token   current_token;
         // clang-format on
     } ps_lexer;
 
     /**
      * @brief Initialize a lexer
      */
-    bool ps_lexer_init(ps_lexer *lexer);
+    ps_lexer *ps_lexer_init();
 
     /**
      * @brief Release a lexer
      */
-    bool ps_lexer_done(ps_lexer *lexer);
+    void ps_lexer_done(ps_lexer *lexer);
 
     /**
      * @brief Reset lexer:

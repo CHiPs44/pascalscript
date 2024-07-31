@@ -16,8 +16,7 @@
 #include "../src/ps_readall.c"
 #include "../src/ps_buffer.c"
 
-ps_buffer _buffer;
-ps_buffer *buffer = &_buffer;
+ps_buffer *buffer;
 
 char *minimal_source =
     "PROGRAM MINIMAL;\n"
@@ -45,7 +44,7 @@ int main(void)
     printf("TEST BUFFER: BEGIN\n");
 
     printf("TEST BUFFER: INIT\n");
-    ps_buffer_init(buffer);
+    buffer = ps_buffer_init();
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
@@ -79,5 +78,6 @@ int main(void)
     ps_buffer_dump(buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST BUFFER: END\n");
+    ps_buffer_done(buffer);
     return 0;
 }

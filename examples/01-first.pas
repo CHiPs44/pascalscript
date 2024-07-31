@@ -1,14 +1,12 @@
-program first;
-const
+Program First;
+Const 
   THOUSAND = 1000;
-var
-  a: integer;
-  b, c: integer;
-begin
+Var 
+  a: Integer;
+  b, c: Integer;
+Begin
   a := 1;
   b := -2;
-  c := (a - b) * (THOUSAND + THOUSAND) div 1000;
+  c := (a - b) * (THOUSAND + THOUSAND) Div THOUSAND;
   WriteLn(c);
-  d := a * b div c;
-  foo := 12;
-end.
+End.

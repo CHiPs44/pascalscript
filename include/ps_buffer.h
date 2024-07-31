@@ -43,11 +43,11 @@ extern "C"
         // clang-format on
     } ps_buffer;
 
-    /** @brief Init / reset buffer */
-    bool ps_buffer_init(ps_buffer *buffer);
+    /** @brief Init buffer */
+    ps_buffer *ps_buffer_init();
 
     /** @brief Release buffer */
-    bool ps_buffer_done(ps_buffer *buffer);
+    void ps_buffer_done(ps_buffer *buffer);
 
     /** @brief Reset buffer */
     void ps_buffer_reset(ps_buffer *buffer);

@@ -16,19 +16,11 @@
 #include "ps_readall.h"
 #include "ps_buffer.h"
 
-void ps_buffer_free(ps_buffer *buffer)
+ps_buffer *ps_buffer_init()
 {
-    if (buffer->line_lengths != NULL)
-        free(buffer->line_lengths);
-    buffer->line_lengths = NULL;
-    if (buffer->line_starts != NULL)
-        free(buffer->line_starts);
-    buffer->line_starts = NULL;
-}
-
-bool ps_buffer_init(ps_buffer *buffer)
-{
-    ps_buffer_free(buffer);
+    ps_buffer *buffer = calloc(1, sizeof(ps_buffer));
+    if (buffer == NULL)
+        return NULL;
     buffer->text = NULL;
     buffer->length = 0;
     buffer->line_count = 0;
@@ -36,14 +28,16 @@ bool ps_buffer_init(ps_buffer *buffer)
     buffer->next_char = '\0';
     buffer->error = PS_BUFFER_ERROR_NONE;
     buffer->debug = 0;
-    return true;
+    buffer->line_starts = NULL;
+    buffer->line_lengths = NULL;
+    return buffer;
 }
 
-bool ps_buffer_done(ps_buffer *buffer)
+void ps_buffer_done(ps_buffer *buffer)
 {
-    ps_buffer_free(buffer);
-    memset(buffer, 0, sizeof(ps_buffer));
-    return true;
+    free(buffer->line_starts);
+    free(buffer->line_lengths);
+    free(buffer);
 }
 
 void ps_buffer_reset(ps_buffer *buffer)
@@ -52,6 +46,7 @@ void ps_buffer_reset(ps_buffer *buffer)
     buffer->current_column = 0;
     buffer->current_char = '\0';
     buffer->next_char = '\0';
+    buffer->error = PS_BUFFER_ERROR_NONE;
 }
 
 char *ps_buffer_show_error(ps_buffer *buffer)
