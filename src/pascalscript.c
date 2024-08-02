@@ -12,8 +12,8 @@
 #include "ps_lexer.h"
 #include "ps_buffer.h"
 #include "ps_parser.h"
-#include "ps_symbol_table.h"
 #include "ps_symbol.h"
+#include "ps_symbol_table.h"
 // #include "ps_vm.h"
 
 // ps_vm _vm;

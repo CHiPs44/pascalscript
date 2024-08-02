@@ -61,3 +61,4 @@ GTAGS
 pascalscript
 test/test_value
 tmp*
+.antlr*

@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-    typedef enum e_ps_type
+    typedef enum e_ps_value_type
     {
         /* simple types => direct value */
         PS_TYPE_NONE = 0,
@@ -32,33 +32,37 @@ extern "C"
         PS_TYPE_SET,      // future => unsigned value as a bit field
         PS_TYPE_POINTER,  // future
         /* reference types (pointer to value(s)) */
-        PS_TYPE_STRING, // 
+        PS_TYPE_STRING, //
         PS_TYPE_ARRAY,  // future
         PS_TYPE_RECORD, // future
         PS_TYPE_FILE,   // future
-    } __attribute__((__packed__)) ps_type;
+    } __attribute__((__packed__)) ps_value_type;
 
-    typedef union u_ps_data
+    typedef size_t ps_value_size;
+
+    // clang-format off
+    /** @brief Union value*/
+    typedef union u_ps_value_data
     {
-        // clang-format off
-        ps_integer   i;
-        ps_unsigned  u;
-        ps_real      r;
-        ps_boolean   b;
-        ps_char      c;
-        ps_pointer   p;
-        ps_string   *s;
-        // clang-format on
-    } ps_data;
+        //     Model/bytes 16  32  64 bits
+        ps_integer   i; //  2   4   8
+        ps_unsigned  u; //  2   4   8 
+        ps_real      r; //  2?  4   8
+        ps_boolean   b; //  1?  1?  1?
+        ps_char      c; //  1   1   1
+        ps_pointer   p; //  2   4   8
+        ps_string   *s; //  2   4   8
+    } ps_value_data;
+    // clang-format on
 
+    /* clang-format off */
     typedef struct s_ps_value
     {
-        /* clang-format off */
-        ps_type type;
-        size_t  size;
-        ps_data data;
-        /* clang-format on */
+        ps_value_type type;
+        ps_value_size size;
+        ps_value_data data;
     } ps_value;
+    /* clang-format on */
 
     // clang-format off
     ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
@@ -78,7 +82,7 @@ extern "C"
     ps_pointer  ps_value_get_pointer (ps_value *value);
     // clang-format on
 
-    char *ps_value_get_type_name(ps_type type);
+    char *ps_value_get_type_name(ps_value_type type);
     char *ps_value_get_value(ps_value *value);
     void ps_value_debug(ps_value *value, char *message);
 

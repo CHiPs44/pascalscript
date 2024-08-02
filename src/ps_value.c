@@ -129,7 +129,7 @@ ps_value *ps_value_set_subrange(ps_value *value, ps_integer i)
 
 const struct s_ps_type_name
 {
-    ps_type type;
+    ps_value_type type;
     char *name;
 } ps_type_names[] = {
     // clang-format off
@@ -148,7 +148,7 @@ const struct s_ps_type_name
     // clang-format on
 };
 
-char *ps_value_get_type_name(ps_type type)
+char *ps_value_get_type_name(ps_value_type type)
 {
     for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(struct s_ps_type_name); i++)
     {

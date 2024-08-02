@@ -48,9 +48,7 @@ instruction: assignment | procedureCall;
 
 assignment: variableReference DOT_COLON expression SEMI_COLON;
 
-procedureCall
-    : (WRITE | WRITELN) (LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS)? SEMI_COLON
-;
+procedureCall: (WRITE | WRITELN) (LEFT_PARENTHESIS parameterList RIGHT_PARENTHESIS)? SEMI_COLON;
 
 parameterList: parameter (COMMA parameter)*;
 

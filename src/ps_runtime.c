@@ -12,12 +12,24 @@
 #include "ps_value.h"
 #include "ps_runtime.h"
 
-void ps_runtime_init(ps_runtime *runtime, bool range_check)
+/** @brief Create new runtime */
+ps_runtime *ps_runtime_init()
 {
+    ps_runtime *runtime = calloc(1, sizeof(ps_runtime));
+    if (runtime == NULL)
+        return NULL;
     runtime->error = PS_RUNTIME_ERROR_NONE;
-    runtime->range_check = range_check;
+    runtime->range_check = false;
+    return runtime;
 }
 
+/** @brief Create new runtime */
+ps_runtime *ps_runtime_free(ps_runtime *runtime)
+{
+    free(runtime);
+}
+
+/** @brief Allocate new value */
 ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
 {
     if (runtime->error != PS_RUNTIME_ERROR_NONE)
@@ -31,6 +43,7 @@ ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
     return value;
 }
 
+/** @brief Free value */
 void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
 {
     free(value);
@@ -72,10 +85,10 @@ ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value)
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
-        result->data.b = (ps_boolean)(value->data.u % 2 == 1);
+        result->data.b = (ps_boolean)(value->data.u & 1 == 1);
         return result;
     case PS_TYPE_INTEGER:
-        result->data.b = (ps_boolean)(value->data.i % 2 == 1);
+        result->data.b = (ps_boolean)(value->data.i & 1 == 1);
         return result;
     default:
         free(result);
@@ -272,5 +285,3 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
         return NULL;
     }
 }
-
-// ps_runtime_func_sizeof?

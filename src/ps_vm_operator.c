@@ -37,7 +37,7 @@ bool vm_is_op_boolean(ps_vm_opcode op)
            op == OP_BOOL_OR || op == OP_BOOL_XOR;
 }
 
-ps_type vm_get_op_binary_type(ps_vm_opcode op, ps_type a, ps_type b)
+ps_value_type vm_get_op_binary_type(ps_vm_opcode op, ps_value_type a, ps_value_type b)
 {
     if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
         return PS_TYPE_NONE;
