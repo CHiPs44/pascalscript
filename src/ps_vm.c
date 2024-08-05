@@ -13,63 +13,71 @@
 #include "ps_config.h"
 #include "ps_error.h"
 #include "ps_symbol.h"
+#include "ps_value.h"
 #include "ps_vm.h"
+
+void ps_runtime_add_system_constant(ps_vm *vm, const char *name, ps_value *value)
+{
+    ps_symbol symbol;
+    strcpy(symbol.name, name);
+    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
+    symbol.scope = PS_SCOPE_SYSTEM;
+    ps_symbol_table_add(&vm->symbols, &symbol);
+}
 
 /**
  * @brief Initialize VM
  */
-void vm_init(ps_vm *vm)
+ps_vm *ps_runtime_init()
 {
-    ps_symbol symbol;
-    ps_symbol_table_init(&vm->symbols);
-    /*******************************************/
-    strcpy(symbol.name, "__PS_VERSION__");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_unsigned(&symbol.value,
-                      (PS_VERSION_MAJOR << 24) | (PS_VERSION_MINOR << 16) | (PS_VERSION_PATCH << 8) | (PS_VERSION_INDEX & 0xff));
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "__PS_VERTEXT__");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    symbol.value.type = PS_TYPE_STRING;
-    symbol.value.size = ps_string_max + 1;
-    snprintf(&symbol.value.data.s.str, ps_string_max, "%d.%d.%d.%d",
-             PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "MAXINT");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_integer(&symbol.value, PS_INTEGER_MAX);
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "MAXUINT");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_unsigned(&symbol.value, PS_UNSIGNED_MAX);
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "FALSE");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_boolean(&symbol.value, false);
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "TRUE");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_boolean(&symbol.value, true);
-    ps_symbol_table_add(&vm->symbols, &symbol);
-    /*******************************************/
-    strcpy(symbol.name, "PI");
-    symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    ps_value_set_real(&symbol.value, 3.141592653589793);
-    ps_symbol_table_add(&vm->symbols, &symbol);
+    ps_char buffer[128];
+    ps_value *value;
+
+    ps_vm *vm = calloc(1, sizeof(ps_vm));
+    if (vm == NULL)
+        return NULL;
+
+    /* Symbol table */
+    vm->symbols = ps_symbol_table_init();
+    if (vm->symbols == NULL)
+    {
+        free(vm);
+        return NULL;
+    }
     /* Stack */
-    ps_symbol_stack_init(&vm->stack);
+    vm->stack = ps_symbol_stack_init();
+    if (vm->stack == NULL)
+    {
+        free(vm->symbols);
+        free(vm);
+        return NULL;
+    }
+
+    // Version
+    value = ps_value_set_unsigned(NULL, PS_VERSION_MAJOR);
+    ps_runtime_add_system_constant(vm, "PS_VERSION_MAJOR", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_MINOR);
+    ps_runtime_add_system_constant(vm, "PS_VERSION_MINOR", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_PATCH);
+    ps_runtime_add_system_constant(vm, "PS_VERSION_PATCH", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_INDEX);
+    ps_runtime_add_system_constant(vm, "PS_VERSION_INDEX", value);
+    snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+    value = ps_value_set_string(NULL, buffer, strlen(buffer));
+    ps_runtime_add_system_constant(vm, "PS_VERSION", value);
+    // Limits
+    value = ps_value_set_integer(NULL, ps_integer_max);
+    ps_runtime_add_system_constant(vm, "MAXINT", value);
+    value = ps_value_set_unsigned(NULL, ps_unsigned_max);
+    ps_runtime_add_system_constant(vm, "MAXUINT", value);
+    // These are keywords for now
+    // value = ps_value_set_boolean(NULL, false);
+    // ps_runtime_add_system_constant(vm, "FALSE", value);
+    // value = ps_value_set_boolean(NULL, true);
+    // ps_runtime_add_system_constant(vm, "TRUE", value);
+    // Reals without PI is not conceivable
+    value = ps_value_set_real(NULL, 3.141592653589793); // 115997963468544185161590576171875);
+    ps_runtime_add_system_constant(vm, "PI", value);
 }
 
 /**
@@ -82,6 +90,11 @@ void vm_init(ps_vm *vm)
 ps_symbol *vm_global_get(ps_vm *vm, char *name)
 {
     ps_symbol *symbol = ps_symbol_table_get(&vm->symbols, name);
+    if (symbol == NULL)
+        return NULL;
+    if (symbol->kind != PS_SCOPE_GLOBAL)
+        return NULL;
+    return symbol;
 }
 
 /**
@@ -131,12 +144,12 @@ ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value *value)
     return index >= 0 ? &vm->symbols.symbols[index] : NULL;
 }
 
-ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value value)
+ps_symbol *vm_auto_add_value(ps_vm *vm, ps_scope scope, ps_value value)
 {
     ps_symbol symbol;
     strcpy(symbol.name, "");
     symbol.kind = PS_SYMBOL_KIND_AUTO;
-    symbol.scope = PS_SCOPE_GLOBAL;
+    symbol.scope = scope;
     symbol.value.type = PS_TYPE_INTEGER;
     symbol.value.size = sizeof(ps_integer);
     symbol.value.data.i = value;

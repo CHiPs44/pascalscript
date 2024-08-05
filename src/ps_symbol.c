@@ -71,17 +71,17 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
             *name++ += ('A' - 'a');
 }
 
-ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol)
-{
-    // cf. 
-    ps_symbol_hash_key hash = 5381u;
-    char *name = symbol->name;
-    while (*name)
-    {
-        // 33 * x => 32 * x + x => x << 5 + x
-        hash = (hash << 5) + hash + *name;
-    }
-    return hash;
-}
+// ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol)
+// {
+//     // cf. 
+//     ps_symbol_hash_key hash = 5381u;
+//     char *name = symbol->name;
+//     while (*name)
+//     {
+//         // 33 * x => 32 * x + x => x << 5 + x
+//         hash = (hash << 5) + hash + *name;
+//     }
+//     return hash;
+// }
 
 /* EOF */

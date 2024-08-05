@@ -26,7 +26,7 @@ int main(void)
     int result;
     ps_error_t code;
     printf("TEST VM #02 UNARY: BEGIN\n");
-    vm_init(vm);
+    ps_runtime_init(vm);
     ps_symbol_table_dump(&vm->symbols, "Init");
     printf("TEST VM #02 UNARY: INIT OK\n");
     ps_symbol symbol = {"I", PS_SYMBOL_KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};

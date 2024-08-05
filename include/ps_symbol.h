@@ -31,7 +31,9 @@ extern "C"
         // ...
     } __attribute__((__packed__)) ps_symbol_kind;
 
-#define PS_SCOPE_GLOBAL 0
+#define PS_SCOPE_SYSTEM 0
+#define PS_SCOPE_GLOBAL 1
+#define PS_SCOPE_LOCAL_START 2
 #define PS_SCOPE_LOCAL_FORMAT "LOCAL%03d"
 
     typedef uint8_t ps_scope;
@@ -44,8 +46,6 @@ extern "C"
         char name[PS_IDENTIFIER_MAX + 1];
         ps_value value;
     } ps_symbol;
-
-    typedef uint16_t ps_symbol_hash_key;
 
     /** @brief Get kind name for symbol () */
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);
@@ -62,8 +62,10 @@ extern "C"
     /** @brief Normalize symbol name (=> UPPERCASE) in place (no string copy) */
     void ps_symbol_normalize_name(ps_symbol *symbol);
 
-    /** @brief Get hash key of symbol name (using DJB2's algorithm) */
-    ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol);
+    // typedef uint16_t ps_symbol_hash_key;
+
+    // /** @brief Get hash key of symbol name (using DJB2's algorithm) */
+    // ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol);
 
 #ifdef __cplusplus
 }

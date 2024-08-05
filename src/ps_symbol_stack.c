@@ -17,35 +17,22 @@
  *
  * @param stack
  */
-void ps_symbol_stack_init(ps_symbol_stack *stack)
+ps_symbol_stack *ps_symbol_stack_init()
 {
+    ps_symbol_stack *stack = calloc(1, sizeof(ps_symbol_stack));
+    if (stack == NULL)
+        return NULL;
     stack->sp = -1;
     for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
     {
         stack->symbols[i] = NULL;
     }
+    return stack;
 }
 
-/**
- * @brief Get actual stack size
- *
- * @param stack
- * @return int
- */
-int ps_symbol_stack_size(ps_symbol_stack *stack)
+void ps_symbol_stack_free(ps_symbol_stack *stack)
 {
-    return stack->sp + 1;
-}
-
-/**
- * @brief Check if stack is full
- *
- * @param Stack
- * @return true if stack is full
- */
-extern bool ps_symbol_stack_full(ps_symbol_stack *stack)
-{
-    return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
+    free(stack);
 }
 
 void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
@@ -74,6 +61,28 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
         }
     }
     fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+}
+
+/**
+ * @brief Get actual stack size
+ *
+ * @param stack
+ * @return int
+ */
+int ps_symbol_stack_size(ps_symbol_stack *stack)
+{
+    return stack->sp + 1;
+}
+
+/**
+ * @brief Check if stack is full
+ *
+ * @param Stack
+ * @return true if stack is full
+ */
+extern bool ps_symbol_stack_full(ps_symbol_stack *stack)
+{
+    return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
 }
 
 /**

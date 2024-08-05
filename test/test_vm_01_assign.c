@@ -29,7 +29,7 @@ int main(void)
     ps_error code;
 
     printf("TEST VM #01 ASSIGN: BEGIN\n");
-    vm_init(vm);
+    ps_runtime_init(vm);
     ps_symbol_table_dump(&vm->symbols, "Init");
     printf("TEST VM #01 ASSIGN: INIT OK\n");
 

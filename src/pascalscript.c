@@ -43,7 +43,7 @@ char *hello_source =
 int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
-  // vm_init(vm);
+  // ps_runtime_init(vm);
   ps_symbol_table_dump(&vm->symbols, "Init");
   ps_symbol *ps_version = vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",

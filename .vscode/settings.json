@@ -42,6 +42,7 @@
         "resource.h": "c",
         "ps_symbol_table.h": "c",
         "ps_readall.h": "c",
-        "ps_runtime.h": "c"
+        "ps_runtime.h": "c",
+        "ps_type_definition.h": "c"
     }
 }

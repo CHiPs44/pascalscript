@@ -77,13 +77,13 @@ extern "C"
     typedef struct s_ps_vm_t
     {
         // ps_parser parser;
-        ps_symbol_table symbols;
-        ps_symbol_stack stack;
+        ps_symbol_table *symbols;
+        ps_symbol_stack *stack;
         ps_error error;
     } ps_vm;
 
     /**@brief Initialize VM: reset source, global table & stack */
-    void vm_init(ps_vm *vm);
+    void ps_runtime_init(ps_vm *vm);
 
     // extern bool vm_exec(ps_vm *vm);
 

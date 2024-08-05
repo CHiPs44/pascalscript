@@ -29,14 +29,14 @@ extern "C"
     } ps_symbol_stack;
 
     // clang-format off
-    void       ps_symbol_stack_init(ps_symbol_stack *stack);
-    int        ps_symbol_stack_size(ps_symbol_stack *stack);
-    bool       ps_symbol_stack_full(ps_symbol_stack *stack);
-    void       ps_symbol_stack_dump(ps_symbol_stack *stack, char *title);
-    int        ps_symbol_stack_push(ps_symbol_stack *stack, ps_symbol *symbol);
-    ps_symbol *ps_symbol_stack_pop (ps_symbol_stack *stack);
-    bool       ps_symbol_stack_poke(ps_symbol_stack *stack, ps_symbol *symbol);
-    ps_symbol *ps_symbol_stack_peek(ps_symbol_stack *stack);
+    ps_symbol_stack *ps_symbol_stack_init();
+    void             ps_symbol_stack_dump(ps_symbol_stack *stack, char *title);
+    int              ps_symbol_stack_size(ps_symbol_stack *stack);
+    bool             ps_symbol_stack_full(ps_symbol_stack *stack);
+    int              ps_symbol_stack_push(ps_symbol_stack *stack, ps_symbol *symbol);
+    ps_symbol       *ps_symbol_stack_pop (ps_symbol_stack *stack);
+    bool             ps_symbol_stack_poke(ps_symbol_stack *stack, ps_symbol *symbol);
+    ps_symbol       *ps_symbol_stack_peek(ps_symbol_stack *stack);
     // clang-format on
 
 #ifdef __cplusplus
