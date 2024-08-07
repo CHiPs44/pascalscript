@@ -22,12 +22,9 @@ extern "C"
         PS_SYMBOL_KIND_AUTO,
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
+        PS_SYMBOL_KIND_TYPE,
         // PS_SYMBOL_KIND_PROCEDURE,
         // PS_SYMBOL_KIND_FUNCTION,
-        // PS_SYMBOL_KIND_TYPE,
-        // PS_SYMBOL_KIND_POINTER,
-        // PS_SYMBOL_KIND_SET,
-        // PS_SYMBOL_KIND_RECORD,
         // ...
     } __attribute__((__packed__)) ps_symbol_kind;
 
@@ -43,7 +40,7 @@ extern "C"
     {
         ps_symbol_kind kind;
         ps_scope scope;
-        char name[PS_IDENTIFIER_MAX + 1];
+        ps_identifier name;
         ps_value value;
     } ps_symbol;
 

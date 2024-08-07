@@ -7,34 +7,36 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ps_symbol.h"
 #include "ps_value.h"
+#include "ps_symbol.h"
 
-const char *ps_symbol_kind_names[] = {
-    "FREE",
-    "AUTO",
-    "CONSTANT",
-    "VARIABLE",
-    // "PROCEDURE",
-    // "FUNCTION",
-    // "TYPE",
-    // "POINTER",
-    // "SET",
-    // "RECORD",
+const struct s_ps_symbol_kind_name
+{
+    ps_symbol_kind kind;
+    char *name;
+} ps_symbol_kind_names[] = {
+    {PS_SYMBOL_KIND_FREE, "FREE"},
+    {PS_SYMBOL_KIND_AUTO, "AUTO"},
+    {PS_SYMBOL_KIND_CONSTANT, "CONSTANT"},
+    {PS_SYMBOL_KIND_VARIABLE, "VARIABLE"},
+    {PS_SYMBOL_KIND_TYPE, "TYPE"},
 };
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 {
-    static char kind_name[16];
-    if (kind >= PS_SYMBOL_KIND_FREE && kind <= PS_SYMBOL_KIND_VARIABLE /*PS_SYMBOL_KIND_RECORD*/)
-        return ps_symbol_kind_names[kind];
-    snprintf(kind_name, 15, "? Unknown %d ?", kind);
-    return kind_name;
+    static char name[16];
+    for (int i = 0; i < sizeof(ps_symbol_kind_names) / sizeof(struct s_ps_symbol_kind_name); i += 1)
+        if (ps_symbol_kind_names[i].kind == kind)
+            return ps_symbol_kind_names[i].name;
+    snprintf(name, 15, "? Unknown %d ?", kind);
+    return name;
 }
 
 char *ps_symbol_get_scope_name(ps_scope scope)
 {
-    static char scope_name[7 + 1];
+    static char scope_name[8 + 1];
+    if (scope==PS_SCOPE_SYSTEM)
+        snprintf(scope_name, 7, "SYSTEM");
     if (scope == PS_SCOPE_GLOBAL)
         snprintf(scope_name, 7, "GLOBAL");
     else
@@ -44,15 +46,14 @@ char *ps_symbol_get_scope_name(ps_scope scope)
 
 char *ps_symbol_dump(ps_symbol *symbol)
 {
-    static char buffer[512];
+    static char buffer[256];
     snprintf(buffer, sizeof(buffer) - 1,
-             "SYMBOL: name=%-*s, kind=%-16s, scope=%-8s, type=%-16s, size=%ld, value=%s",
+             "SYMBOL: name=%-*s, kind=%-16s, scope=%-8s, type=%-16s, value=%s",
              PS_IDENTIFIER_MAX,
              symbol->name,
              ps_symbol_get_kind_name(symbol->kind),
              ps_symbol_get_scope_name(symbol->scope),
              ps_value_get_type_name(symbol->value.type),
-             symbol->value.size,
              ps_value_get_value(&symbol->value));
     return buffer;
 }
@@ -73,7 +74,7 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
 
 // ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol)
 // {
-//     // cf. 
+//     // cf.
 //     ps_symbol_hash_key hash = 5381u;
 //     char *name = symbol->name;
 //     while (*name)

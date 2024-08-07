@@ -21,23 +21,29 @@ extern "C"
 #define PS_IDENTIFIER_MAX 31
 #endif
 
+typedef char ps_identifier[PS_IDENTIFIER_MAX+1];
+
     /*
         NB: 32 bits by default, as our far target is RP2040 which has ARM M0+ cores
     */
 
 #ifndef PS_INTEGER
+
 // 16 bits
 // #define PS_INTEGER int16_t
 // #define PS_INTEGER_MIN INT16_MIN
 // #define PS_INTEGER_MAX INT32_MAX
+
 // 32 bits
 #define PS_INTEGER int32_t
 #define PS_INTEGER_MIN INT32_MIN
 #define PS_INTEGER_MAX INT32_MAX
+
 // 64 bits
 // #define PS_INTEGER int64_t
 // #define PS_INTEGER_MIN INT64_MIN
 // #define PS_INTEGER_MAX INT64_MAX
+
 #endif
 
 #ifndef PS_INTEGER_MIN
@@ -49,18 +55,22 @@ extern "C"
 #endif
 
 #ifndef PS_UNSIGNED
+
 // 16 bits
 // #define PS_UNSIGNED uint16_t
 // #define PS_UNSIGNED_MAX 0xffff
 // #define PS_UNSIGNED_WIDTH UINT16_WIDTH
+
 // 32 bits
 #define PS_UNSIGNED uint32_t
 #define PS_UNSIGNED_MAX UINT32_MAX
 #define PS_UNSIGNED_WIDTH UINT32_WIDTH
+
 // 64 bits
 // #define PS_UNSIGNED uint64_t
 // #define PS_UNSIGNED_MAX UINT64_MAX
 // #define PS_UNSIGNED_WIDTH UINT64_WIDTH
+
 #endif
 
 #ifndef PS_UNSIGNED_MAX

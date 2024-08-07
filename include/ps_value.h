@@ -21,14 +21,16 @@ extern "C"
     /** @brief Union value*/
     typedef union u_ps_value_data
     {
-        //     Model/bytes 16  32  64 bits
-        ps_integer   i; //  2   4   8
-        ps_unsigned  u; //  2   4   8 
-        ps_real      r; //  2?  4   8
-        ps_boolean   b; //  1?  1?  1?
-        ps_char      c; //  1   1   1
-        ps_pointer   p; //  2   4   8
-        ps_string   *s; //  2   4   8
+        //             Model/bytes 16  32  64 bits
+        //                         --- --- ---
+        ps_integer          i; //  2   4   8
+        ps_unsigned         u; //  2   4   8 
+        ps_real             r; //  2?  4   8
+        ps_boolean          b; //  1?  1?  1?
+        ps_char             c; //  1   1   1
+        ps_pointer          p; //  2   4   8
+        ps_string          *s; //  2   4   8
+        ps_type_definition *t; //  2   4   8
     } ps_value_data;
     // clang-format on
 

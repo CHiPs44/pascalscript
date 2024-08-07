@@ -46,9 +46,9 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
     //                        1         2         3         4         5         6         7         8         9        10
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
     //                1234 1234567890123456789012345678901 12345678 12345678 12345678 12345678 1234567890123456789012345678901
-    fprintf(stderr, "┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(stderr, "┃  # ┃            Name               ┃  Kind  ┃ Scope  ┃  Type  ┃  Size  ┃              Value            ┃\n");
-    fprintf(stderr, "┣━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(stderr, "┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(stderr, "┃  # ┃            Name               ┃  Kind  ┃ Scope  ┃  Type  ┃              Value            ┃\n");
+    fprintf(stderr, "┣━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
     {
         if (table->symbols[i].kind == PS_SYMBOL_KIND_FREE)
@@ -64,10 +64,10 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
             char *type_name = ps_value_get_type_name(symbol->value.type);
             char *buffer = ps_value_get_value(&symbol->value);
             fprintf(stderr, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, 31, symbol->name, kind_name, scope_name, type_name, symbol->value.size, 31, buffer);
+                    i, 31, symbol->name, kind_name, scope_name, type_name, 31, buffer);
         }
     }
-    fprintf(stderr, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(stderr, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
     fprintf(stderr, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used, free + used == table->size ? "OK" : "KO");
 }
 
@@ -123,7 +123,6 @@ ps_symbol_table_size ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symb
         strncpy(table->symbols[index].name, symbol->name, PS_IDENTIFIER_MAX);
     table->symbols[index].kind = symbol->kind;
     table->symbols[index].value.type = symbol->value.type;
-    table->symbols[index].value.size = symbol->value.size;
     table->symbols[index].value.data = symbol->value.data;
     // if (symbol->value.type == PS_TYPE_STRING)
     // {
