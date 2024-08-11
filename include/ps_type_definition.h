@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 #include "ps_config.h"
-#include "ps_types.h"
+#include "ps_system_types.h"
 
 #ifdef __cplusplus
 extern "C"

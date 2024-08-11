@@ -43,6 +43,8 @@
         "ps_symbol_table.h": "c",
         "ps_readall.h": "c",
         "ps_runtime.h": "c",
-        "ps_type_definition.h": "c"
+        "ps_type_definition.h": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     }
 }

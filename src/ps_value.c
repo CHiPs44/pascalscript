@@ -14,7 +14,7 @@
 
 static ps_error ps_value_error = PS_ERROR_ZERO;
 
-#define PS_VALUE_SET(PS_TYPE, ps_type, x)                    \
+#define PS_VALUE_SET(PS_TYPE, x)                    \
     if (value == NULL)                                       \
     {                                                        \
         value = calloc(1, sizeof(ps_value));                 \
@@ -25,43 +25,42 @@ static ps_error ps_value_error = PS_ERROR_ZERO;
         }                                                    \
     }                                                        \
     value->type = PS_TYPE;                                   \
-    value->size = sizeof(ps_type);                           \
     value->data.x = x;                                       \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET(PS_TYPE_INTEGER, ps_integer, i);
+    PS_VALUE_SET(PS_TYPE_INTEGER, i);
 }
 
 ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET(PS_TYPE_UNSIGNED, ps_unsigned, u);
+    PS_VALUE_SET(PS_TYPE_UNSIGNED, u);
 }
 
 ps_value *ps_value_set_real(ps_value *value, ps_real r)
 {
-    PS_VALUE_SET(PS_TYPE_REAL, ps_real, r);
+    PS_VALUE_SET(PS_TYPE_REAL, r);
 }
 
 ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
 {
-    PS_VALUE_SET(PS_TYPE_BOOLEAN, ps_boolean, b);
+    PS_VALUE_SET(PS_TYPE_BOOLEAN, b);
 }
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c)
 {
-    PS_VALUE_SET(PS_TYPE_CHAR, ps_char, c);
+    PS_VALUE_SET(PS_TYPE_CHAR, c);
 }
 
 ps_value *ps_value_set_enum(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET(PS_TYPE_ENUM, ps_unsigned, u);
+    PS_VALUE_SET(PS_TYPE_ENUM, u);
 }
 
 ps_value *ps_value_set_subrange(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET(PS_TYPE_SUBRANGE, ps_integer, i);
+    PS_VALUE_SET(PS_TYPE_SUBRANGE, i);
 }
 
 ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
@@ -127,7 +126,7 @@ ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
 
 ps_value *ps_value_set_pointer(ps_value *value, void *p)
 {
-    PS_VALUE_SET(PS_TYPE_POINTER, ps_pointer, p);
+    PS_VALUE_SET(PS_TYPE_POINTER, p);
 }
 
 const struct s_ps_type_name
@@ -146,6 +145,7 @@ const struct s_ps_type_name
     {PS_TYPE_SUBRANGE   , "SUBRANGE"},
     {PS_TYPE_SET        , "SET"     },
     {PS_TYPE_STRING     , "STRING"  },
+    {PS_TYPE_DEFINITION , "TYPE_DEF"},
     {PS_TYPE_POINTER    , "POINTER" },
     {PS_TYPE_ARRAY      , "ARRAY"   },
     {PS_TYPE_RECORD     , "RECORD"  },

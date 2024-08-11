@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 
-#include "ps_types.h"
+#include "ps_system_types.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus

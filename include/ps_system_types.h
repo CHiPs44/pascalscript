@@ -4,8 +4,8 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _PS_TYPES_H
-#define _PS_TYPES_H
+#ifndef _PS_SYSTEM_TYPES_H
+#define _PS_SYSTEM_TYPES_H
 
 // #include <stdlib.h>
 // #include <stdbool.h>
@@ -66,4 +66,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_TYPES_H */
+#endif /* _PS_SYSTEM_TYPES_H */

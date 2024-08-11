@@ -52,7 +52,7 @@ extern "C"
     ps_value *ps_value_set_subrange(ps_value *value, ps_integer  i);
     ps_value *ps_value_set_string  (ps_value *value, char *s, ps_string_len max);
     ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p);
-    // TODO
+    // TODO?
     ps_integer  ps_value_get_integer (ps_value *value);
     ps_unsigned ps_value_get_unsigned(ps_value *value);
     ps_boolean  ps_value_get_boolean (ps_value *value);
