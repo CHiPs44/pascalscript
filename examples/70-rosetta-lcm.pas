@@ -18,5 +18,5 @@ Begin
     A := 12;
     B := 18;
     R := 36;
-    WriteLn('GCD(', A, ', ', B, '): ', LCM(A, B), ' (', R, ')');
+    WriteLn('LCM(', A, ', ', B, '): ', LCM(A, B), ' (', R, ')');
 End.
