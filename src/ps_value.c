@@ -87,7 +87,7 @@ ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
         }
     }
     value->type = PS_TYPE_STRING;
-    value->size = sizeof(ps_string);
+    // value->size = sizeof(ps_string);
     if (max > 0 || is_new)
     {
         // (Re)allocate to new max length

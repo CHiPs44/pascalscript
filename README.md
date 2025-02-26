@@ -315,12 +315,12 @@ end.
 ### Types
 
 - Unsigned and signed integers:
-  - `integer` is 32 bits signed type, period.
+  - `Integer` is 32 bits signed type, period.
   - 8 bits: `Byte` / `Shortint`
   - 16 bits: `Word` / `Smallint`
-  - 32 bits: `Longword` / `Longint`
+  - 32 bits: `Longword` / `Longint` => `Cardinal`
   - 64 bits: `QWord` / `Int64`
-- Ranges: `Min .. Max`
+- Ranges: `Min .. Max` for unsigned or signed integer
 - Enums: `(One, Two, Three, Four)`
 - Arrays: `Array[1..10] Of Integer`
 - Char (see below)
@@ -371,7 +371,7 @@ This will wait until we have implemented range types.
   - all Unicode chars can be encoded
   - 4 bytes per char for ASCII only text
   - fixed length make string operations easy
-  - maximum length: either4294967295 (length is a 32 bits word, too)
+  - maximum length: 4294967295 (length is a 32 bits word, too)
 
 ### Standard libraries
 

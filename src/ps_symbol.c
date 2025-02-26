@@ -20,6 +20,9 @@ const struct s_ps_symbol_kind_name
     {PS_SYMBOL_KIND_CONSTANT, "CONSTANT"},
     {PS_SYMBOL_KIND_VARIABLE, "VARIABLE"},
     {PS_SYMBOL_KIND_TYPE, "TYPE"},
+    // {PS_SYMBOL_KIND_PROCEDURE, "PROCEDURE"},
+    // {PS_SYMBOL_KIND_FUNCTION, "FUNCTION"},
+    // ...
 };
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
@@ -34,13 +37,18 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 
 char *ps_symbol_get_scope_name(ps_scope scope)
 {
-    static char scope_name[8 + 1];
-    if (scope==PS_SCOPE_SYSTEM)
-        snprintf(scope_name, 7, "SYSTEM");
-    if (scope == PS_SCOPE_GLOBAL)
-        snprintf(scope_name, 7, "GLOBAL");
-    else
-        snprintf(scope_name, 7, PS_SCOPE_LOCAL_FORMAT, scope);
+    static char scope_name[PS_SCOPE_NAME_LEN + 1];
+    switch (scope)
+    {
+    case PS_SCOPE_SYSTEM:
+        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_SYSTEM_NAME);
+        break;
+    case PS_SCOPE_GLOBAL:
+        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_GLOBAL_NAME);
+        break;
+    default:
+        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_LOCAL_FORMAT, scope);
+    }
     return scope_name;
 }
 

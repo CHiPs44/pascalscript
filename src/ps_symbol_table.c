@@ -49,7 +49,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
     fprintf(stderr, "┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(stderr, "┃  # ┃            Name               ┃  Kind  ┃ Scope  ┃  Type  ┃              Value            ┃\n");
     fprintf(stderr, "┣━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
+    for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i].kind == PS_SYMBOL_KIND_FREE)
         {
@@ -100,9 +100,9 @@ ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
 
 ps_symbol_table_size ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
-    if (symbol->kind==PS_SYMBOL_KIND_FREE)
+    if (symbol->kind == PS_SYMBOL_KIND_FREE)
         return PS_SYMBOL_TABLE_ERROR_KIND;
-    if (table->used >= PS_SYMBOL_TABLE_SIZE)
+    if (table->used >= table->size)
     {
         return PS_SYMBOL_TABLE_ERROR_FULL;
     }
@@ -184,7 +184,7 @@ ps_symbol_table_size ps_symbol_table_free(ps_symbol_table *table, char *name)
 ps_symbol_table_size ps_symbol_table_gc(ps_symbol_table *table)
 {
     int count = 0;
-    for (int i = 0; i < PS_SYMBOL_TABLE_SIZE; i++)
+    for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i].kind == PS_SYMBOL_KIND_FREE)
         {

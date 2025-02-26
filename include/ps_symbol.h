@@ -31,7 +31,10 @@ extern "C"
 #define PS_SCOPE_SYSTEM 0
 #define PS_SCOPE_GLOBAL 1
 #define PS_SCOPE_LOCAL_START 2
-#define PS_SCOPE_LOCAL_FORMAT "LOCAL%03d"
+#define PS_SCOPE_NAME_LEN 7
+#define PS_SCOPE_SYSTEM_NAME "SYSTEM"
+#define PS_SCOPE_GLOBAL_NAME "GLOBAL"
+#define PS_SCOPE_LOCAL_FORMAT "LOC-%03d"
 
     typedef uint8_t ps_scope;
     const ps_scope_max = UINT8_MAX;
@@ -44,10 +47,10 @@ extern "C"
         ps_value value;
     } ps_symbol;
 
-    /** @brief Get kind name for symbol () */
+    /** @brief Get kind name for symbol */
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);
 
-    /** @brief Get kind name for symbol () */
+    /** @brief Get scope name for symbol */
     char *ps_symbol_get_scope_name(ps_scope scope);
 
     /** @brief Get symbol info */

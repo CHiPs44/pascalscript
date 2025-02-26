@@ -1,17 +1,19 @@
+
 Program second;
 
-Const foo = 1;
+Const 
+  foo = 1;
   msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
-  result = 'The result is: ';
+  r = 'The result is: ';
 
-Var a, b, c: integer;
+Var a, b, c: Integer;
 
 Begin
   WriteLn(msg);
   a := foo;
   b := 2;
   c := a + b;
-  Write(result);
+  Write(r);
   WriteLn(c);
   d := a * b Div c;
   foo := 12;
