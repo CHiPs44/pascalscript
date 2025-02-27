@@ -13,6 +13,12 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
+ps_type_definition ps_type_def_integer = {.base = PS_TYPE_INTEGER};
+ps_type_definition ps_type_def_unsigned = {.base = PS_TYPE_UNSIGNED};
+ps_type_definition ps_type_def_real = {.base = PS_TYPE_REAL};
+ps_type_definition ps_type_def_boolean = {.base = PS_TYPE_BOOLEAN};
+ps_type_definition ps_type_def_char = {.base = PS_TYPE_CHAR};
+
 ps_type_definition *ps_type_definition_create()
 {
     ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));

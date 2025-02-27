@@ -39,16 +39,22 @@ extern "C"
         PS_TYPE_ARRAY,  // *FUTURE*
         PS_TYPE_RECORD, // *FUTURE*
         PS_TYPE_FILE,   // *FUTURE*
-    } __attribute__((__packed__)) ps_value_type;
+    } /*__attribute__((__packed__))*/ ps_value_type;
 
-    /** @brief *FUTURE* => stored in unsigned value (first=0, second=1, ...) */
+    typedef struct s_ps_type_name
+    {
+        ps_value_type type;
+        char *name;
+    } ps_type_name;
+
+    /** @brief *FUTURE* => enums are stored in unsigned value (first=0, second=1, ...) */
     typedef struct s_ps_type_definition_enum
     {
         ps_unsigned count;
         ps_identifier *values;
     } ps_type_definition_enum;
 
-    /** @brief *FUTURE* => stored in integer value (-10..15), reference to type needed, needed to implement arrays */
+    /** @brief *FUTURE* => subranges are stored in integer value (-10..15), reference to type needed, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
         ps_integer min;
@@ -68,8 +74,8 @@ extern "C"
         ps_string_len max_length;
     } ps_type_definition_string;
 
-    /** @brief  */
-    typedef struct
+    /** @brief Type definition: base + parameters if needed */
+    typedef struct s_ps_type_definition
     {
         ps_value_type base;
         union
@@ -82,6 +88,12 @@ extern "C"
             // ps_type_definition_array def_array;
         } def;
     } ps_type_definition;
+
+    extern ps_type_definition ps_type_def_integer;
+    extern ps_type_definition ps_type_def_unsigned;
+    extern ps_type_definition ps_type_def_real;
+    extern ps_type_definition ps_type_def_boolean;
+    extern ps_type_definition ps_type_def_char;
 
 #ifdef __cplusplus
 }

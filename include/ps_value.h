@@ -24,13 +24,14 @@ extern "C"
         //             Model/bytes 16  32  64 bits
         //                         --- --- ---
         ps_integer          i; //  2   4   8
-        ps_unsigned         u; //  2   4   8 
+        ps_unsigned         u; //  2   4   8
         ps_real             r; //  2?  4   8
         ps_boolean          b; //  1?  1?  1?
         ps_char             c; //  1   1   1
+        ps_unsigned         e; //  2   4   8
         ps_pointer          p; //  2   4   8
         ps_string          *s; //  2   4   8
-        ps_type_definition *t; //  2   4   8
+        // ps_type_definition *t; //  2   4   8
     } ps_value_data;
     // clang-format on
 
@@ -48,8 +49,8 @@ extern "C"
     ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
     ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
     ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
-    ps_value *ps_value_set_enum    (ps_value *value, ps_unsigned u);
-    ps_value *ps_value_set_subrange(ps_value *value, ps_integer  i);
+    ps_value *ps_value_set_enum    (ps_value *value, ps_unsigned e, ps_type_definition *type_def);
+    ps_value *ps_value_set_subrange(ps_value *value, ps_integer  i, ps_type_definition *type_def);
     ps_value *ps_value_set_string  (ps_value *value, char *s, ps_string_len max);
     ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p);
     // TODO?

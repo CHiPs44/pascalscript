@@ -10,11 +10,12 @@
 
 #include "ps_error.h"
 #include "ps_string.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 static ps_error ps_value_error = PS_ERROR_ZERO;
 
-#define PS_VALUE_SET(PS_TYPE, x)                    \
+#define PS_VALUE_SET(PS_TYPE_DEF, x)                         \
     if (value == NULL)                                       \
     {                                                        \
         value = calloc(1, sizeof(ps_value));                 \
@@ -24,42 +25,46 @@ static ps_error ps_value_error = PS_ERROR_ZERO;
             return NULL;                                     \
         }                                                    \
     }                                                        \
-    value->type = PS_TYPE;                                   \
+    value->type = PS_TYPE_DEF;                               \
     value->data.x = x;                                       \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET(PS_TYPE_INTEGER, i);
+    PS_VALUE_SET(&ps_type_def_integer, i);
 }
 
 ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET(PS_TYPE_UNSIGNED, u);
+    PS_VALUE_SET(&ps_type_def_unsigned, u);
 }
 
 ps_value *ps_value_set_real(ps_value *value, ps_real r)
 {
-    PS_VALUE_SET(PS_TYPE_REAL, r);
+    PS_VALUE_SET(&ps_type_def_real, r);
 }
 
 ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
 {
-    PS_VALUE_SET(PS_TYPE_BOOLEAN, b);
+    PS_VALUE_SET(&ps_type_def_boolean, b);
 }
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c)
 {
-    PS_VALUE_SET(PS_TYPE_CHAR, c);
+    PS_VALUE_SET(&ps_type_def_char, c);
 }
 
-ps_value *ps_value_set_enum(ps_value *value, ps_unsigned u)
+ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)
 {
-    PS_VALUE_SET(PS_TYPE_ENUM, u);
+    if (PS_TYPE_ENUM != type_def->base)
+        return NULL;
+    PS_VALUE_SET(type_def, e);
 }
 
-ps_value *ps_value_set_subrange(ps_value *value, ps_integer i)
+ps_value *ps_value_set_subrange(ps_value *value, ps_integer i, ps_type_definition *type_def)
 {
+    if (PS_TYPE_ENUM != type_def->base)
+        return NULL;
     PS_VALUE_SET(PS_TYPE_SUBRANGE, i);
 }
 
@@ -129,11 +134,7 @@ ps_value *ps_value_set_pointer(ps_value *value, void *p)
     PS_VALUE_SET(PS_TYPE_POINTER, p);
 }
 
-const struct s_ps_type_name
-{
-    ps_value_type type;
-    char *name;
-} ps_type_names[] = {
+const ps_type_name ps_type_names[] = {
     // clang-format off
     {PS_TYPE_NONE       , "NONE"    },
     {PS_TYPE_INTEGER    , "INTEGER" },
@@ -155,7 +156,7 @@ const struct s_ps_type_name
 
 char *ps_value_get_type_name(ps_value_type type)
 {
-    for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(struct s_ps_type_name); i++)
+    for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(ps_type_name); i++)
     {
         if (type == ps_type_names[i].type)
             return ps_type_names[i].name;
@@ -166,7 +167,7 @@ char *ps_value_get_type_name(ps_value_type type)
 char *ps_value_get_value(ps_value *value)
 {
     static char buffer[128];
-    switch (value->type)
+    switch (value->type->base)
     {
     case PS_TYPE_NONE:
         snprintf(buffer, sizeof(buffer) - 1, "[none]");
@@ -187,7 +188,7 @@ char *ps_value_get_value(ps_value *value)
         snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", value->data.c, value->data.c);
         break;
     case PS_TYPE_STRING:
-        snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", 100, value->data.s->str, value->data.s->len, value->data.s->max);
+        snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", sizeof(buffer) - 20, value->data.s->str, value->data.s->len, value->data.s->max);
         break;
     case PS_TYPE_POINTER:
         snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
@@ -203,10 +204,10 @@ char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
     snprintf(buffer, sizeof(buffer) - 1,
-             "VALUE: type=%d/%s, size=%zu, value=%s",
+             "VALUE: type=%d/%s, value=%s", // , size=%zu
              value->type,
              ps_value_get_type_name(value->type),
-             value->size,
+             //  value->size,
              ps_value_get_value(value));
     return buffer;
 }
