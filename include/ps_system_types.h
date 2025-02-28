@@ -18,10 +18,12 @@ extern "C"
 #endif
 
     typedef PS_INTEGER ps_integer;
+    typedef PS_INTEGER ps_subrange;
     const ps_integer ps_integer_min = PS_INTEGER_MIN;
     const ps_integer ps_integer_max = PS_INTEGER_MAX;
 
     typedef PS_UNSIGNED ps_unsigned;
+    typedef PS_UNSIGNED ps_enum;
     const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
 
     typedef PS_REAL ps_real;

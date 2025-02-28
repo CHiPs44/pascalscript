@@ -62,7 +62,7 @@ char *ps_symbol_dump(ps_symbol *symbol)
              ps_symbol_get_kind_name(symbol->kind),
              ps_symbol_get_scope_name(symbol->scope),
              ps_value_get_type_name(symbol->value.type),
-             ps_value_get_value(&symbol->value));
+             ps_value_get_debug_value(&symbol->value));
     return buffer;
 }
 

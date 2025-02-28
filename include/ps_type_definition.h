@@ -43,6 +43,7 @@ extern "C"
 
     typedef struct s_ps_type_name
     {
+        bool is_base_type;
         ps_value_type type;
         char *name;
     } ps_type_name;
@@ -54,7 +55,7 @@ extern "C"
         ps_identifier *values;
     } ps_type_definition_enum;
 
-    /** @brief *FUTURE* => subranges are stored in integer value (-10..15), reference to type needed, needed to implement arrays */
+    /** @brief *FUTURE* => limits stored in integer values (-10..15), reference to type needed, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
         ps_integer min;
@@ -64,14 +65,14 @@ extern "C"
     /** @brief *FUTURE* => stored in unsigned value as a bit field */
     typedef struct s_ps_type_definition_set
     {
-        ps_unsigned count;
+        ps_unsigned count; // max: 16, 32 or 64
         ps_identifier *values;
     } ps_type_definition_set;
 
-    /** @brief *IN PROGRESS* => ... */
+    /** @brief *IN PROGRESS* => maximum length only, nothing more */
     typedef struct s_ps_type_definition_string
     {
-        ps_string_len max_length;
+        ps_string_len max;
     } ps_type_definition_string;
 
     /** @brief Type definition: base + parameters if needed */

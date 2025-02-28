@@ -57,22 +57,27 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)
 {
     if (PS_TYPE_ENUM != type_def->base)
+    {
+        ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return NULL;
+    }
     PS_VALUE_SET(type_def, e);
 }
 
-ps_value *ps_value_set_subrange(ps_value *value, ps_integer i, ps_type_definition *type_def)
+ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def)
 {
     if (PS_TYPE_ENUM != type_def->base)
+    {
+        ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return NULL;
-    PS_VALUE_SET(PS_TYPE_SUBRANGE, i);
+    }
+    PS_VALUE_SET(PS_TYPE_SUBRANGE, g);
 }
 
-ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
+ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max, ps_string_len len)
 {
     // ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
     // return NULL;
-    size_t len = strlen(s);
     if (max == 0)
         max = len;
     if (value == NULL && max == 0)
@@ -129,42 +134,66 @@ ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max)
     return value;
 }
 
-ps_value *ps_value_set_pointer(ps_value *value, void *p)
+ps_value *ps_value_set_pointer(ps_value *value, ps_pointer p, ps_type_definition *type_def)
 {
+    if (PS_TYPE_POINTER != type_def->base)
+    {
+        ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+        return NULL;
+    }
     PS_VALUE_SET(PS_TYPE_POINTER, p);
 }
 
 const ps_type_name ps_type_names[] = {
     // clang-format off
-    {PS_TYPE_NONE       , "NONE"    },
-    {PS_TYPE_INTEGER    , "INTEGER" },
-    {PS_TYPE_UNSIGNED   , "UNSIGNED"},
-    {PS_TYPE_REAL       , "REAL"    },
-    {PS_TYPE_BOOLEAN    , "BOOLEAN" },
-    {PS_TYPE_CHAR       , "CHAR"    },
-    {PS_TYPE_ENUM       , "ENUM"    },
-    {PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    {PS_TYPE_SET        , "SET"     },
-    {PS_TYPE_STRING     , "STRING"  },
-    {PS_TYPE_DEFINITION , "TYPE_DEF"},
-    {PS_TYPE_POINTER    , "POINTER" },
-    {PS_TYPE_ARRAY      , "ARRAY"   },
-    {PS_TYPE_RECORD     , "RECORD"  },
-    {PS_TYPE_FILE       , "FILE"    },
+    {true , PS_TYPE_NONE       , "NONE"    },
+    {true , PS_TYPE_INTEGER    , "INTEGER" },
+    {true , PS_TYPE_UNSIGNED   , "UNSIGNED"},
+    {true , PS_TYPE_REAL       , "REAL"    },
+    {true , PS_TYPE_BOOLEAN    , "BOOLEAN" },
+    {true , PS_TYPE_CHAR       , "CHAR"    },
+    {false, PS_TYPE_DEFINITION , "TYPE_DEF"},
+    {false, PS_TYPE_ENUM       , "ENUM"    },
+    {false, PS_TYPE_SUBRANGE   , "SUBRANGE"},
+    {false, PS_TYPE_SET        , "SET"     },
+    {false, PS_TYPE_POINTER    , "POINTER" },
+    {false, PS_TYPE_STRING     , "STRING"  },
+    {false, PS_TYPE_ARRAY      , "ARRAY"   },
+    {false, PS_TYPE_RECORD     , "RECORD"  },
+    {false, PS_TYPE_FILE       , "FILE"    },
     // clang-format on
 };
 
-char *ps_value_get_type_name(ps_value_type type)
+char *ps_value_get_type_name(ps_type_definition *type_def)
 {
+    static char buffer[(PS_IDENTIFIER_MAX + 1) * 4 + 1];
     for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(ps_type_name); i++)
     {
-        if (type == ps_type_names[i].type)
-            return ps_type_names[i].name;
+        if (type_def->base == ps_type_names[i].type)
+        {
+            if (ps_type_names[i].is_base_type)
+                strncpy(buffer, ps_type_names[i].name, sizeof(buffer) - 1);
+            else
+            {
+                // switch (type_def->base)
+                // {
+                // case PS_TYPE_ENUM:
+                //     /* code */
+                //     break;
+
+                // default:
+                //     break;
+                // }
+                snprintf(buffer, sizeof(buffer) - 1, "%s*", ps_type_names[i].name);
+            }
+            return buffer;
+        }
     }
-    return "UNKNOWN";
+    strncpy(buffer, "UNKNOWN", sizeof(buffer) - 1);
+    return buffer;
 }
 
-char *ps_value_get_value(ps_value *value)
+char *ps_value_get_debug_value(ps_value *value)
 {
     static char buffer[128];
     switch (value->type->base)
@@ -208,7 +237,7 @@ char *ps_value_dump(ps_value *value)
              value->type,
              ps_value_get_type_name(value->type),
              //  value->size,
-             ps_value_get_value(value));
+             ps_value_get_debug_value(value));
     return buffer;
 }
 

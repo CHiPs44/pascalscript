@@ -28,7 +28,8 @@ extern "C"
         ps_real             r; //  2?  4   8
         ps_boolean          b; //  1?  1?  1?
         ps_char             c; //  1   1   1
-        ps_unsigned         e; //  2   4   8
+        ps_subrange         g; //  2   4   8
+        ps_enum             e; //  2   4   8
         ps_pointer          p; //  2   4   8
         ps_string          *s; //  2   4   8
         // ps_type_definition *t; //  2   4   8
@@ -49,10 +50,10 @@ extern "C"
     ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
     ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
     ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
-    ps_value *ps_value_set_enum    (ps_value *value, ps_unsigned e, ps_type_definition *type_def);
-    ps_value *ps_value_set_subrange(ps_value *value, ps_integer  i, ps_type_definition *type_def);
-    ps_value *ps_value_set_string  (ps_value *value, char *s, ps_string_len max);
-    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p);
+    ps_value *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
+    ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
+    ps_value *ps_value_set_string  (ps_value *value, char       *s, ps_string_len max, ps_string_len len);
+    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
     // TODO?
     ps_integer  ps_value_get_integer (ps_value *value);
     ps_unsigned ps_value_get_unsigned(ps_value *value);
@@ -64,7 +65,7 @@ extern "C"
     // clang-format on
 
     char *ps_value_get_type_name(ps_value_type type);
-    char *ps_value_get_value(ps_value *value);
+    char *ps_value_get_debug_value(ps_value *value);
     void ps_value_debug(ps_value *value, char *message);
 
 #ifdef __cplusplus

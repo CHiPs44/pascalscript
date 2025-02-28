@@ -62,7 +62,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_name(symbol->value.type);
-            char *buffer = ps_value_get_value(&symbol->value);
+            char *buffer = ps_value_get_debug_value(&symbol->value);
             fprintf(stderr, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
                     i, 31, symbol->name, kind_name, scope_name, type_name, 31, buffer);
         }
