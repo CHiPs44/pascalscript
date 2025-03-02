@@ -35,19 +35,19 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
     return name;
 }
 
-char *ps_symbol_get_scope_name(ps_scope scope)
+char *ps_symbol_get_scope_name(ps_symbol_scope scope)
 {
-    static char scope_name[PS_SCOPE_NAME_LEN + 1];
+    static char scope_name[PS_SYMBOL_SCOPE_NAME_SIZE];
     switch (scope)
     {
-    case PS_SCOPE_SYSTEM:
-        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_SYSTEM_NAME);
+    case PS_SYMBOL_SCOPE_SYSTEM:
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_SYSTEM_NAME);
         break;
-    case PS_SCOPE_GLOBAL:
-        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_GLOBAL_NAME);
+    case PS_SYMBOL_SCOPE_GLOBAL:
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_GLOBAL_NAME);
         break;
     default:
-        snprintf(scope_name, PS_SCOPE_NAME_LEN, PS_SCOPE_LOCAL_FORMAT, scope);
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_LOCAL_FORMAT, scope);
     }
     return scope_name;
 }

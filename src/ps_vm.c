@@ -9,11 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ps_version.h"
 #include "ps_config.h"
 #include "ps_error.h"
 #include "ps_symbol.h"
 #include "ps_value.h"
+#include "ps_version.h"
 #include "ps_vm.h"
 
 void ps_runtime_add_system_constant(ps_vm *vm, const char *name, ps_value *value)
@@ -21,27 +21,34 @@ void ps_runtime_add_system_constant(ps_vm *vm, const char *name, ps_value *value
     ps_symbol symbol;
     strcpy(symbol.name, name);
     symbol.kind = PS_SYMBOL_KIND_CONSTANT;
-    symbol.scope = PS_SCOPE_SYSTEM;
-    ps_symbol_table_add(&vm->symbols, &symbol);
+    symbol.scope = PS_SYMBOL_SCOPE_SYSTEM;
+    ps_symbol_table_add(vm->symbols, &symbol);
 }
 
 /**
  * @brief Initialize VM
  */
-ps_vm *ps_runtime_init()
+ps_vm *ps_vm_init_runtime(ps_vm *vm)
 {
-    ps_char buffer[128];
+    char buffer[32];
     ps_value *value;
+    bool allocated=false;
 
-    ps_vm *vm = calloc(1, sizeof(ps_vm));
     if (vm == NULL)
-        return NULL;
+    {
+        vm = calloc(1, sizeof(ps_vm));
+        if (vm == NULL)
+        {
+            return NULL;
+        }
+        allocated=true;
+    }
 
     /* Symbol table */
     vm->symbols = ps_symbol_table_init();
     if (vm->symbols == NULL)
     {
-        free(vm);
+        if (allocated) free(vm);
         return NULL;
     }
     /* Stack */
@@ -49,7 +56,7 @@ ps_vm *ps_runtime_init()
     if (vm->stack == NULL)
     {
         free(vm->symbols);
-        free(vm);
+        if (allocated) free(vm);
         return NULL;
     }
 
@@ -63,14 +70,14 @@ ps_vm *ps_runtime_init()
     value = ps_value_set_unsigned(NULL, PS_VERSION_INDEX);
     ps_runtime_add_system_constant(vm, "PS_VERSION_INDEX", value);
     snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
-    value = ps_value_set_string(NULL, buffer, strlen(buffer));
+    value = ps_value_set_string(NULL, buffer, strlen(buffer), strlen(buffer));
     ps_runtime_add_system_constant(vm, "PS_VERSION", value);
     // Limits
     value = ps_value_set_integer(NULL, ps_integer_max);
     ps_runtime_add_system_constant(vm, "MAXINT", value);
     value = ps_value_set_unsigned(NULL, ps_unsigned_max);
     ps_runtime_add_system_constant(vm, "MAXUINT", value);
-    // These are keywords for now
+    // These are keywords for now (until enums are implemented)
     // value = ps_value_set_boolean(NULL, false);
     // ps_runtime_add_system_constant(vm, "FALSE", value);
     // value = ps_value_set_boolean(NULL, true);
@@ -87,12 +94,12 @@ ps_vm *ps_runtime_init()
  * @param already normalized name
  * @return global or NULL if not found
  */
-ps_symbol *vm_global_get(ps_vm *vm, char *name)
+ps_symbol *ps_vm_global_get(ps_vm *vm, char *name)
 {
-    ps_symbol *symbol = ps_symbol_table_get(&vm->symbols, name);
+    ps_symbol *symbol = ps_symbol_table_get(vm->symbols, name);
     if (symbol == NULL)
         return NULL;
-    if (symbol->kind != PS_SCOPE_GLOBAL)
+    if (symbol->kind != PS_SYMBOL_SCOPE_GLOBAL)
         return NULL;
     return symbol;
 }
@@ -104,9 +111,9 @@ ps_symbol *vm_global_get(ps_vm *vm, char *name)
  * @param Symbol
  * @return Index of added symbol (>=0) or error (<0)
  */
-int vm_global_add(ps_vm *vm, ps_symbol *symbol)
+int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol)
 {
-    return ps_symbol_table_add(&vm->symbols, symbol);
+    return ps_symbol_table_add(vm->symbols, symbol);
 }
 
 /**
@@ -116,45 +123,32 @@ int vm_global_add(ps_vm *vm, ps_symbol *symbol)
  * @param Symbol name
  * @return index of symbol or -1 if not found
  */
-int vm_global_delete(ps_vm *vm, char *name)
+int ps_vm_global_delete(ps_vm *vm, char *name)
 {
-    return ps_symbol_table_delete(&vm->symbols, name);
+    return ps_symbol_table_delete(vm->symbols, name);
 }
 
-int vm_stack_push(ps_vm *vm, ps_symbol *symbol)
+int ps_vm_stack_push(ps_vm *vm, ps_symbol *symbol)
 {
     return ps_symbol_stack_push(&vm->stack, symbol);
 }
 
-ps_symbol *vm_stack_pop(ps_vm *vm)
+ps_symbol *ps_vm_stack_pop(ps_vm *vm)
 {
     return ps_symbol_stack_pop(&vm->stack);
 }
 
-ps_symbol *vm_auto_add_value(ps_vm *vm, ps_value *value)
-{
-    ps_symbol symbol;
-    strcpy(symbol.name, "");
-    symbol.kind = PS_SYMBOL_KIND_AUTO;
-    symbol.scope = PS_SCOPE_GLOBAL;
-    symbol.value.type = PS_TYPE_INTEGER;
-    symbol.value.size = sizeof(ps_integer);
-    symbol.value.data.i = value;
-    int index = ps_symbol_table_add(&vm->symbols, &symbol);
-    return index >= 0 ? &vm->symbols.symbols[index] : NULL;
-}
-
-ps_symbol *vm_auto_add_value(ps_vm *vm, ps_scope scope, ps_value value)
+ps_symbol *ps_vm_auto_add_value(ps_vm *vm, ps_symbol_scope scope, ps_value value)
 {
     ps_symbol symbol;
     strcpy(symbol.name, "");
     symbol.kind = PS_SYMBOL_KIND_AUTO;
     symbol.scope = scope;
     symbol.value.type = PS_TYPE_INTEGER;
-    symbol.value.size = sizeof(ps_integer);
-    symbol.value.data.i = value;
-    int index = ps_symbol_table_add(&vm->symbols, &symbol);
-    return index >= 0 ? &vm->symbols.symbols[index] : NULL;
+    // symbol.value.size = sizeof(ps_integer);
+    symbol.value.data.i = value.data.i;
+    int index = ps_symbol_table_add(vm->symbols, &symbol);
+    return index >= 0 ? &vm->symbols->symbols[index] : NULL;
 }
 
 /**
@@ -164,9 +158,9 @@ ps_symbol *vm_auto_add_value(ps_vm *vm, ps_scope scope, ps_value value)
  * @param string Normalized name
  * @return index of symbol or -1 if not found
  */
-int vm_auto_free(ps_vm *vm, char *name)
+int ps_vm_auto_free(ps_vm *vm, char *name)
 {
-    return ps_symbol_table_free(&vm->symbols, name);
+    return ps_symbol_table_free(vm->symbols, name);
 }
 
 /**
@@ -175,9 +169,9 @@ int vm_auto_free(ps_vm *vm, char *name)
  * @param VM
  * @return Count of garbage collected symbols
  */
-int vm_auto_gc(ps_vm *vm)
+int ps_vm_auto_gc(ps_vm *vm)
 {
-    int count = ps_symbol_table_gc(&vm->symbols);
+    int count = ps_symbol_table_gc(vm->symbols);
     fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     return count;
 }
@@ -188,14 +182,14 @@ int vm_auto_gc(ps_vm *vm)
  *      2. POP variable
  *      3. SET variable TO value
  */
-ps_error vm_exec_assign(ps_vm *vm)
+ps_error ps_vm_exec_assign(ps_vm *vm)
 {
-    ps_symbol *value = vm_stack_pop(vm);
+    ps_symbol *value = ps_vm_stack_pop(vm);
     if (value == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (value->kind == PS_SYMBOL_KIND_AUTO)
-        vm_auto_free(vm, value->name);
-    ps_symbol *variable = vm_stack_pop(vm);
+        ps_vm_auto_free(vm, value->name);
+    ps_symbol *variable = ps_vm_stack_pop(vm);
     if (variable == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -209,20 +203,26 @@ ps_error vm_exec_assign(ps_vm *vm)
     return PS_RUNTIME_ERROR_NONE;
 }
 
-ps_error vm_exec_sys(ps_vm *vm)
+ps_error ps_vm_exec_sys(ps_vm *vm)
 {
-    ps_symbol *command = vm_stack_pop(vm);
+    ps_symbol *command = ps_vm_stack_pop(vm);
     if (command == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (command->kind == PS_SYMBOL_KIND_AUTO)
-        vm_auto_free(vm, command->name);
+        ps_vm_auto_free(vm, command->name);
 
     return PS_ERROR_NOT_IMPLEMENTED;
 }
 
-ps_error vm_exec_xxx(ps_vm *vm)
+ps_error ps_vm_exec_xxx(ps_vm *vm)
 {
     return PS_ERROR_NOT_IMPLEMENTED;
+}
+
+bool ps_vm_load_source(ps_vm *vm, char *source, size_t length)
+{
+    bool ok = ps_buffer_set_text(&vm->parser->lexer.buffer, source, length);
+    return ok;
 }
 
 /* EOF */

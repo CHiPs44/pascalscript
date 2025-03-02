@@ -67,12 +67,12 @@ ps_value_type vm_get_op_binary_type(ps_vm_opcode op, ps_value_type a, ps_value_t
 ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
 {
     ps_value result;
-    ps_symbol *a = vm_stack_pop(vm);
+    ps_symbol *a = ps_vm_stack_pop(vm);
     if (a == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == PS_SYMBOL_KIND_AUTO)
-        vm_auto_free(vm, a->name);
+        ps_vm_auto_free(vm, a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
         switch (op)
@@ -105,9 +105,9 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         ps_symbol *b = vm_auto_add_integer(vm, result.data.i);
         if (b == NULL)
             return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (vm_stack_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
+        if (ps_vm_stack_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
-            vm_auto_free(vm, b->name);
+            ps_vm_auto_free(vm, b->name);
             return PS_RUNTIME_ERROR_STACK_OVERFLOW;
         }
         return PS_RUNTIME_ERROR_NONE;
@@ -118,18 +118,18 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
 ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
 {
     ps_value result;
-    ps_symbol *b = vm_stack_pop(vm);
+    ps_symbol *b = ps_vm_stack_pop(vm);
     if (b == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (b->kind == PS_SYMBOL_KIND_AUTO)
-        vm_auto_free(vm, b->name);
-    ps_symbol *a = vm_stack_pop(vm);
+        ps_vm_auto_free(vm, b->name);
+    ps_symbol *a = ps_vm_stack_pop(vm);
     if (a == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == PS_SYMBOL_KIND_AUTO)
-        vm_auto_free(vm, a->name);
+        ps_vm_auto_free(vm, a->name);
     if (op == OP_ADD || op == OP_SUB ||
         op == OP_MUL || op == OP_DIV ||
         op == OP_MOD || op == OP_BIT_AND ||
@@ -182,9 +182,9 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
         ps_symbol *c = vm_auto_add_integer(vm, result.data.i);
         if (c == NULL)
             return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (vm_stack_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
+        if (ps_vm_stack_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
-            vm_auto_free(vm, c->name);
+            ps_vm_auto_free(vm, c->name);
             return PS_RUNTIME_ERROR_STACK_OVERFLOW;
         }
         return PS_RUNTIME_ERROR_NONE;

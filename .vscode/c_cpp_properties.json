@@ -3,13 +3,12 @@
         {
             "name": "Project",
             "includePath": [
-                "${workspaceFolder}/include/",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/include/"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "gnu23",
-            "cppStandard": "gnu++23",
+            "cStandard": "gnu20",
+            "cppStandard": "gnu++20",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

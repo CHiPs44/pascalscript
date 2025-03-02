@@ -13,7 +13,7 @@
 #include "ps_runtime.h"
 
 /** @brief Create new runtime */
-ps_runtime *ps_runtime_init()
+ps_runtime *ps_vm_init_runtime()
 {
     ps_runtime *runtime = calloc(1, sizeof(ps_runtime));
     if (runtime == NULL)

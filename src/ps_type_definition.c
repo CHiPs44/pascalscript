@@ -60,7 +60,7 @@ bool ps_type_definition_create_system_types(ps_symbol_table *symbol_table)
 {
     ps_symbol symbol;
     symbol.kind = PS_SYMBOL_KIND_TYPE;
-    symbol.scope = PS_SCOPE_SYSTEM;
+    symbol.scope = PS_SYMBOL_SCOPE_SYSTEM;
     symbol.value.type = PS_TYPE_DEFINITION;
 
     // *** INTEGER ***

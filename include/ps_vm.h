@@ -7,10 +7,10 @@
 #ifndef _PS_VM_H
 #define _PS_VM_H
 
-// #include "ps_buffer.h"
+#include "ps_buffer.h"
 #include "ps_error.h"
-// #include "ps_lexer.h"
-// #include "ps_parser.h"
+#include "ps_lexer.h"
+#include "ps_parser.h"
 #include "ps_symbol_stack.h"
 #include "ps_symbol_table.h"
 #include "ps_token.h"
@@ -45,7 +45,7 @@ extern "C"
         OP_ADD,      // +
         OP_SUB,      // -
         OP_MUL,      // *
-        OP_DIV,      // "div"
+        OP_DIV,      // integer "div"
         OP_MOD,      // %
         OP_REAL_DIV, // "/"
         // Bit operators
@@ -76,32 +76,34 @@ extern "C"
 
     typedef struct s_ps_vm_t
     {
-        // ps_parser parser;
+        ps_parser *parser;
         ps_symbol_table *symbols;
         ps_symbol_stack *stack;
         ps_error error;
     } ps_vm;
 
     /**@brief Initialize VM: reset source, global table & stack */
-    void ps_runtime_init(ps_vm *vm);
+    ps_vm *ps_vm_init_runtime(ps_vm *vm);
 
     // extern bool vm_exec(ps_vm *vm);
 
     /** @brief Get global symbol */
-    ps_symbol *vm_global_get(ps_vm *vm, char *name);
+    ps_symbol *ps_vm_global_get(ps_vm *vm, char *name);
     /** @brief Add global symbol */
-    int vm_global_add(ps_vm *vm, ps_symbol *symbol);
+    int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol);
     /** @brief Delete global symbol */
-    int vm_global_delete(ps_vm *vm, char *name);
+    int ps_vm_global_delete(ps_vm *vm, char *name);
 
     /** @brief Push symbol on top of stack */
-    int vm_stack_push(ps_vm *vm, ps_symbol *symbol);
+    int ps_vm_stack_push(ps_vm *vm, ps_symbol *symbol);
     /** @brief Pop symbol from top of stack */
-    ps_symbol *vm_stack_pop(ps_vm *vm);
+    ps_symbol *ps_vm_stack_pop(ps_vm *vm);
 
     ps_symbol *vm_auto_add_integer(ps_vm *vm, int value);
-    int vm_auto_free(ps_vm *vm, char *name);
-    int vm_auto_gc(ps_vm *vm);
+    int ps_vm_auto_free(ps_vm *vm, char *name);
+    int ps_vm_auto_gc(ps_vm *vm);
+
+    bool ps_vm_load_source(ps_vm *vm, char *source, size_t length);
 
 #ifdef __cplusplus
 }

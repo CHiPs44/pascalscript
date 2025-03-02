@@ -20,9 +20,11 @@ extern "C"
 {
 #endif
 
+#define PS_PARSER_LEXER_COUNT 1
+
     typedef struct ps_parser
     {
-        ps_lexer lexer;
+        ps_lexer lexer[PS_PARSER_LEXER_COUNT];
         ps_error error;
         ps_symbol_table *symbol_table;
     } ps_parser;

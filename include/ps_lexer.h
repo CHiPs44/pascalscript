@@ -43,7 +43,7 @@ extern "C"
 
     /**
      * @brief Reset lexer:
-     *  - reset buffer position
+     *  - reset "cursor" position
      *  - clear current token and error
      */
     void ps_lexer_reset(ps_lexer *lexer);

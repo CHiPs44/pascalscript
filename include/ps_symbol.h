@@ -16,6 +16,20 @@ extern "C"
 {
 #endif
 
+#define PS_SYMBOL_SCOPE_NAME_LEN 7
+#define PS_SYMBOL_SCOPE_NAME_SIZE (PS_SYMBOL_SCOPE_NAME_LEN + 1)
+#define PS_SYMBOL_SCOPE_SYSTEM_NAME "SYSTEM"
+#define PS_SYMBOL_SCOPE_GLOBAL_NAME "GLOBAL"
+#define PS_SYMBOL_SCOPE_LOCAL_FORMAT "L%05d"
+
+    typedef enum e_ps_symbol_scope
+    {
+        PS_SYMBOL_SCOPE_SYSTEM = 0,
+        PS_SYMBOL_SCOPE_GLOBAL,
+        PS_SYMBOL_SCOPE_LOCAL,
+        PS_SYMBOL_SCOPE_MAX = UINT16_MAX
+    } __attribute__((__packed__)) ps_symbol_scope;
+
     typedef enum e_ps_symbol_kind
     {
         PS_SYMBOL_KIND_FREE = 0,
@@ -23,26 +37,16 @@ extern "C"
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
         PS_SYMBOL_KIND_TYPE,
-        // PS_SYMBOL_KIND_PROCEDURE,
-        // PS_SYMBOL_KIND_FUNCTION,
+        PS_SYMBOL_KIND_PROCEDURE,
+        PS_SYMBOL_KIND_FUNCTION,
         // ...
+        PS_SYMBOL_KIND_MAX = UINT16_MAX
     } __attribute__((__packed__)) ps_symbol_kind;
-
-#define PS_SCOPE_SYSTEM 0
-#define PS_SCOPE_GLOBAL 1
-#define PS_SCOPE_LOCAL_START 2
-#define PS_SCOPE_NAME_LEN 7
-#define PS_SCOPE_SYSTEM_NAME "SYSTEM"
-#define PS_SCOPE_GLOBAL_NAME "GLOBAL"
-#define PS_SCOPE_LOCAL_FORMAT "LOC-%03d"
-
-    typedef uint8_t ps_scope;
-    const ps_scope_max = UINT8_MAX;
 
     typedef struct s_ps_symbol
     {
         ps_symbol_kind kind;
-        ps_scope scope;
+        ps_symbol_scope scope;
         ps_identifier name;
         ps_value value;
     } ps_symbol;
@@ -51,7 +55,7 @@ extern "C"
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);
 
     /** @brief Get scope name for symbol */
-    char *ps_symbol_get_scope_name(ps_scope scope);
+    char *ps_symbol_get_scope_name(ps_symbol_scope scope);
 
     /** @brief Get symbol info */
     char *ps_symbol_dump(ps_symbol *symbol);
