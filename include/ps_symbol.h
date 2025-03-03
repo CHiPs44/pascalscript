@@ -24,11 +24,15 @@ extern "C"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM = 0,
-        PS_SYMBOL_SCOPE_GLOBAL,
-        PS_SYMBOL_SCOPE_LOCAL,
-        PS_SYMBOL_SCOPE_MAX = UINT16_MAX
+        PS_SYMBOL_SCOPE_SYSTEM = 0,      /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
+        PS_SYMBOL_SCOPE_GLOBAL,          /** @brief User defined: for constants, types, variables, procedures and functions at top level */
+        PS_SYMBOL_SCOPE_LOCAL,           /** @brief Local defined, may be used for units, too */
+        PS_SYMBOL_SCOPE_MAX = UINT16_MAX /** @brief Ensure scope "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_scope;
+
+#define PS_SYMBOL_KIND_NAME_LEN 15
+#define PS_SYMBOL_KIND_NAME_SIZE (PS_SYMBOL_KIND_NAME_LEN + 1)
+#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04x"
 
     typedef enum e_ps_symbol_kind
     {
@@ -39,14 +43,16 @@ extern "C"
         PS_SYMBOL_KIND_TYPE,
         PS_SYMBOL_KIND_PROCEDURE,
         PS_SYMBOL_KIND_FUNCTION,
+        PS_SYMBOL_KIND_UNIT,
         // ...
-        PS_SYMBOL_KIND_MAX = UINT16_MAX
+        PS_SYMBOL_KIND_MAX = UINT16_MAX /** @brief Ensure kind "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_kind;
 
+    /** @brief Symbol is a named value within a scope (system, global, local, ...) */
     typedef struct s_ps_symbol
     {
-        ps_symbol_kind kind;
         ps_symbol_scope scope;
+        ps_symbol_kind kind;
         ps_identifier name;
         ps_value value;
     } ps_symbol;

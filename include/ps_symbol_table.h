@@ -18,15 +18,13 @@
 #define PS_SYMBOL_TABLE_SIZE (256)
 #endif
 
-#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04x"
-
 #define PS_SYMBOL_TABLE_ERROR_NOT_FOUND (UINT16_MAX - 1)
 #define PS_SYMBOL_TABLE_ERROR_EXISTS (UINT16_MAX - 2)
 #define PS_SYMBOL_TABLE_ERROR_FULL (UINT16_MAX - 3)
 #define PS_SYMBOL_TABLE_ERROR_KIND (UINT16_MAX - 4)
 #define PS_SYMBOL_TABLE_ERROR_TODO (UINT16_MAX - 5)
 
-    typedef uint16_t ps_symbol_table_size;
+    typedef uint32_t ps_symbol_table_size;
 
     /* clang-format off */
     typedef struct s_ps_symbol_table
@@ -37,14 +35,11 @@
     } ps_symbol_table;
     /* clang-format on */
 
-    /** @brief Allocate and initialize symbol table (reset count & mark all symbols as free) */
-    ps_symbol_table *ps_symbol_table_init();
+    /** @brief (Allocate and) initialize symbol table (reset count & mark all symbols as free) */
+    ps_symbol_table *ps_symbol_table_init(ps_symbol_table *table);
 
     /** @brief Deallocate symbol table */
     void ps_symbol_table_done(ps_symbol_table * table);
-
-    /** @brief Dump symbol table to stderr */
-    void ps_symbol_table_dump(ps_symbol_table * table, char *title);
 
     /** @brief Find symbol's index in table by name */
     ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, char *name);
@@ -63,6 +58,9 @@
     ps_symbol_table_size ps_symbol_table_free(ps_symbol_table * table, char *name);
 
     ps_symbol_table_size ps_symbol_table_gc(ps_symbol_table * table);
+
+    /** @brief Dump symbol table to stderr */
+    void ps_symbol_table_dump(ps_symbol_table * table, char *title);
 
 #ifdef __cplusplus
 }
