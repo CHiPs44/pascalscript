@@ -11,6 +11,7 @@
 #include "ps_error.h"
 #include "ps_string.h"
 #include "ps_type_definition.h"
+#include "ps_symbol.h"
 #include "ps_value.h"
 
 static ps_error ps_value_error = PS_ERROR_ZERO;
@@ -175,16 +176,38 @@ char *ps_value_get_type_name(ps_type_definition *type_def)
                 strncpy(buffer, ps_type_names[i].name, sizeof(buffer) - 1);
             else
             {
-                // switch (type_def->base)
-                // {
-                // case PS_TYPE_ENUM:
-                //     /* code */
-                //     break;
-
-                // default:
-                //     break;
-                // }
-                snprintf(buffer, sizeof(buffer) - 1, "%s*", ps_type_names[i].name);
+                switch (type_def->base)
+                {
+                case PS_TYPE_ENUM:
+                    snprintf(buffer, sizeof(buffer) - 1,
+                             "%s(%d, '%s', ...)",
+                             ps_type_names[i].name,
+                             type_def->def.def_enum.count,
+                             type_def->def.def_enum.count == 0 ? "???" : type_def->def.def_enum.values[0]);
+                    break;
+                case PS_TYPE_SUBRANGE:
+                    snprintf(buffer, sizeof(buffer) - 1,
+                             "%s(%d..%d)",
+                             ps_type_names[i].name,
+                             type_def->def.def_subrange.min,
+                             type_def->def.def_subrange.max);
+                    break;
+                case PS_TYPE_SET:
+                    snprintf(buffer, sizeof(buffer) - 1,
+                             "%s(%d, '%s', ...)",
+                             ps_type_names[i].name,
+                             type_def->def.def_set.count,
+                             type_def->def.def_set.count == 0 ? "???" : type_def->def.def_set.values[0]);
+                    break;
+                case PS_TYPE_POINTER:
+                    snprintf(buffer, sizeof(buffer) - 1,
+                             "^%s",
+                             ps_type_names[i].name,
+                             type_def->def.def_pointer.type_def == NULL ? "???" : type_def->def.def_pointer.type_def->name);
+                    break;
+                default:
+                    break;
+                }
             }
             return buffer;
         }

@@ -69,6 +69,12 @@ extern "C"
         ps_identifier *values;
     } ps_type_definition_set;
 
+    /** @brief *FUTURE* => stored in a symbol */
+    typedef struct s_ps_type_definition_pointer
+    {
+        ps_symbol *type_def;
+    } ps_type_definition_pointer;
+
     /** @brief *IN PROGRESS* => maximum length only, nothing more */
     typedef struct s_ps_type_definition_string
     {
@@ -84,9 +90,11 @@ extern "C"
             ps_type_definition_enum def_enum;
             ps_type_definition_subrange def_subrange;
             ps_type_definition_set def_set;
+            ps_type_definition_pointer def_pointer;
             ps_type_definition_string def_string;
-            // ps_type_definition_pointer def_pointer;
             // ps_type_definition_array def_array;
+            // ps_type_definition_record def_record;
+            // ps_type_definition_file def_file;
         } def;
     } ps_type_definition;
 
