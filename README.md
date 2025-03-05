@@ -104,6 +104,9 @@ Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fp
 - "Dragon compiler" <https://github.com/TimD1/DragonCompiler>
 - "Simple Swift interpreter for the Pascal language" <https://github.com/igorkulman/SwiftPascalInterpreter>
 - "Turbo Pascal Archive" <https://github.com/romiras/turbo-pascal-archive>
+- "Brinch Hansen On Pascal Compilers"
+  - <http://pascal.hansotten.com/uploads/pbh/brinch%20hansen%20on%20pascal%20compilers%20OCR.pdf>
+  - <https://github.com/Jtkozzy/BHK>
 
 ### Other sources about compilers and interpreters
 

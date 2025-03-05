@@ -17,10 +17,10 @@ extern "C"
 {
 #endif
 
-    // clang-format off
     /** @brief Union value */
     typedef union u_ps_value_data
     {
+        // clang-format off
         //             Model/bytes 16  32  64 bits
         //                         --- --- ---
         ps_integer          i; //  2   4   8
@@ -28,22 +28,24 @@ extern "C"
         ps_real             r; //  2?  4   8
         ps_boolean          b; //  1?  1?  1?
         ps_char             c; //  1   1   1
-        ps_subrange         g; //  2   4   8
+        ps_subrange         g; //  2   4   8 "g" is for "subran_g_e" ;-)
         ps_enum             e; //  2   4   8
         ps_pointer          p; //  2   4   8
         ps_string          *s; //  2   4   8
         // ps_type_definition *t; //  2   4   8
+        // clang-format on
     } ps_value_data;
-    // clang-format on
+
+#define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 
     /** @brief Value */
     typedef struct s_ps_value
     {
-        /* clang-format off */
         ps_type_definition *type;
         ps_value_data data;
-        /* clang-format on */
     } ps_value;
+
+#define PS_VALUE_SIZE sizeof(ps_value)
 
     // clang-format off
     ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);

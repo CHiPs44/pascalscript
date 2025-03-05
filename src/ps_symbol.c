@@ -37,11 +37,14 @@ char *ps_symbol_get_scope_name(ps_symbol_scope scope)
     static char scope_name[PS_SYMBOL_SCOPE_NAME_SIZE];
     switch (scope)
     {
+    case PS_SYMBOL_SCOPE_NONE:
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "NONE");
+        break;
     case PS_SYMBOL_SCOPE_SYSTEM:
-        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_SYSTEM_NAME);
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "SYSTEM");
         break;
     case PS_SYMBOL_SCOPE_GLOBAL:
-        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_GLOBAL_NAME);
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "GLOBAL");
         break;
     default:
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_LOCAL_FORMAT, scope);
@@ -96,7 +99,7 @@ char *ps_symbol_dump(ps_symbol *symbol)
              symbol->name,
              ps_symbol_get_kind_name(symbol->kind),
              ps_symbol_get_scope_name(symbol->scope),
-             ps_value_get_type_name(symbol->value.type),
+             ps_type_get_debug_name(symbol->value.type),
              ps_value_get_debug_value(&symbol->value));
     return buffer;
 }

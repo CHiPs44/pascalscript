@@ -72,7 +72,7 @@ ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definiti
         ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return NULL;
     }
-    PS_VALUE_SET(PS_TYPE_SUBRANGE, g);
+    PS_VALUE_SET(type_def, g);
 }
 
 ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max, ps_string_len len)
@@ -142,78 +142,7 @@ ps_value *ps_value_set_pointer(ps_value *value, ps_pointer p, ps_type_definition
         ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return NULL;
     }
-    PS_VALUE_SET(PS_TYPE_POINTER, p);
-}
-
-const ps_type_name ps_type_names[] = {
-    // clang-format off
-    {true , PS_TYPE_NONE       , "NONE"    },
-    {true , PS_TYPE_INTEGER    , "INTEGER" },
-    {true , PS_TYPE_UNSIGNED   , "UNSIGNED"},
-    {true , PS_TYPE_REAL       , "REAL"    },
-    {true , PS_TYPE_BOOLEAN    , "BOOLEAN" },
-    {true , PS_TYPE_CHAR       , "CHAR"    },
-    {false, PS_TYPE_DEFINITION , "TYPE_DEF"},
-    {false, PS_TYPE_ENUM       , "ENUM"    },
-    {false, PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    {false, PS_TYPE_SET        , "SET"     },
-    {false, PS_TYPE_POINTER    , "POINTER" },
-    {false, PS_TYPE_STRING     , "STRING"  },
-    {false, PS_TYPE_ARRAY      , "ARRAY"   },
-    {false, PS_TYPE_RECORD     , "RECORD"  },
-    {false, PS_TYPE_FILE       , "FILE"    },
-    // clang-format on
-};
-
-char *ps_value_get_type_name(ps_type_definition *type_def)
-{
-    static char buffer[(PS_IDENTIFIER_MAX + 1) * 4 + 1];
-    for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(ps_type_name); i++)
-    {
-        if (type_def->base == ps_type_names[i].type)
-        {
-            if (ps_type_names[i].is_base_type)
-                strncpy(buffer, ps_type_names[i].name, sizeof(buffer) - 1);
-            else
-            {
-                switch (type_def->base)
-                {
-                case PS_TYPE_ENUM:
-                    snprintf(buffer, sizeof(buffer) - 1,
-                             "%s(%d, '%s', ...)",
-                             ps_type_names[i].name,
-                             type_def->def.def_enum.count,
-                             type_def->def.def_enum.count == 0 ? "???" : type_def->def.def_enum.values[0]);
-                    break;
-                case PS_TYPE_SUBRANGE:
-                    snprintf(buffer, sizeof(buffer) - 1,
-                             "%s(%d..%d)",
-                             ps_type_names[i].name,
-                             type_def->def.def_subrange.min,
-                             type_def->def.def_subrange.max);
-                    break;
-                case PS_TYPE_SET:
-                    snprintf(buffer, sizeof(buffer) - 1,
-                             "%s(%d, '%s', ...)",
-                             ps_type_names[i].name,
-                             type_def->def.def_set.count,
-                             type_def->def.def_set.count == 0 ? "???" : type_def->def.def_set.values[0]);
-                    break;
-                case PS_TYPE_POINTER:
-                    snprintf(buffer, sizeof(buffer) - 1,
-                             "^%s",
-                             ps_type_names[i].name,
-                             type_def->def.def_pointer.type_def == NULL ? "???" : type_def->def.def_pointer.type_def->name);
-                    break;
-                default:
-                    break;
-                }
-            }
-            return buffer;
-        }
-    }
-    strncpy(buffer, "UNKNOWN", sizeof(buffer) - 1);
-    return buffer;
+    PS_VALUE_SET(type_def, p);
 }
 
 char *ps_value_get_debug_value(ps_value *value)

@@ -45,7 +45,8 @@
         "ps_runtime.h": "c",
         "ps_type_definition.h": "c",
         "string_view": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "ps_system_types.h": "c"
     },
     "makefile.configureOnOpen": false
 }
