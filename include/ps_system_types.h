@@ -21,21 +21,16 @@ extern "C"
     typedef PS_INTEGER ps_subrange;
     const ps_integer ps_integer_min = PS_INTEGER_MIN;
     const ps_integer ps_integer_max = PS_INTEGER_MAX;
-#define PS_INTEGER_SIZE sizeof(ps_integer)
 
     typedef PS_UNSIGNED ps_unsigned;
     typedef PS_UNSIGNED ps_enum;
-    typedef PS_UNSIGNED ps_set;
     const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
-#define PS_UNSIGNED_SIZE sizeof(ps_unsigned)
 
     typedef PS_REAL ps_real;
     const ps_real ps_real_min = PS_REAL_MIN;
     const ps_real ps_real_max = PS_REAL_MAX;
-    #define PS_REAL_SIZE sizeof(ps_real)
 
     typedef PS_BOOLEAN ps_boolean;
-#define PS_BOOLEAN_SIZE sizeof(ps_boolean)
 
     typedef PS_CHAR ps_char;
     const ps_char ps_char_max = PS_CHAR_MAX;
@@ -48,10 +43,10 @@ extern "C"
     // will be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
     typedef struct s_ps_string
     {
+        // ps_string_num num;
         ps_string_len max;
         ps_string_len len;
         ps_char str[1];
-        // ps_string_num num;
     } ps_string;
 
     typedef void *ps_pointer;
@@ -68,6 +63,13 @@ extern "C"
         bool is_text;
         FILE *handle;
     } ps_file;*/
+
+#define PS_INTEGER_SIZE     sizeof(ps_integer)
+#define PS_UNSIGNED_SIZE    sizeof(ps_unsigned)
+#define PS_REAL_SIZE        sizeof(ps_real)
+#define PS_BOOLEAN_SIZE     sizeof(ps_boolean)
+#define PS_CHAR_SIZE        sizeof(ps_char)
+#define PS_STRING_SIZE      sizeof(ps_string)
 
 #ifdef __cplusplus
 }

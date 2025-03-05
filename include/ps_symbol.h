@@ -18,12 +18,13 @@ extern "C"
 
 #define PS_SYMBOL_SCOPE_NAME_LEN 7
 #define PS_SYMBOL_SCOPE_NAME_SIZE (PS_SYMBOL_SCOPE_NAME_LEN + 1)
+#define PS_SYMBOL_SCOPE_SYSTEM_NAME "SYSTEM"
+#define PS_SYMBOL_SCOPE_GLOBAL_NAME "GLOBAL"
 #define PS_SYMBOL_SCOPE_LOCAL_FORMAT "L%05d"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_NONE = 0,        /** @brief Useful? */
-        PS_SYMBOL_SCOPE_SYSTEM,          /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
+        PS_SYMBOL_SCOPE_SYSTEM = 0,      /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
         PS_SYMBOL_SCOPE_GLOBAL,          /** @brief User defined: for constants, types, variables, procedures and functions at top level */
         PS_SYMBOL_SCOPE_LOCAL,           /** @brief Local defined, may be used for units, too */
         PS_SYMBOL_SCOPE_MAX = UINT16_MAX /** @brief Ensure scope "packs" to a 16 bits unsigned */
@@ -58,7 +59,7 @@ extern "C"
         ps_symbol_kind kind;
         ps_identifier name;
         ps_value value;
-    } ps_symbol; /*__attribute__((__packed__))*/
+    } ps_symbol;
 
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
