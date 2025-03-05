@@ -21,14 +21,17 @@ extern "C"
     typedef PS_INTEGER ps_subrange;
     const ps_integer ps_integer_min = PS_INTEGER_MIN;
     const ps_integer ps_integer_max = PS_INTEGER_MAX;
+#define PS_INTEGER_SIZE sizeof(ps_integer)
 
     typedef PS_UNSIGNED ps_unsigned;
     typedef PS_UNSIGNED ps_enum;
     const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
+#define PS_UNSIGNED_SIZE sizeof(ps_unsigned)
 
     typedef PS_REAL ps_real;
     const ps_real ps_real_min = PS_REAL_MIN;
     const ps_real ps_real_max = PS_REAL_MAX;
+    #define PS_REAL_SIZE sizeof(ps_real)
 
     typedef PS_BOOLEAN ps_boolean;
 

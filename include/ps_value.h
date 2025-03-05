@@ -18,7 +18,7 @@ extern "C"
 #endif
 
     // clang-format off
-    /** @brief Union value*/
+    /** @brief Union value */
     typedef union u_ps_value_data
     {
         //             Model/bytes 16  32  64 bits
@@ -36,13 +36,14 @@ extern "C"
     } ps_value_data;
     // clang-format on
 
-    /* clang-format off */
+    /** @brief Value */
     typedef struct s_ps_value
     {
+        /* clang-format off */
         ps_type_definition *type;
         ps_value_data data;
+        /* clang-format on */
     } ps_value;
-    /* clang-format on */
 
     // clang-format off
     ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
