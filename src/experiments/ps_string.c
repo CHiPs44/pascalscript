@@ -49,17 +49,18 @@ void ps_string_free(ps_string *s)
     free(s);
 }
 
-ps_string *ps_string_set(ps_string *ptr, ps_char *z)
+ps_string *ps_string_set(ps_string *s, ps_char *z)
 {
     size_t len = strlen(z);
-    if (len > ps_string_max || len > ptr->max)
+    if (len > ps_string_max || len > s->max)
     {
         errno = EINVAL;
         return NULL;
     }
-    ptr->len = (ps_string_len)len;
-    strcpy(ptr->str, z);
-    return ptr;
+    s->len = (ps_string_len)len;
+    // TODO
+    memcpy(s->str, z);
+    return s;
 }
 
 ps_string *ps_string_create(ps_string_len max, ps_char *z)

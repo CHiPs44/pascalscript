@@ -75,7 +75,16 @@ ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definiti
     PS_VALUE_SET(type_def, g);
 }
 
-ps_value *ps_value_set_string(ps_value *value, char *s, ps_string_len max, ps_string_len len)
+ps_value *ps_value_set_string(ps_value *value, ps_string *s)
+{
+    if (NULL == value)
+    {
+        return ps_value_new_string()
+    }
+    return s;
+}
+
+ps_string *ps_value_new_string(char *s, ps_string_len max, ps_string_len len)
 {
     // ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
     // return NULL;
