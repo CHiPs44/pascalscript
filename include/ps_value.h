@@ -33,6 +33,7 @@ extern "C"
         ps_pointer          p; //  2   4   8
         ps_string          *s; //  2   4   8
         ps_type_definition *t; //  2   4   8
+        void               *x; //  2   4   8 
         // clang-format on
     } ps_value_data;
 

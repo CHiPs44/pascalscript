@@ -6,7 +6,6 @@
 
 #include "ps_system_types.h"
 #include "ps_error.h"
-#include "ps_value.h"
 
 #ifndef _PS_SYMBOL_H
 #define _PS_SYMBOL_H
@@ -15,6 +14,9 @@
 extern "C"
 {
 #endif
+
+    // Forward reference
+    typedef struct s_ps_value ps_value;
 
 #define PS_SYMBOL_SCOPE_NAME_LEN 7
 #define PS_SYMBOL_SCOPE_NAME_SIZE (PS_SYMBOL_SCOPE_NAME_LEN + 1)
@@ -52,13 +54,13 @@ extern "C"
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 
-    /** @brief Symbol is a named value within a scope (system, global, local, ...) */
+    /** @brief Symbol is a named value within a scope */
     typedef struct s_ps_symbol
     {
         ps_symbol_scope scope;
         ps_symbol_kind kind;
         ps_identifier name;
-        ps_value value;
+        ps_value *value;
     } ps_symbol;
 
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)

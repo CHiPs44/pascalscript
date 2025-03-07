@@ -170,7 +170,7 @@ extern "C"
             ps_unsigned u;
             ps_real r;
             ps_char c;
-            ps_char s[PS_STRING_MAX + 1];
+            ps_char s[PS_STRING_MAX_LEN + 1];
         } value;
     } ps_token;
 

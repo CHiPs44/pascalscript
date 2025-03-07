@@ -7,9 +7,6 @@
 #ifndef _PS_SYSTEM_TYPES_H
 #define _PS_SYSTEM_TYPES_H
 
-// #include <stdlib.h>
-// #include <stdbool.h>
-
 #include "ps_config.h"
 
 #ifdef __cplusplus
@@ -36,11 +33,11 @@ extern "C"
     const ps_char ps_char_max = PS_CHAR_MAX;
 
     typedef PS_STRING_LEN_TYPE ps_string_len;
-    const ps_string_len ps_string_max = PS_STRING_MAX;
+    const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
 
     // typedef PS_STRING_NUM ps_string_num;
 
-    // will be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
+    // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
     typedef struct s_ps_string
     {
         // ps_string_num num;

@@ -37,9 +37,9 @@ char *ps_symbol_get_scope_name(ps_symbol_scope scope)
     static char scope_name[PS_SYMBOL_SCOPE_NAME_SIZE];
     switch (scope)
     {
-    case PS_SYMBOL_SCOPE_NONE:
-        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "NONE");
-        break;
+    // case PS_SYMBOL_SCOPE_NONE:
+    //     snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "NONE");
+    //     break;
     case PS_SYMBOL_SCOPE_SYSTEM:
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "SYSTEM");
         break;

@@ -19,6 +19,9 @@ extern "C"
 {
 #endif
 
+    // Forward reference
+    typedef struct s_ps_value ps_value;
+
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
@@ -44,13 +47,6 @@ extern "C"
         PS_TYPE_MAX = UINT16_MAX
     } __attribute__((__packed__)) ps_value_type;
 
-    typedef struct s_ps_type_name
-    {
-        bool is_base_type;
-        ps_value_type type;
-        char *name;
-    } ps_type_name;
-
     /** @brief Enums are stored in unsigned value (first=0, second=1, ...) */
     typedef struct s_ps_type_definition_enum
     {
@@ -62,8 +58,8 @@ extern "C"
     typedef struct s_ps_type_definition_subrange
     {
         ps_unsigned count;
-        ps_value min;
-        ps_value max;
+        ps_value *min;
+        ps_value *max;
     } ps_type_definition_subrange;
 
     /** @brief Sets are stored in unsigned value as a bit field */
@@ -73,17 +69,17 @@ extern "C"
         ps_identifier *values;
     } ps_type_definition_set;
 
-    /** @brief stored in a symbol */
+    /** @brief Pointer type is stored in a symbol */
     typedef struct s_ps_type_definition_pointer
     {
         ps_symbol *type_def;
     } ps_type_definition_pointer;
 
-    /** @brief stored in a symbol */
-    typedef struct s_ps_type_definition_pointer
+    /** @brief Type definition type stored in a symbol */
+    typedef struct s_ps_type_definition_type_def
     {
         ps_symbol *type_def;
-    } ps_type_definition_pointer;
+    } s_ps_type_definition_type_def;
 
     /** @brief *IN PROGRESS* => maximum length only, nothing more */
     typedef struct s_ps_type_definition_string
