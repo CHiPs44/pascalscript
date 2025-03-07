@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "ps_config.h"
+#include "ps_symbol.h"
 #include "ps_system_types.h"
 
 #ifdef __cplusplus
@@ -21,25 +22,27 @@ extern "C"
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        /* simple types => direct value */
+        /* Simple types => direct value */
         PS_TYPE_NONE = 0,
         PS_TYPE_INTEGER,
         PS_TYPE_UNSIGNED,
         PS_TYPE_REAL,
         PS_TYPE_BOOLEAN,
         PS_TYPE_CHAR,
-        /* user defineable types */
+        /* User defineable types */
         PS_TYPE_DEFINITION,
-        PS_TYPE_ENUM,     // *FUTURE*
-        PS_TYPE_SUBRANGE, // *FUTURE*
-        PS_TYPE_SET,      // *FUTURE*
-        PS_TYPE_POINTER,  // *FUTURE*
-        /* reference types (pointer to value(s)) */
+        PS_TYPE_ENUM,
+        PS_TYPE_SUBRANGE,
+        PS_TYPE_SET,
+        PS_TYPE_POINTER,
+        /* Reference types (pointer to value(s)) */
         PS_TYPE_STRING, // *IN PROGRESS*
         PS_TYPE_ARRAY,  // *FUTURE*
         PS_TYPE_RECORD, // *FUTURE*
         PS_TYPE_FILE,   // *FUTURE*
-    } /*__attribute__((__packed__))*/ ps_value_type;
+        PS_TYPE_OBJECT, // *FUTURE*
+        PS_TYPE_MAX = UINT16_MAX
+    } __attribute__((__packed__)) ps_value_type;
 
     typedef struct s_ps_type_name
     {
@@ -48,28 +51,35 @@ extern "C"
         char *name;
     } ps_type_name;
 
-    /** @brief *FUTURE* => enums are stored in unsigned value (first=0, second=1, ...) */
+    /** @brief Enums are stored in unsigned value (first=0, second=1, ...) */
     typedef struct s_ps_type_definition_enum
     {
         ps_unsigned count;
         ps_identifier *values;
     } ps_type_definition_enum;
 
-    /** @brief *FUTURE* => limits stored in integer values (-10..15), reference to type needed, needed to implement arrays */
+    /** @brief Subranges limits stored in simple values (-10..15 or 'A'..'Z'), needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
-        ps_integer min;
-        ps_integer max;
+        ps_unsigned count;
+        ps_value min;
+        ps_value max;
     } ps_type_definition_subrange;
 
-    /** @brief *FUTURE* => stored in unsigned value as a bit field */
+    /** @brief Sets are stored in unsigned value as a bit field */
     typedef struct s_ps_type_definition_set
     {
-        ps_unsigned count; // max: 16, 32 or 64
+        ps_unsigned count; // max: UINT8_MAX, UINT16_MAX, UINT32_MAX, UINT64_MAX
         ps_identifier *values;
     } ps_type_definition_set;
 
-    /** @brief *FUTURE* => stored in a symbol */
+    /** @brief stored in a symbol */
+    typedef struct s_ps_type_definition_pointer
+    {
+        ps_symbol *type_def;
+    } ps_type_definition_pointer;
+
+    /** @brief stored in a symbol */
     typedef struct s_ps_type_definition_pointer
     {
         ps_symbol *type_def;

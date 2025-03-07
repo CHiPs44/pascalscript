@@ -21,7 +21,7 @@ ps_type_definition ps_type_def_char = {.base = PS_TYPE_CHAR};
 
 ps_type_definition *ps_type_definition_create()
 {
-    ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
+    ps_type_definition *definition = ;
     if (definition == NULL)
         return NULL;
     return definition;
@@ -29,7 +29,7 @@ ps_type_definition *ps_type_definition_create()
 
 ps_type_definition *ps_type_definition_create_base(ps_value_type type)
 {
-    ps_type_definition *definition = ps_type_definition_create();
+    ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
     if (definition == NULL)
         return NULL;
     definition->base = type;
@@ -59,18 +59,13 @@ ps_type_definition *ps_type_definition_create_subrange(ps_integer low, ps_intege
 bool ps_type_definition_create_system_types(ps_symbol_table *symbol_table)
 {
     ps_symbol symbol;
-    symbol.kind = PS_SYMBOL_KIND_TYPE;
+    symbol.kind = PS_SYMBOL_KIND_TYPE_DEFINITION;
     symbol.scope = PS_SYMBOL_SCOPE_SYSTEM;
     symbol.value.type = PS_TYPE_DEFINITION;
 
     // *** INTEGER ***
-    ps_type_definition *ps_type_definition_integer = ps_type_definition_create_base(PS_TYPE_INTEGER);
-    if (ps_type_definition_integer == NULL)
-        return false;
-    ps_type_definition_integer->def.def_subrange.min = ps_integer_min;
-    ps_type_definition_integer->def.def_subrange.max = ps_integer_max;
     strcpy(symbol.name, "INTEGER");
-    symbol.value.data.t = ps_type_definition_integer;
+    symbol.value.data.t = &ps_type_def_integer;
     ps_symbol_table_add(symbol_table, &symbol);
 
     // *** UNSIGNED / CARDINAL ***

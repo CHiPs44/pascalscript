@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_buffer_dump(vm->parser->lexer.buffer, 0, PS_BUFFER_MAX_LINES-1);
+  ps_buffer_dump(vm->parser->lexer->buffer, 0, PS_BUFFER_MAX_LINES-1);
   printf("Listed!\n");
-  ps_parser_start(vm);
+  ps_parser_start(vm->parser);
   return 0;
 }
 

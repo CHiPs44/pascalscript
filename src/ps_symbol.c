@@ -62,7 +62,7 @@ const struct s_ps_symbol_kind_name
     {PS_SYMBOL_KIND_AUTO     , "AUTO"     },
     {PS_SYMBOL_KIND_CONSTANT , "CONSTANT" },
     {PS_SYMBOL_KIND_VARIABLE , "VARIABLE" },
-    {PS_SYMBOL_KIND_TYPE     , "TYPE"     },
+    {PS_SYMBOL_KIND_TYPE_DEFINITION     , "TYPE"     },
     {PS_SYMBOL_KIND_PROCEDURE, "PROCEDURE"},
     {PS_SYMBOL_KIND_FUNCTION , "FUNCTION" },
     {PS_SYMBOL_KIND_UNIT     , "UNIT"     },

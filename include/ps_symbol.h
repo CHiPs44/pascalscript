@@ -4,12 +4,12 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-#ifndef _PS_SYMBOL_H
-#define _PS_SYMBOL_H
-
 #include "ps_system_types.h"
 #include "ps_error.h"
 #include "ps_value.h"
+
+#ifndef _PS_SYMBOL_H
+#define _PS_SYMBOL_H
 
 #ifdef __cplusplus
 extern "C"
@@ -42,7 +42,7 @@ extern "C"
         PS_SYMBOL_KIND_AUTO,
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
-        PS_SYMBOL_KIND_TYPE,
+        PS_SYMBOL_KIND_TYPE_DEFINITION,
         PS_SYMBOL_KIND_PROCEDURE,
         PS_SYMBOL_KIND_FUNCTION,
         PS_SYMBOL_KIND_UNIT,

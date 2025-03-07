@@ -46,7 +46,7 @@ extern "C"
         // ps_string_num num;
         ps_string_len max;
         ps_string_len len;
-        ps_char str[1];
+        ps_char *str;
     } ps_string;
 
     typedef void *ps_pointer;

@@ -221,7 +221,7 @@ ps_error ps_vm_exec_xxx(ps_vm *vm)
 
 bool ps_vm_load_source(ps_vm *vm, char *source, size_t length)
 {
-    bool ok = ps_buffer_set_text(&vm->parser->lexer.buffer, source, length);
+    bool ok = ps_buffer_set_text(&vm->parser->lexer[0].buffer, source, length);
     return ok;
 }
 
