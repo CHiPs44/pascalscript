@@ -55,12 +55,8 @@ extern "C"
 
 #endif
 
-#ifndef PS_INTEGER_MIN
-#error PS_INTEGER_MIN must be defined.
-#endif
-
-#ifndef PS_INTEGER_MAX
-#error PS_INTEGER_MAX must be defined.
+#if !defined(PS_INTEGER) || !defined(PS_INTEGER_MIN) || !defined(PS_INTEGER_MAX)
+#error PS_INTEGER, PS_INTEGER_MIN & PS_INTEGER_MAX must be defined.
 #endif
 
 #ifndef PS_UNSIGNED
@@ -82,8 +78,8 @@ extern "C"
 
 #endif
 
-#ifndef PS_UNSIGNED_MAX
-#error PS_UNSIGNED_MAX must be defined.
+#if !defined(PS_UNSIGNED) || !defined(PS_UNSIGNED_MAX)
+#error PS_UNSIGNED & PS_UNSIGNED_MAX must be defined.
 #endif
 
 #ifndef PS_BOOLEAN
@@ -94,7 +90,7 @@ extern "C"
 
 #if PS_BITNESS == 16
 // float16 support? Is it enough? Is it better than nothing?
-//  => default to float for now
+//  => default to 4 bytes floats for now
 #define PS_REAL float
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
