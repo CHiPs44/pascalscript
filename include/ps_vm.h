@@ -97,7 +97,7 @@ extern "C"
     /** @brief Push symbol on top of stack */
     int ps_vm_push(ps_vm *vm, ps_symbol *symbol);
     /** @brief Pop symbol from top of stack */
-    ps_symbol *ps_vm_stack_pop(ps_vm *vm);
+    ps_symbol *ps_vm_pop(ps_vm *vm);
 
     ps_symbol *vm_auto_add_integer(ps_vm *vm, int value);
     int ps_vm_auto_free(ps_vm *vm, char *name);

@@ -12,17 +12,15 @@
 #include "ps_value.h"
 #include "ps_symbol_stack.h"
 
-/**
- * @brief Initialize stack
- *
- * @param stack
- */
-ps_symbol_stack *ps_symbol_stack_init()
+ps_symbol_stack *ps_symbol_stack_init(ps_symbol_stack *stack)
 {
-    ps_symbol_stack *stack = calloc(1, sizeof(ps_symbol_stack));
     if (stack == NULL)
-        return NULL;
-    stack->sp = -1;
+    {
+        stack = calloc(1, sizeof(ps_symbol_stack));
+        if (stack == NULL)
+            return NULL;
+    }
+    stack->sp = SIZE_MAX;
     for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
     {
         stack->symbols[i] = NULL;
@@ -33,6 +31,59 @@ ps_symbol_stack *ps_symbol_stack_init()
 void ps_symbol_stack_free(ps_symbol_stack *stack)
 {
     free(stack);
+}
+
+size_t ps_symbol_stack_size(ps_symbol_stack *stack)
+{
+    return stack->sp == SIZE_MAX ? 0 : stack->sp + 1;
+}
+
+bool ps_symbol_stack_full(ps_symbol_stack *stack)
+{
+    return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
+}
+
+bool ps_symbol_stack_push(ps_symbol_stack *stack, ps_symbol *symbol)
+{
+    if (ps_symbol_stack_full(stack))
+    {
+        return false;
+    }
+    stack->sp += 1;
+    stack->symbols[stack->sp] = symbol;
+    return true;
+}
+
+ps_symbol *ps_symbol_stack_pop(ps_symbol_stack *stack)
+{
+    ps_symbol *symbol;
+    if (ps_symbol_stack_size(stack) == 0)
+    {
+        return NULL;
+    }
+    symbol = stack->symbols[stack->sp];
+    stack->symbols[stack->sp] = NULL;
+    stack->sp -= 1;
+    return symbol;
+}
+
+bool ps_symbol_stack_poke(ps_symbol_stack *stack, ps_symbol *symbol)
+{
+    if (ps_symbol_stack_size(stack) == 0)
+    {
+        return false;
+    }
+    stack->symbols[stack->sp] = symbol;
+    return true;
+}
+
+ps_symbol *ps_symbol_stack_peek(ps_symbol_stack *stack)
+{
+    if (ps_symbol_stack_size(stack) == 0)
+    {
+        return NULL;
+    }
+    return stack->symbols[stack->sp];
 }
 
 void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
@@ -61,97 +112,6 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
         }
     }
     fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
-}
-
-/**
- * @brief Get actual stack size
- *
- * @param stack
- * @return int
- */
-int ps_symbol_stack_size(ps_symbol_stack *stack)
-{
-    return stack->sp + 1;
-}
-
-/**
- * @brief Check if stack is full
- *
- * @param Stack
- * @return true if stack is full
- */
-extern bool ps_symbol_stack_full(ps_symbol_stack *stack)
-{
-    return ps_symbol_stack_size(stack) >= PS_SYMBOL_STACK_SIZE;
-}
-
-/**
- * @brief Push symbol on top of stack
- *
- * @param stack
- * @param symbol
- * @return int
- */
-int ps_symbol_stack_push(ps_symbol_stack *stack, ps_symbol *symbol)
-{
-    if (ps_symbol_stack_full(stack))
-    {
-        return PS_SYMBOL_STACK_ERROR_OVERFLOW;
-    }
-    stack->sp += 1;
-    stack->symbols[stack->sp] = symbol;
-    return stack->sp;
-}
-
-/**
- * @brief Pop symbol from top of stack
- *
- * @param stack
- * @return ps_symbol* NULL if stack is empty
- */
-ps_symbol *ps_symbol_stack_pop(ps_symbol_stack *stack)
-{
-    ps_symbol *symbol;
-    if (ps_symbol_stack_size(stack) == 0)
-    {
-        return NULL;
-    }
-    symbol = stack->symbols[stack->sp];
-    stack->symbols[stack->sp] = NULL;
-    stack->sp -= 1;
-    return symbol;
-}
-
-/**
- * @brief Replace top of stack
- *
- * @param Stack
- * @param Symbol
- * @return true (false if stack is empty)
- */
-bool ps_symbol_stack_poke(ps_symbol_stack *stack, ps_symbol *symbol)
-{
-    if (ps_symbol_stack_size(stack) == 0)
-    {
-        return false;
-    }
-    stack->symbols[stack->sp] = symbol;
-    return true;
-}
-
-/**
- * @brief Get top of stack
- *
- * @param Stack
- * @return Top or NULL if stack is empty
- */
-ps_symbol *ps_symbol_stack_peek(ps_symbol_stack *stack)
-{
-    if (ps_symbol_stack_size(stack) == 0)
-    {
-        return NULL;
-    }
-    return stack->symbols[stack->sp];
 }
 
 /* EOF */

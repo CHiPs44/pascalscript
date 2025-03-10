@@ -120,8 +120,9 @@ extern "C"
 
 #ifndef PS_CHAR
 // #define PS_CHAR unsigned char (does not work for now)
-#define PS_CHAR char
-#define PS_CHAR_MAX 255
+// #define PS_CHAR char
+#define PS_CHAR uint8_t
+#define PS_CHAR_MAX UINT8_MAX
 #endif
 
 #ifndef PS_STRING_MAX_LEN
@@ -136,12 +137,9 @@ extern "C"
 // #define PS_STRING_MAX_LEN UINT32_MAX
 #endif
 
-#ifndef PS_STRING_LEN_TYPE
-#error PS_STRING_LEN_TYPE must be defined.
+#if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN)
+#error PS_STRING_LEN_TYPE & PS_STRING_MAX_LEN must be defined.
 #endif
-
-    // #define PS_STRING_NUM uint16_t
-    // #define PS_STRING_NUM_MAX UINT16_MAX
 
 #ifdef __cplusplus
 }

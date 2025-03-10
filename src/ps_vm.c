@@ -45,7 +45,7 @@ ps_vm *ps_vm_init_runtime(ps_vm *vm)
     }
 
     /* Symbol table */
-    vm->symbols = ps_symbol_table_init();
+    vm->symbols = ps_symbol_table_init(NULL);
     if (vm->symbols == NULL)
     {
         if (allocated) free(vm);
@@ -92,7 +92,7 @@ int ps_vm_push(ps_vm *vm, ps_symbol *symbol)
     return ps_symbol_stack_push(&vm->stack, symbol);
 }
 
-ps_symbol *ps_vm_stack_pop(ps_vm *vm)
+ps_symbol *ps_vm_pop(ps_vm *vm)
 {
     return ps_symbol_stack_pop(&vm->stack);
 }

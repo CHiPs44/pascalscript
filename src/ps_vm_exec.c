@@ -24,12 +24,12 @@
  */
 ps_error ps_vm_exec_assign(ps_vm *vm)
 {
-    ps_symbol *value = ps_vm_stack_pop(vm);
+    ps_symbol *value = ps_vm_pop(vm);
     if (value == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (value->kind == PS_SYMBOL_KIND_AUTO)
         ps_vm_auto_free(vm, value->name);
-    ps_symbol *variable = ps_vm_stack_pop(vm);
+    ps_symbol *variable = ps_vm_pop(vm);
     if (variable == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -45,7 +45,7 @@ ps_error ps_vm_exec_assign(ps_vm *vm)
 
 ps_error ps_vm_exec_sys(ps_vm *vm)
 {
-    ps_symbol *command = ps_vm_stack_pop(vm);
+    ps_symbol *command = ps_vm_pop(vm);
     if (command == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (command->kind == PS_SYMBOL_KIND_AUTO)

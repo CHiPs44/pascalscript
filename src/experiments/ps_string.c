@@ -32,13 +32,14 @@ void ps_string_debug(ps_string *s, char *message)
     fprintf(stderr, "PS_STRING: %s%s\n", message, ps_string_dump(s));
 }
 
-ps_string *ps_string_alloc(ps_string_len max)
+ps_string *ps_string_new(ps_string_len max)
 {
     // allocate sizeof(max) + sizeof(len) + (max + 1) chars
+    // maximum:          1   +         1   + 255 + 1  bytes for "short" strings
     ps_string *s = (ps_string *)malloc(
         2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
     if (s == NULL)
-        return NULL; // errno = ENOMEM
+        return NULL;
     s->max = max;
     s->len = 0;
     return s;
@@ -54,8 +55,7 @@ ps_string *ps_string_set(ps_string *s, ps_char *z)
     size_t len = strlen(z);
     if (len > ps_string_max || len > s->max)
     {
-        errno = EINVAL;
-        return NULL;
+        return NULL; // errno = EINVAL
     }
     s->len = (ps_string_len)len;
     // TODO
@@ -65,7 +65,7 @@ ps_string *ps_string_set(ps_string *s, ps_char *z)
 
 ps_string *ps_string_create(ps_string_len max, ps_char *z)
 {
-    ps_string *s = ps_string_alloc(max);
+    ps_string *s = ps_string_new(max);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     if (ps_string_set(s, z) == NULL)
@@ -81,37 +81,61 @@ ps_string *ps_string_concat(ps_string *a, ps_string *b)
     size_t len = a->len + b->len;
     if (len > ps_string_max)
     {
-        errno = EINVAL;
-        return NULL;
+        return NULL; // errno = EINVAL;
     }
-    ps_string *c = ps_string_alloc((ps_string_len)len);
+    ps_string *c = ps_string_new((ps_string_len)len);
     if (c == NULL)
         return NULL; // errno = ENOMEM
-    strncpy(c->str, a->str, c->max);
-    strncat(c->str, b->str, c->max);
+    memcpy(c->str, a->str, a->len);
+    memcpy(c->str + a->len, b->str, b->len);
     c->len = len;
     return c;
 }
 
-ps_string *ps_string_get_substring(
-    ps_string *a, ps_string_len start, ps_string_len length)
+ps_string *ps_string_substring(ps_string *a, ps_string_len from, ps_string_len len)
 {
-    if (start > a->len)
+    if (from > a->len)
     {
-        errno = EINVAL;
-        return NULL;
+        return NULL; // errno = EINVAL;
     }
-    if (start + length > a->len)
-        length = a->len - start;
-    ps_string *b = ps_string_alloc(length);
+    if (from + len > a->len)
+        len = a->len - from;
+    ps_string *b = ps_string_new(len);
     if (b == NULL)
         return NULL; // errno = ENOMEM
-    strncpy(b->str, &a->str[start - 1], length);
-    b->len = length;
+    memcpy(b->str, &a->str[from - 1], len);
+    b->len = len;
     return b;
 }
 
 int ps_string_compare(ps_string *a, ps_string *b)
 {
-    return strcmp(a->str, b->str);
+    // return strcmp(a->str, b->str);
+    int diff;
+    ps_string_len len = a->len > b->len ? a->len : b->len;
+    for (ps_string_len i = 0; i < len; i++)
+    {
+        if (i < a->len)
+        {
+            if (i < b->len)
+            {
+                diff = (int)a->str[i] - (int)b->str[i];
+                if (diff == 0)
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                diff = (int)a->str[i];
+                break;
+            }
+        }
+        else
+        {
+            diff = -(int)b->str[i];
+            break;
+        }
+    }
+    return diff;
 }
