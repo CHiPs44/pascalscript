@@ -39,8 +39,8 @@ int main(void)
     ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
 
     ps_symbol *three = vm_auto_add_integer(vm, 3);
-    ps_vm_stack_push(vm, ps_vm_global_get(vm, "I"));
-    ps_vm_stack_push(vm, three);
+    ps_vm_push(vm, ps_vm_global_get(vm, "I"));
+    ps_vm_push(vm, three);
     ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = ps_vm_exec_assign(vm);
     ps_vm_auto_gc(vm);
@@ -54,8 +54,8 @@ int main(void)
     ps_symbol_table_dump(&vm->symbols, "CONST K = 1234;");
 
     ps_symbol *_5678 = vm_auto_add_integer(vm, 5678);
-    ps_vm_stack_push(vm, ps_vm_global_get(vm, "K"));
-    ps_vm_stack_push(vm, _5678);
+    ps_vm_push(vm, ps_vm_global_get(vm, "K"));
+    ps_vm_push(vm, _5678);
     ps_symbol_stack_dump(&vm->stack, "2 PUSH?");
     code = ps_vm_exec_assign(vm);
     ps_vm_auto_gc(vm);

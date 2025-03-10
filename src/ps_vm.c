@@ -87,48 +87,7 @@ ps_vm *ps_vm_init_runtime(ps_vm *vm)
     ps_runtime_add_system_constant(vm, "PI", value);
 }
 
-/**
- * @brief Get global symbol
- *
- * @param VM
- * @param already normalized name
- * @return global or NULL if not found
- */
-ps_symbol *ps_vm_global_get(ps_vm *vm, char *name)
-{
-    ps_symbol *symbol = ps_symbol_table_get(vm->symbols, name);
-    if (symbol == NULL)
-        return NULL;
-    if (symbol->kind != PS_SYMBOL_SCOPE_GLOBAL)
-        return NULL;
-    return symbol;
-}
-
-/**
- * @brief Add global symbol
- *
- * @param VM
- * @param Symbol
- * @return Index of added symbol (>=0) or error (<0)
- */
-int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol)
-{
-    return ps_symbol_table_add(vm->symbols, symbol);
-}
-
-/**
- * @brief Delete global symbol
- *
- * @param VM
- * @param Symbol name
- * @return index of symbol or -1 if not found
- */
-int ps_vm_global_delete(ps_vm *vm, char *name)
-{
-    return ps_symbol_table_delete(vm->symbols, name);
-}
-
-int ps_vm_stack_push(ps_vm *vm, ps_symbol *symbol)
+int ps_vm_push(ps_vm *vm, ps_symbol *symbol)
 {
     return ps_symbol_stack_push(&vm->stack, symbol);
 }
@@ -174,49 +133,6 @@ int ps_vm_auto_gc(ps_vm *vm)
     int count = ps_symbol_table_gc(vm->symbols);
     fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     return count;
-}
-
-/**
- * @brief Execute ASSIGN statement
- *      1. POP value
- *      2. POP variable
- *      3. SET variable TO value
- */
-ps_error ps_vm_exec_assign(ps_vm *vm)
-{
-    ps_symbol *value = ps_vm_stack_pop(vm);
-    if (value == NULL)
-        return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (value->kind == PS_SYMBOL_KIND_AUTO)
-        ps_vm_auto_free(vm, value->name);
-    ps_symbol *variable = ps_vm_stack_pop(vm);
-    if (variable == NULL)
-        return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
-        return PS_RUNTIME_ERROR_ASSIGN_TO_CONST;
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-        return PS_RUNTIME_ERROR_EXPECTED_VARIABLE;
-    if (variable->value.type != value->value.type)
-        return PS_RUNTIME_ERROR_TYPE_MISMATCH;
-    variable->value = value->value;
-    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.data.i);
-    return PS_RUNTIME_ERROR_NONE;
-}
-
-ps_error ps_vm_exec_sys(ps_vm *vm)
-{
-    ps_symbol *command = ps_vm_stack_pop(vm);
-    if (command == NULL)
-        return PS_RUNTIME_ERROR_STACK_EMPTY;
-    if (command->kind == PS_SYMBOL_KIND_AUTO)
-        ps_vm_auto_free(vm, command->name);
-
-    return PS_ERROR_NOT_IMPLEMENTED;
-}
-
-ps_error ps_vm_exec_xxx(ps_vm *vm)
-{
-    return PS_ERROR_NOT_IMPLEMENTED;
 }
 
 bool ps_vm_load_source(ps_vm *vm, char *source, size_t length)

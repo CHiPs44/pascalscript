@@ -60,7 +60,7 @@ extern "C"
         ps_symbol_scope scope;
         ps_symbol_kind kind;
         ps_identifier name;
-        ps_value *value;
+        ps_value value;
     } ps_symbol;
 
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)

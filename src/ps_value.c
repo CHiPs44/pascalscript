@@ -79,69 +79,69 @@ ps_value *ps_value_set_string(ps_value *value, ps_string *s)
 {
     if (NULL == value)
     {
-        return ps_value_new_string()
+        return ps_value_new_string();
     }
     return s;
 }
 
 ps_string *ps_value_new_string(char *s, ps_string_len max, ps_string_len len)
 {
-    // ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
-    // return NULL;
-    if (max == 0)
-        max = len;
-    if (value == NULL && max == 0)
-    {
-        ps_value_error = PS_RUNTIME_ERROR_INVALID_PARAMETERS;
-        return NULL;
-    }
-    bool is_new = false;
-    if (value == NULL)
-    {
-        is_new = true;
-        value = calloc(1, sizeof(ps_value));
-        if (value == NULL)
-        {
-            ps_value_error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-            return NULL;
-        }
-    }
-    value->type = PS_TYPE_STRING;
-    // value->size = sizeof(ps_string);
-    if (max > 0 || is_new)
-    {
-        // (Re)allocate to new max length
-        if (!is_new)
-            ps_string_free(value->data.s);
-        value->data.s = ps_string_create(max, s);
-        if (value->data.s == NULL)
-        {
-            ps_value_error = errno == ENOMEM
-                                 ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
-                                 : PS_RUNTIME_ERROR_OUT_OF_RANGE;
-            if (is_new)
-                free(value);
-            return NULL;
-        }
-    }
-    else
-    {
-        // Try to put new value in existing one
-        ps_string *p = ps_string_set(value->data.s, s);
-        if (p == NULL)
-        {
-            ps_value_error = errno == ENOMEM
-                                 ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
-                                 : PS_RUNTIME_ERROR_OUT_OF_RANGE;
-            if (is_new)
-            {
-                ps_string_free(value->data.s);
-                free(value);
-            }
-            return NULL;
-        }
-    }
-    return value;
+    ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
+    return NULL;
+    // if (max == 0)
+    //     max = len;
+    // if (value == NULL && max == 0)
+    // {
+    //     ps_value_error = PS_RUNTIME_ERROR_INVALID_PARAMETERS;
+    //     return NULL;
+    // }
+    // bool is_new = false;
+    // if (value == NULL)
+    // {
+    //     is_new = true;
+    //     value = calloc(1, sizeof(ps_value));
+    //     if (value == NULL)
+    //     {
+    //         ps_value_error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+    //         return NULL;
+    //     }
+    // }
+    // value->type = PS_TYPE_STRING;
+    // // value->size = sizeof(ps_string);
+    // if (max > 0 || is_new)
+    // {
+    //     // (Re)allocate to new max length
+    //     if (!is_new)
+    //         ps_string_free(value->data.s);
+    //     value->data.s = ps_string_create(max, s);
+    //     if (value->data.s == NULL)
+    //     {
+    //         ps_value_error = errno == ENOMEM
+    //                              ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
+    //                              : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+    //         if (is_new)
+    //             free(value);
+    //         return NULL;
+    //     }
+    // }
+    // else
+    // {
+    //     // Try to put new value in existing one
+    //     ps_string *p = ps_string_set(value->data.s, s);
+    //     if (p == NULL)
+    //     {
+    //         ps_value_error = errno == ENOMEM
+    //                              ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
+    //                              : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+    //         if (is_new)
+    //         {
+    //             ps_string_free(value->data.s);
+    //             free(value);
+    //         }
+    //         return NULL;
+    //     }
+    // }
+    // return value;
 }
 
 ps_value *ps_value_set_pointer(ps_value *value, ps_pointer p, ps_type_definition *type_def)

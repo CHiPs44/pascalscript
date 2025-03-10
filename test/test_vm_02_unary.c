@@ -34,8 +34,8 @@ int main(void)
     ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
     printf("TEST VM #02 UNARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     ps_symbol *three = vm_auto_add_integer(vm, 3);
-    ps_vm_stack_push(vm, ps_vm_global_get(vm, "I"));
-    ps_vm_stack_push(vm, three);
+    ps_vm_push(vm, ps_vm_global_get(vm, "I"));
+    ps_vm_push(vm, three);
     code = vm_exec_op_unary(vm, OP_NEG);
     printf("TEST VM #02 UNARY: -3; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
     ps_symbol_stack_dump(&vm->stack, "2 PUSH?");

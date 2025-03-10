@@ -49,29 +49,21 @@ extern "C"
 #define PS_VALUE_SIZE sizeof(ps_value)
 
     // clang-format off
-    ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
-    ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
-    ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
-    ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
-    ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
-    ps_value *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
-    ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
-    ps_value *ps_value_set_string  (ps_value *value, ps_string  *s);
+    ps_value  *ps_value_set_integer (ps_value *value, ps_integer  i);
+    ps_value  *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
+    ps_value  *ps_value_set_real    (ps_value *value, ps_real     r);
+    ps_value  *ps_value_set_boolean (ps_value *value, ps_boolean  b);
+    ps_value  *ps_value_set_char    (ps_value *value, ps_char     c);
+    ps_value  *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
+    ps_value  *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
+    ps_value  *ps_value_set_string  (ps_value *value, ps_string  *s);
+    ps_value  *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
     ps_string *ps_value_new_string  (char *s, ps_string_len max, ps_string_len len);
-    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
-    // TODO?
-    ps_integer  ps_value_get_integer (ps_value *value);
-    ps_unsigned ps_value_get_unsigned(ps_value *value);
-    ps_boolean  ps_value_get_boolean (ps_value *value);
-    ps_char     ps_value_get_char    (ps_value *value);
-    ps_string  *ps_value_get_string  (ps_value *value);
-    ps_real     ps_value_get_real    (ps_value *value);
-    ps_pointer  ps_value_get_pointer (ps_value *value);
     // clang-format on
 
-    char *ps_value_get_type_name(ps_value_type type);
+    char *ps_value_get_type_name  (ps_value_type type);
     char *ps_value_get_debug_value(ps_value *value);
-    void ps_value_debug(ps_value *value, char *message);
+    void  ps_value_debug          (ps_value *value, char *message);
 
 #ifdef __cplusplus
 }

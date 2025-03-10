@@ -71,7 +71,9 @@ ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
 ps_symbol_table_size ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (symbol->kind == PS_SYMBOL_KIND_FREE)
+    {
         return PS_SYMBOL_TABLE_ERROR_KIND;
+    }
     if (table->used >= table->size)
     {
         return PS_SYMBOL_TABLE_ERROR_FULL;

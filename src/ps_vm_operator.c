@@ -77,35 +77,49 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     {
         switch (op)
         {
-        case OP_NEG:
+        case OP_NEG: // applicable to integer or real values
             if (a->value.type == PS_TYPE_INTEGER)
+            {
+                result.type = PS_TYPE_INTEGER;
                 result.data.i = -a->value.data.i;
+            }
             else if (a->value.type == PS_TYPE_REAL)
+            {
+                result.type = PS_TYPE_REAL;
                 result.data.r = -a->value.data.r;
+            }
             else
                 return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
             break;
-        case OP_BOOL_NOT:
+        case OP_BOOL_NOT: // applicable to bolean values
             if (a->value.type == PS_TYPE_BOOLEAN)
+            {
+                result.type = PS_TYPE_BOOLEAN;
                 result.data.b = !(a->value.data.b);
+            }
             else
-                return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+                return PS_RUNTIME_ERROR_EXPECTED_BOOLEAN;
             break;
-        case OP_BIT_NOT:
+        case OP_BIT_NOT: // applicable to integer or unsigned values
             if (a->value.type == PS_TYPE_INTEGER)
+            {
+                result.type = PS_TYPE_INTEGER;
                 result.data.i = ~a->value.data.i;
+            }
             else if (a->value.type == PS_TYPE_UNSIGNED)
+            {
+                result.type = PS_TYPE_UNSIGNED;
                 result.data.u = ~a->value.data.u;
+            }
             else
                 return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
             break;
-        default:
-            break;
         }
+        // TODO
         ps_symbol *b = vm_auto_add_integer(vm, result.data.i);
         if (b == NULL)
             return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (ps_vm_stack_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
+        if (ps_vm_push(vm, b) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             ps_vm_auto_free(vm, b->name);
             return PS_RUNTIME_ERROR_STACK_OVERFLOW;
@@ -182,7 +196,7 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
         ps_symbol *c = vm_auto_add_integer(vm, result.data.i);
         if (c == NULL)
             return PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW;
-        if (ps_vm_stack_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
+        if (ps_vm_push(vm, c) == PS_SYMBOL_STACK_ERROR_OVERFLOW)
         {
             ps_vm_auto_free(vm, c->name);
             return PS_RUNTIME_ERROR_STACK_OVERFLOW;
