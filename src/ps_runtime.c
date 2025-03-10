@@ -81,8 +81,7 @@ ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value)
     if (result == NULL)
         return NULL;
     result->type = PS_TYPE_BOOLEAN;
-    result->size = sizeof(ps_boolean);
-    switch (value->type)
+    switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
         result->data.b = (ps_boolean)(value->data.u & 1 == 1);
@@ -113,7 +112,7 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
     ps_value *result = ps_runtime_alloc_value(runtime);
     if (result == NULL)
         return NULL;
-    switch (value->type)
+    switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
     case PS_TYPE_INTEGER:
@@ -125,13 +124,11 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
     case PS_TYPE_BOOLEAN:
         // ord(true) => 1 / ord(false) => 0
         result->type = PS_TYPE_UNSIGNED;
-        result->size = sizeof(ps_unsigned);
         result->data.u = value->data.b ? 1u : 0u;
         return result;
     case PS_TYPE_CHAR:
         // ord('0') => 48 / ord('A') => 65 / ...
         result->type = PS_TYPE_UNSIGNED;
-        result->size = sizeof(ps_unsigned);
         result->data.u = (ps_unsigned)(value->data.c);
         return result;
     default:
@@ -148,7 +145,6 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     if (result == NULL)
         return NULL;
     result->type = PS_TYPE_CHAR;
-    result->size = sizeof(ps_char);
     switch (value->type)
     {
     case PS_TYPE_UNSIGNED:
@@ -173,20 +169,8 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     if (result == NULL)
         return NULL;
     memcpy(result, value, sizeof(ps_value));
-    switch (value->type)
+    switch (value->type->base)
     {
-    case PS_TYPE_UNSIGNED:
-        // succ(0) => error / succ(u) => u - 1
-        if (runtime->range_check && value->data.u == 0)
-        {
-            free(result);
-            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
-            return NULL;
-        }
-        result->data.u = value->data.u - 1;
-        return result;
-    // case PS_TYPE_ENUM:
-    //   TODO needs low()
     case PS_TYPE_INTEGER:
         // succ(min) => error / succ(i) => i - 1
         if (runtime->range_check && value->data.u == ps_integer_min)
@@ -197,6 +181,18 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
         }
         result->data.i = value->data.i - 1;
         return result;
+        case PS_TYPE_UNSIGNED:
+        // pred(0) => error / pred(u) => u - 1
+        if (runtime->range_check && value->data.u == 0)
+        {
+            free(result);
+            runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return NULL;
+        }
+        result->data.u = value->data.u - 1;
+        return result;
+    // case PS_TYPE_ENUM:
+    //   TODO needs low()
     // case PS_TYPE_SUBRANGE:
     //   TODO needs low()
     case PS_TYPE_BOOLEAN:

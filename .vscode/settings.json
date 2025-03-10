@@ -46,7 +46,25 @@
         "ps_type_definition.h": "c",
         "string_view": "c",
         "initializer_list": "c",
-        "ps_system_types.h": "c"
+        "ps_system_types.h": "c",
+        "atomic": "c",
+        "bit": "c",
+        "*.tcc": "c",
+        "cmath": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "exception": "c",
+        "algorithm": "c",
+        "memory": "c",
+        "memory_resource": "c",
+        "fstream": "c",
+        "iosfwd": "c",
+        "limits": "c",
+        "new": "c",
+        "numeric": "c",
+        "sstream": "c",
+        "streambuf": "c",
+        "typeinfo": "c"
     },
     "makefile.configureOnOpen": false
 }
