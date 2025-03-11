@@ -49,14 +49,36 @@ void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
     free(value);
 }
 
+/******************************************************************************/
+/* FUNCTIONS                                                                  */
+/******************************************************************************/
+
+bool is_scalar(ps_value *value)
+{
+    return (value->type->base >= PS_TYPE_INTEGER && value->type->base <= PS_TYPE_SUBRANGE);
+}
+
+bool is_number(ps_value *value)
+{
+    return (value->type->base >= PS_TYPE_REAL || value->type->base <= PS_TYPE_UNSIGNED);
+}
+
 /** @brief Get absolute value of integer / unsigned / real */
 ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value)
 {
+    if (!is_number(value))
+    {
+        runtime->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+        return NULL;
+    }
     ps_value *result = ps_runtime_alloc_value(runtime);
     if (result == NULL)
+    {
+        runtime->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
         return NULL;
+    }
     memcpy(result, value, sizeof(ps_value));
-    switch (value->type)
+    switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
         // abs(u) => u
@@ -141,16 +163,21 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
 /** @brief Get char value of unsigned / integer or subrange value */
 ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
 {
+    if (!is_scalar(value))
+    {
+        runtime->error = PS_RUNTIME_ERROR_EXPECTED_SCALAR;
+        return NULL;
+    }
     ps_value *result = ps_runtime_alloc_value(runtime);
     if (result == NULL)
         return NULL;
-    result->type = PS_TYPE_CHAR;
-    switch (value->type)
+    result->type->base = PS_TYPE_CHAR;
+    switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
     case PS_TYPE_ENUM:
         result->data.c = (ps_char)(value->data.u);
-        return result;
+        
     case PS_TYPE_INTEGER:
     case PS_TYPE_SUBRANGE:
         result->data.c = (ps_char)(value->data.i);
@@ -160,11 +187,22 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
         runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return NULL;
     }
+    return result;
 }
 
 /** @brief Get previous value (predecessor) of ordinal value */
 ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
 {
+    if (value == NULL)
+    {
+        runtime->error = PS_RUNTIME_ERROR_EXPECTED_VALUE;
+        return NULL;
+    }
+    if (!is_scalar(value))
+    {
+        runtime->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+        return NULL;
+    }
     ps_value *result = ps_runtime_alloc_value(runtime);
     if (result == NULL)
         return NULL;
@@ -173,7 +211,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
     {
     case PS_TYPE_INTEGER:
         // succ(min) => error / succ(i) => i - 1
-        if (runtime->range_check && value->data.u == ps_integer_min)
+        if (runtime->range_check && value->data.i == ps_integer_min)
         {
             free(result);
             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
@@ -181,7 +219,7 @@ ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
         }
         result->data.i = value->data.i - 1;
         return result;
-        case PS_TYPE_UNSIGNED:
+    case PS_TYPE_UNSIGNED:
         // pred(0) => error / pred(u) => u - 1
         if (runtime->range_check && value->data.u == 0)
         {
@@ -229,7 +267,7 @@ ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
     if (result == NULL)
         return NULL;
     memcpy(result, value, sizeof(ps_value));
-    switch (value->type)
+    switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
         // succ(max) => error / succ(u) => u + 1

@@ -35,16 +35,13 @@ extern "C"
     typedef PS_STRING_LEN_TYPE ps_string_len;
     const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
 
-    // typedef PS_STRING_NUM ps_string_num;
-
     // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
     typedef struct s_ps_string
     {
-        // ps_string_num num;
         ps_string_len max;
         ps_string_len len;
         ps_char *str;
-    } ps_string;
+    } __attribute__((__packed__)) ps_string;
 
     typedef void *ps_pointer;
 
@@ -61,12 +58,12 @@ extern "C"
         FILE *handle;
     } ps_file;*/
 
-#define PS_INTEGER_SIZE     sizeof(ps_integer)
-#define PS_UNSIGNED_SIZE    sizeof(ps_unsigned)
-#define PS_REAL_SIZE        sizeof(ps_real)
-#define PS_BOOLEAN_SIZE     sizeof(ps_boolean)
-#define PS_CHAR_SIZE        sizeof(ps_char)
-#define PS_STRING_SIZE      sizeof(ps_string)
+#define PS_INTEGER_SIZE sizeof(ps_integer)
+#define PS_UNSIGNED_SIZE sizeof(ps_unsigned)
+#define PS_REAL_SIZE sizeof(ps_real)
+#define PS_BOOLEAN_SIZE sizeof(ps_boolean)
+#define PS_CHAR_SIZE sizeof(ps_char)
+#define PS_STRING_SIZE sizeof(ps_string)
 
 #ifdef __cplusplus
 }

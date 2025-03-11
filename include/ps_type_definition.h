@@ -25,19 +25,22 @@ extern "C"
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        /* Simple types => direct value */
+        /* DO NOT CHANGE ORDER! */
         PS_TYPE_NONE = 0,
+        /* Simple types => direct value */
+        PS_TYPE_REAL,
+        /* Simple types with scalar values (with ord/pred/succ) */
         PS_TYPE_INTEGER,
         PS_TYPE_UNSIGNED,
-        PS_TYPE_REAL,
         PS_TYPE_BOOLEAN,
         PS_TYPE_CHAR,
-        /* User defineable types */
-        PS_TYPE_DEFINITION,
+        /* User defineable types with scalar values (with ord/pred/succ) */
         PS_TYPE_ENUM,
         PS_TYPE_SUBRANGE,
+        /* User defineable types without scalar values */
         PS_TYPE_SET,
         PS_TYPE_POINTER,
+        PS_TYPE_DEFINITION,
         /* Reference types (pointer to value(s)) */
         PS_TYPE_STRING, // *IN PROGRESS*
         PS_TYPE_ARRAY,  // *FUTURE*
