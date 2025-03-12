@@ -13,7 +13,7 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
-ps_type_definition ps_type_def_integer = {.base = PS_TYPE_INTEGER};
+ *ps_type_definition ps_type_def_integer = {.base = PS_TYPE_INTEGER, .def = {.def_subrange = {.min = ps_integer_min, .max = ps_integer_max}}};
 ps_type_definition ps_type_def_unsigned = {.base = PS_TYPE_UNSIGNED};
 ps_type_definition ps_type_def_real = {.base = PS_TYPE_REAL};
 ps_type_definition ps_type_def_boolean = {.base = PS_TYPE_BOOLEAN};

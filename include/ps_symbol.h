@@ -22,17 +22,17 @@ extern "C"
 #define PS_SYMBOL_SCOPE_NAME_SIZE (PS_SYMBOL_SCOPE_NAME_LEN + 1)
 #define PS_SYMBOL_SCOPE_SYSTEM_NAME "SYSTEM"
 #define PS_SYMBOL_SCOPE_GLOBAL_NAME "GLOBAL"
-#define PS_SYMBOL_SCOPE_LOCAL_FORMAT "L%05d"
+#define PS_SYMBOL_SCOPE_LOCAL_FORMAT "L%06d"
+#define PS_SYMBOL_SCOPE_LOCAL_FORMAT "U%06d"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM = 0,      /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
-        PS_SYMBOL_SCOPE_GLOBAL,          /** @brief User defined: for constants, types, variables, procedures and functions at top level */
-        PS_SYMBOL_SCOPE_LOCAL,           /** @brief Local defined, may be used for units, too */
-        PS_SYMBOL_SCOPE_MAX = UINT16_MAX /** @brief Ensure scope "packs" to a 16 bits unsigned */
+        PS_SYMBOL_SCOPE_SYSTEM = 0,                  /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
+        PS_SYMBOL_SCOPE_GLOBAL,                      /** @brief User defined: for constants, types, variables, procedures and functions at top level */
+        PS_SYMBOL_SCOPE_LOCAL,                       /** @brief Local defined */
+        PS_SYMBOL_SCOPE_UNIT = (UINT16_MAX + 1) / 2, /** @brief Unit defined */
+        PS_SYMBOL_SCOPE_MAX = UINT16_MAX             /** @brief Ensure scope "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_scope;
-
-#define PS_SYMBOL_SCOPE_SIZE sizeof(ps_symbol_scope)
 
 #define PS_SYMBOL_KIND_NAME_LEN 15
 #define PS_SYMBOL_KIND_NAME_SIZE (PS_SYMBOL_KIND_NAME_LEN + 1)
@@ -52,8 +52,6 @@ extern "C"
         PS_SYMBOL_KIND_MAX = UINT16_MAX /** @brief Ensure kind "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_kind;
 
-#define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
-
     /** @brief Symbol is a named value within a scope */
     typedef struct s_ps_symbol
     {
@@ -63,6 +61,8 @@ extern "C"
         ps_value value;
     } ps_symbol;
 
+#define PS_SYMBOL_SCOPE_SIZE sizeof(ps_symbol_scope)
+#define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
     /** @brief Get kind name for symbol */

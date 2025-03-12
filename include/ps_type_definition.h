@@ -55,40 +55,40 @@ extern "C"
     {
         ps_unsigned count;
         ps_identifier *values;
-    } ps_type_definition_enum;
+    } __attribute__((__packed__)) ps_type_definition_enum;
 
-    /** @brief Subranges limits stored in simple values (-10..15 or 'A'..'Z'), needed to implement arrays */
+    /** @brief Subranges limits stored in integer, unsigned or char values (-10..15 or 'A'..'Z'), needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
         ps_unsigned count;
         ps_value *min;
         ps_value *max;
-    } ps_type_definition_subrange;
+    } __attribute__((__packed__)) ps_type_definition_subrange;
 
     /** @brief Sets are stored in unsigned value as a bit field */
     typedef struct s_ps_type_definition_set
     {
         ps_unsigned count; // max: UINT8_MAX, UINT16_MAX, UINT32_MAX, UINT64_MAX
         ps_identifier *values;
-    } ps_type_definition_set;
+    } __attribute__((__packed__)) ps_type_definition_set;
 
     /** @brief Pointer type is stored in a symbol */
     typedef struct s_ps_type_definition_pointer
     {
         ps_symbol *type_def;
-    } ps_type_definition_pointer;
+    } __attribute__((__packed__)) ps_type_definition_pointer;
 
     /** @brief Type definition type stored in a symbol */
     typedef struct s_ps_type_definition_type_def
     {
         ps_symbol *type_def;
-    } s_ps_type_definition_type_def;
+    } __attribute__((__packed__)) s_ps_type_definition_type_def;
 
     /** @brief *IN PROGRESS* => maximum length only, nothing more */
     typedef struct s_ps_type_definition_string
     {
         ps_string_len max;
-    } ps_type_definition_string;
+    } __attribute__((__packed__)) ps_type_definition_string;
 
     /** @brief Type definition: base + parameters if needed */
     typedef struct s_ps_type_definition
@@ -105,7 +105,9 @@ extern "C"
             // ps_type_definition_record def_record;
             // ps_type_definition_file def_file;
         } def;
-    } ps_type_definition;
+    } __attribute__((__packed__)) ps_type_definition;
+
+    #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
     extern ps_type_definition ps_type_def_integer;
     extern ps_type_definition ps_type_def_unsigned;
