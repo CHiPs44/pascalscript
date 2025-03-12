@@ -190,7 +190,7 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     return result;
 }
 
-/** @brief Get previous value (predecessor) of ordinal value */
+/** @brief Get previous value (predecessor) of scalar value */
 ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
 {
     if (value == NULL)

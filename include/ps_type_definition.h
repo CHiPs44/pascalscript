@@ -32,6 +32,7 @@ extern "C"
         /* Simple types with scalar values (with ord/pred/succ) */
         PS_TYPE_INTEGER,
         PS_TYPE_UNSIGNED,
+        /* Simple types that are scalar but not numbers (without abs for example) */
         PS_TYPE_BOOLEAN,
         PS_TYPE_CHAR,
         /* User defineable types with scalar values (with ord/pred/succ) */
@@ -93,6 +94,7 @@ extern "C"
     /** @brief Type definition: base + parameters if needed */
     typedef struct s_ps_type_definition
     {
+        ps_value_type type;
         ps_value_type base;
         union
         {
