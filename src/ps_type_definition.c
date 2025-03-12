@@ -12,17 +12,54 @@
 #include "ps_type_definition.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_value.h"
 
-// /* Base type definitions */
-// ps_type_definition ps_type_def_boolean = {.base = PS_TYPE_BOOLEAN};
-// ps_type_definition ps_type_def_char = {.base = PS_TYPE_CHAR};
-// ps_type_definition ps_type_def_integer = {.base = PS_TYPE_INTEGER};
-// ps_type_definition ps_type_def_real = {.base = PS_TYPE_REAL};
-// ps_type_definition ps_type_def_unsigned = {.base = PS_TYPE_UNSIGNED};
+/* Base type definitions as globals */
 
-ps_type_definition *ps_type_definition_create()
+ps_type_definition ps_type_def_boolean = {.base = PS_TYPE_BOOLEAN};
+ps_value ps_value_boolean = {.type = PS_TYPE_DEFINITION, .data = {.t = &ps_type_def_boolean}};
+ps_symbol ps_symbol_boolean = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+    .name = "BOOLEAN",
+    .value = &ps_value_boolean};
+
+ps_type_definition ps_type_def_char = {.base = PS_TYPE_CHAR};
+ps_value ps_value_char = {.type = PS_TYPE_DEFINITION, .data = {.t = &ps_type_def_char}};
+ps_symbol ps_symbol_char = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+    .name = "CHAR",
+    .value = &ps_value_char};
+
+ps_type_definition ps_type_def_integer = {.base = PS_TYPE_INTEGER};
+ps_value ps_value_integer = {.type = PS_TYPE_DEFINITION, .data = {.t = &ps_type_def_integer}};
+ps_symbol ps_symbol_integer = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+    .name = "INTEGER",
+    .value = &ps_value_integer};
+
+ps_type_definition ps_type_def_real = {.base = PS_TYPE_REAL};
+ps_value ps_value_unsigned = {.type = PS_TYPE_DEFINITION, .data = {.t = &ps_type_def_unsigned}};
+ps_symbol ps_symbol_unsigned = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+    .name = "CARDINAL",
+    .value = &ps_value_unsigned};
+
+ps_type_definition ps_type_def_unsigned = {.base = PS_TYPE_UNSIGNED};
+ps_value ps_value_real = {.type = PS_TYPE_DEFINITION, .data = {.t = &ps_type_def_real}};
+ps_symbol ps_symbol_real = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+    .name = "REAL",
+    .value = &ps_value_real};
+
+ps_type_definition *
+ps_type_definition_create()
 {
-    ps_type_definition *definition = calloc(1,sizeof(ps_type_definition));
+    ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
     if (definition == NULL)
         return NULL;
     return definition;

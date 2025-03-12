@@ -109,13 +109,13 @@ extern "C"
         } def;
     } __attribute__((__packed__)) ps_type_definition;
 
-    #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
+#define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
-    extern ps_type_definition ps_type_def_integer;
-    extern ps_type_definition ps_type_def_unsigned;
-    extern ps_type_definition ps_type_def_real;
-    extern ps_type_definition ps_type_def_boolean;
-    extern ps_type_definition ps_type_def_char;
+    extern ps_symbol ps_symbol_boolean;
+    extern ps_symbol ps_symbol_char;
+    extern ps_symbol ps_symbol_integer;
+    extern ps_symbol ps_symbol_real;
+    extern ps_symbol ps_symbol_unsigned;
 
 #ifdef __cplusplus
 }

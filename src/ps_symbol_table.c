@@ -79,7 +79,7 @@ ps_symbol_table_size ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symb
         return PS_SYMBOL_TABLE_ERROR_FULL;
     }
     ps_symbol_table_size index = ps_symbol_table_find(table, symbol->name);
-    if (index >= 0)
+    if (index != PS_SYMBOL_TABLE_ERROR_NOT_FOUND)
     {
         return PS_SYMBOL_TABLE_ERROR_EXISTS;
     }

@@ -33,19 +33,18 @@ extern "C"
         ps_pointer          p; //  2   4   8
         ps_string          *s; //  2   4   8
         ps_type_definition *t; //  2   4   8
-        void               *x; //  2   4   8 
+        void               *x; //  2   4   8
         // clang-format on
-    } ps_value_data;
-
-#define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
+    } __attribute__((__packed__)) ps_value_data;
 
     /** @brief Value */
     typedef struct s_ps_value
     {
         ps_type_definition *type;
         ps_value_data data;
-    } ps_value;
+    } __attribute__((__packed__)) ps_value;
 
+#define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 #define PS_VALUE_SIZE sizeof(ps_value)
 
     // clang-format off
@@ -61,9 +60,9 @@ extern "C"
     ps_string *ps_value_new_string  (char *s, ps_string_len max, ps_string_len len);
     // clang-format on
 
-    char *ps_value_get_type_name  (ps_value_type type);
+    char *ps_value_get_type_name(ps_value_type type);
     char *ps_value_get_debug_value(ps_value *value);
-    void  ps_value_debug          (ps_value *value, char *message);
+    void ps_value_debug(ps_value *value, char *message);
 
 #ifdef __cplusplus
 }

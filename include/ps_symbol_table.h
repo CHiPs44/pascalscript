@@ -18,14 +18,13 @@
 #define PS_SYMBOL_TABLE_SIZE (256)
 #endif
 
-#define PS_SYMBOL_TABLE_ERROR (UINT16_MAX)
-#define PS_SYMBOL_TABLE_ERROR_NOT_FOUND (UINT16_MAX - 1)
-#define PS_SYMBOL_TABLE_ERROR_EXISTS (UINT16_MAX - 2)
-#define PS_SYMBOL_TABLE_ERROR_FULL (UINT16_MAX - 3)
-#define PS_SYMBOL_TABLE_ERROR_KIND (UINT16_MAX - 4)
-#define PS_SYMBOL_TABLE_ERROR_TODO (UINT16_MAX - 5)
+#define PS_SYMBOL_TABLE_ERROR_NOT_FOUND (UINT16_MAX - 0)
+#define PS_SYMBOL_TABLE_ERROR_EXISTS (UINT16_MAX - 1)
+#define PS_SYMBOL_TABLE_ERROR_FULL (UINT16_MAX - 2)
+#define PS_SYMBOL_TABLE_ERROR_KIND (UINT16_MAX - 3)
+#define PS_SYMBOL_TABLE_ERROR_TODO (UINT16_MAX - 4)
 
-    typedef uint32_t ps_symbol_table_size;
+    typedef uint16_t ps_symbol_table_size;
 
     /* clang-format off */
     typedef struct s_ps_symbol_table

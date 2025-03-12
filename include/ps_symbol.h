@@ -36,7 +36,7 @@ extern "C"
 
 #define PS_SYMBOL_KIND_NAME_LEN 15
 #define PS_SYMBOL_KIND_NAME_SIZE (PS_SYMBOL_KIND_NAME_LEN + 1)
-#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04x"
+#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
 
     typedef enum e_ps_symbol_kind
     {
@@ -52,14 +52,14 @@ extern "C"
         PS_SYMBOL_KIND_MAX = UINT16_MAX /** @brief Ensure kind "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_kind;
 
-    /** @brief Symbol is a named value within a scope */
+    /** @brief Symbol is a named typed value within a scope */
     typedef struct s_ps_symbol
     {
         ps_symbol_scope scope;
         ps_symbol_kind kind;
         ps_identifier name;
-        ps_value value;
-    } ps_symbol;
+        ps_value *value;
+    } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_SCOPE_SIZE sizeof(ps_symbol_scope)
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
