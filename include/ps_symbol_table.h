@@ -41,6 +41,10 @@
     /** @brief Deallocate symbol table */
     void ps_symbol_table_done(ps_symbol_table * table);
 
+    /** @brief */
+    ps_symbol_table_size ps_symbol_table_used(ps_symbol_table *table);
+    ps_symbol_table_size ps_symbol_table_available(ps_symbol_table *table);
+
     /** @brief Find symbol's index in table by name */
     ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, char *name);
 

@@ -97,7 +97,7 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     // fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Value                          ┃\n");
     fprintf(stderr, "┃ # ┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-            PS_IDENTIFIER_MAX, "Name", "Kind", "Scope", "Type", PS_IDENTIFIER_MAX, "Value");
+            PS_IDENTIFIER_LEN, "Name", "Kind", "Scope", "Type", PS_IDENTIFIER_LEN, "Value");
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
     {
@@ -106,10 +106,10 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
         {
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = ps_value_get_type_name(symbol->value.type);
+            char *type_name = ps_value_get_type_definition_name(symbol->value.type);
             char *buffer = ps_value_get_debug_value(&symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, PS_IDENTIFIER_MAX, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_MAX, buffer);
+                    i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, buffer);
         }
     }
     fprintf(stderr, "┗━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");

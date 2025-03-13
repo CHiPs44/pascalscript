@@ -41,6 +41,16 @@ void ps_symbol_table_done(ps_symbol_table *table)
     free(table);
 }
 
+ps_symbol_table_size ps_symbol_table_used(ps_symbol_table *table)
+{
+    return table->used;
+}
+
+ps_symbol_table_size ps_symbol_table_available(ps_symbol_table *table)
+{
+    return table->size - table->used;
+}
+
 ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, char *name)
 {
     int index = 0;
@@ -89,23 +99,11 @@ ps_symbol_table_size ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symb
     {
         index += 1;
     }
+    memcpy(&table->symbols[index], symbol, sizeof(ps_symbol));
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
-        snprintf(table->symbols[index].name, PS_IDENTIFIER_MAX, PS_SYMBOL_AUTO_FORMAT, index);
+        snprintf(table->symbols[index].name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, index);
     else
-        strncpy(table->symbols[index].name, symbol->name, PS_IDENTIFIER_MAX);
-    table->symbols[index].kind = symbol->kind;
-    table->symbols[index].value.type = symbol->value.type;
-    table->symbols[index].value.data = symbol->value.data;
-    // if (symbol->value.type == PS_TYPE_STRING)
-    // {
-    //     strncpy(table->symbols[index].value.data.s.str,
-    //             symbol->value.data.s.str,
-    //             ps_string_max);
-    // }
-    // else
-    // {
-    // table->symbols[index].value.data = symbol->value.data;
-    // }
+        strncpy(table->symbols[index].name, symbol->name, PS_IDENTIFIER_LEN);
     table->used += 1;
     return index;
 }
@@ -192,7 +190,7 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title)
             symbol = &table->symbols[i];
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = ps_value_get_type_name(symbol->value.type);
+            char *type_name = ps_value_get_type_definition_name(symbol->value);
             char *buffer = ps_value_get_debug_value(&symbol->value);
             fprintf(stderr, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
                     i, 31, symbol->name, kind_name, scope_name, type_name, 31, buffer);

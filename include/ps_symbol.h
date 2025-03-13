@@ -23,7 +23,7 @@ extern "C"
 #define PS_SYMBOL_SCOPE_SYSTEM_NAME "SYSTEM"
 #define PS_SYMBOL_SCOPE_GLOBAL_NAME "GLOBAL"
 #define PS_SYMBOL_SCOPE_LOCAL_FORMAT "L%06d"
-#define PS_SYMBOL_SCOPE_LOCAL_FORMAT "U%06d"
+#define PS_SYMBOL_SCOPE_UNIT_FORMAT "U%06d"
 
     typedef enum e_ps_symbol_scope
     {

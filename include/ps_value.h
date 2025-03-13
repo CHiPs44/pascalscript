@@ -60,7 +60,7 @@ extern "C"
     ps_string *ps_value_new_string  (char *s, ps_string_len max, ps_string_len len);
     // clang-format on
 
-    char *ps_value_get_type_name(ps_value_type type);
+    char *ps_value_get_type_definition_name(ps_value_type type);
     char *ps_value_get_debug_value(ps_value *value);
     void ps_value_debug(ps_value *value, char *message);
 

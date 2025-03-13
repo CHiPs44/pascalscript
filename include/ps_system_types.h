@@ -28,6 +28,8 @@ extern "C"
     const ps_real ps_real_max = PS_REAL_MAX;
 
     typedef PS_BOOLEAN ps_boolean;
+    const ps_boolean ps_false = false;
+    const ps_boolean ps_true = true;
 
     typedef PS_CHAR ps_char;
     const ps_char ps_char_max = PS_CHAR_MAX;

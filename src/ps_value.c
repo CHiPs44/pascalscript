@@ -196,7 +196,7 @@ char *ps_value_dump(ps_value *value)
     snprintf(buffer, sizeof(buffer) - 1,
              "VALUE: type=%d/%s, value=%s", // , size=%zu
              value->type,
-             ps_value_get_type_name(value->type),
+             ps_value_get_type_definition_name(value->type),
              //  value->size,
              ps_value_get_debug_value(value));
     return buffer;

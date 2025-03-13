@@ -25,17 +25,17 @@ extern "C"
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        /* DO NOT CHANGE ORDER! */
+        /* DO NOT CHANGE ORDER, AS RANGES ARE USED! */
         PS_TYPE_NONE = 0,
         /* Simple types => direct value */
         PS_TYPE_REAL,
         /* Simple types with scalar values (with ord/pred/succ) */
         PS_TYPE_INTEGER,
         PS_TYPE_UNSIGNED,
-        /* Simple types that are scalar but not numbers (without abs for example) */
+        /* Simple types that are scalar but not numbers (without Abs for example) */
         PS_TYPE_BOOLEAN,
         PS_TYPE_CHAR,
-        /* User defineable types with scalar values (with ord/pred/succ) */
+        /* User defineable types with scalar values (with Ord/Pred/Succ) */
         PS_TYPE_ENUM,
         PS_TYPE_SUBRANGE,
         /* User defineable types without scalar values */
@@ -91,7 +91,7 @@ extern "C"
         ps_string_len max;
     } __attribute__((__packed__)) ps_type_definition_string;
 
-    /** @brief Type definition: base + parameters if needed */
+    /** @brief Type definition: type + base + parameters if needed (simple types have type == base)*/
     typedef struct s_ps_type_definition
     {
         ps_value_type type;
@@ -101,8 +101,8 @@ extern "C"
             ps_type_definition_enum def_enum;
             ps_type_definition_subrange def_subrange;
             ps_type_definition_set def_set;
-            ps_type_definition_pointer def_pointer;
-            ps_type_definition_string def_string;
+            // ps_type_definition_pointer def_pointer;
+            // ps_type_definition_string def_string;
             // ps_type_definition_array def_array;
             // ps_type_definition_record def_record;
             // ps_type_definition_file def_file;

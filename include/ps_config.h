@@ -17,11 +17,12 @@ extern "C"
 {
 #endif
 
-#ifndef PS_IDENTIFIER_MAX
-#define PS_IDENTIFIER_MAX 31
+#ifndef PS_IDENTIFIER_LEN
+#define PS_IDENTIFIER_LEN 31
 #endif
 
-    typedef char ps_identifier[PS_IDENTIFIER_MAX + 1];
+#define PS_IDENTIFIER_SIZE (PS_IDENTIFIER_LEN + 1)
+    typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 
     /*
         NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either ARM M0+ or M33 cores
