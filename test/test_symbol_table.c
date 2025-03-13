@@ -15,7 +15,7 @@
 ps_symbol_table table;
 ps_symbol constant1 = {.name = "CONSTANT1", .kind = PS_SYMBOL_KIND_CONSTANT};
 ps_symbol variable2 = {.name = "VARIABLE2", .kind = PS_SYMBOL_KIND_VARIABLE};
-ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO};    
+ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO};
 ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_KIND_CONSTANT};
 
 // Poor man's Makefile ;-)
@@ -29,6 +29,7 @@ int main(void)
     setrlimit(RLIMIT_AS, &rl);
 
     int result;
+    ps_symbol *symbol;
 
     ps_value_set_integer(&constant1.value, 1234567890);
     ps_value_set_unsigned(&variable2.value, 0xDEADBEEF);
@@ -43,11 +44,11 @@ int main(void)
     printf("TEST SYMBOL TABLE: ADD CONSTANT1 %s %d\n", result == 0 ? "OK" : "KO", result);
     result = ps_symbol_table_add(&table, &variable2);
     printf("TEST SYMBOL TABLE: ADD VARIABLE2 %s %d\n", result == 1 ? "OK" : "KO", result);
-    ps_symbol_table_dump(&table, "Test");
+    ps_symbol_table_dump(&table, "Test", stdout);
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     // Re-add constant1 => EXISTS
-    result = ps_symbol_table_add(&table, &constant1);
-    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", result == PS_PS_SYMBOL_TABLE_ERROR_EXISTS ? "OK" : "KO", result);
+    symbol = ps_symbol_table_add(&table, &constant1);
+    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", symbol == NULL ? "OK" : "KO", result);
     // auto_var3 shoulfd fit => 2
     result = ps_symbol_table_add(&table, &auto_var3);
     printf("TEST SYMBOL TABLE: ADD AUTO_VAR3 %s %d\n", result == 2 ? "OK" : "KO", result);
@@ -55,7 +56,7 @@ int main(void)
     result = ps_symbol_table_add(&table, &constant4);
     printf("TEST SYMBOL TABLE: ADD CONSTANT4 %s %d\n", result == PS_SYMBOL_TABLE_ERROR_FULL ? "OK" : "KO", result);
     // This is the end
-    ps_symbol_table_dump(&table, "Test");
+    ps_symbol_table_dump(&table, "Test", stdout);
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     printf("TEST SYMBOL TABLE: END\n");
     return 0;

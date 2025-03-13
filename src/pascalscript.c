@@ -20,8 +20,8 @@ ps_vm _vm;
 ps_vm *vm = &_vm;
 
 char *minimal_source =
-    "PROGRAM Minimal;\n"
-    "BeGiN\n"
+    "Program Minimal;\n"
+    "Begin\n"
     "End.\n";
 
 char *hello_source =
@@ -44,11 +44,11 @@ int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
   ps_vm_init_runtime(vm);
-  ps_symbol_table_dump(vm->symbols, "Init");
+  ps_symbol_table_dump(vm->symbols, "Init", stderr);
   ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
-         ps_version->value.data.i, ps_version->value.data.i);
+         ps_version->value->data.i, ps_version->value->data.i);
   if (!ps_vm_load_source(vm, minimal_source, strlen(minimal_source)))
   // if (!ps_vm_load_source(vm, hello, strlen(hello)))
   // if (!ps_vm_load_source(vm,"examples/00-hello.pas"))
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_buffer_dump(vm->parser->lexer->buffer, 0, PS_BUFFER_MAX_LINES-1);
+  ps_buffer_dump(vm->parser->lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
   printf("Listed!\n");
   ps_parser_start(vm->parser);
   return 0;

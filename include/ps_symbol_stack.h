@@ -28,8 +28,6 @@ extern "C"
         ps_symbol *symbols[PS_SYMBOL_STACK_SIZE];
     } ps_symbol_stack;
 
-#define PS_SYMBOL_STACK_SIZE sizeof(ps_symbol_stack)
-
     // clang-format off
     ps_symbol_stack *ps_symbol_stack_init(ps_symbol_stack *stack);
     void             ps_symbol_stack_free(ps_symbol_stack *stack);

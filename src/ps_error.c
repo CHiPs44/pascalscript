@@ -82,10 +82,12 @@ char *ps_error_get_message(ps_error error)
         return "Unexpected type";
     case PS_RUNTIME_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
+    case PS_RUNTIME_ERROR_EXPECTED_VALUE:
+        return "Value expected";
     case PS_RUNTIME_ERROR_EXPECTED_NUMBER:
         return "Number expected";
-    case PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL:
-        return "Number expected";
+    case PS_RUNTIME_ERROR_EXPECTED_SCALAR:
+        return "Scalar expected";
     case PS_RUNTIME_ERROR_EXPECTED_INTEGER:
         return "Integer expected";
     case PS_RUNTIME_ERROR_EXPECTED_UNSIGNED:

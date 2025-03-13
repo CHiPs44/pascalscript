@@ -27,11 +27,11 @@ int main(void)
     ps_error code;
     printf("TEST VM #03 BINARY: BEGIN\n");
     ps_vm_init_runtime(vm);
-    ps_symbol_table_dump(&vm->symbols, "Init");
+    ps_symbol_table_dump(&vm->symbols, "Init", stdout);
     printf("TEST VM #03 BINARY: INIT OK\n");
     ps_symbol symbol = {"I", PS_SYMBOL_KIND_VARIABLE, PS_TYPE_INTEGER, sizeof(ps_integer), {0}};
     result = ps_vm_global_add(vm, &symbol);
-    ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;");
+    ps_symbol_table_dump(&vm->symbols, "VAR I: INTEGER;", stdout);
     printf("TEST VM #03 BINARY: VAR I: INTEGER; %s %d\n", result == 0 ? "OK" : "KO", result);
     ps_vm_push(vm, ps_vm_global_get(vm, "I"));
     ps_symbol *n1234 = vm_auto_add_integer(vm, 1234);
@@ -44,7 +44,7 @@ int main(void)
     code = ps_vm_exec_assign(vm);
     ps_vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "3 POP?");
-    ps_symbol_table_dump(&vm->symbols, "I=6912?");
+    ps_symbol_table_dump(&vm->symbols, "I=6912?", stdout);
     printf("TEST VM #03 BINARY: I := 1234 + 5678 = 6912; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
     printf("TEST VM #03 BINARY: END\n");
     return 0;

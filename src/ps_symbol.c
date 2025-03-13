@@ -57,17 +57,14 @@ const struct s_ps_symbol_kind_name
     ps_symbol_kind kind;
     char *name;
 } ps_symbol_kind_names[] = {
-    // clang-format off
-    {PS_SYMBOL_KIND_FREE     , "FREE"     },
-    {PS_SYMBOL_KIND_AUTO     , "AUTO"     },
-    {PS_SYMBOL_KIND_CONSTANT , "CONSTANT" },
-    {PS_SYMBOL_KIND_VARIABLE , "VARIABLE" },
-    {PS_SYMBOL_KIND_TYPE_DEFINITION     , "TYPE"     },
+    {PS_SYMBOL_KIND_AUTO, "AUTO"},
+    {PS_SYMBOL_KIND_CONSTANT, "CONSTANT"},
+    {PS_SYMBOL_KIND_VARIABLE, "VARIABLE"},
+    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"},
     {PS_SYMBOL_KIND_PROCEDURE, "PROCEDURE"},
-    {PS_SYMBOL_KIND_FUNCTION , "FUNCTION" },
-    {PS_SYMBOL_KIND_UNIT     , "UNIT"     },
+    {PS_SYMBOL_KIND_FUNCTION, "FUNCTION"},
+    {PS_SYMBOL_KIND_UNIT, "UNIT"},
     // ...
-    // clang-format on
 };
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)

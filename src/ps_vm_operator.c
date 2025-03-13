@@ -89,7 +89,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
                 result.data.r = -a->value.data.r;
             }
             else
-                return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+                return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
             break;
         case OP_BOOL_NOT: // applicable to bolean values
             if (a->value.type == PS_TYPE_BOOLEAN)
@@ -151,9 +151,9 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
         if (a->value.type != PS_TYPE_INTEGER)
-            return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+            return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
         if (b->value.type != PS_TYPE_INTEGER)
-            return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_REAL;
+            return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
         switch (op)
         {
         case OP_ADD:
