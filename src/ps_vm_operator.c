@@ -78,38 +78,38 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         switch (op)
         {
         case OP_NEG: // applicable to integer or real values
-            if (a->value.type == PS_TYPE_INTEGER)
+            if (a->value->type->base == PS_TYPE_INTEGER)
             {
                 result.type = PS_TYPE_INTEGER;
-                result.data.i = -a->value.data.i;
+                result.data.i = -a->value->data.i;
             }
-            else if (a->value.type == PS_TYPE_REAL)
+            else if (a->value->type->base == PS_TYPE_REAL)
             {
                 result.type = PS_TYPE_REAL;
-                result.data.r = -a->value.data.r;
+                result.data.r = -a->value->data.r;
             }
             else
-                return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
+                return PS_RUNTIME_ERROR_EXPECTED_NUMBER;
             break;
         case OP_BOOL_NOT: // applicable to bolean values
-            if (a->value.type == PS_TYPE_BOOLEAN)
+            if (a->value->type->base == PS_TYPE_BOOLEAN)
             {
                 result.type = PS_TYPE_BOOLEAN;
-                result.data.b = !(a->value.data.b);
+                result.data.b = !(a->value->data.b);
             }
             else
                 return PS_RUNTIME_ERROR_EXPECTED_BOOLEAN;
             break;
         case OP_BIT_NOT: // applicable to integer or unsigned values
-            if (a->value.type == PS_TYPE_INTEGER)
+            if (a->value->type->base == PS_TYPE_INTEGER)
             {
                 result.type = PS_TYPE_INTEGER;
-                result.data.i = ~a->value.data.i;
+                result.data.i = ~a->value->data.i;
             }
-            else if (a->value.type == PS_TYPE_UNSIGNED)
+            else if (a->value->type->base == PS_TYPE_UNSIGNED)
             {
                 result.type = PS_TYPE_UNSIGNED;
-                result.data.u = ~a->value.data.u;
+                result.data.u = ~a->value->data.u;
             }
             else
                 return PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
@@ -150,45 +150,45 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
         op == OP_BIT_OR || op == OP_BIT_XOR ||
         op == OP_BOOL_AND || op == OP_BOOL_OR)
     {
-        if (a->value.type != PS_TYPE_INTEGER)
+        if (a->value->type->base != PS_TYPE_INTEGER)
             return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
-        if (b->value.type != PS_TYPE_INTEGER)
+        if (b->value->type->base != PS_TYPE_INTEGER)
             return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
         switch (op)
         {
         case OP_ADD:
-            result.data.i = a->value.data.i + b->value.data.i;
+            result.data.i = a->value->data.i + b->value->data.i;
             break;
         case OP_SUB:
-            result.data.i = a->value.data.i - b->value.data.i;
+            result.data.i = a->value->data.i - b->value->data.i;
             break;
         case OP_MUL:
-            result.data.i = a->value.data.i * b->value.data.i;
+            result.data.i = a->value->data.i * b->value->data.i;
             break;
         case OP_DIV:
-            if (b->value.data.i == 0)
+            if (b->value->data.i == 0)
                 return PS_RUNTIME_ERROR_DIVISION_BY_ZERO;
-            result.data.i = a->value.data.i / b->value.data.i;
+            result.data.i = a->value->data.i / b->value->data.i;
             break;
         case OP_MOD:
-            if (b->value.data.i == 0)
+            if (b->value->data.i == 0)
                 return PS_RUNTIME_ERROR_DIVISION_BY_ZERO;
-            result.data.i = a->value.data.i % b->value.data.i;
+            result.data.i = a->value->data.i % b->value->data.i;
             break;
         case OP_BIT_AND:
-            result.data.u = a->value.data.u & b->value.data.u;
+            result.data.u = a->value->data.u & b->value->data.u;
             break;
         case OP_BIT_OR:
-            result.data.u = a->value.data.u | b->value.data.u;
+            result.data.u = a->value->data.u | b->value->data.u;
             break;
         case OP_BIT_XOR:
-            result.data.u = a->value.data.u ^ b->value.data.u;
+            result.data.u = a->value->data.u ^ b->value->data.u;
             break;
         case OP_BOOL_AND:
-            result.data.b = a->value.data.b && b->value.data.b;
+            result.data.b = a->value->data.b && b->value->data.b;
             break;
         case OP_BOOL_OR:
-            result.data.b = a->value.data.b || b->value.data.b;
+            result.data.b = a->value->data.b || b->value->data.b;
             break;
         default:
             break;

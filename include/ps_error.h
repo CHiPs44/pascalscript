@@ -68,16 +68,18 @@ extern "C"
         PS_RUNTIME_ERROR_DIVISION_BY_ZERO,
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
         PS_RUNTIME_ERROR_INVALID_PARAMETERS,
+        // ...
+        PS_RUNTIME_ERROR_MAX = UINT8_MAX,
     } __attribute__((__packed__)) ps_error;
 
-#define ps_error_is_from_buffer (error) (error >= PS_BUFFER_ERROR_NONE  && error <= PS_BUFFER_ERROR_NONE  + 0xf)
-#define ps_error_is_from_lexer  (error) (error >= PS_LEXER_ERROR_NONE   && error <= PS_LEXER_ERROR_NONE   + 0xf)
-#define ps_error_is_from_parser (error) (error >= PS_PARSER_ERROR_NONE  && error <= PS_PARSER_ERROR_NONE  + 0xf)
-#define ps_error_is_from_runtime(error) (error >= PS_RUNTIME_ERROR_NONE && error <= PS_RUNTIME_ERROR_NONE + 0xf)
+#define ps_error_is_from_buffer (error)(error >= PS_BUFFER_ERROR_NONE && error <= PS_BUFFER_ERROR_NONE + 0xf)
+#define ps_error_is_from_lexer (error)(error >= PS_LEXER_ERROR_NONE && error <= PS_LEXER_ERROR_NONE + 0xf)
+#define ps_error_is_from_parser (error)(error >= PS_PARSER_ERROR_NONE && error <= PS_PARSER_ERROR_NONE + 0xf)
+#define ps_error_is_from_runtime(error) (error >= PS_RUNTIME_ERROR_NONE && error <= PS_RUNTIME_ERROR_NONE + 07f)
 
     char *ps_error_get_message(ps_error error);
 
-    void ps_error_printf(ps_error error, const char *format, ...);
+    void ps_error_printf(FILE *output, ps_error error, const char *format, ...);
 
 #ifdef __cplusplus
 }

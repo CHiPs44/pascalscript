@@ -116,13 +116,15 @@ char *ps_error_get_message(ps_error error)
     return "Unknown";
 }
 
-void ps_error_printf(ps_error error, const char *format, ...)
+void ps_error_printf(FILE *output, ps_error error, const char *format, ...)
 {
+    if (output == NULL)
+        output = stderr;
     va_list args;
     va_start(args, format);
-    fprintf(stderr, "ERROR: %s ", ps_error_get_message(error));
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
+    fprintf(output, "ERROR: %s ", ps_error_get_message(error));
+    vfprintf(output, format, args);
+    fprintf(output, "\n");
     va_end(args);
 }
 
