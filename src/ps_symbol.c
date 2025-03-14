@@ -35,20 +35,14 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
 char *ps_symbol_get_scope_name(ps_symbol_scope scope)
 {
     static char scope_name[PS_SYMBOL_SCOPE_NAME_SIZE];
-    switch (scope)
-    {
-    // case PS_SYMBOL_SCOPE_NONE:
-    //     snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "NONE");
-    //     break;
-    case PS_SYMBOL_SCOPE_SYSTEM:
+    if (scope == PS_SYMBOL_SCOPE_SYSTEM)
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "SYSTEM");
-        break;
-    case PS_SYMBOL_SCOPE_GLOBAL:
+    else if (scope == PS_SYMBOL_SCOPE_GLOBAL)
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "GLOBAL");
-        break;
-    default:
+    else if (scope >= PS_SYMBOL_SCOPE_LOCAL && scope < PS_SYMBOL_KIND_UNIT)
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_LOCAL_FORMAT, scope);
-    }
+    else
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, PS_SYMBOL_SCOPE_UNIT_FORMAT, scope);
     return scope_name;
 }
 
@@ -69,25 +63,30 @@ const struct s_ps_symbol_kind_name
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 {
-    static char name[PS_SYMBOL_KIND_NAME_SIZE];
+    static char kind_name[PS_IDENTIFIER_SIZE];
     bool found = false;
     for (int i = 0; i < sizeof(ps_symbol_kind_names) / sizeof(struct s_ps_symbol_kind_name); i += 1)
     {
         if (ps_symbol_kind_names[i].kind == kind)
         {
-            snprintf(name, PS_SYMBOL_KIND_NAME_LEN, "%s", ps_symbol_kind_names[i].name);
+            snprintf(kind_name, PS_IDENTIFIER_LEN, "%s", ps_symbol_kind_names[i].name);
             found = true;
             break;
         }
     }
     if (!found)
     {
-        snprintf(name, PS_SYMBOL_KIND_NAME_LEN, "?UNKNOWN-%d?", kind);
+        snprintf(kind_name, PS_IDENTIFIER_LEN, "?UNKNOWN-%d?", kind);
     }
-    return name;
+    return kind_name;
 }
 
-char *ps_symbol_dump(ps_symbol *symbol)
+char *ps_symbol_dump_header()
+{
+    return "TODO?";
+}
+
+char *ps_symbol_dump_value(ps_symbol *symbol)
 {
     static char buffer[256];
     snprintf(buffer, sizeof(buffer) - 1,
@@ -103,7 +102,7 @@ char *ps_symbol_dump(ps_symbol *symbol)
 
 void ps_symbol_debug(ps_symbol *symbol)
 {
-    fprintf(stderr, "DEBUG\t%s", ps_symbol_dump(symbol));
+    fprintf(stderr, "DEBUG\t%s", ps_symbol_dump_value(symbol));
 }
 
 /* EOF */

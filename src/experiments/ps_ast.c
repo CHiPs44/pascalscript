@@ -115,7 +115,7 @@ bool ps_ast_visit_program(ps_ast_node_program *node)
     {
         printf("\nCONST\n");
         for (size_t i = 0; i < node->n_consts; i++)
-            printf("\t%s\n", ps_symbol_dump(&node->consts[i]));
+            printf("\t%s\n", ps_symbol_dump_value(&node->consts[i]));
         printf("\n");
     }
     // TODO types
@@ -123,7 +123,7 @@ bool ps_ast_visit_program(ps_ast_node_program *node)
     {
         printf("\nVAR\n");
         for (size_t i = 0; i < node->n_vars; i++)
-            printf("\t%s\n", ps_symbol_dump(&node->vars[i]));
+            printf("\t%s\n", ps_symbol_dump_value(&node->vars[i]));
         printf("\n");
     }
     printf("\nBEGIN\n");

@@ -25,7 +25,7 @@ extern "C"
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        /* DO NOT CHANGE ORDER, AS RANGES ARE USED! */
+        /* /!\ DO NOT CHANGE ORDER, AS RANGES ARE USED! /!\ */
         PS_TYPE_NONE = 0,
         /* Simple types => direct value */
         PS_TYPE_REAL,
@@ -58,7 +58,7 @@ extern "C"
         ps_identifier *values;
     } __attribute__((__packed__)) ps_type_definition_enum;
 
-    /** @brief Subranges limits stored in integer, unsigned or char values (-10..15 or 'A'..'Z'), needed to implement arrays */
+    /** @brief Subranges limits stored in integer, unsigned or char values (-10..15, 3..18 or 'A'..'Z'), needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
         ps_unsigned count;
@@ -66,11 +66,11 @@ extern "C"
         ps_value *max;
     } __attribute__((__packed__)) ps_type_definition_subrange;
 
-    /** @brief Sets are stored in unsigned value as a bit field */
+    /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to 2^ord(enum_value) */
     typedef struct s_ps_type_definition_set
     {
         ps_unsigned count; // max: UINT8_MAX, UINT16_MAX, UINT32_MAX, UINT64_MAX
-        ps_identifier *values;
+        ps_symbol *symbol_enum;
     } __attribute__((__packed__)) ps_type_definition_set;
 
     /** @brief Pointer type is stored in a symbol */
@@ -94,13 +94,13 @@ extern "C"
     /** @brief Type definition: type + base + parameters if needed (simple types have type == base)*/
     typedef struct s_ps_type_definition
     {
-        ps_value_type type;
-        ps_value_type base;
+        ps_value_type type; /** @brief visible value type */
+        ps_value_type base; /** @brief same as visible for system types like integer or char, values sub-type for subranges and enums */
         union
         {
             ps_type_definition_enum def_enum;
             ps_type_definition_subrange def_subrange;
-            ps_type_definition_set def_set;
+            // ps_type_definition_set def_set;
             // ps_type_definition_pointer def_pointer;
             // ps_type_definition_string def_string;
             // ps_type_definition_array def_array;
@@ -111,6 +111,7 @@ extern "C"
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
+    /* System types (with type==base) */
     extern ps_symbol ps_symbol_boolean;
     extern ps_symbol ps_symbol_char;
     extern ps_symbol ps_symbol_integer;

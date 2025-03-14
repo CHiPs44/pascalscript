@@ -104,7 +104,6 @@ ps_symbol *ps_vm_auto_add_value(ps_vm *vm, ps_symbol_scope scope, ps_value value
     symbol.kind = PS_SYMBOL_KIND_AUTO;
     symbol.scope = scope;
     symbol.value.type = PS_TYPE_INTEGER;
-    // symbol.value.size = sizeof(ps_integer);
     symbol.value.data.i = value.data.i;
     int index = ps_symbol_table_add(vm->symbols, &symbol);
     return index >= 0 ? &vm->symbols->symbols[index] : NULL;

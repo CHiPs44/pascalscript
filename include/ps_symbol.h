@@ -34,8 +34,6 @@ extern "C"
         PS_SYMBOL_SCOPE_MAX = UINT16_MAX             /** @brief Ensure scope "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_scope;
 
-#define PS_SYMBOL_KIND_NAME_LEN 15
-#define PS_SYMBOL_KIND_NAME_SIZE (PS_SYMBOL_KIND_NAME_LEN + 1)
 #define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
 
     typedef enum e_ps_symbol_kind
@@ -71,7 +69,7 @@ extern "C"
     char *ps_symbol_get_scope_name(ps_symbol_scope scope);
 
     /** @brief Get symbol info */
-    char *ps_symbol_dump(ps_symbol *symbol);
+    char *ps_symbol_dump_value(ps_symbol *symbol);
 
     /** @brief Print symbol info to stderr */
     void ps_symbol_debug(ps_symbol *symbol);

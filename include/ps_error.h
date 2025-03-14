@@ -7,6 +7,7 @@
 #ifndef _PS_ERROR_H
 #define _PS_ERROR_H
 
+#include <stdio.h>
 #include <stdarg.h>
 
 #ifdef __cplusplus
@@ -69,7 +70,6 @@ extern "C"
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
         PS_RUNTIME_ERROR_INVALID_PARAMETERS,
         // ...
-        PS_RUNTIME_ERROR_MAX = UINT8_MAX,
     } __attribute__((__packed__)) ps_error;
 
 #define ps_error_is_from_buffer (error)(error >= PS_BUFFER_ERROR_NONE && error <= PS_BUFFER_ERROR_NONE + 0xf)

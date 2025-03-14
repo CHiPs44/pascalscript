@@ -117,9 +117,9 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
     //                        1         2         3         4         5         6         7         8         9        10
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
     //                1234 1234567890123456789012345678901 12345678 12345678 12345678 12345678 1234567890123456789012345678901
-    fprintf(output, "┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "┃  # ┃            Name               ┃  Kind  ┃ Scope  ┃  Type  ┃              Value            ┃\n");
-    fprintf(output, "┣━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output, "     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(output, "     ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Value                          ┃\n");
+    fprintf(output, "┏━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -133,9 +133,9 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
             char *type_name = ps_value_get_type_definition_name(symbol->value);
-            char *buffer = ps_value_get_debug_value(&symbol->value);
+            char *value = ps_value_get_debug_value(&symbol->value);
             fprintf(output, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
-                    i, 31, symbol->name, kind_name, scope_name, type_name, 31, buffer);
+                    i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, value);
         }
     }
     fprintf(output, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");

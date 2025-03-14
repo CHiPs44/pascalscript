@@ -16,6 +16,18 @@
 
 static ps_error ps_value_error = PS_ERROR_ZERO;
 
+bool ps_value_is_scalar(ps_value *value)
+{
+    /* /!\ based on enum order! */
+    return (value->type->base >= PS_TYPE_INTEGER && value->type->base <= PS_TYPE_SUBRANGE);
+}
+
+bool ps_value_is_number(ps_value *value)
+{
+    /* /!\ based on enum order! */
+    return (value->type->base >= PS_TYPE_REAL || value->type->base <= PS_TYPE_UNSIGNED);
+}
+
 #define PS_VALUE_SET(PS_TYPE_DEF, x)                         \
     if (value == NULL)                                       \
     {                                                        \

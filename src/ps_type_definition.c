@@ -4,14 +4,14 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #include "ps_error.h"
-#include "ps_type_definition.h"
-#include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_symbol.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 /******************************************************************************/
@@ -60,9 +60,9 @@ ps_symbol ps_symbol_integer = {
     .name = "INTEGER",
     .value = &ps_value_integer};
 
-ps_type_definition ps_type_def_real = {
-    .type = PS_TYPE_REAL,
-    .base = PS_TYPE_REAL,
+ps_type_definition ps_type_def_unsigned = {
+    .type = PS_TYPE_UNSIGNED,
+    .base = PS_TYPE_UNSIGNED,
 };
 ps_value ps_value_unsigned = {
     .type = PS_TYPE_DEFINITION,
@@ -74,9 +74,9 @@ ps_symbol ps_symbol_unsigned = {
     .name = "CARDINAL",
     .value = &ps_value_unsigned};
 
-ps_type_definition ps_type_def_unsigned = {
-    .type = PS_TYPE_UNSIGNED,
-    .base = PS_TYPE_UNSIGNED,
+ps_type_definition ps_type_def_real = {
+    .type = PS_TYPE_REAL,
+    .base = PS_TYPE_REAL,
 };
 ps_value ps_value_real = {
     .type = PS_TYPE_DEFINITION,
@@ -121,41 +121,41 @@ ps_type_definition *ps_type_definition_create_subrange(ps_integer low, ps_intege
     return definition;
 }
 
-bool ps_type_definition_create_system_types(ps_symbol_table *symbol_table)
+bool ps_type_definition_create_system_types(ps_symbol_table *table)
 {
-    if (ps_symbol_table_used(symbol_table))
+    if (ps_symbol_table_available(table) < 5)
     {
+        return false;
     }
-    ps_symbol_table_add(symbol_table, &ps_type_def_boolean);
-    ps_symbol_table_add(symbol_table, &ps_type_def_char);
-    ps_symbol_table_add(symbol_table, &ps_type_def_integer);
-    ps_symbol_table_add(symbol_table, &ps_type_def_unsigned);
-    ps_symbol_table_add(symbol_table, &ps_type_def_real);
+    ps_symbol_table_add(table, &ps_symbol_boolean);
+    ps_symbol_table_add(table, &ps_symbol_char);
+    ps_symbol_table_add(table, &ps_symbol_integer);
+    ps_symbol_table_add(table, &ps_symbol_unsigned);
+    ps_symbol_table_add(table, &ps_symbol_real);
     return true;
 }
 
 const struct s_ps_type_name
 {
-    bool is_base_type;
     ps_value_type type;
     char *name;
 } ps_type_names[] = {
     // clang-format off
-    {true , PS_TYPE_NONE       , "NONE"    },
-    {true , PS_TYPE_INTEGER    , "INTEGER" },
-    {true , PS_TYPE_UNSIGNED   , "UNSIGNED"},
-    {true , PS_TYPE_REAL       , "REAL"    },
-    {true , PS_TYPE_BOOLEAN    , "BOOLEAN" },
-    {true , PS_TYPE_CHAR       , "CHAR"    },
-    {false, PS_TYPE_DEFINITION , "TYPE_DEF"},
-    {false, PS_TYPE_ENUM       , "ENUM"    },
-    {false, PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    {false, PS_TYPE_SET        , "SET"     },
-    {false, PS_TYPE_POINTER    , "POINTER" },
-    {false, PS_TYPE_STRING     , "STRING"  },
-    {false, PS_TYPE_ARRAY      , "ARRAY"   },
-    {false, PS_TYPE_RECORD     , "RECORD"  },
-    {false, PS_TYPE_FILE       , "FILE"    },
+    {PS_TYPE_NONE       , "NONE"    },
+    {PS_TYPE_INTEGER    , "INTEGER" },
+    {PS_TYPE_UNSIGNED   , "UNSIGNED"},
+    {PS_TYPE_REAL       , "REAL"    },
+    {PS_TYPE_BOOLEAN    , "BOOLEAN" },
+    {PS_TYPE_CHAR       , "CHAR"    },
+    {PS_TYPE_DEFINITION , "TYPE_DEF"},
+    {PS_TYPE_ENUM       , "ENUM"    },
+    {PS_TYPE_SUBRANGE   , "SUBRANGE"},
+    {PS_TYPE_SET        , "SET"     },
+    {PS_TYPE_POINTER    , "POINTER" },
+    {PS_TYPE_STRING     , "STRING"  },
+    {PS_TYPE_ARRAY      , "ARRAY"   },
+    {PS_TYPE_RECORD     , "RECORD"  },
+    {PS_TYPE_FILE       , "FILE"    },
     // clang-format on
 };
 
@@ -186,9 +186,10 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
         snprintf(buffer, sizeof(buffer), "%s with unknown base!", type_name);
         return buffer;
     }
-    switch (type_def->base)
+    switch (type_def->type)
     {
     case PS_TYPE_ENUM:
+        // (One, Two, Three) => "ENUM(CARDINAL, 3, 'One', ...)"
         snprintf(buffer, sizeof(buffer) - 1,
                  "%s(%s, %d, '%s', ...)",
                  type_name,
@@ -197,6 +198,7 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
                  type_def->def.def_enum.count == 0 ? "???" : type_def->def.def_enum.values[0]);
         break;
     case PS_TYPE_SUBRANGE:
+        // -5..24 => "SUBRANGE(INTEGER, -5..24)"
         snprintf(buffer, sizeof(buffer) - 1,
                  "%s(%s, %d..%d)",
                  type_name,
@@ -204,14 +206,14 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
                  type_def->def.def_subrange.min,
                  type_def->def.def_subrange.max);
         break;
-    case PS_TYPE_SET:
-        snprintf(buffer, sizeof(buffer) - 1,
-                 "%s(%s, %d, '%s', ...)",
-                 type_name,
-                 base_name,
-                 type_def->def.def_set.count,
-                 type_def->def.def_set.count == 0 ? "???" : type_def->def.def_set.values[0]);
-        break;
+    // case PS_TYPE_SET:
+    //     snprintf(buffer, sizeof(buffer) - 1,
+    //              "%s(%s, %d, '%s', ...)",
+    //              type_name,
+    //              base_name,
+    //              type_def->def.def_set.count,
+    //              type_def->def.def_set.count == 0 ? "???" : type_def->def.def_set.values[0]);
+    //     break;
     // case PS_TYPE_POINTER:
     //     snprintf(buffer, sizeof(buffer) - 1,
     //              "^%s",
@@ -219,6 +221,7 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
     //              type_def->def.def_pointer.type_def == NULL ? "???" : type_def->def.def_pointer.type_def->name);
     //     break;
     default:
+        snprintf(buffer, sizeof(buffer) - 1, "%s(%s)???", type_name, base_name);
         break;
     }
     return buffer;

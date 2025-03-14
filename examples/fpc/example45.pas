@@ -19,5 +19,5 @@ Begin
   Y := One;
   Writeln(Ord(Y));  { Prints 1 }
   Y := Succ(Y);
-  Writeln(Ord(Y));  { Prints 2}
+  Writeln(Ord(Y));  { Prints 2 }
 End.

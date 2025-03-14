@@ -21,8 +21,6 @@
 #define PS_SYMBOL_TABLE_ERROR_NOT_FOUND (UINT16_MAX - 0)
 #define PS_SYMBOL_TABLE_ERROR_EXISTS (UINT16_MAX - 1)
 #define PS_SYMBOL_TABLE_ERROR_FULL (UINT16_MAX - 2)
-#define PS_SYMBOL_TABLE_ERROR_KIND (UINT16_MAX - 3)
-#define PS_SYMBOL_TABLE_ERROR_TODO (UINT16_MAX - 4)
 
     typedef uint16_t ps_symbol_table_size;
 
@@ -35,7 +33,7 @@
     } ps_symbol_table;
     /* clang-format on */
 
-    /** @brief (Allocate and) initialize symbol table (reset count & mark all symbols as free) */
+    /** @brief (Allocate and) initialize symbol table (reset used count & empty all symbols) */
     ps_symbol_table *ps_symbol_table_init(ps_symbol_table * table);
 
     /** @brief Deallocate symbol table */

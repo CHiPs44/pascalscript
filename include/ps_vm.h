@@ -22,12 +22,14 @@ extern "C"
 
     typedef enum e_ps_vm_opcode
     {
-        OP_NOP = 0x00, // do nothing
+        OP_NOP,        // do nothing
         OP_PUSH,       // push value to stack
         OP_POP,        // pop value from stack
+        OP_JUMP,       // inconditionnally
+        OP_JUMP_TRUE,  // top of stack is strictly boolean true
+        OP_JUMP_FALSE, // top of stack is strictly boolean false
         OP_CALL,       // call procedure or function
         OP_RETURN,     // return from procedure or function
-        OP_SYS,        // system call
         // Test operators => boolean
         OP_TEST_EQ, // "="
         OP_TEST_NE, // "<>"
@@ -35,19 +37,15 @@ extern "C"
         OP_TEST_GE, // ">="
         OP_TEST_LT, // "<"
         OP_TEST_LE, // "<="
-        // Jump
-        OP_JUMP,       // Inconditionnally
-        OP_JUMP_TRUE,  // Top of stack is strictly boolean true
-        OP_JUMP_FALSE, // Top of stack is strictly boolean false
         // Unary operators
         OP_NEG,
         // Binary operators
         OP_ADD,      // +
         OP_SUB,      // -
         OP_MUL,      // *
-        OP_DIV,      // integer "div"
+        OP_DIV,      // "div"
         OP_MOD,      // %
-        OP_REAL_DIV, // "/"
+        OP_DIV_REAL, // "/"
         // Bit operators
         OP_BIT_NOT,
         OP_BIT_AND,
@@ -60,7 +58,12 @@ extern "C"
         OP_BOOL_AND,
         OP_BOOL_OR,
         OP_BOOL_XOR,
+        // Specials
+        OP_SYS = 0xf0, // system call
+        OP_DEBUG,
     } __attribute__((__packed__)) ps_vm_opcode;
+
+#define PS_VM_OPCODE_SIZE sizeof(ps_vm_opcode)
 
     typedef enum e_ps_vm_sys_command
     {
