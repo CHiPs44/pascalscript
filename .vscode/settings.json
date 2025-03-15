@@ -64,7 +64,8 @@
         "numeric": "c",
         "sstream": "c",
         "streambuf": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "locale_t.h": "c"
     },
     "makefile.configureOnOpen": false
 }

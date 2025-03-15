@@ -128,8 +128,8 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
     {
     case PS_TYPE_UNSIGNED:
     case PS_TYPE_INTEGER:
-    case PS_TYPE_ENUM:
-    case PS_TYPE_SUBRANGE:
+    // case PS_TYPE_ENUM:
+    // case PS_TYPE_SUBRANGE:
         // just copy: ord(x) => x
         memcpy(result, value, sizeof(ps_value));
         return result;
@@ -165,11 +165,11 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
-    case PS_TYPE_ENUM:
+    // case PS_TYPE_ENUM:
         result->data.c = (ps_char)(value->data.u);
 
     case PS_TYPE_INTEGER:
-    case PS_TYPE_SUBRANGE:
+    // case PS_TYPE_SUBRANGE:
         result->data.c = (ps_char)(value->data.i);
         return result;
     default:

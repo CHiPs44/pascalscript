@@ -19,27 +19,27 @@ void ps_token_dump(ps_token *token)
     {
     case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(buffer, 256 + 16, "%04d: %d", token->type, token->value.i);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: %d", token->type, token->value.i);
         break;
     case TOKEN_CARDINAL_VALUE:
         type = "CARDINAL";
-        snprintf(buffer, 256 + 16, "%04d: %u", token->type, token->value.u);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: %u", token->type, token->value.u);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(buffer, 256 + 16, "%04d: %f", token->type, token->value.r);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: %f", token->type, token->value.r);
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(buffer, 256 + 16, "%04d: '%c'", token->type, token->value.c);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: '%c'", token->type, token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.s);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.s);
         break;
     case TOKEN_AT_SIGN:           // @
     case TOKEN_CARET:             // ^
@@ -64,19 +64,19 @@ void ps_token_dump(ps_token *token)
     case TOKEN_SLASH:             // /
     case TOKEN_STAR:              // *
         type = "RESERVED";
-        snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     default:
         token_type = ps_token_is_keyword(token->value.identifier);
         if (token_type == TOKEN_IDENTIFIER)
         {
             type = "UNKNOWN";
-            snprintf(buffer, 256 + 16, "'%s'", "?");
+            snprintf(buffer, sizeof(buffer)-1, "'%s'", "?");
         }
         else
         {
             type = "KEYWORD";
-            snprintf(buffer, 256 + 16, "%04d: '%s'", token->type, token->value.identifier);
+            snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }
