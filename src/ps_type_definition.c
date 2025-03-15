@@ -101,25 +101,25 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
     return definition;
 }
 
-ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_identifier *values)
-{
-    ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_ENUM);
-    if (definition == NULL)
-        return NULL;
-    definition->def.def_enum.count = count;
-    // TODO definition->def.def_enum.values = values;
-    return definition;
-}
+// ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_identifier *values)
+// {
+//     ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_ENUM);
+//     if (definition == NULL)
+//         return NULL;
+//     definition->def.def_enum.count = count;
+//     // TODO definition->def.def_enum.values = values;
+//     return definition;
+// }
 
-ps_type_definition *ps_type_definition_create_subrange(ps_integer low, ps_integer high)
-{
-    ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_SUBRANGE);
-    if (definition == NULL)
-        return NULL;
-    definition->def.def_subrange.min = low;
-    definition->def.def_subrange.max = high;
-    return definition;
-}
+// ps_type_definition *ps_type_definition_create_subrange(ps_integer low, ps_integer high)
+// {
+//     ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_SUBRANGE);
+//     if (definition == NULL)
+//         return NULL;
+//     definition->def.def_subrange.min = low;
+//     definition->def.def_subrange.max = high;
+//     return definition;
+// }
 
 bool ps_type_definition_create_system_types(ps_symbol_table *table)
 {
@@ -142,20 +142,20 @@ const struct s_ps_type_name
 } ps_type_names[] = {
     // clang-format off
     {PS_TYPE_NONE       , "NONE"    },
+    {PS_TYPE_DEFINITION , "TYPE_DEF"},
     {PS_TYPE_INTEGER    , "INTEGER" },
     {PS_TYPE_UNSIGNED   , "UNSIGNED"},
     {PS_TYPE_REAL       , "REAL"    },
     {PS_TYPE_BOOLEAN    , "BOOLEAN" },
     {PS_TYPE_CHAR       , "CHAR"    },
-    {PS_TYPE_DEFINITION , "TYPE_DEF"},
-    {PS_TYPE_ENUM       , "ENUM"    },
-    {PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    {PS_TYPE_SET        , "SET"     },
-    {PS_TYPE_POINTER    , "POINTER" },
-    {PS_TYPE_STRING     , "STRING"  },
-    {PS_TYPE_ARRAY      , "ARRAY"   },
-    {PS_TYPE_RECORD     , "RECORD"  },
-    {PS_TYPE_FILE       , "FILE"    },
+    // {PS_TYPE_ENUM       , "ENUM"    },
+    // {PS_TYPE_SUBRANGE   , "SUBRANGE"},
+    // {PS_TYPE_SET        , "SET"     },
+    // {PS_TYPE_POINTER    , "POINTER" },
+    // {PS_TYPE_STRING     , "STRING"  },
+    // {PS_TYPE_ARRAY      , "ARRAY"   },
+    // {PS_TYPE_RECORD     , "RECORD"  },
+    // {PS_TYPE_FILE       , "FILE"    },
     // clang-format on
 };
 
@@ -186,26 +186,26 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
         snprintf(buffer, sizeof(buffer), "%s with unknown base!", type_name);
         return buffer;
     }
-    switch (type_def->type)
-    {
-    case PS_TYPE_ENUM:
-        // (One, Two, Three) => "ENUM(CARDINAL, 3, 'One', ...)"
-        snprintf(buffer, sizeof(buffer) - 1,
-                 "%s(%s, %d, '%s', ...)",
-                 type_name,
-                 base_name,
-                 type_def->def.def_enum.count,
-                 type_def->def.def_enum.count == 0 ? "???" : type_def->def.def_enum.values[0]);
-        break;
-    case PS_TYPE_SUBRANGE:
-        // -5..24 => "SUBRANGE(INTEGER, -5..24)"
-        snprintf(buffer, sizeof(buffer) - 1,
-                 "%s(%s, %d..%d)",
-                 type_name,
-                 base_name,
-                 type_def->def.def_subrange.min,
-                 type_def->def.def_subrange.max);
-        break;
+    // switch (type_def->type)
+    // {
+    // case PS_TYPE_ENUM:
+    //     // (One, Two, Three) => "ENUM(CARDINAL, 3, 'One', ...)"
+    //     snprintf(buffer, sizeof(buffer) - 1,
+    //              "%s(%s, %d, '%s', ...)",
+    //              type_name,
+    //              base_name,
+    //              type_def->def.def_enum.count,
+    //              type_def->def.def_enum.count == 0 ? "???" : type_def->def.def_enum.values[0]);
+    //     break;
+    // case PS_TYPE_SUBRANGE:
+    // // -5..24 => "SUBRANGE(INTEGER, -5..24)"
+    // snprintf(buffer, sizeof(buffer) - 1,
+    //          "%s(%s, %d..%d)",
+    //          type_name,
+    //          base_name,
+    //          type_def->def.def_subrange.min,
+    //          type_def->def.def_subrange.max);
+    // break;
     // case PS_TYPE_SET:
     //     snprintf(buffer, sizeof(buffer) - 1,
     //              "%s(%s, %d, '%s', ...)",
@@ -220,9 +220,9 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
     //              ps_type_names[i].name,
     //              type_def->def.def_pointer.type_def == NULL ? "???" : type_def->def.def_pointer.type_def->name);
     //     break;
-    default:
-        snprintf(buffer, sizeof(buffer) - 1, "%s(%s)???", type_name, base_name);
-        break;
-    }
+    // default:
+    snprintf(buffer, sizeof(buffer) - 1, "%s(%s)???", type_name, base_name);
+    //     break;
+    // }
     return buffer;
 }

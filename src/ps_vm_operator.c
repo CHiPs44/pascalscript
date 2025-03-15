@@ -10,39 +10,39 @@
 #include "ps_symbol.h"
 #include "ps_vm.h"
 
-bool vm_is_op_relational(ps_vm_opcode op)
+bool ps_vm_is_op_relational(ps_vm_opcode op)
 {
     return op == OP_TEST_EQ || op == OP_TEST_NE ||
            op == OP_TEST_GT || op == OP_TEST_GE ||
            op == OP_TEST_LT || op == OP_TEST_LE;
 }
 
-bool vm_is_op_arithmetic(ps_vm_opcode op)
+bool ps_vm_is_op_arithmetic(ps_vm_opcode op)
 {
     return op == OP_ADD || op == OP_SUB ||
            op == OP_MUL || op == OP_DIV ||
            op == OP_MOD;
 }
 
-bool vm_is_op_bit(ps_vm_opcode op)
+bool ps_vm_is_op_bit(ps_vm_opcode op)
 {
     return op == OP_BIT_NOT || op == OP_BIT_AND ||
            op == OP_BIT_OR || op == OP_BIT_XOR ||
            op == OP_BIT_SHL || op == OP_BIT_SHR;
 }
 
-bool vm_is_op_boolean(ps_vm_opcode op)
+bool ps_vm_is_op_boolean(ps_vm_opcode op)
 {
     return op == OP_BOOL_NOT || op == OP_BOOL_AND ||
            op == OP_BOOL_OR || op == OP_BOOL_XOR;
 }
 
-ps_value_type vm_get_op_binary_type(ps_vm_opcode op, ps_value_type a, ps_value_type b)
+ps_value_type ps_vm_get_op_binary_type(ps_vm_opcode op, ps_value_type a, ps_value_type b)
 {
     if (a == PS_TYPE_NONE || b == PS_TYPE_NONE)
         return PS_TYPE_NONE;
     // X <EQ|NE|GT|GE|LT|LE> X => B
-    if (vm_is_op_relational(op))
+    if (ps_vm_is_op_relational(op))
         return PS_TYPE_BOOLEAN;
     // X <op> X => X
     if (a == b)

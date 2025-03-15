@@ -31,7 +31,7 @@ extern "C"
         OP_CALL,       // call procedure or function
         OP_RETURN,     // return from procedure or function
         // Test operators => boolean
-        OP_TEST_EQ, // "="
+        OP_TEST_EQ, // "=="
         OP_TEST_NE, // "<>"
         OP_TEST_GT, // ">"
         OP_TEST_GE, // ">="
@@ -47,20 +47,20 @@ extern "C"
         OP_MOD,      // %
         OP_DIV_REAL, // "/"
         // Bit operators
-        OP_BIT_NOT,
-        OP_BIT_AND,
-        OP_BIT_OR,
-        OP_BIT_XOR,
-        OP_BIT_SHL,
-        OP_BIT_SHR,
+        OP_BIT_NOT, // !
+        OP_BIT_AND, // &
+        OP_BIT_OR,  // |
+        OP_BIT_XOR, // ^
+        OP_BIT_SHL, // <<
+        OP_BIT_SHR, // >>
         // Boolean operators
-        OP_BOOL_NOT,
-        OP_BOOL_AND,
-        OP_BOOL_OR,
-        OP_BOOL_XOR,
+        OP_BOOL_NOT, // !
+        OP_BOOL_AND, // &&
+        OP_BOOL_OR,  // ||
+        OP_BOOL_XOR, // no ^^ but != should do it
         // Specials
         OP_SYS = 0xf0, // system call
-        OP_DEBUG,
+        OP_DEBUG = UINT8_MAX,
     } __attribute__((__packed__)) ps_vm_opcode;
 
 #define PS_VM_OPCODE_SIZE sizeof(ps_vm_opcode)

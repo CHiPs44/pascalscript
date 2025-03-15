@@ -15,12 +15,12 @@ extern "C"
 #endif
 
     typedef PS_INTEGER ps_integer;
-    typedef PS_INTEGER ps_subrange;
+    // typedef PS_INTEGER ps_subrange;
     const ps_integer ps_integer_min = PS_INTEGER_MIN;
     const ps_integer ps_integer_max = PS_INTEGER_MAX;
 
     typedef PS_UNSIGNED ps_unsigned;
-    typedef PS_UNSIGNED ps_enum;
+    // typedef PS_UNSIGNED ps_enum;
     const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
 
     typedef PS_REAL ps_real;
@@ -34,18 +34,18 @@ extern "C"
     typedef PS_CHAR ps_char;
     const ps_char ps_char_max = PS_CHAR_MAX;
 
-    typedef PS_STRING_LEN_TYPE ps_string_len;
-    const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
+    // typedef PS_STRING_LEN_TYPE ps_string_len;
+    // const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
 
-    // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
-    typedef struct s_ps_string
-    {
-        ps_string_len max;
-        ps_string_len len;
-        ps_char *str;
-    } __attribute__((__packed__)) ps_string;
+    // // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
+    // typedef struct s_ps_string
+    // {
+    //     ps_string_len max;
+    //     ps_string_len len;
+    //     ps_char *str;
+    // } __attribute__((__packed__)) ps_string;
 
-    typedef void *ps_pointer;
+    // typedef void *ps_pointer;
 
     /*typedef struct s_ps_enum_type
     {
@@ -65,7 +65,7 @@ extern "C"
 #define PS_REAL_SIZE sizeof(ps_real)
 #define PS_BOOLEAN_SIZE sizeof(ps_boolean)
 #define PS_CHAR_SIZE sizeof(ps_char)
-#define PS_STRING_SIZE sizeof(ps_string)
+// #define PS_STRING_SIZE sizeof(ps_string)
 
 #ifdef __cplusplus
 }
