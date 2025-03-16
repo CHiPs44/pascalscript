@@ -10,6 +10,8 @@
 #include <string.h>
 
 #include "ps_error.h"
+#include "ps_parser.h"
+#include "ps_symbol_table.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -21,41 +23,33 @@ extern "C"
 
     typedef struct s_ps_runtime
     {
+        ps_parser *parser;
+        ps_symbol_table *symbols;
         ps_error error;
-        bool range_check;
     } ps_runtime;
 
     /**
      * @brief Allocate new value
-     * @return New value or NULL if no free memory (errno = ENOMEM)
+     * @return NULL if no free memory (errno = ENOMEM)
      */
     ps_value *ps_runtime_alloc_value(ps_runtime *runtime);
 
     /** @brief Free existing value */
     void ps_runtime_free_value(ps_runtime *runtime, ps_value *value);
 
-    /** @brief Get absolute value of integer / unsigned / real */
-    ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value);
+    /** @brief Get global symbol */
+    ps_symbol *ps_runtime_global_get(ps_runtime *runtime, char *name);
 
-    /** @brief true if integer/unsigned value is odd, false if even */
-    ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value);
+    /** @brief Add global symbol */
+    int ps_runtime_global_add(ps_runtime *runtime, ps_symbol *symbol);
 
-    /** @brief true if integer/unsigned value is even, false if odd */
-    ps_value *ps_runtime_func_even(ps_runtime *runtime, ps_value *value);
+    /** @brief Delete global symbol */
+    int ps_runtime_global_delete(ps_runtime *runtime, char *name);
 
-    /** @brief Get ordinal value of boolean / char */
-    ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value);
-
-    /** @brief Get char value of unsigned / integer or subrange value */
-    ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value);
-
-    /** @brief Get previous value of ordinal value */
-    ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value);
-
-    /** @brief Get next value of ordinal value */
-    ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value);
-
-    // ps_runtime_func_sizeof?
+    ps_symbol *runtime_auto_add_integer(ps_runtime *runtime, int value);
+    int ps_runtime_auto_free(ps_runtime *runtime, char *name);
+    int ps_runtime_auto_gc(ps_runtime *runtime);
+    bool ps_runtime_load_source(ps_runtime *runtime, char *source, size_t length);
 
 #ifdef __cplusplus
 }

@@ -14,7 +14,18 @@
 
 bool ps_parser_init(ps_parser *parser)
 {
-    ps_lexer_init(&parser->lexer);
+    if (parser == NULL)
+    {
+        parser = calloc(1, sizeof(ps_parser));
+        if (parser == NULL)
+            return NULL;
+        parser->allocated = true;
+    }
+    else
+    {
+        parser->allocated = true;
+    }
+    parser->lexer[0] = ps_lexer_init(NULL);
     parser->symbol_table = ps_symbol_table_init(NULL);
     parser->error = PS_PARSER_ERROR_NONE;
     return true;
@@ -22,11 +33,16 @@ bool ps_parser_init(ps_parser *parser)
 
 void ps_parser_done(ps_parser *parser)
 {
+    ps_lexer_done(parser->lexer);
+    ps_symbol_table_done(parser->symbol_table);
+    if (!parser->allocated)
+        return;
+    free(parser);
 }
 
 bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
 {
-    if (parser->lexer[0].current_token.type != token_type)
+    if (parser->lexer[0]->current_token.type != token_type)
     {
         parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
         return false;
@@ -50,11 +66,11 @@ bool ps_parser_start(ps_parser *parser)
     strcpy(program.name, "PROGRAM");
     program.value.type = &ps_type_def_integer;
     program.value.data.s = calloc(1, sizeof(ps_string));
-    size_t len = strlen(parser->lexer[0].current_token.value.s);
+    size_t len = strlen(parser->lexer[0]->current_token.value.s);
     program.value.data.s->max = len;
     program.value.data.s->len = len;
     program.value.data.s.str = calloc(len + 1, sizeof(ps_char));
-    strcpy(program.value.data.s->str, parser->lexer[0].current_token.value.s);
+    strcpy(program.value.data.s->str, parser->lexer[0]->current_token.value.s);
     ps_symbol_table_add(&vm->symbols, &program);
 
     return true;

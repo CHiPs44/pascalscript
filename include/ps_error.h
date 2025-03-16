@@ -8,6 +8,7 @@
 #define _PS_ERROR_H
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdarg.h>
 
 #ifdef __cplusplus
@@ -44,7 +45,7 @@ extern "C"
         PS_PARSER_ERROR_UNKOWN_IDENTIFIER,
         PS_PARSER_ERROR_CONSTANT_VALUE,
         /* -------------------- RUNTIME -------------------- */
-        PS_RUNTIME_ERROR_NONE = 0x80,
+        PS_RUNTIME_ERROR_NONE = 0x40,
         PS_RUNTIME_ERROR_OUT_OF_MEMORY,
         PS_RUNTIME_ERROR_STACK_EMPTY,
         PS_RUNTIME_ERROR_STACK_OVERFLOW,
@@ -70,7 +71,10 @@ extern "C"
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
         PS_RUNTIME_ERROR_INVALID_PARAMETERS,
         // ...
+        PS_ERROR_MAX = UINT16_MAX
     } __attribute__((__packed__)) ps_error;
+
+#define PS_ERROR_SIZE sizeof(ps_error)
 
 #define ps_error_is_from_buffer (error)(error >= PS_BUFFER_ERROR_NONE && error <= PS_BUFFER_ERROR_NONE + 0xf)
 #define ps_error_is_from_lexer (error)(error >= PS_LEXER_ERROR_NONE && error <= PS_LEXER_ERROR_NONE + 0xf)
@@ -79,7 +83,7 @@ extern "C"
 
     char *ps_error_get_message(ps_error error);
 
-    void ps_error_printf(FILE *output, ps_error error, const char *format, ...);
+    int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...);
 
 #ifdef __cplusplus
 }

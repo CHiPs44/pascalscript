@@ -23,8 +23,8 @@
 ps_lexer _lexer;
 ps_lexer *lexer = &_lexer;
 
-char *minimal_source =
-    "Program Minimal;\n"
+char *empty_source =
+    "Program Empty;\n"
     "{ Comment made with curly brackets }   \n"
     "Begin\n"
     "  (* Comment with parenthesis & stars *)\n"
@@ -33,9 +33,8 @@ char *minimal_source =
     "  // Comment with 2 slashes\n"
     "End.\n"
     "";
-
-ps_token_type minimal_expected[] = {
-    // PROGRAM MINIMAL;
+ps_token_type empty_expected[] = {
+    // PROGRAM EMPTY;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
@@ -44,50 +43,54 @@ ps_token_type minimal_expected[] = {
     //
 };
 
-char *hello_source =
-    "Program HelloWorld;\n"
-    "Const\n"
-    "  K1 = 1234;\n"
-    "  K2 = 'Select A or B.';\n"
-    "Begin\n"
-    "  { Comment1 (* Comment2 *) }\n"
-    "  WriteLn('Hello, World!');\n"
-    "  WriteLn(K1, K2);\n"
-    "End.\n"
-    "";
-
-ps_token_type hello_expected[] = {
-    // PROGRAM HELLOWORLD;
-    TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
-    // CONST
-    TOKEN_CONST,
-    // K1 = 1234;
-    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
-    // K2 = 'Choose ''A'' or ''B''.';\n"
-    TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
-    // BEGIN
-    TOKEN_BEGIN,
-    // WRITELN('Hello, World!');
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
-    // WRITELN(K1, K2);
-    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
-    // END.
-    TOKEN_END, TOKEN_DOT
-    // EOF
-};
+// char *hello_source =
+//     "Program HelloWorld;\n"
+//     "Const\n"
+//     "  K1 = 1234;\n"
+//     "  K2 = 'Select A or B.';\n"
+//     "Begin\n"
+//     "  { Comment1 (* Comment2 *) }\n"
+//     "  WriteLn('Hello, World!');\n"
+//     "  WriteLn(K1, K2);\n"
+//     "End.\n"
+//     "";
+// ps_token_type hello_expected[] = {
+//     // PROGRAM HELLOWORLD;
+//     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
+//     // CONST
+//     TOKEN_CONST,
+//     // K1 = 1234;
+//     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CARDINAL_VALUE, TOKEN_SEMI_COLON,
+//     // K2 = 'Choose ''A'' or ''B''.';\n"
+//     TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+//     // BEGIN
+//     TOKEN_BEGIN,
+//     // WRITELN('Hello, World!');
+//     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_STRING_VALUE, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+//     // WRITELN(K1, K2);
+//     TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_COMMA, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
+//     // END.
+//     TOKEN_END, TOKEN_DOT
+//     // EOF
+// };
 
 char *quotes_source =
     "Program Quotes;\n"
-    "Const K = '''X''=''Y'' ';\n"
+    // "Const K = '''X''=''Y''';\n"
+    "Const K1 = 'K';\n"
+    "Const K2 = '''';\n"
     "Begin\n"
     "End.\n"
     "";
-
 ps_token_type quotes_expected[] = {
     // PROGRAM QUOTES;
     TOKEN_PROGRAM, TOKEN_IDENTIFIER, TOKEN_SEMI_COLON,
-    // CONST K = '''X''=''Y'' ';
-    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    // // CONST K = '''X''=''Y'' ';
+    // TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_STRING_VALUE, TOKEN_SEMI_COLON,
+    // CONST K1 = 'K';
+    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CHAR_VALUE, TOKEN_SEMI_COLON,
+    // CONST K2 = '''';
+    TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CHAR_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
     // END.
@@ -100,9 +103,9 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
     int index;
 
     printf("TEST LEXER: INIT %s\n", name);
-    lexer = ps_lexer_init();
+    lexer = ps_lexer_init(NULL);
     lexer->buffer->debug = 0;
-    ps_buffer_set_text(lexer->buffer, source, strlen(source));
+    ps_buffer_load_text(lexer->buffer, source, strlen(source));
     ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST LEXER: LOOP ON %s\n", name);
@@ -154,16 +157,20 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
 
 int main(void)
 {
-    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    struct rlimit rl = {1024 * 1024 * 3, 1024 * 1024 * 3};
     setrlimit(RLIMIT_AS, &rl);
 
     printf("TEST LEXER: BEGIN\n");
+
+    // printf("================================================================================\n");
+    // test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type));
+
+    // printf("================================================================================\n");
+    // test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type));
+
     printf("================================================================================\n");
-    test_lexer("MINIMAL", minimal_source, minimal_expected, sizeof(minimal_expected) / sizeof(ps_token_type));
-    // printf("================================================================================\n");
-    // test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type_t));
-    // printf("================================================================================\n");
-    // test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type_t));
+    test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type));
+
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");
     return 0;

@@ -24,17 +24,18 @@ ps_buffer *ps_buffer_init()
     buffer->text = NULL;
     buffer->length = 0;
     buffer->line_count = 0;
-    buffer->current_char = '\0';
-    buffer->next_char = '\0';
-    buffer->error = PS_BUFFER_ERROR_NONE;
     buffer->debug = 0;
     buffer->line_starts = NULL;
     buffer->line_lengths = NULL;
+    buffer->from_file = false;
+    ps_buffer_reset(buffer);
     return buffer;
 }
 
 void ps_buffer_done(ps_buffer *buffer)
 {
+    if (buffer->from_file)
+        free(buffer->text);
     free(buffer->line_starts);
     free(buffer->line_lengths);
     free(buffer);
@@ -52,7 +53,7 @@ void ps_buffer_reset(ps_buffer *buffer)
 char *ps_buffer_show_error(ps_buffer *buffer)
 {
     static char error_message[256];
-    snprintf(error_message, 255, "LEXER: %d %s, line %d, column %d",
+    snprintf(error_message, 255, "BUFFER: %d %s, line %d, column %d",
              buffer->error, ps_error_get_message(buffer->error),
              buffer->current_line, buffer->current_column);
     return error_message;
@@ -61,15 +62,15 @@ char *ps_buffer_show_error(ps_buffer *buffer)
 char *ps_buffer_debug_char(char c)
 {
     static char tmp[16];
-    static char *ctrl[32] = {
-        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
-        "BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
-        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
-        "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
-    if (c >= ' ')
-        sprintf(tmp, " '%c' (0x%02x)", c, c);
+    // static char *ctrl[32] = {
+    //     "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
+    //     "BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
+    //     "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+    //     "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
+    if (c < ' ')
+        snprintf(tmp, 15, "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
     else
-        sprintf(tmp, " %s (0x%02x)", ctrl[c + 0], c);
+        snprintf(tmp, 15, "%c/%02x", c, c);
     return tmp;
 }
 
@@ -78,7 +79,7 @@ void ps_buffer_debug(ps_buffer *buffer, int level, char *message)
     if (buffer->debug < level)
         return;
     fprintf(stderr,
-            "%s line=%05d col=%03d char=%s, next=%s, error=%d %s\n",
+            "%s line=%05d col=%03d current=%s, next=%s, error=%d %s\n",
             message,
             buffer->current_line, buffer->current_column,
             ps_buffer_debug_char(buffer->current_char),
@@ -139,6 +140,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     }
     // Find and memorize line starts
     text = buffer->text;
+    int line_length;
     bool stop = false;
     while (!stop)
     {
@@ -146,8 +148,18 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
         switch (c)
         {
         case '\n':
+            line_length = text - start;
+            if (line_length > PS_BUFFER_MAX_COLUMNS)
+            {
+                free(buffer->line_starts);
+                buffer->line_starts = NULL;
+                free(buffer->line_lengths);
+                buffer->line_lengths = NULL;
+                buffer->error = PS_BUFFER_ERROR_OVERFLOW_COLUMNS;
+                return false;
+            }
             buffer->line_starts[line] = start;
-            buffer->line_lengths[line] = text - start;
+            buffer->line_lengths[line] = line_length;
             line += 1;
             column = 0;
             text += 1;
@@ -168,7 +180,9 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
 
 bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
 {
+    int result;
     size_t length;
+    // Open file
     FILE *input = fopen(filename, "r");
     if (input == NULL)
     {
@@ -176,35 +190,52 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
         buffer->file_errno = errno;
         return false;
     }
-    int result = ps_readall(input, &(buffer->text), &length);
+    // Check length of file
+    if (fseek(input, 0, SEEK_END))
+    {
+        buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        buffer->file_errno = errno;
+        fclose(input);
+        return false;
+    }
+    length = ftell(input);
+    if (length > PS_BUFFER_MAX_SIZE)
+    {
+        buffer->error = PS_BUFFER_ERROR_OVERFLOW;
+        fclose(input);
+        return false;
+    }
+    if (fseek(input, 0, 0))
+    {
+        buffer->file_errno = errno;
+        buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        fclose(input);
+        return false;
+    }
+    // Read file
+    result = ps_readall(input, &(buffer->text), &length);
+    buffer->file_errno = errno;
     fclose(input);
     switch (result)
     {
-    case PS_READALL_ERROR:
-        buffer->error = PS_BUFFER_ERROR_READING_FILE;
-        buffer->file_errno = errno;
-        return false;
+    case PS_READALL_OK:
+        buffer->from_file = true;
+        buffer->length = (uint16_t)length;
+        buffer->error = PS_BUFFER_ERROR_NONE;
+        return ps_buffer_scan_text(buffer);
     case PS_READALL_NOMEM:
         buffer->error = PS_BUFFER_ERROR_OUT_OF_MEMORY;
         return false;
-    case PS_READALL_OK:
-        if (length > UINT16_MAX)
-        {
-            free(buffer->text);
-            buffer->error = PS_BUFFER_ERROR_OVERFLOW;
-            return false;
-        }
-        buffer->length = length;
-        buffer->error = PS_BUFFER_ERROR_NONE;
-        buffer->file_errno = 0;
-        return ps_buffer_scan_text(buffer);
+    // case PS_READALL_ERROR:
+    //     buffer->error = PS_BUFFER_ERROR_READING_FILE;
+    //     return false;
     default:
         buffer->error = PS_BUFFER_ERROR_READING_FILE;
         return false;
     }
 }
 
-bool ps_buffer_set_text(ps_buffer *buffer, char *text, size_t length)
+bool ps_buffer_load_text(ps_buffer *buffer, char *text, size_t length)
 {
     buffer->text = text;
     buffer->length = length;
@@ -218,6 +249,7 @@ bool ps_buffer_set_text(ps_buffer *buffer, char *text, size_t length)
         free(buffer->line_lengths);
         buffer->line_lengths = NULL;
     }
+    buffer->from_file = false;
     return ps_buffer_scan_text(buffer);
 }
 

@@ -10,9 +10,7 @@
 #include "ps_buffer.h"
 #include "ps_error.h"
 #include "ps_lexer.h"
-#include "ps_parser.h"
 #include "ps_symbol_stack.h"
-#include "ps_symbol_table.h"
 #include "ps_token.h"
 
 #ifdef __cplusplus
@@ -79,34 +77,45 @@ extern "C"
 
     typedef struct s_ps_vm_t
     {
-        ps_parser *parser;
-        ps_symbol_table *symbols;
         ps_symbol_stack *stack;
+        bool allocated;
+        bool range_check;
         ps_error error;
-    } ps_vm;
+    } __attribute__((__packed__)) ps_vm;
 
-    /**@brief Initialize VM: reset source, global table & stack */
-    ps_vm *ps_vm_init_runtime(ps_vm *vm);
+#define PS_VM_SIZE sizeof(ps_vm)
 
-    // extern bool vm_exec(ps_vm *vm);
-
-    /** @brief Get global symbol */
-    ps_symbol *ps_vm_global_get(ps_vm *vm, char *name);
-    /** @brief Add global symbol */
-    int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol);
-    /** @brief Delete global symbol */
-    int ps_vm_global_delete(ps_vm *vm, char *name);
+    ps_vm *ps_vm_init(ps_vm *vm);
+    void ps_vm_free(ps_vm *vm);
+    // extern bool ps_vm_exec(ps_vm *vm);
 
     /** @brief Push symbol on top of stack */
-    int ps_vm_push(ps_vm *vm, ps_symbol *symbol);
+    bool ps_vm_push(ps_vm *vm, ps_symbol *symbol);
     /** @brief Pop symbol from top of stack */
     ps_symbol *ps_vm_pop(ps_vm *vm);
 
-    ps_symbol *vm_auto_add_integer(ps_vm *vm, int value);
-    int ps_vm_auto_free(ps_vm *vm, char *name);
-    int ps_vm_auto_gc(ps_vm *vm);
+    /** @brief Get absolute value of integer / unsigned / real */
+    ps_value *ps_vm_func_abs(ps_vm *vm, ps_value *value);
 
-    bool ps_vm_load_source(ps_vm *vm, char *source, size_t length);
+    /** @brief true if integer/unsigned value is odd, false if even */
+    ps_value *ps_vm_func_odd(ps_vm *vm, ps_value *value);
+
+    /** @brief true if integer/unsigned value is even, false if odd */
+    ps_value *ps_vm_func_even(ps_vm *vm, ps_value *value);
+
+    /** @brief Get ordinal value of boolean / char */
+    ps_value *ps_vm_func_ord(ps_vm *vm, ps_value *value);
+
+    /** @brief Get char value of unsigned / integer or subrange value */
+    ps_value *ps_vm_func_chr(ps_vm *vm, ps_value *value);
+
+    /** @brief Get previous value of ordinal value */
+    ps_value *ps_vm_func_pred(ps_vm *vm, ps_value *value);
+
+    /** @brief Get next value of ordinal value */
+    ps_value *ps_vm_func_succ(ps_vm *vm, ps_value *value);
+
+    // ps_vm_func_sizeof?
 
 #ifdef __cplusplus
 }

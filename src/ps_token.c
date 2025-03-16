@@ -45,8 +45,8 @@ void ps_token_dump(ps_token *token)
     case TOKEN_CARET:             // ^
     case TOKEN_COLON:             // :
     case TOKEN_COMMA:             // ,
-    case TOKEN_DOT_COLON:         // :=
-    case TOKEN_DOT_DOT:           // ..
+    case TOKEN_ASSIGN:         // :=
+    case TOKEN_RANGE:           // ..
     case TOKEN_DOT:               // .
     case TOKEN_EQUAL:             // =
     case TOKEN_GREATER_OR_EQUAL:  // >=

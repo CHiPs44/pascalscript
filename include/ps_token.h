@@ -69,18 +69,16 @@ extern "C"
     {
         TOKEN_NONE = 0,
         TOKEN_END_OF_FILE,
-        // Numeric values        bytes mini / maxi
-        //                       ----- ---------------------------------------------
-        TOKEN_INTEGER_VALUE,  // 2 / 4 -32768..32767 / -2,147,483,648..2,147,483,647
-        TOKEN_CARDINAL_VALUE, // 2 / 4 0..65,535 / 0..4,294,967,295
-        TOKEN_REAL_VALUE,     // 4 / 8 +/- 1.5E-45 .. 3.4E38 / +/- 5.0E-324..1.7E308
+        // Numeric values
+        TOKEN_INTEGER_VALUE,
+        TOKEN_CARDINAL_VALUE,
+        TOKEN_REAL_VALUE,
         // Other value types
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
         TOKEN_IDENTIFIER,
         // Reserved words
-        // ==============
         TOKEN_RESERVED_WORDS = 127,
         TOKEN_PROGRAM,
         TOKEN_CONST,
@@ -134,12 +132,12 @@ extern "C"
         TOKEN_SHR,
         // Symbols
         // =======
-        TOKEN_DOT_COLON,         // :=  assign
+        TOKEN_ASSIGN,         // :=  assign
         TOKEN_AT_SIGN,           // @   address of
         TOKEN_CARET,             // ^   pointer to
         TOKEN_COLON,             // :   various uses
         TOKEN_COMMA,             // ,   various uses
-        TOKEN_DOT_DOT,           // ..  ranges
+        TOKEN_RANGE,           // ..  ranges
         TOKEN_DOT,               // .   various uses
         TOKEN_LEFT_BRACKET,      // [   array access
         TOKEN_LEFT_PARENTHESIS,  // (   various uses

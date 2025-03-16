@@ -113,21 +113,25 @@ char *ps_error_get_message(ps_error error)
         return "Out of range";
     case PS_RUNTIME_ERROR_INVALID_PARAMETERS:
         return "Invalid parameters";
+    case PS_ERROR_MAX:
+        return "MAX error?";
     }
     snprintf(message, sizeof(message) - 1, "Unknown %d", error);
     return message;
 }
 
-void ps_error_printf(FILE *output, ps_error error, const char *format, ...)
+int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...)
 {
+    int n = 0;
     if (output == NULL)
         output = stderr;
     va_list args;
     va_start(args, format);
-    fprintf(output, "ERROR: %s ", ps_error_get_message(error));
-    vfprintf(output, format, args);
-    fprintf(output, "\n");
+    n += fprintf(output, "ERROR: %s ", ps_error_get_message(error));
+    n += vfprintf(output, format, args);
+    n += fprintf(output, "\n");
     va_end(args);
+    return n;
 }
 
 /* EOF */

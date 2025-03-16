@@ -11,21 +11,72 @@
 #include "ps_error.h"
 #include "ps_value.h"
 #include "ps_runtime.h"
+#include "ps_version.h"
 
 /** @brief Create new runtime */
-ps_runtime *ps_vm_init_runtime()
+ps_runtime *ps_runtime_init(ps_runtime *runtime)
 {
-    ps_runtime *runtime = calloc(1, sizeof(ps_runtime));
+    char buffer[32];
+    ps_value *value;
+
+    bool allocated = false;
     if (runtime == NULL)
+    {
+        runtime = calloc(1, sizeof(ps_runtime));
+        if (runtime == NULL)
+            return NULL;
+        allocated = true;
+    }
+    /* Parser */
+    runtime->parser = ps_parser_init(NULL);
+    if (runtime->parser == NULL)
+    {
+        if (allocated)
+            free(runtime);
         return NULL;
+    }
+    // /* Symbol table */
+    // runtime->symbols = ps_symbol_table_init(NULL);
+    // if (runtime->symbols == NULL)
+    // {
+    //     free(runtime->parser);
+    //     if (allocated)
+    //         free(runtime);
+    //     return NULL;
+    // }
     runtime->error = PS_RUNTIME_ERROR_NONE;
-    runtime->range_check = false;
+
+    // Version
+    value = ps_value_set_unsigned(NULL, PS_VERSION_MAJOR);
+    ps_runtime_add_system_constant(runtime, "PS_VERSION_MAJOR", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_MINOR);
+    ps_runtime_add_system_constant(runtime, "PS_VERSION_MINOR", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_PATCH);
+    ps_runtime_add_system_constant(runtime, "PS_VERSION_PATCH", value);
+    value = ps_value_set_unsigned(NULL, PS_VERSION_INDEX);
+    ps_runtime_add_system_constant(runtime, "PS_VERSION_INDEX", value);
+    snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+    value = ps_value_set_string(NULL, buffer, strlen(buffer), strlen(buffer));
+    ps_runtime_add_system_constant(runtime, "PS_VERSION", value);
+    // Limits
+    value = ps_value_set_integer(NULL, ps_integer_max);
+    ps_runtime_add_system_constant(runtime, "MAXINT", value);
+    value = ps_value_set_unsigned(NULL, ps_unsigned_max);
+    ps_runtime_add_system_constant(runtime, "MAXUINT", value);
+    // These are keywords for now (until enums are implemented)
+    // value = ps_value_set_boolean(NULL, ps_false);
+    // ps_runtime_add_system_constant(runtime, "FALSE", value);
+    // value = ps_value_set_boolean(NULL, ps_true);
+    // ps_runtime_add_system_constant(runtime, "TRUE", value);
+    // Reals without PI is not conceivable
+    value = ps_value_set_real(NULL, 3.141592653589793); // 115997963468544185161590576171875);
+    ps_runtime_add_system_constant(runtime, "PI", value);
     return runtime;
 }
 
-/** @brief Create new runtime */
-ps_runtime *ps_runtime_free(ps_runtime *runtime)
+ps_runtime *ps_runtime_done(ps_runtime *runtime)
 {
+    ps_parser_init
     free(runtime);
 }
 
@@ -43,10 +94,52 @@ ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
     return value;
 }
 
-/** @brief Free value */
 void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
 {
     free(value);
+}
+
+ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope, ps_value value)
+{
+    ps_symbol symbol;
+    strcpy(symbol.name, "");
+    symbol.kind = PS_SYMBOL_KIND_AUTO;
+    symbol.scope = scope;
+    symbol.value.type = PS_TYPE_INTEGER;
+    symbol.value.data.i = value.data.i;
+    int index = ps_symbol_table_add(runtime->symbols, &symbol);
+    return index >= 0 ? &runtime->symbols[index] : NULL;
+}
+
+/**
+ * @brief Free auto variable after use
+ *
+ * @param VM
+ * @param string Normalized name
+ * @return index of symbol or -1 if not found
+ */
+int ps_runtime_auto_free(ps_runtime *runtime, char *name)
+{
+    return ps_symbol_table_free(runtime->symbols, name);
+}
+
+/**
+ * @brief Garbage collector: release free symbols
+ *
+ * @param VM
+ * @return Count of garbage collected symbols
+ */
+int ps_runtime_auto_gc(ps_runtime *runtime)
+{
+    int count = ps_symbol_table_gc(runtime->symbols);
+    fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
+    return count;
+}
+
+bool ps_runtime_load_source(ps_runtime *runtime, char *source, size_t length)
+{
+    bool ok = ps_buffer_load_text(runtime->parser->lexer[0]->buffer, source, length);
+    return ok;
 }
 
 /******************************************************************************/
@@ -128,8 +221,8 @@ ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
     {
     case PS_TYPE_UNSIGNED:
     case PS_TYPE_INTEGER:
-    // case PS_TYPE_ENUM:
-    // case PS_TYPE_SUBRANGE:
+        // case PS_TYPE_ENUM:
+        // case PS_TYPE_SUBRANGE:
         // just copy: ord(x) => x
         memcpy(result, value, sizeof(ps_value));
         return result;
@@ -165,11 +258,11 @@ ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
-    // case PS_TYPE_ENUM:
+        // case PS_TYPE_ENUM:
         result->data.c = (ps_char)(value->data.u);
 
     case PS_TYPE_INTEGER:
-    // case PS_TYPE_SUBRANGE:
+        // case PS_TYPE_SUBRANGE:
         result->data.c = (ps_char)(value->data.i);
         return result;
     default:

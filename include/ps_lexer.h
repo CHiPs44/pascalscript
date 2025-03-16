@@ -28,6 +28,7 @@ extern "C"
         ps_buffer *buffer;
         ps_error   error;
         ps_token   current_token;
+        bool       allocated;
         // clang-format on
     } ps_lexer;
 
