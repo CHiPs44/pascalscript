@@ -8,6 +8,7 @@
 #include "ps_symbol.h"
 #include "ps_runtime.h"
 #include "ps_version.h"
+#include "ps_system.h"
 
 ps_value ps_value_version_major = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_MAJOR}};
 ps_value ps_value_version_minor = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_MINOR}};
