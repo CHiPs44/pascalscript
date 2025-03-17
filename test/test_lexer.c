@@ -77,9 +77,10 @@ ps_token_type empty_expected[] = {
 char *quotes_source =
     "Program Quotes;\n"
     // "Const K = '''X''=''Y''';\n"
-    "Const K1 = 'K';\n"
+    "Const K1 = 'X';\n"
     "Const K2 = '''';\n"
     "Begin\n"
+    "  Write(K1);\n"
     "End.\n"
     "";
 ps_token_type quotes_expected[] = {
@@ -93,6 +94,8 @@ ps_token_type quotes_expected[] = {
     TOKEN_CONST, TOKEN_IDENTIFIER, TOKEN_EQUAL, TOKEN_CHAR_VALUE, TOKEN_SEMI_COLON,
     // BEGIN
     TOKEN_BEGIN,
+    // WRITE(K1);
+    TOKEN_IDENTIFIER, TOKEN_LEFT_PARENTHESIS, TOKEN_IDENTIFIER, TOKEN_RIGHT_PARENTHESIS, TOKEN_SEMI_COLON,
     // END.
     TOKEN_END, TOKEN_DOT
     // EOF

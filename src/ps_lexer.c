@@ -254,6 +254,7 @@ bool ps_lexer_read_char_value(ps_lexer *lexer)
 {
     char c1 = ps_buffer_peek_char(lexer->buffer);
     char c2 = ps_buffer_peek_next_char(lexer->buffer);
+    // fprintf(stderr, "#0 c1='%c' c2='%c'\n", c1, c2);
 
     // 'x' or '''' only for now (no strings)
     if (c1 == '\'')
@@ -262,28 +263,33 @@ bool ps_lexer_read_char_value(ps_lexer *lexer)
             return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #1");
         c1 = ps_buffer_peek_char(lexer->buffer);
         c2 = ps_buffer_peek_next_char(lexer->buffer);
-        fprintf(stderr, "#1 %c/%c\n", c1, c2);
+        // fprintf(stderr, "#1 c1='%c' c2='%c'\n", c1, c2);
         if (c1 == '\'' && c2 == '\'')
         {
             if (!ps_lexer_read_next_char(lexer))
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #2");
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
-            fprintf(stderr, "#2 %c/%c\n", c1, c2);
+            // fprintf(stderr, "#2 c1='%c' c2='%c'\n", c1, c2);
             if (c1 == '\'' && c2 == '\'')
             {
                 lexer->current_token.type = TOKEN_CHAR_VALUE;
                 lexer->current_token.value.c = '\'';
                 if (!ps_lexer_read_next_char(lexer))
-                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3");
+                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.1");
+                if (!ps_lexer_read_next_char(lexer))
+                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.2");
+                return true;
             }
         }
         else if (c1 != '\'' && c2 == '\'')
         {
-            if (!ps_lexer_read_next_char(lexer))
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4");
             lexer->current_token.type = TOKEN_CHAR_VALUE;
             lexer->current_token.value.c = c1;
+            if (!ps_lexer_read_next_char(lexer))
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.1");
+            if (!ps_lexer_read_next_char(lexer))
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.2");
             return true;
         }
         return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #5");
