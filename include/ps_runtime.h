@@ -11,8 +11,8 @@
 
 #include "ps_error.h"
 #include "ps_parser.h"
-#include "ps_symbol_table.h"
 #include "ps_value.h"
+#include "ps_vm.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -24,8 +24,9 @@ extern "C"
     typedef struct s_ps_runtime
     {
         ps_parser *parser;
-        ps_symbol_table *symbols;
+        ps_vm *vm;
         ps_error error;
+        bool allocated;
     } ps_runtime;
 
     /**

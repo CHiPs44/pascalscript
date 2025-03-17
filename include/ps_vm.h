@@ -11,6 +11,7 @@
 #include "ps_error.h"
 #include "ps_lexer.h"
 #include "ps_symbol_stack.h"
+#include "ps_symbol_table.h"
 #include "ps_token.h"
 
 #ifdef __cplusplus
@@ -55,7 +56,12 @@ extern "C"
         OP_BOOL_NOT, // !
         OP_BOOL_AND, // &&
         OP_BOOL_OR,  // ||
-        OP_BOOL_XOR, // no ^^ but != should do it
+        OP_BOOL_XOR, // no ^^ but != should do it for booleans
+        // Pascal?
+        // OP_SUCC,
+        // OP_PRED,
+        // OP_ORD,
+        // OP_CHR,
         // Specials
         OP_SYS = 0xf0, // system call
         OP_DEBUG = UINT8_MAX,
@@ -75,8 +81,9 @@ extern "C"
         SYS_FILE_GET_BYTES,
     } __attribute__((__packed__)) ps_vm_sys_command;
 
-    typedef struct s_ps_vm_t
+    typedef struct s_ps_vm
     {
+        ps_symbol_table *symbols;
         ps_symbol_stack *stack;
         bool allocated;
         bool range_check;

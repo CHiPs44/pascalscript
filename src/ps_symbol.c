@@ -5,10 +5,29 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ps_value.h"
 #include "ps_symbol.h"
+
+ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value)
+{
+    ps_symbol *symbol = (ps_symbol *)calloc(1, sizeof(ps_symbol));
+    if (symbol == NULL)
+        return NULL;
+    symbol->scope = scope;
+    symbol->kind = kind;
+    if (name != NULL)
+        strncpy(symbol->name, name, PS_IDENTIFIER_LEN);
+    symbol->value = value;
+    return symbol;
+}
+
+void ps_symbol_free(ps_symbol *symbol)
+{
+    free(symbol);
+}
 
 void ps_symbol_normalize_name(ps_symbol *symbol)
 {

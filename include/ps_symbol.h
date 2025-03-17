@@ -27,7 +27,7 @@ extern "C"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM = 0,                  /** @brief System defined: for things like StdOut, StdErr, False, True, ... */
+        PS_SYMBOL_SCOPE_SYSTEM = 0,                  /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
         PS_SYMBOL_SCOPE_GLOBAL,                      /** @brief User defined: for constants, types, variables, procedures and functions at top level */
         PS_SYMBOL_SCOPE_LOCAL,                       /** @brief Local defined */
         PS_SYMBOL_SCOPE_UNIT = (UINT16_MAX + 1) / 2, /** @brief Unit defined */
@@ -62,11 +62,14 @@ extern "C"
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
-    /** @brief Get kind name for symbol */
-    char *ps_symbol_get_kind_name(ps_symbol_kind kind);
+    ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value);
+    void ps_symbol_free(ps_symbol *symbol);
 
     /** @brief Get scope name for symbol */
     char *ps_symbol_get_scope_name(ps_symbol_scope scope);
+
+    /** @brief Get kind name for symbol */
+    char *ps_symbol_get_kind_name(ps_symbol_kind kind);
 
     /** @brief Get symbol info */
     char *ps_symbol_dump_value(ps_symbol *symbol);

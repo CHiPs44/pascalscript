@@ -65,7 +65,8 @@
         "sstream": "c",
         "streambuf": "c",
         "typeinfo": "c",
-        "locale_t.h": "c"
+        "locale_t.h": "c",
+        "ps_version.h": "c"
     },
     "makefile.configureOnOpen": false
 }

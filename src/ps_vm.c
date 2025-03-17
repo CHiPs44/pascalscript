@@ -31,6 +31,14 @@ ps_vm *ps_vm_init(ps_vm *vm)
     {
         vm->allocated = false;
     }
+    /* Symbol table */
+    vm->symbols = ps_symbol_table_init(NULL);
+    if (vm->symbols == NULL)
+    {
+        if (vm->allocated)
+            free(vm);
+        return NULL;
+    }
     vm->stack = ps_symbol_stack_init(NULL);
     if (vm->stack == NULL)
     {
@@ -46,6 +54,7 @@ void ps_vm_free(ps_vm *vm)
 {
     if (!vm->allocated)
         return;
+    ps_symbol_table_free(vm->symbols);
     ps_symbol_stack_free(vm->stack);
     free(vm);
 }
