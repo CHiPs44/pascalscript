@@ -9,15 +9,15 @@
 
 #include "ps_version.h"
 #include "ps_config.h"
-#include "ps_lexer.h"
-#include "ps_buffer.h"
-#include "ps_parser.h"
-#include "ps_symbol.h"
+// #include "ps_lexer.h"
+// #include "ps_buffer.h"
+// #include "ps_parser.h"
+// #include "ps_symbol.h"
 #include "ps_symbol_table.h"
-#include "ps_vm.h"
+#include "ps_runtime.h"
 
-ps_vm _vm;
-ps_vm *vm = &_vm;
+ps_runtime _runtime;
+ps_runtime *runtime = &_runtime;
 
 char *minimal_source =
     "Program Minimal;\n"
@@ -43,13 +43,13 @@ char *hello_source =
 int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
-  ps_vm_init_runtime(vm);
-  ps_symbol_table_dump(vm->symbols, "Init", stderr);
-  ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
-  printf("PascalScript v%d.%d.%d.%d => %08x %d\n",
-         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX,
-         ps_version->value->data.i, ps_version->value->data.i);
-  if (!ps_vm_load_source(vm, minimal_source, strlen(minimal_source)))
+  ps_runtime_init(runtime);
+  ps_symbol_table_dump(runtime->vm->symbols, "Init", stderr);
+  // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
+  printf("PascalScript v%d.%d.%d.%d\n",                                           // => %08x %d\n",
+         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX); //,
+                                                                                  //  ps_version->value->data.i, ps_version->value->data.i);
+  if (!ps_runtime_load_source(runtime, minimal_source, strlen(minimal_source)))
   // if (!ps_vm_load_source(vm, hello, strlen(hello)))
   // if (!ps_vm_load_source(vm,"examples/00-hello.pas"))
   {
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_buffer_dump(vm->parser->lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
+  ps_buffer_dump(runtime->parser->lexer[0]->buffer, 0, PS_BUFFER_MAX_LINES - 1);
   printf("Listed!\n");
-  ps_parser_start(vm->parser);
+  // ps_parser_start(runtime->parser);
   return 0;
 }
 

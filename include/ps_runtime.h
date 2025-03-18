@@ -29,6 +29,9 @@ extern "C"
         bool allocated;
     } ps_runtime;
 
+    ps_runtime *ps_runtime_init(ps_runtime *runtime);
+    ps_runtime *ps_runtime_done(ps_runtime *runtime);
+
     /**
      * @brief Allocate new value
      * @return NULL if no free memory (errno = ENOMEM)

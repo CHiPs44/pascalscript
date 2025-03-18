@@ -7,6 +7,7 @@
 #ifndef _PS_SYSTEM_H
 #define _PS_SYSTEM_H
 
+#include "ps_symbol.h"
 #include "ps_runtime.h"
 
 #ifdef __cplusplus
@@ -19,8 +20,8 @@ extern "C"
     extern ps_symbol ps_symbol_version_patch;
     extern ps_symbol ps_symbol_version_index;
 
-    // void ps_system_init(ps_runtime *runtime);
-    // void ps_system_done(ps_runtime *runtime);
+    extern void ps_system_init(ps_runtime *runtime);
+    extern void ps_system_done(ps_runtime *runtime);
 
 #ifdef __cplusplus
 }

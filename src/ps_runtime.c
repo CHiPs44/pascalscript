@@ -82,7 +82,7 @@ ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope,
  */
 int ps_runtime_auto_free(ps_runtime *runtime, char *name)
 {
-    return ps_symbol_table_free(runtime->symbols, name);
+    return ps_symbol_table_free(runtime->vm->symbols, name);
 }
 
 /**
@@ -93,7 +93,7 @@ int ps_runtime_auto_free(ps_runtime *runtime, char *name)
  */
 int ps_runtime_auto_gc(ps_runtime *runtime)
 {
-    int count = ps_symbol_table_gc(runtime->symbols);
+    int count = ps_symbol_table_gc(runtime->vm->symbols);
     fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     return count;
 }
