@@ -12,7 +12,7 @@
 #include "ps_symbol_table.h"
 #include "ps_parser.h"
 
-bool ps_parser_init(ps_parser *parser)
+ps_parser *ps_parser_init(ps_parser *parser)
 {
     if (parser == NULL)
     {
