@@ -24,7 +24,8 @@ extern "C"
 
     typedef struct ps_parser
     {
-        ps_lexer *lexer[PS_PARSER_LEXER_COUNT];
+        ps_lexer *lexers[PS_PARSER_LEXER_COUNT];
+        uint8_t lexer;
         ps_error error;
         bool allocated_parser;
         bool allocated_symbol_table;
@@ -34,7 +35,7 @@ extern "C"
     ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbol_table);
     void ps_parser_done(ps_parser *parser);
     bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type);
-    // TODO ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_type[]);
+    ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[]);
     bool ps_parser_start(ps_parser *parser);
 
 #ifdef __cplusplus

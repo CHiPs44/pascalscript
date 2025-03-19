@@ -100,7 +100,7 @@ int ps_runtime_auto_gc(ps_runtime *runtime)
 
 bool ps_runtime_load_source(ps_runtime *runtime, char *source, size_t length)
 {
-    bool ok = ps_buffer_load_text(runtime->parser->lexer[0]->buffer, source, length);
+    bool ok = ps_buffer_load_text(runtime->ps_parser_get_lexer(parser)->buffer, source, length);
     return ok;
 }
 
