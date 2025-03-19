@@ -39,6 +39,7 @@ extern "C"
     typedef enum e_ps_symbol_kind
     {
         PS_SYMBOL_KIND_AUTO,
+        PS_SYMBOL_KIND_PROGRAM,
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
         PS_SYMBOL_KIND_TYPE_DEFINITION,
