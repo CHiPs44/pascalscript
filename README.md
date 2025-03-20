@@ -1,5 +1,17 @@
 # `PascalScript` - an interpreted Pascal dialect
 
+## Build status
+
+__This does not even compile for now!__
+
+As I said in <https://github.com/CHiPs44/pascalscript/issues/7#issuecomment-2741573870>:
+
+"Yes, it's really a work in progress!
+
+Even if the project is nearly 2 years old, I don't work on it an a regular basis, more by cycles of weeks or months when I'm interested again in going forward with it.
+
+I'm going to add an introduction in the README to show current status, or perhaps I'll try to show it doesn't build through Github actions."
+
 ## Introduction
 
 `PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))), with an handmade lexer and parser.
