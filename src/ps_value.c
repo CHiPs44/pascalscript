@@ -14,6 +14,16 @@
 #include "ps_symbol.h"
 #include "ps_value.h"
 
+ps_value *ps_value_init(ps_type_definition *type, ps_value_data data)
+{
+    ps_value *value = calloc(1, sizeof(ps_value));
+    if (value == NULL)
+        return NULL;
+    value->type = type;
+    value->data = data;
+    return value;
+}
+
 bool ps_value_is_scalar(ps_value *value)
 {
     // /* /!\ based on enum order! */

@@ -139,6 +139,8 @@ bool ps_parser_parse_const(ps_parser *parser)
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     ps_identifier identifier;
     ps_value *value;
+    ps_type_definition *type;
+    ps_value_data data;
     ps_symbol *constant;
     if (!ps_parser_expect_token_type(parser, TOKEN_CONST))
     {
@@ -157,22 +159,33 @@ bool ps_parser_parse_const(ps_parser *parser)
         return false;
     if (!ps_parser_expect_token_types(parser, 2, const_value_token_types))
         return false;
+    switch (lexer->current_token.type)
+    {
+    case TOKEN_INTEGER_VALUE:
+        type = &ps_symbol_integer;
+        data.i = lexer->current_token.value.i;
+        break;
+    case TOKEN_CARDINAL_VALUE:
+        type = &ps_symbol_unsigned;
+        data.u = lexer->current_token.value.u;
+        break;
+    default:
+        return false;
+    }
     if (!ps_lexer_read_next_token(lexer))
         return false;
     if (!ps_parser_expect_token_type(parser, TOKEN_SEMI_COLON))
         return false;
     if (!ps_lexer_read_next_token(lexer))
         return false;
-    // TODO loop if identifier
-    // ps_value=ps_value_
+    // TODO loop if we have another identifier
+    ps_value = ps_value_init(type, data);
     constant = ps_symbol_init(
         PS_SYMBOL_SCOPE_GLOBAL,
         PS_SYMBOL_KIND_CONSTANT,
         identifier,
         value);
     ps_symbol_table_add(parser->symbol_table, &constant);
-
-
 
     return true;
 }

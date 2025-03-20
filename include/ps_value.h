@@ -47,6 +47,8 @@ extern "C"
 #define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 #define PS_VALUE_SIZE sizeof(ps_value)
 
+    ps_value *ps_value_init(ps_type_definition *type, ps_value_data data);
+
     // clang-format off
     bool       ps_value_is_scalar   (ps_value *value);
     bool       ps_value_is_number   (ps_value *value);
