@@ -35,18 +35,16 @@ ps_vm *ps_vm_init(ps_vm *vm)
     vm->symbols = ps_symbol_table_init(NULL);
     if (vm->symbols == NULL)
     {
-        if (vm->allocated)
-            free(vm);
+        ps_vm_free(vm);
         return NULL;
     }
     vm->stack = ps_symbol_stack_init(NULL);
     if (vm->stack == NULL)
     {
-        if (vm->allocated)
-            free(vm);
+        ps_vm_free(vm);
         return NULL;
     }
-    vm->range_check = false;
+    vm->range_check = true;
     return vm;
 }
 
@@ -54,8 +52,10 @@ void ps_vm_free(ps_vm *vm)
 {
     if (!vm->allocated)
         return;
-    ps_symbol_table_free(vm->symbols);
-    ps_symbol_stack_free(vm->stack);
+    if (vm->symbols != NULL)
+        ps_symbol_table_free(vm->symbols);
+    if (vm->stack != NULL)
+        ps_symbol_stack_free(vm->stack);
     free(vm);
 }
 

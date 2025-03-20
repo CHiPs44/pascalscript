@@ -235,7 +235,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     }
 }
 
-bool ps_buffer_load_text(ps_buffer *buffer, char *text, size_t length)
+bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
 {
     buffer->text = text;
     buffer->length = length;

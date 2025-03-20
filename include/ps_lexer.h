@@ -9,8 +9,8 @@
 
 #include <stdbool.h>
 
-#include "ps_config.h"
-#include "ps_error.h"
+// #include "ps_config.h"
+// #include "ps_error.h"
 #include "ps_buffer.h"
 #include "ps_token.h"
 
@@ -19,17 +19,12 @@ extern "C"
 {
 #endif
 
-    /**
-     * @brief Lexer state
-     */
     typedef struct s_ps_lexer
     {
-        // clang-format off
         ps_buffer *buffer;
-        ps_error   error;
-        ps_token   current_token;
-        bool       allocated;
-        // clang-format on
+        ps_error error;
+        ps_token current_token;
+        bool allocated;
     } ps_lexer;
 
     /**
@@ -41,37 +36,16 @@ extern "C"
      * @brief Release a lexer
      */
     void ps_lexer_done(ps_lexer *lexer);
-
     /**
      * @brief Reset lexer:
-     *  - reset "cursor" position
+     *  - reset "cursor" position to beginning of buffer
      *  - clear current token and error
      */
     void ps_lexer_reset(ps_lexer *lexer);
-
-    /**
-     * @brief Get error message
-     */
     char *ps_lexer_show_error(ps_lexer *lexer);
-
-    /**
-     * @brief Read next token
-     */
     bool ps_lexer_read_next_token(ps_lexer *lexer);
-
-    /**
-     * @brief Skip whitespace and comments
-     */
     bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
-
-    /**
-     * @brief
-     */
     bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
-
-    /**
-     * @brief
-     */
     bool ps_lexer_read_number(ps_lexer *lexer);
 
     void ps_lexer_dump(ps_lexer *lexer);

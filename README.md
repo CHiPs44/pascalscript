@@ -4,7 +4,7 @@
 
 __This does not even compile for now!__
 
-As I said in <https://github.com/CHiPs44/pascalscript/issues/7#issuecomment-2741573870>:
+As I said in <https://github.com/CHiPs44/pascalscript/issues/7#issuecomment-2741573870>#7":
 
 "Yes, it's really a work in progress!
 

@@ -30,7 +30,7 @@ ps_symbol_table *ps_symbol_table_init(ps_symbol_table *table)
         if (table == NULL)
             return NULL;
     }
-    table->size = sizeof(table->symbols) / sizeof(ps_symbol);
+    table->size = sizeof(table->symbols) / sizeof(ps_symbol *);
     ps_symbol_table_reset(table);
     return table;
 }

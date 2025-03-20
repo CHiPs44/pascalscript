@@ -18,7 +18,7 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-#define PS_SYMBOL_SCOPE_NAME_LEN 7
+#define PS_SYMBOL_SCOPE_NAME_LEN 15
 #define PS_SYMBOL_SCOPE_NAME_SIZE (PS_SYMBOL_SCOPE_NAME_LEN + 1)
 #define PS_SYMBOL_SCOPE_SYSTEM_NAME "SYSTEM"
 #define PS_SYMBOL_SCOPE_GLOBAL_NAME "GLOBAL"
