@@ -75,15 +75,6 @@ ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope,
 }
 
 /**
- * @brief Free auto variable after use
- * @return symbol or NULL if not found
- */
-ps_symbol *ps_runtime_auto_free(ps_runtime *runtime, char *name)
-{
-    return ps_symbol_table_delete(runtime->vm->symbols, name);
-}
-
-/**
  * @brief Garbage collector: release free symbols
  *
  * @param VM

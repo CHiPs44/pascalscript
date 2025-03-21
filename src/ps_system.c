@@ -10,10 +10,10 @@
 #include "ps_version.h"
 #include "ps_system.h"
 
-ps_value ps_value_version_major = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_MAJOR}};
-ps_value ps_value_version_minor = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_MINOR}};
-ps_value ps_value_version_patch = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_PATCH}};
-ps_value ps_value_version_index = {.type = &ps_symbol_unsigned, .data = {.u = PS_VERSION_INDEX}};
+ps_value ps_value_version_major = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MAJOR}};
+ps_value ps_value_version_minor = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MINOR}};
+ps_value ps_value_version_patch = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_PATCH}};
+ps_value ps_value_version_index = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_INDEX}};
 ps_symbol ps_symbol_version_major = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MAJOR", .value = &ps_value_version_major};
 ps_symbol ps_symbol_version_minor = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MINOR", .value = &ps_value_version_minor};
 ps_symbol ps_symbol_version_patch = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_PATCH", .value = &ps_value_version_patch};

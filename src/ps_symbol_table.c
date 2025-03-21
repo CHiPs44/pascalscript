@@ -76,7 +76,7 @@ ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
 ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->used >= table->size)
-        return PS_SYMBOL_TABLE_ERROR_FULL;
+        return NULL;
     if (ps_symbol_table_get(table, symbol->name) != NULL)
         return NULL;
     // Find first free location (table->used *must* be accurate)
@@ -95,7 +95,7 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 /**
  * @brief Delete symbol by name
  */
-ps_symbol *ps_symbol_table_delete(ps_symbol_table *table, char *name)
+ps_symbol *ps_symbol_table_delete(ps_symbol_table *table, ps_identifier *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_ERROR_NOT_FOUND)
@@ -129,12 +129,12 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
         else
         {
             used += 1;
-            symbol = &table->symbols[i];
+            symbol = table->symbols[i];
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = ps_value_get_type_definition_name(symbol->value);
-            char *value = ps_value_get_debug_value(&symbol->value);
-            fprintf(output, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
+            char *type_name = ps_value_get_type_definition_name(symbol->value->type);
+            char *value = ps_value_get_debug_value(symbol->value);
+            fprintf(output, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%-*s┃\n",
                     i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, value);
         }
     }

@@ -53,7 +53,7 @@ void ps_vm_free(ps_vm *vm)
     if (!vm->allocated)
         return;
     if (vm->symbols != NULL)
-        ps_symbol_table_free(vm->symbols);
+        ps_symbol_table_done(vm->symbols);
     if (vm->stack != NULL)
         ps_symbol_stack_free(vm->stack);
     free(vm);
@@ -61,12 +61,21 @@ void ps_vm_free(ps_vm *vm)
 
 bool ps_vm_push(ps_vm *vm, ps_symbol *symbol)
 {
-    return ps_symbol_stack_push(&vm->stack, symbol);
+    return ps_symbol_stack_push(vm->stack, symbol);
 }
 
 ps_symbol *ps_vm_pop(ps_vm *vm)
 {
-    return ps_symbol_stack_pop(&vm->stack);
+    return ps_symbol_stack_pop(vm->stack);
+}
+
+/**
+ * @brief Free auto variable after use
+ * @return symbol or NULL if not found
+ */
+ps_symbol *ps_vm_auto_free(ps_vm *vm, ps_identifier *name)
+{
+    return ps_symbol_table_delete(vm->symbols, name);
 }
 
 /* EOF */

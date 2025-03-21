@@ -18,75 +18,75 @@
 /* BASE TYPE DEFINITIONS AS GLOBALS                                           */
 /******************************************************************************/
 
-ps_type_definition ps_type_def_boolean = {
-    .type = PS_TYPE_BOOLEAN,
-    .base = PS_TYPE_BOOLEAN,
-};
-ps_value ps_value_boolean = {
-    .type = PS_TYPE_DEFINITION,
-    .data = {.t = &ps_type_def_boolean},
-};
-ps_symbol ps_symbol_boolean = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "BOOLEAN",
-    .value = &ps_value_boolean};
+// ps_type_definition ps_type_def_boolean = {
+//     .type = PS_TYPE_BOOLEAN,
+//     .base = PS_TYPE_BOOLEAN,
+// };
+// ps_value ps_value_boolean = {
+//     .type = PS_TYPE_DEFINITION,
+//     .data = {.t = &ps_type_def_boolean},
+// };
+// ps_symbol ps_symbol_boolean = {
+//     .scope = PS_SYMBOL_SCOPE_SYSTEM,
+//     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+//     .name = "BOOLEAN",
+//     .value = &ps_value_boolean};
 
-ps_type_definition ps_type_def_char = {
-    .type = PS_TYPE_CHAR,
-    .base = PS_TYPE_CHAR,
-};
-ps_value ps_value_char = {
-    .type = PS_TYPE_DEFINITION,
-    .data = {.t = &ps_type_def_char},
-};
-ps_symbol ps_symbol_char = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "CHAR",
-    .value = &ps_value_char};
+// ps_type_definition ps_type_def_char = {
+//     .type = PS_TYPE_CHAR,
+//     .base = PS_TYPE_CHAR,
+// };
+// ps_value ps_value_char = {
+//     .type = PS_TYPE_DEFINITION,
+//     .data = {.t = &ps_type_def_char},
+// };
+// ps_symbol ps_symbol_char = {
+//     .scope = PS_SYMBOL_SCOPE_SYSTEM,
+//     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+//     .name = "CHAR",
+//     .value = &ps_value_char};
 
-ps_type_definition ps_type_def_integer = {
-    .type = PS_TYPE_INTEGER,
-    .base = PS_TYPE_INTEGER,
-};
-ps_value ps_value_integer = {
-    .type = PS_TYPE_DEFINITION,
-    .data = {.t = &ps_type_def_integer},
-};
-ps_symbol ps_symbol_integer = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "INTEGER",
-    .value = &ps_value_integer};
+// ps_type_definition ps_type_def_integer = {
+//     .type = PS_TYPE_INTEGER,
+//     .base = PS_TYPE_INTEGER,
+// };
+// ps_value ps_value_integer = {
+//     .type = PS_TYPE_DEFINITION,
+//     .data = {.t = &ps_type_def_integer},
+// };
+// ps_symbol ps_symbol_integer = {
+//     .scope = PS_SYMBOL_SCOPE_SYSTEM,
+//     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+//     .name = "INTEGER",
+//     .value = &ps_value_integer};
 
-ps_type_definition ps_type_def_unsigned = {
-    .type = PS_TYPE_UNSIGNED,
-    .base = PS_TYPE_UNSIGNED,
-};
-ps_value ps_value_unsigned = {
-    .type = PS_TYPE_DEFINITION,
-    .data = {.t = &ps_type_def_unsigned},
-};
-ps_symbol ps_symbol_unsigned = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "CARDINAL",
-    .value = &ps_value_unsigned};
+// ps_type_definition ps_type_def_unsigned = {
+//     .type = PS_TYPE_UNSIGNED,
+//     .base = PS_TYPE_UNSIGNED,
+// };
+// ps_value ps_value_unsigned = {
+//     .type = PS_TYPE_DEFINITION,
+//     .data = {.t = &ps_type_def_unsigned},
+// };
+// ps_symbol ps_symbol_unsigned = {
+//     .scope = PS_SYMBOL_SCOPE_SYSTEM,
+//     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+//     .name = "CARDINAL",
+//     .value = &ps_value_unsigned};
 
-ps_type_definition ps_type_def_real = {
-    .type = PS_TYPE_REAL,
-    .base = PS_TYPE_REAL,
-};
-ps_value ps_value_real = {
-    .type = PS_TYPE_DEFINITION,
-    .data = {.t = &ps_type_def_real},
-};
-ps_symbol ps_symbol_real = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "REAL",
-    .value = &ps_value_real};
+// ps_type_definition ps_type_def_real = {
+//     .type = PS_TYPE_REAL,
+//     .base = PS_TYPE_REAL,
+// };
+// ps_value ps_value_real = {
+//     .type = PS_TYPE_DEFINITION,
+//     .data = {.t = &ps_type_def_real},
+// };
+// ps_symbol ps_symbol_real = {
+//     .scope = PS_SYMBOL_SCOPE_SYSTEM,
+//     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
+//     .name = "REAL",
+//     .value = &ps_value_real};
 
 /******************************************************************************/
 /* FUNCTIONS                                                                  */

@@ -37,7 +37,7 @@ bool ps_value_is_number(ps_value *value)
     return (value->type->base >= PS_TYPE_REAL || value->type->base <= PS_TYPE_UNSIGNED);
 }
 
-#define PS_VALUE_SET(ps_symbol_xxx, x)       \
+#define PS_VALUE_SET(type_def, x)               \
     if (value == NULL)                       \
     {                                        \
         value = calloc(1, sizeof(ps_value)); \
@@ -46,33 +46,33 @@ bool ps_value_is_number(ps_value *value)
             return NULL;                     \
         }                                    \
     }                                        \
-    value->type = ps_symbol_xxx;             \
+    value->type = type_def;                   \
     value->data.x = x;                       \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET(&ps_symbol_integer, i);
+    PS_VALUE_SET(ps_symbol_integer.value->type, i);
 }
 
 ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET(&ps_symbol_unsigned, u);
+    PS_VALUE_SET(ps_symbol_unsigned.value->type, u);
 }
 
 ps_value *ps_value_set_real(ps_value *value, ps_real r)
 {
-    PS_VALUE_SET(&ps_symbol_real, r);
+    PS_VALUE_SET(ps_symbol_real.value->type, r);
 }
 
 ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
 {
-    PS_VALUE_SET(&ps_symbol_boolean, b);
+    PS_VALUE_SET(ps_symbol_boolean.value->type, b);
 }
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c)
 {
-    PS_VALUE_SET(&ps_symbol_char, c);
+    PS_VALUE_SET(ps_symbol_char.value->type, c);
 }
 
 // ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)
@@ -178,7 +178,7 @@ char *ps_value_get_debug_value(ps_value *value)
 {
     static char buffer[128];
     // TODO? if (value->type->type!=value->type->base)
-    switch (value->type->type)
+    switch (value->type->base)
     {
     case PS_TYPE_NONE:
         snprintf(buffer, sizeof(buffer) - 1, "[none]");
@@ -208,7 +208,7 @@ char *ps_value_get_debug_value(ps_value *value)
     //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
     //     break;
     default:
-        snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type);
+        snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type->base);
         break;
     }
     return buffer;
