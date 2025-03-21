@@ -96,6 +96,8 @@ extern "C"
     void ps_vm_free(ps_vm *vm);
     // extern bool ps_vm_exec(ps_vm *vm);
 
+    ps_symbol *ps_vm_auto_free(ps_vm *vm, ps_identifier *name);
+
     /** @brief Push symbol on top of stack */
     bool ps_vm_push(ps_vm *vm, ps_symbol *symbol);
     /** @brief Pop symbol from top of stack */

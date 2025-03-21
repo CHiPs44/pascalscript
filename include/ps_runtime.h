@@ -30,7 +30,7 @@ extern "C"
     } ps_runtime;
 
     ps_runtime *ps_runtime_init(ps_runtime *runtime);
-    ps_runtime *ps_runtime_done(ps_runtime *runtime);
+    void ps_runtime_done(ps_runtime *runtime);
 
     /**
      * @brief Allocate new value
@@ -50,10 +50,9 @@ extern "C"
     /** @brief Delete global symbol */
     int ps_runtime_global_delete(ps_runtime *runtime, char *name);
 
-    ps_symbol *runtime_auto_add_integer(ps_runtime *runtime, int value);
-    int ps_runtime_auto_free(ps_runtime *runtime, char *name);
-    int ps_runtime_auto_gc(ps_runtime *runtime);
-    bool ps_runtime_load_source(ps_runtime *runtime, char *source, size_t length);
+    // ps_symbol *runtime_auto_add_integer(ps_runtime *runtime, int value);
+    // int ps_runtime_auto_gc(ps_runtime *runtime);
+    bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length);
 
 #ifdef __cplusplus
 }

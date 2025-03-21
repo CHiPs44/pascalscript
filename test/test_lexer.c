@@ -108,7 +108,7 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
     printf("TEST LEXER: INIT %s\n", name);
     lexer = ps_lexer_init(NULL);
     lexer->buffer->debug = 0;
-    ps_buffer_load_text(lexer->buffer, source, strlen(source));
+    ps_buffer_load_string(lexer->buffer, source, strlen(source));
     ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST LEXER: LOOP ON %s\n", name);

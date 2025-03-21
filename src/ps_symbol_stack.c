@@ -90,13 +90,13 @@ ps_symbol *ps_symbol_stack_peek(ps_symbol_stack *stack)
 void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
 {
     ps_symbol *symbol;
-    fprintf(stderr, "*** Symbol stack %s (%d)%s ***\n",
+    fprintf(stderr, "*** Symbol stack %s (%ld)%s ***\n",
             title,
             ps_symbol_stack_size(stack),
             ps_symbol_stack_full(stack) ? " (FULL)" : "");
     fprintf(stderr, "┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     // fprintf(stderr, "┃ # ┃Name                           ┃Kind    ┃Scope   ┃Type    ┃Value                          ┃\n");
-    fprintf(stderr, "┃ # ┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
+    fprintf(stderr, "┃ # ┃%-*s┃%-8s┃%-8s┃%-8s┃%-*s┃\n",
             PS_IDENTIFIER_LEN, "Name", "Kind", "Scope", "Type", PS_IDENTIFIER_LEN, "Value");
     fprintf(stderr, "┣━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < PS_SYMBOL_STACK_SIZE; i++)
@@ -106,9 +106,9 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
         {
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = ps_value_get_type_definition_name(symbol->value.type);
-            char *buffer = ps_value_get_debug_value(&symbol->value);
-            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%8lu┃%-*s┃\n",
+            char *type_name = ps_value_get_type_definition_name(symbol->value->type);
+            char *buffer = ps_value_get_debug_value(symbol->value);
+            fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%-*s┃\n",
                     i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, buffer);
         }
     }

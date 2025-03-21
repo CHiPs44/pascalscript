@@ -112,6 +112,7 @@ extern "C"
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
     /* System types (with type==base) */
+    extern ps_type_definition ps_type_def_unsigned;
     extern ps_symbol ps_symbol_boolean;
     extern ps_symbol ps_symbol_char;
     extern ps_symbol ps_symbol_integer;

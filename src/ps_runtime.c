@@ -9,15 +9,13 @@
 #include <string.h>
 
 #include "ps_error.h"
-#include "ps_value.h"
+#include "ps_parser.h"
 #include "ps_runtime.h"
+#include "ps_value.h"
 
 /** @brief Create new runtime */
 ps_runtime *ps_runtime_init(ps_runtime *runtime)
 {
-    char buffer[PS_IDENTIFIER_SIZE];
-    ps_value *value;
-
     bool allocated = false;
     if (runtime == NULL)
     {
@@ -26,8 +24,10 @@ ps_runtime *ps_runtime_init(ps_runtime *runtime)
             return NULL;
         allocated = true;
     }
-    /* Parser */
-    runtime->parser = ps_parser_init(NULL);
+    /* */
+    runtime->vm = ps_vm_init(NULL);
+    /* Parser: symbols are shared with VM */
+    runtime->parser = ps_parser_init(NULL, runtime->vm->symbols);
     if (runtime->parser == NULL)
     {
         if (allocated)
@@ -35,16 +35,17 @@ ps_runtime *ps_runtime_init(ps_runtime *runtime)
         return NULL;
     }
     runtime->error = PS_RUNTIME_ERROR_NONE;
-
     return runtime;
 }
 
-ps_runtime *ps_runtime_done(ps_runtime *runtime)
+void ps_runtime_done(ps_runtime *runtime)
 {
-    if (runtime->vm != NULL)
-        ps_vm_free(runtime->vm);
     if (!runtime->allocated)
         return;
+    if (runtime->vm != NULL)
+        ps_vm_free(runtime->vm);
+    if (runtime->parser != NULL)
+        ps_parser_done(runtime->parser);
     free(runtime);
 }
 
@@ -69,20 +70,8 @@ void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
 
 ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope, ps_value *value)
 {
-    ps_symbol *symbol = ps_symbol_init(scope,PS_SYMBOL_KIND_AUTO,NULL,value);
-
-}
-
-/**
- * @brief Free auto variable after use
- *
- * @param VM
- * @param string Normalized name
- * @return index of symbol or -1 if not found
- */
-int ps_runtime_auto_free(ps_runtime *runtime, char *name)
-{
-    return ps_symbol_table_free(runtime->vm->symbols, name);
+    ps_symbol *symbol = ps_symbol_init(scope, PS_SYMBOL_KIND_AUTO, NULL, value);
+    return symbol;
 }
 
 /**
@@ -93,14 +82,17 @@ int ps_runtime_auto_free(ps_runtime *runtime, char *name)
  */
 int ps_runtime_auto_gc(ps_runtime *runtime)
 {
-    int count = ps_symbol_table_gc(runtime->vm->symbols);
-    fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
-    return count;
+    return 0;
+    // TODO?
+    // int count = ps_symbol_table_gc(runtime->vm->symbols);
+    // fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
+    // return count;
 }
 
-bool ps_runtime_load_source(ps_runtime *runtime, char *source, size_t length)
+bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 {
-    bool ok = ps_buffer_load_text(runtime->parser->lexer[0]->buffer, source, length);
+    ps_lexer *lexer = ps_parser_get_lexer(runtime->parser);
+    bool ok = ps_buffer_load_string(lexer->buffer, source, length);
     return ok;
 }
 

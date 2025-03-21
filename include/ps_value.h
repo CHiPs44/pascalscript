@@ -23,17 +23,17 @@ extern "C"
         // clang-format off
         //             Model/bytes 16  32  64 bits
         //                         --- --- ---
-        ps_integer          i; //  2   4   8 "i" is for "_i_nteger"
-        ps_unsigned         u; //  2   4   8
-        ps_real             r; //  2?  4   8
-        ps_boolean          b; //  1?  1?  1?
-        ps_char             c; //  1   1   1
-        // ps_subrange         g; //  2   4   8 "g" is for "subran_g_e" ;-)
-        // ps_enum             e; //  2   4   8
-        // ps_pointer          p; //  2   4   8
-        // ps_string          *s; //  2   4   8
-        ps_type_definition *t; //  2   4   8
-        void               *x; //  2   4   8
+        ps_integer          i; //  2   4   8  "i" is for "_i_nteger"
+        ps_unsigned         u; //  2   4   8  "u" is for "_u_nsigned"
+        ps_real             r; //  2?  4   8  "r" is for "_r_eal"
+        ps_boolean          b; //  1?  1?  1? "b" is for "_b_oolean"
+        ps_char             c; //  1   1   1  "c" is for "_c_har"
+        // ps_subrange         g; //  2   4   8  "g" is for "subran_g_e" ;-)
+        // ps_enum             e; //  2   4   8  "e" is for "_e_num"
+        // ps_pointer          p; //  2   4   8  "p" is for "_p_ointer"
+        // ps_string          *s; //  2   4   8  "s" is for "_s_tring"
+        ps_type_definition *t; //  2   4   8  "t" is for "_t_ype"
+        void               *x; //  2   4   8  "x" is for "void"
         // clang-format on
     } __attribute__((__packed__)) ps_value_data;
 
@@ -46,6 +46,8 @@ extern "C"
 
 #define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 #define PS_VALUE_SIZE sizeof(ps_value)
+
+    ps_value *ps_value_init(ps_type_definition *type, ps_value_data data);
 
     // clang-format off
     bool       ps_value_is_scalar   (ps_value *value);

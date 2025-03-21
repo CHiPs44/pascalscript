@@ -67,7 +67,7 @@ extern "C"
     bool ps_buffer_load_file(ps_buffer *buffer, char *filename);
 
     /** @brief Set source code from memory buffer */
-    bool ps_buffer_load_text(ps_buffer *buffer, char *source, size_t length);
+    bool ps_buffer_load_string(ps_buffer *buffer, char *source, size_t length);
 
     /** @brief Dump content from one line for one "page" */
     void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size);

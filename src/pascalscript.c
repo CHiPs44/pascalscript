@@ -7,14 +7,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ps_version.h"
+#include "ps_buffer.h"
 #include "ps_config.h"
-// #include "ps_lexer.h"
-// #include "ps_buffer.h"
-// #include "ps_parser.h"
-// #include "ps_symbol.h"
-#include "ps_symbol_table.h"
+#include "ps_lexer.h"
+#include "ps_parser.h"
 #include "ps_runtime.h"
+#include "ps_symbol_table.h"
+#include "ps_symbol.h"
+#include "ps_version.h"
 
 ps_runtime _runtime;
 ps_runtime *runtime = &_runtime;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   printf("PascalScript v%d.%d.%d.%d\n",                                           // => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX); //,
                                                                                   //  ps_version->value->data.i, ps_version->value->data.i);
-  if (!ps_runtime_load_source(runtime, minimal_source, strlen(minimal_source)))
+  if (!ps_runtime_load_string(runtime, minimal_source, strlen(minimal_source)))
   // if (!ps_vm_load_source(vm, hello, strlen(hello)))
   // if (!ps_vm_load_source(vm,"examples/00-hello.pas"))
   {
@@ -57,9 +57,10 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_buffer_dump(runtime->parser->lexer[0]->buffer, 0, PS_BUFFER_MAX_LINES - 1);
+  ps_lexer *lexer = ps_parser_get_lexer(runtime->parser);
+  ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
   printf("Listed!\n");
-  // ps_parser_start(runtime->parser);
+  ps_parser_start(runtime->parser);
   return 0;
 }
 
