@@ -9,6 +9,7 @@
 #include "ps_symbol_stack.h"
 #include "ps_symbol.h"
 #include "ps_vm.h"
+#include "ps_system.h"
 
 bool ps_vm_is_op_relational(ps_vm_opcode op)
 {
@@ -72,7 +73,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     // Release auto values ASAP, we can still reference them
     if (a->kind == PS_SYMBOL_KIND_AUTO)
-        ps_vm_auto_free(vm, a->name);
+        ps_vm_auto_free(vm, &a->name);
     if (op == OP_NEG || op == OP_BOOL_NOT || op == OP_BIT_NOT)
     {
         switch (op)
@@ -80,12 +81,12 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         case OP_NEG: // applicable to integer or real values
             if (a->value->type->base == PS_TYPE_INTEGER)
             {
-                result.type = PS_TYPE_INTEGER;
+                result.type = ps_symbol_integer.value->type;
                 result.data.i = -a->value->data.i;
             }
             else if (a->value->type->base == PS_TYPE_REAL)
             {
-                result.type = PS_TYPE_REAL;
+                result.type = ps_symbol_real.value->type;
                 result.data.r = -a->value->data.r;
             }
             else
@@ -94,7 +95,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         case OP_BOOL_NOT: // applicable to bolean values
             if (a->value->type->base == PS_TYPE_BOOLEAN)
             {
-                result.type = PS_TYPE_BOOLEAN;
+                result.type = ps_symbol_boolean.value->type;
                 result.data.b = !(a->value->data.b);
             }
             else
@@ -103,12 +104,12 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
         case OP_BIT_NOT: // applicable to integer or unsigned values
             if (a->value->type->base == PS_TYPE_INTEGER)
             {
-                result.type = PS_TYPE_INTEGER;
+                result.type = ps_symbol_integer.value->type;
                 result.data.i = ~a->value->data.i;
             }
             else if (a->value->type->base == PS_TYPE_UNSIGNED)
             {
-                result.type = PS_TYPE_UNSIGNED;
+                result.type = ps_symbol_unsigned.value->type;
                 result.data.u = ~a->value->data.u;
             }
             else

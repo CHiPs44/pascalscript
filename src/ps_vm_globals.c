@@ -23,12 +23,12 @@
  * @param already normalized name
  * @return global or NULL if not found
  */
-ps_symbol *ps_vm_global_get(ps_vm *vm, char *name)
+ps_symbol *ps_vm_global_get(ps_vm *vm, ps_identifier *name)
 {
     ps_symbol *symbol = ps_symbol_table_get(vm->symbols, name);
     if (symbol == NULL)
         return NULL;
-    if (symbol->kind != PS_SYMBOL_SCOPE_GLOBAL)
+    if (symbol->scope != PS_SYMBOL_SCOPE_GLOBAL)
         return NULL;
     return symbol;
 }
@@ -40,7 +40,7 @@ ps_symbol *ps_vm_global_get(ps_vm *vm, char *name)
  * @param Symbol
  * @return Index of added symbol (>=0) or error (<0)
  */
-int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol)
+ps_symbol *ps_vm_global_add(ps_vm *vm, ps_symbol *symbol)
 {
     return ps_symbol_table_add(vm->symbols, symbol);
 }
@@ -52,7 +52,7 @@ int ps_vm_global_add(ps_vm *vm, ps_symbol *symbol)
  * @param Symbol name
  * @return index of symbol or -1 if not found
  */
-int ps_vm_global_delete(ps_vm *vm, char *name)
+ps_symbol *ps_vm_global_delete(ps_vm *vm, ps_identifier *name)
 {
     return ps_symbol_table_delete(vm->symbols, name);
 }

@@ -65,7 +65,7 @@ ps_symbol_table_size s_symbol_table_find(ps_symbol_table *table, char *name)
     return PS_SYMBOL_TABLE_ERROR_NOT_FOUND;
 }
 
-ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
+ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_ERROR_NOT_FOUND)
@@ -77,7 +77,7 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->used >= table->size)
         return NULL;
-    if (ps_symbol_table_get(table, symbol->name) != NULL)
+    if (ps_symbol_table_get(table, &symbol->name) != NULL)
         return NULL;
     // Find first free location (table->used *must* be accurate)
     ps_symbol_table_size index = 0;

@@ -46,16 +46,16 @@
     ps_symbol_table_size ps_symbol_table_available(ps_symbol_table * table);
 
     /** @brief Find symbol's index in table by name or PS_SYMBOL_TABLE_ERROR_NOT_FOUND */
-    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, char *name);
+    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, ps_identifier * name);
 
     /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_get(ps_symbol_table * table, char *name);
+    ps_symbol *ps_symbol_table_get(ps_symbol_table * table, ps_identifier * name);
 
     /** @brief Add symbol, returning NULL if table is full or symbol already exists */
     ps_symbol *ps_symbol_table_add(ps_symbol_table * table, ps_symbol * symbol);
 
     /** @brief Delete symbol, returning NULL if symbol doesn't exist */
-    ps_symbol *ps_symbol_table_delete(ps_symbol_table * table, char *name);
+    ps_symbol *ps_symbol_table_delete(ps_symbol_table * table, ps_identifier * name);
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(ps_symbol_table * table, char *title, FILE *output);
