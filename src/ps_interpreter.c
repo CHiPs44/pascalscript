@@ -10,65 +10,58 @@
 
 #include "ps_error.h"
 #include "ps_parser.h"
-#include "ps_runtime.h"
+#include "ps_interpreter.h"
 #include "ps_value.h"
 
-/** @brief Create new runtime */
-ps_runtime *ps_runtime_init(ps_runtime *runtime)
+/** @brief Create new interpreter */
+ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
 {
-    bool allocated = false;
-    if (runtime == NULL)
+    interpreter->allocated = false;
+    if (interpreter == NULL)
     {
-        runtime = calloc(1, sizeof(ps_runtime));
-        if (runtime == NULL)
+        interpreter = calloc(1, sizeof(ps_interpreter));
+        if (interpreter == NULL)
             return NULL;
-        allocated = true;
+        interpreter->allocated = true;
     }
-    /* */
-    runtime->vm = ps_vm_init(NULL);
-    /* Parser: symbols are shared with VM */
-    runtime->parser = ps_parser_init(NULL, runtime->vm->symbols);
-    if (runtime->parser == NULL)
+    interpreter->parser = ps_parser_init(NULL, NULL);
+    if (interpreter->parser == NULL)
     {
-        if (allocated)
-            free(runtime);
+        ps_interpreter_done(interpreter);
         return NULL;
     }
-    runtime->error = PS_RUNTIME_ERROR_NONE;
-    return runtime;
+    interpreter->error = PS_RUNTIME_ERROR_NONE;
+    interpreter->range_check = true;
+    return interpreter;
 }
 
-void ps_runtime_done(ps_runtime *runtime)
+void ps_interpreter_done(ps_interpreter *interpreter)
 {
-    if (!runtime->allocated)
+    if (!interpreter->allocated)
         return;
-    if (runtime->vm != NULL)
-        ps_vm_free(runtime->vm);
-    if (runtime->parser != NULL)
-        ps_parser_done(runtime->parser);
-    free(runtime);
+    if (interpreter->parser != NULL)
+        ps_parser_done(interpreter->parser);
+    free(interpreter);
 }
 
 /** @brief Allocate new value */
-ps_value *ps_runtime_alloc_value(ps_runtime *runtime)
+ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter)
 {
-    if (runtime->error != PS_RUNTIME_ERROR_NONE)
-        return NULL;
     ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
     if (value == NULL)
     {
-        runtime->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+        interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
         return NULL;
     }
     return value;
 }
 
-void ps_runtime_free_value(ps_runtime *runtime, ps_value *value)
+void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
 {
     free(value);
 }
 
-ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope, ps_value *value)
+ps_symbol *ps_interpreter_auto_add_value(ps_interpreter *interpreter, ps_symbol_scope scope, ps_value *value)
 {
     ps_symbol *symbol = ps_symbol_init(scope, PS_SYMBOL_KIND_AUTO, NULL, value);
     return symbol;
@@ -77,21 +70,20 @@ ps_symbol *ps_runtime_auto_add_value(ps_runtime *runtime, ps_symbol_scope scope,
 /**
  * @brief Garbage collector: release free symbols
  *
- * @param VM
  * @return Count of garbage collected symbols
  */
-int ps_runtime_auto_gc(ps_runtime *runtime)
+int ps_interpreter_auto_gc(ps_interpreter *interpreter)
 {
     return 0;
     // TODO?
-    // int count = ps_symbol_table_gc(runtime->vm->symbols);
+    // int count = ps_symbol_table_gc(interpreter->vm->symbols);
     // fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
     // return count;
 }
 
-bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
+bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
 {
-    ps_lexer *lexer = ps_parser_get_lexer(runtime->parser);
+    ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     bool ok = ps_buffer_load_string(lexer->buffer, source, length);
     return ok;
 }
@@ -101,14 +93,14 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 /******************************************************************************/
 
 // /** @brief Get absolute value of integer / unsigned / real */
-// ps_value *ps_runtime_func_abs(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_abs(ps_interpreter *interpreter, ps_value *value)
 // {
 //     if (!ps_value_is_number(value))
 //     {
-//         runtime->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+//         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
 //         return NULL;
 //     }
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     switch (value->type->base)
@@ -126,15 +118,15 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+//         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
 //         return NULL;
 //     }
 // }
 
 // /** @brief true if integer/unsigned value is odd, false if even */
-// ps_value *ps_runtime_func_odd(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_odd(ps_interpreter *interpreter, ps_value *value)
 // {
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     result->type = PS_TYPE_BOOLEAN;
@@ -148,15 +140,15 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
+//         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED;
 //         return NULL;
 //     }
 // }
 
 // /** @brief true if integer/unsigned value is even, false if odd */
-// ps_value *ps_runtime_func_even(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_even(ps_interpreter *interpreter, ps_value *value)
 // {
-//     ps_value *result = ps_runtime_func_odd(runtime, value);
+//     ps_value *result = ps_interpreter_func_odd(interpreter, value);
 //     if (result == NULL)
 //         return NULL;
 //     result->data.b = !result->data.b;
@@ -164,9 +156,9 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 // }
 
 // /** @brief Get ordinal value of boolean / char */
-// ps_value *ps_runtime_func_ord(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_ord(ps_interpreter *interpreter, ps_value *value)
 // {
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     switch (value->type->base)
@@ -190,20 +182,20 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+//         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
 //         return NULL;
 //     }
 // }
 
 // /** @brief Get char value of unsigned / integer or subrange value */
-// ps_value *ps_runtime_func_chr(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_chr(ps_interpreter *interpreter, ps_value *value)
 // {
 //     if (!ps_value_is_scalar(value))
 //     {
-//         runtime->error = PS_RUNTIME_ERROR_EXPECTED_SCALAR;
+//         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_SCALAR;
 //         return NULL;
 //     }
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     result->type->base = PS_TYPE_CHAR;
@@ -219,26 +211,26 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+//         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
 //         return NULL;
 //     }
 //     return result;
 // }
 
 // /** @brief Get previous value (predecessor) of scalar value */
-// ps_value *ps_runtime_func_pred(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_pred(ps_interpreter *interpreter, ps_value *value)
 // {
 //     if (value == NULL)
 //     {
-//         runtime->error = PS_RUNTIME_ERROR_EXPECTED_VALUE;
+//         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_VALUE;
 //         return NULL;
 //     }
 //     if (!ps_value_is_scalar(value))
 //     {
-//         runtime->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+//         interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
 //         return NULL;
 //     }
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     memcpy(result, value, sizeof(ps_value));
@@ -246,20 +238,20 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //     {
 //     case PS_TYPE_INTEGER:
 //         // succ(min) => error / succ(i) => i - 1
-//         if (runtime->vm->range_check && value->data.i == ps_integer_min)
+//         if (interpreter->vm->range_check && value->data.i == ps_integer_min)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.i = value->data.i - 1;
 //         return result;
 //     case PS_TYPE_UNSIGNED:
 //         // pred(0) => error / pred(u) => u - 1
-//         if (runtime->vm->range_check && value->data.u == 0)
+//         if (interpreter->vm->range_check && value->data.u == 0)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.u = value->data.u - 1;
@@ -270,35 +262,35 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //     //   TODO needs low()
 //     case PS_TYPE_BOOLEAN:
 //         // succ(true) => false / succ(false) => error
-//         if (runtime->vm->range_check && value->data.b == false)
+//         if (interpreter->vm->range_check && value->data.b == false)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.b = false;
 //         return result;
 //     case PS_TYPE_CHAR:
 //         // succ(NUL) => error / succ(c) => c - 1
-//         if (runtime->vm->range_check && value->data.c == 0)
+//         if (interpreter->vm->range_check && value->data.c == 0)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.c = value->data.c - 1;
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+//         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
 //         return NULL;
 //     }
 // }
 
 // /** @brief Get next value (successor) of ordinal value */
-// ps_value *ps_runtime_func_succ(ps_runtime *runtime, ps_value *value)
+// ps_value *ps_interpreter_func_succ(ps_interpreter *interpreter, ps_value *value)
 // {
-//     ps_value *result = ps_runtime_alloc_value(runtime);
+//     ps_value *result = ps_interpreter_alloc_value(interpreter);
 //     if (result == NULL)
 //         return NULL;
 //     memcpy(result, value, sizeof(ps_value));
@@ -306,10 +298,10 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //     {
 //     case PS_TYPE_UNSIGNED:
 //         // succ(max) => error / succ(u) => u + 1
-//         if (runtime->vm->range_check && value->data.u == ps_unsigned_max)
+//         if (interpreter->vm->range_check && value->data.u == ps_unsigned_max)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.u = value->data.u + 1;
@@ -318,10 +310,10 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //     //   TODO needs high()
 //     case PS_TYPE_INTEGER:
 //         // succ(max) => error / succ(i) => i + 1
-//         if (runtime->vm->range_check && value->data.u == ps_integer_max)
+//         if (interpreter->vm->range_check && value->data.u == ps_integer_max)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.i = value->data.i + 1;
@@ -330,27 +322,27 @@ bool ps_runtime_load_string(ps_runtime *runtime, char *source, size_t length)
 //     //   TODO needs high()
 //     case PS_TYPE_BOOLEAN:
 //         // succ(true) => error / succ(false) => true
-//         if (runtime->vm->range_check && value->data.b == true)
+//         if (interpreter->vm->range_check && value->data.b == true)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.b = true;
 //         return result;
 //     case PS_TYPE_CHAR:
 //         // succ(char_max) => error / succ(c) => c + 1
-//         if (runtime->vm->range_check && value->data.c == ps_char_max)
+//         if (interpreter->vm->range_check && value->data.c == ps_char_max)
 //         {
 //             free(result);
-//             runtime->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
 //             return NULL;
 //         }
 //         result->data.c = value->data.c + 1;
 //         return result;
 //     default:
 //         free(result);
-//         runtime->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+//         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
 //         return NULL;
 //     }
 // }

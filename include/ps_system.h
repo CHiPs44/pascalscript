@@ -8,7 +8,7 @@
 #define _PS_SYSTEM_H
 
 #include "ps_symbol.h"
-#include "ps_vm.h"
+#include "ps_interpreter.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -20,8 +20,8 @@ extern "C"
     extern ps_symbol ps_symbol_version_patch;
     extern ps_symbol ps_symbol_version_index;
 
-    extern void ps_system_init(ps_vm *vm);
-    extern void ps_system_done(ps_vm *vm);
+    extern void ps_system_init(ps_interpreter *interpreter);
+    extern void ps_system_done(ps_interpreter *interpreter);
 
 #ifdef __cplusplus
 }

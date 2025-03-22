@@ -16,23 +16,23 @@ extern "C"
 
     typedef PS_INTEGER ps_integer;
     // typedef PS_INTEGER ps_subrange;
-    const ps_integer ps_integer_min = PS_INTEGER_MIN;
-    const ps_integer ps_integer_max = PS_INTEGER_MAX;
+    // const ps_integer ps_integer_min = PS_INTEGER_MIN;
+    // const ps_integer ps_integer_max = PS_INTEGER_MAX;
 
     typedef PS_UNSIGNED ps_unsigned;
     // typedef PS_UNSIGNED ps_enum;
-    const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
+    // const ps_unsigned ps_unsigned_max = PS_UNSIGNED_MAX;
 
     typedef PS_REAL ps_real;
-    const ps_real ps_real_min = PS_REAL_MIN;
-    const ps_real ps_real_max = PS_REAL_MAX;
+    // const ps_real ps_real_min = PS_REAL_MIN;
+    // const ps_real ps_real_max = PS_REAL_MAX;
 
     typedef PS_BOOLEAN ps_boolean;
-    const ps_boolean ps_false = false;
-    const ps_boolean ps_true = true;
+    // const ps_boolean ps_false = false;
+    // const ps_boolean ps_true = true;
 
     typedef PS_CHAR ps_char;
-    const ps_char ps_char_max = PS_CHAR_MAX;
+    // const ps_char ps_char_max = PS_CHAR_MAX;
 
     // typedef PS_STRING_LEN_TYPE ps_string_len;
     // const ps_string_len ps_string_max = PS_STRING_MAX_LEN;

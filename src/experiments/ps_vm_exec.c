@@ -28,7 +28,7 @@ ps_error ps_vm_exec_assign(ps_vm *vm)
     if (value == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (value->kind == PS_SYMBOL_KIND_AUTO)
-        ps_vm_auto_free(vm, value->name);
+        ps_vm_auto_free(vm, &value->name);
     ps_symbol *variable = ps_vm_pop(vm);
     if (variable == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
@@ -36,10 +36,10 @@ ps_error ps_vm_exec_assign(ps_vm *vm)
         return PS_RUNTIME_ERROR_ASSIGN_TO_CONST;
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
         return PS_RUNTIME_ERROR_EXPECTED_VARIABLE;
-    if (variable->value.type != value->value.type)
+    if (variable->value->type->base != value->value->type->base)
         return PS_RUNTIME_ERROR_TYPE_MISMATCH;
-    variable->value = value->value;
-    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %d\n", variable->name, variable->value.data.i);
+    memcpy(variable->value, value->value, sizeof(ps_value));
+    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %s\n", variable->name, ps_value_get_debug_value(variable->value));
     return PS_RUNTIME_ERROR_NONE;
 }
 
@@ -49,8 +49,7 @@ ps_error ps_vm_exec_sys(ps_vm *vm)
     if (command == NULL)
         return PS_RUNTIME_ERROR_STACK_EMPTY;
     if (command->kind == PS_SYMBOL_KIND_AUTO)
-        ps_vm_auto_free(vm, command->name);
-
+        ps_vm_auto_free(vm, &command->name);
     return PS_ERROR_NOT_IMPLEMENTED;
 }
 

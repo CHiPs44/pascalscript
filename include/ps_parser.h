@@ -7,11 +7,11 @@
 #ifndef _PS_PARSER_H
 #define _PS_PARSER_H
 
-// #include "ps_config.h"
+#include "ps_config.h"
 #include "ps_error.h"
 #include "ps_token.h"
 #include "ps_lexer.h"
-// #include "ps_symbol.h"
+#include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
 #ifdef __cplusplus

@@ -27,11 +27,11 @@ extern "C"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM = 0,                  /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
-        PS_SYMBOL_SCOPE_GLOBAL,                      /** @brief User defined: for constants, types, variables, procedures and functions at top level */
-        PS_SYMBOL_SCOPE_LOCAL,                       /** @brief Local defined */
-        PS_SYMBOL_SCOPE_UNIT = (UINT16_MAX + 1) / 2, /** @brief Unit defined */
-        PS_SYMBOL_SCOPE_MAX = UINT16_MAX             /** @brief Ensure scope "packs" to a 16 bits unsigned */
+        PS_SYMBOL_SCOPE_SYSTEM = 0,                   /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
+        PS_SYMBOL_SCOPE_GLOBAL,                       /** @brief User defined: for constants, types, variables, procedures and functions at top level */
+        PS_SYMBOL_SCOPE_UNIT,                         /** @brief Unit defined */
+        PS_SYMBOL_SCOPE_LOCAL = (UINT16_MAX + 1) / 2, /** @brief Local defined */
+        PS_SYMBOL_SCOPE_MAX = UINT16_MAX              /** @brief Ensure scope "packs" to a 16 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_scope;
 
 #define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"

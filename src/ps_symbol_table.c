@@ -50,13 +50,13 @@ ps_symbol_table_size ps_symbol_table_available(ps_symbol_table *table)
     return table->size - table->used;
 }
 
-ps_symbol_table_size s_symbol_table_find(ps_symbol_table *table, char *name)
+ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier *name)
 {
     ps_symbol_table_size index = 0;
     // ps_symbol_normalize_name(name);
     while (index < table->size)
     {
-        if (table->symbols[index] != NULL && strcmp(name, table->symbols[index]->name) == 0)
+        if (table->symbols[index] != NULL && strcmp((char *)name, (char *)table->symbols[index]->name) == 0)
         {
             return index;
         }

@@ -418,11 +418,11 @@ Turbo Pascal 5.5 syntax should be enough.
 
 - Variable length arrays?
 
-## Stack based VM or simpler runtime status?
+## Stack based VM or simpler interpreter status?
 
 Should we implement a stack based VM to execute code, and make the interpreter interact with this VM?
 
-Or should we have a simpler "runtime status" like:
+Or should we have a simpler "interpreter status" like:
 
 - `program`: source code of the program to execute
 - `symbol_table`: hashtable with lower case key for the name, an integer as value, and necessary data

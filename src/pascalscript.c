@@ -11,13 +11,13 @@
 #include "ps_config.h"
 #include "ps_lexer.h"
 #include "ps_parser.h"
-#include "ps_runtime.h"
+#include "ps_interpreter.h"
 #include "ps_symbol_table.h"
 #include "ps_symbol.h"
 #include "ps_version.h"
 
-ps_runtime _runtime;
-ps_runtime *runtime = &_runtime;
+ps_interpreter _runtime;
+ps_interpreter *interpreter = &_runtime;
 
 char *minimal_source =
     "Program Minimal;\n"
@@ -43,13 +43,13 @@ char *hello_source =
 int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
-  ps_runtime_init(runtime);
-  ps_symbol_table_dump(runtime->vm->symbols, "Init", stderr);
+  ps_interpreter_init(interpreter);
+  ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
   // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d\n",                                           // => %08x %d\n",
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX); //,
                                                                                   //  ps_version->value->data.i, ps_version->value->data.i);
-  if (!ps_runtime_load_string(runtime, minimal_source, strlen(minimal_source)))
+  if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
   // if (!ps_vm_load_source(vm, hello, strlen(hello)))
   // if (!ps_vm_load_source(vm,"examples/00-hello.pas"))
   {
@@ -57,10 +57,10 @@ int main(int argc, char *argv[])
     return 1;
   }
   printf("Loaded!\n");
-  ps_lexer *lexer = ps_parser_get_lexer(runtime->parser);
+  ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
   ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
   printf("Listed!\n");
-  ps_parser_start(runtime->parser);
+  ps_parser_start(interpreter->parser);
   return 0;
 }
 
