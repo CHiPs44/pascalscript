@@ -2,7 +2,7 @@
 
 ## Build status
 
-__This does not even compile for now!__
+**This does not even compile for now!**
 
 As I said in <https://github.com/CHiPs44/pascalscript/issues/7#issuecomment-2741573870>#7":
 
@@ -14,7 +14,7 @@ I'm going to add an introduction in the README to show current status, or perhap
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](https://en.wikipedia.org/wiki/C17_(C_standard_revision))), with an handmade lexer and parser.
+`PascalScript` should be a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
@@ -49,7 +49,7 @@ Begin
 End;
 
 Function IterativeFactorial(N: Integer): Integer;
-Var 
+Var
   I, F: Integer;
 Begin
   If N <= 1 Then
@@ -69,7 +69,7 @@ Begin
   IterativeFactorial := F;
 End;
 
-Var 
+Var
   N: Integer;
 Begin
   Repeat
@@ -100,7 +100,7 @@ Hello, world!
 
 In the future, it should be embeddable in other projects, like [Lua](https://lua.org/) is for example.
 
-Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
+Examples **must** be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 
 ## Links to seemingly useful documentations
 
@@ -166,7 +166,7 @@ Integer type will be the default of C `int` type.
 Language elements are limited to:
 
 - Keywords: `program` `const` `var` `integer` `begin` `end` `WriteLn`
-- Symbols:  `=` `:=` `:` `;` `,` `{` `}` `(*` `*)` `//`
+- Symbols: `=` `:=` `:` `;` `,` `{` `}` `(*` `*)` `//`
 - Identifiers: `[a-z|A-Z|_][a-z|A-Z|0-9|_]*`
 - Integer constants: `[0-9]*` (positive)
 - Operators: `+` `-` `*` `/` `div` `mod`
@@ -333,31 +333,31 @@ end.
   - `Integer` is 32 bits signed type, period.
   - 8 bits: `Byte` / `Shortint`
   - 16 bits: `Word` / `Smallint`
-  - 32 bits: `Longword` / `Longint` => `Cardinal`
+  - 32 bits: `Longword` / `Longint` => `UNSIGNED`
   - 64 bits: `QWord` / `Int64`
-- Ranges: `Min .. Max` for unsigned or signed integer
+- Ranges: `Min .. Max` for chars `'A'..'Z'`, unsigned `0.999` & signed integers `-100..100`
 - Enums: `(One, Two, Three, Four)`
 - Arrays: `Array[1..10] Of Integer`
 - Char (see below)
-- Strings (array of chars)
-- Sets: `` (256 values max?)
+- Strings (not really arrays of chars)
+- Sets: as bitfields (256 values max?)
 - Records
-- Pointers (`^`, `@`, ...)
+- Pointers (operators: `^`, `@`, ...)
 
 #### Case statement
 
 This will wait until we have implemented range types.
 
 ```pascal
-        ...
-        case x of
-                1: a := 1;
-                2: a := 2;
-                3..5: a := 3;
-        else
-                a := 34;
-        end;
-        ...
+  ...
+  case x of
+    1: a := 1;
+    2: a := 2;
+    3..5: a := 3;
+  else
+    a := 34;
+  end;
+  ...
 ```
 
 ### Characters and strings
@@ -368,6 +368,7 @@ This will wait until we have implemented range types.
   - fixed length make string operations easy
   - maximum length: 255 (length is a byte, too)
 - ANSI / Codepage support?
+  - canonical way of handling strings in many Pascal dialects
   - 437 for US and 850 for Western EU first
   - 1 byte per char
   - fixed length make string operations easy
@@ -375,18 +376,26 @@ This will wait until we have implemented range types.
 - UTF-8 support?
   - all Unicode chars can be encoded
   - 1 byte per char for ASCII only text
-  - variable length make string operations hard to implement
+  - variable length glyphs make string operations hard to implement
   - maximum length: 255 (length is a byte, too)
 - UTF-16 support?
   - many Unicode chars can be encoded
   - 2 bytes per char for ASCII only text
   - fixed length make string operations easy
-  - maximum length: 65535 (length is a 16 bits word, too)
+  - maximum length: 65,535 (length is a 16 bits word, too)
 - UTF-32 support?
   - all Unicode chars can be encoded
   - 4 bytes per char for ASCII only text
   - fixed length make string operations easy
-  - maximum length: 4294967295 (length is a 32 bits word, too)
+  - maximum length: 4,294,967,295 (length is a 32 bits word, too)
+
+Things one can say against Unicode on our 256KB / 512KB RAM target (and even with 8MB of PSRAM):
+
+- Unicode, be it encoded as UTF-8, UTF-16 or UTF-32 is a nightmare
+  - even fixed width fonts can have glyphs that are wider
+  - some sequences can combine to a single glyph, making computing length or width of a string very hard...
+- Bitmap fonts are huge if they define many glyphs
+- 8x8 or even 8x14/16 bitmap fonts can't represent accuratly many if not most Unicode glyphs
 
 ### Standard libraries
 
@@ -445,7 +454,7 @@ sudo apt install gcc-multilib g++-multilib
 
 To compile a 32 bits executable, use `-m32`:
 
-``` bash
+```bash
 cd test/
 gcc -m32 -std=c17 -Wall -I../include test_value.c
 ```
