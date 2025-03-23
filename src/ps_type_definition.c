@@ -18,7 +18,7 @@
 /* BASE TYPE DEFINITIONS AS GLOBALS                                           */
 /******************************************************************************/
 
-//PS_TYPE_DEFINITION
+// PS_TYPE_DEFINITION
 
 ps_type_definition ps_type_def_boolean = {
     .type = PS_TYPE_BOOLEAN,
@@ -90,6 +90,24 @@ const ps_symbol ps_symbol_real = {
     .name = "REAL",
     .value = &ps_value_real};
 
+ps_value ps_value_boolean_false = {
+    .type = NULL,
+    .data = {.t = &ps_type_def_boolean, .b = (ps_boolean) false}};
+const ps_symbol ps_symbol_boolean_false = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_CONSTANT,
+    .name = "FALSE",
+    .value = &ps_value_boolean_false};
+
+ps_value ps_value_boolean_true = {
+    .type = NULL,
+    .data = {.t = &ps_type_def_boolean, .b = (ps_boolean) true}};
+const ps_symbol ps_symbol_boolean_true = {
+    .scope = PS_SYMBOL_SCOPE_SYSTEM,
+    .kind = PS_SYMBOL_KIND_CONSTANT,
+    .name = "TRUE",
+    .value = &ps_value_boolean_true};
+
 /******************************************************************************/
 /* FUNCTIONS                                                                  */
 /******************************************************************************/
@@ -125,13 +143,22 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 
 bool ps_type_definition_create_system_types(ps_symbol_table *table)
 {
-    if (ps_symbol_table_available(table) < 5)
+    if (ps_symbol_table_available(table) < 5 + 2)
         return false;
+    ps_symbol_boolean.value->type = &ps_type_def_boolean;
+    ps_symbol_char.value->type = &ps_type_def_char;
+    ps_symbol_integer.value->type = &ps_type_def_integer;
+    ps_symbol_unsigned.value->type = &ps_type_def_unsigned;
+    ps_symbol_real.value->type = &ps_type_def_real;
     ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean);
     ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_char);
     ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_integer);
     ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_unsigned);
     ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_real);
+    ps_symbol_boolean_false.value->type = &ps_type_def_boolean;
+    ps_symbol_boolean_true.value->type = &ps_type_def_boolean;
+    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean_false);
+    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean_true);
     return true;
 }
 

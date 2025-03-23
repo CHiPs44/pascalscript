@@ -70,16 +70,20 @@ extern "C"
         TOKEN_NONE = 0,
         TOKEN_END_OF_FILE,
         // Numeric values
+        // ==============
         TOKEN_INTEGER_VALUE,
         TOKEN_UNSIGNED_VALUE,
         TOKEN_REAL_VALUE,
         // Other value types
+        // =================
         TOKEN_BOOLEAN_VALUE,
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
+        // ==========
         TOKEN_IDENTIFIER,
         // Reserved words
+        // ==============
         TOKEN_RESERVED_WORDS = (UINT8_MAX / 2) + 1,
         TOKEN_PROGRAM = TOKEN_RESERVED_WORDS,
         TOKEN_CONST,
@@ -146,17 +150,21 @@ extern "C"
         TOKEN_RIGHT_PARENTHESIS, // )   various uses
         TOKEN_SEMI_COLON,        // ;   various uses
         // Arithmetic operators
+        // ====================
         TOKEN_PLUS,  // +   addition
         TOKEN_MINUS, // -   substraction / negation
         TOKEN_STAR,  // *   multiplication
         TOKEN_SLASH, // /   division (real)
         // Comparison operators
+        // ====================
         TOKEN_EQUAL,            // =
         TOKEN_NOT_EQUAL,        // <>
         TOKEN_LESS_THAN,        // <
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
+        // Make token value fit in one byte
+        // ================================
         TOKEN_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_token_type;
 
@@ -174,6 +182,9 @@ extern "C"
             ps_char s[PS_STRING_MAX_LEN + 1];
         } value;
     } ps_token;
+
+#define PS_TOKEN_TYPE_SIZE sizeof(ps_token_type)
+#define PS_TOKEN_SIZE sizeof(ps_token)
 
     void ps_token_dump(ps_token *token);
 

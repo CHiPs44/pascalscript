@@ -23,12 +23,8 @@ void ps_token_dump(ps_token *token)
         snprintf(buffer, sizeof(buffer) - 1, "%04d: NONE", token->type);
         break;
     case TOKEN_END_OF_FILE:
-        type = "END_OF_FILE";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: EOF", token->type);
-        break;
-    case TOKEN_IDENTIFIER:
-        type = "IDENTIFIER";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
+        type = "EOF";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: END_OF_FILE", token->type);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
@@ -54,6 +50,10 @@ void ps_token_dump(ps_token *token)
         type = "STRING";
         strncpy(string, (char *)token->value.s, sizeof(string) - 1);
         snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, string);
+        break;
+    case TOKEN_IDENTIFIER:
+        type = "IDENTIFIER";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case TOKEN_AT_SIGN:           // @
     case TOKEN_CARET:             // ^

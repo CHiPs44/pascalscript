@@ -2,18 +2,16 @@
 
 #include "ps_parser.h"
 
-#define GET_LEXER ps_lexer *lexer = ps_parser_get_lexer(parser)
-#define READ_NEXT_TOKEN                   \
-    if (!ps_lexer_read_next_token(lexer)) \
-    return false
-#define EXPECT_TOKEN(__TOKEN_TYPE__)                          \
-    if (!ps_parser_expect_token_type(parser, __TOKEN_TYPE__)) \
-    return false
+// clang-format off
+#define GET_LEXER                    ps_lexer *lexer = ps_parser_get_lexer(parser)
+#define READ_NEXT_TOKEN              if (!ps_lexer_read_next_token(lexer)) return false
+#define EXPECT_TOKEN(__TOKEN_TYPE__) if (!ps_parser_expect_token_type(parser, __TOKEN_TYPE__)) return false
+// clang-format on
 
 /**
  * Visit PROGRAM IDENTIFIER;
  */
-bool ps_parser_visit_program(ps_parser *parser)
+bool ps_visit_program(ps_parser *parser)
 {
     ps_identifier identifier;
 
@@ -37,7 +35,7 @@ bool ps_parser_visit_program(ps_parser *parser)
 /**
  * Visit CONST IDENTIFIER = VALUE;
  */
-bool ps_parser_visit_block_const(ps_parser *parser)
+bool ps_visit_block_const(ps_parser *parser)
 {
     GET_LEXER;
     ps_identifier identifier;
@@ -52,19 +50,33 @@ bool ps_parser_visit_block_const(ps_parser *parser)
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_EQUAL);
     READ_NEXT_TOKEN;
-    // static const ps_token_type const_value_token_types[] = {TOKEN_INTEGER_VALUE, TOKEN_UNSIGNED_VALUE};
-    // if (!ps_parser_expect_token_types(parser, sizeof(const_value_token_types) / sizeof(ps_token_type), const_value_token_types))
-    //     return false;
     switch (lexer->current_token.type)
     {
     case TOKEN_INTEGER_VALUE:
         type = ps_symbol_integer.value->data.t;
         data.i = lexer->current_token.value.i;
         break;
+    case TOKEN_REAL_VALUE:
+        type = ps_symbol_real.value->data.t;
+        data.r = lexer->current_token.value.r;
+        break;
     case TOKEN_UNSIGNED_VALUE:
         type = ps_symbol_unsigned.value->data.t;
         data.u = lexer->current_token.value.u;
         break;
+    case TOKEN_CHAR_VALUE:
+        type = ps_symbol_char.value->data.t;
+        data.c = lexer->current_token.value.c;
+        break;
+    case TOKEN_BOOLEAN_VALUE:
+        type = ps_symbol_boolean.value->data.t;
+        data.b = lexer->current_token.value.b;
+        break;
+    // Not yet!
+    // case TOKEN_STRING_VALUE:
+    //     type = ps_symbol_string.value->data.t;
+    //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
+    //     break;
     default:
         parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
         return false;
@@ -87,7 +99,7 @@ bool ps_parser_visit_block_const(ps_parser *parser)
 /**
  * Visit VAR IDENTIFIER : TYPE;
  */
-bool ps_parser_visit_block_var(ps_parser *parser)
+bool ps_visit_block_var(ps_parser *parser)
 {
     GET_LEXER;
     ps_identifier identifier;
@@ -132,7 +144,7 @@ bool ps_parser_visit_block_var(ps_parser *parser)
     return true;
 }
 
-bool ps_parser_visit_main_block(ps_parser *parser)
+bool ps_visit_main_block(ps_parser *parser)
 {
     GET_LEXER;
     EXPECT_TOKEN(TOKEN_BEGIN);
@@ -150,14 +162,14 @@ bool ps_parser_start(ps_parser *parser)
     GET_LEXER;
     READ_NEXT_TOKEN;
     // Mandatory
-    if (!ps_parser_visit_program(parser))
+    if (!ps_visit_program(parser))
         return false;
     // Optional
-    if (lexer->current_token.type == TOKEN_CONST && !ps_parser_visit_block_const(parser))
+    if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
         return false;
     // Optional
-    if (lexer->current_token.type == TOKEN_VAR && !ps_parser_visit_block_var(parser))
+    if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
         return false;
     // Mandatory
-    return ps_parser_visit_main_block(parser);
+    return ps_visit_main_block(parser);
 }

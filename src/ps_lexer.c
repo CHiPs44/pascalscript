@@ -390,6 +390,11 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
         if (!ps_lexer_read_identifier_or_keyword(lexer))
             return false;
         lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
+        if (lexer->current_token.type == TOKEN_FALSE && lexer->current_token.type == TOKEN_TRUE)
+        {
+            lexer->current_token.type = TOKEN_BOOLEAN_VALUE;
+            lexer->current_token.value.b = (ps_boolean)(lexer->current_token.type == TOKEN_TRUE);
+        }
     }
     else if (current_char == '\'')
     {
