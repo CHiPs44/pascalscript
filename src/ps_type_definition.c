@@ -73,7 +73,7 @@ ps_value ps_value_unsigned = {
 const ps_symbol ps_symbol_unsigned = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "CARDINAL",
+    .name = "UNSIGNED",
     .value = &ps_value_unsigned};
 
 ps_type_definition ps_type_def_real = {
@@ -189,7 +189,7 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
     // switch (type_def->type)
     // {
     // case PS_TYPE_ENUM:
-    //     // (One, Two, Three) => "ENUM(CARDINAL, 3, 'One', ...)"
+    //     // (One, Two, Three) => "ENUM(UNSIGNED, 3, 'One', ...)"
     //     snprintf(buffer, sizeof(buffer) - 1,
     //              "%s(%s, %d, '%s', ...)",
     //              type_name,

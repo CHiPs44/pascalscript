@@ -64,7 +64,7 @@ constantDeclaration: IDENTIFIER EQUAL expression SEMI_COLON;
 
 varBlock: VAR variableDeclaration+;
 
-variableDeclaration: identifierList COLON (REAL | INTEGER | CARDINAL) SEMI_COLON;
+variableDeclaration: identifierList COLON (REAL | INTEGER | UNSIGNED) SEMI_COLON;
 
 identifierList: IDENTIFIER (COMMA IDENTIFIER)*;
 

@@ -51,6 +51,16 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
 //     return hash;
 // }
 
+bool ps_symbol_scope_is_unit(ps_symbol_scope scope)
+{
+    return scope >= PS_SYMBOL_SCOPE_UNIT && scope < PS_SYMBOL_SCOPE_LOCAL;
+}
+
+bool ps_symbol_scope_is_local(ps_symbol_scope scope)
+{
+    return scope >= PS_SYMBOL_SCOPE_LOCAL;
+}
+
 char *ps_symbol_get_scope_name(ps_symbol_scope scope)
 {
     static char scope_name[PS_SYMBOL_SCOPE_NAME_SIZE];
@@ -59,9 +69,9 @@ char *ps_symbol_get_scope_name(ps_symbol_scope scope)
     else if (scope == PS_SYMBOL_SCOPE_GLOBAL)
         snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "GLOBAL");
     else if (scope >= PS_SYMBOL_SCOPE_LOCAL && scope < PS_SYMBOL_SCOPE_UNIT)
-        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "L%06d"/*PS_SYMBOL_SCOPE_LOCAL_FORMAT*/, scope);
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "L%06d" /*PS_SYMBOL_SCOPE_LOCAL_FORMAT*/, scope);
     else
-        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "U%06d"/*PS_SYMBOL_SCOPE_UNIT_FORMAT*/, scope);
+        snprintf(scope_name, PS_SYMBOL_SCOPE_NAME_LEN, "U%06d" /*PS_SYMBOL_SCOPE_UNIT_FORMAT*/, scope);
     return scope_name;
 }
 
@@ -112,8 +122,8 @@ char *ps_symbol_dump_value(ps_symbol *symbol)
              "SYMBOL: name=%-*s, scope=%-8s, kind=%-16s, type=%-16s, value=%s",
              PS_IDENTIFIER_LEN,
              symbol->name,
-             ps_symbol_get_kind_name(symbol->kind),
              ps_symbol_get_scope_name(symbol->scope),
+             ps_symbol_get_kind_name(symbol->kind),
              ps_value_get_type_definition_name(symbol->value->type),
              ps_value_get_debug_value(symbol->value));
     return buffer;

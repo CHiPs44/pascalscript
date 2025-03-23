@@ -2,9 +2,9 @@
 
 Program RosettaLeastCommonMultiple;
 
-Function LCM(A, B: Cardinal):   Cardinal;
+Function LCM(A, B: UNSIGNED):   UNSIGNED;
 Var
-    R: Cardinal;
+    R: UNSIGNED;
 Begin
     R := A;
     While (R Mod B) <> 0 Do
@@ -13,7 +13,7 @@ Begin
 End;
 
 Var 
-    A, B, R:   Cardinal;
+    A, B, R:   UNSIGNED;
 Begin
     A := 12;
     B := 18;

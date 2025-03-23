@@ -11,7 +11,7 @@ Const
 Var 
   Test1, Test2: Integer;
   Test3: Boolean;
-  Test4: Cardinal;
+  Test4: UNSIGNED;
 
 Begin
   Test1 := AAA + 3 * 456 / 234;

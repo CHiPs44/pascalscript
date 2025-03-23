@@ -44,7 +44,7 @@ type                    =   simple_type | string_type | structured_type | pointe
 simple_type             =   ordinal_type | real_type ;
 real_type               =   real_type_identifier ;
 ordinal_type            =   'INTEGER' | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'LONGWORD' | 'INT64' | 
-                            'BYTE' | 'WORD' | 'CARDINAL' | 'QWORD' | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ;
+                            'BYTE' | 'WORD' | 'UNSIGNED' | 'QWORD' | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ;
 boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
 enumerated_type         =   '(' identifier_list ')' ;
 identifier_list         =   [ identifier ][ , identifier , ]* ;

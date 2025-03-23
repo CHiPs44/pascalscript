@@ -237,7 +237,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             pos += 1;
         } while (isdigit(c));
         buffer[pos] = '\0';
-        lexer->current_token.type = TOKEN_CARDINAL_VALUE;
+        lexer->current_token.type = TOKEN_UNSIGNED_VALUE;
         // TODO? use even better conversion from string to unsigned integer
         char *end;
         unsigned long u = strtoul(buffer, &end, base);

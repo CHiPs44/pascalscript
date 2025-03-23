@@ -13,40 +13,54 @@ void ps_token_dump(ps_token *token)
 {
     ps_token_type token_type;
     char *type;
-    char buffer[256 + 16];
+    static char buffer[128];
+    static char string[(PS_STRING_MAX_LEN / 4) + 1];
 
     switch (token->type)
     {
+    case TOKEN_NONE:
+        type = "NONE";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: NONE", token->type);
+        break;
+    case TOKEN_END_OF_FILE:
+        type = "END_OF_FILE";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: EOF", token->type);
+        break;
     case TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: %d", token->type, token->value.i);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: %d", token->type, token->value.i);
         break;
-    case TOKEN_CARDINAL_VALUE:
-        type = "CARDINAL";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: %u", token->type, token->value.u);
+    case TOKEN_UNSIGNED_VALUE:
+        type = "UNSIGNED";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: %u", token->type, token->value.u);
         break;
     case TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: %f", token->type, token->value.r);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: %f", token->type, token->value.r);
+        break;
+    case TOKEN_BOOLEAN_VALUE:
+        type = "BOOLEAN";
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.b ? "TRUE" : "FALSE");
         break;
     case TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: '%c'", token->type, token->value.c);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%c'", token->type, token->value.c);
         break;
     case TOKEN_STRING_VALUE:
         type = "STRING";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.s);
+        strncpy(string, (char *)token->value.s, sizeof(string) - 1);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, string);
         break;
     case TOKEN_AT_SIGN:           // @
     case TOKEN_CARET:             // ^
     case TOKEN_COLON:             // :
     case TOKEN_COMMA:             // ,
-    case TOKEN_ASSIGN:         // :=
-    case TOKEN_RANGE:           // ..
+    case TOKEN_ASSIGN:            // :=
+    case TOKEN_RANGE:             // ..
     case TOKEN_DOT:               // .
     case TOKEN_EQUAL:             // =
     case TOKEN_GREATER_OR_EQUAL:  // >=
@@ -64,32 +78,36 @@ void ps_token_dump(ps_token *token)
     case TOKEN_SLASH:             // /
     case TOKEN_STAR:              // *
         type = "RESERVED";
-        snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     default:
         token_type = ps_token_is_keyword(token->value.identifier);
         if (token_type == TOKEN_IDENTIFIER)
         {
             type = "UNKNOWN";
-            snprintf(buffer, sizeof(buffer)-1, "'%s'", "?");
+            snprintf(buffer, sizeof(buffer) - 1, "'%s'", "?");
         }
         else
         {
             type = "KEYWORD";
-            snprintf(buffer, sizeof(buffer)-1, "%04d: '%s'", token->type, token->value.identifier);
+            snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }
     printf("TOKEN: type=%-16s, value=%s\n", type, buffer);
 }
 
-ps_keyword ps_keywords[] = {
+struct s_ps_keyword
+{
+    ps_token_type token_type;
+    char *keyword;
+} ps_keywords[] = {
     // clang-format off
     { .token_type = TOKEN_AND           , .keyword = "AND"              },
     { .token_type = TOKEN_ARRAY         , .keyword = "ARRAY"            },
     { .token_type = TOKEN_BEGIN         , .keyword = "BEGIN"            },
     { .token_type = TOKEN_BOOLEAN       , .keyword = "BOOLEAN"          },
-    { .token_type = TOKEN_CARDINAL      , .keyword = "CARDINAL"         },
+    { .token_type = TOKEN_UNSIGNED      , .keyword = "UNSIGNED"         },
     { .token_type = TOKEN_CASE          , .keyword = "CASE"             },
     { .token_type = TOKEN_CHAR          , .keyword = "CHAR"             },
     { .token_type = TOKEN_CONST         , .keyword = "CONST"            },
@@ -136,14 +154,14 @@ ps_keyword ps_keywords[] = {
     // clang-format on
 };
 
-ps_token_type ps_token_is_keyword(char *text)
+ps_token_type ps_token_is_keyword(char *identifier)
 {
-    // NB: text should already be normalized to uppercase
-    // TODO? dichotomic search instead of sequential one
-    for (int i = 0; i < sizeof(ps_keywords) / sizeof(ps_keyword); i += 1)
+    // NB: identifier should already be normalized to uppercase
+    // TODO dichotomic search instead of sequential one
+    for (int i = 0; i < sizeof(ps_keywords) / sizeof(struct s_ps_keyword); i += 1)
     {
-        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", text, ps_keywords[i].keyword);
-        if (strcmp(text, ps_keywords[i].keyword) == 0)
+        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", identifier, ps_keywords[i].keyword);
+        if (strcmp(identifier, ps_keywords[i].keyword) == 0)
         {
             return ps_keywords[i].token_type;
         }

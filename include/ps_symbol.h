@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-    // Forward reference
+    // Forward reference to value
     typedef struct s_ps_value ps_value;
 
 #define PS_SYMBOL_SCOPE_NAME_LEN 15
@@ -56,7 +56,7 @@ extern "C"
         ps_symbol_scope scope;
         ps_symbol_kind kind;
         ps_identifier name;
-        ps_value *value;
+        ps_value *value; // must be a pointer
     } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_SCOPE_SIZE sizeof(ps_symbol_scope)
@@ -66,10 +66,10 @@ extern "C"
     ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value);
     void ps_symbol_free(ps_symbol *symbol);
 
-    /** @brief Get scope name for symbol */
+    /** @brief Get name of symbol scope */
     char *ps_symbol_get_scope_name(ps_symbol_scope scope);
 
-    /** @brief Get kind name for symbol */
+    /** @brief Get name of symbol kind */
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);
 
     /** @brief Get symbol info */
@@ -78,7 +78,7 @@ extern "C"
     /** @brief Print symbol info to stderr */
     void ps_symbol_debug(ps_symbol *symbol);
 
-    /** @brief Normalize symbol name (=> UPPERCASE) in place (no string copy) */
+    /** @brief Normalize symbol name (makes it UPPERCASE) in place (no string copy) */
     void ps_symbol_normalize_name(ps_symbol *symbol);
 
     // typedef uint16_t ps_symbol_hash_key;
@@ -86,7 +86,10 @@ extern "C"
     // /** @brief Get hash key of symbol name (using DJB2's algorithm) */
     // ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol);
 
-#ifdef __cplusplus
+    bool ps_symbol_scope_is_unit(ps_symbol_scope scope);
+    bool ps_symbol_scope_is_local(ps_symbol_scope scope);
+
+    #ifdef __cplusplus
 }
 #endif
 

@@ -68,7 +68,8 @@
         "locale_t.h": "c",
         "ps_version.h": "c",
         "cstdlib": "c",
-        "ps_system.h": "c"
+        "ps_system.h": "c",
+        "ps_interpreter.h": "c"
     },
     "makefile.configureOnOpen": false
 }

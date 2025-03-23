@@ -52,7 +52,7 @@ bool ps_parser_visit_block_const(ps_parser *parser)
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_EQUAL);
     READ_NEXT_TOKEN;
-    // static const ps_token_type const_value_token_types[] = {TOKEN_INTEGER_VALUE, TOKEN_CARDINAL_VALUE};
+    // static const ps_token_type const_value_token_types[] = {TOKEN_INTEGER_VALUE, TOKEN_UNSIGNED_VALUE};
     // if (!ps_parser_expect_token_types(parser, sizeof(const_value_token_types) / sizeof(ps_token_type), const_value_token_types))
     //     return false;
     switch (lexer->current_token.type)
@@ -61,7 +61,7 @@ bool ps_parser_visit_block_const(ps_parser *parser)
         type = ps_symbol_integer.value->data.t;
         data.i = lexer->current_token.value.i;
         break;
-    case TOKEN_CARDINAL_VALUE:
+    case TOKEN_UNSIGNED_VALUE:
         type = ps_symbol_unsigned.value->data.t;
         data.u = lexer->current_token.value.u;
         break;
@@ -108,7 +108,7 @@ bool ps_parser_visit_block_var(ps_parser *parser)
         type = ps_symbol_integer.value->data.t;
         data.i = 0;
         break;
-    case TOKEN_CARDINAL:
+    case TOKEN_UNSIGNED:
         type = ps_symbol_unsigned.value->data.t;
         data.u = 0;
         break;

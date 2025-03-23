@@ -209,7 +209,7 @@ typeDefinition
 
 scalarType
     : INTEGER
-    | CARDINAL
+    | UNSIGNED
     | BOOLEAN
     | CHAR
     // | enumType

@@ -19,39 +19,39 @@ extern "C"
 #define MAX_IDENTIFIER 31
 #endif
 
-/*
-    1. Mimimalistic
-        program         begin           end
-        const           var
-        integer         cardinal        real
-        char            string
-    2. Expressions
-        div             mod
-    3. Decision making
-        boolean         true            false
-        if              then            else
-        and             not             or
-    4. Loops
-        repeat          until           while       do
-    5. User types
-        type            set
-    6. Arrays
-        array
-    6. "Modularity"
-        function        procedure
-    7. More control
-        case            of
-        for             downto          to          in
-    8. Mother of all evil?
-        goto            label
-    9. More operators
-        shl             shr             xor
+    /*
+        1. Mimimalistic
+            program         begin           end
+            const           var
+            integer         UNSIGNED        real
+            char            string
+        2. Expressions
+            div             mod
+        3. Decision making
+            boolean         true            false
+            if              then            else
+            and             not             or
+        4. Loops
+            repeat          until           while       do
+        5. User types
+            type            set
+        6. Arrays
+            array
+        6. "Modularity"
+            function        procedure
+        7. More control
+            case            of
+            for             downto          to          in
+        8. Mother of all evil?
+            goto            label
+        9. More operators
+            shl             shr             xor
 
-    -file           -packed         -record             -nil        -with
-    -absolute       -asm            -inline             -operator   -reintroduce
-    -unit           -interface      -implementation     -uses
-    -constructor    -destructor     -inherited          -object     -self
-*/
+        -file           -packed         -record             -nil        -with
+        -absolute       -asm            -inline             -operator   -reintroduce
+        -unit           -interface      -implementation     -uses
+        -constructor    -destructor     -inherited          -object     -self
+    */
 
     /* THESE ARE NOT TOKENS
         Comments
@@ -71,16 +71,17 @@ extern "C"
         TOKEN_END_OF_FILE,
         // Numeric values
         TOKEN_INTEGER_VALUE,
-        TOKEN_CARDINAL_VALUE,
+        TOKEN_UNSIGNED_VALUE,
         TOKEN_REAL_VALUE,
         // Other value types
+        TOKEN_BOOLEAN_VALUE,
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
         TOKEN_IDENTIFIER,
         // Reserved words
-        TOKEN_RESERVED_WORDS = 127,
-        TOKEN_PROGRAM,
+        TOKEN_RESERVED_WORDS = (UINT8_MAX / 2) + 1,
+        TOKEN_PROGRAM = TOKEN_RESERVED_WORDS,
         TOKEN_CONST,
         TOKEN_TYPE,
         TOKEN_VAR,
@@ -89,7 +90,7 @@ extern "C"
         TOKEN_BEGIN,
         TOKEN_END,
         TOKEN_INTEGER,
-        TOKEN_CARDINAL,
+        TOKEN_UNSIGNED,
         TOKEN_BOOLEAN,
         TOKEN_CHAR,
         TOKEN_STRING,
@@ -132,12 +133,12 @@ extern "C"
         TOKEN_SHR,
         // Symbols
         // =======
-        TOKEN_ASSIGN,         // :=  assign
+        TOKEN_ASSIGN,            // :=  assign
         TOKEN_AT_SIGN,           // @   address of
         TOKEN_CARET,             // ^   pointer to
         TOKEN_COLON,             // :   various uses
         TOKEN_COMMA,             // ,   various uses
-        TOKEN_RANGE,           // ..  ranges
+        TOKEN_RANGE,             // ..  ranges
         TOKEN_DOT,               // .   various uses
         TOKEN_LEFT_BRACKET,      // [   array access
         TOKEN_LEFT_PARENTHESIS,  // (   various uses
@@ -156,9 +157,10 @@ extern "C"
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
-    } ps_token_type;
+        TOKEN_MAX = UINT8_MAX
+    } __attribute__((__packed__)) ps_token_type;
 
-    typedef struct _token_t
+    typedef struct s_ps_token
     {
         ps_token_type type;
         union
@@ -168,19 +170,13 @@ extern "C"
             ps_unsigned u;
             ps_real r;
             ps_char c;
+            ps_boolean b;
             ps_char s[PS_STRING_MAX_LEN + 1];
         } value;
     } ps_token;
 
-    typedef struct s_ps_keyword
-    {
-        ps_token_type token_type;
-        char *keyword;
-    } ps_keyword;
-
     void ps_token_dump(ps_token *token);
 
-    extern ps_keyword ps_keywords[];
     ps_token_type ps_token_is_keyword(char *text);
 
 #ifdef __cplusplus

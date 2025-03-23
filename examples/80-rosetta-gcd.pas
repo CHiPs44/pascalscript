@@ -2,7 +2,7 @@
 
 Program RosettaGreatestCommonDivisor;
 
-Function RecursiveGCD(U, V: Cardinal):   Cardinal;
+Function RecursiveGCD(U, V: UNSIGNED):   UNSIGNED;
 Begin
     If V = 0 Then
         RecursiveGCD := U
@@ -10,9 +10,9 @@ Begin
         RecursiveGCD := RecursiveGCD(V, U Mod V) ;
 End;
 
-Function IterativeGCD(U, V: Cardinal):   Cardinal;
+Function IterativeGCD(U, V: UNSIGNED):   UNSIGNED;
 Var 
-    T:   Cardinal;
+    T:   UNSIGNED;
 Begin
     While V <> 0 Do
         Begin
@@ -24,7 +24,7 @@ Begin
 End;
 
 Var 
-    U, V, R:   Cardinal;
+    U, V, R:   UNSIGNED;
 Begin
     {U := 231;
     V := 7;

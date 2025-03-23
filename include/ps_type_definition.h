@@ -25,7 +25,7 @@ extern "C"
     /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        /* /!\ DO NOT CHANGE ORDER, AS RANGES ARE USED! /!\ */
+        /* /!\ DO NOT CHANGE ORDER, AS RANGES ARE USED IN CODE! /!\ */
         PS_TYPE_NONE = 0,
         PS_TYPE_DEFINITION,
         /* Simple types => direct value */
@@ -48,7 +48,7 @@ extern "C"
         // PS_TYPE_RECORD, // *FUTURE*
         // PS_TYPE_FILE,   // *FUTURE*
         // PS_TYPE_OBJECT, // *FUTURE*
-        PS_TYPE_MAX = UINT16_MAX
+        PS_TYPE_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_value_type;
 
     // /** @brief Enums are stored in unsigned value (first=0, second=1, ...) */
@@ -112,7 +112,6 @@ extern "C"
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
     /* System types (with type==base) */
-    // extern ps_type_definition ps_type_def_unsigned;
     extern const ps_symbol ps_symbol_boolean;
     extern const ps_symbol ps_symbol_char;
     extern const ps_symbol ps_symbol_integer;
