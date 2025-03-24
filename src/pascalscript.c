@@ -21,6 +21,7 @@ ps_interpreter *interpreter = &_runtime;
 
 char *minimal_source =
     "Program Minimal;\n"
+    "Const AAA = 123;\n"
     "Begin\n"
     "End.\n";
 
@@ -50,8 +51,8 @@ int main(int argc, char *argv[])
          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX); //,
                                                                                   //  ps_version->value->data.i, ps_version->value->data.i);
   if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
-  // if (!ps_vm_load_source(vm, hello, strlen(hello)))
-  // if (!ps_vm_load_source(vm,"examples/00-hello.pas"))
+  // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
+  // if (!ps_interpreter_load_string(interpreter,"examples/00-hello.pas"))
   {
     printf("Not loaded!\n");
     return 1;
@@ -60,7 +61,11 @@ int main(int argc, char *argv[])
   ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
   ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
   printf("Listed!\n");
+  ps_lexer_reset(lexer);
+  ps_buffer_read_next_char(lexer->buffer);
   ps_parser_start(interpreter->parser);
+  ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
+  ps_interpreter_done(interpreter);
   return 0;
 }
 

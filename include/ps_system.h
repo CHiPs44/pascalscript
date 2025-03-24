@@ -15,12 +15,20 @@ extern "C"
 {
 #endif
 
+    /* System types (with type==base) */
+    extern const ps_symbol ps_symbol_boolean;
+    extern const ps_symbol ps_symbol_char;
+    extern const ps_symbol ps_symbol_integer;
+    extern const ps_symbol ps_symbol_real;
+    extern const ps_symbol ps_symbol_unsigned;
+
+    /* System constants */
     extern ps_symbol ps_symbol_version_major;
     extern ps_symbol ps_symbol_version_minor;
     extern ps_symbol ps_symbol_version_patch;
     extern ps_symbol ps_symbol_version_index;
 
-    extern void ps_system_init(ps_interpreter *interpreter);
+    extern bool ps_system_init(ps_interpreter *interpreter);
     extern void ps_system_done(ps_interpreter *interpreter);
 
 #ifdef __cplusplus

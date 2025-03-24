@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "ps_system.h"
 #include "ps_parser.h"
 
 // clang-format off
@@ -45,8 +46,13 @@ bool ps_visit_block_const(ps_parser *parser)
     ps_symbol *constant;
     EXPECT_TOKEN(TOKEN_CONST);
     READ_NEXT_TOKEN;
+    fprintf(stderr, "expect identifier\n");
     EXPECT_TOKEN(TOKEN_IDENTIFIER);
+    fprintf(stderr, "identifier0 %d\n", lexer->current_token.type);
+    ps_token_dump(&lexer->current_token);
+    fprintf(stderr, "identifier1 %s\n", lexer->current_token.value.identifier);
     strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+    fprintf(stderr, "identifier2 %s\n", identifier);
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_EQUAL);
     READ_NEXT_TOKEN;
@@ -85,12 +91,17 @@ bool ps_visit_block_const(ps_parser *parser)
     EXPECT_TOKEN(TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
     value = ps_value_init(type, data);
+    ps_value_debug(stderr, "constant=", value);
     constant = ps_symbol_init(
         PS_SYMBOL_SCOPE_GLOBAL,
         PS_SYMBOL_KIND_CONSTANT,
         &identifier,
         value);
-    ps_symbol_table_add(parser->symbols, constant);
+    if (constant == NULL)
+        return false;
+    fprintf(stderr, "constant: %d, %s\n", constant->kind, constant->name);
+    if (ps_symbol_table_add(parser->symbols, constant) == NULL)
+        return false;
     // TODO loop if we have another identifier
 
     return true;
@@ -164,12 +175,17 @@ bool ps_parser_start(ps_parser *parser)
     // Mandatory
     if (!ps_visit_program(parser))
         return false;
+    fprintf(stderr, "PROGRAM OK\n");
     // Optional
     if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
         return false;
+    fprintf(stderr, "CONST OK\n");
     // Optional
     if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
         return false;
     // Mandatory
-    return ps_visit_main_block(parser);
+    if (!ps_visit_main_block(parser))
+        return false;
+    fprintf(stderr, "MAIN_BLOCK OK\n");
+    return true;
 }

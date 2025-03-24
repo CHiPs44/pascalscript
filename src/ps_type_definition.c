@@ -14,104 +14,6 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-/******************************************************************************/
-/* BASE TYPE DEFINITIONS AS GLOBALS                                           */
-/******************************************************************************/
-
-// PS_TYPE_DEFINITION
-
-ps_type_definition ps_type_def_boolean = {
-    .type = PS_TYPE_BOOLEAN,
-    .base = PS_TYPE_BOOLEAN,
-};
-ps_value ps_value_boolean = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_boolean},
-};
-const ps_symbol ps_symbol_boolean = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "BOOLEAN",
-    .value = &ps_value_boolean};
-
-ps_type_definition ps_type_def_char = {
-    .type = PS_TYPE_CHAR,
-    .base = PS_TYPE_CHAR,
-};
-ps_value ps_value_char = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_char},
-};
-const ps_symbol ps_symbol_char = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "CHAR",
-    .value = &ps_value_char};
-
-ps_type_definition ps_type_def_integer = {
-    .type = PS_TYPE_INTEGER,
-    .base = PS_TYPE_INTEGER,
-};
-ps_value ps_value_integer = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_integer},
-};
-const ps_symbol ps_symbol_integer = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "INTEGER",
-    .value = &ps_value_integer};
-
-ps_type_definition ps_type_def_unsigned = {
-    .type = PS_TYPE_UNSIGNED,
-    .base = PS_TYPE_UNSIGNED,
-};
-ps_value ps_value_unsigned = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_unsigned},
-};
-const ps_symbol ps_symbol_unsigned = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "UNSIGNED",
-    .value = &ps_value_unsigned};
-
-ps_type_definition ps_type_def_real = {
-    .type = PS_TYPE_REAL,
-    .base = PS_TYPE_REAL,
-};
-ps_value ps_value_real = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_real},
-};
-const ps_symbol ps_symbol_real = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
-    .name = "REAL",
-    .value = &ps_value_real};
-
-ps_value ps_value_boolean_false = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_boolean, .b = (ps_boolean) false}};
-const ps_symbol ps_symbol_boolean_false = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_CONSTANT,
-    .name = "FALSE",
-    .value = &ps_value_boolean_false};
-
-ps_value ps_value_boolean_true = {
-    .type = NULL,
-    .data = {.t = &ps_type_def_boolean, .b = (ps_boolean) true}};
-const ps_symbol ps_symbol_boolean_true = {
-    .scope = PS_SYMBOL_SCOPE_SYSTEM,
-    .kind = PS_SYMBOL_KIND_CONSTANT,
-    .name = "TRUE",
-    .value = &ps_value_boolean_true};
-
-/******************************************************************************/
-/* FUNCTIONS                                                                  */
-/******************************************************************************/
-
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
     ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
@@ -140,27 +42,6 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 //     definition->def.def_subrange.max = high;
 //     return definition;
 // }
-
-bool ps_type_definition_create_system_types(ps_symbol_table *table)
-{
-    if (ps_symbol_table_available(table) < 5 + 2)
-        return false;
-    ps_symbol_boolean.value->type = &ps_type_def_boolean;
-    ps_symbol_char.value->type = &ps_type_def_char;
-    ps_symbol_integer.value->type = &ps_type_def_integer;
-    ps_symbol_unsigned.value->type = &ps_type_def_unsigned;
-    ps_symbol_real.value->type = &ps_type_def_real;
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean);
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_char);
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_integer);
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_unsigned);
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_real);
-    ps_symbol_boolean_false.value->type = &ps_type_def_boolean;
-    ps_symbol_boolean_true.value->type = &ps_type_def_boolean;
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean_false);
-    ps_symbol_table_add(table, (ps_symbol *)&ps_symbol_boolean_true);
-    return true;
-}
 
 const struct s_ps_type_name
 {

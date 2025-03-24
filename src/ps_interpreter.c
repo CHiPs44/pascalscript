@@ -11,6 +11,7 @@
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_interpreter.h"
+#include "ps_system.h"
 #include "ps_value.h"
 
 /** @brief Create new interpreter */
@@ -26,6 +27,11 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
     }
     interpreter->parser = ps_parser_init(NULL, NULL);
     if (interpreter->parser == NULL)
+    {
+        ps_interpreter_done(interpreter);
+        return NULL;
+    }
+    if (!ps_system_init(interpreter))
     {
         ps_interpreter_done(interpreter);
         return NULL;

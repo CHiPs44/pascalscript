@@ -380,6 +380,7 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
         return false;
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
+    // fprintf(stderr, "char=%d next=%d length=%d error=%d\n", current_char, next_char, lexer->buffer->length, lexer->buffer->error);
     if (isdigit(current_char))
     {
         if (!ps_lexer_read_number(lexer))
@@ -535,7 +536,7 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 return false;
             break;
         default:
-            printf("DEFAULT! %c %d\n", current_char, current_char);
+            printf("DEFAULT! %c %d at line %d column %d\n", current_char, current_char, lexer->buffer->current_line, lexer->buffer->current_column);
             lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
             return false;
         }

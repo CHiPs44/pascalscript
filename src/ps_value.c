@@ -4,14 +4,16 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
-#include "ps_error.h"
 // #include "ps_string.h"
-#include "ps_type_definition.h"
+#include "ps_error.h"
 #include "ps_symbol.h"
+#include "ps_system.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 ps_value *ps_value_init(ps_type_definition *type, ps_value_data data)
@@ -37,7 +39,7 @@ bool ps_value_is_number(ps_value *value)
     return (value->type->base >= PS_TYPE_REAL || value->type->base <= PS_TYPE_UNSIGNED);
 }
 
-#define PS_VALUE_SET(type_def, x)               \
+#define PS_VALUE_SET(type_def, x)            \
     if (value == NULL)                       \
     {                                        \
         value = calloc(1, sizeof(ps_value)); \
@@ -46,7 +48,7 @@ bool ps_value_is_number(ps_value *value)
             return NULL;                     \
         }                                    \
     }                                        \
-    value->type = type_def;                   \
+    value->type = type_def;                  \
     value->data.x = x;                       \
     return value
 
@@ -199,7 +201,7 @@ char *ps_value_get_debug_value(ps_value *value)
         snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "TRUE" : "FALSE");
         break;
     case PS_TYPE_CHAR:
-        snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", value->data.c, value->data.c);
+        snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.', value->data.c);
         break;
     // case PS_TYPE_STRING:
     //     snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", sizeof(buffer) - 20, value->data.s->str, value->data.s->len, value->data.s->max);
@@ -217,10 +219,11 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
+    char *type = "TODO1"; // ps_value_get_type_definition_name(value->type);
+    char *data = "TODO2";      // ps_value_get_debug_value(value);
     snprintf(buffer, sizeof(buffer) - 1,
              "VALUE: type=%s, value=%s",
-             ps_value_get_type_definition_name(value->type),
-             ps_value_get_debug_value(value));
+             type, data);
     return buffer;
 }
 
