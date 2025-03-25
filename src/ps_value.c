@@ -219,8 +219,9 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = "TODO1"; // ps_value_get_type_definition_name(value->type);
-    char *data = "TODO2";      // ps_value_get_debug_value(value);
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!"
+                                                               : "TODO1"; // ps_value_get_type_definition_name(value->type);
+    char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
     snprintf(buffer, sizeof(buffer) - 1,
              "VALUE: type=%s, value=%s",
              type, data);

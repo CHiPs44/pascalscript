@@ -4,7 +4,7 @@
 
 CC = LANG=C gcc
 # CFLAGS = -W -Wall -ansi -pedantic -std=c17 -g
-CFLAGS   = -Wall -Iinclude
+CFLAGS   = -Wall -Iinclude -ggdb
 PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)
 INCLUDES = $(wildcard include/*.h)

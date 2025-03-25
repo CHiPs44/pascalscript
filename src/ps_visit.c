@@ -91,7 +91,7 @@ bool ps_visit_block_const(ps_parser *parser)
     EXPECT_TOKEN(TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
     value = ps_value_init(type, data);
-    ps_value_debug(stderr, "constant=", value);
+    ps_value_debug(stderr, "constant ", value);
     constant = ps_symbol_init(
         PS_SYMBOL_SCOPE_GLOBAL,
         PS_SYMBOL_KIND_CONSTANT,
