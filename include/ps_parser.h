@@ -23,16 +23,20 @@ extern "C"
 
     typedef struct ps_parser
     {
+        ps_symbol_table *symbols;
         ps_lexer *lexers[PS_PARSER_LEXER_COUNT];
-        uint8_t lexer;
+        uint8_t current_lexer;
         ps_error error;
         bool allocated_parser;
         bool allocated_symbol_table;
-        ps_symbol_table *symbols;
+        bool trace;
+        bool debug;
     } ps_parser;
 
+#define PS_PARSER_SIZE sizeof(ps_parser)
+
     /** @brief Initialize parser with attached symbol table */
-    ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols);
+    ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols, bool trace, bool debug);
     /** @brief Free parser & symbol table */
     void ps_parser_done(ps_parser *parser);
     ps_lexer *ps_parser_get_lexer(ps_parser *parser);

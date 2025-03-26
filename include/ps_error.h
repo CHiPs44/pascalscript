@@ -71,7 +71,7 @@ extern "C"
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
         PS_RUNTIME_ERROR_INVALID_PARAMETERS,
         // ...
-        PS_ERROR_MAX = UINT16_MAX
+        PS_ERROR_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_error;
 
 #define PS_ERROR_SIZE sizeof(ps_error)

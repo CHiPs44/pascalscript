@@ -23,7 +23,7 @@ ps_symbol ps_symbol_type_def = {
     .value = &ps_value_type_def};
 
 ps_type_definition ps_type_def_boolean = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
-ps_value ps_value_boolean = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean, .b = (ps_boolean) false}};
+ps_value ps_value_boolean = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
 ps_symbol ps_symbol_boolean = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -31,7 +31,7 @@ ps_symbol ps_symbol_boolean = {
     .value = &ps_value_boolean};
 
 ps_type_definition ps_type_def_char = {.type = PS_TYPE_CHAR, .base = PS_TYPE_CHAR};
-ps_value ps_value_char = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_char, .c = '\0'}};
+ps_value ps_value_char = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_char}};
 ps_symbol ps_symbol_char = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -39,7 +39,7 @@ ps_symbol ps_symbol_char = {
     .value = &ps_value_char};
 
 ps_type_definition ps_type_def_integer = {.type = PS_TYPE_INTEGER, .base = PS_TYPE_INTEGER};
-ps_value ps_value_integer = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_integer, .i = 0}};
+ps_value ps_value_integer = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_integer}};
 ps_symbol ps_symbol_integer = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -47,7 +47,7 @@ ps_symbol ps_symbol_integer = {
     .value = &ps_value_integer};
 
 ps_type_definition ps_type_def_unsigned = {.type = PS_TYPE_UNSIGNED, .base = PS_TYPE_UNSIGNED};
-ps_value ps_value_unsigned = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_unsigned, .u = 0}};
+ps_value ps_value_unsigned = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_unsigned}};
 ps_symbol ps_symbol_unsigned = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -55,7 +55,7 @@ ps_symbol ps_symbol_unsigned = {
     .value = &ps_value_unsigned};
 
 ps_type_definition ps_type_def_real = {.type = PS_TYPE_REAL, .base = PS_TYPE_REAL};
-ps_value ps_value_real = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_real, .r = 0.0}};
+ps_value ps_value_real = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_real}};
 ps_symbol ps_symbol_real = {
     .scope = PS_SYMBOL_SCOPE_SYSTEM,
     .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -139,6 +139,11 @@ bool ps_system_init(ps_interpreter *interpreter)
     /* TYPES                                                                  */
     /**************************************************************************/
 
+    ps_value_boolean.data.t = &ps_type_def_boolean;
+    ps_value_char.data.t = &ps_type_def_char;
+    ps_value_integer.data.t = &ps_type_def_integer;
+    ps_value_unsigned.data.t = &ps_type_def_unsigned;
+    ps_value_real.data.t = &ps_type_def_real;
     ps_symbol_table_add(symbols, &ps_symbol_boolean);
     ps_symbol_table_add(symbols, &ps_symbol_char);
     ps_symbol_table_add(symbols, &ps_symbol_integer);

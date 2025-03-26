@@ -10,8 +10,10 @@
 
 #include "ps_parser.h"
 
-ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
+ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols, bool trace, bool debug)
 {
+    parser->allocated_parser = false;
+    parser->allocated_symbol_table = true;
     if (parser == NULL)
     {
         parser = calloc(1, sizeof(ps_parser));
@@ -27,7 +29,7 @@ ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
     {
         parser->lexers[i] = ps_lexer_init(NULL);
     }
-    parser->lexer = 0;
+    parser->current_lexer = 0;
     if (symbols == NULL)
     {
         parser->allocated_symbol_table = true;
@@ -39,6 +41,8 @@ ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
         parser->symbols = symbols;
     }
     parser->error = PS_PARSER_ERROR_NONE;
+    parser->trace = trace;
+    parser->debug = debug;
     return parser;
 }
 
@@ -53,17 +57,17 @@ void ps_parser_done(ps_parser *parser)
         free(parser);
 }
 
-bool ps_parser_use_lexer(ps_parser *parser, uint8_t lexer)
+bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
 {
-    if (lexer > PS_PARSER_LEXER_COUNT || parser->lexers[lexer] == NULL)
+    if (current_lexer > PS_PARSER_LEXER_COUNT || parser->lexers[current_lexer] == NULL)
         return false;
-    parser->lexer = lexer;
+    parser->current_lexer = current_lexer;
     return true;
 }
 
 ps_lexer *ps_parser_get_lexer(ps_parser *parser)
 {
-    return parser->lexers[parser->lexer];
+    return parser->lexers[parser->current_lexer];
 }
 
 bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)

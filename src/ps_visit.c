@@ -5,7 +5,7 @@
 
 // clang-format off
 #define GET_LEXER                    ps_lexer *lexer = ps_parser_get_lexer(parser)
-#define READ_NEXT_TOKEN              if (!ps_lexer_read_next_token(lexer)) return false; else ps_token_dump(&lexer->current_token)
+#define READ_NEXT_TOKEN              if (!ps_lexer_read_next_token(lexer)) return false; else if (parser->trace) ps_token_dump(&lexer->current_token)
 #define EXPECT_TOKEN(__TOKEN_TYPE__) if (!ps_parser_expect_token_type(parser, __TOKEN_TYPE__)) return false
 // clang-format on
 
@@ -167,16 +167,33 @@ bool ps_visit_block_var(ps_parser *parser)
     return true;
 }
 
-bool ps_visit_main_block(ps_parser *parser)
+bool ps_visit_block(ps_parser *parser)
 {
     GET_LEXER;
+
+    if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
+        return false;
+    fprintf(stderr, "CONST OK\n");
+
+    if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(parser))
+        return false;
+    fprintf(stderr, "TYPE OK\n");
+
+    if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
+        return false;
+    fprintf(stderr, "VAR OK\n");
+
     EXPECT_TOKEN(TOKEN_BEGIN);
     READ_NEXT_TOKEN;
-    // TODO instruction block
+    if (lexer->current_token.type != TOKEN_END && !ps_visit_instructions(parser))
+        return false;
     EXPECT_TOKEN(TOKEN_END);
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_DOT);
     // NB: source code after '.' is not analyzed and has not to be
+
+    fprintf(stderr, "MAIN_BLOCK OK\n");
+
     return true;
 }
 
@@ -188,17 +205,8 @@ bool ps_parser_start(ps_parser *parser)
     if (!ps_visit_program(parser))
         return false;
     fprintf(stderr, "PROGRAM OK\n");
-    // Optional
-    if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
-        return false;
-    fprintf(stderr, "CONST OK\n");
-    // Optional
-    if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
-        return false;
-    fprintf(stderr, "VAR OK\n");
     // Mandatory
     if (!ps_visit_main_block(parser))
         return false;
-    fprintf(stderr, "MAIN_BLOCK OK\n");
     return true;
 }
