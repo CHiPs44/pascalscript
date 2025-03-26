@@ -94,6 +94,18 @@ bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_
     return ok;
 }
 
+bool ps_interpreter_run(ps_interpreter *interpreter)
+{
+    if (!ps_parser_start(interpreter->parser))
+    {
+        fprintf(stderr, "ERROR interpreter=%d %s parser=%d %s\n",
+                interpreter->error, ps_error_get_message(interpreter->error),
+                interpreter->parser->error, ps_error_get_message(interpreter->parser->error));
+        return false;
+    }
+    return true;
+}
+
 /******************************************************************************/
 /* FUNCTIONS                                                                  */
 /******************************************************************************/

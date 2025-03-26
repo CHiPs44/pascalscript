@@ -179,6 +179,16 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 char *ps_value_get_debug_value(ps_value *value)
 {
     static char buffer[128];
+    if (value == NULL)
+    {
+        snprintf(buffer, sizeof(buffer) - 1, "NULL VALUE");
+        return buffer;
+    }
+    if (value->type == NULL)
+    {
+        snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
+        return buffer;
+    }
     // TODO? if (value->type->type!=value->type->base)
     switch (value->type->base)
     {
@@ -219,8 +229,9 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!"
-                                                               : "TODO1"; // ps_value_get_type_definition_name(value->type);
+    char *type = value == NULL         ? "NULL!"
+                 : value->type == NULL ? "TYPE!"
+                                       : ps_value_get_type_definition_name(value->type);
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
     snprintf(buffer, sizeof(buffer) - 1,
              "VALUE: type=%s, value=%s",

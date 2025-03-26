@@ -22,6 +22,7 @@ ps_interpreter *interpreter = &_runtime;
 char *minimal_source =
     "Program Minimal;\n"
     "Const AAA = 123;\n"
+    "Var BBB: Real;\n"
     "Begin\n"
     "End.\n";
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
   printf("Listed!\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
-  ps_parser_start(interpreter->parser);
+  ps_interpreter_run(interpreter);
   ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
   ps_interpreter_done(interpreter);
   return 0;

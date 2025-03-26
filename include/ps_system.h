@@ -16,11 +16,11 @@ extern "C"
 #endif
 
     /* System types (with type==base) */
-    extern const ps_symbol ps_symbol_boolean;
-    extern const ps_symbol ps_symbol_char;
-    extern const ps_symbol ps_symbol_integer;
-    extern const ps_symbol ps_symbol_real;
-    extern const ps_symbol ps_symbol_unsigned;
+    extern ps_symbol ps_symbol_boolean;
+    extern ps_symbol ps_symbol_char;
+    extern ps_symbol ps_symbol_integer;
+    extern ps_symbol ps_symbol_real;
+    extern ps_symbol ps_symbol_unsigned;
 
     /* System constants */
     extern ps_symbol ps_symbol_version_major;

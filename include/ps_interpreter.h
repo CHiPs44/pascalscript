@@ -53,6 +53,8 @@ extern "C"
     // int ps_interpreter_auto_gc(ps_interpreter *interpreter);
     bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length);
 
+    bool ps_interpreter_run(ps_interpreter *interpreter);
+
 #ifdef __cplusplus
 }
 #endif

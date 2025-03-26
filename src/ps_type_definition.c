@@ -83,6 +83,10 @@ char *ps_value_get_type_name(ps_value_type type)
 char *ps_value_get_type_definition_name(ps_type_definition *type_def)
 {
     static char buffer[PS_IDENTIFIER_SIZE * 4];
+    if (type_def == NULL)
+    {
+        return "NULL";
+    }
     char *type_name = ps_value_get_type_name(type_def->type);
     if (type_name == NULL)
         return "UNKNOWN";

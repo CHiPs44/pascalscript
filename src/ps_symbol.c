@@ -19,8 +19,9 @@ ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identif
     symbol->scope = scope;
     symbol->kind = kind;
     if (name != NULL)
-        strncpy(symbol->name, (char *)name, PS_IDENTIFIER_LEN);
+        memcpy(&symbol->name, name, PS_IDENTIFIER_LEN + 1);
     symbol->value = value;
+    fprintf(stderr, "ps_symbol_init: %s\n", name == NULL ? "NULL" : (char *)name);
     return symbol;
 }
 
@@ -86,6 +87,7 @@ const struct s_ps_symbol_kind_name
     {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"},
     {PS_SYMBOL_KIND_PROCEDURE, "PROCEDURE"},
     {PS_SYMBOL_KIND_FUNCTION, "FUNCTION"},
+    {PS_SYMBOL_KIND_PROGRAM, "PROGRAM"},
     {PS_SYMBOL_KIND_UNIT, "UNIT"},
     // ...
 };

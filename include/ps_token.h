@@ -97,6 +97,7 @@ extern "C"
         TOKEN_UNSIGNED,
         TOKEN_BOOLEAN,
         TOKEN_CHAR,
+        TOKEN_REAL,
         TOKEN_STRING,
         TOKEN_FALSE,
         TOKEN_TRUE,

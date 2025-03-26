@@ -83,12 +83,14 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     ps_symbol_table_size index = 0;
     while (table->symbols[index] != NULL)
     {
+        // fprintf(stderr, "%d\n", index);
         index += 1;
     }
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         snprintf(symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, index);
     table->symbols[index] = symbol;
     table->used += 1;
+    fprintf(stderr, "ps_symbol_table_add: %d/%d %d %s \n", table->used, table->size, index, symbol->name);
     return symbol;
 }
 
@@ -132,8 +134,8 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
             symbol = table->symbols[i];
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = ps_value_get_type_definition_name(symbol->value->type);
-            char *value = ps_value_get_debug_value(symbol->value);
+            char *type_name = symbol->value == NULL ? "N/A" : ps_value_get_type_definition_name(symbol->value->type);
+            char *value = symbol->value == NULL ? "N/A" : ps_value_get_debug_value(symbol->value);
             fprintf(output, "┃%04d┃%-*s┃%-8s┃%-8s┃%-8s┃%-*s┃\n",
                     i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, value);
         }

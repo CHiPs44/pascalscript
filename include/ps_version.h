@@ -21,13 +21,13 @@ extern "C"
 #define PS_VERSION_MAJOR 0
 #endif
 #ifndef PS_VERSION_MINOR
-#define PS_VERSION_MINOR 0
+#define PS_VERSION_MINOR 1
 #endif
 #ifndef PS_VERSION_PATCH
-#define PS_VERSION_PATCH 0
+#define PS_VERSION_PATCH 2
 #endif
 #ifndef PS_VERSION_INDEX
-#define PS_VERSION_INDEX 0
+#define PS_VERSION_INDEX 3
 #endif
 
 #ifdef __cplusplus
