@@ -20,14 +20,16 @@ ps_interpreter *interpreter = NULL;
 
 char *minimal_source =
     "Program Minimal;\n"
-    // "Const AAA = 123.45;\n"
-    // "Const AAA = $AABBCCDD;\n"
-    "Const AAA = &1000;\n"
-    // "Const AAA = %1011011101111;\n"
+    "Const Int1 = 12345;\n"
+    "      Num1 = 123.45;\n"
+    "      Num2 = 1.2e--34;\n"
+    "      Hex1 = $AABBCCDD;\n"
+    "      Oct1 = &1000;\n"
+    "      Bin1 = %1011011101111;\n"
     // "Var   BBB : Real;\n"
-    "Var   BBB : Unsigned;\n"
+    // "Var   BBB : Unsigned;\n"
     "Begin\n"
-    "  {BBB := AAA;}\n"
+    // "  {BBB := AAA;}\n"
     "End.\n";
 
 char *hello_source =

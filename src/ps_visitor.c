@@ -46,59 +46,61 @@ bool ps_visit_block_const(ps_parser *parser)
     ps_symbol *constant;
     EXPECT_TOKEN(TOKEN_CONST);
     READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_IDENTIFIER);
-    strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_EQUAL);
-    READ_NEXT_TOKEN;
-    switch (lexer->current_token.type)
+    do
     {
-    case TOKEN_INTEGER_VALUE:
-        type = ps_symbol_integer.value->data.t;
-        data.i = lexer->current_token.value.i;
-        break;
-    case TOKEN_REAL_VALUE:
-        type = ps_symbol_real.value->data.t;
-        data.r = lexer->current_token.value.r;
-        break;
-    case TOKEN_UNSIGNED_VALUE:
-        type = ps_symbol_unsigned.value->data.t;
-        data.u = lexer->current_token.value.u;
-        break;
-    case TOKEN_CHAR_VALUE:
-        type = ps_symbol_char.value->data.t;
-        data.c = lexer->current_token.value.c;
-        break;
-    case TOKEN_BOOLEAN_VALUE:
-        type = ps_symbol_boolean.value->data.t;
-        data.b = lexer->current_token.value.b;
-        break;
-    // Not yet!
-    // case TOKEN_STRING_VALUE:
-    //     type = ps_symbol_string.value->data.t;
-    //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
-    //     break;
-    default:
-        parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-        return false;
-    }
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_SEMI_COLON);
-    READ_NEXT_TOKEN;
-    value = ps_value_init(type, data);
-    constant = ps_symbol_init(
-        PS_SYMBOL_SCOPE_GLOBAL,
-        PS_SYMBOL_KIND_CONSTANT,
-        &identifier,
-        value);
-    if (constant == NULL)
-    {
-        parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-        return false;
-    }
-    if (ps_symbol_table_add(parser->symbols, constant) == NULL)
-        return false;
-    // TODO loop if we have another identifier
+        EXPECT_TOKEN(TOKEN_IDENTIFIER);
+        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(TOKEN_EQUAL);
+        READ_NEXT_TOKEN;
+        switch (lexer->current_token.type)
+        {
+        case TOKEN_INTEGER_VALUE:
+            type = ps_symbol_integer.value->data.t;
+            data.i = lexer->current_token.value.i;
+            break;
+        case TOKEN_REAL_VALUE:
+            type = ps_symbol_real.value->data.t;
+            data.r = lexer->current_token.value.r;
+            break;
+        case TOKEN_UNSIGNED_VALUE:
+            type = ps_symbol_unsigned.value->data.t;
+            data.u = lexer->current_token.value.u;
+            break;
+        case TOKEN_CHAR_VALUE:
+            type = ps_symbol_char.value->data.t;
+            data.c = lexer->current_token.value.c;
+            break;
+        case TOKEN_BOOLEAN_VALUE:
+            type = ps_symbol_boolean.value->data.t;
+            data.b = lexer->current_token.value.b;
+            break;
+        // Not yet!
+        // case TOKEN_STRING_VALUE:
+        //     type = ps_symbol_string.value->data.t;
+        //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
+        //     break;
+        default:
+            parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
+            return false;
+        }
+        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN;
+        value = ps_value_init(type, data);
+        constant = ps_symbol_init(
+            PS_SYMBOL_SCOPE_GLOBAL,
+            PS_SYMBOL_KIND_CONSTANT,
+            &identifier,
+            value);
+        if (constant == NULL)
+        {
+            parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+            return false;
+        }
+        if (ps_symbol_table_add(parser->symbols, constant) == NULL)
+            return false;
+    } while (lexer->current_token.type == TOKEN_IDENTIFIER);
     return true;
 }
 
