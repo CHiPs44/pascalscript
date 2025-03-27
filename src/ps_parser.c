@@ -10,10 +10,8 @@
 
 #include "ps_parser.h"
 
-ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols, bool trace, bool debug)
+ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
 {
-    parser->allocated_parser = false;
-    parser->allocated_symbol_table = true;
     if (parser == NULL)
     {
         parser = calloc(1, sizeof(ps_parser));
@@ -23,7 +21,7 @@ ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols, bool trac
     }
     else
     {
-        parser->allocated_parser = true;
+        parser->allocated_parser = false;
     }
     for (uint8_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
     {
@@ -41,8 +39,8 @@ ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols, bool trac
         parser->symbols = symbols;
     }
     parser->error = PS_PARSER_ERROR_NONE;
-    parser->trace = trace;
-    parser->debug = debug;
+    parser->trace = false;
+    parser->debug = false;
     return parser;
 }
 
@@ -70,11 +68,21 @@ ps_lexer *ps_parser_get_lexer(ps_parser *parser)
     return parser->lexers[parser->current_lexer];
 }
 
+void ps_parser_debug(ps_parser *parser, char *message)
+{
+    if (message == NULL)
+        fprintf(stderr, "ERROR %s\n", ps_error_get_message(parser->error));
+    else
+        fprintf(stderr, "%s %s\n", message, ps_error_get_message(parser->error));
+}
+
 bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
 {
     if (ps_parser_get_lexer(parser)->current_token.type != token_type)
     {
         parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
+        if (parser->debug)
+            ps_parser_debug(parser, NULL);
         return false;
     }
     return true;

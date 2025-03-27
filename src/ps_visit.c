@@ -175,9 +175,10 @@ bool ps_visit_block(ps_parser *parser)
         return false;
     fprintf(stderr, "CONST OK\n");
 
-    if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(parser))
-        return false;
-    fprintf(stderr, "TYPE OK\n");
+    // TODO
+    // if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(parser))
+    //     return false;
+    // fprintf(stderr, "TYPE OK\n");
 
     if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
         return false;
@@ -185,8 +186,9 @@ bool ps_visit_block(ps_parser *parser)
 
     EXPECT_TOKEN(TOKEN_BEGIN);
     READ_NEXT_TOKEN;
-    if (lexer->current_token.type != TOKEN_END && !ps_visit_instructions(parser))
-        return false;
+    // TODO
+    // if (lexer->current_token.type != TOKEN_END && !ps_visit_instructions(parser))
+    //     return false;
     EXPECT_TOKEN(TOKEN_END);
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_DOT);
@@ -201,12 +203,10 @@ bool ps_parser_start(ps_parser *parser)
 {
     GET_LEXER;
     READ_NEXT_TOKEN;
-    // Mandatory
     if (!ps_visit_program(parser))
         return false;
     fprintf(stderr, "PROGRAM OK\n");
-    // Mandatory
-    if (!ps_visit_main_block(parser))
+    if (!ps_visit_block(parser))
         return false;
     return true;
 }

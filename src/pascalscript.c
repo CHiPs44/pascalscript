@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
 {
   /* Initialize VM and display banner on stdout */
   ps_interpreter_init(interpreter);
+  interpreter->parser->trace = true;
+  interpreter->parser->debug = false;
   ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
   // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
   printf("PascalScript v%d.%d.%d.%d\n",                                           // => %08x %d\n",
