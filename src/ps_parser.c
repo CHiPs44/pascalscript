@@ -48,10 +48,16 @@ void ps_parser_done(ps_parser *parser)
 {
     for (size_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
         if (parser->lexers[i] != NULL)
+        {
             ps_lexer_done(parser->lexers[i]);
+            parser->lexers[i] = NULL;
+        }
     if (parser->allocated_symbol_table)
+    {
         ps_symbol_table_done(parser->symbols);
-    if (!parser->allocated_parser)
+        parser->symbols = NULL;
+    }
+    if (parser->allocated_parser)
         free(parser);
 }
 

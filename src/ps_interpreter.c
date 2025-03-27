@@ -17,7 +17,6 @@
 /** @brief Create new interpreter */
 ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
 {
-    interpreter->allocated = false;
     if (interpreter == NULL)
     {
         interpreter = calloc(1, sizeof(ps_interpreter));
@@ -25,6 +24,8 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
             return NULL;
         interpreter->allocated = true;
     }
+    else
+        interpreter->allocated = false;
     interpreter->parser = ps_parser_init(NULL, NULL);
     if (interpreter->parser == NULL)
     {
@@ -46,7 +47,10 @@ void ps_interpreter_done(ps_interpreter *interpreter)
     if (!interpreter->allocated)
         return;
     if (interpreter->parser != NULL)
+    {
         ps_parser_done(interpreter->parser);
+        interpreter->parser = NULL;
+    }
     free(interpreter);
 }
 

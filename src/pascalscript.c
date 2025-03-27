@@ -16,14 +16,18 @@
 #include "ps_symbol.h"
 #include "ps_version.h"
 
-ps_interpreter _runtime;
-ps_interpreter *interpreter = &_runtime;
+ps_interpreter *interpreter = NULL;
 
 char *minimal_source =
     "Program Minimal;\n"
-    "Const AAA = 123;\n"
-    "Var BBB: Real;\n"
+    // "Const AAA = 123.45;\n"
+    // "Const AAA = $AABBCCDD;\n"
+    "Const AAA = &1000;\n"
+    // "Const AAA = %1011011101111;\n"
+    // "Var   BBB : Real;\n"
+    "Var   BBB : Unsigned;\n"
     "Begin\n"
+    "  {BBB := AAA;}\n"
     "End.\n";
 
 char *hello_source =
@@ -44,18 +48,27 @@ char *hello_source =
 
 int main(int argc, char *argv[])
 {
-  /* Initialize VM and display banner on stdout */
-  ps_interpreter_init(interpreter);
+  /* Display banner on stdout */
+  // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
+  printf(
+      "PascalScript v%d.%d.%d.%d\n",
+      PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+  interpreter = ps_interpreter_init(NULL);
+  if (interpreter == NULL)
+  {
+    printf("Could not allocate interpreter!\n");
+    return 1;
+  }
   interpreter->parser->trace = true;
   interpreter->parser->debug = false;
+  fprintf(
+      stderr,
+      "interpreter: %p, parser %p, symbols %p\n",
+      interpreter, interpreter->parser, interpreter->parser->symbols);
   ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
-  // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
-  printf("PascalScript v%d.%d.%d.%d\n",                                           // => %08x %d\n",
-         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX); //,
-                                                                                  //  ps_version->value->data.i, ps_version->value->data.i);
   if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
   // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
-  // if (!ps_interpreter_load_string(interpreter,"examples/00-hello.pas"))
+  // if (!ps_interpreter_load_string(interpreter, "examples/00-hello.pas"))
   {
     printf("Not loaded!\n");
     return 1;
@@ -69,6 +82,7 @@ int main(int argc, char *argv[])
   ps_interpreter_run(interpreter);
   ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
   ps_interpreter_done(interpreter);
+  interpreter = NULL;
   return 0;
 }
 

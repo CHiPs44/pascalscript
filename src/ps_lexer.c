@@ -69,7 +69,10 @@ char *ps_lexer_show_error(ps_lexer *lexer)
 bool ps_lexer_return_error(ps_lexer *lexer, ps_error error, char *message)
 {
     if (message != NULL)
-        fprintf(stderr, "%s: %d %s\n", message, error, ps_error_get_message(error));
+        fprintf(stderr, "%s: %d %s at line %d column %d %c\n",
+                message, error, ps_error_get_message(error),
+                lexer->buffer->current_line, lexer->buffer->current_column,
+                lexer->buffer->current_char >= ' ' ? lexer->buffer->current_char : '_');
     lexer->current_token.type = TOKEN_NONE;
     lexer->error = error;
     return false;
@@ -220,30 +223,88 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 
 bool ps_lexer_read_number(ps_lexer *lexer)
 {
-    char buffer[PS_BUFFER_MAX_COLUMNS];
+    char buffer[PS_BUFFER_MAX_COLUMNS + 1];
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     int base = 10;
-    if (isdigit(c))
+    bool is_real = false;
+    bool has_exp = false;
+    char *digits = "0123456789";
+    if (c == '%')
+    {
+        base = 2;
+        digits = "01";
+        if (!ps_lexer_read_next_char(lexer))
+            return false;
+        c = ps_buffer_peek_char(lexer->buffer);
+    }
+    else if (c == '&')
+    {
+        base = 8;
+        digits = "01234567";
+        if (!ps_lexer_read_next_char(lexer))
+            return false;
+        c = ps_buffer_peek_char(lexer->buffer);
+    }
+    else if (c == '$')
+    {
+        base = 16;
+        digits = "01234567abcdefABCDEF";
+        if (!ps_lexer_read_next_char(lexer))
+            return false;
+        c = ps_buffer_peek_char(lexer->buffer);
+    }
+    if (strchr(digits, c) != NULL)
     {
         do
         {
-            buffer[pos] = c;
-            if (pos > 9)
+            if (pos > PS_BUFFER_MAX_COLUMNS)
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
+            buffer[pos] = c;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             c = ps_buffer_peek_char(lexer->buffer);
+            if (base == 10)
+            {
+                if (c == '.')
+                {
+                    if (!is_real)
+                        is_real = true;
+                    else
+                        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
+                }
+                else if (c == 'e' || c == 'E')
+                {
+                    is_real = true;
+                    has_exp = true;
+                }
+                else if (c == '+' || c == '-')
+                {
+                    if (!has_exp)
+                        break;
+                }
+            }
             pos += 1;
-        } while (isdigit(c));
+        } while (strchr(digits, c) != NULL || strchr(".eE+-", c) != NULL);
         buffer[pos] = '\0';
-        lexer->current_token.type = TOKEN_UNSIGNED_VALUE;
-        // TODO? use even better conversion from string to unsigned integer
+        // TODO? use even better conversion from string to real or unsigned integer
         char *end;
-        unsigned long u = strtoul(buffer, &end, base);
-        if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
-            return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
-        lexer->current_token.value.u = (ps_unsigned)u;
+        if (is_real)
+        {
+            double d = strtod(buffer, &end);
+            if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
+            lexer->current_token.type = TOKEN_REAL_VALUE;
+            lexer->current_token.value.r = (float)d;
+        }
+        else
+        {
+            unsigned long u = strtoul(buffer, &end, base);
+            if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
+            lexer->current_token.type = TOKEN_UNSIGNED_VALUE;
+            lexer->current_token.value.u = (ps_unsigned)u;
+        }
         lexer->error = PS_LEXER_ERROR_NONE;
         return true;
     }
@@ -381,7 +442,7 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
     // fprintf(stderr, "char=%d next=%d length=%d error=%d\n", current_char, next_char, lexer->buffer->length, lexer->buffer->error);
-    if (isdigit(current_char))
+    if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))
             return false;
