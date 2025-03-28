@@ -117,75 +117,71 @@ bool ps_visit_block_var(ps_parser *parser)
     ps_symbol *var;
     EXPECT_TOKEN(TOKEN_VAR);
     READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_IDENTIFIER);
-    strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_COLON);
-    READ_NEXT_TOKEN;
-    switch (lexer->current_token.type)
+    do
     {
-    case TOKEN_BOOLEAN:
-        type = ps_symbol_boolean.value->data.t;
-        data.b = (ps_boolean) false;
-        break;
-    case TOKEN_CHAR:
-        type = ps_symbol_char.value->data.t;
-        data.c = '\0';
-        break;
-    case TOKEN_INTEGER:
-        type = ps_symbol_integer.value->data.t;
-        data.i = 0;
-        break;
-    case TOKEN_UNSIGNED:
-        type = ps_symbol_unsigned.value->data.t;
-        data.u = 0;
-        break;
-    case TOKEN_REAL:
-        type = ps_symbol_real.value->data.t;
-        data.r = 0.0;
-        break;
-    default:
-        parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-        return false;
-    }
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_SEMI_COLON);
-    READ_NEXT_TOKEN;
-    value = ps_value_init(type, data);
-    var = ps_symbol_init(
-        PS_SYMBOL_SCOPE_GLOBAL,
-        PS_SYMBOL_KIND_VARIABLE,
-        &identifier,
-        value);
-    if (var == NULL)
-    {
-        parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-        return false;
-    }
-    if (ps_symbol_table_add(parser->symbols, var) == NULL)
-        return false;
-    // TODO loop if we have another identifier
-
+        EXPECT_TOKEN(TOKEN_IDENTIFIER);
+        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(TOKEN_COLON);
+        READ_NEXT_TOKEN;
+        switch (lexer->current_token.type)
+        {
+        case TOKEN_BOOLEAN:
+            type = ps_symbol_boolean.value->data.t;
+            data.b = (ps_boolean) false;
+            break;
+        case TOKEN_CHAR:
+            type = ps_symbol_char.value->data.t;
+            data.c = '\0';
+            break;
+        case TOKEN_INTEGER:
+            type = ps_symbol_integer.value->data.t;
+            data.i = 0;
+            break;
+        case TOKEN_UNSIGNED:
+            type = ps_symbol_unsigned.value->data.t;
+            data.u = 0;
+            break;
+        case TOKEN_REAL:
+            type = ps_symbol_real.value->data.t;
+            data.r = 0.0;
+            break;
+        default:
+            parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
+            return false;
+        }
+        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN;
+        value = ps_value_init(type, data);
+        var = ps_symbol_init(
+            PS_SYMBOL_SCOPE_GLOBAL,
+            PS_SYMBOL_KIND_VARIABLE,
+            &identifier,
+            value);
+        if (var == NULL)
+        {
+            parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+            return false;
+        }
+        if (ps_symbol_table_add(parser->symbols, var) == NULL)
+            return false;
+    } while (lexer->current_token.type == TOKEN_IDENTIFIER);
     return true;
 }
 
 bool ps_visit_block(ps_parser *parser)
 {
     GET_LEXER;
-
-    if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
-        return false;
-    fprintf(stderr, "CONST OK\n");
-
-    // TODO
-    // if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(parser))
-    //     return false;
-    // fprintf(stderr, "TYPE OK\n");
-
-    if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
-        return false;
-    fprintf(stderr, "VAR OK\n");
-
+    do
+    {
+        if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(parser))
+            return false;
+        // if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(parser))
+        //     return false;
+        if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(parser))
+            return false;
+    } while (lexer->current_token.type != TOKEN_BEGIN);
     EXPECT_TOKEN(TOKEN_BEGIN);
     READ_NEXT_TOKEN;
     // TODO
@@ -193,11 +189,6 @@ bool ps_visit_block(ps_parser *parser)
     //     return false;
     EXPECT_TOKEN(TOKEN_END);
     READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_DOT);
-    // NB: source code after '.' is not analyzed and has not to be
-
-    fprintf(stderr, "MAIN_BLOCK OK\n");
-
     return true;
 }
 
@@ -210,5 +201,7 @@ bool ps_parser_start(ps_parser *parser)
     fprintf(stderr, "PROGRAM OK\n");
     if (!ps_visit_block(parser))
         return false;
+    EXPECT_TOKEN(TOKEN_DOT);
+    // NB: source code after '.' is not analyzed and has not to be
     return true;
 }
