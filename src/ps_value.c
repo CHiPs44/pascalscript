@@ -176,42 +176,65 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     PS_VALUE_SET(type_def, p);
 // }
 
-char *ps_value_get_debug_value(ps_value *value)
+char *ps_value_to_string(ps_value *value, bool debug)
 {
-    static char buffer[128];
+    static char buffer[PS_STRING_MAX_LEN + 1];
     if (value == NULL)
     {
-        snprintf(buffer, sizeof(buffer) - 1, "NULL VALUE");
-        return buffer;
+        if (debug)
+        {
+            snprintf(buffer, sizeof(buffer) - 1, "NULL VALUE");
+            return buffer;
+        }
+        return NULL;
     }
     if (value->type == NULL)
     {
-        snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
-        return buffer;
+        if (debug)
+        {
+            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
+            return buffer;
+        }
+        return NULL;
     }
     // TODO? if (value->type->type!=value->type->base)
     switch (value->type->base)
     {
     case PS_TYPE_NONE:
-        snprintf(buffer, sizeof(buffer) - 1, "[none]");
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "[none]");
+        else
+            return NULL;
         break;
     case PS_TYPE_DEFINITION:
-        snprintf(buffer, sizeof(buffer) - 1, "%s", ps_value_get_type_definition_name(value->type));
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "%s", ps_value_get_type_definition_name(value->type));
+        else
+            return NULL;
         break;
     case PS_TYPE_REAL:
         snprintf(buffer, sizeof(buffer) - 1, "%G", value->data.r);
         break;
     case PS_TYPE_INTEGER:
-        snprintf(buffer, sizeof(buffer) - 1, "%d / 0x%x", value->data.i, value->data.i);
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "%d / 0x%x", value->data.i, value->data.i);
+        else
+            snprintf(buffer, sizeof(buffer) - 1, "%d", value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
-        snprintf(buffer, sizeof(buffer) - 1, "%u / 0x%x", value->data.u, value->data.u);
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "%u / 0x%x", value->data.u, value->data.u);
+        else
+            snprintf(buffer, sizeof(buffer) - 1, "%u", value->data.u);
         break;
     case PS_TYPE_BOOLEAN:
         snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "TRUE" : "FALSE");
         break;
     case PS_TYPE_CHAR:
-        snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.', value->data.c);
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.', value->data.c);
+        else
+            snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
         break;
     // case PS_TYPE_STRING:
     //     snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", sizeof(buffer) - 20, value->data.s->str, value->data.s->len, value->data.s->max);
@@ -220,10 +243,23 @@ char *ps_value_get_debug_value(ps_value *value)
     //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
     //     break;
     default:
-        snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type->base);
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type->base);
+        else
+            return NULL;
         break;
     }
     return buffer;
+}
+
+char *ps_value_get_display_value(ps_value *value)
+{
+    return ps_value_to_string(value, false);
+}
+
+char *ps_value_get_debug_value(ps_value *value)
+{
+    return ps_value_to_string(value, true);
 }
 
 char *ps_value_dump(ps_value *value)

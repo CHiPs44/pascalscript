@@ -151,6 +151,8 @@ struct s_ps_keyword
     { .token_type = TOKEN_VAR           , .keyword = "VAR"              },
     { .token_type = TOKEN_WHILE         , .keyword = "WHILE"            },
     { .token_type = TOKEN_WITH          , .keyword = "WITH"             },
+    { .token_type = TOKEN_WRITE         , .keyword = "WRITE"            },
+    { .token_type = TOKEN_WRITELN       , .keyword = "WRITELN"          },
     { .token_type = TOKEN_XOR           , .keyword = "XOR"              },
     // clang-format on
 };

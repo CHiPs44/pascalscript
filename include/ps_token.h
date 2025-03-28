@@ -51,6 +51,8 @@ extern "C"
         -absolute       -asm            -inline             -operator   -reintroduce
         -unit           -interface      -implementation     -uses
         -constructor    -destructor     -inherited          -object     -self
+
+        forward
     */
 
     /* THESE ARE NOT TOKENS
@@ -164,6 +166,10 @@ extern "C"
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
+        // These should not be tokens (?)
+        // ==============================
+        TOKEN_WRITE,
+        TOKEN_WRITELN,
         // Make token value fit in one byte
         // ================================
         TOKEN_MAX = UINT8_MAX
