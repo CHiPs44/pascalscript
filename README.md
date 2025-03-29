@@ -119,6 +119,7 @@ Examples **must** be compilable with Free Pascal `fpc`, in default FPC mode (`fp
 - "Brinch Hansen On Pascal Compilers"
   - <http://pascal.hansotten.com/uploads/pbh/brinch%20hansen%20on%20pascal%20compilers%20OCR.pdf>
   - <https://github.com/Jtkozzy/BHK>
+- "Rascal - A simple Pascal interpreter written in rust, by Tyler LaBerge (MIT license)." <https://github.com/tylerlaberge/rascal>
 
 ### Other sources about compilers and interpreters
 
