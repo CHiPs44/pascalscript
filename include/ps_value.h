@@ -50,7 +50,7 @@ extern "C"
     ps_value *ps_value_init(ps_type_definition *type, ps_value_data data);
 
     // clang-format off
-    bool       ps_value_is_scalar   (ps_value *value);
+    bool       ps_value_is_ordinal   (ps_value *value);
     bool       ps_value_is_number   (ps_value *value);
     ps_value  *ps_value_set_integer (ps_value *value, ps_integer  i);
     ps_value  *ps_value_set_unsigned(ps_value *value, ps_unsigned u);

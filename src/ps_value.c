@@ -26,7 +26,7 @@ ps_value *ps_value_init(ps_type_definition *type, ps_value_data data)
     return value;
 }
 
-bool ps_value_is_scalar(ps_value *value)
+bool ps_value_is_ordinal(ps_value *value)
 {
     // /* /!\ based on enum order! */
     // return (value->type->base >= PS_TYPE_INTEGER && value->type->base <= PS_TYPE_SUBRANGE);
@@ -244,7 +244,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
     //     break;
     default:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "[? %d ?]", value->type->base);
+            snprintf(buffer, sizeof(buffer) - 1, "[? TYPE %d ?]", value->type->base);
         else
             return NULL;
         break;

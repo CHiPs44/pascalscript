@@ -20,11 +20,11 @@ extern "C"
 
     // static ps_error interpreter_errno = PS_ERROR_ZERO;
 
-    typedef struct s_ps_runtime
+    typedef struct s_ps_interpreter
     {
         ps_parser *parser;
-        bool range_check;
         ps_error error;
+        bool range_check;
         bool allocated;
     } ps_interpreter;
 

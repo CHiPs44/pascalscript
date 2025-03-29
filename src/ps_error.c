@@ -67,14 +67,14 @@ char *ps_error_get_message(ps_error error)
         return "None";
     case PS_RUNTIME_ERROR_OUT_OF_MEMORY:
         return "Out of memory";
-    case PS_RUNTIME_ERROR_STACK_EMPTY:
+    case PS_RUNTIME_ERROR_STACK_UNDERFLOW:
         return "Stack empty";
     case PS_RUNTIME_ERROR_STACK_OVERFLOW:
         return "Stack overflow";
-    case PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW:
-        return "Global table full";
-    case PS_RUNTIME_ERROR_GLOBAL_TABLE_NOT_FOUND:
-        return "Symbol not foun in global table";
+    case PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED:
+        return "Symbol not added";
+    case PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND:
+        return "Symbol not found";
     case PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
         return "Unknown unary operator";
     case PS_RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR:
@@ -83,11 +83,13 @@ char *ps_error_get_message(ps_error error)
         return "Unexpected type";
     case PS_RUNTIME_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
+    case PS_RUNTIME_ERROR_EXPECTED_CONSTANT:
+        return "Constant expected";
     case PS_RUNTIME_ERROR_EXPECTED_VALUE:
         return "Value expected";
     case PS_RUNTIME_ERROR_EXPECTED_NUMBER:
         return "Number expected";
-    case PS_RUNTIME_ERROR_EXPECTED_SCALAR:
+    case PS_RUNTIME_ERROR_EXPECTED_ORDINAL:
         return "Scalar expected";
     case PS_RUNTIME_ERROR_EXPECTED_INTEGER:
         return "Integer expected";
@@ -118,6 +120,17 @@ char *ps_error_get_message(ps_error error)
     }
     snprintf(message, sizeof(message) - 1, "Unknown %d", error);
     return message;
+}
+
+int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...)
+{
+    int n = 0;
+    va_list args;
+    va_start(args, format);
+    n += vsnprintf(buffer, len, "ERROR: %s ", ps_error_get_message(error));
+    n += vsnprintf(buffer + n, len - n, format, args);
+    va_end(args);
+    return n;
 }
 
 int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...)

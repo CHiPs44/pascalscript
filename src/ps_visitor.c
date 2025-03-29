@@ -4,23 +4,27 @@
 #include "ps_parser.h"
 
 // clang-format off
-#define GET_LEXER                    ps_lexer *lexer = ps_parser_get_lexer(parser)
-#define READ_NEXT_TOKEN              if (!ps_lexer_read_next_token(lexer)) return false; else if (parser->trace) ps_token_dump(&lexer->current_token)
-#define EXPECT_TOKEN(__TOKEN_TYPE__) if (!ps_parser_expect_token_type(parser, __TOKEN_TYPE__)) return false
+#define GET_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(parser)
+#define READ_NEXT_TOKEN                 if (!ps_lexer_read_next_token(lexer)) return false; else if (parser->trace) ps_token_dump(&lexer->current_token)
+#define EXPECT_TOKEN(__TOKEN_TYPE__)    if (!ps_parser_expect_token_type(parser, __TOKEN_TYPE__)) return false
+#define RETURN_ERROR(__PS_ERROR__)      { parser->error = __PS_ERROR__; return false; }
+#define COPY_IDENTIFIER(__IDENTIFIER__) strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 // clang-format on
 
 /**
  * Visit PROGRAM IDENTIFIER;
+ *
+ * Next step : ignore?
+ *       ( IDENTIFIER , IDENTIFIER ...)
  */
 bool ps_visit_program(ps_parser *parser)
 {
     ps_identifier identifier;
-
     GET_LEXER;
     EXPECT_TOKEN(TOKEN_PROGRAM);
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_IDENTIFIER);
-    strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+    COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
@@ -29,7 +33,8 @@ bool ps_visit_program(ps_parser *parser)
         PS_SYMBOL_KIND_PROGRAM,
         &identifier,
         NULL);
-    ps_symbol_table_add(parser->symbols, program);
+    if (ps_symbol_table_add(parser->symbols, program) == NULL)
+        RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     return true;
 }
 
@@ -37,6 +42,9 @@ bool ps_visit_program(ps_parser *parser)
  * Visit CONST IDENTIFIER = VALUE;
  *             IDENTIFIER = VALUE;
  *             ...
+ * Next steps:
+ *       IDENTIFIER = IDENTIFIER | VALUE ;
+ *       IDENTIFIER = CONSTANT_EXPRESSION ;
  */
 bool ps_visit_block_const(ps_parser *parser)
 {
@@ -51,12 +59,21 @@ bool ps_visit_block_const(ps_parser *parser)
     do
     {
         EXPECT_TOKEN(TOKEN_IDENTIFIER);
-        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        COPY_IDENTIFIER(identifier);
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_EQUAL);
         READ_NEXT_TOKEN;
         switch (lexer->current_token.type)
         {
+        case TOKEN_IDENTIFIER:
+            constant = ps_symbol_table_find(parser->symbols, lexer->current_token.value.identifier);
+            if (constant == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
+            if (constant->kind != PS_SYMBOL_KIND_CONSTANT)
+                RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_CONSTANT);
+            type = constant->value->type;
+            data = constant->value->data;
+            break;
         case TOKEN_INTEGER_VALUE:
             type = ps_symbol_integer.value->data.t;
             data.i = lexer->current_token.value.i;
@@ -83,8 +100,7 @@ bool ps_visit_block_const(ps_parser *parser)
         //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
         //     break;
         default:
-            parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-            return false;
+            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_SEMI_COLON);
@@ -97,19 +113,20 @@ bool ps_visit_block_const(ps_parser *parser)
             value);
         if (constant == NULL)
         {
-            parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-            return false;
+            RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
         }
         if (ps_symbol_table_add(parser->symbols, constant) == NULL)
-            return false;
+            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == TOKEN_IDENTIFIER);
     return true;
 }
 
 /**
- * Visit VAR IDENTIFIER : TYPE;
- *           IDENTIFIER : TYPE;
- *           ...
+ * Visit    VAR IDENTIFIER : TYPE;
+ *              IDENTIFIER : TYPE;
+ *          ...
+ * Next step: allow identifier list with commas
+ *              IDENTIFIER, IDENTIFIER, ... : TYPE ;
  */
 bool ps_visit_block_var(ps_parser *parser)
 {
@@ -118,13 +135,13 @@ bool ps_visit_block_var(ps_parser *parser)
     ps_type_definition *type;
     ps_value *value;
     ps_value_data data;
-    ps_symbol *var;
+    ps_symbol *variable;
     EXPECT_TOKEN(TOKEN_VAR);
     READ_NEXT_TOKEN;
     do
     {
         EXPECT_TOKEN(TOKEN_IDENTIFIER);
-        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        COPY_IDENTIFIER(identifier);
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_COLON);
         READ_NEXT_TOKEN;
@@ -151,33 +168,33 @@ bool ps_visit_block_var(ps_parser *parser)
             data.r = 0.0;
             break;
         default:
-            parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-            return false;
+            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
         value = ps_value_init(type, data);
-        var = ps_symbol_init(
+        variable = ps_symbol_init(
             PS_SYMBOL_SCOPE_GLOBAL,
             PS_SYMBOL_KIND_VARIABLE,
             &identifier,
             value);
-        if (var == NULL)
-        {
-            parser->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-            return false;
-        }
-        if (ps_symbol_table_add(parser->symbols, var) == NULL)
-            return false;
+        if (variable == NULL)
+            RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+        if (ps_symbol_table_add(parser->symbols, variable) == NULL)
+            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == TOKEN_IDENTIFIER);
     return true;
 }
 
 /**
  * Visit instruction sequence
+ *      WRITE | WRITELN ( IDENTIFIER ) ;
+ *      ...
+ * Next steps:
  *      IDENTIFIER := EXPRESSION ;
- *      WRITELN ( IDENTIFIER ) ;
+ *      WRITE | WRITELN ( EXPRESSION ) ;
+ *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
  */
 bool ps_visit_instructions(ps_parser *parser)
 {
@@ -189,34 +206,33 @@ bool ps_visit_instructions(ps_parser *parser)
     switch (lexer->current_token.type)
     {
     case TOKEN_IDENTIFIER:
-        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        COPY_IDENTIFIER(identifier);
         EXPECT_TOKEN(TOKEN_ASSIGN);
         // TODO
-        parser->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         break;
+    case TOKEN_WRITE:
     case TOKEN_WRITELN:
+        READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_LEFT_PARENTHESIS);
+        READ_NEXT_TOKEN;
         EXPECT_TOKEN(TOKEN_IDENTIFIER);
-        strncpy(identifier, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN);
+        COPY_IDENTIFIER(identifier);
         EXPECT_TOKEN(TOKEN_RIGHT_PARENTHESIS);
+        READ_NEXT_TOKEN;
+        // start "code" execution⁼
         symbol = ps_symbol_table_get(parser->symbols, identifier);
         if (symbol == NULL)
-        {
-            parser->error = PS_RUNTIME_ERROR_GLOBAL_TABLE_NOT_FOUND;
-            return false;
-        }
+            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
         display_value = ps_value_get_display_value(symbol->value);
         if (display_value == NULL)
-        {
-            parser->error = PS_RUNTIME_ERROR_EXPECTED_STRING;
-            return false;
-        }
-        printf("%s\n", display_value);
+            RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
+        if (lexer->current_token.type == TOKEN_WRITELN)
+            printf("%s\n", display_value);
+        // end "code" execution
         break;
     default:
-        parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-        return false;
+        RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
     }
 
     return true;
@@ -227,6 +243,7 @@ bool ps_visit_instructions(ps_parser *parser)
  *       BEGIN
  *         [ INSTRUCTION ... ]
  *       END
+ * NB: ; or . after END is analyzed in the caller
  */
 bool ps_visit_block(ps_parser *parser)
 {
@@ -249,13 +266,17 @@ bool ps_visit_block(ps_parser *parser)
     return true;
 }
 
+/**
+ * Visit PROGRAM...
+ *       BLOCK
+ *       .
+ */
 bool ps_parser_start(ps_parser *parser)
 {
     GET_LEXER;
     READ_NEXT_TOKEN;
     if (!ps_visit_program(parser))
         return false;
-    fprintf(stderr, "PROGRAM OK\n");
     if (!ps_visit_block(parser))
         return false;
     EXPECT_TOKEN(TOKEN_DOT);

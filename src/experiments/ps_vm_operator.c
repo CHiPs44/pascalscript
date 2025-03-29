@@ -71,7 +71,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     // ps_value result;
     // ps_symbol *a = ps_vm_pop(vm);
     // if (a == NULL)
-    //     return PS_RUNTIME_ERROR_STACK_EMPTY;
+    //     return PS_RUNTIME_ERROR_STACK_UNDERFLOW;
     // // Release auto values ASAP, we can still reference them
     // if (a->kind == PS_SYMBOL_KIND_AUTO)
     //     ps_vm_auto_free(vm, &a->name);
@@ -135,13 +135,13 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
     // ps_value result;
     // ps_symbol *b = ps_vm_pop(vm);
     // if (b == NULL)
-    //     return PS_RUNTIME_ERROR_STACK_EMPTY;
+    //     return PS_RUNTIME_ERROR_STACK_UNDERFLOW;
     // // Release auto values ASAP, we can still reference them
     // if (b->kind == PS_SYMBOL_KIND_AUTO)
     //     ps_vm_auto_free(vm, b->name);
     // ps_symbol *a = ps_vm_pop(vm);
     // if (a == NULL)
-    //     return PS_RUNTIME_ERROR_STACK_EMPTY;
+    //     return PS_RUNTIME_ERROR_STACK_UNDERFLOW;
     // // Release auto values ASAP, we can still reference them
     // if (a->kind == PS_SYMBOL_KIND_AUTO)
     //     ps_vm_auto_free(vm, a->name);
@@ -152,9 +152,9 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
     //     op == OP_BOOL_AND || op == OP_BOOL_OR)
     // {
     //     if (a->value->type->base != PS_TYPE_INTEGER)
-    //         return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
+    //         return PS_RUNTIME_ERROR_EXPECTED_ORDINAL;
     //     if (b->value->type->base != PS_TYPE_INTEGER)
-    //         return PS_RUNTIME_ERROR_EXPECTED_SCALAR;
+    //         return PS_RUNTIME_ERROR_EXPECTED_ORDINAL;
     //     switch (op)
     //     {
     //     case OP_ADD:

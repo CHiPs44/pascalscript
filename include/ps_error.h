@@ -47,10 +47,10 @@ extern "C"
         /* -------------------- RUNTIME -------------------- */
         PS_RUNTIME_ERROR_NONE = 0x40,
         PS_RUNTIME_ERROR_OUT_OF_MEMORY,
-        PS_RUNTIME_ERROR_STACK_EMPTY,
+        PS_RUNTIME_ERROR_STACK_UNDERFLOW,
         PS_RUNTIME_ERROR_STACK_OVERFLOW,
-        PS_RUNTIME_ERROR_GLOBAL_TABLE_OVERFLOW,
-        PS_RUNTIME_ERROR_GLOBAL_TABLE_NOT_FOUND,
+        PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED,
+        PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND,
         PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR,
         PS_RUNTIME_ERROR_UNKNOWN_BINARY_OPERATOR,
         PS_RUNTIME_ERROR_UNEXPECTED_TYPE,
@@ -60,12 +60,13 @@ extern "C"
         PS_RUNTIME_ERROR_EXPECTED_UNSIGNED,
         PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED,
         PS_RUNTIME_ERROR_EXPECTED_REAL,
-        PS_RUNTIME_ERROR_EXPECTED_SCALAR,
+        PS_RUNTIME_ERROR_EXPECTED_ORDINAL,
         PS_RUNTIME_ERROR_EXPECTED_BOOLEAN,
         PS_RUNTIME_ERROR_EXPECTED_CHAR,
         PS_RUNTIME_ERROR_EXPECTED_STRING,
         PS_RUNTIME_ERROR_ASSIGN_TO_CONST,
         PS_RUNTIME_ERROR_EXPECTED_VARIABLE,
+        PS_RUNTIME_ERROR_EXPECTED_CONSTANT,
         PS_RUNTIME_ERROR_TYPE_MISMATCH,
         PS_RUNTIME_ERROR_DIVISION_BY_ZERO,
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
@@ -76,13 +77,14 @@ extern "C"
 
 #define PS_ERROR_SIZE sizeof(ps_error)
 
-#define ps_error_is_from_buffer (error)(error >= PS_BUFFER_ERROR_NONE && error <= PS_BUFFER_ERROR_NONE + 0xf)
-#define ps_error_is_from_lexer (error)(error >= PS_LEXER_ERROR_NONE && error <= PS_LEXER_ERROR_NONE + 0xf)
-#define ps_error_is_from_parser (error)(error >= PS_PARSER_ERROR_NONE && error <= PS_PARSER_ERROR_NONE + 0xf)
-#define ps_error_is_from_runtime(error) (error >= PS_RUNTIME_ERROR_NONE && error <= PS_RUNTIME_ERROR_NONE + 07f)
+#define ps_error_is_from_buffer(error) (error >= PS_BUFFER_ERROR_NONE && error <= PS_BUFFER_ERROR_NONE + 0xf)
+#define ps_error_is_from_lexer(error) (error >= PS_LEXER_ERROR_NONE && error <= PS_LEXER_ERROR_NONE + 0xf)
+#define ps_error_is_from_parser(error) (error >= PS_PARSER_ERROR_NONE && error <= PS_PARSER_ERROR_NONE + 0xf)
+#define ps_error_is_from_runtime(error) (error >= PS_RUNTIME_ERROR_NONE && error <= PS_RUNTIME_ERROR_NONE + 0x7f)
 
     char *ps_error_get_message(ps_error error);
 
+    int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...);
     int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...);
 
 #ifdef __cplusplus
