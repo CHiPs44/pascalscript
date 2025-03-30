@@ -55,6 +55,8 @@ extern "C"
 
     bool ps_interpreter_run(ps_interpreter *interpreter);
 
+    bool ps_visit_start(ps_interpreter *interpreter);
+
 #ifdef __cplusplus
 }
 #endif

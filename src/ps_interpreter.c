@@ -103,11 +103,20 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
 
 bool ps_interpreter_run(ps_interpreter *interpreter)
 {
-    if (!ps_parser_start(interpreter->parser))
+    ps_parser *parser = interpreter->parser;
+    ps_lexer *lexer = ps_parser_get_lexer(parser);
+    parser->debug = true;
+    if (!ps_visit_start(interpreter))
     {
-        fprintf(stderr, "ERROR interpreter=%d %s parser=%d %s\n",
+        ps_buffer_dump(lexer->buffer,
+                       lexer->buffer->current_line > 0 ? lexer->buffer->current_line - 1 : 0,
+                       lexer->buffer->current_line < lexer->buffer->line_count - 1 ? lexer->buffer->current_line + 1 : lexer->buffer->line_count - 1);
+        fprintf(stderr,
+                "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
+                lexer->buffer->current_line + 1, lexer->buffer->current_column + 1,
                 interpreter->error, ps_error_get_message(interpreter->error),
-                interpreter->parser->error, ps_error_get_message(interpreter->parser->error));
+                parser->error, ps_error_get_message(parser->error),
+                lexer->error, ps_error_get_message(lexer->error));
         return false;
     }
     return true;

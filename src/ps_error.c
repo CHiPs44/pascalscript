@@ -124,10 +124,9 @@ char *ps_error_get_message(ps_error error)
 
 int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...)
 {
-    int n = 0;
+    int n = snprintf(buffer, len, "ERROR: %s ", ps_error_get_message(error));
     va_list args;
     va_start(args, format);
-    n += vsnprintf(buffer, len, "ERROR: %s ", ps_error_get_message(error));
     n += vsnprintf(buffer + n, len - n, format, args);
     va_end(args);
     return n;

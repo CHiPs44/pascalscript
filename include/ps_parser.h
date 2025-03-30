@@ -9,10 +9,10 @@
 
 #include "ps_config.h"
 #include "ps_error.h"
-#include "ps_token.h"
 #include "ps_lexer.h"
-#include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_symbol.h"
+#include "ps_token.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -42,7 +42,6 @@ extern "C"
     ps_lexer *ps_parser_get_lexer(ps_parser *parser);
     bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type);
     ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[]);
-    bool ps_parser_start(ps_parser *parser);
 
 #ifdef __cplusplus
 }

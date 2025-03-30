@@ -39,6 +39,9 @@ extern "C"
     /** @brief SUCC - Get next value (successor) of ordinal value */
     bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
+    /** @brief NEG - Negate value of integer / unsigned / real */
+    bool ps_function_neg(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+
     /** @brief ABS - Get absolute value of integer / unsigned / real */
     bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 

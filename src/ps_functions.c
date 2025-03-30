@@ -121,39 +121,22 @@ bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_v
 /* ORDINAL                                                                    */
 /******************************************************************************/
 
-bool ps_function_neg(ps_interpreter *interpreter, ps_value *value, ps_value *result)
-{
-    result->type = value->type;
-    switch (value->type->base)
-    {
-    case PS_TYPE_INTEGER:
-        result->data.i = -value->data.i;
-        break;
-    case PS_TYPE_REAL:
-        result->data.r = -value->data.r;
-        break;
-    default:
-        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
-        return false;
-    }
-    return true;
-}
-
 bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = ps_symbol_boolean.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
-        result->data.b = (ps_boolean)(value->data.u & 1 == 1);
+        result->data.b = (ps_boolean)((value->data.u & 1) != 0);
         break;
     case PS_TYPE_INTEGER:
-        result->data.b = (ps_boolean)(value->data.i & 1 == 1);
+        result->data.b = (ps_boolean)((value->data.i & 1) != 0);
         break;
     default:
         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return false;
     }
+    return true;
 }
 
 bool ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *result)
@@ -192,11 +175,12 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
         return false;
     }
+    return true;
 }
 
 bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = &ps_symbol_char.value->type;
+    result->type = ps_symbol_char.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
@@ -330,6 +314,24 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
 /******************************************************************************/
 /* "MATH"                                                                     */
 /******************************************************************************/
+
+bool ps_function_neg(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    result->type = value->type;
+    switch (value->type->base)
+    {
+    case PS_TYPE_INTEGER:
+        result->data.i = -value->data.i;
+        break;
+    case PS_TYPE_REAL:
+        result->data.r = -value->data.r;
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+        return false;
+    }
+    return true;
+}
 
 bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
