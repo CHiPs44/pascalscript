@@ -5,6 +5,7 @@
 CC = LANG=C gcc
 # CFLAGS = -W -Wall -ansi -pedantic -std=c17 -g
 CFLAGS   = -Wall -Iinclude -ggdb
+CLIBS    = -lm 
 PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)
 INCLUDES = $(wildcard include/*.h)
@@ -12,7 +13,7 @@ INCLUDES = $(wildcard include/*.h)
 all: $(PROJECT)
 
 $(PROJECT): $(SOURCES) $(INCLUDES)
-	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES)
+	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES) $(CLIBS)
 
 clean:
 	rm -f $(PROJECT)
