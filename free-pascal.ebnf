@@ -47,7 +47,37 @@ ordinal_type            =   'INTEGER' | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'L
                             'BYTE' | 'WORD' | 'UNSIGNED' | 'QWORD' | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ;
 boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
 enumerated_type         =   '(' identifier_list ')' ;
-identifier_list         =   [ identifier ][ , identifier , ]* ;
+identifier_list         =   [ identifier ][ ',' , identifier ]* ;
 (* IGNORED assigned_enum_list *)
 
+expression              =   simple_expression [ relational_operator , simple_expression ] ;
+relational_operator     =   '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS' ;
+
+simple_expression       =   term [ additive_operator , term ] ;
+additive_operator       =   '+' | '-' | 'OR' | 'XOR' ;
+
+term                    =   factor [ multiplicative_operator , factor ] ;
+multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
+
+factor                  =   '(' expression ')'
+                        |   variable_reference
+                        |   function_call
+                        |   unsigned_constant
+                        |   'NOT' factor
+                        |   sign factor
+                        |   set_constructor
+                        |   value_typecast
+                        |   address_factor
+                        ;
+
+variable_reference      =   ???
+function_call           =   function_identifier , '(' , actual_parameter_list , ')' ;
+actual_parameter_list   =   expression [ ',' , expression ]*
+unsigned_constant       =   unsigned_number
+                        |   character_string
+                        |   constant identifier
+                        |   'NIL'
+                        ;
+
+...
 ```

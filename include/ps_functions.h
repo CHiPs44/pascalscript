@@ -15,8 +15,14 @@ extern "C"
 {
 #endif
 
-    /** @brief ABS - Get absolute value of integer / unsigned / real */
+    /** @brief NOT - Compute bitwise not for integer / unsigned, logical not for boolean */
     bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    /** @brief AND - Compute bitwise and for integer / unsigned, logical and for boolean */
+    bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
+    /** @brief OR - Compute bitwise or for integer / unsigned, logical or for boolean */
+    bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
+    /** @brief XOR - Compute bitwise xor for integer / unsigned, logical xor for boolean */
+    bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
 
     /** @brief ODD - true if integer/unsigned value is odd, false if even */
     bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result);
@@ -32,6 +38,15 @@ extern "C"
     bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *result);
     /** @brief SUCC - Get next value (successor) of ordinal value */
     bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+
+    /** @brief ABS - Get absolute value of integer / unsigned / real */
+    bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+
+    /** @brief TRUNC - Truncate real as integer */
+    bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+
+    /** @brief ROUND - Round real as integer */
+    bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
 #ifdef __cplusplus
 }

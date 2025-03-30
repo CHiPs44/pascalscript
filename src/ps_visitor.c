@@ -11,6 +11,36 @@
 #define COPY_IDENTIFIER(__IDENTIFIER__) strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 // clang-format on
 
+/* cf. https://en.wikipedia.org/wiki/Comparison_of_Pascal_and_C#Expressions
+    Level   Syntax Element      Operator
+    ------- ------------------- -----------------
+    0       factor              literal, variable
+    1       signed factor       unary minus, NOT
+    2       term                *, /, AND
+    3       expression          +, -, OR
+*/
+
+bool ps_visit_factor(ps_parser *parser)
+{
+    return true;
+}
+
+bool ps_visit_factor(ps_parser *parser)
+{
+    return true;
+}
+
+bool ps_visit_factor(ps_parser *parser)
+{
+    return true;
+}
+
+bool ps_visit_expression(ps_parser *parser)
+{
+    
+    return true;
+}
+
 /**
  * Visit PROGRAM IDENTIFIER;
  *

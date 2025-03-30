@@ -4,34 +4,133 @@
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+#include <math.h>
 #include <string.h>
 
 #include "ps_error.h"
-#include "ps_parser.h"
 #include "ps_system.h"
 #include "ps_value.h"
 #include "ps_interpreter.h"
 #include "ps_functions.h"
 
-bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+/******************************************************************************/
+/* BASE                                                                       */
+/******************************************************************************/
+
+bool ps_function_not(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_number(value))
+    result->type = value->type;
+    // NB: with FPC, not(subrange) or not(enum) yields integer result without range checking
+    switch (value->type->base)
     {
-        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+    case PS_TYPE_INTEGER:
+        result->data.i = ~value->data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        result->data.u = ~value->data.u;
+        break;
+    case PS_TYPE_BOOLEAN:
+        result->data.b = !value->data.b;
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return false;
     }
+    return true;
+}
+
+#define OP_AND 1
+#define OP_OR 2
+#define OP_XOR 3
+
+bool ps_function_and_or_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result, int op)
+{
+    if (a->type->base != b->type->base)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+        return false;
+    }
+    result->type = a->type;
+    switch (a->type->base)
+    {
+    case PS_TYPE_INTEGER:
+        switch (op)
+        {
+        case OP_AND:
+            result->data.i = a->data.i & b->data.i;
+            break;
+        case OP_OR:
+            result->data.i = a->data.i | b->data.i;
+            break;
+        case OP_XOR:
+            result->data.i = a->data.i ^ b->data.i;
+            break;
+        }
+        break;
+    case PS_TYPE_UNSIGNED:
+        switch (op)
+        {
+        case OP_AND:
+            result->data.u = a->data.u & b->data.u;
+            break;
+        case OP_OR:
+            result->data.u = a->data.u | b->data.u;
+            break;
+        case OP_XOR:
+            result->data.u = a->data.u ^ b->data.u;
+            break;
+        }
+        break;
+    case PS_TYPE_BOOLEAN:
+        switch (op)
+        {
+        case OP_AND:
+            result->data.b = (ps_boolean)(a->data.b && b->data.b);
+            break;
+        case OP_OR:
+            result->data.b = (ps_boolean)(a->data.b || b->data.b);
+            break;
+        case OP_XOR:
+            result->data.b = (ps_boolean)(a->data.b != b->data.b);
+            break;
+        }
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+        return false;
+    }
+    return true;
+}
+
+bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+{
+    return ps_function_and_or_xor(interpreter, a, b, result, OP_AND);
+}
+
+bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+{
+    return ps_function_and_or_xor(interpreter, a, b, result, OP_OR);
+}
+
+bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+{
+    return ps_function_and_or_xor(interpreter, a, b, result, OP_XOR);
+}
+
+/******************************************************************************/
+/* ORDINAL                                                                    */
+/******************************************************************************/
+
+bool ps_function_neg(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
     result->type = value->type;
     switch (value->type->base)
     {
-    case PS_TYPE_UNSIGNED:
-        // abs(u) => u
-        result->data.u = value->data.u;
-        break;
     case PS_TYPE_INTEGER:
-        result->data.i = abs(value->data.i);
+        result->data.i = -value->data.i;
         break;
     case PS_TYPE_REAL:
-        result->data.r = fabs(value->data.r);
+        result->data.r = -value->data.r;
         break;
     default:
         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
@@ -223,6 +322,72 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
         break;
     default:
         interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+        return false;
+    }
+    return true;
+}
+
+/******************************************************************************/
+/* "MATH"                                                                     */
+/******************************************************************************/
+
+bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    result->type = value->type;
+    switch (value->type->base)
+    {
+    case PS_TYPE_UNSIGNED:
+        // abs(u) => u
+        result->data.u = value->data.u;
+        break;
+    case PS_TYPE_INTEGER:
+        result->data.i = abs(value->data.i);
+        break;
+    case PS_TYPE_REAL:
+        result->data.r = fabs(value->data.r);
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_NUMBER;
+        return false;
+    }
+    return true;
+}
+
+bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    result->type = ps_symbol_integer.value->type;
+    switch (value->type->base)
+    {
+    case PS_TYPE_REAL:
+        if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
+        {
+            interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return false;
+        }
+        result->data.i = (ps_integer)trunc(value->data.r);
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_REAL;
+        return false;
+    }
+    return true;
+}
+
+bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    result->type = ps_symbol_integer.value->type;
+    switch (value->type->base)
+    {
+    case PS_TYPE_REAL:
+        if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
+        {
+            interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return false;
+        }
+        result->data.i = (ps_integer)round(value->data.r);
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_REAL;
         return false;
     }
     return true;
