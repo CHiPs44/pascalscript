@@ -70,8 +70,8 @@ factor                  =   '(' expression ')'
                         |   address_factor
                         ;
 
-variable_reference      =   ???
-function_call           =   function_identifier , '(' , actual_parameter_list , ')' ;
+variable_reference      =   identifier ;
+function_call           =   function_identifier , [ '(' , actual_parameter_list , ')' ] ;
 actual_parameter_list   =   expression [ ',' , expression ]*
 unsigned_constant       =   unsigned_number
                         |   character_string
