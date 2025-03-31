@@ -23,7 +23,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 {
     GET_LEXER;
     ps_value factor;
-    fprintf(stderr, "*** FACTOR\n");
+    if (interpreter->parser->debug)
+        fprintf(stderr, "*** FACTOR\n");
     switch (lexer->current_token.type)
     {
     case TOKEN_IDENTIFIER:
@@ -76,13 +77,16 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 
 bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
-    fprintf(stderr, "*** TERM\n");
+    if (interpreter->parser->debug)
+        fprintf(stderr, "*** TERM\n");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
 
 bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
 {
+    if (interpreter->parser->debug)
+        fprintf(stderr, "*** SIMPLE_EXPRESSION\n");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
@@ -325,7 +329,21 @@ bool ps_visit_instructions(ps_interpreter *interpreter)
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, &result))
             return false;
-        ps_value_debug(stderr, "ASSIGN", &result);
+        ps_value_debug(stderr, "ASSIGN => ", &result);
+        EXPECT_TOKEN(TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN;
+        symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+        if (symbol == NULL)
+        {
+            interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
+            return false;
+        }
+        if (result.type != symbol->value->type)
+        {
+            interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+            return false;
+        }
+        symbol->value->data = result.data;
         break;
     case TOKEN_WRITE:
     case TOKEN_WRITELN:
