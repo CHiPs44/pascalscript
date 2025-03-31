@@ -32,27 +32,27 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         return false;
     case TOKEN_CHAR_VALUE:
-        result->type = ps_symbol_char.value->type;
+        result->type = ps_symbol_char.value->data.t;
         result->data.c = lexer->current_token.value.c;
         READ_NEXT_TOKEN;
         return true;
     case TOKEN_INTEGER_VALUE:
-        result->type = ps_symbol_integer.value->type;
+        result->type = ps_symbol_integer.value->data.t;
         result->data.i = lexer->current_token.value.i;
         READ_NEXT_TOKEN;
         return true;
     case TOKEN_UNSIGNED_VALUE:
-        result->type = ps_symbol_unsigned.value->type;
+        result->type = ps_symbol_unsigned.value->data.t;
         result->data.u = lexer->current_token.value.u;
         READ_NEXT_TOKEN;
         return true;
     case TOKEN_REAL_VALUE:
-        result->type = ps_symbol_real.value->type;
+        result->type = ps_symbol_real.value->data.t;
         result->data.r = lexer->current_token.value.r;
         READ_NEXT_TOKEN;
         return true;
     case TOKEN_BOOLEAN_VALUE:
-        result->type = ps_symbol_boolean.value->type;
+        result->type = ps_symbol_boolean.value->data.t;
         result->data.b = lexer->current_token.value.b;
         READ_NEXT_TOKEN;
         return true;
@@ -79,42 +79,65 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
     if (interpreter->parser->debug)
         fprintf(stderr, "*** TERM\n");
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    if (!ps_visit_factor(interpreter, result))
+        return false;
+    return true;
+    // interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+    // return false;
 }
 
 bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
 {
     if (interpreter->parser->debug)
         fprintf(stderr, "*** SIMPLE_EXPRESSION\n");
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    if (!ps_visit_term(interpreter, result))
+        return false;
+    return true;
+    // interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+    // return false;
 }
 
-static ps_token_type relational_operators[] = {
-    TOKEN_LESS_THAN,
-    TOKEN_LESS_OR_EQUAL,
-    TOKEN_GREATER_THAN,
-    TOKEN_GREATER_OR_EQUAL,
-    TOKEN_EQUAL,
-    TOKEN_NOT_EQUAL,
-    TOKEN_IN,
-    // TOKEN_IS,
-};
+// static ps_token_type relational_operators[] = {
+//     TOKEN_LESS_THAN,
+//     TOKEN_LESS_OR_EQUAL,
+//     TOKEN_GREATER_THAN,
+//     TOKEN_GREATER_OR_EQUAL,
+//     TOKEN_EQUAL,
+//     TOKEN_NOT_EQUAL,
+//     TOKEN_IN,
+//     // TOKEN_IS,
+// };
 
-bool ps_visit_expression(ps_interpreter *interpreter)
+bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
 {
-    // GET_LEXER;
+    GET_LEXER;
     ps_value left = {0}; //, right = {0};
+    // ps_token_type relational_operator;
     if (!ps_visit_simple_expression(interpreter, &left))
         return false;
-    if (ps_parser_expect_token_types(
-            interpreter->parser,
-            sizeof(relational_operators) / sizeof(ps_token_type),
-            relational_operators))
+    if (lexer->current_token.type == TOKEN_SEMI_COLON ||
+        lexer->current_token.type == TOKEN_ELSE)
     {
+        result->type = left.type;
+        result->data = left.data;
+        return true;
     }
-    return true;
+    // No right part for now
+    interpreter->parser->error = PS_ERROR_NOT_IMPLEMENTED;
+    return false;
+    // relational_operator = ps_parser_expect_token_types(
+    //     interpreter->parser,
+    //     sizeof(relational_operators) / sizeof(ps_token_type),
+    //     relational_operators);
+    // if (relational_operator == TOKEN_NONE)
+    // {
+    //     interpreter->parser = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
+    //     return false;
+    // }
+    // if (!ps_visit_simple_expression(interpreter, &right))
+    //     return false;
+    // // ...
+    // return true;
 }
 
 /**
@@ -320,55 +343,65 @@ bool ps_visit_instructions(ps_interpreter *interpreter)
         fprintf(stderr, "*** INSTRUCTIONS\n=> ");
         ps_token_dump(&lexer->current_token);
     }
-    switch (lexer->current_token.type)
+    do
     {
-    case TOKEN_IDENTIFIER:
-        COPY_IDENTIFIER(identifier);
-        READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_ASSIGN);
-        READ_NEXT_TOKEN;
-        if (!ps_visit_factor(interpreter, &result))
-            return false;
-        ps_value_debug(stderr, "ASSIGN => ", &result);
-        EXPECT_TOKEN(TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
-        symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
-        if (symbol == NULL)
+        switch (lexer->current_token.type)
         {
-            interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
-            return false;
+        case TOKEN_IDENTIFIER:
+            COPY_IDENTIFIER(identifier);
+            READ_NEXT_TOKEN;
+            EXPECT_TOKEN(TOKEN_ASSIGN);
+            READ_NEXT_TOKEN;
+            symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+            if (symbol == NULL)
+            {
+                interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
+                return false;
+            }
+            fprintf(stderr, "IDENTIFIER => ");
+            ps_symbol_debug(symbol);
+            if (!ps_visit_expression(interpreter, &result))
+                return false;
+            ps_value_debug(stderr, "ASSIGN => ", &result);
+            EXPECT_TOKEN(TOKEN_SEMI_COLON);
+            READ_NEXT_TOKEN;
+            if (result.type != symbol->value->type)
+            {
+                interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+                return false;
+            }
+            symbol->value->data = result.data;
+            break;
+        case TOKEN_WRITE:
+        case TOKEN_WRITELN:
+            bool newline = lexer->current_token.type == TOKEN_WRITELN;
+            READ_NEXT_TOKEN;
+            EXPECT_TOKEN(TOKEN_LEFT_PARENTHESIS);
+            READ_NEXT_TOKEN;
+            EXPECT_TOKEN(TOKEN_IDENTIFIER);
+            COPY_IDENTIFIER(identifier);
+            READ_NEXT_TOKEN;
+            EXPECT_TOKEN(TOKEN_RIGHT_PARENTHESIS);
+            READ_NEXT_TOKEN;
+            // start "code" execution⁼
+            symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+            if (symbol == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
+            display_value = ps_value_get_display_value(symbol->value);
+            if (display_value == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
+            if (newline)
+                printf("%s\n", display_value);
+            else
+                printf("%s", display_value);
+            // end "code" execution
+            break;
+        case TOKEN_END:
+            return true;
+        default:
+            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
-        if (result.type != symbol->value->type)
-        {
-            interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
-            return false;
-        }
-        symbol->value->data = result.data;
-        break;
-    case TOKEN_WRITE:
-    case TOKEN_WRITELN:
-        READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_LEFT_PARENTHESIS);
-        READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_IDENTIFIER);
-        COPY_IDENTIFIER(identifier);
-        EXPECT_TOKEN(TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
-        // start "code" execution⁼
-        symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
-        display_value = ps_value_get_display_value(symbol->value);
-        if (display_value == NULL)
-            RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
-        if (lexer->current_token.type == TOKEN_WRITELN)
-            printf("%s\n", display_value);
-        // end "code" execution
-        break;
-    default:
-        RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
-    }
-
+    } while (true);
     return true;
 }
 

@@ -31,10 +31,11 @@ char *minimal_source =
     // "      U : Unsigned;\n"
     // "Const Int2 = 54321;\n"
     // "Var   I : Integer;\n"
-    "Var   I : Unsigned;\n"
+    "Var   U : Unsigned;\n"
     "Begin\n"
     // "  {BBB := AAA;}\n"
-    " I := 12345;\n"
+    " U := 12345;\n"
+    " WriteLn(U);\n"
     "End.\n";
 
 char *hello_source =
