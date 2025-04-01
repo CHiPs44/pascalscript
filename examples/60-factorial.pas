@@ -1,17 +1,22 @@
 
 Program Factorial;
 
+Const
+  Trace = true;
+
 Function RecursiveFactorial(N: Integer): Integer;
 Begin
   If N <= 1 Then
     Begin
       RecursiveFactorial := 1;
-      (*WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);*)
+      If Trace Then
+        WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);
     End
   Else
     Begin
       RecursiveFactorial := N * RecursiveFactorial(N -1);
-      (*WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);*)
+      If Trace Then
+        WriteLn('RecursiveFactorial(', N, ') = ', RecursiveFactorial);
     End;
 End;
 
@@ -21,15 +26,17 @@ Var
 Begin
   If N <= 1 Then
     Begin
-        (*WriteLn('IterativeFactorial: I=', I, ', F=', F);*)
-        F := 1;
+      If Trace Then
+        WriteLn('IterativeFactorial: I=', I, ', F=', F);
+      F := 1;
     End
   Else
     Begin
       F := 1;
       For I := 2 To N Do
       Begin
-        (*WriteLn('IterativeFactorial: I=', I, ', F=', F);*)
+        If Trace Then
+          WriteLn('IterativeFactorial: I=', I, ', F=', F);
         F := F * I;
       End;
     End;
@@ -43,6 +50,7 @@ Begin
     Write('N=');
     ReadLn(N);
   Until N > 0;
-  WriteLn('Recursive: ', N, '! = ', RecursiveFactorial(N));
-  WriteLn('Iterative: ', N, '! = ', IterativeFactorial(N));
+  WriteLn('Factorial:');
+  WriteLn(' - Recursive: ', N, '! = ', RecursiveFactorial(N));
+  WriteLn(' - Iterative: ', N, '! = ', IterativeFactorial(N));
 End.
