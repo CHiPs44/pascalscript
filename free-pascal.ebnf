@@ -1,14 +1,16 @@
 (* 
     Pascal EBNF, written from http://downloads.freepascal.org/fpc/docs-pdf/ref.pdf
-    EBNF syntax from ?
+    EBNF syntax from ???
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
 *)
 
-letter                  =   ? lowercase and uppercase letters ? ;
-digit                   =   '0' | '1' | '2'  '3' | '4' |'5' | '6' | '7' | '8' | '9' ;
-hex_digit               =   digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
-octal_digit             =   '0' | '1' | '2'  '3' | '4' |'5' | '6' | '7' ;
+letter                  =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+                        |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+                        ;
 binary_digit            =   '0' | '1' ;
+octal_digit             =   binary_digit | '2'  '3' | '4' |'5' | '6' | '7' ;
+digit                   =   octal_digit | '8' | '9' ;
+hex_digit               =   digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
 
 (*
 ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
