@@ -4,33 +4,39 @@
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
 *)
 
-letter                  =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
-                        |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+letter                  =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' 
+                        |   'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+                        |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' 
+                        |   'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
                         ;
-binary_digit            =   '0' | '1' ;
-octal_digit             =   binary_digit | '2'  '3' | '4' |'5' | '6' | '7' ;
-digit                   =   octal_digit | '8' | '9' ;
-hex_digit               =   digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
+bin_digit               =   '0' | '1' ;
+oct_digit               =   bin_digit | '2'  '3' | '4' |'5' | '6' | '7' ;
+dec_digit               =   oct_digit | '8' | '9' ;
+hex_digit               =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
 
 (*
-' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
-<< >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
+    ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
+    << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
 *)
 
-identifier              =   letter | '_' , [ letter | digit | '_' ]* ;
+identifier              =   letter | '_' , [ letter | dec_digit | '_' ]* ;
 
+bin_digit_sequence      =   hex_digit , [ hex_digit ]* ;
+oct_digit_sequence      =   oct_digit , [ oct_digit ]* ;
+dec_digit_sequence      =   dec_digit , [ dec_digit ]* ;
 hex_digit_sequence      =   hex_digit , [ hex_digit ]* ;
-octal_digit_sequence    =   octal_digit , [ octal_digit ]* ;
-binary_digit_sequence   =   hex_digit , [ hex_digit ]* ;
-digit_sequence          =   digit , [ digit ]* ;
-unsigned_integer        =   digit_sequence | '$' hex_digit_sequence | '&' octal_digit_sequence | '%' binary_digit_sequence ;
+unsigned_integer        =   dec_digit_sequence 
+                        |   '$' , hex_digit_sequence 
+                        |   '&' , oct_digit_sequence 
+                        |   '%' , bin_digit_sequence 
+                        ;
 sign                    =   '+' | '-' ;
-scale_factor            =   'E' | 'e' , [ sign ] , digit_sequence ;
-unsigned_real           =   digit_sequence [ '.' digit_sequence ] [ scale_factor ] ;
+scale_factor            =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
+unsigned_real           =   dec_digit_sequence [ '.' dec_digit_sequence ] [ scale_factor ] ;
 unsigned_number         =   unsigned_real | unsigned_integer ;
 signed_number           =   sign unsigned_number ;
 
-label                   =   'LABEL' , digit_sequence | identifier ;
+label                   =   'LABEL' , dec_digit_sequence | identifier ;
 
 character_string        =   quoted_string | control_string ;
 quoted_string           =   "'" , [ string_character ]* , "'" ;
@@ -49,7 +55,7 @@ ordinal_type            =   'INTEGER' | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'L
                             'BYTE' | 'WORD' | 'UNSIGNED' | 'QWORD' | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ;
 boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
 enumerated_type         =   '(' identifier_list ')' ;
-identifier_list         =   [ identifier ][ ',' , identifier ]* ;
+identifier_list         =   [ identifier ] , [ ',' , identifier ]* ;
 (* IGNORED assigned_enum_list *)
 
 expression              =   simple_expression [ relational_operator , simple_expression ] ;
@@ -73,13 +79,16 @@ factor                  =   '(' expression ')'
                         ;
 
 variable_reference      =   identifier ;
+
 function_call           =   function_identifier , [ '(' , actual_parameter_list , ')' ] ;
+
+function_identifier     =   identifier ;
 actual_parameter_list   =   expression [ ',' , expression ]*
+
 unsigned_constant       =   unsigned_number
                         |   character_string
                         |   constant identifier
                         |   'NIL'
                         ;
 
-...
-```
+(* TO BE CONTINUED... *)

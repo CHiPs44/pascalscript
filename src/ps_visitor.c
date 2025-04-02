@@ -335,12 +335,15 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
 
 /**
  * Visit statement sequence
- *      WRITE | WRITELN ( IDENTIFIER ) ;
- *      ...
- * Next steps:
  *      IDENTIFIER := EXPRESSION ;
  *      WRITE | WRITELN ( EXPRESSION ) ;
+ * Next steps:
  *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
+ *      IF EXPRESSION THEN STATEMENT ;
+ *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT ;
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT ;
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END ;
+ *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END ;
  */
 bool ps_visit_statements(ps_interpreter *interpreter)
 {
