@@ -94,7 +94,7 @@ void ps_token_dump(ps_token *token)
         }
         break;
     }
-    printf("TOKEN: type=%-16s, value=%s\n", type, buffer);
+    fprintf(stderr, "TOKEN: type=%-16s, value=%s\n", type, buffer);
 }
 
 struct s_ps_keyword

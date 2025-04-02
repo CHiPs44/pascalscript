@@ -15,14 +15,19 @@ extern "C"
 {
 #endif
 
-    /** @brief NOT - Compute bitwise not for integer / unsigned, logical not for boolean */
-    bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    /** @brief AND - Compute bitwise and for integer / unsigned, logical and for boolean */
-    bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
-    /** @brief OR - Compute bitwise or for integer / unsigned, logical or for boolean */
-    bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
-    /** @brief XOR - Compute bitwise xor for integer / unsigned, logical xor for boolean */
-    bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
+    /** @brief Compute bitwise not for integer / unsigned, logical not for boolean, neg for integer / real */
+    bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
+
+bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result, ps_token_type token_type);
+
+    // /** @brief NOT - Compute bitwise not for integer / unsigned, logical not for boolean */
+    // bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    // /** @brief AND - Compute bitwise and for integer / unsigned, logical and for boolean */
+    // bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
+    // /** @brief OR - Compute bitwise or for integer / unsigned, logical or for boolean */
+    // bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
+    // /** @brief XOR - Compute bitwise xor for integer / unsigned, logical xor for boolean */
+    // bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
 
     /** @brief ODD - true if integer/unsigned value is odd, false if even */
     bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result);

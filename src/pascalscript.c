@@ -34,7 +34,7 @@ char *minimal_source =
     "Var   U : Unsigned;\n"
     "Begin\n"
     // "  {BBB := AAA;}\n"
-    " U := 12345;\n"
+    " U := (12345 + 23456);\n"
     " WriteLn(U);\n"
     "End.\n";
 
