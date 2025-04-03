@@ -26,9 +26,9 @@ oct_digit_sequence      =   oct_digit , [ oct_digit ]* ;
 dec_digit_sequence      =   dec_digit , [ dec_digit ]* ;
 hex_digit_sequence      =   hex_digit , [ hex_digit ]* ;
 unsigned_integer        =   dec_digit_sequence 
-                        |   '$' , hex_digit_sequence 
-                        |   '&' , oct_digit_sequence 
                         |   '%' , bin_digit_sequence 
+                        |   '&' , oct_digit_sequence 
+                        |   '$' , hex_digit_sequence 
                         ;
 sign                    =   '+' | '-' ;
 scale_factor            =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
@@ -43,11 +43,12 @@ quoted_string           =   "'" , [ string_character ]* , "'" ;
 string_character        =   "''" | ? Any character except ' or CR ? ;
 control_string          =   '#' , unsigned_integer ;
 
-constant_declaration    =   identifier = expression hintdirectives ; 
+constant_declaration    =   identifier = expression hint_directives ; 
 (* IGNORED typed_constant_declaration =   .. *)
 
-type_declaration        =   identifier = type hint_directives ;
-type                    =   simple_type | string_type | structured_type | pointer_type | 
+type_declaration        =   identifier '=' type hint_directives ;
+type                    =   simple_type | string_type 
+                        |   structured_type | pointer_type | 
                             procedural_type | generic_type | specialized_type | type_alias ;
 simple_type             =   ordinal_type | real_type ;
 real_type               =   real_type_identifier ;
@@ -83,7 +84,7 @@ variable_reference      =   identifier ;
 function_call           =   function_identifier , [ '(' , actual_parameter_list , ')' ] ;
 
 function_identifier     =   identifier ;
-actual_parameter_list   =   expression [ ',' , expression ]*
+actual_parameter_list   =   expression [ ',' , expression ]* ;
 
 unsigned_constant       =   unsigned_number
                         |   character_string
