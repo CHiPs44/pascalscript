@@ -7,7 +7,7 @@
 
 // clang-format off
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
-#define SET_VISITOR(__VISITOR__)        static string visitor = "__VISITOR__"
+#define SET_VISITOR(__VISITOR__)        static char *visitor = __VISITOR__
 #define READ_NEXT_TOKEN                 if (!ps_lexer_read_next_token(lexer)) return false
 #define EXPECT_TOKEN(__TOKEN_TYPE__)    if (!ps_parser_expect_token_type(interpreter->parser, __TOKEN_TYPE__)) return false
 #define RETURN_ERROR(__PS_ERROR__)      { interpreter->error = __PS_ERROR__; return false; }
@@ -28,7 +28,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 {
     USE_LEXER;
     SET_VISITOR("FACTOR");
-    TRACE_BEGIN(NULL);
+    TRACE_BEGIN("");
     ps_value factor;
     ps_identifier identifier;
     ps_symbol *symbol;
@@ -99,7 +99,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         return false;
     }
 
-    TRACE_END(NULL);
+    TRACE_END("");
     return true;
 }
 
@@ -111,7 +111,8 @@ static ps_token_type multiplicative_operators[] = {
 bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
     USE_LEXER;
-    TRACE_BEGIN("TERM");
+    SET_VISITOR("TERM");
+    TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
     ps_token_type multiplicative_operator;
     if (!ps_visit_factor(interpreter, &left))
@@ -132,7 +133,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     READ_NEXT_TOKEN;
     if (!ps_function_binary_op(interpreter, &left, &right, result, multiplicative_operator))
         return false;
-    TRACE_END("TERM");
+    TRACE_END("");
     return true;
 }
 
@@ -142,7 +143,8 @@ static ps_token_type additive_operators[] = {TOKEN_PLUS, TOKEN_MINUS, TOKEN_OR, 
 bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
 {
     USE_LEXER;
-    TRACE_BEGIN("SIMPLE_EXPRESSION");
+    SET_VISITOR("SIMPLE_EXPRESSION");
+    TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
     ps_token_type additive_operator;
     if (!ps_visit_term(interpreter, &left))
@@ -155,7 +157,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
     {
         result->type = left.type;
         result->data = left.data;
-        TRACE_END("SIMPLE_EXPRESSION 1");
+        TRACE_END("1");
         return true;
     }
     READ_NEXT_TOKEN;
@@ -163,7 +165,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
         return false;
     if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
         return false;
-    TRACE_END("SIMPLE_EXPRESSION 2");
+    TRACE_END("2");
     return true;
 }
 
@@ -180,7 +182,8 @@ static ps_token_type relational_operators[] = {
 bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
 {
     USE_LEXER;
-    TRACE_BEGIN("EXPRESSION");
+    SET_VISITOR("EXPRESSION");
+    TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
     ps_token_type relational_operator;
     if (!ps_visit_simple_expression(interpreter, &left))
@@ -193,14 +196,14 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
     {
         result->type = left.type;
         result->data = left.data;
-        TRACE_END("EXPRESSION 2");
+        TRACE_END("2");
         return true;
     }
     if (!ps_visit_simple_expression(interpreter, &right))
         return false;
     if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
         return false;
-    TRACE_END("EXPRESSION 2");
+    TRACE_END("2");
     return true;
 }
 
@@ -210,7 +213,8 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
 bool ps_visit_program(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("PROGRAM");
+    SET_VISITOR("PROGRAM");
+    TRACE_BEGIN("");
     ps_identifier identifier;
     EXPECT_TOKEN(TOKEN_PROGRAM);
     READ_NEXT_TOKEN;
@@ -226,7 +230,7 @@ bool ps_visit_program(ps_interpreter *interpreter)
         NULL);
     if (ps_symbol_table_add(interpreter->parser->symbols, program) == NULL)
         RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
-    TRACE_END("PROGRAM");
+    TRACE_END("");
     return true;
 }
 
@@ -241,7 +245,8 @@ bool ps_visit_program(ps_interpreter *interpreter)
 bool ps_visit_block_const(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("CONST");
+    SET_VISITOR("CONST");
+    TRACE_BEGIN("");
     ps_identifier identifier;
     ps_type_definition *type;
     ps_value *value;
@@ -311,7 +316,7 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
         if (ps_symbol_table_add(interpreter->parser->symbols, constant) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == TOKEN_IDENTIFIER);
-    TRACE_END("CONST");
+    TRACE_END("");
     return true;
 }
 
@@ -325,7 +330,8 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
 bool ps_visit_block_var(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("VAR");
+    SET_VISITOR("VAR");
+    TRACE_BEGIN("");
     ps_identifier identifier;
     ps_type_definition *type;
     ps_value *value;
@@ -379,7 +385,7 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
         if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == TOKEN_IDENTIFIER);
-    TRACE_END("VAR");
+    TRACE_END("");
     return true;
 }
 
@@ -398,7 +404,8 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
 bool ps_visit_statements(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("STATEMENTS");
+    SET_VISITOR("STATEMENTS");
+    TRACE_BEGIN("");
     ps_identifier identifier;
     ps_symbol *symbol;
     ps_value result;
@@ -473,7 +480,7 @@ bool ps_visit_statements(ps_interpreter *interpreter)
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
     } while (loop);
-    TRACE_END("STATEMENTS");
+    TRACE_END("");
     return true;
 }
 
@@ -487,7 +494,8 @@ bool ps_visit_statements(ps_interpreter *interpreter)
 bool ps_visit_block(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("BLOCK");
+    SET_VISITOR("BLOCK");
+    TRACE_BEGIN("");
     do
     {
         if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(interpreter))
@@ -503,7 +511,7 @@ bool ps_visit_block(ps_interpreter *interpreter)
         return false;
     EXPECT_TOKEN(TOKEN_END);
     READ_NEXT_TOKEN;
-    TRACE_END("BLOCK");
+    TRACE_END("");
     return true;
 }
 
@@ -515,7 +523,8 @@ bool ps_visit_block(ps_interpreter *interpreter)
 bool ps_visit_start(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    TRACE_BEGIN("START");
+    SET_VISITOR("START");
+    TRACE_BEGIN("");
     READ_NEXT_TOKEN;
     if (!ps_visit_program(interpreter))
         return false;
@@ -523,6 +532,6 @@ bool ps_visit_start(ps_interpreter *interpreter)
         return false;
     EXPECT_TOKEN(TOKEN_DOT);
     // NB: source code after '.' is not analyzed and has not to be
-    TRACE_END("STOP");
+    TRACE_END("");
     return true;
 }
