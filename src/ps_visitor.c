@@ -7,16 +7,17 @@
 
 // clang-format off
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
+#define SET_VISITOR(__VISITOR__)        static string visitor = "__VISITOR__"
 #define READ_NEXT_TOKEN                 if (!ps_lexer_read_next_token(lexer)) return false
 #define EXPECT_TOKEN(__TOKEN_TYPE__)    if (!ps_parser_expect_token_type(interpreter->parser, __TOKEN_TYPE__)) return false
 #define RETURN_ERROR(__PS_ERROR__)      { interpreter->error = __PS_ERROR__; return false; }
 #define COPY_IDENTIFIER(__IDENTIFIER__) strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 #define TRACE_BEGIN(__TITLE__)          if (interpreter->debug) { \
-                                            fprintf(stderr, "BEGIN %-32s",__TITLE__); \
+                                            fprintf(stderr, "BEGIN %-32s %s", visitor, __TITLE__); \
                                             ps_token_dump(&lexer->current_token); \
                                         }
 #define TRACE_END(__TITLE__)            if (interpreter->debug) { \
-                                            fprintf(stderr, "END   %-32s",__TITLE__); \
+                                            fprintf(stderr, "END   %-32s %s", visitor, __TITLE__); \
                                             ps_token_dump(&lexer->current_token); \
                                         }
 // clang-format on
@@ -26,10 +27,12 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result);
 bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 {
     USE_LEXER;
-    TRACE_BEGIN("FACTOR");
+    SET_VISITOR("FACTOR");
+    TRACE_BEGIN(NULL);
     ps_value factor;
     ps_identifier identifier;
     ps_symbol *symbol;
+
     switch (lexer->current_token.type)
     {
     case TOKEN_LEFT_PARENTHESIS:
@@ -95,7 +98,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         interpreter->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
         return false;
     }
-    TRACE_END("FACTOR");
+
+    TRACE_END(NULL);
     return true;
 }
 
