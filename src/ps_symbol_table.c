@@ -29,7 +29,14 @@ ps_symbol_table *ps_symbol_table_init(ps_symbol_table *table)
         table = calloc(1, sizeof(ps_symbol_table));
         if (table == NULL)
             return NULL;
+        table->allocated = true;
     }
+    else
+    {
+        table->allocated = false;
+    }
+    table->debug = false;
+    table->trace = false;
     table->size = sizeof(table->symbols) / sizeof(ps_symbol *);
     ps_symbol_table_reset(table);
     return table;
@@ -37,6 +44,8 @@ ps_symbol_table *ps_symbol_table_init(ps_symbol_table *table)
 
 void ps_symbol_table_done(ps_symbol_table *table)
 {
+    if (!table->allocated)
+        return;
     free(table);
 }
 
@@ -79,18 +88,21 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
         return NULL;
     if (ps_symbol_table_get(table, &symbol->name) != NULL)
         return NULL;
-    // Find first free location (table->used *must* be accurate)
     ps_symbol_table_size index = 0;
     while (table->symbols[index] != NULL)
     {
-        // fprintf(stderr, "%d\n", index);
         index += 1;
+        if (index > PS_SYMBOL_TABLE_SIZE)
+            return NULL;
     }
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         snprintf(symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, index);
     table->symbols[index] = symbol;
     table->used += 1;
-    fprintf(stderr, "ps_symbol_table_add: %d/%d %d %s \n", table->used, table->size, index, symbol->name);
+    if (table->trace)
+        fprintf(stderr,
+                "ps_symbol_table_add: %d/%d %d %s \n",
+                table->used, table->size, index, symbol->name);
     return symbol;
 }
 

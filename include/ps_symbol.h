@@ -27,11 +27,11 @@ extern "C"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM = 0,                   /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
-        PS_SYMBOL_SCOPE_GLOBAL,                       /** @brief User defined: for constants, types, variables, procedures and functions at top level */
-        PS_SYMBOL_SCOPE_UNIT,                         /** @brief Unit defined */
-        PS_SYMBOL_SCOPE_LOCAL = (UINT16_MAX + 1) / 2, /** @brief Local defined */
-        PS_SYMBOL_SCOPE_MAX = UINT16_MAX              /** @brief Ensure scope "packs" to a 16 bits unsigned */
+        PS_SYMBOL_SCOPE_SYSTEM,          /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
+        PS_SYMBOL_SCOPE_GLOBAL,          /** @brief For constants, types, variables, procedures and functions at top level */
+        PS_SYMBOL_SCOPE_UNIT,            /** @brief Same for units */
+        PS_SYMBOL_SCOPE_LOCAL = 16,      /** @brief Same for local levels */
+        PS_SYMBOL_SCOPE_MAX = UINT8_MAX /** @brief Ensure scope "packs" to a 8 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_scope;
 
 #define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
@@ -47,7 +47,7 @@ extern "C"
         PS_SYMBOL_KIND_FUNCTION,
         PS_SYMBOL_KIND_UNIT,
         // ...
-        PS_SYMBOL_KIND_MAX = UINT16_MAX /** @brief Ensure kind "packs" to a 16 bits unsigned */
+        PS_SYMBOL_KIND_MAX = UINT8_MAX /** @brief Ensure kind "packs" to a 8 bits unsigned */
     } __attribute__((__packed__)) ps_symbol_kind;
 
     /** @brief Symbol is a named typed value within a scope */
@@ -56,7 +56,7 @@ extern "C"
         ps_symbol_scope scope;
         ps_symbol_kind kind;
         ps_identifier name;
-        ps_value *value; // must be a pointer
+        ps_value *value; // must be a pointer as it is a forward reference
     } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_SCOPE_SIZE sizeof(ps_symbol_scope)
@@ -89,7 +89,7 @@ extern "C"
     bool ps_symbol_scope_is_unit(ps_symbol_scope scope);
     bool ps_symbol_scope_is_local(ps_symbol_scope scope);
 
-    #ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

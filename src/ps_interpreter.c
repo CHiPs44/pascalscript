@@ -35,6 +35,8 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
         ps_interpreter_done(interpreter);
         return NULL;
     }
+    interpreter->debug = true;
+    interpreter->trace = true;
     interpreter->error = PS_RUNTIME_ERROR_NONE;
     interpreter->range_check = true;
     return interpreter;

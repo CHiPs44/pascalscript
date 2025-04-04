@@ -24,14 +24,18 @@
 
     typedef uint16_t ps_symbol_table_size;
 
-    /* clang-format off */
     typedef struct s_ps_symbol_table
     {
         ps_symbol_table_size size;
         ps_symbol_table_size used;
-        ps_symbol           *symbols[PS_SYMBOL_TABLE_SIZE];
-    } ps_symbol_table;
-    /* clang-format on */
+        bool trace : 1;
+        bool debug : 1;
+        bool allocated : 1;
+        uint16_t flags : 13;
+        ps_symbol *symbols[PS_SYMBOL_TABLE_SIZE];
+    } __attribute__((__packed__)) ps_symbol_table;
+
+#define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
 
     /** @brief (Allocate and) initialize symbol table (reset used count & empty all symbols) */
     ps_symbol_table *ps_symbol_table_init(ps_symbol_table * table);

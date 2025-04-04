@@ -24,6 +24,8 @@ extern "C"
     {
         ps_parser *parser;
         ps_error error;
+        bool trace;
+        bool debug;
         bool range_check;
         bool allocated;
     } ps_interpreter;

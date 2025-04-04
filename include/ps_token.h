@@ -72,20 +72,16 @@ extern "C"
         TOKEN_NONE = 0,
         TOKEN_END_OF_FILE,
         // Numeric values
-        // ==============
         TOKEN_INTEGER_VALUE,
         TOKEN_UNSIGNED_VALUE,
         TOKEN_REAL_VALUE,
         // Other value types
-        // =================
         TOKEN_BOOLEAN_VALUE,
         TOKEN_CHAR_VALUE,
         TOKEN_STRING_VALUE,
         // Identifier
-        // ==========
         TOKEN_IDENTIFIER,
         // Reserved words
-        // ==============
         TOKEN_RESERVED_WORDS = (UINT8_MAX / 2) + 1,
         TOKEN_PROGRAM = TOKEN_RESERVED_WORDS,
         TOKEN_CONST,
@@ -129,7 +125,6 @@ extern "C"
         TOKEN_INTERFACE,
         TOKEN_IMPLEMENTATION,
         // Operators
-        // =========
         TOKEN_DIV,
         TOKEN_MOD,
         TOKEN_AND,
@@ -139,7 +134,6 @@ extern "C"
         TOKEN_SHL,
         TOKEN_SHR,
         // Symbols
-        // =======
         TOKEN_ASSIGN,            // :=  assign
         TOKEN_AT_SIGN,           // @   address of
         TOKEN_CARET,             // ^   pointer to
@@ -153,25 +147,21 @@ extern "C"
         TOKEN_RIGHT_PARENTHESIS, // )   various uses
         TOKEN_SEMI_COLON,        // ;   various uses
         // Arithmetic operators
-        // ====================
         TOKEN_PLUS,  // +   addition
         TOKEN_MINUS, // -   substraction / negation
         TOKEN_STAR,  // *   multiplication
         TOKEN_SLASH, // /   division (real)
         // Comparison operators
-        // ====================
         TOKEN_EQUAL,            // =
         TOKEN_NOT_EQUAL,        // <>
         TOKEN_LESS_THAN,        // <
         TOKEN_LESS_OR_EQUAL,    // <=
         TOKEN_GREATER_THAN,     // >
         TOKEN_GREATER_OR_EQUAL, // >=
-        // These should not be tokens (?)
-        // ==============================
+        // These should not be tokens
         TOKEN_WRITE,
         TOKEN_WRITELN,
         // Make token value fit in one byte
-        // ================================
         TOKEN_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_token_type;
 
