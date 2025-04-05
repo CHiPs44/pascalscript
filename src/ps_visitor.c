@@ -8,7 +8,12 @@
 // clang-format off
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
 #define SET_VISITOR(__VISITOR__)        static char *visitor = __VISITOR__
-#define READ_NEXT_TOKEN                 if (!ps_lexer_read_next_token(lexer)) return false
+#define READ_NEXT_TOKEN                 { \
+                                            if (!ps_lexer_read_next_token(lexer)) \
+                                                return false; \
+                                            fprintf(stderr, "TOKEN\t%-32s %-8s ", "", ""); \
+                                            ps_token_dump(&lexer->current_token); \
+                                        }
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__) if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__)) return false
 #define RETURN_ERROR(__PS_ERROR__)      { \
                                             interpreter->error = __PS_ERROR__; \
@@ -143,7 +148,6 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     READ_NEXT_TOKEN;
     if (!ps_visit_factor(interpreter, &right))
         TRACE_ERROR("");
-    READ_NEXT_TOKEN;
     if (!ps_function_binary_op(interpreter, &left, &right, result, multiplicative_operator))
         TRACE_ERROR("");
     TRACE_END("OK");
@@ -478,26 +482,38 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
                 if (newline)
                 {
                     if (interpreter->debug)
-                        printf("\tWRITELN => ");
-                    printf("%s\n", display_value);
+                        printf("WRITELN\t%s\n", display_value);
+                    else
+                        printf("%s\n", display_value);
                 }
                 else
                 {
                     if (interpreter->debug)
-                        printf("\tWRITE => ");
-                    printf("%s", display_value);
+                        printf("WRITE\t%s\n", display_value);
+                    else
+                        printf("%s", display_value);
                 }
                 // end "code" execution
                 break;
             default:
                 RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
             }
-            if (lexer->current_token.type != PS_TOKEN_SEMI_COLON && lexer->current_token.type != PS_TOKEN_END)
-                RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
-            if (lexer->current_token.type == PS_TOKEN_END)
-                loop = false;
-            else
+            if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
+            {
                 READ_NEXT_TOKEN;
+                if (lexer->current_token.type == PS_TOKEN_END)
+                {
+                    loop = false;
+                }
+            }
+            else if (lexer->current_token.type == PS_TOKEN_END)
+            {
+                loop = false;
+            }
+            else
+            {
+                RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+            }
         } while (loop);
     }
     TRACE_END("OK");
