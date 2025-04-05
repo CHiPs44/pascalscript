@@ -13,7 +13,7 @@ Next step should be implementing conditional statement `if` `then` `else`.
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
+`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
@@ -99,7 +99,7 @@ Hello, world!
 
 In the future, it should be embeddable in other projects, like [Lua](https://lua.org/) is for example.
 
-Examples **must** be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
+Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 
 ## Links to seemingly useful documentations
 
