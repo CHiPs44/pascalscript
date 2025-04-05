@@ -35,14 +35,14 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 
     switch (lexer->current_token.type)
     {
-    case TOKEN_LEFT_PARENTHESIS:
+    case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN;
         if (!ps_visit_expression(interpreter, result))
             return false;
-        EXPECT_TOKEN(TOKEN_RIGHT_PARENTHESIS);
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_IDENTIFIER:
+    case PS_TOKEN_IDENTIFIER:
         // TODO: variable, const, function, ...
         COPY_IDENTIFIER(identifier);
         symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
@@ -56,42 +56,42 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         result->data = symbol->value->data;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_CHAR_VALUE:
+    case PS_TOKEN_CHAR_VALUE:
         result->type = ps_symbol_char.value->data.t;
         result->data.c = lexer->current_token.value.c;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_INTEGER_VALUE:
+    case PS_TOKEN_INTEGER_VALUE:
         result->type = ps_symbol_integer.value->data.t;
         result->data.i = lexer->current_token.value.i;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_UNSIGNED_VALUE:
+    case PS_TOKEN_UNSIGNED_VALUE:
         result->type = ps_symbol_unsigned.value->data.t;
         result->data.u = lexer->current_token.value.u;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_REAL_VALUE:
+    case PS_TOKEN_REAL_VALUE:
         result->type = ps_symbol_real.value->data.t;
         result->data.r = lexer->current_token.value.r;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_BOOLEAN_VALUE:
+    case PS_TOKEN_BOOLEAN_VALUE:
         result->type = ps_symbol_boolean.value->data.t;
         result->data.b = lexer->current_token.value.b;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_MINUS:
-    case TOKEN_NOT:
+    case PS_TOKEN_MINUS:
+    case PS_TOKEN_NOT:
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, &factor))
             return false;
-        if (!ps_function_unary_op(interpreter, &factor, result, TOKEN_MINUS))
+        if (!ps_function_unary_op(interpreter, &factor, result, PS_TOKEN_MINUS))
             return false;
         READ_NEXT_TOKEN;
         break;
-    case TOKEN_STRING_VALUE:
-    case TOKEN_NIL:
+    case PS_TOKEN_STRING_VALUE:
+    case PS_TOKEN_NIL:
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         return false;
     default:
@@ -107,20 +107,20 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
     // '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
     static ps_token_type multiplicative_operators[] = {
-        TOKEN_STAR, TOKEN_SLASH, TOKEN_DIV, TOKEN_MOD, TOKEN_AND, // TOKEN_SHL, TOKEN_SHR,
+        PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD, PS_TOKEN_AND, // PS_TOKEN_SHL, PS_TOKEN_SHR,
     };
     USE_LEXER;
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type multiplicative_operator = TOKEN_NONE;
+    ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, &left))
         return false;
     multiplicative_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(multiplicative_operators) / sizeof(ps_token_type),
         multiplicative_operators);
-    if (multiplicative_operator == TOKEN_NONE)
+    if (multiplicative_operator == PS_TOKEN_NONE)
     {
         result->type = left.type;
         result->data = left.data;
@@ -139,19 +139,19 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
 {
     // '+' | '-' | 'OR' | 'XOR'
-    static ps_token_type additive_operators[] = {TOKEN_PLUS, TOKEN_MINUS, TOKEN_OR, TOKEN_XOR};
+    static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS, PS_TOKEN_OR, PS_TOKEN_XOR};
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type additive_operator = TOKEN_NONE;
+    ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, &left))
         return false;
     additive_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(additive_operators) / sizeof(ps_token_type),
         additive_operators);
-    if (additive_operator == TOKEN_NONE)
+    if (additive_operator == PS_TOKEN_NONE)
     {
         result->type = left.type;
         result->data = left.data;
@@ -174,22 +174,22 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
 {
     // '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS'
     static ps_token_type relational_operators[] = {
-        TOKEN_LESS_THAN, TOKEN_LESS_OR_EQUAL,
-        TOKEN_GREATER_THAN, TOKEN_GREATER_OR_EQUAL,
-        TOKEN_EQUAL, TOKEN_NOT_EQUAL, TOKEN_IN, // TOKEN_IS,
+        PS_TOKEN_LESS_THAN, PS_TOKEN_LESS_OR_EQUAL,
+        PS_TOKEN_GREATER_THAN, PS_TOKEN_GREATER_OR_EQUAL,
+        PS_TOKEN_EQUAL, PS_TOKEN_NOT_EQUAL, PS_TOKEN_IN, // PS_TOKEN_IS,
     };
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type relational_operator = TOKEN_NONE;
+    ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, &left))
         return false;
     relational_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(relational_operators) / sizeof(ps_token_type),
         relational_operators);
-    if (relational_operator == TOKEN_NONE)
+    if (relational_operator == PS_TOKEN_NONE)
     {
         result->type = left.type;
         result->data = left.data;
@@ -213,12 +213,12 @@ bool ps_visit_program(ps_interpreter *interpreter)
     SET_VISITOR("PROGRAM");
     TRACE_BEGIN("");
     ps_identifier identifier;
-    EXPECT_TOKEN(TOKEN_PROGRAM);
+    EXPECT_TOKEN(PS_TOKEN_PROGRAM);
     READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_IDENTIFIER);
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
-    EXPECT_TOKEN(TOKEN_SEMI_COLON);
+    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
     ps_symbol *program = ps_symbol_init(
         PS_SYMBOL_SCOPE_GLOBAL,
@@ -249,18 +249,18 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
     ps_value *value;
     ps_value_data data;
     ps_symbol *constant;
-    EXPECT_TOKEN(TOKEN_CONST);
+    EXPECT_TOKEN(PS_TOKEN_CONST);
     READ_NEXT_TOKEN;
     do
     {
-        EXPECT_TOKEN(TOKEN_IDENTIFIER);
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
         COPY_IDENTIFIER(identifier);
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_EQUAL);
+        EXPECT_TOKEN(PS_TOKEN_EQUAL);
         READ_NEXT_TOKEN;
         switch (lexer->current_token.type)
         {
-        case TOKEN_IDENTIFIER:
+        case PS_TOKEN_IDENTIFIER:
             constant = ps_symbol_table_get(interpreter->parser->symbols, &lexer->current_token.value.identifier);
             if (constant == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
@@ -269,28 +269,28 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
             type = constant->value->type;
             data = constant->value->data;
             break;
-        case TOKEN_INTEGER_VALUE:
+        case PS_TOKEN_INTEGER_VALUE:
             type = ps_symbol_integer.value->data.t;
             data.i = lexer->current_token.value.i;
             break;
-        case TOKEN_REAL_VALUE:
+        case PS_TOKEN_REAL_VALUE:
             type = ps_symbol_real.value->data.t;
             data.r = lexer->current_token.value.r;
             break;
-        case TOKEN_UNSIGNED_VALUE:
+        case PS_TOKEN_UNSIGNED_VALUE:
             type = ps_symbol_unsigned.value->data.t;
             data.u = lexer->current_token.value.u;
             break;
-        case TOKEN_CHAR_VALUE:
+        case PS_TOKEN_CHAR_VALUE:
             type = ps_symbol_char.value->data.t;
             data.c = lexer->current_token.value.c;
             break;
-        case TOKEN_BOOLEAN_VALUE:
+        case PS_TOKEN_BOOLEAN_VALUE:
             type = ps_symbol_boolean.value->data.t;
             data.b = lexer->current_token.value.b;
             break;
         // Not yet!
-        // case TOKEN_STRING_VALUE:
+        // case PS_TOKEN_STRING_VALUE:
         //     type = ps_symbol_string.value->data.t;
         //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
         //     break;
@@ -298,7 +298,7 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_SEMI_COLON);
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
         value = ps_value_init(type, data);
         constant = ps_symbol_init(
@@ -312,7 +312,7 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
         }
         if (ps_symbol_table_add(interpreter->parser->symbols, constant) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
-    } while (lexer->current_token.type == TOKEN_IDENTIFIER);
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
     TRACE_END("");
     return true;
 }
@@ -334,34 +334,34 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
     ps_value *value;
     ps_value_data data;
     ps_symbol *variable;
-    EXPECT_TOKEN(TOKEN_VAR);
+    EXPECT_TOKEN(PS_TOKEN_VAR);
     READ_NEXT_TOKEN;
     do
     {
-        EXPECT_TOKEN(TOKEN_IDENTIFIER);
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
         COPY_IDENTIFIER(identifier);
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_COLON);
+        EXPECT_TOKEN(PS_TOKEN_COLON);
         READ_NEXT_TOKEN;
         switch (lexer->current_token.type)
         {
-        case TOKEN_BOOLEAN:
+        case PS_TOKEN_BOOLEAN:
             type = ps_symbol_boolean.value->data.t;
             data.b = (ps_boolean) false;
             break;
-        case TOKEN_CHAR:
+        case PS_TOKEN_CHAR:
             type = ps_symbol_char.value->data.t;
             data.c = '\0';
             break;
-        case TOKEN_INTEGER:
+        case PS_TOKEN_INTEGER:
             type = ps_symbol_integer.value->data.t;
             data.i = 0;
             break;
-        case TOKEN_UNSIGNED:
+        case PS_TOKEN_UNSIGNED:
             type = ps_symbol_unsigned.value->data.t;
             data.u = 0;
             break;
-        case TOKEN_REAL:
+        case PS_TOKEN_REAL:
             type = ps_symbol_real.value->data.t;
             data.r = 0.0;
             break;
@@ -369,7 +369,7 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(TOKEN_SEMI_COLON);
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
         value = ps_value_init(type, data);
         variable = ps_symbol_init(
@@ -381,7 +381,7 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
             RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
         if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
-    } while (lexer->current_token.type == TOKEN_IDENTIFIER);
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
     TRACE_END("");
     return true;
 }
@@ -412,11 +412,11 @@ bool ps_visit_statements(ps_interpreter *interpreter)
     {
         switch (lexer->current_token.type)
         {
-        case TOKEN_IDENTIFIER:
+        case PS_TOKEN_IDENTIFIER:
             /* IDENTIFIER := EXPRESSION ; */
             COPY_IDENTIFIER(identifier);
             READ_NEXT_TOKEN;
-            EXPECT_TOKEN(TOKEN_ASSIGN);
+            EXPECT_TOKEN(PS_TOKEN_ASSIGN);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, &result))
                 return false;
@@ -435,19 +435,19 @@ bool ps_visit_statements(ps_interpreter *interpreter)
             }
             symbol->value->data = result.data;
             // end "code" execution
-            EXPECT_TOKEN(TOKEN_SEMI_COLON);
+            EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
             READ_NEXT_TOKEN;
             break;
-        case TOKEN_WRITE:
-        case TOKEN_WRITELN:
+        case PS_TOKEN_WRITE:
+        case PS_TOKEN_WRITELN:
             /* WRITE[LN] ( EXPRESSION ) ; */
-            bool newline = lexer->current_token.type == TOKEN_WRITELN;
+            bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
             READ_NEXT_TOKEN;
-            EXPECT_TOKEN(TOKEN_LEFT_PARENTHESIS);
+            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, &result))
                 return false;
-            EXPECT_TOKEN(TOKEN_RIGHT_PARENTHESIS);
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
             // start "code" execution
             display_value = ps_value_get_display_value(&result);
@@ -466,10 +466,10 @@ bool ps_visit_statements(ps_interpreter *interpreter)
                 printf("%s", display_value);
             }
             // end "code" execution
-            EXPECT_TOKEN(TOKEN_SEMI_COLON);
+            EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
             READ_NEXT_TOKEN;
             break;
-        case TOKEN_END:
+        case PS_TOKEN_END:
             READ_NEXT_TOKEN;
             loop = false;
             break;
@@ -495,18 +495,18 @@ bool ps_visit_block(ps_interpreter *interpreter)
     TRACE_BEGIN("");
     do
     {
-        if (lexer->current_token.type == TOKEN_CONST && !ps_visit_block_const(interpreter))
+        if (lexer->current_token.type == PS_TOKEN_CONST && !ps_visit_block_const(interpreter))
             return false;
-        // if (lexer->current_token.type == TOKEN_TYPE && !ps_visit_block_type(interpreter))
+        // if (lexer->current_token.type == PS_TOKEN_TYPE && !ps_visit_block_type(interpreter))
         //     return false;
-        if (lexer->current_token.type == TOKEN_VAR && !ps_visit_block_var(interpreter))
+        if (lexer->current_token.type == PS_TOKEN_VAR && !ps_visit_block_var(interpreter))
             return false;
-    } while (lexer->current_token.type != TOKEN_BEGIN);
-    EXPECT_TOKEN(TOKEN_BEGIN);
+    } while (lexer->current_token.type != PS_TOKEN_BEGIN);
+    EXPECT_TOKEN(PS_TOKEN_BEGIN);
     READ_NEXT_TOKEN;
-    if (lexer->current_token.type != TOKEN_END && !ps_visit_statements(interpreter))
+    if (lexer->current_token.type != PS_TOKEN_END && !ps_visit_statements(interpreter))
         return false;
-    EXPECT_TOKEN(TOKEN_END);
+    EXPECT_TOKEN(PS_TOKEN_END);
     READ_NEXT_TOKEN;
     TRACE_END("");
     return true;
@@ -527,7 +527,7 @@ bool ps_visit_start(ps_interpreter *interpreter)
         return false;
     if (!ps_visit_block(interpreter))
         return false;
-    EXPECT_TOKEN(TOKEN_DOT);
+    EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: source code after '.' is not analyzed and has not to be
     TRACE_END("");
     return true;

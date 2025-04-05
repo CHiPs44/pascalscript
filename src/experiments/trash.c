@@ -12,7 +12,7 @@ ps_error lexer_copy_identifier(char *text, ps_token *token)
     {
         return PS_LEXER_ERROR_IDENTIFIER_TOO_LONG;
     }
-    token->type = TOKEN_IDENTIFIER;
+    token->type = PS_TOKEN_IDENTIFIER;
     strcpy(identifier, text);
     ps_symbol_normalize_name(identifier);
     strcpy(token->value.identifier, identifier);
@@ -34,7 +34,7 @@ ps_error lexer_copy_integer_value(char *text, ps_token *token)
         fprintf(stderr, "PS_LEXER_ERROR_OVERFLOW %s %ld", text, val);
         return PS_LEXER_ERROR_OVERFLOW;
     }
-    token->type = TOKEN_INTEGER_VALUE;
+    token->type = PS_TOKEN_INTEGER_VALUE;
     token->value.i = (int)val;
     return PS_ERROR_ZERO;
 }
@@ -53,7 +53,7 @@ ps_error lexer_copy_real_value(char *text, ps_token *token)
         fprintf(stderr, "PS_LEXER_ERROR_OVERFLOW %s %f", text, val);
         return PS_LEXER_ERROR_OVERFLOW;
     }
-    token->type = TOKEN_REAL_VALUE;
+    token->type = PS_TOKEN_REAL_VALUE;
     token->value.r = val;
     return PS_ERROR_ZERO;
 }
@@ -68,7 +68,7 @@ ps_error lexer_copy_char_value(char *text, ps_token *token)
     // TODO? "'X'" or "''''"
     ps_char val = text[1];
     // fprintf(stderr, " [lexer_copy_char_value %s %c]", text, val);
-    token->type = TOKEN_CHAR_VALUE;
+    token->type = PS_TOKEN_CHAR_VALUE;
     token->value.c = val;
     return PS_ERROR_ZERO;
 }
@@ -89,7 +89,7 @@ ps_error lexer_copy_string_value(char *text, ps_token *token)
         fprintf(stderr, "PS_LEXER_ERROR_STRING_TOO_LONG %ld |%s|", len, text);
         return PS_LEXER_ERROR_STRING_TOO_LONG;
     }
-    token->type = TOKEN_STRING_VALUE;
+    token->type = PS_TOKEN_STRING_VALUE;
     if (len == 0)
         strcpy(token->value.s, "");
     else

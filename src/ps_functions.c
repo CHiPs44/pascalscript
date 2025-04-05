@@ -27,10 +27,10 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
     case PS_TYPE_INTEGER:
         switch (token_type)
         {
-        case TOKEN_NOT:
+        case PS_TOKEN_NOT:
             result->data.i = ~value->data.i;
             break;
-        case TOKEN_MINUS:
+        case PS_TOKEN_MINUS:
             result->data.i = -value->data.i;
             break;
         default:
@@ -41,7 +41,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
     case PS_TYPE_UNSIGNED:
         switch (token_type)
         {
-        case TOKEN_NOT:
+        case PS_TOKEN_NOT:
             result->data.u = ~value->data.u;
             break;
         default:
@@ -51,7 +51,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
     case PS_TYPE_REAL:
         switch (token_type)
         {
-        case TOKEN_MINUS:
+        case PS_TOKEN_MINUS:
             result->data.r = -value->data.u;
             break;
         default:
@@ -61,7 +61,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
     case PS_TYPE_BOOLEAN:
         switch (token_type)
         {
-        case TOKEN_NOT:
+        case PS_TOKEN_NOT:
             result->data.b = !value->data.b;
             break;
         default:
@@ -90,46 +90,46 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     case PS_TYPE_INTEGER:
         switch (token_type)
         {
-        case TOKEN_AND:
+        case PS_TOKEN_AND:
             result->data.i = a->data.i & b->data.i;
             break;
-        case TOKEN_OR:
+        case PS_TOKEN_OR:
             result->data.i = a->data.i | b->data.i;
             break;
-        case TOKEN_XOR:
+        case PS_TOKEN_XOR:
             result->data.i = a->data.i ^ b->data.i;
             break;
-        case TOKEN_PLUS:
+        case PS_TOKEN_PLUS:
             result->data.i = a->data.i + b->data.i;
             break;
-        case TOKEN_MINUS:
+        case PS_TOKEN_MINUS:
             result->data.i = a->data.i - b->data.i;
             break;
-        case TOKEN_STAR:
+        case PS_TOKEN_STAR:
             result->data.i = a->data.i * b->data.i;
             break;
-        case TOKEN_DIV:
+        case PS_TOKEN_DIV:
             result->data.i = a->data.i / b->data.i;
             break;
-        case TOKEN_MOD:
+        case PS_TOKEN_MOD:
             result->data.i = a->data.i % b->data.i;
             break;
-        case TOKEN_LESS_THAN:
+        case PS_TOKEN_LESS_THAN:
             result->data.i = a->data.i < b->data.i;
             break;
-        case TOKEN_LESS_OR_EQUAL:
+        case PS_TOKEN_LESS_OR_EQUAL:
             result->data.i = a->data.i <= b->data.i;
             break;
-        case TOKEN_GREATER_THAN:
+        case PS_TOKEN_GREATER_THAN:
             result->data.i = a->data.i > b->data.i;
             break;
-        case TOKEN_GREATER_OR_EQUAL:
+        case PS_TOKEN_GREATER_OR_EQUAL:
             result->data.i = a->data.i >= b->data.i;
             break;
-        case TOKEN_EQUAL:
+        case PS_TOKEN_EQUAL:
             result->data.i = a->data.i == b->data.i;
             break;
-        case TOKEN_NOT_EQUAL:
+        case PS_TOKEN_NOT_EQUAL:
             result->data.i = a->data.i != b->data.i;
             break;
         default:
@@ -140,46 +140,46 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     case PS_TYPE_UNSIGNED:
         switch (token_type)
         {
-        case TOKEN_AND:
+        case PS_TOKEN_AND:
             result->data.u = a->data.u & b->data.u;
             break;
-        case TOKEN_OR:
+        case PS_TOKEN_OR:
             result->data.u = a->data.u | b->data.u;
             break;
-        case TOKEN_XOR:
+        case PS_TOKEN_XOR:
             result->data.u = a->data.u ^ b->data.u;
             break;
-        case TOKEN_PLUS:
+        case PS_TOKEN_PLUS:
             result->data.u = a->data.i + b->data.i;
             break;
-        case TOKEN_MINUS:
+        case PS_TOKEN_MINUS:
             result->data.u = a->data.u - b->data.u;
             break;
-        case TOKEN_STAR:
+        case PS_TOKEN_STAR:
             result->data.u = a->data.u * b->data.u;
             break;
-        case TOKEN_DIV:
+        case PS_TOKEN_DIV:
             result->data.u = a->data.u / b->data.u;
             break;
-        case TOKEN_MOD:
+        case PS_TOKEN_MOD:
             result->data.u = a->data.u % b->data.u;
             break;
-        case TOKEN_LESS_THAN:
+        case PS_TOKEN_LESS_THAN:
             result->data.u = a->data.u < b->data.u;
             break;
-        case TOKEN_LESS_OR_EQUAL:
+        case PS_TOKEN_LESS_OR_EQUAL:
             result->data.u = a->data.u <= b->data.u;
             break;
-        case TOKEN_GREATER_THAN:
+        case PS_TOKEN_GREATER_THAN:
             result->data.u = a->data.u > b->data.u;
             break;
-        case TOKEN_GREATER_OR_EQUAL:
+        case PS_TOKEN_GREATER_OR_EQUAL:
             result->data.u = a->data.u >= b->data.u;
             break;
-        case TOKEN_EQUAL:
+        case PS_TOKEN_EQUAL:
             result->data.u = a->data.u == b->data.u;
             break;
-        case TOKEN_NOT_EQUAL:
+        case PS_TOKEN_NOT_EQUAL:
             result->data.u = a->data.u != b->data.u;
             break;
         default:
@@ -190,34 +190,34 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     case PS_TYPE_REAL:
         switch (token_type)
         {
-        case TOKEN_PLUS:
+        case PS_TOKEN_PLUS:
             result->data.r = a->data.r + b->data.r;
             break;
-        case TOKEN_MINUS:
+        case PS_TOKEN_MINUS:
             result->data.r = a->data.r - b->data.r;
             break;
-        case TOKEN_STAR:
+        case PS_TOKEN_STAR:
             result->data.r = a->data.r * b->data.r;
             break;
-        case TOKEN_SLASH:
+        case PS_TOKEN_SLASH:
             result->data.r = a->data.r / b->data.r;
             break;
-        case TOKEN_LESS_THAN:
+        case PS_TOKEN_LESS_THAN:
             result->data.r = a->data.r < b->data.r;
             break;
-        case TOKEN_LESS_OR_EQUAL:
+        case PS_TOKEN_LESS_OR_EQUAL:
             result->data.r = a->data.r <= b->data.r;
             break;
-        case TOKEN_GREATER_THAN:
+        case PS_TOKEN_GREATER_THAN:
             result->data.r = a->data.r > b->data.r;
             break;
-        case TOKEN_GREATER_OR_EQUAL:
+        case PS_TOKEN_GREATER_OR_EQUAL:
             result->data.r = a->data.r >= b->data.r;
             break;
-        case TOKEN_EQUAL:
+        case PS_TOKEN_EQUAL:
             result->data.r = a->data.r == b->data.r;
             break;
-        case TOKEN_NOT_EQUAL:
+        case PS_TOKEN_NOT_EQUAL:
             result->data.r = a->data.r != b->data.r;
             break;
         default:
@@ -228,13 +228,13 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     case PS_TYPE_BOOLEAN:
         switch (token_type)
         {
-        case TOKEN_AND:
+        case PS_TOKEN_AND:
             result->data.b = (ps_boolean)(a->data.b && b->data.b);
             break;
-        case TOKEN_OR:
+        case PS_TOKEN_OR:
             result->data.b = (ps_boolean)(a->data.b || b->data.b);
             break;
-        case TOKEN_XOR:
+        case PS_TOKEN_XOR:
             result->data.b = (ps_boolean)(a->data.b != b->data.b);
             break;
         default:
@@ -251,17 +251,17 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
 
 // bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
 // {
-//     return ps_function_and_or_xor(interpreter, a, b, result, TOKEN_AND);
+//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_AND);
 // }
 
 // bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
 // {
-//     return ps_function_and_or_xor(interpreter, a, b, result, TOKEN_OR);
+//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_OR);
 // }
 
 // bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
 // {
-//     return ps_function_and_or_xor(interpreter, a, b, result, TOKEN_XOR);
+//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_XOR);
 // }
 
 /******************************************************************************/

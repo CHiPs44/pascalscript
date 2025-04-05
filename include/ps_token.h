@@ -57,112 +57,112 @@ extern "C"
 
     /* THESE ARE NOT TOKENS
         Comments
-            TOKEN_LEFT_COMMENT,        (*
-            TOKEN_LEFT_CURLY_BRACKET,  {
-            TOKEN_RIGHT_COMMENT,       *)
-            TOKEN_RIGHT_CURLY_BRACKET, }
+            PS_TOKEN_LEFT_COMMENT,        (*
+            PS_TOKEN_LEFT_CURLY_BRACKET,  {
+            PS_TOKEN_RIGHT_COMMENT,       *)
+            PS_TOKEN_RIGHT_CURLY_BRACKET, }
         Numerical base prefixes
-            TOKEN_AMPERSAND,         & => Octal
-            TOKEN_DOLLAR,            $ => Hexadecimal
-            TOKEN_PERCENT,           % => Binary
+            PS_TOKEN_AMPERSAND,         & => Octal
+            PS_TOKEN_DOLLAR,            $ => Hexadecimal
+            PS_TOKEN_PERCENT,           % => Binary
      */
 
     typedef enum _token_type_t
     {
-        TOKEN_NONE = 0,
-        TOKEN_END_OF_FILE,
+        PS_TOKEN_NONE = 0,
+        PS_TOKEN_END_OF_FILE,
         // Numeric values
-        TOKEN_INTEGER_VALUE,
-        TOKEN_UNSIGNED_VALUE,
-        TOKEN_REAL_VALUE,
+        PS_TOKEN_INTEGER_VALUE,
+        PS_TOKEN_UNSIGNED_VALUE,
+        PS_TOKEN_REAL_VALUE,
         // Other value types
-        TOKEN_BOOLEAN_VALUE,
-        TOKEN_CHAR_VALUE,
-        TOKEN_STRING_VALUE,
+        PS_TOKEN_BOOLEAN_VALUE,
+        PS_TOKEN_CHAR_VALUE,
+        PS_TOKEN_STRING_VALUE,
         // Identifier
-        TOKEN_IDENTIFIER,
+        PS_TOKEN_IDENTIFIER,
         // Reserved words
-        TOKEN_RESERVED_WORDS = (UINT8_MAX / 2) + 1,
-        TOKEN_PROGRAM = TOKEN_RESERVED_WORDS,
-        TOKEN_CONST,
-        TOKEN_TYPE,
-        TOKEN_VAR,
-        TOKEN_FUNCTION,
-        TOKEN_PROCEDURE,
-        TOKEN_BEGIN,
-        TOKEN_END,
-        TOKEN_INTEGER,
-        TOKEN_UNSIGNED,
-        TOKEN_BOOLEAN,
-        TOKEN_CHAR,
-        TOKEN_REAL,
-        TOKEN_STRING,
-        TOKEN_FALSE,
-        TOKEN_TRUE,
-        TOKEN_NIL,
-        TOKEN_ARRAY,
-        TOKEN_OF,
-        TOKEN_SET,
-        TOKEN_RECORD,
-        TOKEN_WITH,
-        TOKEN_FILE,
-        TOKEN_IF,
-        TOKEN_THEN,
-        TOKEN_ELSE,
-        TOKEN_DO,
-        TOKEN_WHILE,
-        TOKEN_REPEAT,
-        TOKEN_UNTIL,
-        TOKEN_FOR,
-        TOKEN_TO,
-        TOKEN_DOWNTO,
-        TOKEN_IN,
-        TOKEN_CASE,
-        TOKEN_GOTO,
-        TOKEN_LABEL,
-        TOKEN_UNIT,
-        TOKEN_USES,
-        TOKEN_INTERFACE,
-        TOKEN_IMPLEMENTATION,
+        PS_TOKEN_RESERVED_WORDS = (UINT8_MAX / 2) + 1,
+        PS_TOKEN_PROGRAM = PS_TOKEN_RESERVED_WORDS,
+        PS_TOKEN_CONST,
+        PS_TOKEN_TYPE,
+        PS_TOKEN_VAR,
+        PS_TOKEN_FUNCTION,
+        PS_TOKEN_PROCEDURE,
+        PS_TOKEN_BEGIN,
+        PS_TOKEN_END,
+        PS_TOKEN_INTEGER,
+        PS_TOKEN_UNSIGNED,
+        PS_TOKEN_BOOLEAN,
+        PS_TOKEN_CHAR,
+        PS_TOKEN_REAL,
+        PS_TOKEN_STRING,
+        PS_TOKEN_FALSE,
+        PS_TOKEN_TRUE,
+        PS_TOKEN_NIL,
+        PS_TOKEN_ARRAY,
+        PS_TOKEN_OF,
+        PS_TOKEN_SET,
+        PS_TOKEN_RECORD,
+        PS_TOKEN_WITH,
+        PS_TOKEN_FILE,
+        PS_TOKEN_IF,
+        PS_TOKEN_THEN,
+        PS_TOKEN_ELSE,
+        PS_TOKEN_DO,
+        PS_TOKEN_WHILE,
+        PS_TOKEN_REPEAT,
+        PS_TOKEN_UNTIL,
+        PS_TOKEN_FOR,
+        PS_TOKEN_TO,
+        PS_TOKEN_DOWNTO,
+        PS_TOKEN_IN,
+        PS_TOKEN_CASE,
+        PS_TOKEN_GOTO,
+        PS_TOKEN_LABEL,
+        PS_TOKEN_UNIT,
+        PS_TOKEN_USES,
+        PS_TOKEN_INTERFACE,
+        PS_TOKEN_IMPLEMENTATION,
         // Operators
-        TOKEN_DIV,
-        TOKEN_MOD,
-        TOKEN_AND,
-        TOKEN_OR,
-        TOKEN_XOR,
-        TOKEN_NOT,
-        TOKEN_SHL,
-        TOKEN_SHR,
+        PS_TOKEN_DIV,
+        PS_TOKEN_MOD,
+        PS_TOKEN_AND,
+        PS_TOKEN_OR,
+        PS_TOKEN_XOR,
+        PS_TOKEN_NOT,
+        PS_TOKEN_SHL,
+        PS_TOKEN_SHR,
         // Symbols
-        TOKEN_ASSIGN,            // :=  assign
-        TOKEN_AT_SIGN,           // @   address of
-        TOKEN_CARET,             // ^   pointer to
-        TOKEN_COLON,             // :   various uses
-        TOKEN_COMMA,             // ,   various uses
-        TOKEN_RANGE,             // ..  ranges
-        TOKEN_DOT,               // .   various uses
-        TOKEN_LEFT_BRACKET,      // [   array access
-        TOKEN_LEFT_PARENTHESIS,  // (   various uses
-        TOKEN_RIGHT_BRACKET,     // ]   array access
-        TOKEN_RIGHT_PARENTHESIS, // )   various uses
-        TOKEN_SEMI_COLON,        // ;   various uses
+        PS_TOKEN_ASSIGN,            // :=  assign
+        PS_TOKEN_AT_SIGN,           // @   address of
+        PS_TOKEN_CARET,             // ^   pointer to
+        PS_TOKEN_COLON,             // :   various uses
+        PS_TOKEN_COMMA,             // ,   various uses
+        PS_TOKEN_RANGE,             // ..  ranges
+        PS_TOKEN_DOT,               // .   various uses
+        PS_TOKEN_LEFT_BRACKET,      // [   array access
+        PS_TOKEN_LEFT_PARENTHESIS,  // (   various uses
+        PS_TOKEN_RIGHT_BRACKET,     // ]   array access
+        PS_TOKEN_RIGHT_PARENTHESIS, // )   various uses
+        PS_TOKEN_SEMI_COLON,        // ;   various uses
         // Arithmetic operators
-        TOKEN_PLUS,  // +   addition
-        TOKEN_MINUS, // -   substraction / negation
-        TOKEN_STAR,  // *   multiplication
-        TOKEN_SLASH, // /   division (real)
+        PS_TOKEN_PLUS,  // +   addition
+        PS_TOKEN_MINUS, // -   substraction / negation
+        PS_TOKEN_STAR,  // *   multiplication
+        PS_TOKEN_SLASH, // /   division (real)
         // Comparison operators
-        TOKEN_EQUAL,            // =
-        TOKEN_NOT_EQUAL,        // <>
-        TOKEN_LESS_THAN,        // <
-        TOKEN_LESS_OR_EQUAL,    // <=
-        TOKEN_GREATER_THAN,     // >
-        TOKEN_GREATER_OR_EQUAL, // >=
+        PS_TOKEN_EQUAL,            // =
+        PS_TOKEN_NOT_EQUAL,        // <>
+        PS_TOKEN_LESS_THAN,        // <
+        PS_TOKEN_LESS_OR_EQUAL,    // <=
+        PS_TOKEN_GREATER_THAN,     // >
+        PS_TOKEN_GREATER_OR_EQUAL, // >=
         // These should not be tokens
-        TOKEN_WRITE,
-        TOKEN_WRITELN,
+        PS_TOKEN_WRITE,
+        PS_TOKEN_WRITELN,
         // Make token value fit in one byte
-        TOKEN_MAX = UINT8_MAX
+        PS_TOKEN_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_token_type;
 
     typedef struct s_ps_token

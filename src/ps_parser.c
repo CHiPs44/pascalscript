@@ -102,5 +102,5 @@ ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_
         if (token_type == token_types[i])
             return token_type;
     }
-    return TOKEN_NONE;
+    return PS_TOKEN_NONE;
 }
