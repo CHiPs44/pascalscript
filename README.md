@@ -1,16 +1,15 @@
 # `PascalScript` - an interpreted Pascal dialect
 
-## Build status
+## Status
 
-**This does not even compile for now!**
+As of 2025-04-05, with commit [b3cd327](https://github.com/CHiPs44/pascalscript/commit/b3cd327fc5ba1f77be46c0e149285d277f2f777d), is __does__ compile and can execute a trivial program with:
 
-As I said in <https://github.com/CHiPs44/pascalscript/issues/7#issuecomment-2741573870>#7":
+- assignment to variable from an arithmetic expression
+- writing its value to standard output
 
-"Yes, it's really a work in progress!
+There is much more to do, but it's an achievement I'm glad to see!
 
-Even if the project is nearly 2 years old, I don't work on it an a regular basis, more by cycles of weeks or months when I'm interested again in going forward with it.
-
-I'm going to add an introduction in the README to show current status, or perhaps I'll try to show it doesn't build through Github actions."
+Next step should be implementing conditional statement `if` `then` `else`.
 
 ## Introduction
 
