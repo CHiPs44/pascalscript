@@ -33,7 +33,7 @@ char *minimal_source =
     // "Var   I : Integer;\n"
     "Var   U : Unsigned;\n"
     "Begin\n"
-    " U := (12345 + 23456);\n"
+    " U := (12345 + 23456) * 2;\n"
     " WriteLn(U);\n"
     "End.\n";
 

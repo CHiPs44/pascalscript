@@ -12,12 +12,12 @@
 #define EXPECT_TOKEN(__TOKEN_TYPE__)    if (!ps_parser_expect_token_type(interpreter->parser, __TOKEN_TYPE__)) return false
 #define RETURN_ERROR(__PS_ERROR__)      { interpreter->error = __PS_ERROR__; return false; }
 #define COPY_IDENTIFIER(__IDENTIFIER__) strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
-#define TRACE_BEGIN(__TITLE__)          if (interpreter->debug) { \
-                                            fprintf(stderr, "BEGIN %-32s %s", visitor, __TITLE__); \
+#define TRACE_BEGIN(__PLUS__)           if (interpreter->debug) { \
+                                            fprintf(stderr, "BEGIN %-32s %-8s ", visitor, __PLUS__); \
                                             ps_token_dump(&lexer->current_token); \
                                         }
-#define TRACE_END(__TITLE__)            if (interpreter->debug) { \
-                                            fprintf(stderr, "END   %-32s %s", visitor, __TITLE__); \
+#define TRACE_END(__PLUS__)             if (interpreter->debug) { \
+                                            fprintf(stderr, "END   %-32s %-8s ", visitor, __PLUS__); \
                                             ps_token_dump(&lexer->current_token); \
                                         }
 // clang-format on
@@ -103,18 +103,17 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
     return true;
 }
 
-// '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
-static ps_token_type multiplicative_operators[] = {
-    TOKEN_STAR, TOKEN_SLASH, TOKEN_DIV, TOKEN_MOD, TOKEN_AND, // TOKEN_SHL, TOKEN_SHR,
-};
-
 bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
+    // '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
+    static ps_token_type multiplicative_operators[] = {
+        TOKEN_STAR, TOKEN_SLASH, TOKEN_DIV, TOKEN_MOD, TOKEN_AND, // TOKEN_SHL, TOKEN_SHR,
+    };
     USE_LEXER;
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type multiplicative_operator;
+    ps_token_type multiplicative_operator = TOKEN_NONE;
     if (!ps_visit_factor(interpreter, &left))
         return false;
     multiplicative_operator = ps_parser_expect_token_types(
@@ -137,16 +136,15 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     return true;
 }
 
-// '+' | '-' | 'OR' | 'XOR'
-static ps_token_type additive_operators[] = {TOKEN_PLUS, TOKEN_MINUS, TOKEN_OR, TOKEN_XOR};
-
 bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
 {
+    // '+' | '-' | 'OR' | 'XOR'
+    static ps_token_type additive_operators[] = {TOKEN_PLUS, TOKEN_MINUS, TOKEN_OR, TOKEN_XOR};
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type additive_operator;
+    ps_token_type additive_operator = TOKEN_NONE;
     if (!ps_visit_term(interpreter, &left))
         return false;
     additive_operator = ps_parser_expect_token_types(
@@ -169,23 +167,22 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
     return true;
 }
 
-// '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS'
-static ps_token_type relational_operators[] = {
-    TOKEN_LESS_THAN, TOKEN_LESS_OR_EQUAL,
-    TOKEN_GREATER_THAN, TOKEN_GREATER_OR_EQUAL,
-    TOKEN_EQUAL, TOKEN_NOT_EQUAL, TOKEN_IN, // TOKEN_IS,
-};
-
 /**
  * SIMPLE_EXPRESSION [ RELATIONAL_OPERATOR SIMPLE_EXPRESSION ]
  */
 bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
 {
+    // '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS'
+    static ps_token_type relational_operators[] = {
+        TOKEN_LESS_THAN, TOKEN_LESS_OR_EQUAL,
+        TOKEN_GREATER_THAN, TOKEN_GREATER_OR_EQUAL,
+        TOKEN_EQUAL, TOKEN_NOT_EQUAL, TOKEN_IN, // TOKEN_IS,
+    };
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
     ps_value left = {0}, right = {0};
-    ps_token_type relational_operator;
+    ps_token_type relational_operator = TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, &left))
         return false;
     relational_operator = ps_parser_expect_token_types(
