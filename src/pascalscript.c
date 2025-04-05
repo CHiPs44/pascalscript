@@ -20,20 +20,21 @@ ps_interpreter *interpreter = NULL;
 
 char *minimal_source =
     "Program Minimal;\n"
-    // "Const Int1 = 12345;\n"
-    // "      Num1 = 123.45;\n"
-    // "      Num2 = 1.17549435082228750796873653722224568e-38;\n"
-    // "      Num3 = 3.40282346638528859811704183484516925e38;\n"
-    // "      Hex1 = $AABBCCDD;\n"
-    // "      Oct1 = &1000;\n"
-    // "      Bin1 = %1111000010101010;\n"
-    // "Var   R : Real;\n" 
-    // "      U : Unsigned;\n"
-    // "Const Int2 = 54321;\n"
-    // "Var   I : Integer;\n"
-    "Var   U : Unsigned;\n"
+    "Const Int1 = 10;\n"
+    "      Num1 = 123.45;\n"
+    "      Num2 = 1.17549435082228750796873653722224568e-38;\n"
+    "      Num3 = 3.40282346638528859811704183484516925e38;\n"
+    "      Hex1 = $AABBCCDD;\n"
+    "      Oct1 = &1000;\n"
+    "      Bin1 = %1111000010101010;\n"
+    "Var   R : Real;\n"
+    "Const Int2 = 10;\n"
+    "      Real1 = 12.34;\n"
+    "Var   I : Integer;\n"
+    "      U : Unsigned;\n"
     "Begin\n"
-    " U := (12345 + 23456) * 2;\n"
+    " U := (Int1 + Int2) * 2;\n"
+    " { No strings yet! }"
     " Write('U');\n"
     " Write('=');\n"
     " WriteLn(U);\n"
@@ -68,8 +69,10 @@ int main(int argc, char *argv[])
     printf("Could not allocate interpreter!\n");
     return 1;
   }
-  interpreter->parser->trace = true;
-  interpreter->parser->debug = false;
+  interpreter->trace = false;
+  interpreter->debug = false;
+  interpreter->parser->trace = interpreter->trace;
+  interpreter->parser->debug = interpreter->debug;
   fprintf(
       stderr,
       "interpreter: %p, parser %p, symbols %p\n",

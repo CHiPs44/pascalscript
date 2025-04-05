@@ -11,8 +11,11 @@
 #define READ_NEXT_TOKEN                 { \
                                             if (!ps_lexer_read_next_token(lexer)) \
                                                 return false; \
-                                            fprintf(stderr, "TOKEN\t%-32s %-8s ", "", ""); \
-                                            ps_token_dump(&lexer->current_token); \
+                                            if (interpreter->debug) \
+                                            { \
+                                                fprintf(stderr, "TOKEN\t%-32s %-8s ", "", ""); \
+                                                ps_token_dump(&lexer->current_token); \
+                                            } \
                                         }
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__) if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__)) return false
 #define RETURN_ERROR(__PS_ERROR__)      { \
@@ -455,7 +458,8 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
                     interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
                     TRACE_ERROR("");
                 }
-                ps_value_debug(stderr, "ASSIGN => ", &result);
+                if (interpreter->debug)
+                    ps_value_debug(stderr, "ASSIGN => ", &result);
                 if (result.type != symbol->value->type)
                 {
                     interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;

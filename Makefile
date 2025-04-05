@@ -4,7 +4,8 @@
 
 CC = LANG=C gcc
 # CFLAGS = -W -Wall -ansi -pedantic -std=c17 -g
-CFLAGS   = -Wall -Iinclude -ggdb
+# CFLAGS   = -std=c17 -Wall -Iinclude -ggdb
+CFLAGS   = -std=c17 -Wall -Iinclude -ggdb -m32 
 CLIBS    = -lm 
 PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)
