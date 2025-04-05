@@ -131,6 +131,7 @@ struct s_ps_keyword
     { .token_type = PS_TOKEN_NOT           , .keyword = "NOT"              },
     { .token_type = PS_TOKEN_OF            , .keyword = "OF"               },
     { .token_type = PS_TOKEN_OR            , .keyword = "OR"               },
+    { .token_type = PS_TOKEN_OTHERWISE     , .keyword = "OTHERWISE"        },
     { .token_type = PS_TOKEN_PROCEDURE     , .keyword = "PROCEDURE"        },
     { .token_type = PS_TOKEN_PROGRAM       , .keyword = "PROGRAM"          },
     { .token_type = PS_TOKEN_REAL          , .keyword = "REAL"             },

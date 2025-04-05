@@ -118,6 +118,7 @@ extern "C"
         PS_TOKEN_DOWNTO,
         PS_TOKEN_IN,
         PS_TOKEN_CASE,
+        PS_TOKEN_OTHERWISE,
         PS_TOKEN_GOTO,
         PS_TOKEN_LABEL,
         PS_TOKEN_UNIT,

@@ -9,16 +9,30 @@
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
 #define SET_VISITOR(__VISITOR__)        static char *visitor = __VISITOR__
 #define READ_NEXT_TOKEN                 if (!ps_lexer_read_next_token(lexer)) return false
-#define EXPECT_TOKEN(__TOKEN_TYPE__)    if (!ps_parser_expect_token_type(interpreter->parser, __TOKEN_TYPE__)) return false
-#define RETURN_ERROR(__PS_ERROR__)      { interpreter->error = __PS_ERROR__; return false; }
+#define EXPECT_TOKEN(__PS_TOKEN_TYPE__) if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__)) return false
+#define RETURN_ERROR(__PS_ERROR__)      { \
+                                            interpreter->error = __PS_ERROR__; \
+                                            if (interpreter->debug) { \
+                                                fprintf(stderr, "RETURN\t%-32s %-8d ", visitor, __PS_ERROR__); \
+                                                ps_token_dump(&lexer->current_token); \
+                                            } \
+                                            return false; \
+                                        }
 #define COPY_IDENTIFIER(__IDENTIFIER__) strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 #define TRACE_BEGIN(__PLUS__)           if (interpreter->debug) { \
-                                            fprintf(stderr, "BEGIN %-32s %-8s ", visitor, __PLUS__); \
+                                            fprintf(stderr, "BEGIN\t%-32s %-8s ", visitor, __PLUS__); \
                                             ps_token_dump(&lexer->current_token); \
                                         }
 #define TRACE_END(__PLUS__)             if (interpreter->debug) { \
-                                            fprintf(stderr, "END   %-32s %-8s ", visitor, __PLUS__); \
+                                            fprintf(stderr, "END\t%-32s %-8s ", visitor, __PLUS__); \
                                             ps_token_dump(&lexer->current_token); \
+                                        }
+#define TRACE_ERROR(__PLUS__)           { \
+                                            if (interpreter->debug) { \
+                                                fprintf(stderr, "ERROR\t%-32s %-8s ", visitor, __PLUS__); \
+                                                ps_token_dump(&lexer->current_token); \
+                                            } \
+                                            return false; \
                                         }
 // clang-format on
 
@@ -38,7 +52,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
     case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN;
         if (!ps_visit_expression(interpreter, result))
-            return false;
+            TRACE_ERROR("");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN;
         break;
@@ -85,21 +99,21 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
     case PS_TOKEN_NOT:
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, &factor))
-            return false;
+            TRACE_ERROR("");
         if (!ps_function_unary_op(interpreter, &factor, result, PS_TOKEN_MINUS))
-            return false;
+            TRACE_ERROR("");
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_STRING_VALUE:
     case PS_TOKEN_NIL:
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
+        TRACE_ERROR("");
     default:
         interpreter->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
-        return false;
+        TRACE_ERROR("");
     }
 
-    TRACE_END("");
+    TRACE_END("OK");
     return true;
 }
 
@@ -115,7 +129,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     ps_value left = {0}, right = {0};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, &left))
-        return false;
+        TRACE_ERROR("");
     multiplicative_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(multiplicative_operators) / sizeof(ps_token_type),
@@ -128,11 +142,11 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     }
     READ_NEXT_TOKEN;
     if (!ps_visit_factor(interpreter, &right))
-        return false;
+        TRACE_ERROR("");
     READ_NEXT_TOKEN;
     if (!ps_function_binary_op(interpreter, &left, &right, result, multiplicative_operator))
-        return false;
-    TRACE_END("");
+        TRACE_ERROR("");
+    TRACE_END("OK");
     return true;
 }
 
@@ -146,7 +160,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
     ps_value left = {0}, right = {0};
     ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, &left))
-        return false;
+        TRACE_ERROR("");
     additive_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(additive_operators) / sizeof(ps_token_type),
@@ -160,9 +174,9 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
     }
     READ_NEXT_TOKEN;
     if (!ps_visit_factor(interpreter, &right))
-        return false;
+        TRACE_ERROR("");
     if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
-        return false;
+        TRACE_ERROR("");
     TRACE_END("2");
     return true;
 }
@@ -184,7 +198,7 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
     ps_value left = {0}, right = {0};
     ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, &left))
-        return false;
+        TRACE_ERROR("");
     relational_operator = ps_parser_expect_token_types(
         interpreter->parser,
         sizeof(relational_operators) / sizeof(ps_token_type),
@@ -197,9 +211,9 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
         return true;
     }
     if (!ps_visit_simple_expression(interpreter, &right))
-        return false;
+        TRACE_ERROR("");
     if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
-        return false;
+        TRACE_ERROR("");
     TRACE_END("2");
     return true;
 }
@@ -227,7 +241,7 @@ bool ps_visit_program(ps_interpreter *interpreter)
         NULL);
     if (ps_symbol_table_add(interpreter->parser->symbols, program) == NULL)
         RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
-    TRACE_END("");
+    TRACE_END("OK");
     return true;
 }
 
@@ -239,7 +253,7 @@ bool ps_visit_program(ps_interpreter *interpreter)
  *       IDENTIFIER = IDENTIFIER | VALUE ;
  *       IDENTIFIER = CONSTANT_EXPRESSION ;
  */
-bool ps_visit_block_const(ps_interpreter *interpreter)
+bool ps_visit_const(ps_interpreter *interpreter)
 {
     USE_LEXER;
     SET_VISITOR("CONST");
@@ -313,7 +327,7 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
         if (ps_symbol_table_add(interpreter->parser->symbols, constant) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
-    TRACE_END("");
+    TRACE_END("OK");
     return true;
 }
 
@@ -324,7 +338,7 @@ bool ps_visit_block_const(ps_interpreter *interpreter)
  * Next step: allow identifier list with commas
  *              IDENTIFIER, IDENTIFIER, ... : TYPE ;
  */
-bool ps_visit_block_var(ps_interpreter *interpreter)
+bool ps_visit_var(ps_interpreter *interpreter)
 {
     USE_LEXER;
     SET_VISITOR("VAR");
@@ -382,110 +396,140 @@ bool ps_visit_block_var(ps_interpreter *interpreter)
         if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
-    TRACE_END("");
+    TRACE_END("OK");
     return true;
 }
 
 /**
  * Visit statement sequence
- *      IDENTIFIER := EXPRESSION ;
- *      WRITE | WRITELN ( EXPRESSION ) ;
+ *      IDENTIFIER := EXPRESSION
+ *      WRITE | WRITELN ( EXPRESSION )
  * Next steps:
  *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
- *      IF EXPRESSION THEN STATEMENT ;
- *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END ;
- *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END ;
+ *      IF EXPRESSION THEN STATEMENT
+ *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END
+ *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END
  */
-bool ps_visit_statements(ps_interpreter *interpreter)
+bool ps_visit_statement_list(ps_interpreter *interpreter)
 {
     USE_LEXER;
-    SET_VISITOR("STATEMENTS");
+    SET_VISITOR("STATEMENT_LIST");
     TRACE_BEGIN("");
+    // for assignement
     ps_identifier identifier;
     ps_symbol *symbol;
+    // for assignement & write[ln]
     ps_value result;
+    // for write[ln]
     char *display_value;
-    bool loop = true;
-    do
+    if (lexer->current_token.type == PS_TOKEN_END)
     {
-        switch (lexer->current_token.type)
+        READ_NEXT_TOKEN;
+    }
+    else
+    {
+        // let's go!
+        bool loop = true;
+        do
         {
-        case PS_TOKEN_IDENTIFIER:
-            /* IDENTIFIER := EXPRESSION ; */
-            COPY_IDENTIFIER(identifier);
-            READ_NEXT_TOKEN;
-            EXPECT_TOKEN(PS_TOKEN_ASSIGN);
-            READ_NEXT_TOKEN;
-            if (!ps_visit_expression(interpreter, &result))
-                return false;
-            // start "code" execution
-            symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
-            if (symbol == NULL)
+            switch (lexer->current_token.type)
             {
-                interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
-                return false;
+            case PS_TOKEN_IDENTIFIER:
+                /* IDENTIFIER := EXPRESSION ; */
+                COPY_IDENTIFIER(identifier);
+                READ_NEXT_TOKEN;
+                EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+                READ_NEXT_TOKEN;
+                if (!ps_visit_expression(interpreter, &result))
+                    TRACE_ERROR("");
+                // start "code" execution
+                symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+                if (symbol == NULL)
+                {
+                    interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
+                    TRACE_ERROR("");
+                }
+                ps_value_debug(stderr, "ASSIGN => ", &result);
+                if (result.type != symbol->value->type)
+                {
+                    interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+                    TRACE_ERROR("");
+                }
+                symbol->value->data = result.data;
+                // end "code" execution
+                break;
+            case PS_TOKEN_WRITE:
+            case PS_TOKEN_WRITELN:
+                /* WRITE[LN] ( EXPRESSION ) ; */
+                bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
+                READ_NEXT_TOKEN;
+                EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+                READ_NEXT_TOKEN;
+                if (!ps_visit_expression(interpreter, &result))
+                    TRACE_ERROR("");
+                EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+                READ_NEXT_TOKEN;
+                // start "code" execution
+                display_value = ps_value_get_display_value(&result);
+                if (display_value == NULL)
+                    RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
+                if (newline)
+                {
+                    if (interpreter->debug)
+                        printf("\tWRITELN => ");
+                    printf("%s\n", display_value);
+                }
+                else
+                {
+                    if (interpreter->debug)
+                        printf("\tWRITE => ");
+                    printf("%s", display_value);
+                }
+                // end "code" execution
+                break;
+            default:
+                RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
             }
-            ps_value_debug(stderr, "ASSIGN => ", &result);
-            if (result.type != symbol->value->type)
-            {
-                interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
-                return false;
-            }
-            symbol->value->data = result.data;
-            // end "code" execution
-            EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-            READ_NEXT_TOKEN;
-            break;
-        case PS_TOKEN_WRITE:
-        case PS_TOKEN_WRITELN:
-            /* WRITE[LN] ( EXPRESSION ) ; */
-            bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
-            READ_NEXT_TOKEN;
-            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN;
-            if (!ps_visit_expression(interpreter, &result))
-                return false;
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN;
-            // start "code" execution
-            display_value = ps_value_get_display_value(&result);
-            if (display_value == NULL)
-                RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
-            if (newline)
-            {
-                if (interpreter->debug)
-                    printf("\tWRITELN => ");
-                printf("%s\n", display_value);
-            }
+            if (lexer->current_token.type != PS_TOKEN_SEMI_COLON && lexer->current_token.type != PS_TOKEN_END)
+                RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+            if (lexer->current_token.type == PS_TOKEN_END)
+                loop = false;
             else
-            {
-                if (interpreter->debug)
-                    printf("\tWRITE => ");
-                printf("%s", display_value);
-            }
-            // end "code" execution
-            EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-            READ_NEXT_TOKEN;
-            break;
-        case PS_TOKEN_END:
-            READ_NEXT_TOKEN;
-            loop = false;
-            break;
-        default:
-            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
-        }
-    } while (loop);
-    TRACE_END("");
+                READ_NEXT_TOKEN;
+        } while (loop);
+    }
+    TRACE_END("OK");
+    return true;
+}
+
+/**
+ * Visit BEGIN
+ *         [ STATEMENT ... ]
+ *       END
+ * NB: ; or . or whatever after END is analyzed in the caller
+ */
+bool ps_visit_compound_statement(ps_interpreter *interpreter)
+{
+    USE_LEXER;
+    SET_VISITOR("COMPOUND_STATEMENT");
+    TRACE_BEGIN("");
+
+    EXPECT_TOKEN(PS_TOKEN_BEGIN);
+    READ_NEXT_TOKEN;
+    if (!ps_visit_statement_list(interpreter))
+        TRACE_ERROR("");
+    EXPECT_TOKEN(PS_TOKEN_END);
+    READ_NEXT_TOKEN;
+
+    TRACE_END("OK");
     return true;
 }
 
 /**
  * Visit [ CONST ... TYPE ... VAR ... ]
- *       BEGIN
- *         [ STATEMENT ... ]
- *       END
+ *       COMPOUND_STATEMENT
  * NB: ; or . or whatever after END is analyzed in the caller
  */
 bool ps_visit_block(ps_interpreter *interpreter)
@@ -493,22 +537,21 @@ bool ps_visit_block(ps_interpreter *interpreter)
     USE_LEXER;
     SET_VISITOR("BLOCK");
     TRACE_BEGIN("");
+
     do
     {
-        if (lexer->current_token.type == PS_TOKEN_CONST && !ps_visit_block_const(interpreter))
-            return false;
-        // if (lexer->current_token.type == PS_TOKEN_TYPE && !ps_visit_block_type(interpreter))
-        //     return false;
-        if (lexer->current_token.type == PS_TOKEN_VAR && !ps_visit_block_var(interpreter))
-            return false;
+        if (lexer->current_token.type == PS_TOKEN_CONST && !ps_visit_const(interpreter))
+            TRACE_ERROR("");
+        // if (lexer->current_token.type == PS_TOKEN_TYPE && !ps_visit_type(interpreter))
+        //     TRACE_ERROR("");
+        if (lexer->current_token.type == PS_TOKEN_VAR && !ps_visit_var(interpreter))
+            TRACE_ERROR("");
     } while (lexer->current_token.type != PS_TOKEN_BEGIN);
-    EXPECT_TOKEN(PS_TOKEN_BEGIN);
-    READ_NEXT_TOKEN;
-    if (lexer->current_token.type != PS_TOKEN_END && !ps_visit_statements(interpreter))
-        return false;
-    EXPECT_TOKEN(PS_TOKEN_END);
-    READ_NEXT_TOKEN;
-    TRACE_END("");
+
+    if (!ps_visit_compound_statement(interpreter))
+        TRACE_ERROR("");
+
+    TRACE_END("OK");
     return true;
 }
 
@@ -524,11 +567,11 @@ bool ps_visit_start(ps_interpreter *interpreter)
     TRACE_BEGIN("");
     READ_NEXT_TOKEN;
     if (!ps_visit_program(interpreter))
-        return false;
+        TRACE_ERROR("");
     if (!ps_visit_block(interpreter))
-        return false;
+        TRACE_ERROR("");
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: source code after '.' is not analyzed and has not to be
-    TRACE_END("");
+    TRACE_END("OK");
     return true;
 }
