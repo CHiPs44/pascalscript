@@ -310,8 +310,16 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             unsigned long u = strtoul(buffer, &end, base);
             if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
-            lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
-            lexer->current_token.value.u = (ps_unsigned)u;
+            if (u > PS_INTEGER_MAX)
+            {
+                lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
+                lexer->current_token.value.u = (ps_unsigned)u;
+            }
+            else
+            {
+                lexer->current_token.type = PS_TOKEN_INTEGER_VALUE;
+                lexer->current_token.value.i = (ps_integer)u;
+            }
         }
         lexer->error = PS_LEXER_ERROR_NONE;
         return true;

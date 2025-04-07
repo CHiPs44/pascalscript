@@ -226,7 +226,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             result->data.u = a->data.u ^ b.data.u;
             break;
         case PS_TOKEN_PLUS:
-            result->data.u = a->data.i + b.data.i;
+            result->data.u = a->data.u + b.data.u;
             break;
         case PS_TOKEN_MINUS:
             result->data.u = a->data.u - b.data.u;
