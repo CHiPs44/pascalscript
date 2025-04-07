@@ -204,7 +204,7 @@ ps_error vm_exec_op_binary(ps_vm *vm, ps_vm_opcode op)
         }
         return PS_RUNTIME_ERROR_NONE;
     }
-    return PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+    return PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
 }
 
 /* EOF */

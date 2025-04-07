@@ -15,10 +15,19 @@ extern "C"
 {
 #endif
 
+    /**@brief Write / WriteLn instruction */
+    bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value, bool newline);
+
+    /**
+     *  @brief Copy value of "from" into "to", converting unsigned/integer if possible
+     *         sets error to PS_RUNTIME_ERROR_OUT_OF_RANGE or PS_RUNTIME_ERROR_TYPE_MISMATCH
+     */
+    bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
+
     /** @brief Compute bitwise not for integer / unsigned, logical not for boolean, neg for integer / real */
     bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
 
-bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result, ps_token_type token_type);
+    bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result, ps_token_type token_type);
 
     // /** @brief NOT - Compute bitwise not for integer / unsigned, logical not for boolean */
     // bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result);

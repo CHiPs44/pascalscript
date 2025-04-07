@@ -426,11 +426,9 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
     TRACE_BEGIN("");
     // for assignement
     ps_identifier identifier;
-    ps_symbol *symbol;
+    ps_symbol *variable;
     // for assignement & write[ln]
     ps_value result;
-    // for write[ln]
-    char *display_value;
     if (lexer->current_token.type == PS_TOKEN_END)
     {
         READ_NEXT_TOKEN;
@@ -452,20 +450,19 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
                 if (!ps_visit_expression(interpreter, &result))
                     TRACE_ERROR("");
                 // start "code" execution
-                symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
-                if (symbol == NULL)
+                variable = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+                if (variable == NULL)
                 {
                     interpreter->parser->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
                     TRACE_ERROR("");
                 }
                 if (interpreter->debug)
                     ps_value_debug(stderr, "ASSIGN => ", &result);
-                if (result.type != symbol->value->type)
+                if (!ps_function_copy_value(interpreter, &result, variable->value))
                 {
-                    interpreter->parser->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
                     TRACE_ERROR("");
                 }
-                symbol->value->data = result.data;
+                variable->value->data = result.data;
                 // end "code" execution
                 break;
             case PS_TOKEN_WRITE:
@@ -480,23 +477,8 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
                 EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
                 READ_NEXT_TOKEN;
                 // start "code" execution
-                display_value = ps_value_get_display_value(&result);
-                if (display_value == NULL)
-                    RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING);
-                if (newline)
-                {
-                    if (interpreter->debug)
-                        printf("WRITELN\t%s\n", display_value);
-                    else
-                        printf("%s\n", display_value);
-                }
-                else
-                {
-                    if (interpreter->debug)
-                        printf("WRITE\t%s\n", display_value);
-                    else
-                        printf("%s", display_value);
-                }
+                if (!ps_function_write(interpreter, stdout, &result, newline))
+                    TRACE_ERROR("DISPLAY");
                 // end "code" execution
                 break;
             default:

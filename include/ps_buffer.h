@@ -17,7 +17,7 @@ extern "C"
 {
 #endif
 
-/* NB: maximum buffer is 65,535 chars with 65,535 lines of 255 characters */
+    /* NB: maximum buffer is 65,535 chars with 65,535 lines of 255 characters */
 
 #ifndef PS_BUFFER_MAX_SIZE
 #define PS_BUFFER_MAX_SIZE UINT16_MAX
@@ -42,13 +42,13 @@ extern "C"
         uint8_t current_column;
         char current_char;
         char next_char;
-        bool from_file;
         ps_error error;
+        bool from_file;
         int file_errno;
-        uint8_t debug; // 0=OFF, 1=debug, 2=verbose
+        uint8_t debug; // 0=off, 1=debug, 2=verbose
     } ps_buffer;
 
-    /** @brief Init buffer */
+    /** @brief Initialize buffer */
     ps_buffer *ps_buffer_init();
 
     /** @brief Release buffer */

@@ -77,8 +77,8 @@ char *ps_error_get_message(ps_error error)
         return "Symbol not found";
     case PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
         return "Unknown unary operator";
-    case PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE:
-        return "Unapplicable binary operator";
+    case PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE:
+        return "Unapplicable operator";
     case PS_RUNTIME_ERROR_UNEXPECTED_TYPE:
         return "Unexpected type";
     case PS_RUNTIME_ERROR_EXPECTED_VARIABLE:

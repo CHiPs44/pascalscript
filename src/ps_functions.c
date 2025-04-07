@@ -14,6 +14,66 @@
 #include "ps_token.h"
 #include "ps_functions.h"
 
+bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value, bool newline)
+{
+    char *display_value = ps_value_get_display_value(value);
+    if (display_value == NULL)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_STRING;
+        return false;
+    }
+    if (newline)
+    {
+        if (interpreter->debug)
+            fprintf(f, "WRITELN\t%s\n", display_value);
+        else
+            fprintf(f, "%s\n", display_value);
+    }
+    else
+    {
+        if (interpreter->debug)
+            fprintf(f, "WRITE\t%s\n", display_value);
+        else
+            fprintf(f, "%s", display_value);
+    }
+    return true;
+}
+
+bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
+{
+    // ps_value_debug(stderr,"FROM ",from);
+    // ps_value_debug(stderr,"TO   ",to);
+    if (from->type == to->type)
+    {
+        to->data = from->data;
+        return true;
+    }
+    // Integer => Unsigned
+    if (from->type->base == PS_TYPE_INTEGER && to->type->base == PS_TYPE_UNSIGNED)
+    {
+        if (interpreter->range_check && from->data.i < 0)
+        {
+            interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return false;
+        }
+        to->data.u = from->data.i;
+        return true;
+    }
+    // Unsigned => Integer
+    if (from->type->base == PS_TYPE_UNSIGNED && to->type->base == PS_TYPE_INTEGER)
+    {
+        if (interpreter->range_check && from->data.u > PS_INTEGER_MAX)
+        {
+            interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+            return false;
+        }
+        to->data.i = from->data.u;
+        return true;
+    }
+    interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+    return false;
+}
+
 /******************************************************************************/
 /* BASE                                                                       */
 /******************************************************************************/
@@ -34,7 +94,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.i = -value->data.i;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;
@@ -45,7 +105,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.u = ~value->data.u;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
     case PS_TYPE_REAL:
@@ -55,7 +115,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.r = -value->data.u;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
     case PS_TYPE_BOOLEAN:
@@ -65,7 +125,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.b = !value->data.b;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;
@@ -81,8 +141,27 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     // Be more than strict for now!
     if (a->type->base != b->type->base)
     {
+        // if (a->type->base == PS_TYPE_INTEGER && b->type->base == PS_TYPE_UNSIGNED)
+        // {
+        //     if (interpreter->range_check && a->data.i < 0)
+        //     {
+        //         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+        //         return false;
+        //     }
+        // }
+        // else if (a->type->base == PS_TYPE_UNSIGNED && b->type->base == PS_TYPE_INTEGER)
+        // {
+        //     if (interpreter->range_check && a->data.u > PS_INTEGER_MAX)
+        //     {
+        //         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
+        //         return false;
+        //     }
+        // }
+        // else
+        // {
         interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return false;
+        // }
     }
     result->type = a->type;
     switch (a->type->base)
@@ -133,7 +212,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             result->data.i = a->data.i != b->data.i;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;
@@ -183,7 +262,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             result->data.u = a->data.u != b->data.u;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;
@@ -221,7 +300,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             result->data.r = a->data.r != b->data.r;
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;
@@ -238,7 +317,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             result->data.b = (ps_boolean)(a->data.b != b->data.b);
             break;
         default:
-            interpreter->error = PS_RUNTIME_ERROR_BINARY_OPERATOR_NOT_APPLICABLE;
+            interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
             return false;
         }
         break;

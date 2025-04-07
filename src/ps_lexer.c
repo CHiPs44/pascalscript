@@ -260,31 +260,39 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         {
             if (pos > PS_BUFFER_MAX_COLUMNS)
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
-            buffer[pos] = c;
+            buffer[pos++] = c;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             c = ps_buffer_peek_char(lexer->buffer);
             if (base == 10)
             {
-                if (c == '.')
-                {
-                    if (!is_real)
-                        is_real = true;
-                    else
-                        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
-                }
-                else if (c == 'e' || c == 'E')
+                if (c == '.' && !is_real)
                 {
                     is_real = true;
-                    has_exp = true;
+                    buffer[pos++] = c;
+                    if (!ps_lexer_read_next_char(lexer))
+                        return false;
+                    c = ps_buffer_peek_char(lexer->buffer);
                 }
-                else if (c == '+' || c == '-')
+                else if ((c == 'e' || c == 'E'))
                 {
-                    if (!has_exp)
-                        break;
+                    if (has_exp)
+                        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
+                    has_exp = true;
+                    is_real = true;
+                    buffer[pos++] = c;
+                    if (!ps_lexer_read_next_char(lexer))
+                        return false;
+                    c = ps_buffer_peek_char(lexer->buffer);
+                    if (c == '+' || c == '-')
+                    {
+                        buffer[pos++] = c;
+                        if (!ps_lexer_read_next_char(lexer))
+                            return false;
+                        c = ps_buffer_peek_char(lexer->buffer);
+                    }
                 }
             }
-            pos += 1;
         } while (strchr(digits, c) != NULL || strchr(".eE+-", c) != NULL);
         buffer[pos] = '\0';
         // TODO? use even better conversion from string to real or unsigned integer

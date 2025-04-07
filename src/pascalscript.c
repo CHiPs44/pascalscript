@@ -20,24 +20,24 @@ ps_interpreter *interpreter = NULL;
 
 char *minimal_source =
     "Program Minimal;\n"
-    "Const Int1 = 10;\n"
-    "      Num1 = 123.45;\n"
-    "      Num2 = 1.17549435082228750796873653722224568e-38;\n"
-    "      Num3 = 3.40282346638528859811704183484516925e38;\n"
-    "      Hex1 = $AABBCCDD;\n"
-    "      Oct1 = &1000;\n"
-    "      Bin1 = %1111000010101010;\n"
+    "Const Int1 = MaxInt;\n"
+    // "      Num1 = 123.45;\n"
+    // "      Num2 = 1.17549435082228750796873653722224568e-38;\n"
+    // "      Num3 = 3.40282346638528859811704183484516925e38;\n"
+    // "      Hex1 = $AABBCCDD;\n"
+    // "      Oct1 = &1000;\n"
+    // "      Bin1 = %11110000101010100000111101010101;\n"
     "Var   R : Real;\n"
     "Const Int2 = 10;\n"
-    "      Real1 = 12.34;\n"
+    // "      Real1 = 12.34;\n"
     "Var   I : Integer;\n"
     "      U : Unsigned;\n"
     "Begin\n"
-    " U := (Int1 + Int2) * 2;\n"
-    " { No strings yet! }"
-    " Write('U');\n"
-    " Write('=');\n"
-    " WriteLn(U);\n"
+    "   U := (Int1 + Int2) * 2;\n"
+    "   { No strings yet! }\n"
+    "   Write('U'); Write('='); WriteLn(U);\n"
+    "   I := U + 1;\n"
+    "   Write('I'); Write('='); WriteLn(I);\n"
     "End.\n";
 
 char *hello_source =
@@ -69,15 +69,15 @@ int main(int argc, char *argv[])
     printf("Could not allocate interpreter!\n");
     return 1;
   }
-  interpreter->trace = false;
-  interpreter->debug = false;
+  interpreter->trace = true;
+  interpreter->debug = true;
   interpreter->parser->trace = interpreter->trace;
   interpreter->parser->debug = interpreter->debug;
   fprintf(
       stderr,
       "interpreter: %p, parser %p, symbols %p\n",
       interpreter, interpreter->parser, interpreter->parser->symbols);
-  ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
+  // ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
   if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
   // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
   // if (!ps_interpreter_load_string(interpreter, "examples/00-hello.pas"))
@@ -91,11 +91,13 @@ int main(int argc, char *argv[])
   printf("Listed!\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
-  if (ps_interpreter_run(interpreter))
-    ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
+  printf("================================================================================\n");
+  bool ok = ps_interpreter_run(interpreter);
+  printf("================================================================================\n");
+  // ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
   ps_interpreter_done(interpreter);
   interpreter = NULL;
-  return 0;
+  return ok ? 0 : 1;
 }
 
 /* EOF */

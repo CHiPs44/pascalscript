@@ -21,13 +21,6 @@ ps_buffer *ps_buffer_init()
     ps_buffer *buffer = calloc(1, sizeof(ps_buffer));
     if (buffer == NULL)
         return NULL;
-    buffer->text = NULL;
-    buffer->length = 0;
-    buffer->line_count = 0;
-    buffer->debug = 0;
-    buffer->line_starts = NULL;
-    buffer->line_lengths = NULL;
-    buffer->from_file = false;
     ps_buffer_reset(buffer);
     return buffer;
 }
