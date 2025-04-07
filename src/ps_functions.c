@@ -136,32 +136,29 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
     return true;
 }
 
-bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result, ps_token_type token_type)
+bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *bb, ps_value *result, ps_token_type token_type)
 {
-    // Be more than strict for now!
-    if (a->type->base != b->type->base)
+    ps_value b;
+    if (a->type->base == bb->type->base)
     {
-        // if (a->type->base == PS_TYPE_INTEGER && b->type->base == PS_TYPE_UNSIGNED)
-        // {
-        //     if (interpreter->range_check && a->data.i < 0)
-        //     {
-        //         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
-        //         return false;
-        //     }
-        // }
-        // else if (a->type->base == PS_TYPE_UNSIGNED && b->type->base == PS_TYPE_INTEGER)
-        // {
-        //     if (interpreter->range_check && a->data.u > PS_INTEGER_MAX)
-        //     {
-        //         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
-        //         return false;
-        //     }
-        // }
-        // else
-        // {
-        interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
-        return false;
-        // }
+        b.type = a->type;
+        b.data = bb->data;
+    }
+    else
+    {
+        // "cast" integer to unsigned or integer to unsigned?
+        if ((a->type->base == PS_TYPE_INTEGER && bb->type->base == PS_TYPE_UNSIGNED) ||
+            (a->type->base == PS_TYPE_UNSIGNED && bb->type->base == PS_TYPE_INTEGER))
+        {
+            b.type = a->type;
+            if (!ps_function_copy_value(interpreter, bb, &b))
+                return false;
+        }
+        else
+        {
+            interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+            return false;
+        }
     }
     result->type = a->type;
     switch (a->type->base)
@@ -170,46 +167,46 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         switch (token_type)
         {
         case PS_TOKEN_AND:
-            result->data.i = a->data.i & b->data.i;
+            result->data.i = a->data.i & b.data.i;
             break;
         case PS_TOKEN_OR:
-            result->data.i = a->data.i | b->data.i;
+            result->data.i = a->data.i | b.data.i;
             break;
         case PS_TOKEN_XOR:
-            result->data.i = a->data.i ^ b->data.i;
+            result->data.i = a->data.i ^ b.data.i;
             break;
         case PS_TOKEN_PLUS:
-            result->data.i = a->data.i + b->data.i;
+            result->data.i = a->data.i + b.data.i;
             break;
         case PS_TOKEN_MINUS:
-            result->data.i = a->data.i - b->data.i;
+            result->data.i = a->data.i - b.data.i;
             break;
         case PS_TOKEN_STAR:
-            result->data.i = a->data.i * b->data.i;
+            result->data.i = a->data.i * b.data.i;
             break;
         case PS_TOKEN_DIV:
-            result->data.i = a->data.i / b->data.i;
+            result->data.i = a->data.i / b.data.i;
             break;
         case PS_TOKEN_MOD:
-            result->data.i = a->data.i % b->data.i;
+            result->data.i = a->data.i % b.data.i;
             break;
         case PS_TOKEN_LESS_THAN:
-            result->data.i = a->data.i < b->data.i;
+            result->data.i = a->data.i < b.data.i;
             break;
         case PS_TOKEN_LESS_OR_EQUAL:
-            result->data.i = a->data.i <= b->data.i;
+            result->data.i = a->data.i <= b.data.i;
             break;
         case PS_TOKEN_GREATER_THAN:
-            result->data.i = a->data.i > b->data.i;
+            result->data.i = a->data.i > b.data.i;
             break;
         case PS_TOKEN_GREATER_OR_EQUAL:
-            result->data.i = a->data.i >= b->data.i;
+            result->data.i = a->data.i >= b.data.i;
             break;
         case PS_TOKEN_EQUAL:
-            result->data.i = a->data.i == b->data.i;
+            result->data.i = a->data.i == b.data.i;
             break;
         case PS_TOKEN_NOT_EQUAL:
-            result->data.i = a->data.i != b->data.i;
+            result->data.i = a->data.i != b.data.i;
             break;
         default:
             interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
@@ -220,46 +217,46 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         switch (token_type)
         {
         case PS_TOKEN_AND:
-            result->data.u = a->data.u & b->data.u;
+            result->data.u = a->data.u & b.data.u;
             break;
         case PS_TOKEN_OR:
-            result->data.u = a->data.u | b->data.u;
+            result->data.u = a->data.u | b.data.u;
             break;
         case PS_TOKEN_XOR:
-            result->data.u = a->data.u ^ b->data.u;
+            result->data.u = a->data.u ^ b.data.u;
             break;
         case PS_TOKEN_PLUS:
-            result->data.u = a->data.i + b->data.i;
+            result->data.u = a->data.i + b.data.i;
             break;
         case PS_TOKEN_MINUS:
-            result->data.u = a->data.u - b->data.u;
+            result->data.u = a->data.u - b.data.u;
             break;
         case PS_TOKEN_STAR:
-            result->data.u = a->data.u * b->data.u;
+            result->data.u = a->data.u * b.data.u;
             break;
         case PS_TOKEN_DIV:
-            result->data.u = a->data.u / b->data.u;
+            result->data.u = a->data.u / b.data.u;
             break;
         case PS_TOKEN_MOD:
-            result->data.u = a->data.u % b->data.u;
+            result->data.u = a->data.u % b.data.u;
             break;
         case PS_TOKEN_LESS_THAN:
-            result->data.u = a->data.u < b->data.u;
+            result->data.u = a->data.u < b.data.u;
             break;
         case PS_TOKEN_LESS_OR_EQUAL:
-            result->data.u = a->data.u <= b->data.u;
+            result->data.u = a->data.u <= b.data.u;
             break;
         case PS_TOKEN_GREATER_THAN:
-            result->data.u = a->data.u > b->data.u;
+            result->data.u = a->data.u > b.data.u;
             break;
         case PS_TOKEN_GREATER_OR_EQUAL:
-            result->data.u = a->data.u >= b->data.u;
+            result->data.u = a->data.u >= b.data.u;
             break;
         case PS_TOKEN_EQUAL:
-            result->data.u = a->data.u == b->data.u;
+            result->data.u = a->data.u == b.data.u;
             break;
         case PS_TOKEN_NOT_EQUAL:
-            result->data.u = a->data.u != b->data.u;
+            result->data.u = a->data.u != b.data.u;
             break;
         default:
             interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
@@ -270,34 +267,34 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         switch (token_type)
         {
         case PS_TOKEN_PLUS:
-            result->data.r = a->data.r + b->data.r;
+            result->data.r = a->data.r + b.data.r;
             break;
         case PS_TOKEN_MINUS:
-            result->data.r = a->data.r - b->data.r;
+            result->data.r = a->data.r - b.data.r;
             break;
         case PS_TOKEN_STAR:
-            result->data.r = a->data.r * b->data.r;
+            result->data.r = a->data.r * b.data.r;
             break;
         case PS_TOKEN_SLASH:
-            result->data.r = a->data.r / b->data.r;
+            result->data.r = a->data.r / b.data.r;
             break;
         case PS_TOKEN_LESS_THAN:
-            result->data.r = a->data.r < b->data.r;
+            result->data.r = a->data.r < b.data.r;
             break;
         case PS_TOKEN_LESS_OR_EQUAL:
-            result->data.r = a->data.r <= b->data.r;
+            result->data.r = a->data.r <= b.data.r;
             break;
         case PS_TOKEN_GREATER_THAN:
-            result->data.r = a->data.r > b->data.r;
+            result->data.r = a->data.r > b.data.r;
             break;
         case PS_TOKEN_GREATER_OR_EQUAL:
-            result->data.r = a->data.r >= b->data.r;
+            result->data.r = a->data.r >= b.data.r;
             break;
         case PS_TOKEN_EQUAL:
-            result->data.r = a->data.r == b->data.r;
+            result->data.r = a->data.r == b.data.r;
             break;
         case PS_TOKEN_NOT_EQUAL:
-            result->data.r = a->data.r != b->data.r;
+            result->data.r = a->data.r != b.data.r;
             break;
         default:
             interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;
@@ -308,13 +305,13 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         switch (token_type)
         {
         case PS_TOKEN_AND:
-            result->data.b = (ps_boolean)(a->data.b && b->data.b);
+            result->data.b = (ps_boolean)(a->data.b && b.data.b);
             break;
         case PS_TOKEN_OR:
-            result->data.b = (ps_boolean)(a->data.b || b->data.b);
+            result->data.b = (ps_boolean)(a->data.b || b.data.b);
             break;
         case PS_TOKEN_XOR:
-            result->data.b = (ps_boolean)(a->data.b != b->data.b);
+            result->data.b = (ps_boolean)(a->data.b != b.data.b);
             break;
         default:
             interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE;

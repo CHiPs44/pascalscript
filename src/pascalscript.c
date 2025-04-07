@@ -33,8 +33,12 @@ char *minimal_source =
     "Var   I : Integer;\n"
     "      U : Unsigned;\n"
     "Begin\n"
+    "   Write('I'); Write('1'); Write('='); WriteLn(Int1);\n"
+    "   Write('I'); Write('2'); Write('='); WriteLn(Int2);\n"
     "   U := (Int1 + Int2) * 2;\n"
     "   { No strings yet! }\n"
+    "   Write('U'); Write('='); WriteLn(U);\n"
+    "   U := U + 1;\n"
     "   Write('U'); Write('='); WriteLn(U);\n"
     "   I := U + 1;\n"
     "   Write('I'); Write('='); WriteLn(I);\n"
@@ -69,8 +73,9 @@ int main(int argc, char *argv[])
     printf("Could not allocate interpreter!\n");
     return 1;
   }
-  interpreter->trace = true;
-  interpreter->debug = true;
+  interpreter->trace = false;
+  // interpreter->trace = true;
+  interpreter->debug = interpreter->trace;
   interpreter->parser->trace = interpreter->trace;
   interpreter->parser->debug = interpreter->debug;
   fprintf(
