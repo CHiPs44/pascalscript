@@ -19,7 +19,7 @@ extern "C"
     bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value, bool newline);
 
     /**
-     *  @brief Copy value of "from" into "to", converting unsigned/integer if possible
+     *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa
      *         sets error to PS_RUNTIME_ERROR_OUT_OF_RANGE or PS_RUNTIME_ERROR_TYPE_MISMATCH
      */
     bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
