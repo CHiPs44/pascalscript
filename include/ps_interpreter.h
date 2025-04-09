@@ -51,9 +51,9 @@ extern "C"
     /** @brief Delete global symbol */
     int ps_interpreter_global_delete(ps_interpreter *interpreter, char *name);
 
-    // ps_symbol *runtime_auto_add_integer(ps_interpreter *interpreter, int value);
-    // int ps_interpreter_auto_gc(ps_interpreter *interpreter);
     bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length);
+
+    bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename);
 
     bool ps_interpreter_run(ps_interpreter *interpreter);
 

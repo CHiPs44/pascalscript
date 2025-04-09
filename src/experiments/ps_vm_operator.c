@@ -80,12 +80,12 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     case OP_NEG: // applicable to integer or real values
         if (a->value->type->base == PS_TYPE_INTEGER)
         {
-            result.type = ps_symbol_integer.value->type;
+            result.type = ps_system_integer.value->type;
             result.data.i = -a->value->data.i;
         }
         else if (a->value->type->base == PS_TYPE_REAL)
         {
-            result.type = ps_symbol_real.value->type;
+            result.type = ps_system_real.value->type;
             result.data.r = -a->value->data.r;
         }
         else
@@ -94,7 +94,7 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     case OP_BOOL_NOT: // applicable to bolean values
         if (a->value->type->base == PS_TYPE_BOOLEAN)
         {
-            result.type = ps_symbol_boolean.value->type;
+            result.type = ps_system_boolean.value->type;
             result.data.b = !(a->value->data.b);
         }
         else
@@ -103,12 +103,12 @@ ps_error vm_exec_op_unary(ps_vm *vm, ps_vm_opcode op)
     case OP_BIT_NOT: // applicable to integer or unsigned values
         if (a->value->type->base == PS_TYPE_INTEGER)
         {
-            result.type = ps_symbol_integer.value->type;
+            result.type = ps_system_integer.value->type;
             result.data.i = ~a->value->data.i;
         }
         else if (a->value->type->base == PS_TYPE_UNSIGNED)
         {
-            result.type = ps_symbol_unsigned.value->type;
+            result.type = ps_system_unsigned.value->type;
             result.data.u = ~a->value->data.u;
         }
         else

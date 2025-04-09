@@ -54,27 +54,27 @@ bool ps_value_is_number(ps_value *value)
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
-    PS_VALUE_SET(ps_symbol_integer.value->type, i);
+    PS_VALUE_SET(ps_system_integer.value->type, i);
 }
 
 ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
 {
-    PS_VALUE_SET(ps_symbol_unsigned.value->type, u);
+    PS_VALUE_SET(ps_system_unsigned.value->type, u);
 }
 
 ps_value *ps_value_set_real(ps_value *value, ps_real r)
 {
-    PS_VALUE_SET(ps_symbol_real.value->type, r);
+    PS_VALUE_SET(ps_system_real.value->type, r);
 }
 
 ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
 {
-    PS_VALUE_SET(ps_symbol_boolean.value->type, b);
+    PS_VALUE_SET(ps_system_boolean.value->type, b);
 }
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c)
 {
-    PS_VALUE_SET(ps_symbol_char.value->type, c);
+    PS_VALUE_SET(ps_system_char.value->type, c);
 }
 
 // ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)

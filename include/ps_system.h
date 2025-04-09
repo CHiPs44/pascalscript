@@ -16,17 +16,17 @@ extern "C"
 #endif
 
     /* System types (with type==base) */
-    extern ps_symbol ps_symbol_boolean;
-    extern ps_symbol ps_symbol_char;
-    extern ps_symbol ps_symbol_integer;
-    extern ps_symbol ps_symbol_real;
-    extern ps_symbol ps_symbol_unsigned;
+    extern ps_symbol ps_system_boolean;
+    extern ps_symbol ps_system_char;
+    extern ps_symbol ps_system_integer;
+    extern ps_symbol ps_system_real;
+    extern ps_symbol ps_system_unsigned;
 
     /* System constants */
-    extern ps_symbol ps_symbol_version_major;
-    extern ps_symbol ps_symbol_version_minor;
-    extern ps_symbol ps_symbol_version_patch;
-    extern ps_symbol ps_symbol_version_index;
+    extern ps_symbol ps_system_version_major;
+    extern ps_symbol ps_system_version_minor;
+    extern ps_symbol ps_system_version_patch;
+    extern ps_symbol ps_system_version_index;
 
     extern bool ps_system_init(ps_interpreter *interpreter);
     extern void ps_system_done(ps_interpreter *interpreter);

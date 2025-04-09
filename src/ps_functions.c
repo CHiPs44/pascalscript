@@ -243,7 +243,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
 
 bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_symbol_boolean.value->type;
+    result->type = ps_system_boolean.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
@@ -273,22 +273,22 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
     {
     case PS_TYPE_UNSIGNED:
         // case PS_TYPE_ENUM:
-        result->type = ps_symbol_unsigned.value->type;
+        result->type = ps_system_unsigned.value->type;
         result->data.u = value->data.u;
         break;
     case PS_TYPE_INTEGER:
         // case PS_TYPE_SUBRANGE:
-        result->type = ps_symbol_integer.value->type;
+        result->type = ps_system_integer.value->type;
         result->data.u = value->data.u;
         break;
     case PS_TYPE_BOOLEAN:
         // ord(false) => 0 / ord(true) => 1
-        result->type = ps_symbol_integer.value->type;
+        result->type = ps_system_integer.value->type;
         result->data.i = value->data.b ? 1 : 0;
         break;
     case PS_TYPE_CHAR:
         // ord('0') => 48 / ord('A') => 65 / ...
-        result->type = ps_symbol_integer.value->type;
+        result->type = ps_system_integer.value->type;
         result->data.i = (ps_integer)(value->data.c);
         break;
     default:
@@ -300,7 +300,7 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
 
 bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_symbol_char.value->type;
+    result->type = ps_system_char.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
@@ -480,7 +480,7 @@ bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *res
 
 bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_symbol_integer.value->type;
+    result->type = ps_system_integer.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:
@@ -500,7 +500,7 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
 
 bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_symbol_integer.value->type;
+    result->type = ps_system_integer.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:

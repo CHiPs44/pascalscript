@@ -77,40 +77,81 @@ char *hello_source =
 
 int main(int argc, char *argv[])
 {
+  bool trace = true;
+  bool debug = trace;
+  bool dump_symbols = false;
+  bool dump_buffer = true;
+  char *source_file = "examples/01-first.pas";//NULL;
+
+  // if (argc > 1)
+  // {
+  //   source_file = argv[argc - 1];
+  // }
+
   /* Display banner on stdout */
-  // ps_symbol *ps_version = ps_vm_global_get(vm, "__PS_VERSION__");
-  printf(
-      "PascalScript v%d.%d.%d.%d\n",
-      PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+  printf("PascalScript v%d.%d.%d.%d\n",
+         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+
+  /* Initialize interpreter */
   interpreter = ps_interpreter_init(NULL);
   if (interpreter == NULL)
   {
     printf("Could not initialize interpreter!\n");
     return EXIT_FAILURE;
   }
-  interpreter->trace = false;
-  // interpreter->trace = true;
-  interpreter->debug = interpreter->trace;
+  interpreter->trace = trace;
+  interpreter->debug = debug;
   interpreter->parser->trace = interpreter->trace;
   interpreter->parser->debug = interpreter->debug;
-  // ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
-  if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
-  // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
-  // if (!ps_interpreter_load_string(interpreter, "examples/00-hello.pas"))
+
+  /* List symbols */
+  if (dump_symbols)
   {
-    printf("Not loaded!\n");
-    return 1;
+    ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
   }
-  printf("Loaded!\n");
+
+  /* Load program source from string or file */
+  if (source_file == NULL)
+  {
+    if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
+    // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
+    {
+      fprintf(stderr, "Source not loaded!\n");
+      return EXIT_FAILURE;
+    }
+  }
+  else
+  {
+    if (!ps_interpreter_load_file(interpreter, source_file))
+    {
+      fprintf(stderr, "File %s not loaded!\n", source_file);
+      return EXIT_FAILURE;
+    }
+  }
+  fprintf(stderr, "Loaded!\n");
+
+  /* List program */
   ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-  // ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
-  // printf("Listed!\n");
+  if (dump_buffer)
+  {
+    ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
+    fprintf(stderr, "Listed!\n");
+  }
+
+  /* Run program */
+  printf("================================================================================\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
-  printf("================================================================================\n");
   bool ok = ps_interpreter_run(interpreter);
   printf("================================================================================\n");
-  // ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
+
+  /* List symbols */
+  if (dump_symbols)
+  {
+    ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
+  }
+
+  /* Terminate interpreter */
   ps_interpreter_done(interpreter);
   interpreter = NULL;
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;

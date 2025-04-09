@@ -79,27 +79,27 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_CHAR_VALUE:
-        result->type = ps_symbol_char.value->data.t;
+        result->type = ps_system_char.value->data.t;
         result->data.c = lexer->current_token.value.c;
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_INTEGER_VALUE:
-        result->type = ps_symbol_integer.value->data.t;
+        result->type = ps_system_integer.value->data.t;
         result->data.i = lexer->current_token.value.i;
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        result->type = ps_symbol_unsigned.value->data.t;
+        result->type = ps_system_unsigned.value->data.t;
         result->data.u = lexer->current_token.value.u;
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_REAL_VALUE:
-        result->type = ps_symbol_real.value->data.t;
+        result->type = ps_system_real.value->data.t;
         result->data.r = lexer->current_token.value.r;
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        result->type = ps_symbol_boolean.value->data.t;
+        result->type = ps_system_boolean.value->data.t;
         result->data.b = lexer->current_token.value.b;
         READ_NEXT_TOKEN;
         break;
@@ -220,7 +220,7 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
     READ_NEXT_TOKEN;
     if (!ps_visit_simple_expression(interpreter, &right))
         TRACE_ERROR("");
-    result->type = &ps_symbol_boolean;
+    result->type = ps_system_boolean.value->data.t;
     if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
         TRACE_ERROR("");
     TRACE_END("2");
@@ -293,23 +293,23 @@ bool ps_visit_const(ps_interpreter *interpreter)
             data = constant->value->data;
             break;
         case PS_TOKEN_INTEGER_VALUE:
-            type = ps_symbol_integer.value->data.t;
+            type = ps_system_integer.value->data.t;
             data.i = lexer->current_token.value.i;
             break;
         case PS_TOKEN_REAL_VALUE:
-            type = ps_symbol_real.value->data.t;
+            type = ps_system_real.value->data.t;
             data.r = lexer->current_token.value.r;
             break;
         case PS_TOKEN_UNSIGNED_VALUE:
-            type = ps_symbol_unsigned.value->data.t;
+            type = ps_system_unsigned.value->data.t;
             data.u = lexer->current_token.value.u;
             break;
         case PS_TOKEN_CHAR_VALUE:
-            type = ps_symbol_char.value->data.t;
+            type = ps_system_char.value->data.t;
             data.c = lexer->current_token.value.c;
             break;
         case PS_TOKEN_BOOLEAN_VALUE:
-            type = ps_symbol_boolean.value->data.t;
+            type = ps_system_boolean.value->data.t;
             data.b = lexer->current_token.value.b;
             break;
         // Not yet!
@@ -369,23 +369,23 @@ bool ps_visit_var(ps_interpreter *interpreter)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_BOOLEAN:
-            type = ps_symbol_boolean.value->data.t;
+            type = ps_system_boolean.value->data.t;
             data.b = (ps_boolean) false;
             break;
         case PS_TOKEN_CHAR:
-            type = ps_symbol_char.value->data.t;
+            type = ps_system_char.value->data.t;
             data.c = '\0';
             break;
         case PS_TOKEN_INTEGER:
-            type = ps_symbol_integer.value->data.t;
+            type = ps_system_integer.value->data.t;
             data.i = 0;
             break;
         case PS_TOKEN_UNSIGNED:
-            type = ps_symbol_unsigned.value->data.t;
+            type = ps_system_unsigned.value->data.t;
             data.u = 0;
             break;
         case PS_TOKEN_REAL:
-            type = ps_symbol_real.value->data.t;
+            type = ps_system_real.value->data.t;
             data.r = 0.0;
             break;
         default:
@@ -577,7 +577,7 @@ bool ps_visit_statement(ps_interpreter *interpreter)
         READ_NEXT_TOKEN;
         if (!ps_visit_expression(interpreter, &result))
             TRACE_ERROR("");
-        if (result.type != ps_symbol_boolean.value->data.t)
+        if (result.type != ps_system_boolean.value->data.t)
             RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE);
         EXPECT_TOKEN(PS_TOKEN_THEN);
         READ_NEXT_TOKEN;
