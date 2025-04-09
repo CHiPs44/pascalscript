@@ -504,13 +504,47 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter)
     return true;
 }
 
+bool ps_visit_statement_list(ps_interpreter *interpreter);
+
+/**
+ * Visit BEGIN
+ *         [ STATEMENT ... ] [ ; ]
+ *       END
+ * NB: ; or . or whatever after END is analyzed in the caller
+ */
+bool ps_visit_compound_statement(ps_interpreter *interpreter)
+{
+    USE_LEXER;
+    SET_VISITOR("COMPOUND_STATEMENT");
+    TRACE_BEGIN("");
+
+    EXPECT_TOKEN(PS_TOKEN_BEGIN);
+    READ_NEXT_TOKEN;
+    if (!ps_visit_statement_list(interpreter))
+        TRACE_ERROR("");
+    EXPECT_TOKEN(PS_TOKEN_END);
+    READ_NEXT_TOKEN;
+
+    TRACE_END("OK");
+    return true;
+}
+
+/**
+ * Visit statement
+ *      IDENTIFIER := EXPRESSION
+ *      WRITE | WRITELN ( EXPRESSION )
+ * Next steps:
+ *      IF EXPRESSION THEN STATEMENT ;
+ *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT ;
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT ;
+ *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END ;
+ *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END ;
+ *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
+ */
 bool ps_visit_statement(ps_interpreter *interpreter)
 {
     USE_LEXER;
     SET_VISITOR("STATEMENT");
-    // for assignement
-    ps_identifier identifier;
-    ps_symbol *variable;
     // for assignement & write[ln]
     ps_value result = {0};
     TRACE_BEGIN("");
@@ -562,15 +596,6 @@ bool ps_visit_statement(ps_interpreter *interpreter)
 
 /**
  * Visit statement sequence
- *      IDENTIFIER := EXPRESSION
- *      WRITE | WRITELN ( EXPRESSION )
- * Next steps:
- *      IF EXPRESSION THEN STATEMENT ;
- *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END ;
- *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END ;
- *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
  */
 bool ps_visit_statement_list(ps_interpreter *interpreter)
 {
@@ -588,6 +613,8 @@ bool ps_visit_statement_list(ps_interpreter *interpreter)
         bool loop = true;
         do
         {
+            if (!ps_visit_statement(interpreter))
+                TRACE_ERROR("");
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
                 READ_NEXT_TOKEN;
@@ -622,37 +649,14 @@ bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter)
             TRACE_ERROR("");
         return true;
     }
-    if (!ps_visit_statement_(interpreter))
+    if (!ps_visit_statement(interpreter))
         TRACE_ERROR("");
     TRACE_END("OK");
     return true;
 }
 
 /**
- * Visit BEGIN
- *         [ STATEMENT ... ] [ ; ]
- *       END
- * NB: ; or . or whatever after END is analyzed in the caller
- */
-bool ps_visit_compound_statement(ps_interpreter *interpreter)
-{
-    USE_LEXER;
-    SET_VISITOR("COMPOUND_STATEMENT");
-    TRACE_BEGIN("");
-
-    EXPECT_TOKEN(PS_TOKEN_BEGIN);
-    READ_NEXT_TOKEN;
-    if (!ps_visit_statement_list(interpreter))
-        TRACE_ERROR("");
-    EXPECT_TOKEN(PS_TOKEN_END);
-    READ_NEXT_TOKEN;
-
-    TRACE_END("OK");
-    return true;
-}
-
-/**
- * Visit [ CONST ... TYPE ... VAR ... ]
+ * Visit [ CONST ... TYPE ... VAR ... ]*
  *       COMPOUND_STATEMENT
  * NB: ; or . or whatever after END is analyzed in the caller
  */

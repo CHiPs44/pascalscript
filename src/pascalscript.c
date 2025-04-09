@@ -37,19 +37,20 @@ char *minimal_source =
     "      U : Unsigned;\n"
     // "      C : Char;\n"
     "Begin\n"
-    "   WriteLn('m', 'R', '=', MinReal);\n"
-    "   Write('M'); Write('R'); Write('='); WriteLn(MaxReal);\n"
-    "   U1 := Int1;\n"
-    "   U2 := Int2;\n"
-    "   Write('U'); Write('1'); Write('='); WriteLn(U1);\n"
-    "   Write('U'); Write('2'); Write('='); WriteLn(U2);\n"
-    "   U := (U1 + U2) * 2;\n"
     "   { No strings yet! }\n"
-    "   Write('U'); Write('='); WriteLn(U);\n"
-    "   U := U + 1;\n"
-    "   Write('U'); Write('='); WriteLn(U);\n"
-    "   I := U div 2;\n"
-    "   Write('I'); Write('='); WriteLn(I);\n"
+    // "   WriteLn('m', 'R', '=', MinReal);\n"
+    "   WriteLn(MinReal);\n"
+    // "   WriteLn('M', 'R', '=', MaxReal);\n"
+    // "   U1 := Int1;\n"
+    // "   U2 := Int2;\n"
+    // "   Write('U'); Write('1'); Write('='); WriteLn(U1);\n"
+    // "   Write('U'); Write('2'); Write('='); WriteLn(U2);\n"
+    // "   U := (U1 + U2) * 2;\n"
+    // "   Write('U'); Write('='); WriteLn(U);\n"
+    // "   U := U + 1;\n"
+    // "   Write('U'); Write('='); WriteLn(U);\n"
+    // "   I := U div 2;\n"
+    // "   Write('I'); Write('='); WriteLn(I);\n"
     // "   C := Chr(65);\n"
     // "   Write('C'); Write('='); WriteLn(C);\n"
     "End.\n";
@@ -83,15 +84,11 @@ int main(int argc, char *argv[])
     printf("Could not allocate interpreter!\n");
     return 1;
   }
-  interpreter->trace = false;
-  // interpreter->trace = true;
+  // interpreter->trace = false;
+  interpreter->trace = true;
   interpreter->debug = interpreter->trace;
   interpreter->parser->trace = interpreter->trace;
   interpreter->parser->debug = interpreter->debug;
-  fprintf(
-      stderr,
-      "interpreter: %p, parser %p, symbols %p\n",
-      interpreter, interpreter->parser, interpreter->parser->symbols);
   // ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
   if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
   // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
@@ -102,7 +99,7 @@ int main(int argc, char *argv[])
   }
   printf("Loaded!\n");
   ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-  ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
+  ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
   printf("Listed!\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
