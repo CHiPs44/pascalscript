@@ -217,8 +217,10 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
         TRACE_END("2");
         return true;
     }
+    READ_NEXT_TOKEN;
     if (!ps_visit_simple_expression(interpreter, &right))
         TRACE_ERROR("");
+    result->type = &ps_symbol_boolean;
     if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
         TRACE_ERROR("");
     TRACE_END("2");

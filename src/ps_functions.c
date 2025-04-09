@@ -138,8 +138,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
             return false;
         }
+        result->type = a->type;
     }
-    result->type = a->type;
     switch (a->type->base)
     {
     case PS_TYPE_INTEGER:
@@ -194,12 +194,12 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         case PS_TOKEN_MINUS:            result->data.r = a->data.r -  b.data.r; break;
         case PS_TOKEN_STAR:             result->data.r = a->data.r *  b.data.r; break;
         case PS_TOKEN_SLASH:            result->data.r = a->data.r /  b.data.r; break;
-        case PS_TOKEN_LESS_THAN:        result->data.r = a->data.r <  b.data.r; break;
-        case PS_TOKEN_LESS_OR_EQUAL:    result->data.r = a->data.r <= b.data.r; break;
-        case PS_TOKEN_GREATER_THAN:     result->data.r = a->data.r >  b.data.r; break;
-        case PS_TOKEN_GREATER_OR_EQUAL: result->data.r = a->data.r >= b.data.r; break;
-        case PS_TOKEN_EQUAL:            result->data.r = a->data.r == b.data.r; break;
-        case PS_TOKEN_NOT_EQUAL:        result->data.r = a->data.r != b.data.r; break;
+        case PS_TOKEN_LESS_THAN:        result->data.b = (ps_boolean)(a->data.r <  b.data.r); break;
+        case PS_TOKEN_LESS_OR_EQUAL:    result->data.b = (ps_boolean)(a->data.r <= b.data.r); break;
+        case PS_TOKEN_GREATER_THAN:     result->data.b = (ps_boolean)(a->data.r >  b.data.r); break;
+        case PS_TOKEN_GREATER_OR_EQUAL: result->data.b = (ps_boolean)(a->data.r >= b.data.r); break;
+        case PS_TOKEN_EQUAL:            result->data.b = (ps_boolean)(a->data.r == b.data.r); break;
+        case PS_TOKEN_NOT_EQUAL:        result->data.b = (ps_boolean)(a->data.r != b.data.r); break;
         default:                        interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE; return false;
         }
         /* clang-format on */

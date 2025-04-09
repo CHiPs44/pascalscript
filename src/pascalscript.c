@@ -28,21 +28,23 @@ char *minimal_source =
     // "      Hex1 = $AABBCCDD;\n"
     // "      Oct1 = &1000;\n"
     // "      Bin1 = %11110000101010100000111101010101;\n"
-    "Var   R : Real;\n"
-    "Const Int2 = 10;\n"
+    // "Var   R : Real;\n"
+    // "Const Int2 = 10;\n"
     // "      Real1 = 12.34;\n"
     "Var   I : Integer;\n"
-    "      U1 : Unsigned;\n"
-    "      U2 : Unsigned;\n"
-    "      U : Unsigned;\n"
+    // "      U1 : Unsigned;\n"
+    // "      U2 : Unsigned;\n"
+    // "      U : Unsigned;\n"
     // "      C : Char;\n"
+    "      B: Boolean;\n"
     "Begin\n"
     // "   WriteLn;\n"
     // "   WriteLn();\n"
-    // "   { No strings yet! }\n"
-    // "   WriteLn('M', 'i', 'n', 'R', '=', MinReal);\n"
-    // "   WriteLn(MinReal);\n"
-    // "   WriteLn('M', 'R', '=', MaxReal);\n"
+    "   { No strings yet! }\n"
+    "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
+    "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
+    "   B := MinReal > MaxReal;\n"
+    "   WriteLn(B);\n"
     // "   U1 := Int1;\n"
     // "   U2 := Int2;\n"
     // "   Write('U'); Write('1'); Write('='); WriteLn(U1);\n"
@@ -86,8 +88,8 @@ int main(int argc, char *argv[])
     printf("Could not initialize interpreter!\n");
     return EXIT_FAILURE;
   }
-  // interpreter->trace = false;
-  interpreter->trace = true;
+  interpreter->trace = false;
+  // interpreter->trace = true;
   interpreter->debug = interpreter->trace;
   interpreter->parser->trace = interpreter->trace;
   interpreter->parser->debug = interpreter->debug;
