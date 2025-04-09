@@ -110,9 +110,8 @@ bool ps_interpreter_run(ps_interpreter *interpreter)
     parser->debug = true;
     if (!ps_visit_start(interpreter))
     {
-        ps_buffer_dump(lexer->buffer,
-                       lexer->buffer->current_line > 0 ? lexer->buffer->current_line - 1 : 0,
-                       lexer->buffer->current_line < lexer->buffer->line_count - 1 ? lexer->buffer->current_line + 1 : lexer->buffer->line_count - 1);
+        uint16_t start = lexer->buffer->current_line > 0 ? lexer->buffer->current_line - 1 : 0;
+        ps_buffer_dump(lexer->buffer, start, 4);
         fprintf(stderr,
                 "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
                 lexer->buffer->current_line + 1, lexer->buffer->current_column + 1,

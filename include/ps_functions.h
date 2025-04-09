@@ -16,7 +16,7 @@ extern "C"
 #endif
 
     /**@brief Write / WriteLn instruction */
-    bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value, bool newline);
+    bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value);
 
     /**
      *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa

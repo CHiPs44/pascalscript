@@ -313,8 +313,10 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     {
         if (buffer->line_lengths[buffer->current_line] == 0)
             buffer->next_char = '\0';
-        else
+        else if (buffer->current_line < buffer->line_count)
             buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
+        else
+            buffer->next_char = '\0';
     }
     ps_buffer_debug(buffer, 2, "ps_buffer_read_next_char: END  ");
     return true;

@@ -469,17 +469,17 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter)
     if (lexer->current_token.type == PS_TOKEN_SEMI_COLON ||
         lexer->current_token.type == PS_TOKEN_ELSE)
     {
-        if (!ps_function_write(interpreter, stdout, NULL, newline))
-            TRACE_ERROR("DISPLAY");
-        loop = false;
+        if (newline)
+            fprintf(stdout, "\n");
+        TRACE_END("EMPTY1");
+        return true;
     }
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
     READ_NEXT_TOKEN;
     // "Write[Ln]()"?
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
-        if (!ps_function_write(interpreter, stdout, NULL, newline))
-            TRACE_ERROR("DISPLAY");
+        READ_NEXT_TOKEN;
         loop = false;
     }
 
@@ -488,7 +488,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter)
         if (!ps_visit_expression(interpreter, &result))
             TRACE_ERROR("");
         // start "code" execution
-        if (!ps_function_write(interpreter, stdout, &result, newline))
+        if (!ps_function_write(interpreter, stdout, &result))
             TRACE_ERROR("DISPLAY");
         // end "code" execution
         if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -498,7 +498,11 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter)
         }
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN;
+        loop = false;
     }
+
+    if (newline)
+        fprintf(stdout, "\n");
 
     TRACE_END("OK");
     return true;
@@ -520,8 +524,11 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter)
 
     EXPECT_TOKEN(PS_TOKEN_BEGIN);
     READ_NEXT_TOKEN;
-    if (!ps_visit_statement_list(interpreter))
-        TRACE_ERROR("");
+    if (lexer->current_token.type != PS_TOKEN_END)
+    {
+        if (!ps_visit_statement_list(interpreter))
+            TRACE_ERROR("");
+    }
     EXPECT_TOKEN(PS_TOKEN_END);
     READ_NEXT_TOKEN;
 

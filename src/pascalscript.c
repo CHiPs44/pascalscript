@@ -37,9 +37,11 @@ char *minimal_source =
     "      U : Unsigned;\n"
     // "      C : Char;\n"
     "Begin\n"
-    "   { No strings yet! }\n"
-    // "   WriteLn('m', 'R', '=', MinReal);\n"
-    "   WriteLn(MinReal);\n"
+    // "   WriteLn;\n"
+    // "   WriteLn();\n"
+    // "   { No strings yet! }\n"
+    // "   WriteLn('M', 'i', 'n', 'R', '=', MinReal);\n"
+    // "   WriteLn(MinReal);\n"
     // "   WriteLn('M', 'R', '=', MaxReal);\n"
     // "   U1 := Int1;\n"
     // "   U2 := Int2;\n"
@@ -81,8 +83,8 @@ int main(int argc, char *argv[])
   interpreter = ps_interpreter_init(NULL);
   if (interpreter == NULL)
   {
-    printf("Could not allocate interpreter!\n");
-    return 1;
+    printf("Could not initialize interpreter!\n");
+    return EXIT_FAILURE;
   }
   // interpreter->trace = false;
   interpreter->trace = true;
@@ -99,8 +101,8 @@ int main(int argc, char *argv[])
   }
   printf("Loaded!\n");
   ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-  ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
-  printf("Listed!\n");
+  // ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
+  // printf("Listed!\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
   printf("================================================================================\n");
@@ -109,7 +111,7 @@ int main(int argc, char *argv[])
   // ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
   ps_interpreter_done(interpreter);
   interpreter = NULL;
-  return ok ? 0 : 1;
+  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* EOF */

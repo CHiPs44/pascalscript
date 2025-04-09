@@ -14,39 +14,18 @@
 #include "ps_token.h"
 #include "ps_functions.h"
 
-bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value, bool newline)
+bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
 {
-    if (value == NULL)
-    {
-        if (newline)
-        {
-            if (interpreter->debug)
-                fprintf(f, "WRITELN\n");
-            else
-                fprintf(f, "\n");
-        }
-        return true;
-    }
     char *display_value = ps_value_get_display_value(value);
     if (display_value == NULL)
     {
         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_STRING;
         return false;
     }
-    if (newline)
-    {
-        if (interpreter->debug)
-            fprintf(f, "WRITELN\t%s\n", display_value);
-        else
-            fprintf(f, "%s\n", display_value);
-    }
+    if (interpreter->debug)
+        fprintf(f, "WRITE\t%s\n", display_value);
     else
-    {
-        if (interpreter->debug)
-            fprintf(f, "WRITE\t%s\n", display_value);
-        else
-            fprintf(f, "%s", display_value);
-    }
+        fprintf(f, "%s", display_value);
     return true;
 }
 
