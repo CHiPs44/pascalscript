@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "ps_buffer.h"
 #include "ps_config.h"
@@ -83,13 +84,37 @@ int main(int argc, char *argv[])
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = true;
-  // char *source_file = NULL;
-  char *source_file = "/workspaces/pascalscript/examples/01-first.pas";
+  char *current_path = NULL;
+  // char *program_file = "./examples/01-first.pas";
+  char *program_file = NULL;
+  char source_file[256] = {0};
 
-  // if (argc > 1)
-  // {
-  //   source_file = argv[argc - 1];
-  // }
+  current_path = getcwd(NULL, 0);
+  size_t len = strlen(current_path);
+  fprintf(stderr, "Current working directory: %s\n", current_path);
+  if (argc > 1)
+  {
+    program_file = argv[argc - 1];
+  }
+  else
+  {
+    // gdb runs from src directory
+    if (len > 3 &&
+        current_path[len - 4] == '/' &&
+        current_path[len - 3] == 's' &&
+        current_path[len - 2] == 'r' &&
+        current_path[len - 1] == 'c')
+    {
+      program_file = "/../examples/01-first.pas";
+    }
+    else
+    {
+      program_file = "/examples/01-first.pas";
+    }
+  }
+  snprintf(source_file, sizeof(source_file) - 1, "%s%s", current_path, program_file);
+  fprintf(stderr, "Source file: %s\n", source_file);
+  // exit(EXIT_FAILURE);
 
   /* Display banner on stdout */
   printf("PascalScript v%d.%d.%d.%d\n",
@@ -114,7 +139,7 @@ int main(int argc, char *argv[])
   }
 
   /* Load program source from string or file */
-  if (source_file == NULL)
+  if (current_path == NULL)
   {
     if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
     // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))

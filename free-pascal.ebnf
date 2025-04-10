@@ -65,10 +65,10 @@ identifier_list         =   [ identifier ] , [ ',' , identifier ]* ;
 expression              =   simple_expression [ relational_operator , simple_expression ] ;
 relational_operator     =   '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS' ;
 
-simple_expression       =   term [ additive_operator , term ] ;
+simple_expression       =   term [ additive_operator , term ]* ;
 additive_operator       =   '+' | '-' | 'OR' | 'XOR' ;
 
-term                    =   factor [ multiplicative_operator , factor ] ;
+term                    =   factor [ multiplicative_operator , factor ]* ;
 multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
 
 factor                  =   '(' expression ')'
