@@ -3,7 +3,6 @@
 #include "ps_functions.h"
 #include "ps_system.h"
 #include "ps_parser.h"
-// #include "ps_visitor.h"
 
 // clang-format off
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
@@ -110,7 +109,6 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
             TRACE_ERROR("");
         if (!ps_function_unary_op(interpreter, &factor, result, PS_TOKEN_MINUS))
             TRACE_ERROR("");
-        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_STRING_VALUE:
     case PS_TOKEN_NIL:
@@ -134,7 +132,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
     USE_LEXER;
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
-    ps_value left = {0}, right = {0};
+    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0}, right = {.type = ps_system_integer.value->data.t, .data.i = 0};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, &left))
         TRACE_ERROR("");
@@ -164,7 +162,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_value *result)
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {0}, right = {0};
+    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0}, right = {.type = ps_system_integer.value->data.t, .data.i = 0};
     ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, &left))
         TRACE_ERROR("");
@@ -202,7 +200,7 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result)
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {0}, right = {0};
+    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0}, right = {.type = ps_system_integer.value->data.t, .data.i = 0};
     ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, &left))
         TRACE_ERROR("");
@@ -419,7 +417,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter)
     TRACE_BEGIN("");
     ps_identifier identifier;
     ps_symbol *variable;
-    ps_value result = {0};
+    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
 
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
@@ -462,7 +460,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter)
     USE_LEXER;
     SET_VISITOR("WRITE_OR_WRITELN");
     TRACE_BEGIN("");
-    ps_value result = {0};
+    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
     bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
     bool loop = true;
 
@@ -555,7 +553,7 @@ bool ps_visit_statement(ps_interpreter *interpreter)
     USE_LEXER;
     SET_VISITOR("STATEMENT");
     // for assignement & write[ln]
-    ps_value result = {0};
+    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
     TRACE_BEGIN("");
 
     if (lexer->current_token.type == PS_TOKEN_BEGIN)

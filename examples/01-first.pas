@@ -7,9 +7,9 @@ Var
   c: Integer;
 Begin
   a := 1;
-  WriteLn('a', '=', a);
+  {WriteLn('a', '=', a);}
   b := -2;
-  WriteLn('b', '=', b);
+  {WriteLn('b', '=', b);}
   c := (a - b) * (THOUSAND + THOUSAND) Div THOUSAND;
   WriteLn('c', '=', c);
 End.

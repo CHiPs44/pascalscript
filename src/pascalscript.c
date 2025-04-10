@@ -40,11 +40,11 @@ char *minimal_source =
     "Begin\n"
     // "   WriteLn;\n"
     // "   WriteLn();\n"
-    "   { No strings yet! }\n"
-    "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
-    "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
-    "   B := MinReal > MaxReal;\n"
-    "   WriteLn(B);\n"
+    // "   { No strings yet! }\n"
+    // "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
+    // "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
+    // "   B := MinReal > MaxReal;\n"
+    // "   WriteLn(B);\n"
     // "   U1 := Int1;\n"
     // "   U2 := Int2;\n"
     // "   Write('U'); Write('1'); Write('='); WriteLn(U1);\n"
@@ -57,6 +57,8 @@ char *minimal_source =
     // "   Write('I'); Write('='); WriteLn(I);\n"
     // "   C := Chr(65);\n"
     // "   Write('C'); Write('='); WriteLn(C);\n"
+    "   I := -12;\n"
+    "   WriteLn(I);\n"
     "End.\n";
 
 char *hello_source =
@@ -81,7 +83,8 @@ int main(int argc, char *argv[])
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = true;
-  char *source_file = "examples/01-first.pas";//NULL;
+  // char *source_file = NULL;
+  char *source_file = "/workspaces/pascalscript/examples/01-first.pas";
 
   // if (argc > 1)
   // {
