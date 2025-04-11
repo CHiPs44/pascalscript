@@ -103,12 +103,12 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
     return ps_buffer_load_file(lexer->buffer, filename);
 }
 
-bool ps_interpreter_run(ps_interpreter *interpreter)
+bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 {
     ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     parser->debug = true;
-    if (!ps_visit_start(interpreter))
+    if (!ps_visit_start(interpreter, exec))
     {
         uint16_t start = lexer->buffer->current_line > 0 ? lexer->buffer->current_line - 1 : 0;
         ps_buffer_dump(lexer->buffer, start, 4);

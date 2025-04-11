@@ -55,9 +55,9 @@ extern "C"
 
     bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename);
 
-    bool ps_interpreter_run(ps_interpreter *interpreter);
+    bool ps_interpreter_run(ps_interpreter *interpreter, bool exec);
 
-    bool ps_visit_start(ps_interpreter *interpreter);
+    bool ps_visit_start(ps_interpreter *interpreter, bool exec);
 
 #ifdef __cplusplus
 }
