@@ -4,6 +4,10 @@
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
 *)
 
+(******************************************************************************)
+(* LEXER RULES                                                                *)
+(******************************************************************************)
+
 letter                  =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' 
                         |   'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
                         |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' 
@@ -15,8 +19,9 @@ dec_digit               =   oct_digit | '8' | '9' ;
 hex_digit               =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
 
 (*
-    ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
-    << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
+    Symbols
+        ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
+        << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
 *)
 
 identifier              =   letter | '_' , [ letter | dec_digit | '_' ]* ;
@@ -30,18 +35,22 @@ unsigned_integer        =   dec_digit_sequence
                         |   '&' , oct_digit_sequence 
                         |   '$' , hex_digit_sequence 
                         ;
-sign                    =   '+' | '-' ;
+unsigned_real           =   dec_digit_sequence , [ '.' dec_digit_sequence ] [ scale_factor ] ;
 scale_factor            =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
-unsigned_real           =   dec_digit_sequence [ '.' dec_digit_sequence ] [ scale_factor ] ;
+sign                    =   '+' | '-' ;
 unsigned_number         =   unsigned_real | unsigned_integer ;
-signed_number           =   sign unsigned_number ;
-
-label                   =   'LABEL' , dec_digit_sequence | identifier ;
+signed_number           =   sign , unsigned_number ;
 
 character_string        =   quoted_string | control_string ;
 quoted_string           =   "'" , [ string_character ]* , "'" ;
-string_character        =   "''" | ? Any character except ' or CR ? ;
+string_character        =   "''" | ? Any character except ', CR and LF ? ;
 control_string          =   '#' , unsigned_integer ;
+
+(******************************************************************************)
+(* PARSER RULES                                                               *)
+(******************************************************************************)
+
+label                   =   'LABEL' , dec_digit_sequence | identifier ;
 
 constant_declaration    =   identifier = expression ; 
 (* IGNORED typed_constant_declaration =   .. *)
@@ -154,4 +163,3 @@ declaration_part        =   [
                         ;
 
 (* TO BE CONTINUED... *)
-
