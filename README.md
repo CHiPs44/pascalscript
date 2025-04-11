@@ -485,3 +485,5 @@ Each file should contains this header:
     SPDX-License-Identifier: GPL-3.0-or-later
 */
 ```
+
+NB: year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
