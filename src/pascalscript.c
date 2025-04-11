@@ -62,7 +62,7 @@ char *minimal_source =
     "   WriteLn(I);\n"
     "End.\n";
 
-char *hello_source =
+/*char *hello_source =
     "program hello;\n"
     "{ comment with curly brackets }\n"
     "const\n"
@@ -76,11 +76,11 @@ char *hello_source =
     "*)\n"
     "  test := 1 + chips;\n"
     "  writeln('test=', test);\n"
-    "end.\n";
+    "end.\n";*/
 
 int main(int argc, char *argv[])
 {
-  bool trace = true;
+  bool trace = false;
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = true;

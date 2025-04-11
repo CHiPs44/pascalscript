@@ -53,7 +53,11 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_value *result);
 
 /**
  * Visit
- *      factor                 =   '(' , expression , ')' | identifier | char_value | integer_value | unsigned_value | real_value | boolean_value | '-' , factor | 'NOT' , factor ;
+ *      factor  =   '(' , expression , ')'
+ *              |   identifier
+ *              |   char_value | integer_value | unsigned_value | real_value | boolean_value
+ *              |   [ '+' | '-' | 'NOT' ] , factor
+ *              ;
  */
 bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 {
@@ -63,6 +67,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
     ps_value factor;
     ps_identifier identifier;
     ps_symbol *symbol;
+    ps_token_type unary_operator;
 
     switch (lexer->current_token.type)
     {
@@ -119,7 +124,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
         break;
     case PS_TOKEN_MINUS:
     case PS_TOKEN_NOT:
-        ps_token_type unary_operator = lexer->current_token.type;
+        unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, &factor))
             TRACE_ERROR("");
@@ -142,12 +147,13 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_value *result)
 /**
  * Visit
  *      term                    =   factor [ multiplicative_operator , factor ]* ;
- *      multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS'  */
+ *      multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS'
+ */
 bool ps_visit_term(ps_interpreter *interpreter, ps_value *result)
 {
-    // '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
     static ps_token_type multiplicative_operators[] = {
-        PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD, PS_TOKEN_AND, // PS_TOKEN_SHL, PS_TOKEN_SHR,
+        PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD, PS_TOKEN_AND,
+        // PS_TOKEN_SHL, PS_TOKEN_SHR,
     };
     USE_LEXER;
     SET_VISITOR("TERM");
