@@ -80,7 +80,7 @@ char *minimal_source =
 
 int main(int argc, char *argv[])
 {
-  bool trace = false; // argc > 1 && strcmp(argv[1], "-t") == 0;
+  bool trace = true; // argc > 1 && strcmp(argv[1], "-t") == 0;
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = false;
@@ -106,12 +106,14 @@ int main(int argc, char *argv[])
         current_path[len - 1] == 'c')
     {
       // program_file = "/../examples/01-first.pas";
-      program_file = "../examples/03-if-then-else.pas";
+      // program_file = "../examples/03-if-then-else.pas";
+      program_file = "../examples/04-repeat-until.pas";
     }
     else
     {
       // program_file = "/examples/01-first.pas";
-      program_file = "examples/03-if-then-else.pas";
+      // program_file = "examples/03-if-then-else.pas";
+      program_file = "examples/04-repeat-until.pas";
     }
   }
   snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);

@@ -664,18 +664,61 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, bool exec)
     return true;
 }
 
+bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
+{
+    USE_LEXER;
+    SET_VISITOR("REPEAT_UNTIL");
+    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    uint16_t line = 0;
+    uint16_t column = 0;
+    TRACE_BEGIN("");
+
+    // Save "cursor" position
+    line = lexer->buffer->current_line;
+    column = lexer->buffer->current_column;
+    EXPECT_TOKEN(PS_TOKEN_REPEAT);
+    READ_NEXT_TOKEN;
+    do
+    {
+        if (!ps_visit_statement_list(interpreter, exec))
+            TRACE_ERROR("");
+        // Skip optional ';'
+        if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
+            READ_NEXT_TOKEN;
+        EXPECT_TOKEN(PS_TOKEN_UNTIL);
+        READ_NEXT_TOKEN;
+        if (!ps_visit_expression(interpreter, exec, &result))
+            TRACE_ERROR("");
+        if (result.type != ps_system_boolean.value->data.t)
+            RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE);
+        if (!exec || result.data.b)
+            break;
+        // Restore "cursor" position
+        lexer->buffer->current_line = line;
+        lexer->buffer->current_column = column;
+        // Try to set lexer to a known state
+        lexer->buffer->current_char = '\0';
+        lexer->buffer->next_char = '\0';
+        if (!ps_buffer_read_next_char(lexer->buffer))
+            RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE); // TODO better error code
+        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(PS_TOKEN_REPEAT);
+        READ_NEXT_TOKEN;
+    } while (true);
+
+    TRACE_END("OK");
+    return true;
+}
+
 /**
  * Visit statement
- *      WRITE | WRITELN ( EXPRESSION )
  *      assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
  *      if_statement            =   'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
- * Next steps:
- *      IF EXPRESSION THEN STATEMENT ;
- *      IF EXPRESSION THEN STATEMENT ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE STATEMENT ;
- *      IF EXPRESSION THEN BEGIN STATEMENTS END ELSE BEGIN STATEMENTS END ;
- *      IF EXPRESSION THEN STATEMENT ELSE BEGIN STATEMENTS END ;
+ *      repeat_statement        =   'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
  *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
+ * Next steps:
+ *      WHILE
+ *      FOR
  */
 bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
 {
@@ -695,6 +738,10 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
         break;
     case PS_TOKEN_IF:
         if (!ps_visit_if_then_else(interpreter, exec))
+            TRACE_ERROR("");
+        break;
+    case PS_TOKEN_REPEAT:
+        if (!ps_visit_repeat_until(interpreter, exec))
             TRACE_ERROR("");
         break;
     case PS_TOKEN_WRITE:
