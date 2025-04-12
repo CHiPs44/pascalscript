@@ -106,15 +106,15 @@ int main(int argc, char *argv[])
         current_path[len - 1] == 'c')
     {
       // program_file = "/../examples/01-first.pas";
-      program_file = "/../examples/03-if-then-else.pas";
+      program_file = "../examples/03-if-then-else.pas";
     }
     else
     {
       // program_file = "/examples/01-first.pas";
-      program_file = "/examples/03-if-then-else.pas";
+      program_file = "examples/03-if-then-else.pas";
     }
   }
-  snprintf(source_file, sizeof(source_file) - 1, "%s%s", current_path, program_file);
+  snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
   fprintf(stderr, "Source file: %s\n", source_file);
   // exit(EXIT_FAILURE);
 

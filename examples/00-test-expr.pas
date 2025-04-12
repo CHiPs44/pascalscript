@@ -9,13 +9,14 @@ Const
   HEX = $5555AAAA;
 
 Var 
-  Test1, Test2: Integer;
+  Test1: Integer;
+  Test2: Integer;
   Test3: Boolean;
-  Test4: UNSIGNED;
+  Test4: Unsigned;
 
 Begin
-  Test1 := AAA + 3 * 456 / 234;
-  Test2 := BBB * 3 + CCC + 3 / 4;
+  Test1 := AAA + 3 * 456 Div 234;
+  Test2 := BBB * 3 + CCC + 3 Div 4;
   Test3 := Test1 * 12 >= Test2;
   Test4 := (1 * 2 + 3 * 4) * HEX;
   WriteLn(Test1, Test2, Test3, Test4);
