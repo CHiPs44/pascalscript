@@ -542,9 +542,11 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec)
 
 /**
  * Visit
- *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) '(' expression , expression ]* ')' ;
  * Next step:
- *      WRITE | WRITELN ( EXPRESSION [ : WIDTH : PRECISION ] , EXPRESSION [ : WIDTH : PRECISION ] ... ) ;
+ *      write_or_writeln        =   WRITE | WRITELN '('
+ *                                            expression [ ':' width [ ':' precision ] ]
+ *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]* ) ;
  */
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec)
 {
@@ -603,7 +605,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec)
 }
 
 /* forward declarations */
-bool ps_visit_statement_list(ps_interpreter *interpreter, bool exec);
+bool ps_visit_statement_list(ps_interpreter *interpreter, bool exec, ps_token_type stop);
 bool ps_visit_statement(ps_interpreter *interpreter, bool exec);
 
 /**
@@ -622,7 +624,7 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, bool exec)
     READ_NEXT_TOKEN;
     if (lexer->current_token.type != PS_TOKEN_END)
     {
-        if (!ps_visit_statement_list(interpreter, exec))
+        if (!ps_visit_statement_list(interpreter, exec, PS_TOKEN_END))
             TRACE_ERROR("");
     }
     EXPECT_TOKEN(PS_TOKEN_END);
@@ -634,7 +636,7 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, bool exec)
 
 /**
  * Visit
- *      IF EXPRESSION THEN STATEMENT [ ELSE STATEMENT ] ;
+ *      if_statement = 'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
  */
 bool ps_visit_if_then_else(ps_interpreter *interpreter, bool exec)
 {
@@ -664,6 +666,10 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, bool exec)
     return true;
 }
 
+/**
+ * Visit
+ *      repeat_statement = 'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
+ */
 bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
 {
     USE_LEXER;
@@ -680,7 +686,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
     READ_NEXT_TOKEN;
     do
     {
-        if (!ps_visit_statement_list(interpreter, exec))
+        if (!ps_visit_statement_list(interpreter, exec, PS_TOKEN_UNTIL))
             TRACE_ERROR("");
         // Skip optional ';'
         if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
@@ -702,7 +708,50 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
         if (!ps_buffer_read_next_char(lexer->buffer))
             RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE); // TODO better error code
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(PS_TOKEN_REPEAT);
+    } while (true);
+
+    TRACE_END("OK");
+    return true;
+}
+
+/**
+ * Visit
+ *      while_statement = 'WHILE' expression 'DO' statement ;
+ */
+bool ps_visit_while_do(ps_interpreter *interpreter, bool exec)
+{
+    USE_LEXER;
+    SET_VISITOR("WHILE_DO");
+    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    uint16_t line = 0;
+    uint16_t column = 0;
+    TRACE_BEGIN("");
+
+    // Save "cursor" position
+    line = lexer->buffer->current_line;
+    column = lexer->buffer->current_column;
+    EXPECT_TOKEN(PS_TOKEN_WHILE);
+    READ_NEXT_TOKEN;
+    do
+    {
+        if (!ps_visit_expression(interpreter, exec, &result))
+            TRACE_ERROR("");
+        if (result.type != ps_system_boolean.value->data.t)
+            RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE);
+        EXPECT_TOKEN(PS_TOKEN_DO);
+        READ_NEXT_TOKEN;
+        if (!ps_visit_statement(interpreter, exec && result.data.b))
+            TRACE_ERROR("");
+        if (!exec || !result.data.b)
+            break;
+        // Restore "cursor" position
+        lexer->buffer->current_line = line;
+        lexer->buffer->current_column = column;
+        // Try to set lexer to a known state
+        lexer->buffer->current_char = '\0';
+        lexer->buffer->next_char = '\0';
+        if (!ps_buffer_read_next_char(lexer->buffer))
+            RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE); // TODO better error code
         READ_NEXT_TOKEN;
     } while (true);
 
@@ -711,11 +760,18 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
 }
 
 /**
+ * Visit
+ *      for_statement = 'FOR' identifier ':=' expression [ 'TO' | 'DOWNTO' ] expression 'DO' statement ;
+ * Next steps:
+ *      FOR
+ */
+/**
  * Visit statement
  *      assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
  *      if_statement            =   'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
  *      repeat_statement        =   'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
- *      WRITE | WRITELN ( EXPRESSION , EXPRESSION ... ) ;
+ *      while_statement         =   'WHILE' expression 'DO' statement ;
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) '(' expression , expression ]* ')' ;
  * Next steps:
  *      WHILE
  *      FOR
@@ -744,6 +800,10 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
         if (!ps_visit_repeat_until(interpreter, exec))
             TRACE_ERROR("");
         break;
+    case PS_TOKEN_WHILE:
+        if (!ps_visit_while_do(interpreter, exec))
+            TRACE_ERROR("");
+        break;
     case PS_TOKEN_WRITE:
     case PS_TOKEN_WRITELN:
         if (!ps_visit_write_or_writeln(interpreter, exec))
@@ -760,7 +820,7 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
 /**
  * Visit statement sequence
  */
-bool ps_visit_statement_list(ps_interpreter *interpreter, bool exec)
+bool ps_visit_statement_list(ps_interpreter *interpreter, bool exec, ps_token_type stop)
 {
     USE_LEXER;
     SET_VISITOR("STATEMENT_LIST");
@@ -781,12 +841,12 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, bool exec)
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
                 READ_NEXT_TOKEN;
-                if (lexer->current_token.type == PS_TOKEN_END)
+                if (lexer->current_token.type == stop)
                 {
                     loop = false;
                 }
             }
-            else if (lexer->current_token.type == PS_TOKEN_END)
+            else if (lexer->current_token.type == stop)
             {
                 loop = false;
             }

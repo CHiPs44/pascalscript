@@ -1,13 +1,14 @@
-Program Example04RepeatUntil;
+Program Example05WhileDo;
 Const
     Loops = 10;
 Var
     I : Integer;
 Begin
     I := Loops;
-    Repeat
+    While I >= 0 Do
+    Begin
         Write(I, ' ');
         I := I - 1;
-    Until I < 0;
+    End;
     WriteLn('O', 'K', '!');
 End.
