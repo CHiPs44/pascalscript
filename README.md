@@ -249,23 +249,22 @@ New keywords: `while` `do` `repeat` `until` `for` `to` `downto`
 
 ```pascal
 program step3;
-var     i: integer;
+var
+    i: integer;
 begin
-        i := 1;
-        while i < 5 do
-        begin
-          WriteLn(i);
-          i := i + 1;
-        end;
-        i := 1;
-        repeat
-          WriteLn(i);
-          i := i + 1;
-        until i > 5;
-        for i := 9 downto 0 do
-        begin
-          WriteLn(i);
-        end;
+    i := 1;
+    while i < 5 do
+    begin
+        WriteLn(i);
+        i := i + 1;
+    end;
+    i := 1;
+    repeat
+        WriteLn(i);
+        i := i + 1;
+    until i > 5;
+    for i := 9 downto 0 do
+        WriteLn(i);
 end.
 ```
 

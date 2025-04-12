@@ -702,7 +702,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
         // Restore "cursor" position
         lexer->buffer->current_line = line;
         lexer->buffer->current_column = column;
-        // Try to set lexer to a known state
+        // Set lexer to a known state
         lexer->buffer->current_char = '\0';
         lexer->buffer->next_char = '\0';
         if (!ps_buffer_read_next_char(lexer->buffer))
@@ -747,7 +747,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, bool exec)
         // Restore "cursor" position
         lexer->buffer->current_line = line;
         lexer->buffer->current_column = column;
-        // Try to set lexer to a known state
+        // Set lexer to a known state
         lexer->buffer->current_char = '\0';
         lexer->buffer->next_char = '\0';
         if (!ps_buffer_read_next_char(lexer->buffer))
@@ -761,10 +761,104 @@ bool ps_visit_while_do(ps_interpreter *interpreter, bool exec)
 
 /**
  * Visit
- *      for_statement = 'FOR' identifier ':=' expression [ 'TO' | 'DOWNTO' ] expression 'DO' statement ;
- * Next steps:
- *      FOR
+ *      for_statement = 'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
  */
+bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
+{
+    USE_LEXER;
+    SET_VISITOR("FOR_DO");
+    ps_value start = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value finish = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value step = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    ps_identifier identifier;
+    ps_symbol *variable;
+    uint16_t line = 0;
+    uint16_t column = 0;
+    TRACE_BEGIN("");
+
+    // FOR
+    EXPECT_TOKEN(PS_TOKEN_FOR);
+    READ_NEXT_TOKEN;
+    // IDENTIFIER
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    COPY_IDENTIFIER(identifier);
+    variable = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+    if (variable == NULL)
+        RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
+    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+        RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_VARIABLE);
+    READ_NEXT_TOKEN;
+    // :=
+    EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+    READ_NEXT_TOKEN;
+    // START
+    if (!ps_visit_expression(interpreter, exec, &start))
+        TRACE_ERROR("");
+    // TO | DOWNTO
+    if (lexer->current_token.type == PS_TOKEN_TO)
+        step.data.i = 1;
+    else if (lexer->current_token.type == PS_TOKEN_DOWNTO)
+        step.data.i = -1;
+    else
+        RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+    READ_NEXT_TOKEN;
+    // FINISH
+    if (!ps_visit_expression(interpreter, exec, &finish))
+        TRACE_ERROR("");
+    // DO
+    EXPECT_TOKEN(PS_TOKEN_DO);
+    READ_NEXT_TOKEN;
+    if (!exec)
+    {
+        if (!ps_visit_statement(interpreter, exec))
+            TRACE_ERROR("");
+    }
+    else
+    {
+        // Save "cursor" position
+        line = lexer->buffer->current_line;
+        column = lexer->buffer->current_column;
+        // VARIABLE := START
+        if (!ps_function_copy_value(interpreter, &start, variable->value))
+            TRACE_ERROR("COPY");
+        // Loop while variable <= finish for TO (or variable >= finish for DOWNTO)
+        do
+        {
+            if (!ps_function_binary_op(
+                    interpreter, variable->value, &finish, &result,
+                    step.data.i > 0 ? PS_TOKEN_LESS_OR_EQUAL : PS_TOKEN_GREATER_OR_EQUAL))
+                TRACE_ERROR("");
+            if (result.type != ps_system_boolean.value->data.t)
+                RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE);
+            if (!result.data.b)
+            {
+                // End of loop => skip statement
+                if (!ps_visit_statement(interpreter, false))
+                    TRACE_ERROR("");
+                break;
+            }
+            if (!ps_visit_statement(interpreter, true))
+                TRACE_ERROR("");
+            // Restore "cursor" position
+            lexer->buffer->current_line = line;
+            lexer->buffer->current_column = column;
+            // Set lexer to a known state
+            lexer->buffer->current_char = '\0';
+            lexer->buffer->next_char = '\0';
+            if (!ps_buffer_read_next_char(lexer->buffer))
+                RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE); // TODO better error code
+            READ_NEXT_TOKEN;
+            // VARIABLE := VARIABLE + STEP
+            if (!ps_function_binary_op(interpreter, variable->value, &step, variable->value, PS_TOKEN_PLUS))
+                TRACE_ERROR("");
+        } while (true);
+    }
+
+    TRACE_END("OK");
+    return true;
+}
+
 /**
  * Visit statement
  *      assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
@@ -802,6 +896,10 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
         break;
     case PS_TOKEN_WHILE:
         if (!ps_visit_while_do(interpreter, exec))
+            TRACE_ERROR("");
+        break;
+    case PS_TOKEN_FOR:
+        if (!ps_visit_for_do(interpreter, exec))
             TRACE_ERROR("");
         break;
     case PS_TOKEN_WRITE:
