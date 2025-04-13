@@ -473,7 +473,7 @@ int main(void)
 
 ## License
 
-This project is licensed under GNU General Public License 3.0 or later, see file `LICENSE`.
+This project is licensed under GNU Lesser General Public License 3.0 or later, see file `LICENSE`.
 
 Each file should contains this header:
 
