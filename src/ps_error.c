@@ -115,6 +115,8 @@ char *ps_error_get_message(ps_error error)
         return "Out of range";
     case PS_RUNTIME_ERROR_INVALID_PARAMETERS:
         return "Invalid parameters";
+    case PS_PARSER_ERROR_TOO_MANY_VARIABLES:
+        return "Too many variables in declaration";
     case PS_ERROR_MAX:
         return "MAX error?";
     }

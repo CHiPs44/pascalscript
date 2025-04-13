@@ -180,8 +180,8 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
 
-    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0},
-             right = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value left = {.type = NULL, .data.i = 0},
+             right = {.type = NULL, .data.i = 0};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -228,7 +228,8 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0}, right = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value left = {.type = NULL, .data.i = 0},
+             right = {.type = NULL, .data.i = 0};
     ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -278,7 +279,8 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = ps_system_integer.value->data.t, .data.i = 0}, right = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value left = {.type = NULL, .data.i = 0},
+             right = {.type = NULL, .data.i = 0};
     ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -466,7 +468,8 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
     USE_LEXER;
     SET_VISITOR("VAR");
     TRACE_BEGIN("");
-    ps_identifier identifier;
+    ps_identifier identifier[8];
+    int var_count;
     ps_type_definition *type;
     ps_value *value;
     ps_value_data data;
@@ -475,9 +478,23 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
     READ_NEXT_TOKEN;
     do
     {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-        COPY_IDENTIFIER(identifier);
-        READ_NEXT_TOKEN;
+        var_count = 0;
+        do
+        {
+            EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+            COPY_IDENTIFIER(identifier[var_count]);
+            READ_NEXT_TOKEN;
+            if (lexer->current_token.type == PS_TOKEN_COLON)
+                break;
+            if (lexer->current_token.type == PS_TOKEN_COMMA)
+            {
+                READ_NEXT_TOKEN;
+                var_count++;
+                if (var_count > 8 - 1)
+                    RETURN_ERROR(PS_PARSER_ERROR_TOO_MANY_VARIABLES);
+                continue;
+            }
+        } while (true);
         EXPECT_TOKEN(PS_TOKEN_COLON);
         READ_NEXT_TOKEN;
         switch (lexer->current_token.type)
@@ -502,6 +519,8 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
             type = ps_system_real.value->data.t;
             data.r = 0.0;
             break;
+        case PS_TOKEN_IDENTIFIER:
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         default:
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
@@ -510,16 +529,19 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
         READ_NEXT_TOKEN;
         if (exec)
         {
-            value = ps_value_init(type, data);
-            variable = ps_symbol_init(
-                PS_SYMBOL_SCOPE_GLOBAL,
-                PS_SYMBOL_KIND_VARIABLE,
-                &identifier,
-                value);
-            if (variable == NULL)
-                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-            if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
-                RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
+            for (int i = 0; i <= var_count; i++)
+            {
+                value = ps_value_init(type, data);
+                variable = ps_symbol_init(
+                    PS_SYMBOL_SCOPE_GLOBAL,
+                    PS_SYMBOL_KIND_VARIABLE,
+                    &identifier[i],
+                    value);
+                if (variable == NULL)
+                    RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+                if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
+                    RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
+            }
         }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
     TRACE_END("OK");

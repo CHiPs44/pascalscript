@@ -140,6 +140,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         }
         result->type = a->type;
     }
+    if (result->type == NULL || result->type->base == PS_TYPE_NONE)
+        result->type = a->type;
     switch (a->type->base)
     {
     case PS_TYPE_INTEGER:

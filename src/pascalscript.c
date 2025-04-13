@@ -80,7 +80,7 @@ char *minimal_source =
 
 int main(int argc, char *argv[])
 {
-  bool trace = false; // argc > 1 && strcmp(argv[1], "-t") == 0;
+  bool trace = true; // argc > 1 && strcmp(argv[1], "-t") == 0;
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = false;
@@ -109,7 +109,8 @@ int main(int argc, char *argv[])
       // program_file = "../examples/03-if-then-else.pas";
       // program_file = "../examples/04-repeat-until.pas";
       // program_file = "../examples/05-while-do.pas";
-      program_file = "../examples/06-for-do.pas";
+      // program_file = "../examples/06-for-do.pas";
+      program_file = "../examples/41-circle.pas";
     }
     else
     {
@@ -117,7 +118,8 @@ int main(int argc, char *argv[])
       // program_file = "examples/03-if-then-else.pas";
       // program_file = "examples/04-repeat-until.pas";
       // program_file = "examples/05-while-do.pas";
-      program_file = "examples/06-for-do.pas";
+      // program_file = "examples/06-for-do.pas";
+      program_file = "examples/41-circle.pas";
     }
   }
   snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);

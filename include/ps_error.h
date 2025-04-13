@@ -45,7 +45,7 @@ extern "C"
         PS_PARSER_ERROR_UNKOWN_IDENTIFIER,
         PS_PARSER_ERROR_CONSTANT_VALUE,
         /* -------------------- RUNTIME -------------------- */
-        PS_RUNTIME_ERROR_NONE = 0x40,
+        PS_RUNTIME_ERROR_NONE = 0x80,
         PS_RUNTIME_ERROR_OUT_OF_MEMORY,
         PS_RUNTIME_ERROR_STACK_UNDERFLOW,
         PS_RUNTIME_ERROR_STACK_OVERFLOW,
@@ -71,6 +71,7 @@ extern "C"
         PS_RUNTIME_ERROR_DIVISION_BY_ZERO,
         PS_RUNTIME_ERROR_OUT_OF_RANGE,
         PS_RUNTIME_ERROR_INVALID_PARAMETERS,
+        PS_PARSER_ERROR_TOO_MANY_VARIABLES,
         // ...
         PS_ERROR_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_error;
