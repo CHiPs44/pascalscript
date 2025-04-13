@@ -1,7 +1,7 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
     SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
-    SPDX-License-Identifier: GPL-3.0-or-later
+    SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
 // From https://stackoverflow.com/questions/14002954/c-programming-how-to-read-the-whole-file-contents-into-a-buffer
