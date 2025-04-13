@@ -1,6 +1,6 @@
 Program Example05WhileDo;
 Const
-    Start = 1;
+    Start = -1;
     Finish = 10;
 Var
     I : Integer;
