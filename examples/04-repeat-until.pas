@@ -4,10 +4,10 @@ Const
 Var
     I : Integer;
 Begin
-    I := Loops;
+    I := -Loops;
     Repeat
         Write(I, ' ');
-        I := I - 1;
-    Until I < 0;
+        I := I + 1;
+    Until I > Loops;
     WriteLn('O', 'K', '!');
 End.

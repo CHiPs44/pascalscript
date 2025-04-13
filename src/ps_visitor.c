@@ -375,9 +375,9 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
             negate = true;
             READ_NEXT_TOKEN;
         }
-        else if (lexer->current_token.type == PS_TOKEN_MINUS)
+        else
         {
-            READ_NEXT_TOKEN;
+            negate = false;
         }
         switch (lexer->current_token.type)
         {
@@ -449,7 +449,7 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
                 RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
         }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
- 
+
     TRACE_END("OK");
     return true;
 }
@@ -838,6 +838,9 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
         TRACE_ERROR("");
     // DO
     EXPECT_TOKEN(PS_TOKEN_DO);
+    // Save "cursor" position
+    line = lexer->buffer->current_line;
+    column = lexer->buffer->current_column;
     READ_NEXT_TOKEN;
     if (!exec)
     {
@@ -846,9 +849,6 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
     }
     else
     {
-        // Save "cursor" position
-        line = lexer->buffer->current_line;
-        column = lexer->buffer->current_column;
         // VARIABLE := START
         if (!ps_function_copy_value(interpreter, &start, variable->value))
             TRACE_ERROR("COPY");
