@@ -2,14 +2,27 @@
 
 ## Status
 
-As of 2025-04-05, with commit [b3cd327](https://github.com/CHiPs44/pascalscript/commit/b3cd327fc5ba1f77be46c0e149285d277f2f777d), is __does__ compile and can execute a trivial program with:
+As of 2025-04-13, with commit [4b4d50deb3612a4dc46d7ca710066829414ced22](https://github.com/CHiPs44/pascalscript/tree/4b4d50deb3612a4dc46d7ca710066829414ced22), I changed license from GPL 3.0 or later to LGPL 3.0 or later in order to make it easier to embed in other projects.
 
-- assignment to variable from an arithmetic expression
-- writing its value to standard output
+The interpreter itself now implements:
 
-There is much more to do, but it's an achievement I'm glad to see!
+- assignment to variable from an arithmetic expression with `:=`
+- writing its value to standard output with `Write` / `WriteLn`
+- `if` / `then` / `else`
+- `repeat` / `until`
+- `while` / `do`
+- `for` / `to` / `downto` / `do`
 
-Next step should be implementing conditional statement `if` `then` `else`.
+There is much more to do, but it's another achievement I'm glad to see!
+
+Next steps should be implementing:
+
+- function calls (and extend system library with `Odd`, `Ord`, `Chr`, `Abs`, ...)
+- procedure definition (with local variables and recursion)
+- function definition (with proper handling of `Result` pseudo variable?)
+- strings, at least constants
+
+The first two need to be able to compare formal parameter list and actual parameter list, which is not trivial.
 
 ## Introduction
 
