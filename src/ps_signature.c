@@ -6,7 +6,10 @@
 
 #include <stdlib.h>
 
+#include "ps_interpreter.h"
 #include "ps_signature.h"
+#include "ps_symbol.h"
+#include "ps_value.h"
 
 ps_signature *ps_signature_init(ps_symbol *result_type)
 {
@@ -38,10 +41,58 @@ bool ps_signature_add_parameter(ps_signature *signature, ps_symbol *value, bool 
 {
     if (signature->used >= signature->size)
         return false;
-    
+    signature->parameters[signature->used].value = value;
+    signature->parameters[signature->used].byref = byref;
+    signature->used++;
     return true;
 }
 
-bool ps_signature_compare(ps_signature *formal_parameters, ps_signature *actual_parameters)
+bool ps_signature_compare(ps_signature *formal, ps_signature *actual)
 {
+    // Same number of parameters?
+    if (formal->used != actual->used)
+        return false;
+    for (uint8_t i = 0; i < formal->used; i++)
+    {
+        // Same type?
+        if (formal->parameters[i].value->value->type !=
+            actual->parameters[i].value->value->type)
+            return false;
+        // Byref parameters must go to a variable
+        if (formal->parameters[i].byref &&
+            actual->parameters[i].value->kind != PS_SYMBOL_KIND_VARIABLE)
+            return false;
+    }
+    return true;
+}
+
+bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_signature *formal, ps_signature *actual)
+{
+    ps_symbol *variable;
+    for (uint8_t i = 0; i < formal->used; i++)
+    {
+        if (formal->parameters[i].byref)
+        {
+            // TODO
+        }
+        else
+        {
+            variable = ps_symbol_init(
+                scope, PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
+            if (variable == NULL)
+                return false;
+            if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
+            {
+                ps_symbol_free(variable);
+                return false;
+            }
+            if (!ps_function_copy_value(interpreter, actual->parameters[i].value, variable->value))
+            {
+                ps_symbol_free(variable);
+                return false;
+            }
+            variable->value->data = actual->parameters[i].value->value.data;
+        }
+    }
+    return true;
 }
