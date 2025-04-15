@@ -70,7 +70,8 @@
         "cstdlib": "c",
         "ps_system.h": "c",
         "ps_interpreter.h": "c",
-        "ps_functions.h": "c"
+        "ps_functions.h": "c",
+        "ps_signature.h": "c"
     },
     "makefile.configureOnOpen": false
 }
