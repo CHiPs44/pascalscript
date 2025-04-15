@@ -8,43 +8,37 @@
 (* LEXER RULES                                                                *)
 (******************************************************************************)
 
-letter                  =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' 
-                        |   'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
-                        |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' 
-                        |   'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
-                        ;
-bin_digit               =   '0' | '1' ;
-oct_digit               =   bin_digit | '2'  '3' | '4' |'5' | '6' | '7' ;
-dec_digit               =   oct_digit | '8' | '9' ;
-hex_digit               =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
+letter      =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' 
+            |   'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+            |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' 
+            |   'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+            ;
+bin_digit   =   '0' | '1' ;
+oct_digit   =   bin_digit | '2'  '3' | '4' |'5' | '6' | '7' ;
+dec_digit   =   oct_digit | '8' | '9' ;
+hex_digit   =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
 
-(*
-    Symbols
-        ' + - * / = < > [ ] . , ( ) : ^ @ { } $ # & %
-        << >> ** <> >< <= >= := += -= *= /= (* \*) (. .) //
-*)
+bin_digit_sequence  =   hex_digit , [ hex_digit ]* ;
+oct_digit_sequence  =   oct_digit , [ oct_digit ]* ;
+dec_digit_sequence  =   dec_digit , [ dec_digit ]* ;
+hex_digit_sequence  =   hex_digit , [ hex_digit ]* ;
+unsigned_integer    =   dec_digit_sequence 
+                    |   '%' , bin_digit_sequence 
+                    |   '&' , oct_digit_sequence 
+                    |   '$' , hex_digit_sequence 
+                    ;
+unsigned_real       =   dec_digit_sequence , [ '.' dec_digit_sequence ] [ scale_factor ] ;
+scale_factor        =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
+sign                =   '+' | '-' ;
+unsigned_number     =   unsigned_real | unsigned_integer ;
+signed_number       =   sign , unsigned_number ;
 
-identifier              =   letter | '_' , [ letter | dec_digit | '_' ]* ;
+character_string    =   quoted_string | control_string ;
+quoted_string       =   "'" , [ string_character ]* , "'" ;
+string_character    =   "''" | ? Any character except ', CR and LF ? ;
+control_string      =   '#' , unsigned_integer ;
 
-bin_digit_sequence      =   hex_digit , [ hex_digit ]* ;
-oct_digit_sequence      =   oct_digit , [ oct_digit ]* ;
-dec_digit_sequence      =   dec_digit , [ dec_digit ]* ;
-hex_digit_sequence      =   hex_digit , [ hex_digit ]* ;
-unsigned_integer        =   dec_digit_sequence 
-                        |   '%' , bin_digit_sequence 
-                        |   '&' , oct_digit_sequence 
-                        |   '$' , hex_digit_sequence 
-                        ;
-unsigned_real           =   dec_digit_sequence , [ '.' dec_digit_sequence ] [ scale_factor ] ;
-scale_factor            =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
-sign                    =   '+' | '-' ;
-unsigned_number         =   unsigned_real | unsigned_integer ;
-signed_number           =   sign , unsigned_number ;
-
-character_string        =   quoted_string | control_string ;
-quoted_string           =   "'" , [ string_character ]* , "'" ;
-string_character        =   "''" | ? Any character except ', CR and LF ? ;
-control_string          =   '#' , unsigned_integer ;
+identifier          =   letter | '_' , [ letter | dec_digit | '_' ]* ;
 
 (******************************************************************************)
 (* PARSER RULES                                                               *)
@@ -53,7 +47,7 @@ control_string          =   '#' , unsigned_integer ;
 label                   =   'LABEL' , dec_digit_sequence | identifier ;
 
 constant_declaration    =   identifier = expression ; 
-(* IGNORED typed_constant_declaration =   .. *)
+(* omitted: typed_constant_declaration =   .. *)
 
 type_declaration        =   identifier '=' type ;
 type                    =   simple_type | string_type 
@@ -67,8 +61,9 @@ ordinal_type            =   'INTEGER' | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'L
 boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
 string_type             =   'STRING' [ '[' constant_expression ']' ] ;
 enumerated_type         =   '(' identifier_list_one ')' ;
+
 identifier_list_one     =   identifier , [ ',' , identifier ]* ;
-identifier_list         =   [ identifier ] , [ ',' , identifier ]* ;
+identifier_list_zero    =   [ identifier ] , [ ',' , identifier ]* ;
 (* omitted: assigned_enum_list, hint_directives, ansi strings, ... *)
 
 expression              =   simple_expression [ relational_operator , simple_expression ] ;
@@ -95,21 +90,21 @@ variable_reference      =   identifier ;
 
 function_call           =   function_identifier , [ actual_parameter_list ] ;
 function_identifier     =   identifier ;
-actual_parameter_list   =   '(' expression [ ',' expression ]* ')'
+actual_parameter_list   =   '(' [ expression [ ',' expression ]* ] ')'
 
 unsigned_constant       =   unsigned_number
                         |   character_string
-                        |   constant identifier
+                        |   constant_identifier
                         |   'NIL'
                         ;
 
 (* omitted: LABEL, ASM *)
-statement               =   simple_statement
-                        |   structured_statement
+statement               =   [ label ':' ] simple_statement | structured_statement
                         ;
-(* omitted: GOTO, RAISE *)
+(* omitted: RAISE *)
 simple_statement        =   assignment_statement
                         |   procedure_statement
+                        |   'GOTO' label
                         ;
 (* omitted: += -= *= /= *)
 assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
@@ -133,33 +128,65 @@ case_statement          =   'CASE' expression 'OF'
                         |       constant [ '..' constant ] [ ',' constant [ '..' constant ] ] ':' statement
                                 [ ( 'ELSE' | 'OTHERWISE' ) statement_list [ ';' ] ]
                             'END'
+                        ;
 
 repetitive_statement    =   repeat_statement
                         |   while_statement
                         |   for_statement
                         ;
-repeat_statement        =   'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
-while_statement         =   'WHILE' expression 'DO' statement ;
-for_statement           =   'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
+repeat_statement        =   'REPEAT' statement_list [ ';' ] 'UNTIL' expression
+                        ;
+while_statement         =   'WHILE' expression 'DO' statement
+                        ;
+for_statement           =   'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement
+                        ;
 (* NB: BREAK and CONTINUE do not appear in grammar and are not reservved keywords but are usable *)
-
 
 program                 =   'PROGRAM' program_header [ '(' identifier_list ')' ] ';'
                             [ uses_clause ]
                             block
                             '.'
                         ;
+unit                    =   'UNIT' identifier ';'
+                            interface_part
+                            implementation_part
+                            '.'
+                        ;
+interface_part          =   'INTERFACE'
+                            [ uses_clause ]
+                            declaration_part
+                        ;
+implementation_part     =   'IMPLEMENTATION' ';'
+                            [ uses_clause ]
+                            [ implementation_declaration ]*
+                            ;
+
+
 uses_clause             =   'USES' identifier [ 'IN' quoted_string ] [ ',' identifier [ 'IN' quoted_string ]  ]* ';' ;
 block                   =   declaration_part
                             compound_statement
                         ;
-(* omitted: LABEL, RESOURCESTRING, THREADVAR *)
+(* omitted: RESOURCESTRING, THREADVAR *)
 declaration_part        =   [
+                                'LABEL' label [ ',' label ]* ';'
                                 'CONST' constant_declaration ';' [ constant_declaration ';' ]*
                                 'TYPE'  type_declaration ';' [ type_declaration ';' ]*
                                 'VAR'   variable_declaration ';' [ variable_declaration ';' ]*
-                                [ procedure_or_function_declaration ]*
+                                [ procedure_declaration | function_declaration ]*
                             ]*
                         ;
+procedure_declaration   =   'PROCEDURE' identifier [ '(' [ formal_parameter_list ] ')' ] ';'
+                            [ declaration_part ]
+                            [ compound_statement ';' ]
+                            ;
+function_declaration    =   'FUNCTION' identifier [ '(' [ formal_parameter_list ] ')' ] ':' type ';'
+                            [ declaration_part ]
+                            [ compound_statement ';']
+                            ;
+formal_parameter_list   =   formal_parameter [ ',' formal_parameter ]* ;
+formal_parameter        =   [ 'VAR' | 'OUT' ] identifier_list_one ':' type
+                        ;
+
+(* omitted: class, interface, ... *)
 
 (* TO BE CONTINUED... *)
