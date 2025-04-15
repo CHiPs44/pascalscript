@@ -26,17 +26,20 @@ extern "C"
 
     typedef struct s_ps_parameters
     {
-        uint16_t count;           // number of parameters
         uint16_t size;            // size of the array
+        uint16_t count;           // number of parameters
         ps_parameter *parameters; // array of parameters
     } ps_parameters;
 
     /** @brief Initialize a new parameter list */
     ps_parameters *ps_parameters_init(uint16_t size);
+
     /** @brief Release a parameter list */
     void ps_parameters_done(ps_parameters *parameters);
+
     /** @brief Compare formal and actual parameters */
     bool ps_parameters_compare(ps_interpreter *interpreter, ps_parameters *formal_parameters, ps_parameters *actual_parameters);
+
 #ifdef __cplusplus
 }
 #endif

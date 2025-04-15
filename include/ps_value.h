@@ -17,6 +17,9 @@ extern "C"
 {
 #endif
 
+    // Forward reference to parameters
+    typedef struct s_ps_parameters ps_parameters;
+
     /** @brief Union value */
     typedef union u_ps_value_data
     {
@@ -28,11 +31,14 @@ extern "C"
         ps_real             r; //  2?  4   8  "r" is for "_r_eal"
         ps_boolean          b; //  1?  1?  1? "b" is for "_b_oolean"
         ps_char             c; //  1   1   1  "c" is for "_c_har"
-        // ps_subrange         g; //  2   4   8  "g" is for "subran_g_e" ;-)
-        // ps_enum             e; //  2   4   8  "e" is for "_e_num"
-        // ps_pointer          p; //  2   4   8  "p" is for "_p_ointer"
-        // ps_string          *s; //  2   4   8  "s" is for "_s_tring"
+        /*
+        ps_subrange         g; //  2   4   8  "g" is for "subran_g_e" ;-)
+        ps_enum             e; //  2   4   8  "e" is for "_e_num"
+        ps_pointer          p; //  2   4   8  "p" is for "_p_ointer"
+        ps_string          *s; //  2   4   8  "s" is for "_s_tring"
+        */
         ps_type_definition *t; //  2   4   8  "t" is for "_t_ype"
+        ps_parameters      *a; //  2   4   8  "a" is for "p_a_rameters"
         void               *x; //  2   4   8  "x" is for "void"
         // clang-format on
     } __attribute__((__packed__)) ps_value_data;
