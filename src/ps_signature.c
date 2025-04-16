@@ -11,12 +11,14 @@
 #include "ps_symbol.h"
 #include "ps_value.h"
 
-ps_signature *ps_signature_init(ps_symbol *result_type)
+ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type)
 {
     ps_signature *signature = calloc(1, sizeof(ps_signature));
     if (signature == NULL)
         return NULL;
-    signature->parameters = calloc(PS_SIGNATURE_PARAMETER_COUNT, sizeof(ps_parameter));
+    if (size == 0)
+        size == PS_SIGNATURE_PARAMETER_COUNT;
+    signature->parameters = calloc(size, sizeof(ps_parameter));
     if (signature->parameters == NULL)
     {
         ps_signature_done(signature);
@@ -91,7 +93,7 @@ bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_
                 ps_symbol_free(variable);
                 return false;
             }
-            variable->value->data = actual->parameters[i].value->value.data;
+            // TODO variable->value->data = actual->parameters[i].value->value.data;
         }
     }
     return true;

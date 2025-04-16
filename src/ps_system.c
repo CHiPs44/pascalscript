@@ -20,34 +20,31 @@ ps_type_definition  ps_type_def_type_def    = {.type = PS_TYPE_DEFINITION, .base
 ps_value            ps_value_type_def       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}};
 ps_symbol           ps_system_type_def      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = &ps_value_type_def};
 
-ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
-ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
-ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)\
+ps_type_definition  ps_type_def_##__name__    = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};\
+ps_value            ps_value_##__name__       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};\
+ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "__NAME__", .value = &ps_value_##__name__};
 
-ps_type_definition  ps_type_def_char        = {.type = PS_TYPE_CHAR, .base = PS_TYPE_CHAR};
-ps_value            ps_value_char           = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_char}};
-ps_symbol           ps_system_char          = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "CHAR", .value = &ps_value_char};
+// ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
+// ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
+// ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
 
-ps_type_definition  ps_type_def_integer     = {.type = PS_TYPE_INTEGER, .base = PS_TYPE_INTEGER};
-ps_value            ps_value_integer        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_integer}};
-ps_symbol           ps_system_integer       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "INTEGER", .value = &ps_value_integer};
+PS_SYSTEM_TYPE(boolean  , "BOOLEAN"  , PS_TYPE_BOOLEAN   );
+PS_SYSTEM_TYPE(char     , "CHAR"     , PS_TYPE_CHAR      );
+PS_SYSTEM_TYPE(integer  , "INTEGER"  , PS_TYPE_INTEGER   );
+PS_SYSTEM_TYPE(unsigned , "UNSIGNED" , PS_TYPE_UNSIGNED  );
+PS_SYSTEM_TYPE(real     , "REAL"     , PS_TYPE_REAL      );
+PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE      );
+PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 
-ps_type_definition  ps_type_def_unsigned    = {.type = PS_TYPE_UNSIGNED, .base = PS_TYPE_UNSIGNED};
-ps_value            ps_value_unsigned       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_unsigned}};
-ps_symbol           ps_system_unsigned      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "UNSIGNED", .value = &ps_value_unsigned};
-
-ps_type_definition  ps_type_def_real        = {.type = PS_TYPE_REAL, .base = PS_TYPE_REAL};
-ps_value            ps_value_real           = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_real}};
-ps_symbol           ps_system_real          = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "REAL", .value = &ps_value_real};
-
-/* PROCEDURE */
-ps_type_definition  ps_type_def_procedure   = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
-ps_value            ps_value_procedure      = {.type    = &ps_type_def_procedure, .data = {.t = &ps_type_def_procedure}};
-ps_symbol           ps_system_procedure     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "PROCEDURE", .value = &ps_value_procedure};
-/* FUNCTION */
-ps_type_definition  ps_type_def_function    = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
-ps_value            ps_value_function       = {.type = &ps_type_def_function, .data = {.t = &ps_type_def_function}};
-ps_symbol           ps_system_function      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "FUNCTION", .value = &ps_value_function};
+// /* PROCEDURE */
+// ps_type_definition  ps_type_def_procedure   = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
+// ps_value            ps_value_procedure      = {.type    = &ps_type_def_procedure, .data = {.t = &ps_type_def_procedure}};
+// ps_symbol           ps_system_procedure     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "PROCEDURE", .value = &ps_value_procedure};
+// /* FUNCTION */
+// ps_type_definition  ps_type_def_function    = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
+// ps_value            ps_value_function       = {.type = &ps_type_def_function, .data = {.t = &ps_type_def_function}};
+// ps_symbol           ps_system_function      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "FUNCTION", .value = &ps_value_function};
 
 /* STANDARD LIB */
 ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ "  , .value = NULL};

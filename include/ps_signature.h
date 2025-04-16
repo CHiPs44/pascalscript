@@ -40,7 +40,7 @@ extern "C"
     #define PS_SIGNATURE_SIZE sizeof(ps_signature)
 
     /** @brief Initialize a new procedure or function signature */
-    ps_signature *ps_signature_init(ps_symbol *result_type);
+    ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type);
 
     /** @brief Release a procedure or function signature */
     void ps_signature_done(ps_signature *signature);
