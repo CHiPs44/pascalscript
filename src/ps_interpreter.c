@@ -35,6 +35,10 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
         ps_interpreter_done(interpreter);
         return NULL;
     }
+    strncpy(interpreter->scopes[0], "SYSTEM", PS_IDENTIFIER_LEN); // PS_SYMBOL_SCOPE_SYSTEM
+    strncpy(interpreter->scopes[1], "GLOBAL", PS_IDENTIFIER_LEN); // PS_SYMBOL_SCOPE_GLOBAL
+    interpreter->unit_scope = PS_SYMBOL_SCOPE_UNIT;
+    interpreter->local_scope = PS_SYMBOL_SCOPE_LOCAL;
     interpreter->debug = true;
     interpreter->trace = true;
     interpreter->error = PS_RUNTIME_ERROR_NONE;
@@ -101,6 +105,12 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_file(lexer->buffer, filename);
+}
+
+bool ps_interpreter_enter_scope(ps_interpreter *interpreter, ps_symbol_scope scope_base)
+{
+
+    return true;
 }
 
 bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)

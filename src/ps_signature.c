@@ -73,27 +73,27 @@ bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_
     ps_symbol *variable;
     for (uint8_t i = 0; i < formal->used; i++)
     {
+        variable = ps_symbol_init(
+            scope, PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
+        if (variable == NULL)
+            return false;
+        if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
+        {
+            ps_symbol_free(variable);
+            return false;
+        }
         if (formal->parameters[i].byref)
         {
-            // TODO
+            // 2 variables point to the same value
+            variable->value = actual->parameters[i].value;
         }
         else
         {
-            variable = ps_symbol_init(
-                scope, PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
-            if (variable == NULL)
-                return false;
-            if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
-            {
-                ps_symbol_free(variable);
-                return false;
-            }
             if (!ps_function_copy_value(interpreter, actual->parameters[i].value, variable->value))
             {
                 ps_symbol_free(variable);
                 return false;
             }
-            // TODO variable->value->data = actual->parameters[i].value->value.data;
         }
     }
     return true;

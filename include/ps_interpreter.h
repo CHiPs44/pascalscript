@@ -20,14 +20,20 @@ extern "C"
 
     // static ps_error interpreter_errno = PS_ERROR_ZERO;
 
+#define PS_INTERPRETER_SCOPE_COUNT (PS_SYMBOL_SCOPE_MAX + 1)
+
     typedef struct s_ps_interpreter
     {
         ps_parser *parser;
         ps_error error;
-        bool trace;
-        bool debug;
-        bool range_check;
-        bool allocated;
+        ps_identifier scopes[PS_INTERPRETER_SCOPE_COUNT];
+        uint8_t unit_scope;
+        uint8_t local_scope;
+        // flags
+        bool trace : 1;
+        bool debug : 1;
+        bool range_check : 1;
+        bool allocated : 1;
     } ps_interpreter;
 
     ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter);
