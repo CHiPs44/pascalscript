@@ -152,8 +152,8 @@ struct s_ps_keyword
     { .token_type = PS_TOKEN_VAR           , .keyword = "VAR"              },
     { .token_type = PS_TOKEN_WHILE         , .keyword = "WHILE"            },
     { .token_type = PS_TOKEN_WITH          , .keyword = "WITH"             },
-    { .token_type = PS_TOKEN_WRITE         , .keyword = "WRITE"            },
-    { .token_type = PS_TOKEN_WRITELN       , .keyword = "WRITELN"          },
+    // { .token_type = PS_TOKEN_WRITE         , .keyword = "WRITE"            },
+    // { .token_type = PS_TOKEN_WRITELN       , .keyword = "WRITELN"          },
     { .token_type = PS_TOKEN_XOR           , .keyword = "XOR"              },
     // clang-format on
 };

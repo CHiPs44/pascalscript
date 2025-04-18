@@ -25,6 +25,7 @@ ps_type_definition  ps_type_def_##__name__    = {.type = __VALUE_TYPE__, .base =
 ps_value            ps_value_##__name__       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};\
 ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "__NAME__", .value = &ps_value_##__name__};
 
+// Keeped for reference
 // ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
 // ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
 // ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
@@ -46,7 +47,7 @@ PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 // ps_value            ps_value_function       = {.type = &ps_type_def_function, .data = {.t = &ps_type_def_function}};
 // ps_symbol           ps_system_function      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "FUNCTION", .value = &ps_value_function};
 
-/* STANDARD LIB */
+/* STANDARD LIBRARY */
 ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ "  , .value = NULL};
 ps_symbol ps_system_procedure_readln    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN" , .value = NULL};
 ps_symbol ps_system_procedure_write     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"  , .value = NULL};
@@ -58,39 +59,43 @@ ps_symbol ps_system_function_succ       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kin
 ps_symbol ps_system_function_pred       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = NULL};
 
 /* CONSTANTS */
-ps_value ps_value_boolean_false     = {.type = &ps_type_def_boolean , .data = {.b = (ps_boolean) false                        }};        
-ps_value ps_value_boolean_true      = {.type = &ps_type_def_boolean , .data = {.b = (ps_boolean) true                         }};
-ps_value ps_value_integer_maxint    = {.type = &ps_type_def_integer , .data = {.i = PS_INTEGER_MAX                            }};
-ps_value ps_value_unsigned_maxuint  = {.type = &ps_type_def_unsigned, .data = {.u = PS_UNSIGNED_MAX                           }};
-ps_value ps_value_real_pi           = {.type = &ps_type_def_real    , .data = {.t = &ps_type_def_real, .r = 3.141592653589793 }}; /*115997963468544185161590576171875*/
-ps_symbol ps_system_boolean_false   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "FALSE"    , .value = &ps_value_boolean_false      };
-ps_symbol ps_system_boolean_true    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "TRUE"     , .value = &ps_value_boolean_true       };
-ps_symbol ps_system_maxint          = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "MAXINT"   , .value = &ps_value_integer_maxint     };
-ps_symbol ps_system_maxuint         = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "MAXUINT"  , .value = &ps_value_unsigned_maxuint   };
-ps_symbol ps_system_real_pi         = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PI"       , .value = &ps_value_real_pi            };
+
+#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)\
+ps_value  ps_value_##TYPE##_##VALUE  = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};\
+ps_symbol ps_system_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "NAME", .value = &ps_value_##TYPE##_##VALUE};
+
+PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
+PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
+PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, PS_INTEGER_MAX);
+PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, PS_UNSIGNED_MAX);
+PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793); /*115997963468544185161590576171875*/
+
+// Keeped for reference
+// ps_value ps_value_boolean_false     = {.type = &ps_type_def_boolean , .data = {.b = (ps_boolean) false}};        
+// ps_symbol ps_system_boolean_false   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "FALSE"    , .value = &ps_value_boolean_false      };
 
 /* VERSION */
-ps_value ps_value_version_major = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MAJOR}};
-ps_value ps_value_version_minor = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MINOR}};
-ps_value ps_value_version_patch = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_PATCH}};
-ps_value ps_value_version_index = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_INDEX}};
-ps_symbol ps_system_version_major = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MAJOR", .value = &ps_value_version_major};
-ps_symbol ps_system_version_minor = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MINOR", .value = &ps_value_version_minor};
-ps_symbol ps_system_version_patch = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_PATCH", .value = &ps_value_version_patch};
-ps_symbol ps_system_version_index = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_INDEX", .value = &ps_value_version_index};
+PS_SYSTEM_CONSTANT(integer, version_major, "VERSION_MAJOR", u, PS_VERSION_MAJOR);
+PS_SYSTEM_CONSTANT(integer, version_minor, "VERSION_MINOR", u, PS_VERSION_MINOR);
+PS_SYSTEM_CONSTANT(integer, version_patch, "VERSION_PATCH", u, PS_VERSION_PATCH);
+PS_SYSTEM_CONSTANT(integer, version_index, "VERSION_INDEX", u, PS_VERSION_INDEX);
+
+// Keeped for reference
+// ps_value ps_value_version_major = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MAJOR}};
+// ps_symbol ps_system_version_major = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MAJOR", .value = &ps_value_version_major};
 
 /* clang-format on */
 
 bool ps_system_init(ps_interpreter *interpreter)
 {
     ps_symbol_table *symbols = interpreter->parser->symbols;
-    if (ps_symbol_table_available(symbols) < 5 + 2)
-        return false;
-    
+
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/
 
+    if (ps_symbol_table_available(symbols) < 5)
+        return false;
     // ps_value_boolean.data.t = &ps_type_def_boolean;
     // ps_value_char.data.t = &ps_type_def_char;
     // ps_value_integer.data.t = &ps_type_def_integer;
@@ -105,11 +110,12 @@ bool ps_system_init(ps_interpreter *interpreter)
     /**************************************************************************/
     /* PROCEDURES & FUNCTIONS                                                 */
     /**************************************************************************/
-    
+    if (ps_symbol_table_available(symbols) < 11)
+        return false;
     ps_symbol_table_add(symbols, &ps_system_procedure);
     ps_symbol_table_add(symbols, &ps_system_function);
     ps_symbol_table_add(symbols, &ps_system_procedure_read);
-    ps_symbol_table_add(symbols, &ps_system_procedure_readln);  
+    ps_symbol_table_add(symbols, &ps_system_procedure_readln);
     ps_symbol_table_add(symbols, &ps_system_procedure_write);
     ps_symbol_table_add(symbols, &ps_system_procedure_writeln);
     ps_symbol_table_add(symbols, &ps_system_function_abs);
@@ -121,16 +127,19 @@ bool ps_system_init(ps_interpreter *interpreter)
     /**************************************************************************/
     /* CONSTANTS                                                              */
     /**************************************************************************/
-
+    if (ps_symbol_table_available(symbols) < 5)
+        return false;
     ps_symbol_table_add(symbols, &ps_system_boolean_false);
     ps_symbol_table_add(symbols, &ps_system_boolean_true);
-    ps_symbol_table_add(symbols, &ps_system_maxint);
-    ps_symbol_table_add(symbols, &ps_system_maxuint);
+    ps_symbol_table_add(symbols, &ps_system_integer_maxint);
+    ps_symbol_table_add(symbols, &ps_system_unsigned_maxuint);
     ps_symbol_table_add(symbols, &ps_system_real_pi);
 
     /**************************************************************************/
     /* VERSION                                                                */
     /**************************************************************************/
+    if (ps_symbol_table_available(symbols) < 4)
+        return false;
     ps_symbol_table_add(symbols, &ps_system_version_major);
     ps_symbol_table_add(symbols, &ps_system_version_minor);
     ps_symbol_table_add(symbols, &ps_system_version_patch);

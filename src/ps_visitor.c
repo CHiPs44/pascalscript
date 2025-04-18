@@ -599,13 +599,13 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec)
  *                                            expression [ ':' width [ ':' precision ] ]
  *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]* ) ;
  */
-bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec)
+bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool exec)
 {
     USE_LEXER;
     SET_VISITOR("WRITE_OR_WRITELN");
     TRACE_BEGIN("");
     ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
-    bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
+    // bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
     bool loop = true;
 
     READ_NEXT_TOKEN;
@@ -650,6 +650,45 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec)
 
     if (exec && newline)
         fprintf(stdout, "\n");
+
+    TRACE_END("OK");
+    return true;
+}
+
+bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, bool exec)
+{
+    USE_LEXER;
+    SET_VISITOR("ASSIGNMENT_OR_PROCEDURE_CALL");
+    TRACE_BEGIN("");
+    ps_identifier identifier;
+    ps_symbol *symbol;
+
+    COPY_IDENTIFIER(identifier);
+    READ_NEXT_TOKEN;
+    symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+    if (symbol == NULL)
+        RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
+    switch (symbol->kind)
+    {
+    case PS_SYMBOL_KIND_VARIABLE:
+        if (!ps_visit_assignment(interpreter, exec))
+            TRACE_ERROR("ASSIGN!");
+        break;
+    case PS_SYMBOL_KIND_PROCEDURE:
+        if (symbol == &ps_system_procedure_write ||
+            symbol == &ps_system_procedure_writeln)
+        {
+            if (!ps_visit_write_or_writeln(interpreter, symbol == &ps_system_procedure_writeln, exec))
+                TRACE_ERROR("WRITE!");
+        }
+        else
+        {
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        }
+        break;
+    default:
+        RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+    }
 
     TRACE_END("OK");
     return true;
@@ -935,7 +974,7 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
             TRACE_ERROR("");
         break;
     case PS_TOKEN_IDENTIFIER:
-        if (!ps_visit_assignment(interpreter, exec))
+        if (!ps_visit_assignment_or_procedure_call(interpreter, exec))
             TRACE_ERROR("");
         break;
     case PS_TOKEN_IF:
@@ -954,11 +993,11 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
         if (!ps_visit_for_do(interpreter, exec))
             TRACE_ERROR("");
         break;
-    case PS_TOKEN_WRITE:
-    case PS_TOKEN_WRITELN:
-        if (!ps_visit_write_or_writeln(interpreter, exec))
-            TRACE_ERROR("");
-        break;
+    // case PS_TOKEN_WRITE:
+    // case PS_TOKEN_WRITELN:
+    //     if (!ps_visit_write_or_writeln(interpreter, exec))
+    //         TRACE_ERROR("");
+    //     break;
     default:
         RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
     }

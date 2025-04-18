@@ -159,9 +159,9 @@ extern "C"
         PS_TOKEN_LESS_OR_EQUAL,    // <=
         PS_TOKEN_GREATER_THAN,     // >
         PS_TOKEN_GREATER_OR_EQUAL, // >=
-        // These should not be tokens
-        PS_TOKEN_WRITE,
-        PS_TOKEN_WRITELN,
+        // // These should not be tokens
+        // PS_TOKEN_WRITE,
+        // PS_TOKEN_WRITELN,
         // Make token value fit in one byte
         PS_TOKEN_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_token_type;

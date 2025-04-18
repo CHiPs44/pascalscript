@@ -27,11 +27,11 @@ extern "C"
 
     typedef enum e_ps_symbol_scope
     {
-        PS_SYMBOL_SCOPE_SYSTEM,    /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
-        PS_SYMBOL_SCOPE_GLOBAL,    /** @brief For constants, types, variables, procedures and functions at top level */
-        PS_SYMBOL_SCOPE_UNIT,      /** @brief Same for units, 6 max */
-        PS_SYMBOL_SCOPE_LOCAL = 8, /** @brief Same for local levels */
-        PS_SYMBOL_SCOPE_MAX = 15   /** @brief 8 levels of imbrication may not be enough */
+        PS_SYMBOL_SCOPE_SYSTEM,     /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
+        PS_SYMBOL_SCOPE_GLOBAL,     /** @brief For constants, types, variables, procedures and functions at top level */
+        PS_SYMBOL_SCOPE_UNIT,       /** @brief Same for units, 14 max */
+        PS_SYMBOL_SCOPE_LOCAL = 16, /** @brief Same for local levels */
+        PS_SYMBOL_SCOPE_MAX = 31    /** @brief 16 levels of imbrication may not be enough */
     } __attribute__((__packed__)) ps_symbol_scope;
 
 #define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
