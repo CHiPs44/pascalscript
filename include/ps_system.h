@@ -27,6 +27,8 @@ extern "C"
     ps_symbol ps_system_procedure_readln;
     ps_symbol ps_system_procedure_write;
     ps_symbol ps_system_procedure_writeln;
+    ps_symbol ps_system_function_odd;
+    ps_symbol ps_system_function_even;
     ps_symbol ps_system_function_abs;
     ps_symbol ps_system_function_chr;
     ps_symbol ps_system_function_ord;

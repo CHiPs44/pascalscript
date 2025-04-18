@@ -224,20 +224,37 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     return true;
 }
 
-// bool ps_function_and(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
-// {
-//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_AND);
-// }
-
-// bool ps_function_or(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
-// {
-//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_OR);
-// }
-
-// bool ps_function_xor(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
-// {
-//     return ps_function_and_or_xor(interpreter, a, b, result, PS_TOKEN_XOR);
-// }
+bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
+{
+    bool (*function)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    if (symbol == &ps_system_function_odd)
+        function = ps_function_odd;
+    else if (symbol == &ps_system_function_even)
+        function = ps_function_even;
+    else if (symbol == &ps_system_function_ord)
+        function = ps_function_ord;
+    else if (symbol == &ps_system_function_chr)
+        function = ps_function_chr;
+    else if (symbol == &ps_system_function_pred)
+        function = ps_function_pred;
+    else if (symbol == &ps_system_function_succ)
+        function = ps_function_succ;
+    else if (symbol == &ps_system_function_abs)
+        function = ps_function_abs;
+    else if (symbol == &ps_system_procedure_write)
+        function = ps_function_write;
+    else
+    {
+        interpreter->error = PS_UNKNOWN_FUNCTION;
+        return false;
+    }
+    if (!function(interpreter, value, result))
+    {
+        interpreter->error = PS_RUNTIME_ERROR_FUNCTION_FAILED;
+        return false;
+    }
+    return true;
+}
 
 /******************************************************************************/
 /* ORDINAL                                                                    */

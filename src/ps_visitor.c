@@ -49,6 +49,36 @@
                                         }
 // clang-format on
 
+bool ps_visit_function_call(ps_interpreter *interpreter, bool exec, ps_symbol *symbol, ps_value *result)
+{
+    USE_LEXER;
+    SET_VISITOR("FUNCTION_CALL");
+    TRACE_BEGIN("");
+    ps_value value;
+
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    {
+        READ_NEXT_TOKEN;
+        if (!ps_visit_expression(interpreter, exec, &value))
+            TRACE_ERROR("");
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+        READ_NEXT_TOKEN;
+    }
+    else
+    {
+        value.type = NULL;
+        value.data.i = 0;
+    }
+    if (exec)
+    {
+        if (!ps_function_exec(interpreter, symbol, &value, result))
+            TRACE_ERROR("");
+    }
+
+    TRACE_END("OK");
+    return true;
+}
+
 bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result);
 
 /**
@@ -79,19 +109,27 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_IDENTIFIER:
-        // TODO: variable, const, function, ...
+        // variable, constant, function
         if (exec)
         {
             COPY_IDENTIFIER(identifier);
             symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
             if (symbol == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
-            if (symbol->kind != PS_SYMBOL_KIND_AUTO &&
-                symbol->kind != PS_SYMBOL_KIND_CONSTANT &&
-                symbol->kind != PS_SYMBOL_KIND_VARIABLE)
-                RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE);
-            result->type = symbol->value->type;
-            result->data = symbol->value->data;
+            switch (symbol->kind)
+            {
+            case PS_SYMBOL_KIND_AUTO:
+            case PS_SYMBOL_KIND_CONSTANT:
+            case PS_SYMBOL_KIND_VARIABLE:
+                if (!ps_function_copy_value(interpreter, symbol->value, result))
+                    TRACE_ERROR("COPY");
+                break;
+            case PS_SYMBOL_KIND_FUNCTION:
+                if (!ps_visit_function_call(interpreter, exec, symbol, result))
+                    TRACE_ERROR("FUNCTION");
+            default:
+                break;
+            }
         }
         READ_NEXT_TOKEN;
         break;
@@ -952,14 +990,19 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
 
 /**
  * Visit statement
- *      assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
- *      if_statement            =   'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
- *      repeat_statement        =   'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
- *      while_statement         =   'WHILE' expression 'DO' statement ;
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) '(' expression , expression ]* ')' ;
- * Next steps:
- *      WHILE
- *      FOR
+ *      compound_statement   = 'BEGIN' statement_list [ ';' ] 'END' ;
+ *      statement_list       = statement [ ';' ]* ;
+ *      statement            = assignment_statement | procedure_call | if_statement | repeat_statement | while_statement | for_statement ;
+ *      assignment_statement = ( variable_reference | function_identifier | 'RESULT' ) ':=' expression ;
+ *      variable_reference   = identifier ;
+ *      function_identifier  = identifier ;
+ *      procedure_call       = procedure_identifier [ '(' expression , expression ]* ')' ] ;
+ *      procedure_identifier = identifier ;
+ *      if_statement         = 'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
+ *      repeat_statement     = 'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
+ *      while_statement      = 'WHILE' expression 'DO' statement ;
+ *      for_statement        = 'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
+ *      control_variable     = identifier ;
  */
 bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
 {
@@ -993,11 +1036,6 @@ bool ps_visit_statement(ps_interpreter *interpreter, bool exec)
         if (!ps_visit_for_do(interpreter, exec))
             TRACE_ERROR("");
         break;
-    // case PS_TOKEN_WRITE:
-    // case PS_TOKEN_WRITELN:
-    //     if (!ps_visit_write_or_writeln(interpreter, exec))
-    //         TRACE_ERROR("");
-    //     break;
     default:
         RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
     }

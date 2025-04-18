@@ -4,6 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_interpreter.h"
+#include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_system_types.h"
 #include "ps_system.h"
@@ -25,11 +27,6 @@ ps_type_definition  ps_type_def_##__name__    = {.type = __VALUE_TYPE__, .base =
 ps_value            ps_value_##__name__       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};\
 ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "__NAME__", .value = &ps_value_##__name__};
 
-// Keeped for reference
-// ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
-// ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
-// ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
-
 PS_SYSTEM_TYPE(boolean  , "BOOLEAN"  , PS_TYPE_BOOLEAN   );
 PS_SYSTEM_TYPE(char     , "CHAR"     , PS_TYPE_CHAR      );
 PS_SYSTEM_TYPE(integer  , "INTEGER"  , PS_TYPE_INTEGER   );
@@ -38,26 +35,46 @@ PS_SYSTEM_TYPE(real     , "REAL"     , PS_TYPE_REAL      );
 PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE      );
 PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 
-// /* PROCEDURE */
+// Keeped for reference
+// ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
+// ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
+// ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
 // ps_type_definition  ps_type_def_procedure   = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
 // ps_value            ps_value_procedure      = {.type    = &ps_type_def_procedure, .data = {.t = &ps_type_def_procedure}};
 // ps_symbol           ps_system_procedure     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "PROCEDURE", .value = &ps_value_procedure};
-// /* FUNCTION */
 // ps_type_definition  ps_type_def_function    = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
 // ps_value            ps_value_function       = {.type = &ps_type_def_function, .data = {.t = &ps_type_def_function}};
 // ps_symbol           ps_system_function      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "FUNCTION", .value = &ps_value_function};
 
 /* STANDARD LIBRARY */
-ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ "  , .value = NULL};
-ps_symbol ps_system_procedure_readln    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN" , .value = NULL};
-ps_symbol ps_system_procedure_write     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"  , .value = NULL};
-ps_symbol ps_system_procedure_writeln   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITELN", .value = NULL};
-ps_symbol ps_system_function_abs        = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ABS"    , .value = NULL};
-ps_symbol ps_system_function_chr        = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "CHR"    , .value = NULL};
-ps_symbol ps_system_function_ord        = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ORD"    , .value = NULL};
-ps_symbol ps_system_function_succ       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SUCC"   , .value = NULL};
-ps_symbol ps_system_function_pred       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = NULL};
 
+/* procedures */
+ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ"     , .value = NULL};
+ps_symbol ps_system_procedure_readln    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN"   , .value = NULL};
+ps_symbol ps_system_procedure_write     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"    , .value = NULL};
+ps_symbol ps_system_procedure_writeln   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITELN"  , .value = NULL};
+ps_symbol ps_system_procedure_randomize = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "RANDOMIZE", .value = NULL};
+/* ordinal types functions */
+ps_symbol ps_system_function_odd      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ODD"    , .value = NULL};
+ps_symbol ps_system_function_even     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "EVEN"   , .value = NULL};
+ps_symbol ps_system_function_chr      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "CHR"    , .value = NULL};
+ps_symbol ps_system_function_ord      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ORD"    , .value = NULL};
+ps_symbol ps_system_function_succ     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SUCC"   , .value = NULL};
+ps_symbol ps_system_function_pred     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = NULL};
+ps_symbol ps_system_function_random   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "RANDOM" , .value = NULL};
+/* functions with one integer/real argument returning same type */
+ps_symbol ps_system_function_abs      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ABS"    , .value = NULL};
+/* math functions with one real argument returning a real result (except INT) */
+ps_symbol ps_system_function_sin      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SIN"    , .value = NULL};
+ps_symbol ps_system_function_cos      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "COS"    , .value = NULL};
+ps_symbol ps_system_function_arctan   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "TAN"    , .value = NULL};
+ps_symbol ps_system_function_sqrt     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SQRT"   , .value = NULL};
+ps_symbol ps_system_function_exp      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "EXP"    , .value = NULL};
+ps_symbol ps_system_function_ln       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "LN"     , .value = NULL};
+ps_symbol ps_system_function_log      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "LOG"    , .value = NULL};
+ps_symbol ps_system_function_trunc    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "TRUNC"  , .value = NULL};
+ps_symbol ps_system_function_round    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ROUND"  , .value = NULL};
+ps_symbol ps_system_function_int      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "INT"    , .value = NULL};
 /* CONSTANTS */
 
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)\
@@ -65,7 +82,7 @@ ps_value  ps_value_##TYPE##_##VALUE  = {.type = &ps_type_def_##TYPE, .data = {.F
 ps_symbol ps_system_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "NAME", .value = &ps_value_##TYPE##_##VALUE};
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
-PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
+PS_SYSTEM_CO NSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
 PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, PS_INTEGER_MAX);
 PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, PS_UNSIGNED_MAX);
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793); /*115997963468544185161590576171875*/
@@ -96,11 +113,6 @@ bool ps_system_init(ps_interpreter *interpreter)
 
     if (ps_symbol_table_available(symbols) < 5)
         return false;
-    // ps_value_boolean.data.t = &ps_type_def_boolean;
-    // ps_value_char.data.t = &ps_type_def_char;
-    // ps_value_integer.data.t = &ps_type_def_integer;
-    // ps_value_unsigned.data.t = &ps_type_def_unsigned;
-    // ps_value_real.data.t = &ps_type_def_real;
     ps_symbol_table_add(symbols, &ps_system_boolean);
     ps_symbol_table_add(symbols, &ps_system_char);
     ps_symbol_table_add(symbols, &ps_system_integer);
@@ -110,7 +122,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     /**************************************************************************/
     /* PROCEDURES & FUNCTIONS                                                 */
     /**************************************************************************/
-    if (ps_symbol_table_available(symbols) < 11)
+    if (ps_symbol_table_available(symbols) < 13)
         return false;
     ps_symbol_table_add(symbols, &ps_system_procedure);
     ps_symbol_table_add(symbols, &ps_system_function);
@@ -118,6 +130,8 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_procedure_readln);
     ps_symbol_table_add(symbols, &ps_system_procedure_write);
     ps_symbol_table_add(symbols, &ps_system_procedure_writeln);
+    ps_symbol_table_add(symbols, &ps_system_function_odd);
+    ps_symbol_table_add(symbols, &ps_system_function_even);
     ps_symbol_table_add(symbols, &ps_system_function_abs);
     ps_symbol_table_add(symbols, &ps_system_function_chr);
     ps_symbol_table_add(symbols, &ps_system_function_ord);
