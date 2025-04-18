@@ -82,7 +82,7 @@ ps_value  ps_value_##TYPE##_##VALUE  = {.type = &ps_type_def_##TYPE, .data = {.F
 ps_symbol ps_system_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "NAME", .value = &ps_value_##TYPE##_##VALUE};
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
-PS_SYSTEM_CO NSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
+PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
 PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, PS_INTEGER_MAX);
 PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, PS_UNSIGNED_MAX);
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793); /*115997963468544185161590576171875*/
