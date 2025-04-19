@@ -134,6 +134,9 @@ extern "C"
         PS_TOKEN_NOT,
         PS_TOKEN_SHL,
         PS_TOKEN_SHR,
+        PS_TOKEN_IN,
+        PS_TOKEN_IS,
+        PS_TOKEN_AS,
         // Symbols
         PS_TOKEN_ASSIGN,            // :=  assign
         PS_TOKEN_AT_SIGN,           // @   address of
@@ -152,7 +155,7 @@ extern "C"
         PS_TOKEN_MINUS, // -   substraction / negation
         PS_TOKEN_STAR,  // *   multiplication
         PS_TOKEN_SLASH, // /   division (real)
-        PS_TOKEN_POWER, // **   exponentiation
+        PS_TOKEN_POWER, // **  exponentiation
         // Comparison operators
         PS_TOKEN_EQUAL,            // =
         PS_TOKEN_NOT_EQUAL,        // <>
@@ -160,9 +163,6 @@ extern "C"
         PS_TOKEN_LESS_OR_EQUAL,    // <=
         PS_TOKEN_GREATER_THAN,     // >
         PS_TOKEN_GREATER_OR_EQUAL, // >=
-        // // These should not be tokens
-        // PS_TOKEN_WRITE,
-        // PS_TOKEN_WRITELN,
         // Make token value fit in one byte
         PS_TOKEN_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_token_type;
@@ -187,7 +187,7 @@ extern "C"
 
     void ps_token_dump(ps_token *token);
 
-    ps_token_type ps_token_is_keyword(char *text);
+    ps_token_type ps_token_is_keyword(ps_identifier *identifier);
 
 #ifdef __cplusplus
 }

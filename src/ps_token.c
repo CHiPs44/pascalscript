@@ -14,7 +14,7 @@ void ps_token_dump(ps_token *token)
     ps_token_type token_type;
     char *type;
     static char buffer[128];
-    static char string[(PS_STRING_MAX_LEN / 4) + 1];
+    static char string[96];
 
     switch (token->type)
     {
@@ -100,76 +100,81 @@ void ps_token_dump(ps_token *token)
 
 struct s_ps_keyword
 {
-    ps_token_type token_type;
     char *keyword;
+    ps_token_type token_type;
 } ps_keywords[] = {
     // clang-format off
-    { .token_type = PS_TOKEN_AND           , .keyword = "AND"              },
-    { .token_type = PS_TOKEN_ARRAY         , .keyword = "ARRAY"            },
-    { .token_type = PS_TOKEN_BEGIN         , .keyword = "BEGIN"            },
-    { .token_type = PS_TOKEN_BOOLEAN       , .keyword = "BOOLEAN"          },
-    { .token_type = PS_TOKEN_CASE          , .keyword = "CASE"             },
-    { .token_type = PS_TOKEN_CHAR          , .keyword = "CHAR"             },
-    { .token_type = PS_TOKEN_CONST         , .keyword = "CONST"            },
-    { .token_type = PS_TOKEN_DIV           , .keyword = "DIV"              },
-    { .token_type = PS_TOKEN_DO            , .keyword = "DO"               },
-    { .token_type = PS_TOKEN_DOWNTO        , .keyword = "DOWNTO"           },
-    { .token_type = PS_TOKEN_ELSE          , .keyword = "ELSE"             },
-    { .token_type = PS_TOKEN_END           , .keyword = "END"              },
-    { .token_type = PS_TOKEN_FALSE         , .keyword = "FALSE"            },
-    { .token_type = PS_TOKEN_FILE          , .keyword = "FILE"             },
-    { .token_type = PS_TOKEN_FOR           , .keyword = "FOR"              },
-    { .token_type = PS_TOKEN_FUNCTION      , .keyword = "FUNCTION"         },
-    { .token_type = PS_TOKEN_GOTO          , .keyword = "GOTO"             },
-    { .token_type = PS_TOKEN_IF            , .keyword = "IF"               },
-    { .token_type = PS_TOKEN_IMPLEMENTATION, .keyword = "IMPLEMENTATION"   },
-    { .token_type = PS_TOKEN_IN            , .keyword = "IN"               },
-    { .token_type = PS_TOKEN_INTEGER       , .keyword = "INTEGER"          },
-    { .token_type = PS_TOKEN_INTERFACE     , .keyword = "INTERFACE"        },
-    { .token_type = PS_TOKEN_LABEL         , .keyword = "LABEL"            },
-    { .token_type = PS_TOKEN_MOD           , .keyword = "MOD"              },
-    { .token_type = PS_TOKEN_NIL           , .keyword = "NIL"              },
-    { .token_type = PS_TOKEN_NOT           , .keyword = "NOT"              },
-    { .token_type = PS_TOKEN_OF            , .keyword = "OF"               },
-    { .token_type = PS_TOKEN_OR            , .keyword = "OR"               },
-    { .token_type = PS_TOKEN_OTHERWISE     , .keyword = "OTHERWISE"        },
-    { .token_type = PS_TOKEN_PROCEDURE     , .keyword = "PROCEDURE"        },
-    { .token_type = PS_TOKEN_PROGRAM       , .keyword = "PROGRAM"          },
-    { .token_type = PS_TOKEN_REAL          , .keyword = "REAL"             },
-    { .token_type = PS_TOKEN_RECORD        , .keyword = "RECORD"           },
-    { .token_type = PS_TOKEN_REPEAT        , .keyword = "REPEAT"           },
-    { .token_type = PS_TOKEN_SET           , .keyword = "SET"              },
-    { .token_type = PS_TOKEN_SHL           , .keyword = "SHL"              },
-    { .token_type = PS_TOKEN_SHR           , .keyword = "SHR"              },
-    { .token_type = PS_TOKEN_STRING        , .keyword = "STRING"           },
-    { .token_type = PS_TOKEN_THEN          , .keyword = "THEN"             },
-    { .token_type = PS_TOKEN_TO            , .keyword = "TO"               },
-    { .token_type = PS_TOKEN_TRUE          , .keyword = "TRUE"             },
-    { .token_type = PS_TOKEN_TYPE          , .keyword = "TYPE"             },
-    { .token_type = PS_TOKEN_UNIT          , .keyword = "UNIT"             },
-    { .token_type = PS_TOKEN_UNSIGNED      , .keyword = "UNSIGNED"         },
-    { .token_type = PS_TOKEN_UNTIL         , .keyword = "UNTIL"            },
-    { .token_type = PS_TOKEN_USES          , .keyword = "USES"             },
-    { .token_type = PS_TOKEN_VAR           , .keyword = "VAR"              },
-    { .token_type = PS_TOKEN_WHILE         , .keyword = "WHILE"            },
-    { .token_type = PS_TOKEN_WITH          , .keyword = "WITH"             },
-    // { .token_type = PS_TOKEN_WRITE         , .keyword = "WRITE"            },
-    // { .token_type = PS_TOKEN_WRITELN       , .keyword = "WRITELN"          },
-    { .token_type = PS_TOKEN_XOR           , .keyword = "XOR"              },
+    { .keyword = "AND"              , .token_type = PS_TOKEN_AND           },
+    { .keyword = "ARRAY"            , .token_type = PS_TOKEN_ARRAY         },
+    { .keyword = "AS"               , .token_type = PS_TOKEN_AS            },
+    { .keyword = "BEGIN"            , .token_type = PS_TOKEN_BEGIN         },
+    { .keyword = "BOOLEAN"          , .token_type = PS_TOKEN_BOOLEAN       },
+    { .keyword = "CASE"             , .token_type = PS_TOKEN_CASE          },
+    { .keyword = "CHAR"             , .token_type = PS_TOKEN_CHAR          },
+    { .keyword = "CONST"            , .token_type = PS_TOKEN_CONST         },
+    { .keyword = "DIV"              , .token_type = PS_TOKEN_DIV           },
+    { .keyword = "DO"               , .token_type = PS_TOKEN_DO            },
+    { .keyword = "DOWNTO"           , .token_type = PS_TOKEN_DOWNTO        },
+    { .keyword = "ELSE"             , .token_type = PS_TOKEN_ELSE          },
+    { .keyword = "END"              , .token_type = PS_TOKEN_END           },
+    { .keyword = "FALSE"            , .token_type = PS_TOKEN_FALSE         },
+    { .keyword = "FILE"             , .token_type = PS_TOKEN_FILE          },
+    { .keyword = "FOR"              , .token_type = PS_TOKEN_FOR           },
+    { .keyword = "FUNCTION"         , .token_type = PS_TOKEN_FUNCTION      },
+    { .keyword = "GOTO"             , .token_type = PS_TOKEN_GOTO          },
+    { .keyword = "IF"               , .token_type = PS_TOKEN_IF            },
+    { .keyword = "IMPLEMENTATION"   , .token_type = PS_TOKEN_IMPLEMENTATION},
+    { .keyword = "IN"               , .token_type = PS_TOKEN_IN            },
+    { .keyword = "INTEGER"          , .token_type = PS_TOKEN_INTEGER       },
+    { .keyword = "INTERFACE"        , .token_type = PS_TOKEN_INTERFACE     },
+    { .keyword = "IS"               , .token_type = PS_TOKEN_IS            },
+    { .keyword = "LABEL"            , .token_type = PS_TOKEN_LABEL         },
+    { .keyword = "MOD"              , .token_type = PS_TOKEN_MOD           },
+    { .keyword = "NIL"              , .token_type = PS_TOKEN_NIL           },
+    { .keyword = "NOT"              , .token_type = PS_TOKEN_NOT           },
+    { .keyword = "OF"               , .token_type = PS_TOKEN_OF            },
+    { .keyword = "OR"               , .token_type = PS_TOKEN_OR            },
+    { .keyword = "OTHERWISE"        , .token_type = PS_TOKEN_OTHERWISE     },
+    { .keyword = "PROCEDURE"        , .token_type = PS_TOKEN_PROCEDURE     },
+    { .keyword = "PROGRAM"          , .token_type = PS_TOKEN_PROGRAM       },
+    { .keyword = "REAL"             , .token_type = PS_TOKEN_REAL          },
+    { .keyword = "RECORD"           , .token_type = PS_TOKEN_RECORD        },
+    { .keyword = "REPEAT"           , .token_type = PS_TOKEN_REPEAT        },
+    { .keyword = "SET"              , .token_type = PS_TOKEN_SET           },
+    { .keyword = "SHL"              , .token_type = PS_TOKEN_SHL           },
+    { .keyword = "SHR"              , .token_type = PS_TOKEN_SHR           },
+    { .keyword = "STRING"           , .token_type = PS_TOKEN_STRING        },
+    { .keyword = "THEN"             , .token_type = PS_TOKEN_THEN          },
+    { .keyword = "TO"               , .token_type = PS_TOKEN_TO            },
+    { .keyword = "TRUE"             , .token_type = PS_TOKEN_TRUE          },
+    { .keyword = "TYPE"             , .token_type = PS_TOKEN_TYPE          },
+    { .keyword = "UNIT"             , .token_type = PS_TOKEN_UNIT          },
+    { .keyword = "UNSIGNED"         , .token_type = PS_TOKEN_UNSIGNED      },
+    { .keyword = "UNTIL"            , .token_type = PS_TOKEN_UNTIL         },
+    { .keyword = "USES"             , .token_type = PS_TOKEN_USES          },
+    { .keyword = "VAR"              , .token_type = PS_TOKEN_VAR           },
+    { .keyword = "WHILE"            , .token_type = PS_TOKEN_WHILE         },
+    { .keyword = "WITH"             , .token_type = PS_TOKEN_WITH          },
+    { .keyword = "XOR"              , .token_type = PS_TOKEN_XOR           },
     // clang-format on
 };
 
-ps_token_type ps_token_is_keyword(char *identifier)
+ps_token_type ps_token_is_keyword(ps_identifier *identifier)
 {
     // NB: identifier should already be normalized to uppercase
-    // TODO dichotomic search instead of sequential one
-    for (int i = 0; i < sizeof(ps_keywords) / sizeof(struct s_ps_keyword); i += 1)
+    int left = 0;
+    int right = sizeof(ps_keywords) / sizeof(struct s_ps_keyword) - 1;
+    int mid, cmp;
+    while (left <= right)
     {
-        // printf("ps_token_is_keyword: test=%s, keyword=%s\n", identifier, ps_keywords[i].keyword);
-        if (strcmp(identifier, ps_keywords[i].keyword) == 0)
-        {
-            return ps_keywords[i].token_type;
-        }
+        mid = left + (right - left) / 2;
+        cmp = strcmp(identifier, ps_keywords[mid].keyword);
+        if (cmp == 0)
+            return ps_keywords[mid].token_type;
+        else if (cmp < 0)
+            right = mid - 1;
+        else
+            left = mid + 1;
     }
     return PS_TOKEN_IDENTIFIER;
 }
