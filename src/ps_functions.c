@@ -68,6 +68,7 @@ bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_valu
 /* BASE                                                                       */
 /******************************************************************************/
 
+/** @brief Compute bitwise not for integer / unsigned, logical not for boolean, neg for integer / real */
 bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type)
 {
     result->type = value->type;
@@ -226,7 +227,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
 
 bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
-    bool (*function)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    ps_function_1arg function;
     if (symbol == &ps_system_function_odd)
         function = ps_function_odd;
     else if (symbol == &ps_system_function_even)
@@ -241,8 +242,6 @@ bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *
         function = ps_function_succ;
     else if (symbol == &ps_system_function_abs)
         function = ps_function_abs;
-    else if (symbol == &ps_system_procedure_write)
-        function = ps_function_write;
     else
     {
         interpreter->error = PS_UNKNOWN_FUNCTION;
@@ -260,6 +259,7 @@ bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *
 /* ORDINAL                                                                    */
 /******************************************************************************/
 
+/** @brief ODD - true if integer/unsigned value is odd, false if even */
 bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = ps_system_boolean.value->type;
@@ -278,6 +278,7 @@ bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
+/** @brief EVEN - true if integer/unsigned value is even, false if odd */
 bool ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     if (!ps_function_odd(interpreter, value, result))
@@ -286,6 +287,7 @@ bool ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *re
     return true;
 }
 
+/** @brief ORD - Get ordinal value of boolean / char */
 bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -317,6 +319,7 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
+/** @brief CHR - Get char value of unsigned / integer or subrange value */
 bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = ps_system_char.value->type;
@@ -345,6 +348,7 @@ bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
+/** @brief PRED - Get previous value (predecessor) of scalar value */
 bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = value->type;
@@ -398,6 +402,7 @@ bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *re
     return true;
 }
 
+/** @brief SUCC - Get next value (successor) of ordinal value */
 bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = value->type;
@@ -454,27 +459,7 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
 /* "MATH"                                                                     */
 /******************************************************************************/
 
-bool ps_function_neg(ps_interpreter *interpreter, ps_value *value, ps_value *result)
-{
-    result->type = value->type;
-    switch (value->type->base)
-    {
-    // case PS_TYPE_UNSIGNED:
-    //     interpreter->error = PS_RUNTIME_ERROR_XXX;
-    //     break;
-    case PS_TYPE_INTEGER:
-        result->data.i = -value->data.i;
-        break;
-    case PS_TYPE_REAL:
-        result->data.r = -value->data.r;
-        break;
-    default:
-        interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
-        return false;
-    }
-    return true;
-}
-
+/** @brief ABS - Get absolute value of integer / unsigned / real */
 bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = value->type;
@@ -497,6 +482,7 @@ bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
+/** @brief TRUNC - Truncate real as integer */
 bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = ps_system_integer.value->type;
@@ -517,6 +503,7 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
     return true;
 }
 
+/** @brief ROUND - Round real as integer */
 bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = ps_system_integer.value->type;

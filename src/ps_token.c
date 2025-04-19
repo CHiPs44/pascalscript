@@ -72,6 +72,7 @@ void ps_token_dump(ps_token *token)
     case PS_TOKEN_MINUS:             // -
     case PS_TOKEN_NOT_EQUAL:         // <>
     case PS_TOKEN_PLUS:              // +
+    case PS_TOKEN_POWER:             // **
     case PS_TOKEN_RIGHT_BRACKET:     // ]
     case PS_TOKEN_RIGHT_PARENTHESIS: // )
     case PS_TOKEN_SEMI_COLON:        // ;

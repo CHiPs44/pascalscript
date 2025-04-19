@@ -491,7 +491,8 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
             {
                 sprintf(lexer->current_token.value.identifier, ":=");
                 lexer->current_token.type = PS_TOKEN_ASSIGN;
-                ps_lexer_read_next_char(lexer);
+                if (!ps_lexer_read_next_char(lexer))
+                    return false;
             }
             else
                 lexer->current_token.type = PS_TOKEN_COLON;
@@ -519,11 +520,15 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
             {
                 sprintf(lexer->current_token.value.identifier, "..");
                 lexer->current_token.type = PS_TOKEN_RANGE;
-                ps_lexer_read_next_char(lexer);
+                if (!ps_lexer_read_next_char(lexer))
+                    return false;
             }
             else
                 lexer->current_token.type = PS_TOKEN_DOT;
-            ps_lexer_read_next_char(lexer);
+            if (!ps_lexer_read_next_char(lexer))
+                return false;
+            if (!ps_lexer_read_next_char(lexer))
+                return false;
             break;
         case '(':
             lexer->current_token.type = PS_TOKEN_LEFT_PARENTHESIS;
@@ -565,7 +570,15 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 return false;
             break;
         case '*':
-            lexer->current_token.type = PS_TOKEN_STAR;
+            if (next_char == '*')
+            {
+                sprintf(lexer->current_token.value.identifier, "**");
+                lexer->current_token.type = PS_TOKEN_POWER;
+                if (!ps_lexer_read_next_char(lexer))
+                    return false;
+            }
+            else
+                lexer->current_token.type = PS_TOKEN_STAR;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
             break;

@@ -51,8 +51,8 @@ constant_declaration    =   identifier = expression ;
 
 type_declaration        =   identifier '=' type ;
 type                    =   simple_type | string_type 
-                        |   structured_type | pointer_type | 
-                            procedural_type | generic_type | specialized_type | type_alias ;
+                        |   structured_type | pointer_type
+                        |   procedural_type | generic_type | specialized_type | type_alias ;
 simple_type             =   ordinal_type | real_type | boolean_type ;
 real_type               =   real_type_identifier ;
 real_type_identifier    =   'REAL' | 'SINGLE' | 'DOUBLE' | 'EXTENDED' | 'COMP' | 'CURRENCY' ; 

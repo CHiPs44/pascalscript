@@ -152,6 +152,7 @@ extern "C"
         PS_TOKEN_MINUS, // -   substraction / negation
         PS_TOKEN_STAR,  // *   multiplication
         PS_TOKEN_SLASH, // /   division (real)
+        PS_TOKEN_POWER, // **   exponentiation
         // Comparison operators
         PS_TOKEN_EQUAL,            // =
         PS_TOKEN_NOT_EQUAL,        // <>

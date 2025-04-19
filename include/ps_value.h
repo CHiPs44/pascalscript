@@ -38,7 +38,7 @@ extern "C"
         ps_string          *s; //  2   4   8   "s" is for "_s_tring"
         */
         ps_type_definition *t; //  2   4   8   "t" is for "_t_ype"
-        ps_signature       *z; //  2   4   8   "z" is for "_z_ignature" ;-)
+        // ps_signature       *z; //  2   4   8   "z" is for "_z_ignature" ;-)
         void               *v; //  2   4   8   "v" is for "_v_oid"
         // clang-format on
     } __attribute__((__packed__)) ps_value_data;
