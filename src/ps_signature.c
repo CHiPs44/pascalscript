@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "ps_interpreter.h"
+#include "ps_functions.h"
 #include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_value.h"
@@ -17,7 +18,7 @@ ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type)
     if (signature == NULL)
         return NULL;
     if (size == 0)
-        size == PS_SIGNATURE_PARAMETER_COUNT;
+        size = PS_SIGNATURE_PARAMETER_COUNT;
     signature->parameters = calloc(size, sizeof(ps_parameter));
     if (signature->parameters == NULL)
     {
@@ -85,11 +86,11 @@ bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_
         if (formal->parameters[i].byref)
         {
             // 2 variables point to the same value
-            variable->value = actual->parameters[i].value;
+            variable->value = actual->parameters[i].value->value;
         }
         else
         {
-            if (!ps_function_copy_value(interpreter, actual->parameters[i].value, variable->value))
+            if (!ps_function_copy_value(interpreter, actual->parameters[i].value->value, variable->value))
             {
                 ps_symbol_free(variable);
                 return false;

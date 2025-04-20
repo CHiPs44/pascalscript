@@ -26,7 +26,7 @@ extern "C"
     {
         ps_parser *parser;
         ps_error error;
-        ps_symbol *scopes[PS_INTERPRETER_SCOPE_COUNT];
+        ps_symbol scopes[PS_INTERPRETER_SCOPE_COUNT];
         uint8_t unit_scope;
         uint8_t local_scope;
         // flags

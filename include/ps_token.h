@@ -116,7 +116,6 @@ extern "C"
         PS_TOKEN_FOR,
         PS_TOKEN_TO,
         PS_TOKEN_DOWNTO,
-        PS_TOKEN_IN,
         PS_TOKEN_CASE,
         PS_TOKEN_OTHERWISE,
         PS_TOKEN_GOTO,
@@ -187,7 +186,7 @@ extern "C"
 
     void ps_token_dump(ps_token *token);
 
-    ps_token_type ps_token_is_keyword(ps_identifier *identifier);
+    ps_token_type ps_token_is_keyword(char *identifier);
 
 #ifdef __cplusplus
 }

@@ -159,7 +159,7 @@ struct s_ps_keyword
     // clang-format on
 };
 
-ps_token_type ps_token_is_keyword(ps_identifier *identifier)
+ps_token_type ps_token_is_keyword(char *identifier)
 {
     // NB: identifier should already be normalized to uppercase
     int left = 0;

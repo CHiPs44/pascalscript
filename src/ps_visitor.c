@@ -49,6 +49,8 @@
                                         }
 // clang-format on
 
+bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result);
+
 bool ps_visit_function_call(ps_interpreter *interpreter, bool exec, ps_symbol *symbol, ps_value *result)
 {
     USE_LEXER;
@@ -71,15 +73,14 @@ bool ps_visit_function_call(ps_interpreter *interpreter, bool exec, ps_symbol *s
     }
     if (exec)
     {
-        if (!ps_function_exec(interpreter, symbol, &value, result))
-            TRACE_ERROR("");
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+        // if (!ps_function_exec(interpreter, symbol, &value, result))
+        //     TRACE_ERROR("");
     }
 
     TRACE_END("OK");
     return true;
 }
-
-bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result);
 
 /**
  * Visit
@@ -589,17 +590,14 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
 /**
  * Visit IDENTIFIER := EXPRESSION
  */
-bool ps_visit_assignment(ps_interpreter *interpreter, bool exec)
+bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *identifier)
 {
     USE_LEXER;
     SET_VISITOR("ASSIGNMENT");
     TRACE_BEGIN("");
-    ps_identifier identifier;
     ps_symbol *variable;
-    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value result = {.type = NULL, .data.i = 0};
 
-    COPY_IDENTIFIER(identifier);
-    READ_NEXT_TOKEN;
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
     if (!ps_visit_expression(interpreter, exec, &result))
@@ -607,7 +605,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec)
 
     if (exec)
     {
-        variable = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+        variable = ps_symbol_table_get(interpreter->parser->symbols, identifier);
         if (variable == NULL)
         {
             interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
@@ -646,10 +644,10 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool e
     // bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
     bool loop = true;
 
-    READ_NEXT_TOKEN;
-    // "Write[Ln];" or "Write[Ln] Else"?
+    // "Write[Ln];" or "Write[Ln] Else" or "Write[Ln] End"?
     if (lexer->current_token.type == PS_TOKEN_SEMI_COLON ||
-        lexer->current_token.type == PS_TOKEN_ELSE)
+        lexer->current_token.type == PS_TOKEN_ELSE ||
+        lexer->current_token.type == PS_TOKEN_END)
     {
         if (exec && newline)
             fprintf(stdout, "\n");
@@ -709,14 +707,14 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_VARIABLE:
-        if (!ps_visit_assignment(interpreter, exec))
+        if (!ps_visit_assignment(interpreter, exec, &identifier))
             TRACE_ERROR("ASSIGN!");
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
         if (symbol == &ps_system_procedure_write ||
             symbol == &ps_system_procedure_writeln)
         {
-            if (!ps_visit_write_or_writeln(interpreter, symbol == &ps_system_procedure_writeln, exec))
+            if (!ps_visit_write_or_writeln(interpreter, exec, symbol == &ps_system_procedure_writeln))
                 TRACE_ERROR("WRITE!");
         }
         else

@@ -23,17 +23,17 @@ extern "C"
     extern ps_symbol ps_system_unsigned;
 
     /* System procedures & functions */
-    ps_symbol ps_system_procedure_read;
-    ps_symbol ps_system_procedure_readln;
-    ps_symbol ps_system_procedure_write;
-    ps_symbol ps_system_procedure_writeln;
-    ps_symbol ps_system_function_odd;
-    ps_symbol ps_system_function_even;
-    ps_symbol ps_system_function_abs;
-    ps_symbol ps_system_function_chr;
-    ps_symbol ps_system_function_ord;
-    ps_symbol ps_system_function_succ;
-    ps_symbol ps_system_function_pred;
+    // extern ps_symbol ps_system_procedure_read;
+    // extern ps_symbol ps_system_procedure_readln;
+    extern ps_symbol ps_system_procedure_write;
+    extern ps_symbol ps_system_procedure_writeln;
+    extern ps_symbol ps_system_function_odd;
+    extern ps_symbol ps_system_function_even;
+    extern ps_symbol ps_system_function_abs;
+    extern ps_symbol ps_system_function_chr;
+    extern ps_symbol ps_system_function_ord;
+    extern ps_symbol ps_system_function_succ;
+    extern ps_symbol ps_system_function_pred;
 
     /* System constants */
     extern ps_symbol ps_system_version_major;

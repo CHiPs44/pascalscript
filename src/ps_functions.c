@@ -33,6 +33,8 @@ bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_valu
 {
     // ps_value_debug(stderr, "FROM\t", from);
     // ps_value_debug(stderr, "TO\t", to);
+    if (to->type == NULL)
+        to->type = from->type;
     if (from->type == to->type)
     {
         to->data = from->data;
@@ -244,12 +246,12 @@ bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *
         function = ps_function_abs;
     else
     {
-        interpreter->error = PS_UNKNOWN_FUNCTION;
+        interpreter->error = PS_ERROR_NOT_IMPLEMENTED; // PS_UNKNOWN_FUNCTION;
         return false;
     }
     if (!function(interpreter, value, result))
     {
-        interpreter->error = PS_RUNTIME_ERROR_FUNCTION_FAILED;
+        interpreter->error = PS_ERROR_NOT_IMPLEMENTED; // PS_RUNTIME_ERROR_FUNCTION_FAILED;
         return false;
     }
     return true;
@@ -459,7 +461,7 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
 /* "MATH"                                                                     */
 /******************************************************************************/
 
-/** @brief ABS - Get absolute value of integer / unsigned / real */
+/** @brief ABS - Get absolute vaPS_ERROR_NOT_IMPLEMENTEDlue of integer / unsigned / real */
 bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = value->type;

@@ -35,8 +35,10 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
         ps_interpreter_done(interpreter);
         return NULL;
     }
-    strncpy(interpreter->scopes[0], "SYSTEM", PS_IDENTIFIER_LEN); // PS_SYMBOL_SCOPE_SYSTEM
-    strncpy(interpreter->scopes[1], "GLOBAL", PS_IDENTIFIER_LEN); // PS_SYMBOL_SCOPE_GLOBAL
+    strncpy(interpreter->scopes[PS_SYMBOL_SCOPE_SYSTEM].name, "SYSTEM", PS_IDENTIFIER_LEN);
+    // interpreter->scopes[PS_SYMBOL_SCOPE_SYSTEM]->name = "SYSTEM";
+    strncpy(interpreter->scopes[PS_SYMBOL_SCOPE_GLOBAL].name, "GLOBAL", PS_IDENTIFIER_LEN);
+    // interpreter->scopes[PS_SYMBOL_SCOPE_GLOBAL]->name = "GLOBAL";
     interpreter->unit_scope = PS_SYMBOL_SCOPE_UNIT;
     interpreter->local_scope = PS_SYMBOL_SCOPE_LOCAL;
     interpreter->debug = true;
