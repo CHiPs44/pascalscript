@@ -4,7 +4,7 @@ Const
 Var
     I : Integer;
 Begin
-    I := -Loops;
+    I := 0;//-Loops;
     Repeat
         Write(I, ' ');
         I := I + 1;

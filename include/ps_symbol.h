@@ -76,7 +76,7 @@ extern "C"
     char *ps_symbol_dump_value(ps_symbol *symbol);
 
     /** @brief Print symbol info to stderr */
-    void ps_symbol_debug(ps_symbol *symbol);
+    void ps_symbol_debug(FILE *output, char *message, ps_symbol *symbol);
 
     /** @brief Normalize symbol name (makes it UPPERCASE) in place (no string copy) */
     void ps_symbol_normalize_name(ps_symbol *symbol);

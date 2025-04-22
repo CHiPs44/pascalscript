@@ -84,11 +84,11 @@ bool ps_visit_function_call(ps_interpreter *interpreter, bool exec, ps_symbol *s
 
 /**
  * Visit
- *      factor  =   '(' , expression , ')'
- *              |   identifier
- *              |   char_value | integer_value | unsigned_value | real_value | boolean_value
- *              |   [ '+' | '-' | 'NOT' ] , factor
- *              ;
+ *  factor  =   '(' , expression , ')'
+ *          |   identifier
+ *          |   char_value | integer_value | unsigned_value | real_value | boolean_value
+ *          |   [ '+' | '-' | 'NOT' ] , factor
+ *          ;
  */
 bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
 {
@@ -122,6 +122,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
             case PS_SYMBOL_KIND_AUTO:
             case PS_SYMBOL_KIND_CONSTANT:
             case PS_SYMBOL_KIND_VARIABLE:
+                ps_symbol_debug(stderr, "SYMBOL\t", symbol);
+                ps_value_debug(stderr, "RESULT\t", result);
                 if (!ps_function_copy_value(interpreter, symbol->value, result))
                     TRACE_ERROR("COPY");
                 break;
@@ -219,8 +221,8 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
 
-    ps_value left = {.type = NULL, .data.i = 0},
-             right = {.type = NULL, .data.i = 0};
+    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
+             right = {.type = ps_system_none.value->type, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -247,7 +249,7 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
             TRACE_ERROR("");
         if (exec)
         {
-            left.type = result->type;
+            left.type = ps_system_none.value->type;
             left.data = result->data;
         }
     } while (true);
@@ -267,8 +269,8 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = NULL, .data.i = 0},
-             right = {.type = NULL, .data.i = 0};
+    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
+             right = {.type = ps_system_none.value->type, .data.v = NULL};
     ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -295,7 +297,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
         {
             if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
                 TRACE_ERROR("");
-            left.type = result->type;
+            left.type = ps_system_none.value->type;
             left.data = result->data;
         }
     } while (true);
@@ -318,8 +320,8 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = NULL, .data.i = 0},
-             right = {.type = NULL, .data.i = 0};
+    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
+             right = {.type = ps_system_none.value->type, .data.v = NULL};
     ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -596,12 +598,10 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
     SET_VISITOR("ASSIGNMENT");
     TRACE_BEGIN("");
     ps_symbol *variable;
-    ps_value result = {.type = NULL, .data.i = 0};
+    ps_value result = {.type = NULL, .data.v = NULL};
 
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
-    if (!ps_visit_expression(interpreter, exec, &result))
-        TRACE_ERROR("");
 
     if (exec)
     {
@@ -616,11 +616,19 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
             interpreter->error = PS_RUNTIME_ERROR_EXPECTED_VARIABLE;
             TRACE_ERROR("");
         }
+        result.type = variable->value->type;
+        if (!ps_visit_expression(interpreter, exec, &result))
+            TRACE_ERROR("");
         if (interpreter->debug)
             ps_value_debug(stderr, "ASSIGN => ", &result);
         if (!ps_function_copy_value(interpreter, &result, variable->value))
             TRACE_ERROR("");
         variable->value->data = result.data;
+    }
+    else
+    {
+        if (!ps_visit_expression(interpreter, false, &result))
+            TRACE_ERROR("");
     }
 
     TRACE_END("OK");
@@ -640,7 +648,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool e
     USE_LEXER;
     SET_VISITOR("WRITE_OR_WRITELN");
     TRACE_BEGIN("");
-    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value result = {.type = ps_system_integer.value->data.t, .data.v = NULL};
     // bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
     bool loop = true;
 
@@ -799,6 +807,7 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, bool exec)
  */
 bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
 {
+    interpreter->trace = interpreter->debug = true;
     USE_LEXER;
     SET_VISITOR("REPEAT_UNTIL");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
@@ -829,7 +838,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
         // Restore "cursor" position
         lexer->buffer->current_line = line;
         lexer->buffer->current_column = column;
-        // Set lexer to a known state
+        // Reset lexer to a known state
         lexer->buffer->current_char = '\0';
         lexer->buffer->next_char = '\0';
         if (!ps_buffer_read_next_char(lexer->buffer))
@@ -894,9 +903,9 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
 {
     USE_LEXER;
     SET_VISITOR("FOR_DO");
-    ps_value start = {.type = ps_system_integer.value->data.t, .data.i = 0};
-    ps_value finish = {.type = ps_system_integer.value->data.t, .data.i = 0};
-    ps_value step = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value start = {.type = ps_system_integer.value->data.t, .data.v = NULL};
+    ps_value finish = {.type = ps_system_integer.value->data.t, .data.v = NULL};
+    ps_value step = {.type = ps_system_integer.value->data.t, .data.v = NULL};
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
     ps_identifier identifier;
     ps_symbol *variable;

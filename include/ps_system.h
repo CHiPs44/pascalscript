@@ -16,6 +16,7 @@ extern "C"
 #endif
 
     /* System types (with type==base) */
+    extern ps_symbol ps_system_none;
     extern ps_symbol ps_system_boolean;
     extern ps_symbol ps_system_char;
     extern ps_symbol ps_system_integer;
@@ -48,4 +49,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_SYSTEM_H */
+#endif
