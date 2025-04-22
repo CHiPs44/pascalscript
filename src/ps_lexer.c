@@ -527,8 +527,6 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 lexer->current_token.type = PS_TOKEN_DOT;
             if (!ps_lexer_read_next_char(lexer))
                 return false;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
             break;
         case '(':
             lexer->current_token.type = PS_TOKEN_LEFT_PARENTHESIS;
@@ -626,7 +624,9 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 return false;
             break;
         default:
-            printf("DEFAULT! %c %d at line %d column %d\n", current_char, current_char, lexer->buffer->current_line, lexer->buffer->current_column);
+            printf("DEFAULT! %c %d at line %d column %d\n",
+                   current_char, current_char,
+                   lexer->buffer->current_line, lexer->buffer->current_column);
             lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
             return false;
         }
