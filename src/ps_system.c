@@ -58,9 +58,9 @@ ps_symbol ps_system_procedure_writeln   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kin
 // ps_symbol ps_system_procedure_randomize = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "RANDOMIZE", .value = NULL};
 
 /* ordinal types functions */
-ps_value ps_value_function_odd        = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd}}; 
+ps_value ps_value_function_odd        = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd }};
 ps_value ps_value_function_even       = {.type = &ps_type_def_function, .data = {.v = &ps_function_even}};
-ps_value ps_value_function_chr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr}};
+ps_value ps_value_function_chr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr }};
 ps_value ps_value_function_ord        = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
 ps_value ps_value_function_succ       = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
 ps_value ps_value_function_pred       = {.type = &ps_type_def_function, .data = {.v = &ps_function_pred}};

@@ -646,7 +646,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
  *                                            expression [ ':' width [ ':' precision ] ]
  *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]* ) ;
  */
-bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool exec)
+bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec, bool newline)
 {
     USE_LEXER;
     SET_VISITOR("WRITE_OR_WRITELN");

@@ -4,7 +4,8 @@ Const
 Var
     I : Integer;
 Begin
-    I := 0;//-Loops;
+    I := -Loops;
+    Write('=', '>', ' ');
     Repeat
         Write(I, ' ');
         I := I + 1;
