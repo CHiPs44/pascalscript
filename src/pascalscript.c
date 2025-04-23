@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "ps_buffer.h"
 #include "ps_config.h"
@@ -80,17 +81,45 @@ int main(int argc, char *argv[])
 {
   bool trace = false; // argc > 1 && strcmp(argv[1], "-t") == 0;
   bool debug = trace;
-  bool dump_symbols = true;
+  bool dump_symbols = false;
   bool dump_buffer = false;
   char *current_path = NULL;
   // char *program_file = "./examples/01-first.pas";
   char *program_file = NULL;
   char source_file[256] = {0};
 
+  int opt;
+  int arg = 0;
+  while ((opt = getopt(argc, argv, "tdsb")) != -1)
+  {
+    switch (opt)
+    {
+    case 't':
+      trace = true;
+      arg++;
+      break;
+    case 'd':
+      debug = true;
+      arg++;
+      break;
+    case 's':
+      dump_symbols = true;
+      arg++;
+      break;
+    case 'b':
+      dump_buffer = true;
+      arg++;
+      break;
+    default:
+      fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [program_file]\n", argv[0]);
+      exit(EXIT_FAILURE);
+    }
+  }
+
   current_path = getcwd(NULL, 0);
   size_t len = strlen(current_path);
   fprintf(stderr, "Current working directory: %s\n", current_path);
-  if (argc > 1)
+  if (arg + 1 < argc)
   {
     program_file = argv[argc - 1];
   }
