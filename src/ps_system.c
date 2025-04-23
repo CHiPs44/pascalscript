@@ -97,7 +97,11 @@ ps_symbol ps_system_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind =
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
 PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
 PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, PS_INTEGER_MAX);
+PS_SYSTEM_CONSTANT(integer , minint , "MININT" , i, PS_INTEGER_MIN);
 PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, PS_UNSIGNED_MAX);
+PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, PS_REAL_MAX);
+PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, PS_REAL_MIN);
+PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, PS_REAL_EPSILON);
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793); /*115997963468544185161590576171875*/
 
 // Keeped for reference
@@ -159,7 +163,11 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_boolean_false);
     ps_symbol_table_add(symbols, &ps_system_boolean_true);
     ps_symbol_table_add(symbols, &ps_system_integer_maxint);
+    ps_symbol_table_add(symbols, &ps_system_integer_minint);
     ps_symbol_table_add(symbols, &ps_system_unsigned_maxuint);
+    ps_symbol_table_add(symbols, &ps_system_real_maxreal);
+    ps_symbol_table_add(symbols, &ps_system_real_minreal);
+    ps_symbol_table_add(symbols, &ps_system_real_epsreal);
     ps_symbol_table_add(symbols, &ps_system_real_pi);
 
     /**************************************************************************/

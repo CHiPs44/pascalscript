@@ -95,18 +95,21 @@ extern "C"
 #define PS_REAL float
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
+#define PS_REAL_EPSILON FLT_EPSILON
 #endif
 
 #if PS_BITNESS == 32
 #define PS_REAL float
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
+#define PS_REAL_EPSILON FLT_EPSILON
 #endif
 
 #if PS_BITNESS == 64
 #define PS_REAL double
 #define PS_REAL_MIN DBL_MIN
 #define PS_REAL_MAX DBL_MAX
+#define PS_REAL_EPSILON DBL_EPSILON
 #endif
 
 #endif
@@ -117,6 +120,10 @@ extern "C"
 
 #ifndef PS_REAL_MAX
 #error PS_REAL_MAX must be defined.
+#endif
+
+#ifndef PS_REAL_EPSILON
+#error PS_REAL_EPSILON must be defined.
 #endif
 
 #ifndef PS_CHAR

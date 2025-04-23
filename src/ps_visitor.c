@@ -95,7 +95,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
     USE_LEXER;
     SET_VISITOR("FACTOR");
     TRACE_BEGIN("");
-    ps_value factor = {.type = ps_system_none.value->data.t, .data = {.v = NULL}};
+    ps_value factor = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_identifier identifier;
     ps_symbol *symbol;
     ps_token_type unary_operator;
@@ -252,7 +252,7 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
             TRACE_ERROR("");
         if (exec)
         {
-            left.type = ps_system_none.value->data.t;
+            left.type = result->type;
             left.data = result->data;
         }
     } while (true);
@@ -601,7 +601,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
     SET_VISITOR("ASSIGNMENT");
     TRACE_BEGIN("");
     ps_symbol *variable;
-    ps_value result = {.type = ps_system_none.value->data.t, .data = {.v = NULL}};
+    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
 
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
@@ -929,7 +929,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
     // :=
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
-    // START
+    // START VALUE
     if (!ps_visit_expression(interpreter, exec, &start))
         TRACE_ERROR("");
     // TO | DOWNTO
@@ -940,7 +940,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
     else
         RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
     READ_NEXT_TOKEN;
-    // FINISH
+    // FINISH VALUE
     if (!ps_visit_expression(interpreter, exec, &finish))
         TRACE_ERROR("");
     // DO
@@ -984,7 +984,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
             lexer->buffer->current_char = '\0';
             lexer->buffer->next_char = '\0';
             if (!ps_buffer_read_next_char(lexer->buffer))
-                RETURN_ERROR(PS_RUNTIME_ERROR_UNEXPECTED_TYPE); // TODO better error code
+                RETURN_ERROR(PS_LEXER_ERROR_UNEXPECTED_EOF); // TODO better error code?
             READ_NEXT_TOKEN;
             // VARIABLE := VARIABLE + STEP
             if (!ps_function_binary_op(interpreter, variable->value, &step, variable->value, PS_TOKEN_PLUS))
