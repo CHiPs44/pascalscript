@@ -95,13 +95,16 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
         default:                interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE; return false;
         }
         /* clang-format on */
+        break;
     case PS_TYPE_REAL:
         /* clang-format off */
         switch (token_type)
         {
-        case PS_TOKEN_MINUS:    result->data.r = -value->data.u; break;
+        case PS_TOKEN_MINUS:    result->data.r = -value->data.r; break;
         default:                interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE; return false;
         }
+        /* clang-format on */
+        break;
     case PS_TYPE_BOOLEAN:
         /* clang-format off */
         switch (token_type)
@@ -109,12 +112,12 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
         case PS_TOKEN_NOT:      result->data.b = !value->data.b; break;
         default:                interpreter->error = PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE; return false;
         }
+        /* clang-format on */
         break;
     default:
         interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
         return false;
     }
-    /* clang-format on */
     return true;
 }
 

@@ -95,7 +95,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
     USE_LEXER;
     SET_VISITOR("FACTOR");
     TRACE_BEGIN("");
-    ps_value factor;
+    ps_value factor = {.type = ps_system_none.value->data.t, .data = {.v = NULL}};
     ps_identifier identifier;
     ps_symbol *symbol;
     ps_token_type unary_operator;
@@ -601,7 +601,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
     SET_VISITOR("ASSIGNMENT");
     TRACE_BEGIN("");
     ps_symbol *variable;
-    ps_value result = {.type = NULL, .data.v = NULL};
+    ps_value result = {.type = ps_system_none.value->data.t, .data = {.v = NULL}};
 
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
@@ -626,13 +626,11 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
             ps_value_debug(stderr, "ASSIGN => ", &result);
         if (!ps_function_copy_value(interpreter, &result, variable->value))
             TRACE_ERROR("");
-        variable->value->data = result.data;
+        // variable->value->data = result.data;
     }
     else
-    {
         if (!ps_visit_expression(interpreter, false, &result))
             TRACE_ERROR("");
-    }
 
     TRACE_END("OK");
     return true;

@@ -5,7 +5,6 @@ Var
     I : Integer;
 Begin
     I := -Loops;
-    Write('=', '>', ' ');
     Repeat
         Write(I, ' ');
         I := I + 1;
