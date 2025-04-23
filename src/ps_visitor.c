@@ -122,8 +122,11 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
             case PS_SYMBOL_KIND_AUTO:
             case PS_SYMBOL_KIND_CONSTANT:
             case PS_SYMBOL_KIND_VARIABLE:
-                ps_symbol_debug(stderr, "SYMBOL\t", symbol);
-                ps_value_debug(stderr, "RESULT\t", result);
+                if (interpreter->debug)
+                {
+                    ps_symbol_debug(stderr, "SYMBOL\t", symbol);
+                    ps_value_debug(stderr, "RESULT\t", result);
+                }
                 if (!ps_function_copy_value(interpreter, symbol->value, result))
                     TRACE_ERROR("COPY");
                 break;
@@ -221,8 +224,8 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
     SET_VISITOR("TERM");
     TRACE_BEGIN("");
 
-    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
-             right = {.type = ps_system_none.value->type, .data.v = NULL};
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -249,7 +252,7 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
             TRACE_ERROR("");
         if (exec)
         {
-            left.type = ps_system_none.value->type;
+            left.type = ps_system_none.value->data.t;
             left.data = result->data;
         }
     } while (true);
@@ -269,8 +272,8 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
-             right = {.type = ps_system_none.value->type, .data.v = NULL};
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_token_type additive_operator = PS_TOKEN_NONE;
     if (!ps_visit_term(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -297,7 +300,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
         {
             if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
                 TRACE_ERROR("");
-            left.type = ps_system_none.value->type;
+            left.type = result->type;
             left.data = result->data;
         }
     } while (true);
@@ -320,8 +323,8 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
     USE_LEXER;
     SET_VISITOR("EXPRESSION");
     TRACE_BEGIN("");
-    ps_value left = {.type = ps_system_none.value->type, .data.v = NULL},
-             right = {.type = ps_system_none.value->type, .data.v = NULL};
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_token_type relational_operator = PS_TOKEN_NONE;
     if (!ps_visit_simple_expression(interpreter, exec, &left))
         TRACE_ERROR("");
@@ -648,14 +651,14 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool e
     USE_LEXER;
     SET_VISITOR("WRITE_OR_WRITELN");
     TRACE_BEGIN("");
-    ps_value result = {.type = ps_system_integer.value->data.t, .data.v = NULL};
-    // bool newline = lexer->current_token.type == PS_TOKEN_WRITELN;
+    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
     bool loop = true;
 
-    // "Write[Ln];" or "Write[Ln] Else" or "Write[Ln] End"?
+    // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     if (lexer->current_token.type == PS_TOKEN_SEMI_COLON ||
         lexer->current_token.type == PS_TOKEN_ELSE ||
-        lexer->current_token.type == PS_TOKEN_END)
+        lexer->current_token.type == PS_TOKEN_END ||
+        lexer->current_token.type == PS_TOKEN_UNTIL)
     {
         if (exec && newline)
             fprintf(stdout, "\n");
@@ -676,11 +679,11 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool newline, bool e
     while (loop)
     {
         if (!ps_visit_expression(interpreter, exec, &result))
-            TRACE_ERROR("");
+            TRACE_ERROR("EXPR");
         if (exec)
         {
             if (!ps_function_write(interpreter, stdout, &result))
-                TRACE_ERROR("DISPLAY");
+                TRACE_ERROR("WRITE");
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
@@ -807,7 +810,7 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, bool exec)
  */
 bool ps_visit_repeat_until(ps_interpreter *interpreter, bool exec)
 {
-    interpreter->trace = interpreter->debug = true;
+    // interpreter->trace = interpreter->debug = true;
     USE_LEXER;
     SET_VISITOR("REPEAT_UNTIL");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};

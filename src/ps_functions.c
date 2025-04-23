@@ -33,7 +33,7 @@ bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_valu
 {
     // ps_value_debug(stderr, "FROM\t", from);
     // ps_value_debug(stderr, "TO\t", to);
-    if (to->type == NULL)
+    if (to->type == NULL || to->type->base == PS_TYPE_NONE)
         to->type = from->type;
     if (from->type == to->type)
     {

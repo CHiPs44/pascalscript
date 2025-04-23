@@ -26,7 +26,7 @@ ps_symbol           ps_system_type_def      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, 
 #define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)\
 ps_type_definition  ps_type_def_##__name__    = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__}; \
 ps_value            ps_value_##__name__       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}}; \
-ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "__NAME__", .value = &ps_value_##__name__};
+ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
 
 PS_SYSTEM_TYPE(none     , "_N_O_N_E_", PS_TYPE_NONE      );
 PS_SYSTEM_TYPE(boolean  , "BOOLEAN"  , PS_TYPE_BOOLEAN   );
