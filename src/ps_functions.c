@@ -23,7 +23,7 @@ bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
         return false;
     }
     if (interpreter->debug)
-        fprintf(f, "WRITE\t%s\n", display_value);
+        fprintf(f, "WRITE\t'%s'\n", display_value);
     else
         fprintf(f, "%s", display_value);
     return true;

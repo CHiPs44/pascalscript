@@ -628,9 +628,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
             TRACE_ERROR("");
         // variable->value->data = result.data;
     }
-    else
-        if (!ps_visit_expression(interpreter, false, &result))
-            TRACE_ERROR("");
+    else if (!ps_visit_expression(interpreter, false, &result))
+        TRACE_ERROR("");
 
     TRACE_END("OK");
     return true;
@@ -719,6 +718,8 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
         if (!ps_visit_assignment(interpreter, exec, &identifier))
             TRACE_ERROR("ASSIGN!");
         break;
+    case PS_SYMBOL_KIND_CONSTANT:
+        RETURN_ERROR(PS_RUNTIME_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
         if (symbol == &ps_system_procedure_write ||
             symbol == &ps_system_procedure_writeln)
