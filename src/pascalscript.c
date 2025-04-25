@@ -135,19 +135,21 @@ int main(int argc, char *argv[])
       // program_file = "../examples/01-first.pas";
       // program_file = "../examples/03-if-then-else.pas";
       // program_file = "../examples/04-repeat-until.pas";
-      program_file = "../examples/04-repeat-until-real.pas";
+      // program_file = "../examples/04-repeat-until-real.pas";
       // program_file = "../examples/05-while-do.pas";
       // program_file = "../examples/06-for-do.pas";
+      program_file = "../examples/07-random.pas";
       // program_file = "../examples/41-circle.pas";
     }
     else
     {
-      // program_file = "/examples/01-first.pas";
+      // program_file = "examples/01-first.pas";
       // program_file = "examples/03-if-then-else.pas";
       // program_file = "examples/04-repeat-until.pas";
-      program_file = "examples/04-repeat-until-real.pas";
+      // program_file = "examples/04-repeat-until-real.pas";
       // program_file = "examples/05-while-do.pas";
       // program_file = "examples/06-for-do.pas";
+      program_file = "examples/07-random.pas";
       // program_file = "examples/41-circle.pas";
     }
   }

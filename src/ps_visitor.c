@@ -679,7 +679,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, bool exec, bool newl
             TRACE_ERROR("EXPR");
         if (exec)
         {
-            if (!ps_function_write(interpreter, stdout, &result))
+            if (!ps_function_write_text(interpreter, stdout, &result))
                 TRACE_ERROR("WRITE");
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -721,11 +721,15 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_RUNTIME_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (symbol == &ps_system_procedure_write ||
-            symbol == &ps_system_procedure_writeln)
+        if (symbol == &ps_system_procedure_write || symbol == &ps_system_procedure_writeln)
         {
             if (!ps_visit_write_or_writeln(interpreter, exec, symbol == &ps_system_procedure_writeln))
                 TRACE_ERROR("WRITE!");
+        }
+        else if (symbol == &ps_system_procedure_randomize)
+        {
+            if (!ps_function_randomize(interpreter))
+                TRACE_ERROR("RANDOMIZE!");
         }
         else
         {

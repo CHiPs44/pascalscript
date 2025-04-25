@@ -24,10 +24,11 @@ extern "C"
     extern ps_symbol ps_system_unsigned;
 
     /* System procedures & functions */
-    // extern ps_symbol ps_system_procedure_read;
-    // extern ps_symbol ps_system_procedure_readln;
+    extern ps_symbol ps_system_procedure_read;
+    extern ps_symbol ps_system_procedure_readln;
     extern ps_symbol ps_system_procedure_write;
     extern ps_symbol ps_system_procedure_writeln;
+    extern ps_symbol ps_system_procedure_randomize;
     extern ps_symbol ps_system_function_odd;
     extern ps_symbol ps_system_function_even;
     extern ps_symbol ps_system_function_abs;

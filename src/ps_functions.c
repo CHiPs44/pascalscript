@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 #include "ps_error.h"
 #include "ps_system.h"
@@ -14,7 +15,7 @@
 #include "ps_token.h"
 #include "ps_functions.h"
 
-bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_function_write_text(ps_interpreter *interpreter, FILE *f, ps_value *value)
 {
     char *display_value = ps_value_get_display_value(value);
     if (display_value == NULL)
@@ -26,6 +27,12 @@ bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
         fprintf(f, "WRITE\t'%s'\n", display_value);
     else
         fprintf(f, "%s", display_value);
+    return true;
+}
+
+bool ps_function_randomize(ps_interpreter *interpreter)
+{
+    srand((unsigned int)time(NULL));
     return true;
 }
 
@@ -464,7 +471,39 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
 /* "MATH"                                                                     */
 /******************************************************************************/
 
-/** @brief ABS - Get absolute vaPS_ERROR_NOT_IMPLEMENTEDlue of integer / unsigned / real */
+bool ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    if (value == NULL)
+    {
+        // no argument, return random real between 0.0 and 1.0 excluded
+        result->type = ps_system_real.value->data.t;
+        do
+        {
+            result->data.r = (double)rand() / (double)RAND_MAX;
+        } while (result->data.r >= 1.0);
+    }
+    else
+    {
+        // one argument, return random integer / unsigned
+        switch (value->type->base)
+        {
+        case PS_TYPE_INTEGER:
+            result->type = ps_system_integer.value->type;
+            result->data.i = rand() % value->data.i;
+            break;
+        case PS_TYPE_UNSIGNED:
+            result->type = ps_system_unsigned.value->type;
+            result->data.u = rand() % value->data.u;
+            break;
+        default:
+            interpreter->error = PS_RUNTIME_ERROR_UNEXPECTED_TYPE;
+            return false;
+        }
+    }
+    return true;
+}
+
+/** @brief ABS - Get absolute value of integer / unsigned / real */
 bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     result->type = value->type;
@@ -490,7 +529,6 @@ bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *res
 /** @brief TRUNC - Truncate real as integer */
 bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_integer.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:
@@ -499,6 +537,7 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return false;
         }
+        result->type = ps_system_integer.value->type;
         result->data.i = (ps_integer)trunc(value->data.r);
         break;
     default:
@@ -511,7 +550,6 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
 /** @brief ROUND - Round real as integer */
 bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_integer.value->type;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:
@@ -520,7 +558,43 @@ bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *r
             interpreter->error = PS_RUNTIME_ERROR_OUT_OF_RANGE;
             return false;
         }
+        result->type = ps_system_integer.value->type;
         result->data.i = (ps_integer)round(value->data.r);
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_REAL;
+        return false;
+    }
+    return true;
+}
+
+/** @brief INT - Get integer part of floating point value */
+bool ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    switch (value->type->base)
+    {
+    case PS_TYPE_REAL:
+        double r;
+        result->type = ps_system_real.value->type;
+        modf(value->data.r, &r);
+        result->data.r = r;
+        break;
+    default:
+        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_REAL;
+        return false;
+    }
+    return true;
+}
+
+/** @brief FRAC - Get fractional part of floating point value */
+bool ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    double int_part;
+    switch (value->type->base)
+    {
+    case PS_TYPE_REAL:
+        result->type = ps_system_real.value->type;
+        result->data.r = modf(value->data.r, &int_part);
         break;
     default:
         interpreter->error = PS_RUNTIME_ERROR_EXPECTED_REAL;

@@ -19,9 +19,6 @@ extern "C"
 
     typedef bool (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
-    /**@brief Write instruction */
-    bool ps_function_write(ps_interpreter *interpreter, FILE *f, ps_value *value);
-
     /**
      *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa
      *         sets error to PS_RUNTIME_ERROR_OUT_OF_RANGE or PS_RUNTIME_ERROR_TYPE_MISMATCH
@@ -34,15 +31,21 @@ extern "C"
 
     /* clang-format off */
 
-    bool ps_function_odd    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_even   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_ord    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_chr    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_pred   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_succ   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_abs    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_trunc  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-    bool ps_function_round  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_write_text (ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_function_randomize  (ps_interpreter *interpreter);
+
+    bool ps_function_odd        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_even       (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_ord        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_chr        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_pred       (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_succ       (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_random     (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_abs        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_trunc      (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_round      (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_int        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    bool ps_function_frac       (ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
     /* clang-format on */
 
