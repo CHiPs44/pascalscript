@@ -1,13 +1,13 @@
 Program Example05WhileDo;
 Const
-    Start = -5;
-    Finish = 5;
+    Limit = 5;
 Var
     I : Integer;
 Begin
-    For I := Start To Finish Do
+    For I := -Limit To Limit Do
     Begin
-        Write(I, ' ');
+        Write(I);
+        Write(' ');
     End;
     WriteLn('O', 'K', '!');
 End.

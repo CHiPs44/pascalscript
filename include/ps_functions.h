@@ -34,6 +34,8 @@ extern "C"
     bool ps_function_write_text (ps_interpreter *interpreter, FILE *f, ps_value *value);
     bool ps_function_randomize  (ps_interpreter *interpreter);
 
+    bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result);
+
     bool ps_function_odd        (ps_interpreter *interpreter, ps_value *value, ps_value *result);
     bool ps_function_even       (ps_interpreter *interpreter, ps_value *value, ps_value *result);
     bool ps_function_ord        (ps_interpreter *interpreter, ps_value *value, ps_value *result);

@@ -69,6 +69,18 @@ bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_valu
         to->data.i = from->data.u;
         return true;
     }
+    // Integer => Real?
+    if (from->type->base == PS_TYPE_INTEGER && to->type->base == PS_TYPE_REAL)
+    {
+        to->data.r = (double)from->data.i;
+        return true;
+    }
+    // Unsigned => Real?
+    if (from->type->base == PS_TYPE_UNSIGNED && to->type->base == PS_TYPE_REAL)
+    {
+        to->data.r = (double)from->data.u;
+        return true;
+    }
     interpreter->error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
     return false;
 }
@@ -239,29 +251,14 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
 
 bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
-    ps_function_1arg function;
-    if (symbol == &ps_system_function_odd)
-        function = ps_function_odd;
-    else if (symbol == &ps_system_function_even)
-        function = ps_function_even;
-    else if (symbol == &ps_system_function_ord)
-        function = ps_function_ord;
-    else if (symbol == &ps_system_function_chr)
-        function = ps_function_chr;
-    else if (symbol == &ps_system_function_pred)
-        function = ps_function_pred;
-    else if (symbol == &ps_system_function_succ)
-        function = ps_function_succ;
-    else if (symbol == &ps_system_function_abs)
-        function = ps_function_abs;
-    else
+    ps_function_1arg function = symbol->value->data.v;
+    if (function== NULL)
     {
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED; // PS_UNKNOWN_FUNCTION;
         return false;
     }
     if (!function(interpreter, value, result))
     {
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED; // PS_RUNTIME_ERROR_FUNCTION_FAILED;
         return false;
     }
     return true;
@@ -488,11 +485,11 @@ bool ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *
         switch (value->type->base)
         {
         case PS_TYPE_INTEGER:
-            result->type = ps_system_integer.value->type;
+            result->type = ps_system_integer.value->data.t;
             result->data.i = rand() % value->data.i;
             break;
         case PS_TYPE_UNSIGNED:
-            result->type = ps_system_unsigned.value->type;
+            result->type = ps_system_unsigned.value->data.t;
             result->data.u = rand() % value->data.u;
             break;
         default:

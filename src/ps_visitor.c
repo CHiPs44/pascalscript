@@ -51,31 +51,72 @@
 
 bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result);
 
+/**
+ * Visit
+ *      function_call = identifier [ '(' , expression [ ',' , expression ]* ')' ]
+ * TODO
+ *  - only 1 parameter for now and "system" functions
+ *  - get all parameters
+ *  - check function signature
+ *  - check function return type
+ */
 bool ps_visit_function_call(ps_interpreter *interpreter, bool exec, ps_symbol *symbol, ps_value *result)
 {
     USE_LEXER;
     SET_VISITOR("FUNCTION_CALL");
     TRACE_BEGIN("");
-    ps_value value;
+    ps_value arg = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    bool null_arg = false;
 
-    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    READ_NEXT_TOKEN;
+    if (symbol == &ps_system_function_random)
     {
-        READ_NEXT_TOKEN;
-        if (!ps_visit_expression(interpreter, exec, &value))
-            TRACE_ERROR("");
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
+        // Random function can be called with 2 signatures:
+        //  1. Random or Random() => Real
+        //  2. Random(Integer) => Integer
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_LEFT_PARENTHESIS:
+            // Skip '(' and ')' or get parameter enclosed in parentheses
+            READ_NEXT_TOKEN;
+            if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+            {
+                READ_NEXT_TOKEN;
+                null_arg = true;
+            }
+            else
+            {
+                if (!ps_visit_expression(interpreter, exec, &arg))
+                    TRACE_ERROR("PARAMETER");
+                EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+                READ_NEXT_TOKEN;
+            }
+            break;
+        case PS_TOKEN_SEMI_COLON:
+        case PS_TOKEN_ELSE:
+        case PS_TOKEN_END:
+        case PS_TOKEN_UNTIL:
+            // Statement terminators => OK
+            null_arg = true;
+            break;
+        default:
+            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+        }
     }
     else
     {
-        value.type = NULL;
-        value.data.i = 0;
+        // all other functions have one argument
+        EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+        READ_NEXT_TOKEN;
+        if (!ps_visit_expression(interpreter, exec, &arg))
+            TRACE_ERROR("PARAMETER");
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+        READ_NEXT_TOKEN;
     }
     if (exec)
     {
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-        // if (!ps_function_exec(interpreter, symbol, &value, result))
-        //     TRACE_ERROR("");
+        if (!ps_function_exec(interpreter, symbol, null_arg ? NULL : &arg, result))
+            TRACE_ERROR("FUNCTION!");
     }
 
     TRACE_END("OK");
@@ -111,17 +152,17 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
         break;
     case PS_TOKEN_IDENTIFIER:
         // variable, constant, function
-        if (exec)
+        COPY_IDENTIFIER(identifier);
+        symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
+        switch (symbol->kind)
         {
-            COPY_IDENTIFIER(identifier);
-            symbol = ps_symbol_table_get(interpreter->parser->symbols, &identifier);
-            if (symbol == NULL)
-                RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
-            switch (symbol->kind)
+        case PS_SYMBOL_KIND_AUTO:
+        case PS_SYMBOL_KIND_CONSTANT:
+        case PS_SYMBOL_KIND_VARIABLE:
+            if (exec)
             {
-            case PS_SYMBOL_KIND_AUTO:
-            case PS_SYMBOL_KIND_CONSTANT:
-            case PS_SYMBOL_KIND_VARIABLE:
                 if (interpreter->debug)
                 {
                     ps_symbol_debug(stderr, "SYMBOL\t", symbol);
@@ -129,15 +170,18 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
                 }
                 if (!ps_function_copy_value(interpreter, symbol->value, result))
                     TRACE_ERROR("COPY");
-                break;
-            case PS_SYMBOL_KIND_FUNCTION:
-                if (!ps_visit_function_call(interpreter, exec, symbol, result))
-                    TRACE_ERROR("FUNCTION");
-            default:
-                break;
             }
+            READ_NEXT_TOKEN;
+            break;
+        case PS_SYMBOL_KIND_FUNCTION:
+            if (!ps_visit_function_call(interpreter, exec, symbol, result))
+                TRACE_ERROR("FUNCTION");
+            break;
+        default:
+            RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+            break;
         }
-        READ_NEXT_TOKEN;
+
         break;
     case PS_TOKEN_CHAR_VALUE:
         if (exec)

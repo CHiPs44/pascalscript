@@ -36,6 +36,7 @@ extern "C"
     extern ps_symbol ps_system_function_ord;
     extern ps_symbol ps_system_function_succ;
     extern ps_symbol ps_system_function_pred;
+    extern ps_symbol ps_system_function_random;
 
     /* System constants */
     extern ps_symbol ps_system_version_major;

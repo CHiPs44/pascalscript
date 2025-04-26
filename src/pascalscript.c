@@ -79,7 +79,7 @@ char *minimal_source =
 
 int main(int argc, char *argv[])
 {
-  bool trace = false; // argc > 1 && strcmp(argv[1], "-t") == 0;
+  bool trace = false;
   bool debug = trace;
   bool dump_symbols = false;
   bool dump_buffer = false;

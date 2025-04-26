@@ -159,6 +159,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_function_ord);
     ps_symbol_table_add(symbols, &ps_system_function_succ);
     ps_symbol_table_add(symbols, &ps_system_function_pred);
+    ps_symbol_table_add(symbols, &ps_system_function_random);
     ps_symbol_table_add(symbols, &ps_system_function_abs);
     ps_symbol_table_add(symbols, &ps_system_function_trunc);
     ps_symbol_table_add(symbols, &ps_system_function_round);
