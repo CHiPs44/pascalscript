@@ -184,7 +184,8 @@ extern "C"
 #define PS_TOKEN_TYPE_SIZE sizeof(ps_token_type)
 #define PS_TOKEN_SIZE sizeof(ps_token)
 
-    void ps_token_dump(ps_token *token);
+    void ps_token_debug(FILE *output, char *message, ps_token *token);
+    char *ps_token_dump_value(ps_token *token);
 
     ps_token_type ps_token_is_keyword(char *identifier);
 

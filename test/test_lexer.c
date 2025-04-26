@@ -142,7 +142,7 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
                    index + 1, count,
                    expected[index],
                    lexer->current_token.type);
-            ps_token_dump(&lexer->current_token);
+            ps_token_debug(stdout, "", &lexer->current_token);
             break;
         }
         else
@@ -151,7 +151,7 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
                    index + 1, count,
                    expected[index],
                    lexer->current_token.type);
-            ps_token_dump(&lexer->current_token);
+            ps_token_debug(stdout, "", &lexer->current_token);
         }
         // printf("TEST LEXER: %02d/%02d END\n", index + 1, count);
         index += 1;

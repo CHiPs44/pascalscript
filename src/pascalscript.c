@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
   interpreter = ps_interpreter_init(NULL);
   if (interpreter == NULL)
   {
-    printf("Could not initialize interpreter!\n");
+    fprintf(stderr, "Could not initialize interpreter!\n");
     return EXIT_FAILURE;
   }
   interpreter->trace = trace;

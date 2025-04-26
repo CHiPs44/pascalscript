@@ -9,51 +9,62 @@
 #include "ps_error.h"
 #include "ps_token.h"
 
-void ps_token_dump(ps_token *token)
+void ps_token_debug(FILE *output, char *message, ps_token *token)
+{
+    if (output == NULL)
+        output = stderr;
+    fprintf(output,
+            "%s\t%s\n",
+            message == NULL || 0 == strlen(message) ? "TOKEN: " : message,
+            ps_token_dump_value(token));
+}
+
+char *ps_token_dump_value(ps_token *token)
 {
     ps_token_type token_type;
     char *type;
     static char buffer[128];
-    static char string[96];
+    static char value[80];
+    static char string[64];
 
     switch (token->type)
     {
     case PS_TOKEN_NONE:
         type = "NONE";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: NONE", token->type);
+        snprintf(value, sizeof(value) - 1, "%04d: NONE", token->type);
         break;
     case PS_TOKEN_END_OF_FILE:
         type = "EOF";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: END_OF_FILE", token->type);
+        snprintf(value, sizeof(value) - 1, "%04d: END_OF_FILE", token->type);
         break;
     case PS_TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: %d", token->type, token->value.i);
+        snprintf(value, sizeof(value) - 1, "%04d: %d", token->type, token->value.i);
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
         type = "UNSIGNED";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: %u", token->type, token->value.u);
+        snprintf(value, sizeof(value) - 1, "%04d: %u", token->type, token->value.u);
         break;
     case PS_TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: %f", token->type, token->value.r);
+        snprintf(value, sizeof(value) - 1, "%04d: %f", token->type, token->value.r);
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
         type = "BOOLEAN";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.b ? "TRUE" : "FALSE");
+        snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.b ? "TRUE" : "FALSE");
         break;
     case PS_TOKEN_CHAR_VALUE:
         type = "CHAR";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%c'", token->type, token->value.c);
+        snprintf(value, sizeof(value) - 1, "%04d: '%c'", token->type, token->value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
         type = "STRING";
         strncpy(string, (char *)token->value.s, sizeof(string) - 1);
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, string);
+        snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, string);
         break;
     case PS_TOKEN_IDENTIFIER:
         type = "IDENTIFIER";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     case PS_TOKEN_AT_SIGN:           // @
     case PS_TOKEN_CARET:             // ^
@@ -79,23 +90,24 @@ void ps_token_dump(ps_token *token)
     case PS_TOKEN_SLASH:             // /
     case PS_TOKEN_STAR:              // *
         type = "RESERVED";
-        snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
+        snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     default:
         token_type = ps_token_is_keyword(token->value.identifier);
         if (token_type == PS_TOKEN_IDENTIFIER)
         {
             type = "UNKNOWN";
-            snprintf(buffer, sizeof(buffer) - 1, "'%s'", "?");
+            snprintf(value, sizeof(value) - 1, "'%s'", "?");
         }
         else
         {
             type = "KEYWORD";
-            snprintf(buffer, sizeof(buffer) - 1, "%04d: '%s'", token->type, token->value.identifier);
+            snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }
-    fprintf(stderr, "TOKEN: type=%-16s, value=%s\n", type, buffer);
+    snprintf(buffer, sizeof(buffer) - 1, "type=%-16s, value=%s", type, value);
+    return buffer;
 }
 
 struct s_ps_keyword

@@ -18,11 +18,13 @@ Begin
     WriteLn('M', 'a', 'x', '=', Max);
     For I := 0 To 9 Do
     Begin
-        R := Random;
+        // KO: If I Mod 2 = 0 Then
+        If I < 5 Then
+            R := Random
+        Else
+            R := Random();
         WriteLn('R', '(', I, ')', '=', R);
     End;
-    R := Random();
-    WriteLn('R', '=', R);
     // Note: Integer is now cast to Real automatically
     R := Random(6) + 1;
     WriteLn('R', '=', R);
