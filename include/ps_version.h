@@ -7,11 +7,6 @@
 #ifndef _PS_VERSION_H
 #define _PS_VERSION_H
 
-#include <stdint.h>
-#include <stdlib.h>
-// #include <limits.h>
-#include <float.h>
-
 #ifdef __cplusplus
 extern "C"
 {

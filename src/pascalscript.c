@@ -84,7 +84,6 @@ int main(int argc, char *argv[])
   bool dump_symbols = false;
   bool dump_buffer = false;
   char *current_path = NULL;
-  // char *program_file = "./examples/01-first.pas";
   char *program_file = NULL;
   char source_file[256] = {0};
 
@@ -155,11 +154,11 @@ int main(int argc, char *argv[])
   }
   snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
   fprintf(stderr, "Source file: %s\n", source_file);
-  // exit(EXIT_FAILURE);
 
-  /* Display banner on stdout */
-  printf("PascalScript v%d.%d.%d.%d\n",
-         PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+  /* Display banner */
+  fprintf(stdout,
+          "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later\n",
+          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
 
   /* Initialize interpreter */
   interpreter = ps_interpreter_init(NULL);
