@@ -22,6 +22,7 @@ extern "C"
     extern ps_symbol ps_system_integer;
     extern ps_symbol ps_system_real;
     extern ps_symbol ps_system_unsigned;
+    extern ps_symbol ps_system_string;
 
     /* System procedures & functions */
     extern ps_symbol ps_system_procedure_read;

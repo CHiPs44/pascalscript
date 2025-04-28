@@ -34,16 +34,16 @@ extern "C"
     typedef PS_CHAR ps_char;
     // const ps_char ps_char_max = PS_CHAR_MAX;
 
-    // typedef PS_STRING_LEN_TYPE ps_string_len;
+    typedef PS_STRING_LEN_TYPE ps_string_len;
     // const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
 
-    // // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
-    // typedef struct s_ps_string
-    // {
-    //     ps_string_len max;
-    //     ps_string_len len;
-    //     ps_char *str;
-    // } __attribute__((__packed__)) ps_string;
+    // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars?
+    typedef struct s_ps_string
+    {
+        ps_string_len max;
+        ps_string_len len;
+        ps_char str[PS_STRING_MAX_LEN + 1];
+    } __attribute__((__packed__)) ps_string;
 
     // typedef void *ps_pointer;
 

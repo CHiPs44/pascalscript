@@ -110,6 +110,8 @@ char *ps_token_dump_value(ps_token *token)
     return buffer;
 }
 
+/// @brief Pascal keywords
+/// @note *MUST* be sorted in alphabetical order for dichotomic search below to work
 struct s_ps_keyword
 {
     char *keyword;
@@ -118,7 +120,6 @@ struct s_ps_keyword
     // clang-format off
     { .keyword = "AND"              , .token_type = PS_TOKEN_AND           },
     { .keyword = "ARRAY"            , .token_type = PS_TOKEN_ARRAY         },
-    { .keyword = "AS"               , .token_type = PS_TOKEN_AS            },
     { .keyword = "BEGIN"            , .token_type = PS_TOKEN_BEGIN         },
     { .keyword = "BOOLEAN"          , .token_type = PS_TOKEN_BOOLEAN       },
     { .keyword = "CASE"             , .token_type = PS_TOKEN_CASE          },
@@ -139,7 +140,6 @@ struct s_ps_keyword
     { .keyword = "IN"               , .token_type = PS_TOKEN_IN            },
     { .keyword = "INTEGER"          , .token_type = PS_TOKEN_INTEGER       },
     { .keyword = "INTERFACE"        , .token_type = PS_TOKEN_INTERFACE     },
-    { .keyword = "IS"               , .token_type = PS_TOKEN_IS            },
     { .keyword = "LABEL"            , .token_type = PS_TOKEN_LABEL         },
     { .keyword = "MOD"              , .token_type = PS_TOKEN_MOD           },
     { .keyword = "NIL"              , .token_type = PS_TOKEN_NIL           },
@@ -168,6 +168,8 @@ struct s_ps_keyword
     { .keyword = "WHILE"            , .token_type = PS_TOKEN_WHILE         },
     { .keyword = "WITH"             , .token_type = PS_TOKEN_WITH          },
     { .keyword = "XOR"              , .token_type = PS_TOKEN_XOR           },
+    // { .keyword = "AS"               , .token_type = PS_TOKEN_AS            },
+    // { .keyword = "IS"               , .token_type = PS_TOKEN_IS            },
     // clang-format on
 };
 

@@ -134,8 +134,8 @@ extern "C"
         PS_TOKEN_SHL,
         PS_TOKEN_SHR,
         PS_TOKEN_IN,
-        PS_TOKEN_IS,
-        PS_TOKEN_AS,
+        // PS_TOKEN_IS,
+        // PS_TOKEN_AS,
         // Symbols
         PS_TOKEN_ASSIGN,            // :=  assign
         PS_TOKEN_AT_SIGN,           // @   address of
@@ -177,7 +177,7 @@ extern "C"
             ps_real r;
             ps_char c;
             ps_boolean b;
-            ps_char s[PS_STRING_MAX_LEN + 1];
+            char s[PS_STRING_MAX_LEN + 1];
         } value;
     } ps_token;
 

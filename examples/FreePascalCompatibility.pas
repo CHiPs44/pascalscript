@@ -25,4 +25,14 @@ Begin
   Even := Not Odd(N);
 End;
 
+Function Xor(A, B: Boolean): Boolean;
+Begin
+  Xor := (A And Not B) Or (Not A And B);
+End;
+
+Function Xor(A, B: Unsigned): Unsigned;
+Begin
+  Xor := (A And Not B) Or (Not A And B);
+End;
+
 End.

@@ -43,7 +43,7 @@ extern "C"
         // PS_TYPE_SET,
         // PS_TYPE_POINTER,
         // /* Reference types (pointer to value(s)) */
-        // PS_TYPE_STRING, // *IN PROGRESS*
+        PS_TYPE_STRING,
         // PS_TYPE_ARRAY,  // *FUTURE*
         // PS_TYPE_RECORD, // *FUTURE*
         // PS_TYPE_FILE,   // *FUTURE*

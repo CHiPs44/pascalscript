@@ -9,6 +9,7 @@
 #include "ps_functions.h"
 #include "ps_system.h"
 #include "ps_parser.h"
+#include "ps_string.h"
 
 // clang-format off
 #define USE_LEXER                       ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser)
@@ -241,6 +242,15 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
         }
         break;
     case PS_TOKEN_STRING_VALUE:
+        if (exec)
+        {
+            result->type = ps_system_string.value->data.t;
+            result->data.s = ps_string_create(strlen(lexer->current_token.value.s), lexer->current_token.value.s);
+            if (result->data.s == NULL)
+                TRACE_ERROR("STRING");
+        }
+        READ_NEXT_TOKEN;
+        break;
     case PS_TOKEN_NIL:
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         TRACE_ERROR("");
@@ -512,11 +522,14 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
             type = ps_system_boolean.value->data.t;
             data.b = lexer->current_token.value.b;
             break;
-        // Not yet!
-        // case PS_TOKEN_STRING_VALUE:
-        //     type = ps_symbol_string.value->data.t;
-        //     strncpy(data.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
-        //     break;
+        case PS_TOKEN_STRING_VALUE:
+            type = ps_system_string.value->data.t;
+            data.s = ps_string_create(
+                strlen(lexer->current_token.value.s),
+                lexer->current_token.value.s);
+            if (data.s == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+            break;
         default:
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }

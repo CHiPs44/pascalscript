@@ -46,7 +46,7 @@ identifier          =   letter | '_' , [ letter | dec_digit | '_' ]* ;
 
 label                   =   'LABEL' , dec_digit_sequence | identifier ;
 
-constant_declaration    =   identifier = expression ; 
+constant_declaration    =   identifier = constant_expression ;
 (* omitted: typed_constant_declaration =   .. *)
 
 type_declaration        =   identifier '=' type ;
@@ -67,13 +67,13 @@ identifier_list_zero    =   [ identifier ] , [ ',' , identifier ]* ;
 (* omitted: assigned_enum_list, hint_directives, ansi strings, ... *)
 
 expression              =   simple_expression [ relational_operator , simple_expression ] ;
-relational_operator     =   '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' | 'IS' ;
+relational_operator     =   '<' | '<=' | '>' | '>=' | '=' | '<>' | 'IN' ; (* | 'IS' ; *)
 
 simple_expression       =   term [ additive_operator , term ]* ;
 additive_operator       =   '+' | '-' | 'OR' | 'XOR' ;
 
 term                    =   factor [ multiplicative_operator , factor ]* ;
-multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' ;
+multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' ; (* | 'AS' ; *)
 
 factor                  =   '(' expression ')'
                         |   variable_reference
@@ -175,14 +175,28 @@ declaration_part        =   [
                                 [ procedure_declaration | function_declaration ]*
                             ]*
                         ;
+(*
+    Procedure Example1;
+    Procedure Example2();
+    Procedure Example3(A, B: Integer);
+    Procedure Example4(Var A: Integer);
+    ...
+*)
 procedure_declaration   =   'PROCEDURE' identifier [ '(' [ formal_parameter_list ] ')' ] ';'
                             [ declaration_part ]
                             [ compound_statement ';' ]
-                            ;
+                        ;
+(*
+    Function Example1: Integer;
+    Function Example2(): Integer;
+    Function Example3(A, B: Integer): Integer;
+    Function Example4(Var A: Integer): Integer;
+    ...
+*)
 function_declaration    =   'FUNCTION' identifier [ '(' [ formal_parameter_list ] ')' ] ':' type ';'
                             [ declaration_part ]
                             [ compound_statement ';']
-                            ;
+                        ;
 formal_parameter_list   =   formal_parameter [ ',' formal_parameter ]* ;
 formal_parameter        =   [ 'VAR' | 'OUT' ] identifier_list_one ':' type
                         ;

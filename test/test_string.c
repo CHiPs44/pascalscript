@@ -21,7 +21,7 @@ int main(void)
     bool ok;
 
     printf("TEST STRINGS: ALLOC\n");
-    ps_string *s = ps_string_new(ps_string_max);
+    ps_string *s = ps_string_alloc(ps_string_max);
     ps_string_debug(s, "s  ");
     ok = s != NULL && s->max == ps_string_max;
     printf("TEST STRINGS: ALLOC %s\n\n", ok ? "OK" : "KO");
@@ -45,7 +45,7 @@ int main(void)
     printf("TEST STRINGS: CONCAT %s\n\n", ok ? "OK" : "KO");
 
     printf("TEST STRINGS: SUBSTRING\n");
-    ps_string *s4 = ps_string_substring(s, 11, 5);
+    ps_string *s4 = ps_string_copy(s, 11, 5);
     ps_string_debug(s4, "s4 ");
     ok = s4 != NULL && 0 == strcmp(s4->str, "Brown");
     printf("TEST STRINGS: SUBSTRING %s\n\n", ok ? "OK" : "KO");

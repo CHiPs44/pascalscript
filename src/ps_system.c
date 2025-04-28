@@ -34,6 +34,7 @@ PS_SYSTEM_TYPE(char     , "CHAR"     , PS_TYPE_CHAR      );
 PS_SYSTEM_TYPE(integer  , "INTEGER"  , PS_TYPE_INTEGER   );
 PS_SYSTEM_TYPE(unsigned , "UNSIGNED" , PS_TYPE_UNSIGNED  );
 PS_SYSTEM_TYPE(real     , "REAL"     , PS_TYPE_REAL      );
+PS_SYSTEM_TYPE(string   , "STRING"   , PS_TYPE_STRING    );
 PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE      );
 PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 
@@ -140,6 +141,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_integer);
     ps_symbol_table_add(symbols, &ps_system_real);
     ps_symbol_table_add(symbols, &ps_system_unsigned);
+    ps_symbol_table_add(symbols, &ps_system_string);
 
     /**************************************************************************/
     /* PROCEDURES & FUNCTIONS                                                 */

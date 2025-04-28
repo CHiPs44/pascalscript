@@ -60,7 +60,7 @@ const struct s_ps_type_name
     // {PS_TYPE_SUBRANGE   , "SUBRANGE"},
     // {PS_TYPE_SET        , "SET"     },
     // {PS_TYPE_POINTER    , "POINTER" },
-    // {PS_TYPE_STRING     , "STRING"  },
+    {PS_TYPE_STRING     , "STRING"  },
     // {PS_TYPE_ARRAY      , "ARRAY"   },
     // {PS_TYPE_RECORD     , "RECORD"  },
     // {PS_TYPE_FILE       , "FILE"    },

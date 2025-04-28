@@ -9,7 +9,7 @@
 #include <string.h>
 #include <errno.h>
 
-// #include "ps_string.h"
+#include "ps_string.h"
 #include "ps_error.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
@@ -236,9 +236,16 @@ char *ps_value_to_string(ps_value *value, bool debug)
         else
             snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
         break;
-    // case PS_TYPE_STRING:
-    //     snprintf(buffer, sizeof(buffer) - 1, "\"%.*s\" (%d/%d)", sizeof(buffer) - 20, value->data.s->str, value->data.s->len, value->data.s->max);
-    //     break;
+    case PS_TYPE_STRING:
+        if (debug)
+            snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"",
+                     value->data.s->len, value->data.s->max, PS_IDENTIFIER_LEN - 10, value->data.s->str);
+        else
+        {
+            memset(buffer, 0, sizeof(buffer));
+            memcpy(buffer, value->data.s->str, value->data.s->len);
+        }
+        break;
     // case PS_TYPE_POINTER:
     //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
     //     break;

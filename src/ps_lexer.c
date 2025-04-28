@@ -327,129 +327,120 @@ bool ps_lexer_read_number(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
 }
 
-bool ps_lexer_read_char_value(ps_lexer *lexer)
-{
-    char c1 = ps_buffer_peek_char(lexer->buffer);
-    char c2 = ps_buffer_peek_next_char(lexer->buffer);
-    // fprintf(stderr, "#0 c1='%c' c2='%c'\n", c1, c2);
+// bool ps_lexer_read_char_value(ps_lexer *lexer)
+// {
+//     char c1 = ps_buffer_peek_char(lexer->buffer);
+//     char c2 = ps_buffer_peek_next_char(lexer->buffer);
+//     // fprintf(stderr, "#0 c1='%c' c2='%c'\n", c1, c2);
 
-    // 'x' or '''' only for now (no strings)
-    if (c1 == '\'')
-    {
-        if (!ps_lexer_read_next_char(lexer))
-            return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #1");
-        c1 = ps_buffer_peek_char(lexer->buffer);
-        c2 = ps_buffer_peek_next_char(lexer->buffer);
-        // fprintf(stderr, "#1 c1='%c' c2='%c'\n", c1, c2);
-        if (c1 == '\'' && c2 == '\'')
-        {
-            if (!ps_lexer_read_next_char(lexer))
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #2");
-            c1 = ps_buffer_peek_char(lexer->buffer);
-            c2 = ps_buffer_peek_next_char(lexer->buffer);
-            // fprintf(stderr, "#2 c1='%c' c2='%c'\n", c1, c2);
-            if (c1 == '\'' && c2 == '\'')
-            {
-                lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-                lexer->current_token.value.c = '\'';
-                if (!ps_lexer_read_next_char(lexer))
-                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.1");
-                if (!ps_lexer_read_next_char(lexer))
-                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.2");
-                return true;
-            }
-        }
-        else if (c1 != '\'' && c2 == '\'')
-        {
-            lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-            lexer->current_token.value.c = c1;
-            if (!ps_lexer_read_next_char(lexer))
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.1");
-            if (!ps_lexer_read_next_char(lexer))
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.2");
-            return true;
-        }
-        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #5");
-    }
-    lexer->current_token.type = PS_TOKEN_NONE;
-    lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
-    return false;
-}
+//     // 'x' or '''' only for now (no strings)
+//     if (c1 == '\'')
+//     {
+//         if (!ps_lexer_read_next_char(lexer))
+//             return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #1");
+//         c1 = ps_buffer_peek_char(lexer->buffer);
+//         c2 = ps_buffer_peek_next_char(lexer->buffer);
+//         // fprintf(stderr, "#1 c1='%c' c2='%c'\n", c1, c2);
+//         if (c1 == '\'' && c2 == '\'')
+//         {
+//             if (!ps_lexer_read_next_char(lexer))
+//                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #2");
+//             c1 = ps_buffer_peek_char(lexer->buffer);
+//             c2 = ps_buffer_peek_next_char(lexer->buffer);
+//             // fprintf(stderr, "#2 c1='%c' c2='%c'\n", c1, c2);
+//             if (c1 == '\'' && c2 == '\'')
+//             {
+//                 lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+//                 lexer->current_token.value.c = '\'';
+//                 if (!ps_lexer_read_next_char(lexer))
+//                     return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.1");
+//                 if (!ps_lexer_read_next_char(lexer))
+//                     return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #3.2");
+//                 return true;
+//             }
+//         }
+//         else if (c1 != '\'' && c2 == '\'')
+//         {
+//             lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+//             lexer->current_token.value.c = c1;
+//             if (!ps_lexer_read_next_char(lexer))
+//                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.1");
+//             if (!ps_lexer_read_next_char(lexer))
+//                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #4.2");
+//             return true;
+//         }
+//         return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_value #5");
+//     }
+//     lexer->current_token.type = PS_TOKEN_NONE;
+//     lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
+//     return false;
+// }
 
-/*
 bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
-    char buffer[PS_BUFFER_MAX_COLUMNS + 1];
-    char c1 = ps_buffer_peek_char(lexer->buffer);
-    char c2 = ps_buffer_peek_next_char(lexer->buffer);
+    char c;
+    char buffer[PS_STRING_MAX_LEN + 1];
     int pos = 0;
 
-    if (c1 == '\'')
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c != '\'')
+        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_char_or_string_value");
+    // Consume the opening quote
+    if (!ps_lexer_read_next_char(lexer))
+        return false;
+    while (true)
     {
-        if (!ps_lexer_read_next_char(lexer))
-            return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_or_string_value #1");
-        c1 = ps_buffer_peek_char(lexer->buffer);
-        c2 = ps_buffer_peek_next_char(lexer->buffer);
-        while (true)
+        c = ps_buffer_peek_char(lexer->buffer);
+        if (c == '\0')
+            return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_EOF, "ps_lexer_read_char_or_string_value");
+        if (c == '\'')
         {
-            if (c1 == '\n' || c2 == '\n')
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_NOT_MULTI_LINE, "ps_lexer_read_char_or_string_value #2");
-            // printf("ps_lexer_read_char_or_string_value: LOOP1 c=%d, peek=%d\n", c1, c2); //, quote ? "Y" : "N");
-            if (pos > ps_string_max)
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_STRING_TOO_LONG, "ps_lexer_read_char_or_string_value #3");
-            if (c1 == '\'' && c2 == '\'')
+            // Check for doubled single quotes (escaped single quote)
+            char next_char = ps_buffer_peek_next_char(lexer->buffer);
+            if (next_char == '\'')
             {
-                // printf("ps_lexer_read_char_or_string_value: quote1!\n");
-                buffer[pos] = '\'';
-                pos += 1;
-                if (!ps_lexer_read_next_char(lexer))
+                if (pos >= PS_STRING_MAX_LEN)
+                    return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
+
+                buffer[pos++] = '\'';
+                if (!ps_lexer_read_next_char(lexer)) // Consume the first quote
                     return false;
-                c1 = ps_buffer_peek_char(lexer->buffer);
-                c2 = ps_buffer_peek_next_char(lexer->buffer);
-                continue;
+                if (!ps_lexer_read_next_char(lexer)) // Consume the second quote
+                    return false;
             }
-            buffer[pos] = c1;
-            pos += 1;
-            if (!ps_lexer_read_next_char(lexer))
-                return false;
-            c1 = ps_buffer_peek_char(lexer->buffer);
-            c2 = ps_buffer_peek_next_char(lexer->buffer);
-            // printf("ps_lexer_read_char_or_string_value: LOOP2 c=%d, peek=%d\n", c1, c2); //, quote ? "Y" : "N");
-            if (c1 == '\'' && c2 == '\'')
+            else
             {
-                // printf("ps_lexer_read_char_or_string_value: quote2!\n");
-                continue;
-            }
-            else if (c1 == '\'')
-            {
-                // printf("ps_lexer_read_char_or_string_value: done!\n");
+                // End of the string
+                if (!ps_lexer_read_next_char(lexer)) // Consume the closing quote
+                    return false;
                 break;
             }
         }
-        buffer[pos] = '\0';
-        if (!ps_lexer_read_next_char(lexer))
-        {
-            printf("FALSE 1 ps_lexer_read_next_char\n");
-            return false;
-        }
-        if (pos == 1)
-        {
-            lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-            lexer->current_token.value.c = buffer[0];
-        }
         else
         {
-            lexer->current_token.type = PS_TOKEN_STRING_VALUE;
-            strcpy(lexer->current_token.value.s, buffer);
+            if (pos >= PS_STRING_MAX_LEN)
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
+
+            buffer[pos++] = c;
+            if (!ps_lexer_read_next_char(lexer))
+                return false;
         }
-        lexer->error = PS_LEXER_ERROR_NONE;
-        return true;
     }
-    lexer->current_token.type = PS_TOKEN_NONE;
-    lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
-    return false;
+    buffer[pos] = '\0';
+    if (pos == 1)
+    {
+        lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+        lexer->current_token.value.c = buffer[0];
+    }
+    else
+    {
+        lexer->current_token.type = PS_TOKEN_STRING_VALUE;
+        strncpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN);
+    }
+
+    lexer->error = PS_LEXER_ERROR_NONE;
+    return true;
 }
-*/
 
 bool ps_lexer_read_next_token(ps_lexer *lexer)
 {
@@ -476,8 +467,8 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
     }
     else if (current_char == '\'')
     {
-        // if (!ps_lexer_read_char_or_string_value(lexer))
-        if (!ps_lexer_read_char_value(lexer))
+        if (!ps_lexer_read_char_or_string_value(lexer))
+            // if (!ps_lexer_read_char_value(lexer))
             return false;
     }
     else
