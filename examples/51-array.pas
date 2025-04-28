@@ -1,62 +1,64 @@
-program arrays;
+Program Arrays;
 
-const COUNT = 20;
+Const Count = 20;
 
-var Numbers: array[0..COUNT - 1] of LongInt;
-var Strings: array[0..COUNT - 1] of string;
-var i: integer;
-var n: LongInt;
+Var Numbers: Array[1..Count] of Integer;
+    Strings: Array[1..Count] of String;
+    i, n: Integer;
 
 { Same as Free Pascal SysUtils }
-function Int2Str(number: LongInt): string;
-var s: string;
-var digit: integer;
-begin
-    if number = 0 then
-    begin
-        s := '0';
-    end
-    else
-    begin
-        s := '';
-        if number < 0 then
-        begin
-            number := -number;
-            s := '-';
-        end;
-        while number > 0 do
-        begin
-            digit := number mod 10;
-            number := number div 10;
-            s := Chr(Ord('0') + digit) + s;
-        end;
-    end;
+Function Int2Str(number: Integer): String;
+Var s: String;
+    digit: Integer;
+Begin
+    { Convert an Integer to a string }
+    { This is a simplified version of the SysUtils.IntToStr function }
+    { It does not handle all edge cases, but is sufficient for this example }
+    If number = 0 Then
+        Begin
+            s := '0';
+        End
+    Else
+        Begin
+            s := '';
+            If number < 0 Then
+            Begin
+                number := -number;
+                s := '-';
+            End;
+            While number > 0 Do
+            Begin
+                digit := number Mod 10;
+                number := number Div 10;
+                s := Chr(Ord('0') + digit) + s;
+            End;
+        End;
     Int2Str := s;
-end;
+End;
 
-function Pad(n: LongInt; w: integer): string;
-var s: string;
-begin
+function Pad(n: Integer; w: Integer): String;
+Var s: String;
+Begin
     s := Int2Str(n);
     while Length(s) < w do
-    begin
+    Begin
         s := '0' + s;
-    end;
+    End;
     Pad := s;
-end;
+End;
 
-begin
+Begin
     n := 1;
-    for i := 0 to COUNT - 1 do
-    begin
+    For i := 1 To Count Do
+    Begin
         Numbers[i] := n;
         Strings[i] := '#' + Pad(i, 2) + ' ' + Int2Str(n);
         n := n * 2;
-    end;
+    End;
     WriteLn('#  | Number | String    ');
     WriteLn('---|--------|-----------');
-    for i := 0 to COUNT - 1 do
-    begin
+    For i := 1 To Count Do
+    Begin
         WriteLn(Pad(i, 2), ' | ', Numbers[i]:6, ' | ', Strings[i]);
-    end;
-end.
+    End;
+End.
