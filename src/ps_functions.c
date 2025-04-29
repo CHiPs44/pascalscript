@@ -331,7 +331,7 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
 bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_char.value->type;
+    result->type = ps_system_char.value->data.t;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:

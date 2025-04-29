@@ -45,8 +45,9 @@ extern "C"
         ps_error error;
         bool from_file;
         int file_errno;
-        uint8_t debug; // 0=off, 1=debug, 2=verbose
     } ps_buffer;
+
+#define PS_BUFFER_SIZE sizeof(ps_buffer)
 
     /** @brief Initialize buffer */
     ps_buffer *ps_buffer_init();
@@ -80,6 +81,9 @@ extern "C"
 
     /** @brief Peek next char of buffer */
     char ps_buffer_peek_next_char(ps_buffer *buffer);
+
+    /** @brief Send debug message for buffer to file (stderr if NULL)  */
+    void ps_buffer_debug(ps_buffer *buffer, char *message, FILE *f);
 
 #ifdef __cplusplus
 }

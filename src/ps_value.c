@@ -16,7 +16,7 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-ps_value *ps_value_init(ps_type_definition *type, ps_value_data data)
+ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data)
 {
     ps_value *value = calloc(1, sizeof(ps_value));
     if (value == NULL)
@@ -24,6 +24,11 @@ ps_value *ps_value_init(ps_type_definition *type, ps_value_data data)
     value->type = type;
     value->data = data;
     return value;
+}
+
+void ps_value_free(ps_value *value)
+{
+    free(value);
 }
 
 bool ps_value_is_ordinal(ps_value *value)

@@ -4,7 +4,6 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -21,6 +20,12 @@ ps_buffer *ps_buffer_init()
     ps_buffer *buffer = calloc(1, sizeof(ps_buffer));
     if (buffer == NULL)
         return NULL;
+    buffer->file_errno = 0;
+    buffer->text = NULL;
+    buffer->length = 0;
+    buffer->line_count = 0;
+    buffer->line_starts = NULL;
+    buffer->line_lengths = NULL;
     ps_buffer_reset(buffer);
     return buffer;
 }
@@ -45,8 +50,9 @@ void ps_buffer_reset(ps_buffer *buffer)
 
 char *ps_buffer_show_error(ps_buffer *buffer)
 {
-    static char error_message[256];
-    snprintf(error_message, 255, "BUFFER: %d %s, line %d, column %d",
+    static char error_message[128];
+    snprintf(error_message, sizeof(error_message) - 1,
+             "BUFFER: %d %s, line %d, column %d",
              buffer->error, ps_error_get_message(buffer->error),
              buffer->current_line, buffer->current_column);
     return error_message;
@@ -54,24 +60,29 @@ char *ps_buffer_show_error(ps_buffer *buffer)
 
 char *ps_buffer_debug_char(char c)
 {
-    static char tmp[16];
+    static char tmp[8];
     // static char *ctrl[32] = {
     //     "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
     //     "BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
     //     "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
     //     "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
     if (c < ' ')
-        snprintf(tmp, 15, "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
+        // control characters
+        snprintf(tmp, sizeof(tmp) - 1, "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
+    else if (c < 0x7f)
+        // ascii printable characters (DEL excluded)
+        snprintf(tmp, sizeof(tmp) - 1, "%c/%02x", c, c);
     else
-        snprintf(tmp, 15, "%c/%02x", c, c);
+        // extended characters
+        snprintf(tmp, sizeof(tmp) - 1, "%02x", c);
     return tmp;
 }
 
-void ps_buffer_debug(ps_buffer *buffer, int level, char *message)
+void ps_buffer_debug(ps_buffer *buffer, char *message, FILE *f)
 {
-    if (buffer->debug < level)
-        return;
-    fprintf(stderr,
+    if (f == NULL)
+        f = stderr;
+    fprintf(f,
             "%s line=%05d col=%03d current=%s, next=%s, error=%d %s\n",
             message,
             buffer->current_line, buffer->current_column,
@@ -86,15 +97,23 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     int column = 0;
     char *text = buffer->text;
     char *start = text;
-    char c;
+    char current_char, previous_char;
     // Count lines
     buffer->line_count = 0;
-    c = *text++;
-    while (c)
+    current_char = *text++;
+    previous_char = '\0';
+    while (current_char)
     {
-        if (c == '\n')
+        if (current_char == '\r' || current_char == '\n')
             buffer->line_count += 1;
-        c = *text++;
+        previous_char = current_char;
+        current_char = *text++;
+        // Skip LF if CR encountered
+        if (previous_char == '\r' && current_char == '\n')
+        {
+            previous_char = current_char;
+            current_char = *text++;
+        }
     }
     if (buffer->line_count > PS_BUFFER_MAX_LINES)
     {
@@ -132,14 +151,16 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
         return false;
     }
     // Find and memorize line starts
+    // should work for Macintosh CR only files and DOS/Windows/Internet CR+LF files.
     text = buffer->text;
     int line_length;
     bool stop = false;
     while (!stop)
     {
-        c = *text;
-        switch (c)
+        current_char = *text;
+        switch (current_char)
         {
+        case '\r':
         case '\n':
             line_length = text - start;
             if (line_length > PS_BUFFER_MAX_COLUMNS)
@@ -156,6 +177,9 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             line += 1;
             column = 0;
             text += 1;
+            // Skip LF if CR encountered
+            if (current_char == '\r' && *text == '\n')
+                text += 1;
             start = text;
             break;
         case '\0':
@@ -282,7 +306,7 @@ char ps_buffer_peek_next_char(ps_buffer *buffer)
 
 bool ps_buffer_read_next_char(ps_buffer *buffer)
 {
-    ps_buffer_debug(buffer, 2, "ps_buffer_read_next_char: BEGIN");
+    // ps_buffer_debug(buffer, "ps_buffer_read_next_char: BEGIN");
     buffer->current_char = '\0';
     buffer->next_char = '\0';
     // already at end of buffer?
@@ -318,7 +342,7 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
         else
             buffer->next_char = '\0';
     }
-    ps_buffer_debug(buffer, 2, "ps_buffer_read_next_char: END  ");
+    // ps_buffer_debug(buffer, "ps_buffer_read_next_char: END  ");
     return true;
 }
 

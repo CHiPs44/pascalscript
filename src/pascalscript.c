@@ -40,8 +40,8 @@ char *minimal_source =
     "      C : Char;\n"
     "      B: Boolean;\n"
     "Begin\n"
-    "   WriteLn;\n"
-    "   WriteLn();\n"
+    // "   WriteLn;\n"
+    // "   WriteLn();\n"
     "   { No strings yet! }\n"
     "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
     "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
 {
   bool trace = false;
   bool debug = trace;
+  bool verbose = false;
   bool dump_symbols = false;
   bool dump_buffer = false;
   char *current_path = NULL;
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
 
   int opt;
   int arg = 0;
-  while ((opt = getopt(argc, argv, "tdsb")) != -1)
+  while ((opt = getopt(argc, argv, "tdsbv")) != -1)
   {
     switch (opt)
     {
@@ -109,15 +110,20 @@ int main(int argc, char *argv[])
       dump_buffer = true;
       arg++;
       break;
+    case 'v':
+      verbose = true;
+      arg++;
+      break;
     default:
-      fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [program_file]\n", argv[0]);
+      fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", argv[0]);
       exit(EXIT_FAILURE);
     }
   }
 
   current_path = getcwd(NULL, 0);
   size_t len = strlen(current_path);
-  fprintf(stderr, "Current working directory: %s\n", current_path);
+  if (verbose)
+    fprintf(stderr, "Current working directory: %s\n", current_path);
   if (arg + 1 < argc)
   {
     program_file = argv[argc - 1];
@@ -155,12 +161,16 @@ int main(int argc, char *argv[])
     }
   }
   snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
-  fprintf(stderr, "Source file: %s\n", source_file);
+  free(current_path);
+  current_path = NULL;
+  if (verbose)
+    fprintf(stderr, "Source file: %s\n", source_file);
 
   /* Display banner */
-  fprintf(stdout,
-          "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later\n",
-          PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+  if (verbose)
+    fprintf(stdout,
+            "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later, see LICENSE\n",
+            PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
 
   /* Initialize interpreter */
   interpreter = ps_interpreter_init(NULL);
@@ -181,7 +191,7 @@ int main(int argc, char *argv[])
   }
 
   /* Load program source from string or file */
-  if (current_path == NULL)
+  if (false)
   {
     if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
     // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
@@ -198,7 +208,8 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
   }
-  fprintf(stderr, "Loaded!\n");
+  if (verbose)
+    fprintf(stderr, "Loaded %s!\n", source_file);
 
   /* List program */
   ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
@@ -209,11 +220,13 @@ int main(int argc, char *argv[])
   }
 
   /* Run program */
-  printf("================================================================================\n");
+  if (verbose)
+    printf("================================================================================\n");
   ps_lexer_reset(lexer);
   ps_buffer_read_next_char(lexer->buffer);
   bool ok = ps_interpreter_run(interpreter, true);
-  printf("================================================================================\n");
+  if (verbose)
+    printf("================================================================================\n");
 
   /* List symbols */
   if (dump_symbols)

@@ -174,3 +174,21 @@ int ps_string_compare(ps_string *a, ps_string *b)
     }
     return diff;
 }
+
+/// @brief Search for substring in a string, cf. https://www.freepascal.org/docs-html/rtl/system/pos.html
+ps_string_len ps_string_position(ps_string *substr, ps_string *s)
+{
+    return 0; // TODO
+}
+
+/// @brief Delete chars from a string, cf. https://www.freepascal.org/docs-html/rtl/system/delete.html
+bool ps_string_delete_chars(ps_string *s, ps_string_len index, ps_string_len count)
+{
+    return false; // TODO
+}
+
+/// @brief Insert one string into another, cf. https://www.freepascal.org/docs-html/rtl/system/insert.html
+bool ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)
+{
+    return false; // TODO
+}

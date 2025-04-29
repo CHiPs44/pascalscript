@@ -1,31 +1,24 @@
 (* Won't work with first versions *)
 Program HelloWorld;
 Const
-  // EMPTY_STRING = '';
-  // QUOTE_CHAR = '''';
-  // ZZZ = 'Z';
-  // HELLO_WORLD_0 = 'Hello, world!';
-  // HELLO_WORLD_4 = 'Hello, ''world''!';
+  QUOTE_CHAR = '''';
+  Z_CHAR = 'Z';
+  EMPTY_STRING = '';
+  HELLO_WORLD_0 = 'Hello, world!';
+  HELLO_WORLD_1 = 'Hello, ''world''!';
   HELLO_WORLD_MAX = {
                                                                                                    1         1         1         1         1         1         1         1         1         1         2         2         2         2         2         2
          1         2         3         4         5         6         7         8         9         0         1         2         3         4         5         6         7         8         9         0         1         2         3         4         5
 12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234
 }
-'0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF12345678901';
-  // LOREM_IPSUM_1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-  // LOREM_IPSUM_2 = 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
-  // LOREM_IPSUM_3 = 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-  // HelloWorld1 = 12345678;
-  // HelloWorld2 = 123456789023457890123456789023457890;
-  // HelloWorld3 = 4294967295;
-  // HelloWorld3 = 2147483648;
-  // PI = 3.14159265359;
-  // E = 2.71828182846;
-// var
-//   test: integer;
+'0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF123456789012'
+;
 Begin
-  // test := 1 + 2;
-  (*Write(HELLO_WORLD_0);
-  WriteLn(HELLO_WORLD_1);*)
-  WriteLn('Hello, world! ', HELLO_WORLD_MAX);
+  WriteLn('Hello, world!');
+  WriteLn(QUOTE_CHAR);
+  WriteLn(Z_CHAR);
+  WriteLn(EMPTY_STRING);
+  WriteLn(HELLO_WORLD_0);
+  WriteLn(HELLO_WORLD_1);
+  WriteLn(HELLO_WORLD_MAX);
 End.

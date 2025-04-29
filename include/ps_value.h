@@ -38,7 +38,7 @@ extern "C"
         ps_subrange         g; // @brief  2   4   8   "g" is for "subran_g_e"
         ps_enum             e; // @brief  2   4   8   "e" is for "_e_num"
         ps_pointer          p; // @brief  2   4   8   "p" is for "_p_ointer"
-        ps_signature       *z; // @brief 2   4   8   "z" is for "_z_ignature" ;-)
+        ps_signature       *z; // @brief  2   4   8   "z" is for "_z_ignature" ;-)
         */
         // clang-format on
     } __attribute__((__packed__)) ps_value_data;
@@ -53,7 +53,8 @@ extern "C"
 #define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 #define PS_VALUE_SIZE sizeof(ps_value)
 
-    ps_value *ps_value_init(ps_type_definition *type, ps_value_data data);
+    ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data);
+    void ps_value_free(ps_value *value);
 
     // clang-format off
     bool       ps_value_is_ordinal  (ps_value *value);

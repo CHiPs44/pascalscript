@@ -538,7 +538,7 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
         READ_NEXT_TOKEN;
         if (exec)
         {
-            value = ps_value_init(type, data);
+            value = ps_value_alloc(type, data);
             if (value == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             constant = ps_symbol_init(
@@ -632,7 +632,7 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
         {
             for (int i = 0; i <= var_count; i++)
             {
-                value = ps_value_init(type, data);
+                value = ps_value_alloc(type, data);
                 variable = ps_symbol_init(
                     PS_SYMBOL_SCOPE_GLOBAL,
                     PS_SYMBOL_KIND_VARIABLE,
@@ -1191,7 +1191,7 @@ bool ps_visit_block(ps_interpreter *interpreter, bool exec)
     SET_VISITOR("BLOCK");
     TRACE_BEGIN("");
 
-    bool loop = false;
+    bool loop = true;
     do
     {
         switch (lexer->current_token.type)
