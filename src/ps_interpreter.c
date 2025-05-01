@@ -130,6 +130,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
                 interpreter->error, ps_error_get_message(interpreter->error),
                 parser->error, ps_error_get_message(parser->error),
                 lexer->error, ps_error_get_message(lexer->error));
+        ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
         return false;
     }
     return true;
