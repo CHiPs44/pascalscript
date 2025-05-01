@@ -55,8 +55,8 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
 /**
  * Visit
  *      function_call = identifier [ '(' , expression [ ',' , expression ]* ')' ]
+ *      only 1 parameter for now and "system" functions
  * TODO
- *  - only 1 parameter for now and "system" functions
  *  - get all parameters
  *  - check function signature
  *  - check function return type

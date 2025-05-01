@@ -85,8 +85,6 @@ ps_string *ps_string_create(ps_string_len max, char *z)
     return s;
 }
 
-/// @brief Concatenate two strings into another one if lengths are OK
-/// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
 ps_string *ps_string_concat(ps_string *a, ps_string *b)
 {
     size_t len = a->len + b->len;
@@ -118,18 +116,12 @@ ps_string *ps_string_append(ps_string *a, ps_string *b)
     return a;
 }
 
-/// @brief Get substring beginning at "from" for "len" chars (1 based)
-/// @details            123456789
-///          substring("ABCDEFGHI",  3,  5) => "CDEFG"
-///          substring("ABCDEFGHI",  7,  1) => "G"
-///          substring("ABCDEFGHI",  1,  9) => "ABCDEFGHI"
-///          substring("ABCDEFGHI",  1, 99) => "ABCDEFGHI"
-///          substring("ABCDEFGHI", 10,  1) => NULL as 10 > 9
 ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
 {
     if (from > a->len)
     {
-        return NULL; // errno = EINVAL;
+        errno = EINVAL;
+        return NULL;
     }
     if (from + len > a->len)
         len = a->len - from;
@@ -175,20 +167,49 @@ int ps_string_compare(ps_string *a, ps_string *b)
     return diff;
 }
 
-/// @brief Search for substring in a string, cf. https://www.freepascal.org/docs-html/rtl/system/pos.html
 ps_string_len ps_string_position(ps_string *substr, ps_string *s)
 {
     return 0; // TODO
 }
 
-/// @brief Delete chars from a string, cf. https://www.freepascal.org/docs-html/rtl/system/delete.html
-bool ps_string_delete_chars(ps_string *s, ps_string_len index, ps_string_len count)
+ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len count)
 {
-    return false; // TODO
+    return NULL; // TODO
 }
 
-/// @brief Insert one string into another, cf. https://www.freepascal.org/docs-html/rtl/system/insert.html
-bool ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)
+ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)
 {
-    return false; // TODO
+    return NULL; // TODO
+}
+
+ps_string *ps_string_lowercase(ps_string *s)
+{
+    ps_string *t = ps_string_alloc(s->max);
+    if (t == NULL)
+        return NULL; // errno = ENOMEM
+    for (ps_string_len i = 0; i < s->len; i++)
+    {
+        if (s->str[i] >= 'A' && s->str[i] <= 'Z')
+            t->str[i] = s->str[i] + ('a' - 'A');
+        else
+            t->str[i] = s->str[i];
+    }
+    t->len = s->len;
+    return t;
+}
+
+ps_string *ps_string_uppercase(ps_string *s)
+{
+    ps_string *t = ps_string_alloc(s->max);
+    if (t == NULL)
+        return NULL; // errno = ENOMEM
+    for (ps_string_len i = 0; i < s->len; i++)
+    {
+        if (s->str[i] >= 'a' && s->str[i] <= 'z')
+            t->str[i] = s->str[i] - ('a' - 'A');
+        else
+            t->str[i] = s->str[i];
+    }
+    t->len = s->len;
+    return t;
 }

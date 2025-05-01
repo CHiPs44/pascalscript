@@ -3,6 +3,7 @@ Program HelloWorld;
 Const
   QUOTE_CHAR      = '''';
   Z_CHAR          = 'Z';
+  K               = 'test ''A''';
   EMPTY_STRING    = '';
   HELLO_WORLD_0   = '''Hello, world!''';
   HELLO_WORLD_1   = 'Hello, ''world''!';
@@ -18,6 +19,7 @@ Begin
   WriteLn('Hello, world!');
   WriteLn('Quote: ', QUOTE_CHAR);
   WriteLn('Z    : ', Z_CHAR);
+  WriteLn('K    : ', K);
   WriteLn('Empty: ', EMPTY_STRING);
   WriteLn('Zero : ', HELLO_WORLD_0);
   WriteLn('One  : ', HELLO_WORLD_1);
