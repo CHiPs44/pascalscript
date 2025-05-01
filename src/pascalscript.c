@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2023 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
@@ -137,25 +137,25 @@ int main(int argc, char *argv[])
         current_path[len - 2] == 'r' &&
         current_path[len - 1] == 'c')
     {
-      program_file = "../examples/00-hello.pas";
+      // program_file = "../examples/00-hello.pas";
       // program_file = "../examples/01-first.pas";
       // program_file = "../examples/03-if-then-else.pas";
       // program_file = "../examples/04-repeat-until.pas";
       // program_file = "../examples/04-repeat-until-real.pas";
       // program_file = "../examples/05-while-do.pas";
-      // program_file = "../examples/06-for-do.pas";
+      program_file = "../examples/06-for-do.pas";
       // program_file = "../examples/07-random.pas";
       // program_file = "../examples/41-circle.pas";
     }
     else
     {
-      program_file = "examples/00-hello.pas";
+      // program_file = "examples/00-hello.pas";
       // program_file = "examples/01-first.pas";
       // program_file = "examples/03-if-then-else.pas";
       // program_file = "examples/04-repeat-until.pas";
       // program_file = "examples/04-repeat-until-real.pas";
       // program_file = "examples/05-while-do.pas";
-      // program_file = "examples/06-for-do.pas";
+      program_file = "examples/06-for-do.pas";
       // program_file = "examples/07-random.pas";
       // program_file = "examples/41-circle.pas";
     }
@@ -216,7 +216,8 @@ int main(int argc, char *argv[])
   if (dump_buffer)
   {
     ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
-    fprintf(stderr, "Listed!\n");
+    if (verbose)
+      fprintf(stderr, "Listed!\n");
   }
 
   /* Run program */
@@ -230,9 +231,7 @@ int main(int argc, char *argv[])
 
   /* List symbols */
   if (dump_symbols)
-  {
     ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
-  }
 
   /* Terminate interpreter */
   ps_interpreter_done(interpreter);
