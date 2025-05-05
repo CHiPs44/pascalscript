@@ -145,8 +145,12 @@ extern "C"
 // #define PS_STRING_MAX_LEN UINT32_MAX
 #endif
 
-#if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN)
-#error PS_STRING_LEN_TYPE & PS_STRING_MAX_LEN must be defined.
+#ifndef PS_STRING_REF_TYPE
+#define PS_STRING_REF_TYPE uint16_t
+#endif
+
+#if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN) || !defined(PS_STRING_REF_TYPE)
+#error PS_STRING_LEN_TYPE / PS_STRING_MAX_LEN / PS_STRING_REF_TYPE must be defined.
 #endif
 
 #ifdef __cplusplus

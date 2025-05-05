@@ -38,17 +38,6 @@ PS_SYSTEM_TYPE(string   , "STRING"   , PS_TYPE_STRING    );
 PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE      );
 PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 
-// Keeped for reference
-// ps_type_definition  ps_type_def_boolean     = {.type = PS_TYPE_BOOLEAN, .base = PS_TYPE_BOOLEAN};
-// ps_value            ps_value_boolean        = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_boolean}};
-// ps_symbol           ps_system_boolean       = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "BOOLEAN", .value = &ps_value_boolean};
-// ps_type_definition  ps_type_def_procedure   = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
-// ps_value            ps_value_procedure      = {.type    = &ps_type_def_procedure, .data = {.t = &ps_type_def_procedure}};
-// ps_symbol           ps_system_procedure     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "PROCEDURE", .value = &ps_value_procedure};
-// ps_type_definition  ps_type_def_function    = {.type = PS_TYPE_NONE, .base = PS_TYPE_NONE};
-// ps_value            ps_value_function       = {.type = &ps_type_def_function, .data = {.t = &ps_type_def_function}};
-// ps_symbol           ps_system_function      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "FUNCTION", .value = &ps_value_function};
-
 /* STANDARD + MATH LIBRARY */
 
 /* procedures */
@@ -62,7 +51,7 @@ ps_symbol ps_system_procedure_randomize = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kin
 ps_value ps_value_function_odd        = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd }};
 ps_value ps_value_function_even       = {.type = &ps_type_def_function, .data = {.v = &ps_function_even}};
 ps_value ps_value_function_chr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr }};
-ps_value ps_value_function_ord        = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
+ps_value ps_value_function_ord        = {.type = &ps_type_def_function, .data = {.v = &ps_function_ord }};
 ps_value ps_value_function_succ       = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
 ps_value ps_value_function_pred       = {.type = &ps_type_def_function, .data = {.v = &ps_function_pred}};
 ps_symbol ps_system_function_odd      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ODD"    , .value = &ps_value_function_odd  };
