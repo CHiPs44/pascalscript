@@ -4,14 +4,14 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
-#include "ps_value.h"
 #include "ps_string.h"
+#include "ps_value.h"
 
 char *ps_string_dump(ps_string *s)
 {
@@ -20,11 +20,8 @@ char *ps_string_dump(ps_string *s)
     if (s == NULL)
         sprintf(buffer, "NULL");
     else
-        snprintf(buffer, sizeof(buffer) - 1,
-                 "max=%0*d, len=%0*d, str=\"%.*s%s\"",
-                 PS_STRING_MAX_LEN > 255 ? 5 : 3, s->max,
-                 PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len,
-                 width, s->str, s->len > width ? "..." : "");
+        snprintf(buffer, sizeof(buffer) - 1, "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3,
+                 s->max, PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
     return buffer;
 }
 
@@ -138,7 +135,7 @@ ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
 int ps_string_compare(ps_string *a, ps_string *b)
 {
     // return strcmp(a->str, b->str);
-    int diff;
+    int diff = 0;
     ps_string_len len = a->len > b->len ? a->len : b->len;
     for (ps_string_len i = 0; i < len; i++)
     {

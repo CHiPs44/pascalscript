@@ -72,7 +72,8 @@
         "ps_interpreter.h": "c",
         "ps_functions.h": "c",
         "ps_signature.h": "c",
-        "getopt.h": "c"
+        "getopt.h": "c",
+        "inttypes.h": "c"
     },
     "makefile.configureOnOpen": false
 }

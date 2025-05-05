@@ -218,19 +218,19 @@ char *ps_value_to_string(ps_value *value, bool debug)
             return NULL;
         break;
     case PS_TYPE_REAL:
-        snprintf(buffer, sizeof(buffer) - 1, "%G", value->data.r);
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_REAL_FMT, value->data.r);
         break;
     case PS_TYPE_INTEGER:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%d / 0x%x", value->data.i, value->data.i);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i, value->data.i);
         else
-            snprintf(buffer, sizeof(buffer) - 1, "%d", value->data.i);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10, value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%u / 0x%x", value->data.u, value->data.u);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u, value->data.u);
         else
-            snprintf(buffer, sizeof(buffer) - 1, "%u", value->data.u);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10, value->data.u);
         break;
     case PS_TYPE_BOOLEAN:
         snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "TRUE" : "FALSE");
@@ -264,7 +264,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
     return buffer;
 }
 
-char *ps_value_get_display_value(ps_value *value)
+char *ps_value_get_display_string(ps_value *value)
 {
     return ps_value_to_string(value, false);
 }

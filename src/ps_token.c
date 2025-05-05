@@ -39,15 +39,15 @@ char *ps_token_dump_value(ps_token *token)
         break;
     case PS_TOKEN_INTEGER_VALUE:
         type = "INTEGER";
-        snprintf(value, sizeof(value) - 1, "%04d: %d", token->type, token->value.i);
+        snprintf(value, sizeof(value) - 1, "%04d: %" PS_INTEGER_FMT_10, token->type, token->value.i);
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
         type = "UNSIGNED";
-        snprintf(value, sizeof(value) - 1, "%04d: %u", token->type, token->value.u);
+        snprintf(value, sizeof(value) - 1, "%04d: %" PS_UNSIGNED_FMT_10, token->type, token->value.u);
         break;
     case PS_TOKEN_REAL_VALUE:
         type = "REAL";
-        snprintf(value, sizeof(value) - 1, "%04d: %f", token->type, token->value.r);
+        snprintf(value, sizeof(value) - 1, "%04d: %" PS_REAL_FMT, token->type, token->value.r);
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
         type = "BOOLEAN";

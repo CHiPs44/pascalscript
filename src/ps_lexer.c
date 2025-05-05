@@ -303,7 +303,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
                 return ps_lexer_return_error(lexer, PS_LEXER_ERROR_OVERFLOW, "ps_lexer_read_number");
             lexer->current_token.type = PS_TOKEN_REAL_VALUE;
-            lexer->current_token.value.r = (float)d;
+            lexer->current_token.value.r = (ps_real)d;
         }
         else
         {

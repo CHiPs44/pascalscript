@@ -40,6 +40,8 @@ extern "C"
     extern ps_symbol ps_system_function_random;
 
     /* System constants */
+    extern ps_symbol ps_system_constant_boolean_false;
+    extern ps_symbol ps_system_constant_boolean_true;
     extern ps_symbol ps_system_version_major;
     extern ps_symbol ps_system_version_minor;
     extern ps_symbol ps_system_version_patch;

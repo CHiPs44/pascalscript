@@ -7,29 +7,25 @@
 #ifndef _PS_CONFIG_H
 #define _PS_CONFIG_H
 
+#include <float.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <float.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#ifndef PS_IDENTIFIER_LEN
-#define PS_IDENTIFIER_LEN 31
-#endif
+#define PS_BITNESS 64
 
-#define PS_IDENTIFIER_SIZE (PS_IDENTIFIER_LEN + 1)
-    typedef char ps_identifier[PS_IDENTIFIER_SIZE];
-
-    /*
-        NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either ARM M0+ or M33 cores
-            16 bits if someone tries to port PascalScript to an older architecture
-            64 bits on actual computers
-        cf. <https://en.wiktionary.org/wiki/bitness>
-    */
+/*
+    NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either ARM M0+ or M33 cores
+        16 bits if someone tries to port PascalScript to an older architecture
+        64 bits on actual computers
+    cf. <https://en.wiktionary.org/wiki/bitness>
+*/
 #ifndef PS_BITNESS
 #define PS_BITNESS 32
 #endif
@@ -40,18 +36,24 @@ extern "C"
 #define PS_INTEGER int16_t
 #define PS_INTEGER_MIN INT16_MIN
 #define PS_INTEGER_MAX INT16_MAX
+#define PS_INTEGER_FMT_10 PRId16
+#define PS_INTEGER_FMT_16 PRIx16
 #endif
 
 #if PS_BITNESS == 32
 #define PS_INTEGER int32_t
 #define PS_INTEGER_MIN INT32_MIN
 #define PS_INTEGER_MAX INT32_MAX
+#define PS_INTEGER_FMT_10 PRId32
+#define PS_INTEGER_FMT_16 PRIx32
 #endif
 
 #if PS_BITNESS == 64
 #define PS_INTEGER int64_t
 #define PS_INTEGER_MIN INT64_MIN
 #define PS_INTEGER_MAX INT64_MAX
+#define PS_INTEGER_FMT_10 PRId64
+#define PS_INTEGER_FMT_16 PRIx64
 #endif
 
 #endif
@@ -65,16 +67,22 @@ extern "C"
 #if PS_BITNESS == 16
 #define PS_UNSIGNED uint16_t
 #define PS_UNSIGNED_MAX 0xffff
+#define PS_UNSIGNED_FMT_10 PRIu16
+#define PS_UNSIGNED_FMT_16 PRIx16
 #endif
 
 #if PS_BITNESS == 32
 #define PS_UNSIGNED uint32_t
 #define PS_UNSIGNED_MAX UINT32_MAX
+#define PS_UNSIGNED_FMT_10 PRIu32
+#define PS_UNSIGNED_FMT_16 PRIx32
 #endif
 
 #if PS_BITNESS == 64
 #define PS_UNSIGNED uint64_t
 #define PS_UNSIGNED_MAX UINT64_MAX
+#define PS_UNSIGNED_FMT_10 PRIu64
+#define PS_UNSIGNED_FMT_16 PRIx64
 #endif
 
 #endif
@@ -96,6 +104,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
+#define PS_REAL_FMT "G"
 #endif
 
 #if PS_BITNESS == 32
@@ -103,6 +112,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
+#define PS_REAL_FMT "G"
 #endif
 
 #if PS_BITNESS == 64
@@ -110,6 +120,7 @@ extern "C"
 #define PS_REAL_MIN DBL_MIN
 #define PS_REAL_MAX DBL_MAX
 #define PS_REAL_EPSILON DBL_EPSILON
+#define PS_REAL_FMT "lG"
 #endif
 
 #endif
@@ -152,6 +163,13 @@ extern "C"
 #if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN) || !defined(PS_STRING_REF_TYPE)
 #error PS_STRING_LEN_TYPE / PS_STRING_MAX_LEN / PS_STRING_REF_TYPE must be defined.
 #endif
+
+#ifndef PS_IDENTIFIER_LEN
+#define PS_IDENTIFIER_LEN 31
+#endif
+
+#define PS_IDENTIFIER_SIZE (PS_IDENTIFIER_LEN + 1)
+    typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 
 #ifdef __cplusplus
 }

@@ -33,9 +33,9 @@ int main(void)
     ps_value_debug(stdout, "U=", value);
 
     printf("TEST VALUE: BOOLEAN\n");
-    ps_value_set_boolean(value, ps_true);
+    ps_value_set_boolean(value, ps_system_constant_boolean_true.value->data.b);
     ps_value_debug(stdout, "B=", value);
-    ps_value_set_boolean(value, ps_false);
+    ps_value_set_boolean(value, ps_system_constant_boolean_false.value->data.b);
     ps_value_debug(stdout, "B=", value);
 
     printf("TEST VALUE: CHAR\n", value);
