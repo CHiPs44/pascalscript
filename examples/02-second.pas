@@ -1,17 +1,17 @@
-Program second;
+Program Second;
 Const 
-    foo = 1;
-    // msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
-    // r = 'The result is: ';
+    Foo = 1;
+    Msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
+    R = 'The result is: ';
 Var
     a, b, c, d : Integer;
 Begin
-    // WriteLn(msg);
-    a := foo;
+    WriteLn(Msg);
+    a := Foo;
     b := 2;
     c := a + b;
-    // Write(r);
+    Write(R);
     WriteLn(c);
     d := a * b Div c;
-    // foo := 12;
+    // Foo := 12;
 End.
