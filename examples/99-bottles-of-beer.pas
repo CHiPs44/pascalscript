@@ -4,19 +4,19 @@
 Program NinetyNineBottlesOfBeer;
 
 Var 
-  i: Integer;
+  I: Integer;
 
 Begin
-  For i := 99 Downto 1 Do
-    If i <> 1 Then
+  For I := 99 Downto 1 Do
+    If I <> 1 Then
       Begin
-        WriteLn(i, ' bottles of beer on the wall');
-        WriteLn(i, ' bottles of beer');
+        WriteLn(I, ' bottles of beer on the wall');
+        WriteLn(I, ' bottles of beer');
         WriteLn('Take one down, pass it around');
-        If i = 2 Then
+        If I = 2 Then
           WriteLn('One bottle of beer on the wall')
         Else
-          WriteLn(i - 1, ' bottles of beer on the wall');
+          WriteLn(I - 1, ' bottles of beer on the wall');
         WriteLn;
       End
     Else
