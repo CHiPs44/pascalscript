@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 CC = LANG=C gcc
-CFLAGS   = -std=c17 -Wall -Iinclude -ggdb
-# CFLAGS   = -std=c17 -Wall -Iinclude -ggdb -m32
+# CFLAGS   = -std=c17 -Wall -Iinclude -ggdb
+CFLAGS   = -std=c17 -Wall -Iinclude -ggdb -m32
 CLIBS    = -lm
 PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)

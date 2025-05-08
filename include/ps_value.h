@@ -24,26 +24,26 @@ extern "C"
     typedef union u_ps_value_data
     {
         // clang-format off
-        //             Model/bytes        16  32  64
-        //                               --- --- --- ---------------------------
-        ps_integer          i; // @brief  2   4   8   "i" is for "_i_nteger"
-        ps_unsigned         u; // @brief  2   4   8   "u" is for "_u_nsigned"
-        ps_real             r; // @brief  2?  4   8   "r" is for "_r_eal"
-        ps_boolean          b; // @brief  1?  1?  1?  "b" is for "_b_oolean"
-        ps_char             c; // @brief  1   1   1   "c" is for "_c_har"
-        ps_string          *s; // @brief  2   4   8   "s" is for "_s_tring"
-        ps_type_definition *t; // @brief  2   4   8   "t" is for "_t_ype"
-        void               *v; // @brief  2   4   8   "v" is for "_v_oid"
+        //                   Model/bytes 16 32 64 Explanation
+        //                               -- -- -- ---------------------------
+        ps_integer          i; // @brief  2  4  8  "i" is for "_i_nteger"
+        ps_unsigned         u; // @brief  2  4  8  "u" is for "_u_nsigned"
+        ps_real             r; // @brief  2? 4  8  "r" is for "_r_eal"
+        ps_boolean          b; // @brief  1  1  1  "b" is for "_b_oolean"
+        ps_char             c; // @brief  1  1  1  "c" is for "_c_har"
+        ps_string          *s; // @brief  2  4  8  "s" is for "_s_tring"
+        ps_type_definition *t; // @brief  2  4  8  "t" is for "_t_ype"
+        void               *v; // @brief  2  4  8  "v" is for "_v_oid"
         /*
-        ps_subrange         g; // @brief  2   4   8   "g" is for "subran_g_e"
-        ps_enum             e; // @brief  2   4   8   "e" is for "_e_num"
-        ps_pointer          p; // @brief  2   4   8   "p" is for "_p_ointer"
-        ps_signature       *z; // @brief  2   4   8   "z" is for "_z_ignature" ;-)
+        ps_subrange         g; // @brief  2  4  8  "g" is for "subran_g_e"
+        ps_enum             e; // @brief  2  4  8  "e" is for "_e_num"
+        ps_pointer          p; // @brief  2  4  8  "p" is for "_p_ointer"
+        ps_signature       *z; // @brief  2  4  8  "z" is for "_z_ignature" ;-)
         */
         // clang-format on
     } __attribute__((__packed__)) ps_value_data;
 
-    /** @brief Value */
+    /** @brief Value: type + data */
     typedef struct s_ps_value
     {
         ps_type_definition *type;

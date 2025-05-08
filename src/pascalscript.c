@@ -143,14 +143,14 @@ int main(int argc, char *argv[])
         }
         // program_file = "00-hello.pas";
         // program_file = "01-first.pas";
-        program_file = "02-second.pas";
+        // program_file = "02-second.pas";
         // program_file = "03-if-then-else.pas";
         // program_file = "04-repeat-until.pas";
         // program_file = "04-repeat-until-real.pas";
         // program_file = "05-while-do.pas";
         // program_file = "06-for-do.pas";
         // program_file = "07-random.pas";
-        // program_file = "08-math.pas";
+        program_file = "08-math.pas";
         // program_file = "41-circle.pas";
     }
     snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);

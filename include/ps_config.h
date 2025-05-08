@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-#define PS_BITNESS 64
+// #define PS_BITNESS 64
 
 /*
     NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either ARM M0+ or M33 cores
@@ -104,7 +104,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "G"
+#define PS_REAL_FMT "8G"
 #endif
 
 #if PS_BITNESS == 32
@@ -112,7 +112,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "G"
+#define PS_REAL_FMT "8G"
 #endif
 
 #if PS_BITNESS == 64
@@ -120,7 +120,7 @@ extern "C"
 #define PS_REAL_MIN DBL_MIN
 #define PS_REAL_MAX DBL_MAX
 #define PS_REAL_EPSILON DBL_EPSILON
-#define PS_REAL_FMT "lG"
+#define PS_REAL_FMT "15lG"
 #endif
 
 #endif

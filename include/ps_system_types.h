@@ -39,7 +39,7 @@ extern "C"
 
     typedef PS_STRING_REF_TYPE ps_string_ref;
 
-    // should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars?
+    // NO: should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars?
     typedef struct s_ps_string
     {
         ps_string_len max;
@@ -68,7 +68,7 @@ extern "C"
 #define PS_REAL_SIZE sizeof(ps_real)
 #define PS_BOOLEAN_SIZE sizeof(ps_boolean)
 #define PS_CHAR_SIZE sizeof(ps_char)
-// #define PS_STRING_SIZE sizeof(ps_string)
+    // #define PS_STRING_SIZE sizeof(ps_string)
 
 #ifdef __cplusplus
 }

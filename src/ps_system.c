@@ -4,12 +4,13 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_system.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_signature.h"
+#include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_system_types.h"
-#include "ps_system.h"
 #include "ps_value.h"
 #include "ps_version.h"
 
@@ -108,19 +109,17 @@ PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, PS_REAL_MIN);
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, PS_REAL_EPSILON);
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793115997963468544185161590576171875);
 
-ps_value zzz_ps_value_real_maxreal = {.type = &ps_type_def_real, .data = {.r = (ps_real)((double)1.79769313486231570814527423731704357e+308L)}};
-ps_symbol zzz_ps_system_constant_real_maxreal = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "MAXREAL", .value = &zzz_ps_value_real_maxreal};
-
-
 // Keeped for reference
 // ps_value ps_value_boolean_false     = {.type = &ps_type_def_boolean , .data = {.b = (ps_boolean) false}};        
 // ps_symbol ps_system_boolean_false   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "FALSE"    , .value = &ps_value_boolean_false      };
 
 /* VERSION */
-PS_SYSTEM_CONSTANT(integer, version_major, "VERSION_MAJOR", u, PS_VERSION_MAJOR);
-PS_SYSTEM_CONSTANT(integer, version_minor, "VERSION_MINOR", u, PS_VERSION_MINOR);
-PS_SYSTEM_CONSTANT(integer, version_patch, "VERSION_PATCH", u, PS_VERSION_PATCH);
-PS_SYSTEM_CONSTANT(integer, version_index, "VERSION_INDEX", u, PS_VERSION_INDEX);
+PS_SYSTEM_CONSTANT(integer, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS      );
+PS_SYSTEM_CONSTANT(integer, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR);
+PS_SYSTEM_CONSTANT(integer, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_MINOR);
+PS_SYSTEM_CONSTANT(integer, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION_PATCH);
+PS_SYSTEM_CONSTANT(integer, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX);
+PS_SYSTEM_CONSTANT(string , ps_version      , "PS_VERSION"      , s, NULL            );
 
 // Keeped for reference
 // ps_value ps_value_version_major = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MAJOR}};
@@ -136,34 +135,38 @@ bool ps_system_init(ps_interpreter *interpreter)
     /* TYPES                                                                  */
     /**************************************************************************/
 
-    if (ps_symbol_table_available(symbols) < 5)
+    if (ps_symbol_table_available(symbols) < 10)
         return false;
+    ps_symbol_table_add(symbols, &ps_system_none);
+    ps_symbol_table_add(symbols, &ps_system_type_def);
     ps_symbol_table_add(symbols, &ps_system_boolean);
     ps_symbol_table_add(symbols, &ps_system_char);
     ps_symbol_table_add(symbols, &ps_system_integer);
     ps_symbol_table_add(symbols, &ps_system_real);
     ps_symbol_table_add(symbols, &ps_system_unsigned);
     ps_symbol_table_add(symbols, &ps_system_string);
+    ps_symbol_table_add(symbols, &ps_system_procedure);
+    ps_symbol_table_add(symbols, &ps_system_function);
 
     /**************************************************************************/
     /* PROCEDURES & FUNCTIONS                                                 */
     /**************************************************************************/
-    if (ps_symbol_table_available(symbols) < 19)
+    if (ps_symbol_table_available(symbols) < 5 + 6 + 14)
         return false;
-    ps_symbol_table_add(symbols, &ps_system_procedure);
-    ps_symbol_table_add(symbols, &ps_system_function);
+    // procedures
     ps_symbol_table_add(symbols, &ps_system_procedure_read);
     ps_symbol_table_add(symbols, &ps_system_procedure_readln);
     ps_symbol_table_add(symbols, &ps_system_procedure_write);
     ps_symbol_table_add(symbols, &ps_system_procedure_writeln);
     ps_symbol_table_add(symbols, &ps_system_procedure_randomize);
+    // ordinal types functions
     ps_symbol_table_add(symbols, &ps_system_function_odd);
     ps_symbol_table_add(symbols, &ps_system_function_even);
-    ps_symbol_table_add(symbols, &ps_system_function_abs);
     ps_symbol_table_add(symbols, &ps_system_function_chr);
     ps_symbol_table_add(symbols, &ps_system_function_ord);
     ps_symbol_table_add(symbols, &ps_system_function_succ);
     ps_symbol_table_add(symbols, &ps_system_function_pred);
+    // math functions
     ps_symbol_table_add(symbols, &ps_system_function_random);
     ps_symbol_table_add(symbols, &ps_system_function_abs);
     ps_symbol_table_add(symbols, &ps_system_function_trunc);
@@ -197,27 +200,26 @@ bool ps_system_init(ps_interpreter *interpreter)
     /**************************************************************************/
     /* VERSION                                                                */
     /**************************************************************************/
-    if (ps_symbol_table_available(symbols) < 4)
+    if (ps_symbol_table_available(symbols) < 6)
         return false;
-    ps_symbol_table_add(symbols, &ps_system_constant_integer_version_major);
-    ps_symbol_table_add(symbols, &ps_system_constant_integer_version_minor);
-    ps_symbol_table_add(symbols, &ps_system_constant_integer_version_patch);
-    ps_symbol_table_add(symbols, &ps_system_constant_integer_version_index);
-    // No strings yet!
-    // snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH,
-    // PS_VERSION_INDEX); value = ps_value_set_string(NULL, buffer, strlen(buffer), strlen(buffer));
-    // ps_interpreter_add_system_constant(vm, "PS_VERSION", value);
+    ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_bitness);
+    ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_major);
+    ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_minor);
+    ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_patch);
+    ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_index);
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH,
+             PS_VERSION_INDEX);
+    ps_string *ps_version_string = ps_string_create(strlen(buffer), buffer);
+    if (ps_version_string == NULL)
+        return false;
+    ps_system_constant_string_ps_version.value->data.s = ps_version_string;
+    ps_symbol_table_add(symbols, &ps_system_constant_string_ps_version);
 
-    // ...
     return true;
 }
 
 void ps_system_done(ps_interpreter *interpreter)
 {
-    // ps_symbol_table_delete(interpreter->parser->symbols, (ps_identifier *)&ps_system_version_major.name);
-    // ps_symbol_table_delete(interpreter->parser->symbols, (ps_identifier *)&ps_system_version_minor.name);
-    // ps_symbol_table_delete(interpreter->parser->symbols, (ps_identifier *)&ps_system_version_patch.name);
-    // ps_symbol_table_delete(interpreter->parser->symbols, (ps_identifier *)&ps_system_version_index.name);
-    // ps_symbol_table_delete(interpreter->parser->symbols, (ps_identifier *)&ps_system_real_pi.name);
     // ...
 }
