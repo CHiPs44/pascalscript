@@ -33,9 +33,9 @@ extern 'C'
     /// @return string NULL if len > max
     ps_string *ps_string_set(ps_string *s, char *z);
 
-    /// @brief Allocate and set a new string
+    /// @brief Allocate and set a new string from a "C" string
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_create(ps_string_len max, char *z);
+    ps_string *ps_string_create(char *z);
 
     /// @brief Concatenate two strings into another one if lengths are OK
     /// @example concat('ABC', 'DEF') => 'ABCDEF'

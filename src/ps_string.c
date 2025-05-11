@@ -40,10 +40,7 @@ ps_string *ps_string_alloc(ps_string_len max)
     // maximum:          1   +         1   + 255 + 1  bytes for "short" strings
     ps_string *s = (ps_string *)malloc(2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
     if (s == NULL)
-    {
-        return NULL;
-        errno = ENOMEM;
-    }
+        return NULL; // errno = ENOMEM;
     s->max = max;
     s->len = 0;
     return s;
@@ -69,9 +66,15 @@ ps_string *ps_string_set(ps_string *s, char *z)
     return s;
 }
 
-ps_string *ps_string_create(ps_string_len max, char *z)
+ps_string *ps_string_create(char *z)
 {
-    ps_string *s = ps_string_alloc(max);
+    size_t len = strlen(z);
+    if (len > PS_STRING_MAX_LEN)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    ps_string *s = ps_string_alloc((ps_string_len)len);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     if (ps_string_set(s, z) == NULL)

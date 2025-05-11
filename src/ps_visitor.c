@@ -259,7 +259,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
         if (exec)
         {
             result->type = ps_system_string.value->data.t;
-            result->data.s = ps_string_create(strlen(lexer->current_token.value.s), lexer->current_token.value.s);
+            result->data.s = ps_string_create(lexer->current_token.value.s);
             if (result->data.s == NULL)
                 TRACE_ERROR("STRING");
         }
@@ -503,8 +503,9 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
+            // TODO do not create a new string if the value is the same as an existing one
             type = ps_system_string.value->data.t;
-            data.s = ps_string_create(strlen(lexer->current_token.value.s), lexer->current_token.value.s);
+            data.s = ps_string_create(lexer->current_token.value.s);
             if (data.s == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             break;

@@ -200,7 +200,6 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         break;
     case PS_TYPE_CHAR:
         /* clang-format off */
-        result->type = ps_system_boolean.value->data.t;
         switch (token_type)
         {
         case PS_TOKEN_LESS_THAN:        result->data.b = a->data.c <  b.data.c; break;
@@ -212,6 +211,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         default:                        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         /* clang-format on */
+        result->type = ps_system_boolean.value->data.t;
         break;
     case PS_TYPE_REAL:
         /* clang-format off */
@@ -267,7 +267,7 @@ bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
 bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_boolean.value->type;
+    result->type = ps_system_boolean.value->data.t;
     switch (value->type->base)
     {
     case PS_TYPE_UNSIGNED:
@@ -517,7 +517,7 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
             RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_RANGE);
-        result->type = ps_system_integer.value->type;
+        result->type = ps_system_integer.value->data.t;
         result->data.i = (ps_integer)trunc(value->data.r);
         break;
     default:
@@ -529,13 +529,15 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
 /** @brief ROUND - Round real as integer */
 bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    double r;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:
-        if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
+        r = round(value->data.r);
+        if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
             RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_RANGE);
-        result->type = ps_system_integer.value->type;
-        result->data.i = (ps_integer)round(value->data.r);
+        result->type = ps_system_integer.value->data.t;
+        result->data.i = (ps_integer)r;
         break;
     default:
         RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_REAL);

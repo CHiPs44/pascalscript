@@ -37,14 +37,14 @@ extern "C"
     typedef PS_STRING_LEN_TYPE ps_string_len;
     // const ps_string_len ps_string_max = PS_STRING_MAX_LEN;
 
-    typedef PS_STRING_REF_TYPE ps_string_ref;
+    // typedef PS_STRING_REF_TYPE ps_string_ref;
 
     // NO: should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars?
     typedef struct s_ps_string
     {
         ps_string_len max;
         ps_string_len len;
-        ps_string_ref ref;
+        // ps_string_ref ref;
         ps_char str[PS_STRING_MAX_LEN + 1];
     } __attribute__((__packed__)) ps_string;
 

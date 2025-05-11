@@ -216,9 +216,9 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_patch);
     ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_index);
     char buffer[16];
-    snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", PS_VERSION_MAJOR, PS_VERSION_MINOR, PS_VERSION_PATCH,
-             PS_VERSION_INDEX);
-    ps_string *ps_version_string = ps_string_create(strlen(buffer), buffer);
+    snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR, (uint8_t)PS_VERSION_MINOR,
+             (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
+    ps_string *ps_version_string = ps_string_create(buffer);
     if (ps_version_string == NULL)
         return false;
     ps_system_constant_string_ps_version.value->data.s = ps_version_string;
