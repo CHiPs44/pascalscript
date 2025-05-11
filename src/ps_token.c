@@ -13,9 +13,7 @@ void ps_token_debug(FILE *output, char *message, ps_token *token)
 {
     if (output == NULL)
         output = stderr;
-    fprintf(output,
-            "%s\t%s\n",
-            message == NULL || 0 == strlen(message) ? "TOKEN: " : message,
+    fprintf(output, "%s\t%s\n", message == NULL || 0 == strlen(message) ? "TOKEN: " : message,
             ps_token_dump_value(token));
 }
 
@@ -130,7 +128,6 @@ struct s_ps_keyword
     { .keyword = "DOWNTO"           , .token_type = PS_TOKEN_DOWNTO        },
     { .keyword = "ELSE"             , .token_type = PS_TOKEN_ELSE          },
     { .keyword = "END"              , .token_type = PS_TOKEN_END           },
-    { .keyword = "FALSE"            , .token_type = PS_TOKEN_FALSE         },
     { .keyword = "FILE"             , .token_type = PS_TOKEN_FILE          },
     { .keyword = "FOR"              , .token_type = PS_TOKEN_FOR           },
     { .keyword = "FUNCTION"         , .token_type = PS_TOKEN_FUNCTION      },
@@ -158,7 +155,6 @@ struct s_ps_keyword
     { .keyword = "STRING"           , .token_type = PS_TOKEN_STRING        },
     { .keyword = "THEN"             , .token_type = PS_TOKEN_THEN          },
     { .keyword = "TO"               , .token_type = PS_TOKEN_TO            },
-    { .keyword = "TRUE"             , .token_type = PS_TOKEN_TRUE          },
     { .keyword = "TYPE"             , .token_type = PS_TOKEN_TYPE          },
     { .keyword = "UNIT"             , .token_type = PS_TOKEN_UNIT          },
     { .keyword = "UNSIGNED"         , .token_type = PS_TOKEN_UNSIGNED      },

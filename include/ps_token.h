@@ -97,8 +97,6 @@ extern "C"
         PS_TOKEN_CHAR,
         PS_TOKEN_REAL,
         PS_TOKEN_STRING,
-        PS_TOKEN_FALSE,
-        PS_TOKEN_TRUE,
         PS_TOKEN_NIL,
         PS_TOKEN_ARRAY,
         PS_TOKEN_OF,
@@ -169,8 +167,7 @@ extern "C"
     typedef struct s_ps_token
     {
         ps_token_type type;
-        union
-        {
+        union {
             char identifier[MAX_IDENTIFIER + 1];
             ps_integer i;
             ps_unsigned u;
