@@ -12,7 +12,7 @@
 #include "ps_string.h"
 
 #ifdef __cplusplus
-extern 'C'
+extern "C"
 {
 #endif
 
@@ -25,10 +25,10 @@ extern 'C'
         ps_string *data;
     } ps_string_heap;
 
-    ps_string_heap *ps_string_heap_init(ps_string_heap * heap, size_t size);
-    void ps_string_heap_done(ps_string_heap * heap);
-    ps_string *ps_string_heap_alloc(ps_string_heap * heap, ps_string_len max);
-    ps_string *ps_string_heap_free(ps_string_heap * heap, ps_string * s);
+    ps_string_heap *ps_string_heap_init(ps_string_heap *heap, size_t size);
+    void ps_string_heap_done(ps_string_heap *heap);
+    ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max);
+    ps_string *ps_string_heap_free(ps_string_heap *heap, ps_string *s);
 
 #ifdef __cplusplus
 }

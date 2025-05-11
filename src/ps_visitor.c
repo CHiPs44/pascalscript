@@ -678,7 +678,7 @@ ps_visit_write_or_writeln(ps_interpreter* interpreter, bool exec, bool newline)
     if (!ps_visit_expression(interpreter, exec, &result))
       TRACE_ERROR("EXPR");
     if (exec) {
-      if (!ps_function_write_text(interpreter, stdout, &result))
+      if (!ps_procedure_write_text(interpreter, stdout, &result))
         TRACE_ERROR("WRITE");
     }
     if (lexer->current_token.type == PS_TOKEN_COMMA) {
@@ -725,7 +725,7 @@ ps_visit_assignment_or_procedure_call(ps_interpreter* interpreter, bool exec)
               interpreter, exec, symbol == &ps_system_procedure_writeln))
           TRACE_ERROR("WRITE!");
       } else if (symbol == &ps_system_procedure_randomize) {
-        if (!ps_function_randomize(interpreter))
+        if (!ps_procedure_randomize(interpreter))
           TRACE_ERROR("RANDOMIZE!");
       } else {
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);

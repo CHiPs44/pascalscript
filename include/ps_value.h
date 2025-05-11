@@ -7,8 +7,8 @@
 #ifndef _PS_VALUE_H
 #define _PS_VALUE_H
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "ps_type_definition.h"
 
@@ -21,8 +21,7 @@ extern "C"
     typedef struct s_ps_parameters ps_parameters;
 
     /** @brief Value union */
-    typedef union u_ps_value_data
-    {
+    typedef union u_ps_value_data {
         // clang-format off
         //                   Model/bytes 16 32 64 Explanation
         //                               -- -- -- ---------------------------
@@ -56,20 +55,19 @@ extern "C"
     ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data);
     void ps_value_free(ps_value *value);
 
-    // clang-format off
-    bool       ps_value_is_ordinal  (ps_value *value);
-    bool       ps_value_is_number   (ps_value *value);
-    ps_value  *ps_value_set_integer (ps_value *value, ps_integer  i);
-    ps_value  *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
-    ps_value  *ps_value_set_real    (ps_value *value, ps_real     r);
-    ps_value  *ps_value_set_boolean (ps_value *value, ps_boolean  b);
-    ps_value  *ps_value_set_char    (ps_value *value, ps_char     c);
-    // ps_value  *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
-    // ps_value  *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
-    // ps_value  *ps_value_set_string  (ps_value *value, ps_string  *s);
-    // ps_value  *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
-    // ps_string *ps_value_new_string  (char *s, ps_string_len max, ps_string_len len);
-    // clang-format on
+    bool ps_value_is_ordinal(ps_value *value);
+    bool ps_value_is_number(ps_value *value);
+    ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
+    ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
+    ps_value *ps_value_set_real(ps_value *value, ps_real r);
+    ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b);
+    ps_value *ps_value_set_char(ps_value *value, ps_char c);
+    /*
+    ps_value  *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
+    ps_value  *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
+    ps_value  *ps_value_set_string  (ps_value *value, ps_string  *s);
+    ps_value  *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
+    */
 
     char *ps_value_get_display_string(ps_value *value);
 

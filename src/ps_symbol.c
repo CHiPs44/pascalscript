@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ps_value.h"
 #include "ps_symbol.h"
+#include "ps_value.h"
 
 ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value)
 {
@@ -81,15 +81,17 @@ const struct s_ps_symbol_kind_name
     ps_symbol_kind kind;
     char *name;
 } ps_symbol_kind_names[] = {
-    {PS_SYMBOL_KIND_AUTO, "AUTO"},
-    {PS_SYMBOL_KIND_CONSTANT, "CONSTANT"},
-    {PS_SYMBOL_KIND_VARIABLE, "VARIABLE"},
-    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"},
-    {PS_SYMBOL_KIND_PROCEDURE, "PROCEDURE"},
-    {PS_SYMBOL_KIND_FUNCTION, "FUNCTION"},
-    {PS_SYMBOL_KIND_PROGRAM, "PROGRAM"},
-    {PS_SYMBOL_KIND_UNIT, "UNIT"},
+    // clang-format off
+    {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
+    {PS_SYMBOL_KIND_CONSTANT       , "CONSTANT" },
+    {PS_SYMBOL_KIND_VARIABLE       , "VARIABLE" },
+    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"     },
+    {PS_SYMBOL_KIND_PROCEDURE      , "PROCEDURE"},
+    {PS_SYMBOL_KIND_FUNCTION       , "FUNCTION" },
+    {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
+    {PS_SYMBOL_KIND_UNIT           , "UNIT"     },
     // ...
+    // clang-format on
 };
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
@@ -120,13 +122,9 @@ char *ps_symbol_dump_header()
 char *ps_symbol_dump_value(ps_symbol *symbol)
 {
     static char buffer[256];
-    snprintf(buffer, sizeof(buffer) - 1,
-             "SYMBOL: name=%-*s, scope=%-8s, kind=%-16s, type=%-16s, value=%s",
-             PS_IDENTIFIER_LEN,
-             symbol->name,
-             ps_symbol_get_scope_name(symbol->scope),
-             ps_symbol_get_kind_name(symbol->kind),
-             ps_value_get_type_definition_name(symbol->value->type),
+    snprintf(buffer, sizeof(buffer) - 1, "SYMBOL: name=%-*s, scope=%-8s, kind=%-16s, type=%-16s, value=%s",
+             PS_IDENTIFIER_LEN, symbol->name, ps_symbol_get_scope_name(symbol->scope),
+             ps_symbol_get_kind_name(symbol->kind), ps_value_get_type_definition_name(symbol->value->type),
              ps_value_get_debug_value(symbol->value));
     return buffer;
 }

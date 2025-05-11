@@ -7,6 +7,7 @@
 #include "ps_system.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
+#include "ps_procedures.h"
 #include "ps_signature.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
@@ -24,10 +25,15 @@ ps_type_definition  ps_type_def_type_def    = {.type = PS_TYPE_DEFINITION, .base
 ps_value            ps_value_type_def       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}};
 ps_symbol           ps_system_type_def      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = &ps_value_type_def};
 
-#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)\
-ps_type_definition  ps_type_def_##__name__    = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__}; \
-ps_value            ps_value_##__name__       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}}; \
-ps_symbol           ps_system_##__name__      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
+// clang-format on
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
+    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
+    ps_value ps_value_##__name__ = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};            \
+    ps_symbol ps_system_##__name__ = {.scope = PS_SYMBOL_SCOPE_SYSTEM,                                                 \
+                                      .kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
+                                      .name = __NAME__,                                                                \
+                                      .value = &ps_value_##__name__};
+// clang-format off
 
 PS_SYSTEM_TYPE(none     , "_N_O_N_E_", PS_TYPE_NONE      );
 PS_SYSTEM_TYPE(boolean  , "BOOLEAN"  , PS_TYPE_BOOLEAN   );
@@ -42,25 +48,30 @@ PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE      );
 /* STANDARD + MATH LIBRARY */
 
 /* procedures */
-ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ"     , .value = NULL};
-ps_symbol ps_system_procedure_readln    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN"   , .value = NULL};
-ps_symbol ps_system_procedure_write     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"    , .value = NULL};
-ps_symbol ps_system_procedure_writeln   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITELN"  , .value = NULL};
-ps_symbol ps_system_procedure_randomize = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "RANDOMIZE", .value = NULL};
+ps_value ps_value_procedure_read        = {.type = &ps_type_def_procedure, .data = {.v = NULL                    }};
+ps_value ps_value_procedure_readln      = {.type = &ps_type_def_procedure, .data = {.v = NULL                    }};
+ps_value ps_value_procedure_write       = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_write_text}};
+ps_value ps_value_procedure_writeln     = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_write_text}};
+ps_value ps_value_procedure_randomize   = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_randomize }};
+ps_symbol ps_system_procedure_read      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ"     , .value = &ps_value_procedure_read     };
+ps_symbol ps_system_procedure_readln    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN"   , .value = &ps_value_procedure_readln   };
+ps_symbol ps_system_procedure_write     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"    , .value = &ps_value_procedure_write    };
+ps_symbol ps_system_procedure_writeln   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITELN"  , .value = &ps_value_procedure_writeln  };
+ps_symbol ps_system_procedure_randomize = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_PROCEDURE, .name = "RANDOMIZE", .value = &ps_value_procedure_randomize};
 
 /* ordinal types functions */
-ps_value ps_value_function_odd        = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd }};
-ps_value ps_value_function_even       = {.type = &ps_type_def_function, .data = {.v = &ps_function_even}};
-ps_value ps_value_function_chr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr }};
-ps_value ps_value_function_ord        = {.type = &ps_type_def_function, .data = {.v = &ps_function_ord }};
-ps_value ps_value_function_succ       = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
-ps_value ps_value_function_pred       = {.type = &ps_type_def_function, .data = {.v = &ps_function_pred}};
-ps_symbol ps_system_function_odd      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ODD"    , .value = &ps_value_function_odd  };
-ps_symbol ps_system_function_even     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "EVEN"   , .value = &ps_value_function_even };
-ps_symbol ps_system_function_chr      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "CHR"    , .value = &ps_value_function_chr  };
-ps_symbol ps_system_function_ord      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ORD"    , .value = &ps_value_function_ord  };
-ps_symbol ps_system_function_succ     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SUCC"   , .value = &ps_value_function_succ };
-ps_symbol ps_system_function_pred     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = &ps_value_function_pred };
+ps_value ps_value_function_odd    = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd }};
+ps_value ps_value_function_even   = {.type = &ps_type_def_function, .data = {.v = &ps_function_even}};
+ps_value ps_value_function_chr    = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr }};
+ps_value ps_value_function_ord    = {.type = &ps_type_def_function, .data = {.v = &ps_function_ord }};
+ps_value ps_value_function_succ   = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
+ps_value ps_value_function_pred   = {.type = &ps_type_def_function, .data = {.v = &ps_function_pred}};
+ps_symbol ps_system_function_odd  = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ODD"    , .value = &ps_value_function_odd  };
+ps_symbol ps_system_function_even = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "EVEN"   , .value = &ps_value_function_even };
+ps_symbol ps_system_function_chr  = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "CHR"    , .value = &ps_value_function_chr  };
+ps_symbol ps_system_function_ord  = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ORD"    , .value = &ps_value_function_ord  };
+ps_symbol ps_system_function_succ = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SUCC"   , .value = &ps_value_function_succ };
+ps_symbol ps_system_function_pred = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = &ps_value_function_pred };
 /* functions with zero or one integer/real argument returning integer/real type */
 ps_value ps_value_function_random       = {.type = &ps_type_def_function, .data = {.v = &ps_function_random}};
 ps_symbol ps_system_function_random   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "RANDOM" , .value = &ps_value_function_random};
@@ -95,9 +106,14 @@ ps_symbol ps_system_function_log      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind 
 
 /* CONSTANTS */
 
-#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)\
-ps_value  ps_value_##TYPE##_##VALUE  = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};\
-ps_symbol ps_system_constant_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+// clang-format on
+#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
+    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.scope = PS_SYMBOL_SCOPE_SYSTEM,                                  \
+                                                     .kind = PS_SYMBOL_KIND_CONSTANT,                                  \
+                                                     .name = NAME,                                                     \
+                                                     .value = &ps_value_##TYPE##_##VALUE};
+// clang-format off
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
 PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
@@ -109,10 +125,6 @@ PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, PS_REAL_MIN);
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, PS_REAL_EPSILON);
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793115997963468544185161590576171875);
 
-// Keeped for reference
-// ps_value ps_value_boolean_false     = {.type = &ps_type_def_boolean , .data = {.b = (ps_boolean) false}};        
-// ps_symbol ps_system_boolean_false   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "FALSE"    , .value = &ps_value_boolean_false      };
-
 /* VERSION */
 PS_SYSTEM_CONSTANT(integer, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS      );
 PS_SYSTEM_CONSTANT(integer, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR);
@@ -120,10 +132,6 @@ PS_SYSTEM_CONSTANT(integer, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_
 PS_SYSTEM_CONSTANT(integer, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION_PATCH);
 PS_SYSTEM_CONSTANT(integer, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX);
 PS_SYSTEM_CONSTANT(string , ps_version      , "PS_VERSION"      , s, NULL            );
-
-// Keeped for reference
-// ps_value ps_value_version_major = {.type = &ps_type_def_unsigned, .data = {.u = PS_VERSION_MAJOR}};
-// ps_symbol ps_system_version_major = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_CONSTANT, .name = "PS_VERSION_MAJOR", .value = &ps_value_version_major};
 
 /* clang-format on */
 
@@ -221,5 +229,5 @@ bool ps_system_init(ps_interpreter *interpreter)
 
 void ps_system_done(ps_interpreter *interpreter)
 {
-    // ...
+    // ???
 }

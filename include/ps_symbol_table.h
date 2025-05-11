@@ -10,7 +10,7 @@
 #include "ps_symbol.h"
 
 #ifdef __cplusplus
-"C"
+extern "C"
 {
 #endif
 
