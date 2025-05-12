@@ -11,7 +11,7 @@
 #include "ps_symbol.h"
 #include "ps_value.h"
 
-ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value)
+ps_symbol *ps_symbol_alloc(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value)
 {
     ps_symbol *symbol = (ps_symbol *)calloc(1, sizeof(ps_symbol));
     if (symbol == NULL)
@@ -20,8 +20,11 @@ ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identif
     symbol->kind = kind;
     if (name != NULL)
         memcpy(&symbol->name, name, PS_IDENTIFIER_LEN + 1);
+    else
+        memset(&symbol->name, 0, PS_IDENTIFIER_LEN + 1);
+    symbol->allocated = true;
     symbol->value = value;
-    // fprintf(stderr, "ps_symbol_init: %s\n", name == NULL ? "NULL" : (char *)name);
+    // fprintf(stderr, "ps_symbol_alloc: %s\n", name == NULL ? "NULL" : (char *)name);
     return symbol;
 }
 

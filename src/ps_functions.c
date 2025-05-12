@@ -11,6 +11,7 @@
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
+#include "ps_string.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_value.h"
@@ -242,6 +243,30 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         }
         /* clang-format on */
         break;
+    case PS_TYPE_STRING:
+        switch (token_type)
+        {
+        case PS_TOKEN_PLUS:
+            if (a->data.s->len + b.data.s->len > PS_STRING_MAX_LEN)
+                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_RANGE);
+            result->data.s = ps_string_concat(a->data.s, b.data.s);
+            if (result->data.s == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+            result->type = ps_system_string.value->data.t;
+            return true;
+            /* clang-format off */
+        case PS_TOKEN_LESS_THAN:        result->data.b = ps_string_compare(a->data.s, b.data.s) <  0; break;
+        case PS_TOKEN_LESS_OR_EQUAL:    result->data.b = ps_string_compare(a->data.s, b.data.s) <= 0; break;
+        case PS_TOKEN_EQUAL:            result->data.b = ps_string_compare(a->data.s, b.data.s) == 0; break;
+        case PS_TOKEN_NOT_EQUAL:        result->data.b = ps_string_compare(a->data.s, b.data.s) != 0; break;
+        case PS_TOKEN_GREATER_THAN:     result->data.b = ps_string_compare(a->data.s, b.data.s) >  0; break;
+        case PS_TOKEN_GREATER_OR_EQUAL: result->data.b = ps_string_compare(a->data.s, b.data.s) >= 0; break;
+        default:                        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
+            /* clang-format on */
+        }
+        result->type = ps_system_boolean.value->data.t;
+        break;
+    case PS_TYPE_DEFINITION:
     default:
         RETURN_ERROR(PS_RUNTIME_ERROR_TYPE_MISMATCH);
     }

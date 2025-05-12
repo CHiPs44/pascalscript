@@ -66,7 +66,7 @@ extern "C"
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
-    ps_symbol *ps_symbol_init(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value);
+    ps_symbol *ps_symbol_alloc(ps_symbol_scope scope, ps_symbol_kind kind, ps_identifier *name, ps_value *value);
     void ps_symbol_free(ps_symbol *symbol);
 
     /** @brief Get name of symbol scope */

@@ -78,7 +78,7 @@ void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
 
 ps_symbol *ps_interpreter_auto_add_value(ps_interpreter *interpreter, ps_symbol_scope scope, ps_value *value)
 {
-    ps_symbol *symbol = ps_symbol_init(scope, PS_SYMBOL_KIND_AUTO, NULL, value);
+    ps_symbol *symbol = ps_symbol_alloc(scope, PS_SYMBOL_KIND_AUTO, NULL, value);
     return symbol;
 }
 

@@ -74,7 +74,7 @@ bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_
     ps_symbol *variable;
     for (uint8_t i = 0; i < formal->used; i++)
     {
-        variable = ps_symbol_init(
+        variable = ps_symbol_alloc(
             scope, PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
         if (variable == NULL)
             return false;

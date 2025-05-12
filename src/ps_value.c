@@ -5,12 +5,12 @@
 */
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
-#include "ps_string.h"
 #include "ps_error.h"
+#include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
 #include "ps_type_definition.h"
@@ -44,17 +44,17 @@ bool ps_value_is_number(ps_value *value)
     return (value->type->base >= PS_TYPE_REAL || value->type->base <= PS_TYPE_UNSIGNED);
 }
 
-#define PS_VALUE_SET(type_def, x)            \
-    if (value == NULL)                       \
-    {                                        \
-        value = calloc(1, sizeof(ps_value)); \
-        if (value == NULL)                   \
-        {                                    \
-            return NULL;                     \
-        }                                    \
-    }                                        \
-    value->type = type_def;                  \
-    value->data.x = x;                       \
+#define PS_VALUE_SET(type_def, x)                                                                                      \
+    if (value == NULL)                                                                                                 \
+    {                                                                                                                  \
+        value = calloc(1, sizeof(ps_value));                                                                           \
+        if (value == NULL)                                                                                             \
+        {                                                                                                              \
+            return NULL;                                                                                               \
+        }                                                                                                              \
+    }                                                                                                                  \
+    value->type = type_def;                                                                                            \
+    value->data.x = x;                                                                                                 \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
@@ -222,13 +222,15 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_INTEGER:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i, value->data.i);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i,
+                     value->data.i);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10, value->data.i);
         break;
     case PS_TYPE_UNSIGNED:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u, value->data.u);
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u,
+                     value->data.u);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10, value->data.u);
         break;
@@ -237,14 +239,15 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_CHAR:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.', value->data.c);
+            snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.',
+                     value->data.c);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
         break;
     case PS_TYPE_STRING:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"",
-                     value->data.s->len, value->data.s->max, PS_IDENTIFIER_LEN - 10, value->data.s->str);
+            snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"", value->data.s->len, value->data.s->max,
+                     PS_IDENTIFIER_LEN - 10, value->data.s->str);
         else
         {
             memset(buffer, 0, sizeof(buffer));
@@ -281,9 +284,7 @@ char *ps_value_dump(ps_value *value)
                  : value->type == NULL ? "TYPE!"
                                        : ps_value_get_type_definition_name(value->type);
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
-    snprintf(buffer, sizeof(buffer) - 1,
-             "VALUE: type=%s, value=%s",
-             type, data);
+    snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
     return buffer;
 }
 
@@ -291,10 +292,7 @@ void ps_value_debug(FILE *output, char *message, ps_value *value)
 {
     if (output == NULL)
         output = stderr;
-    fprintf(output,
-            "DEBUG\t%s%s\n",
-            message == NULL ? "" : message,
-            ps_value_dump(value));
+    fprintf(output, "DEBUG\t%s%s\n", message == NULL ? "" : message, ps_value_dump(value));
 }
 
 /* EOF */

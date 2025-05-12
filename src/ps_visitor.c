@@ -258,10 +258,11 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
     case PS_TOKEN_STRING_VALUE:
         if (exec)
         {
+            symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, lexer->current_token.value.s);
+            if (symbol == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             result->type = ps_system_string.value->data.t;
-            result->data.s = ps_string_create(lexer->current_token.value.s);
-            if (result->data.s == NULL)
-                TRACE_ERROR("STRING");
+            result->data.s = symbol->value->data.s;
         }
         READ_NEXT_TOKEN;
         break;
@@ -503,11 +504,11 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
-            // TODO do not create a new string if the value is the same as an existing one
-            type = ps_system_string.value->data.t;
-            data.s = ps_string_create(lexer->current_token.value.s);
-            if (data.s == NULL)
+            constant = ps_symbol_table_add_string_constant(interpreter->parser->symbols, lexer->current_token.value.s);
+            if (constant == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+            type = ps_system_string.value->data.t;
+            data.s = constant->value->data.s;
             break;
         default:
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
@@ -520,7 +521,7 @@ bool ps_visit_const(ps_interpreter *interpreter, bool exec)
             value = ps_value_alloc(type, data);
             if (value == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-            constant = ps_symbol_init(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_CONSTANT, &identifier, value);
+            constant = ps_symbol_alloc(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_CONSTANT, &identifier, value);
             if (constant == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             if (ps_symbol_table_add(interpreter->parser->symbols, constant) == NULL)
@@ -595,6 +596,10 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
             type = ps_system_real.value->data.t;
             data.r = 0.0;
             break;
+        case PS_TOKEN_STRING:
+            type = ps_system_string.value->data.t;
+            data.s = NULL;
+            break;
         case PS_TOKEN_IDENTIFIER:
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         default:
@@ -608,7 +613,7 @@ bool ps_visit_var(ps_interpreter *interpreter, bool exec)
             for (int i = 0; i <= var_count; i++)
             {
                 value = ps_value_alloc(type, data);
-                variable = ps_symbol_init(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
+                variable = ps_symbol_alloc(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
                 if (variable == NULL)
                     RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
                 if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
@@ -1230,7 +1235,7 @@ bool ps_visit_program(ps_interpreter *interpreter, bool exec)
     READ_NEXT_TOKEN;
     if (exec)
     {
-        ps_symbol *program = ps_symbol_init(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
+        ps_symbol *program = ps_symbol_alloc(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
         if (ps_symbol_table_add(interpreter->parser->symbols, program) == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
     }

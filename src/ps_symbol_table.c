@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
@@ -83,27 +84,6 @@ ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name)
     return table->symbols[index];
 }
 
-ps_symbol *ps_symbol_table_find_string_constant(ps_symbol_table *table, char *z)
-{
-    ps_symbol_table_size index = 0;
-    ps_symbol *symbol;
-    char *y;
-    while (index < table->size)
-    {
-        symbol = table->symbols[index];
-        if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_CONSTANT ||
-            symbol->value->type != ps_system_string.value->data.t)
-            continue;
-        y = (char *)symbol->value->data.s->str;
-        if (strcmp(z, y) == 0)
-        {
-            return symbol;
-        }
-        index += 1;
-    }
-    return NULL;
-}
-
 ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->used >= table->size)
@@ -140,6 +120,69 @@ ps_symbol *ps_symbol_table_delete(ps_symbol_table *table, ps_identifier *name)
     return symbol;
 }
 
+ps_symbol *ps_symbol_table_find_string_constant(ps_symbol_table *table, char *z)
+{
+    ps_symbol_table_size index = 0;
+    ps_symbol *symbol;
+    while (index < table->size)
+    {
+        symbol = table->symbols[index];
+        // ps_symbol_debug(stderr, "ps_symbol_table_find_string_constant", symbol);
+        if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_AUTO ||
+            symbol->value->type != ps_system_string.value->data.t)
+        {
+            index += 1;
+            continue;
+        }
+        if (strcmp(z, (char *)symbol->value->data.s->str) == 0)
+        {
+            // fprintf(stderr, "ps_symbol_table_find_string_constant: %d %s\n", index, symbol->name);
+            return symbol;
+        }
+        index += 1;
+    }
+    // fprintf(stderr, "ps_symbol_table_find_string_constant: %s not found\n", z);
+    return NULL;
+}
+
+ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z)
+{
+    ps_symbol *symbol;
+    ps_value *value;
+    ps_value_data data;
+    symbol = ps_symbol_table_find_string_constant(table, z);
+    if (symbol != NULL)
+    {
+        // fprintf(stderr, "ps_symbol_table_add_string_constant: OLD '%s' => %s\n", z, symbol->name);
+        return symbol;
+    }
+    data.s = ps_string_create(z);
+    if (data.s == NULL)
+        return NULL;
+    value = ps_value_alloc(ps_system_string.value->data.t, data);
+    if (value == NULL)
+    {
+        ps_string_free(data.s);
+        return NULL;
+    }
+    symbol = ps_symbol_alloc(PS_SYMBOL_SCOPE_GLOBAL, PS_SYMBOL_KIND_AUTO, NULL, value);
+    if (symbol == NULL)
+    {
+        ps_value_free(value);
+        ps_string_free(data.s);
+        return NULL;
+    }
+    if (ps_symbol_table_add(table, symbol) == NULL)
+    {
+        ps_symbol_free(symbol);
+        ps_value_free(value);
+        ps_string_free(data.s);
+        return NULL;
+    }
+    // fprintf(stderr, "ps_symbol_table_add_string_constant: NEW '%s' => %s\n", z, symbol->name);
+    return symbol;
+}
+
 void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
 {
     if (output == NULL)
@@ -169,8 +212,8 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
             symbol = table->symbols[i];
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
-            char *type_name = symbol->value == NULL ? "N/A" : ps_value_get_type_definition_name(symbol->value->type);
-            char *value = symbol->value == NULL ? "N/A" : ps_value_get_debug_value(symbol->value);
+            char *type_name = symbol->value == NULL ? "NULL!" : ps_value_get_type_definition_name(symbol->value->type);
+            char *value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
             fprintf(output, "┃%04d┃%-*s┃%-9s┃%-8s┃%-8s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, symbol->name, kind_name,
                     scope_name, type_name, PS_IDENTIFIER_LEN, value);
         }

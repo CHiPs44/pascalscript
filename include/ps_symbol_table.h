@@ -38,31 +38,34 @@ extern "C"
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
 
     /** @brief (Allocate and) initialize symbol table (reset used count & empty all symbols) */
-    ps_symbol_table *ps_symbol_table_init(ps_symbol_table * table);
+    ps_symbol_table *ps_symbol_table_init(ps_symbol_table *table);
 
     /** @brief Deallocate symbol table */
-    void ps_symbol_table_done(ps_symbol_table * table);
+    void ps_symbol_table_done(ps_symbol_table *table);
 
     /** @brief How many used symbols? */
-    ps_symbol_table_size ps_symbol_table_used(ps_symbol_table * table);
+    ps_symbol_table_size ps_symbol_table_used(ps_symbol_table *table);
 
     /** @brief How many free symbols? */
-    ps_symbol_table_size ps_symbol_table_available(ps_symbol_table * table);
+    ps_symbol_table_size ps_symbol_table_available(ps_symbol_table *table);
 
     /** @brief Find symbol's index in table by name or PS_SYMBOL_TABLE_ERROR_NOT_FOUND */
-    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table * table, ps_identifier * name);
+    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier *name);
 
     /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_get(ps_symbol_table * table, ps_identifier * name);
+    ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name);
 
     /** @brief Add symbol, returning NULL if table is full or symbol already exists */
-    ps_symbol *ps_symbol_table_add(ps_symbol_table * table, ps_symbol * symbol);
+    ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
 
     /** @brief Delete symbol, returning NULL if symbol doesn't exist */
-    ps_symbol *ps_symbol_table_delete(ps_symbol_table * table, ps_identifier * name);
+    ps_symbol *ps_symbol_table_delete(ps_symbol_table *table, ps_identifier *name);
+
+    /** @brief Get or add a string constant */
+    ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z);
 
     /** @brief Dump symbol table to stderr */
-    void ps_symbol_table_dump(ps_symbol_table * table, char *title, FILE *output);
+    void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output);
 
 #ifdef __cplusplus
 }
