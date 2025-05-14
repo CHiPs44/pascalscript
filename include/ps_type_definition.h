@@ -42,7 +42,7 @@ extern "C"
         // /* User defineable types without scalar values */
         // PS_TYPE_SET,
         // PS_TYPE_POINTER,
-        // /* Reference types (pointer to value(s)) */
+        /* Reference types (pointer to value(s)) */
         PS_TYPE_STRING,
         // PS_TYPE_ARRAY,  // *FUTURE*
         // PS_TYPE_RECORD, // *FUTURE*

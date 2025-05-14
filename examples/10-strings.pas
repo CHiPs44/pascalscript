@@ -3,6 +3,7 @@ Const
   HelloWorld = 'Hello, World!';
 Var
   s1, s2, s3: String;
+  I: Integer;
 Begin
   WriteLn('PascalScript version ', PS_VERSION, ' ', PS_BITNESS, ' bits');
   WriteLn;
@@ -17,6 +18,9 @@ Begin
   s3 := s1 + s2;
   // s3 := s1 + ' ';
   // s3 := s3 + s2;
+  s3 := '';
+  For I := 1 to 10 do
+    s3 := s3 + '()';
   WriteLn('s3 = ', s3);
   // WriteLn('Length(s1) = ', Length(s1));
   // WriteLn('Length(s2) = ', Length(s2));

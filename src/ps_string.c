@@ -85,18 +85,31 @@ ps_string *ps_string_create(char *z)
     return s;
 }
 
-ps_string *ps_string_concat(ps_string *a, ps_string *b)
+ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max)
 {
     size_t len = a->len + b->len;
-    if (len > PS_STRING_MAX_LEN)
+    // exit if max length is specified and exceeded
+    if (max > 0)
     {
-        errno = EINVAL;
-        return NULL;
+        if (len > max)
+        {
+            errno = EINVAL;
+            return NULL;
+        }
+    }
+    else
+    {
+        max = PS_STRING_MAX_LEN;
+        // truncate if max length is exceeded
+        if (len > max)
+        {
+            len = PS_STRING_MAX_LEN;
+        }
     }
     ps_string *c = ps_string_alloc((ps_string_len)len);
     if (c == NULL)
     {
-        return NULL;
+        return NULL; // errno = ENOMEM
     }
     memcpy(c->str, a->str, a->len);
     memcpy(c->str + a->len, b->str, b->len);
