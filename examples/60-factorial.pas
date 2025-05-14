@@ -1,8 +1,8 @@
-
 Program Factorial;
 
 Const
-  Trace = true;
+  Trace = false;
+  //true;
 
 Function RecursiveFactorial(N: Integer): Integer;
 Begin
@@ -21,7 +21,7 @@ Begin
 End;
 
 Function IterativeFactorial(N: Integer): Integer;
-Var 
+Var
   I, F: Integer;
 Begin
   If N <= 1 Then
@@ -43,7 +43,7 @@ Begin
   IterativeFactorial := F;
 End;
 
-Var 
+Var
   N: Integer;
 Begin
   Repeat

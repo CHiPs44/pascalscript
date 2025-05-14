@@ -131,6 +131,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                            ps_token_type token_type)
 {
     ps_value b;
+    // Same base type?
     if (a->type->base == bb->type->base)
     {
         b.type = bb->type;
@@ -149,14 +150,14 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         // "cast" char to string? 'a' + 'bb' => 'abb'
         else if (a->type->base == PS_TYPE_CHAR && bb->type->base == PS_TYPE_STRING)
         {
-            interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-            return false;
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         }
         // cast char to string? 'aa' + 'b' => 'aab'
         else if (a->type->base == PS_TYPE_STRING && bb->type->base == PS_TYPE_CHAR)
         {
-            interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-            return false;
+            b.type = ps_system_string.value->data.t;
+            b.data.s = ps_string_create_char(bb->data.c);
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         }
         else
             RETURN_ERROR(PS_RUNTIME_ERROR_TYPE_MISMATCH);
@@ -188,6 +189,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
             case PS_TOKEN_GREATER_OR_EQUAL: result->data.i = a->data.i >= b.data.i; break;
             case PS_TOKEN_EQUAL:            result->data.i = a->data.i == b.data.i; break;
             case PS_TOKEN_NOT_EQUAL:        result->data.i = a->data.i != b.data.i; break;
+            case PS_TOKEN_SHL:              RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            case PS_TOKEN_SHR:              RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
             default:                        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         /* clang-format on */
@@ -196,21 +199,23 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         /* clang-format off */
         switch (token_type)
         {
-        case PS_TOKEN_AND:              result->data.u = a->data.u &  b.data.u; break;
-        case PS_TOKEN_OR:               result->data.u = a->data.u |  b.data.u; break;
-        case PS_TOKEN_XOR:              result->data.u = a->data.u ^  b.data.u; break;
-        case PS_TOKEN_PLUS:             result->data.u = a->data.u +  b.data.u; break;
-        case PS_TOKEN_MINUS:            result->data.u = a->data.u -  b.data.u; break;
-        case PS_TOKEN_STAR:             result->data.u = a->data.u *  b.data.u; break;
-        case PS_TOKEN_DIV:              result->data.u = a->data.u /  b.data.u; break;
-        case PS_TOKEN_MOD:              result->data.u = a->data.u %  b.data.u; break;
-        case PS_TOKEN_LESS_THAN:        result->data.u = a->data.u <  b.data.u; break;
-        case PS_TOKEN_LESS_OR_EQUAL:    result->data.u = a->data.u <= b.data.u; break;
-        case PS_TOKEN_GREATER_THAN:     result->data.u = a->data.u >  b.data.u; break;
-        case PS_TOKEN_GREATER_OR_EQUAL: result->data.u = a->data.u >= b.data.u; break;
-        case PS_TOKEN_EQUAL:            result->data.u = a->data.u == b.data.u; break;
-        case PS_TOKEN_NOT_EQUAL:        result->data.u = a->data.u != b.data.u; break;
-        default:                        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
+            case PS_TOKEN_AND:              result->data.u = a->data.u &  b.data.u; break;
+            case PS_TOKEN_OR:               result->data.u = a->data.u |  b.data.u; break;
+            case PS_TOKEN_XOR:              result->data.u = a->data.u ^  b.data.u; break;
+            case PS_TOKEN_PLUS:             result->data.u = a->data.u +  b.data.u; break;
+            case PS_TOKEN_MINUS:            result->data.u = a->data.u -  b.data.u; break;
+            case PS_TOKEN_STAR:             result->data.u = a->data.u *  b.data.u; break;
+            case PS_TOKEN_DIV:              result->data.u = a->data.u /  b.data.u; break;
+            case PS_TOKEN_MOD:              result->data.u = a->data.u %  b.data.u; break;
+            case PS_TOKEN_LESS_THAN:        result->data.u = a->data.u <  b.data.u; break;
+            case PS_TOKEN_LESS_OR_EQUAL:    result->data.u = a->data.u <= b.data.u; break;
+            case PS_TOKEN_GREATER_THAN:     result->data.u = a->data.u >  b.data.u; break;
+            case PS_TOKEN_GREATER_OR_EQUAL: result->data.u = a->data.u >= b.data.u; break;
+            case PS_TOKEN_EQUAL:            result->data.u = a->data.u == b.data.u; break;
+            case PS_TOKEN_NOT_EQUAL:        result->data.u = a->data.u != b.data.u; break;
+            case PS_TOKEN_SHL:              RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            case PS_TOKEN_SHR:              RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            default:                        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         /* clang-format on */
         break;
@@ -218,6 +223,9 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         /* clang-format off */
         switch (token_type)
         {
+        case PS_TOKEN_PLUS:             result->type=ps_system_string.value->data.t; 
+                                        result->data.s = ps_string_concat_chars(a->data.c, b.data.c); 
+                                        break;
         case PS_TOKEN_LESS_THAN:        result->data.b = a->data.c <  b.data.c; break;
         case PS_TOKEN_LESS_OR_EQUAL:    result->data.b = a->data.c <= b.data.c; break;
         case PS_TOKEN_GREATER_THAN:     result->data.b = a->data.c >  b.data.c; break;
@@ -264,7 +272,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         case PS_TOKEN_PLUS:
             if (a->data.s->len + b.data.s->len > PS_STRING_MAX_LEN)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_RANGE);
-            result->data.s = ps_string_concat(a->data.s, b.data.s);
+            result->data.s = ps_string_concat(a->data.s, b.data.s, a->data.s->len + b.data.s->len);
             if (result->data.s == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             result->type = ps_system_string.value->data.t;

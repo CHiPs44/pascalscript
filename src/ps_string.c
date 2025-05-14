@@ -85,6 +85,17 @@ ps_string *ps_string_create(char *z)
     return s;
 }
 
+ps_string *ps_string_create_char(ps_char c)
+{
+    ps_string *s = ps_string_alloc(1);
+    if (s == NULL)
+        return NULL; // errno = ENOMEM
+    s->str[0] = c;
+    s->str[1] = '\0'; // null terminate
+    s->len = 1;
+    return s;
+}
+
 ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max)
 {
     size_t len = a->len + b->len;
@@ -113,8 +124,21 @@ ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max)
     }
     memcpy(c->str, a->str, a->len);
     memcpy(c->str + a->len, b->str, b->len);
+    c->str[len] = '\0'; // null terminate
     c->len = len;
     return c;
+}
+
+ps_string *ps_string_concat_chars(ps_char a, ps_char b)
+{
+    ps_string *s = ps_string_alloc(2);
+    if (s == NULL)
+        return NULL; // errno = ENOMEM
+    s->str[0] = a;
+    s->str[1] = b;
+    s->str[2] = '\0'; // null terminate
+    s->len = 2;
+    return s;
 }
 
 ps_string *ps_string_append(ps_string *a, ps_string *b)

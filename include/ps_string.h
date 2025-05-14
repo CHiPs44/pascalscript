@@ -12,7 +12,7 @@
 #include "ps_value.h"
 
 #ifdef __cplusplus
-extern 'C'
+extern "C"
 {
 #endif
 
@@ -37,10 +37,20 @@ extern 'C'
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_create(char *z);
 
+    /// @brief Allocate and set a new string from a char
+    /// @example create('A') => 'A'
+    /// @return new string if OK else NULL (check errno for ENOMEM)
+    ps_string *ps_string_create_char(ps_char c);
+
     /// @brief Concatenate two strings into another one if lengths are OK
     /// @example concat('ABC', 'DEF') => 'ABCDEF'
     /// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_concat(ps_string *a, ps_string *b);
+    ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max);
+
+    /// @brief Concatenate two chars into a new string
+    /// @example concat('A', 'B') => 'AB'
+    /// @return Newly allocated string or NULL (check errno for ENOMEM)
+    ps_string *ps_string_concat_chars(ps_char a, ps_char b);
 
     /// @brief Append string b to string a if lengths are OK
     /// @return a or NULL if error
@@ -65,8 +75,8 @@ extern 'C'
 
     /// @brief Get length of string
     /// @example length('ABCDEFGHI') => 9
-    /// @param s 
-    /// @return 
+    /// @param s
+    /// @return
     ps_string_len ps_string_length(ps_string *s);
 
     /// @brief Delete chars from a string, cf. https://www.freepascal.org/docs-html/rtl/system/delete.html
