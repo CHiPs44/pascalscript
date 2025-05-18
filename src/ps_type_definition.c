@@ -9,8 +9,8 @@
 #include <string.h>
 
 #include "ps_error.h"
-#include "ps_symbol_table.h"
 #include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
@@ -18,7 +18,7 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
     ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
     if (definition == NULL)
-        return NULL;
+        return NULL; // errno = ENOMEM
     definition->type = definition->base = type;
     return definition;
 }
@@ -49,21 +49,23 @@ const struct s_ps_type_name
     char *name;
 } ps_type_names[] = {
     // clang-format off
+    //                     12345678
     {PS_TYPE_NONE       , "NONE"    },
     {PS_TYPE_DEFINITION , "TYPE_DEF"},
+    {PS_TYPE_REAL       , "REAL"    },
     {PS_TYPE_INTEGER    , "INTEGER" },
     {PS_TYPE_UNSIGNED   , "UNSIGNED"},
-    {PS_TYPE_REAL       , "REAL"    },
     {PS_TYPE_BOOLEAN    , "BOOLEAN" },
     {PS_TYPE_CHAR       , "CHAR"    },
-    // {PS_TYPE_ENUM       , "ENUM"    },
-    // {PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    // {PS_TYPE_SET        , "SET"     },
-    // {PS_TYPE_POINTER    , "POINTER" },
+    {PS_TYPE_ENUM       , "ENUM"    },
+    {PS_TYPE_SUBRANGE   , "SUBRANGE"},
+    {PS_TYPE_SET        , "SET"     },
+    {PS_TYPE_POINTER    , "POINTER" },
     {PS_TYPE_STRING     , "STRING"  },
-    // {PS_TYPE_ARRAY      , "ARRAY"   },
-    // {PS_TYPE_RECORD     , "RECORD"  },
-    // {PS_TYPE_FILE       , "FILE"    },
+    {PS_TYPE_ARRAY      , "ARRAY"   },
+    {PS_TYPE_RECORD     , "RECORD"  },
+    {PS_TYPE_FILE       , "FILE"    },
+    {PS_TYPE_OBJECT     , "OBJECT"  },
     // clang-format on
 };
 
@@ -71,11 +73,8 @@ char *ps_value_get_type_name(ps_value_type type)
 {
     for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(struct s_ps_type_name); i++)
     {
-        if (type != ps_type_names[i].type)
-        {
-            continue;
-        }
-        return ps_type_names[i].name;
+        if (type == ps_type_names[i].type)
+            return ps_type_names[i].name;
     }
     return NULL;
 }

@@ -7,8 +7,8 @@
 #ifndef _PS_TYPE_DEFINITION
 #define _PS_TYPE_DEFINITION
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "ps_config.h"
 #include "ps_symbol.h"
@@ -36,38 +36,38 @@ extern "C"
         /* Simple types that are scalar but not numbers (without Abs for example) */
         PS_TYPE_BOOLEAN,
         PS_TYPE_CHAR,
-        // /* User defineable types with scalar values (with Ord/Pred/Succ) */
-        // PS_TYPE_ENUM,
-        // PS_TYPE_SUBRANGE,
-        // /* User defineable types without scalar values */
-        // PS_TYPE_SET,
-        // PS_TYPE_POINTER,
+        /* User defineable types with scalar values (with Ord/Pred/Succ) */
+        PS_TYPE_ENUM,     // *FUTURE*
+        PS_TYPE_SUBRANGE, // *FUTURE*
+        /* User defineable types without scalar values */
+        PS_TYPE_SET,     // *FUTURE*
+        PS_TYPE_POINTER, // *FUTURE*
         /* Reference types (pointer to value(s)) */
         PS_TYPE_STRING,
-        // PS_TYPE_ARRAY,  // *FUTURE*
-        // PS_TYPE_RECORD, // *FUTURE*
-        // PS_TYPE_FILE,   // *FUTURE*
-        // PS_TYPE_OBJECT, // *FUTURE*
-        PS_TYPE_MAX = UINT8_MAX
+        PS_TYPE_ARRAY,     // *FUTURE*
+        PS_TYPE_RECORD,    // *FUTURE*
+        PS_TYPE_FILE,      // *FUTURE*
+        PS_TYPE_OBJECT,    // *FUTURE*
+        PS_TYPE_MAX = 0x0f // was UINT8_MAX
     } __attribute__((__packed__)) ps_value_type;
 
     // /** @brief Enums are stored in unsigned value (first=0, second=1, ...) */
     // typedef struct s_ps_type_definition_enum
     // {
     //     ps_unsigned count;
-    //     ps_identifier *values;
+    //     ps_symbol *values;
     // } __attribute__((__packed__)) ps_type_definition_enum;
 
-    // /** @brief Subranges limits stored in integer, unsigned or char values (-10..15, 3..18 or 'A'..'Z'), needed to implement arrays */
-    // typedef struct s_ps_type_definition_subrange
+    // /** @brief Subranges limits stored in integer, unsigned or char values (-10..15, 3..18 or 'A'..'Z'), needed to
+    // implement arrays */ typedef struct s_ps_type_definition_subrange
     // {
     //     ps_unsigned count;
     //     ps_value *min;
     //     ps_value *max;
     // } __attribute__((__packed__)) ps_type_definition_subrange;
 
-    // /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to 2^ord(enum_value) */
-    // typedef struct s_ps_type_definition_set
+    // /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to
+    // 2^ord(enum_value) */ typedef struct s_ps_type_definition_set
     // {
     //     ps_unsigned count; // max: UINT8_MAX, UINT16_MAX, UINT32_MAX, UINT64_MAX
     //     ps_symbol *symbol_enum;
@@ -91,11 +91,12 @@ extern "C"
     //     ps_string_len max;
     // } __attribute__((__packed__)) ps_type_definition_string;
 
-    /** @brief Type definition: type + base + parameters if needed (simple types have type == base)*/
+    /** @brief Type definition: type + base + parameters if needed (simple types have type == base) */
     typedef struct s_ps_type_definition
     {
         ps_value_type type; /** @brief visible value type */
-        ps_value_type base; /** @brief same as type for system types like integer or char, values for sub-type for subranges and enums */
+        ps_value_type base; /** @brief same as type for system types like integer or char, 
+                                       values for sub-type for subranges and enums */
         // union
         // {
         //     ps_type_definition_enum def_enum;
