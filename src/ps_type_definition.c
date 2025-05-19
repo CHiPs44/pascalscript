@@ -16,32 +16,41 @@
 
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
-    ps_type_definition *definition = calloc(1, sizeof(ps_type_definition));
-    if (definition == NULL)
+    ps_type_definition *type_def = calloc(1, sizeof(ps_type_definition));
+    if (type_def == NULL)
         return NULL; // errno = ENOMEM
-    definition->type = definition->base = type;
-    return definition;
+    type_def->type = type_def->base = type;
+    return type_def;
 }
 
-// ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_identifier *values)
-// {
-//     ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_ENUM);
-//     if (definition == NULL)
-//         return NULL;
-//     definition->def.def_enum.count = count;
-//     // TODO definition->def.def_enum.values = values;
-//     return definition;
-// }
+ps_type_definition *ps_type_definition_create_subrange(ps_integer min, ps_integer max)
+{
+    ps_type_definition *type_def = ps_type_definition_create_base(PS_TYPE_SUBRANGE);
+    if (type_def == NULL)
+        return NULL;
+    type_def->def.def_subrange.min = min;
+    type_def->def.def_subrange.max = max;
+    return type_def;
+}
 
-// ps_type_definition *ps_type_definition_create_subrange(ps_integer low, ps_integer high)
-// {
-//     ps_type_definition *definition = ps_type_definition_create_base(PS_TYPE_SUBRANGE);
-//     if (definition == NULL)
-//         return NULL;
-//     definition->def.def_subrange.min = low;
-//     definition->def.def_subrange.max = high;
-//     return definition;
-// }
+ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol *values)
+{
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM);
+    if (type_def == NULL)
+        return NULL;
+    type_def->def.def_enum.count = count;
+    type_def->def.def_enum.values = calloc(count, sizeof(ps_symbol *));
+    if (type_def->def.def_enum.values == NULL)
+    {
+        free(type_def);
+        return NULL; // errno = ENOMEM
+    }
+    for (ps_unsigned i = 0; i < count; i++)
+    {
+        type_def->def.def_enum.values[i] = values[i];
+    }
+    return type_def;
+}
 
 const struct s_ps_type_name
 {
