@@ -22,32 +22,53 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-    /** @brief Base types /!\ DO NOT CHANGE ORDER, AS RANGES ARE USED IN CODE! /!\ */
+    typedef struct _ps_value_type_flag
+    {
+        bool base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
+        bool numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
+        bool scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ) */
+        bool reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
+    } __attribute__((__packed__)) ps_value_type_flag;
+
+    /** @brief Base types */
     typedef enum e_ps_value_type
     {
-        PS_TYPE_NONE = 0,   // No type yet or unknown
+        PS_TYPE_NONE,       // No type yet or unknown
+        PS_TYPE_REAL,       // real /float
+        PS_TYPE_INTEGER,    // signed integer
+        PS_TYPE_UNSIGNED,   // unsigned integer
+        PS_TYPE_BOOLEAN,    // boolean
+        PS_TYPE_CHAR,       // char
+        PS_TYPE_STRING,     // string, Pascal style
         PS_TYPE_DEFINITION, // Type definition
-        /* Simple types => direct value */
-        PS_TYPE_REAL, // float
-        /* Simple types with scalar values (with ord/pred/succ) */
-        PS_TYPE_INTEGER,  // signed integer
-        PS_TYPE_UNSIGNED, // unsigned integer
-        /* Simple types that are scalar but not numbers (without Abs for example) */
-        PS_TYPE_BOOLEAN, // boolean
-        PS_TYPE_CHAR,    // char
-        /* User defineable types with scalar values (with Ord/Pred/Succ) */
-        PS_TYPE_SUBRANGE, // *FUTURE*
-        PS_TYPE_ENUM,     // *FUTURE*
-        /* User defineable types without scalar values */
-        PS_TYPE_SET,     // *FUTURE*
-        PS_TYPE_POINTER, // *FUTURE*
-        /* Reference types (pointer to value(s)) */
-        PS_TYPE_STRING, // string, Pascal style
-        PS_TYPE_ARRAY,  // *FUTURE*
-        PS_TYPE_RECORD, // *FUTURE*
-        PS_TYPE_FILE,   // *FUTURE*
-        PS_TYPE_OBJECT, // *FUTURE*
+        PS_TYPE_SUBRANGE,   // *FUTURE*
+        PS_TYPE_ENUM,       // *FUTURE*
+        PS_TYPE_SET,        // *FUTURE*
+        PS_TYPE_POINTER,    // *FUTURE*
+        PS_TYPE_ARRAY,      // *FUTURE*
+        PS_TYPE_RECORD,     // *FUTURE*
+        PS_TYPE_FILE,       // *FUTURE*
+        PS_TYPE_OBJECT,     // *FUTURE*
     } __attribute__((__packed__)) ps_value_type;
+
+    ps_value_type_flag ps_value_type_flags[] = {
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_NONE
+        {.base = 1, .numeric = 1, .scalar = 0, .reference = 0}, // PS_TYPE_REAL
+        {.base = 1, .numeric = 1, .scalar = 1, .reference = 0}, // PS_TYPE_INTEGER
+        {.base = 1, .numeric = 1, .scalar = 1, .reference = 0}, // PS_TYPE_UNSIGNED
+        {.base = 1, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_BOOLEAN
+        {.base = 1, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_CHAR
+        {.base = 1, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_STRING
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_DEFINITION
+        {.base = 0, .numeric = 1, .scalar = 0, .reference = 0}, // PS_TYPE_SUBRANGE
+        {.base = 0, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_ENUM
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_SET
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_POINTER
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_ARRAY
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_RECORD
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_FILE
+        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}  // PS_TYPE_OBJECT
+    };
 
     /** @brief Subranges, stored as integer values, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
