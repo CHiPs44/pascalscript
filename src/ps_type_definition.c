@@ -14,6 +14,26 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
+ps_value_type_flag ps_value_type_flags[] = {
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_NONE
+    {.is_base = 1, .is_numeric = 1, .is_scalar = 0, .is_signed = 1, .is_reference = 0}, // PS_TYPE_REAL
+    {.is_base = 1, .is_numeric = 1, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, // PS_TYPE_INTEGER
+    {.is_base = 1, .is_numeric = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_UNSIGNED
+    {.is_base = 1, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_BOOLEAN
+    {.is_base = 1, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_CHAR
+    {.is_base = 1, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_STRING
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_DEFINITION
+    {.is_base = 0, .is_numeric = 1, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SUBRANGE
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_ENUM
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SET
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_POINTER
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_ARRAY
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_RECORD
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_FILE
+    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}  // PS_TYPE_OBJECT
+};
+#define PS_VALUE_TYPE_SIZE sizeof(ps_value_type_flags)
+
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
     ps_type_definition *type_def = calloc(1, sizeof(ps_type_definition));
@@ -25,7 +45,7 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 
 ps_type_definition *ps_type_definition_create_subrange(ps_integer min, ps_integer max)
 {
-    ps_type_definition *type_def = ps_type_definition_create_base(PS_TYPE_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
         return NULL;
     type_def->def.def_subrange.min = min;
@@ -52,39 +72,18 @@ ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol 
     return type_def;
 }
 
-const struct s_ps_type_name
-{
-    ps_value_type type;
-    char *name;
-} ps_type_names[] = {
+const char *ps_type_names[] = {
     // clang-format off
-    //                     12345678
-    {PS_TYPE_NONE       , "NONE"    },
-    {PS_TYPE_DEFINITION , "TYPE_DEF"},
-    {PS_TYPE_REAL       , "REAL"    },
-    {PS_TYPE_INTEGER    , "INTEGER" },
-    {PS_TYPE_UNSIGNED   , "UNSIGNED"},
-    {PS_TYPE_BOOLEAN    , "BOOLEAN" },
-    {PS_TYPE_CHAR       , "CHAR"    },
-    {PS_TYPE_ENUM       , "ENUM"    },
-    {PS_TYPE_SUBRANGE   , "SUBRANGE"},
-    {PS_TYPE_SET        , "SET"     },
-    {PS_TYPE_POINTER    , "POINTER" },
-    {PS_TYPE_STRING     , "STRING"  },
-    {PS_TYPE_ARRAY      , "ARRAY"   },
-    {PS_TYPE_RECORD     , "RECORD"  },
-    {PS_TYPE_FILE       , "FILE"    },
-    {PS_TYPE_OBJECT     , "OBJECT"  },
+//   12345678    12345678    12345678    12345678    12345678    12345678    12345678    12345678
+    "NONE"    , "TYPE_DEF", "REAL"    , "INTEGER" , "UNSIGNED", "BOOLEAN" , "CHAR"    , "ENUM"    ,
+    "SUBRANGE", "SET"     , "POINTER" , "STRING"  , "ARRAY"   , "RECORD"  , "FILE"    , "OBJECT"  ,
     // clang-format on
 };
 
 char *ps_value_get_type_name(ps_value_type type)
 {
-    for (size_t i = 0; i < sizeof(ps_type_names) / sizeof(struct s_ps_type_name); i++)
-    {
-        if (type == ps_type_names[i].type)
-            return ps_type_names[i].name;
-    }
+    if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
+        return (char *)ps_type_names[type];
     return NULL;
 }
 
@@ -92,9 +91,7 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
 {
     static char buffer[PS_IDENTIFIER_SIZE * 4];
     if (type_def == NULL)
-    {
         return "NULL";
-    }
     char *type_name = ps_value_get_type_name(type_def->type);
     if (type_name == NULL)
         return "UNKNOWN";

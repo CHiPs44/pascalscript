@@ -24,11 +24,12 @@ extern "C"
 
     typedef struct _ps_value_type_flag
     {
-        bool base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
-        bool numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
-        bool scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ) */
-        bool reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
-    } __attribute__((__packed__)) ps_value_type_flag;
+        bool is_base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
+        bool is_numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
+        bool is_scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ) */
+        bool is_signed : 1;    /** @brief Signed value (integer, real) */
+        bool is_reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
+    } /*__attribute__((__packed__))*/ ps_value_type_flag;
 
     /** @brief Base types */
     typedef enum e_ps_value_type
@@ -51,29 +52,11 @@ extern "C"
         PS_TYPE_OBJECT,     // *FUTURE*
     } __attribute__((__packed__)) ps_value_type;
 
-    ps_value_type_flag ps_value_type_flags[] = {
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_NONE
-        {.base = 1, .numeric = 1, .scalar = 0, .reference = 0}, // PS_TYPE_REAL
-        {.base = 1, .numeric = 1, .scalar = 1, .reference = 0}, // PS_TYPE_INTEGER
-        {.base = 1, .numeric = 1, .scalar = 1, .reference = 0}, // PS_TYPE_UNSIGNED
-        {.base = 1, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_BOOLEAN
-        {.base = 1, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_CHAR
-        {.base = 1, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_STRING
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_DEFINITION
-        {.base = 0, .numeric = 1, .scalar = 0, .reference = 0}, // PS_TYPE_SUBRANGE
-        {.base = 0, .numeric = 0, .scalar = 1, .reference = 0}, // PS_TYPE_ENUM
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 0}, // PS_TYPE_SET
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_POINTER
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_ARRAY
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_RECORD
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}, // PS_TYPE_FILE
-        {.base = 0, .numeric = 0, .scalar = 0, .reference = 1}  // PS_TYPE_OBJECT
-    };
+    extern ps_value_type_flag ps_value_type_flags[];
 
     /** @brief Subranges, stored as integer values, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
-        ps_unsigned count;
         ps_integer min;
         ps_integer max;
     } __attribute__((__packed__)) ps_type_definition_subrange;

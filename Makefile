@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-CC = LANG=C gcc
+CC 		 = LANG=C gcc
 # CFLAGS   = -std=c17 -Wall -Iinclude -ggdb
 CFLAGS   = -std=c17 -Wall -Iinclude -ggdb -m32
 CLIBS    = -lm

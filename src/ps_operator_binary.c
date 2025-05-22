@@ -48,7 +48,7 @@ typedef bool (*ps_binary_func)(ps_interpreter *interpreter, ps_value *a, ps_valu
         return true;                                                                                                   \
     }
 
-#define NUMBER_FUNC_DIV(__NAME__, __A__, __B__, __OP__, __R__)                                                         \
+#define NUMBER_FUNC_DIV_MOD(__NAME__, __A__, __B__, __OP__, __R__)                                                     \
     bool ps_##__NAME__(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)                        \
     {                                                                                                                  \
         if (b->data.__B__ == 0)                                                                                        \
@@ -57,29 +57,29 @@ typedef bool (*ps_binary_func)(ps_interpreter *interpreter, ps_value *a, ps_valu
         return true;                                                                                                   \
     }
 
-#define NUMBER_FUNC_DIVR(__NAME__, __A__, __B__, __OP__)                                                               \
+#define NUMBER_FUNC_DIV_REAL(__NAME__, __A__, __B__)                                                                   \
     bool ps_##__NAME__(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)                        \
     {                                                                                                                  \
         if ((ps_real)(b->data.__B__) == 0.0)                                                                           \
             RETURN_ERROR(PS_RUNTIME_ERROR_DIVISION_BY_ZERO)                                                            \
-        result->data.r = (ps_real)(a->data.__A__)__OP__(ps_real)(b->data.__B__);                                       \
+        result->data.r = (ps_real)(a->data.__A__) / (ps_real)(b->data.__B__);                                          \
         return true;                                                                                                   \
     }
 
 NUMBER_FUNC(and_ii, i, i, &, i)
-NUMBER_FUNC(and_iu, i, i, &, i)
+NUMBER_FUNC(and_iu, i, u, &, i)
 NUMBER_FUNC(and_ui, u, i, &, u)
 NUMBER_FUNC(and_uu, u, u, &, u)
 NUMBER_FUNC(and_bb, b, b, &&, b)
 
 NUMBER_FUNC(or_ii, i, i, &, i)
-NUMBER_FUNC(or_iu, i, i, &, i)
+NUMBER_FUNC(or_iu, i, u, &, i)
 NUMBER_FUNC(or_ui, u, i, &, u)
 NUMBER_FUNC(or_uu, u, u, &, u)
 NUMBER_FUNC(or_bb, b, b, ||, b)
 
 NUMBER_FUNC(xor_ii, i, i, ^, i)
-NUMBER_FUNC(xor_iu, i, i, ^, i)
+NUMBER_FUNC(xor_iu, i, u, ^, i)
 NUMBER_FUNC(xor_ui, u, i, ^, u)
 NUMBER_FUNC(xor_uu, u, u, ^, u)
 
@@ -95,10 +95,9 @@ bool ps_xor_bb(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *
 }
 
 NUMBER_FUNC(add_ii, i, i, &, i)
-NUMBER_FUNC(add_iu, i, i, &, i)
+NUMBER_FUNC(add_iu, i, u, &, i)
 NUMBER_FUNC(add_ui, u, i, &, u)
 NUMBER_FUNC(add_uu, u, u, &, u)
-
 NUMBER_FUNC(add_rr, r, r, +, r)
 NUMBER_FUNC(add_ri, r, i, +, r)
 NUMBER_FUNC(add_ru, r, u, +, r)
@@ -106,10 +105,9 @@ NUMBER_FUNC(add_ir, i, r, +, r)
 NUMBER_FUNC(add_ur, u, r, +, r)
 
 NUMBER_FUNC(sub_ii, i, i, -, i)
-NUMBER_FUNC(sub_iu, i, i, -, i)
+NUMBER_FUNC(sub_iu, i, u, -, i)
 NUMBER_FUNC(sub_ui, u, i, -, u)
 NUMBER_FUNC(sub_uu, u, u, -, u)
-
 NUMBER_FUNC(sub_rr, r, r, -, r)
 NUMBER_FUNC(sub_ri, r, i, -, r)
 NUMBER_FUNC(sub_ru, r, u, -, r)
@@ -117,38 +115,37 @@ NUMBER_FUNC(sub_ir, i, r, -, r)
 NUMBER_FUNC(sub_ur, u, r, -, r)
 
 NUMBER_FUNC(mul_ii, i, i, *, i)
-NUMBER_FUNC(mul_iu, i, i, *, i)
+NUMBER_FUNC(mul_iu, i, u, *, i)
 NUMBER_FUNC(mul_ui, u, i, *, u)
 NUMBER_FUNC(mul_uu, u, u, *, u)
-
 NUMBER_FUNC(mul_rr, r, r, *, r)
 NUMBER_FUNC(mul_ri, r, i, *, r)
 NUMBER_FUNC(mul_ru, r, u, *, r)
 NUMBER_FUNC(mul_ir, i, r, *, r)
 NUMBER_FUNC(mul_ur, u, r, *, r)
 
-NUMBER_FUNC_DIV(div_ii, i, i, /, i)
-NUMBER_FUNC_DIV(div_iu, i, i, /, i)
-NUMBER_FUNC_DIV(div_ui, u, i, /, u)
-NUMBER_FUNC_DIV(div_uu, u, u, /, u)
+NUMBER_FUNC_DIV_MOD(div_ii, i, i, /, i)
+NUMBER_FUNC_DIV_MOD(div_iu, i, u, /, i)
+NUMBER_FUNC_DIV_MOD(div_ui, u, i, /, u)
+NUMBER_FUNC_DIV_MOD(div_uu, u, u, /, u)
 
-NUMBER_FUNC_DIV(mod_ii, i, i, %, i)
-NUMBER_FUNC_DIV(mod_iu, i, i, %, i)
-NUMBER_FUNC_DIV(mod_ui, u, i, %, u)
-NUMBER_FUNC_DIV(mod_uu, u, u, %, u)
+NUMBER_FUNC_DIV_MOD(mod_ii, i, i, %, i)
+NUMBER_FUNC_DIV_MOD(mod_iu, i, u, %, i)
+NUMBER_FUNC_DIV_MOD(mod_ui, u, i, %, u)
+NUMBER_FUNC_DIV_MOD(mod_uu, u, u, %, u)
 
-NUMBER_FUNC_DIVR(divr_ii, i, i, /)
-NUMBER_FUNC_DIVR(divr_iu, i, i, /)
-NUMBER_FUNC_DIVR(divr_ui, u, i, /)
-NUMBER_FUNC_DIVR(divr_uu, u, u, /)
-NUMBER_FUNC_DIVR(divr_rr, r, r, /)
-NUMBER_FUNC_DIVR(divr_ri, r, i, /)
-NUMBER_FUNC_DIVR(divr_ru, r, u, /)
-NUMBER_FUNC_DIVR(divr_ir, i, r, /)
-NUMBER_FUNC_DIVR(divr_ur, u, r, /)
+NUMBER_FUNC_DIV_REAL(divr_ii, i, i)
+NUMBER_FUNC_DIV_REAL(divr_iu, i, u)
+NUMBER_FUNC_DIV_REAL(divr_ui, u, i)
+NUMBER_FUNC_DIV_REAL(divr_uu, u, u)
+NUMBER_FUNC_DIV_REAL(divr_rr, r, r)
+NUMBER_FUNC_DIV_REAL(divr_ri, r, i)
+NUMBER_FUNC_DIV_REAL(divr_ru, r, u)
+NUMBER_FUNC_DIV_REAL(divr_ir, i, r)
+NUMBER_FUNC_DIV_REAL(divr_ur, u, r)
 
 NUMBER_FUNC(eq_ii, i, i, ==, b)
-NUMBER_FUNC(eq_iu, i, i, ==, b)
+NUMBER_FUNC(eq_iu, i, u, ==, b)
 NUMBER_FUNC(eq_ui, u, i, ==, b)
 NUMBER_FUNC(eq_uu, u, u, ==, b)
 NUMBER_FUNC(eq_rr, r, r, ==, b)
@@ -159,7 +156,7 @@ NUMBER_FUNC(eq_ur, u, r, ==, b)
 NUMBER_FUNC(eq_cc, c, c, ==, b)
 
 NUMBER_FUNC(ne_ii, i, i, !=, b)
-NUMBER_FUNC(ne_iu, i, i, !=, b)
+NUMBER_FUNC(ne_iu, i, u, !=, b)
 NUMBER_FUNC(ne_ui, u, i, !=, b)
 NUMBER_FUNC(ne_uu, u, u, !=, b)
 NUMBER_FUNC(ne_rr, r, r, !=, b)
@@ -170,7 +167,7 @@ NUMBER_FUNC(ne_ur, u, r, !=, b)
 NUMBER_FUNC(ne_cc, c, c, !=, b)
 
 NUMBER_FUNC(lt_ii, i, i, <, b)
-NUMBER_FUNC(lt_iu, i, i, <, b)
+NUMBER_FUNC(lt_iu, i, u, <, b)
 NUMBER_FUNC(lt_ui, u, i, <, b)
 NUMBER_FUNC(lt_uu, u, u, <, b)
 NUMBER_FUNC(lt_rr, r, r, <, b)
@@ -181,7 +178,7 @@ NUMBER_FUNC(lt_ur, u, r, <, b)
 NUMBER_FUNC(lt_cc, c, r, <, b)
 
 NUMBER_FUNC(le_ii, i, i, <=, b)
-NUMBER_FUNC(le_iu, i, i, <=, b)
+NUMBER_FUNC(le_iu, i, u, <=, b)
 NUMBER_FUNC(le_ui, u, i, <=, b)
 NUMBER_FUNC(le_uu, u, u, <=, b)
 NUMBER_FUNC(le_rr, r, r, <=, b)
@@ -192,7 +189,7 @@ NUMBER_FUNC(le_ur, u, r, <=, b)
 NUMBER_FUNC(le_cc, c, c, <=, b)
 
 NUMBER_FUNC(gt_ii, i, i, >, b)
-NUMBER_FUNC(gt_iu, i, i, >, b)
+NUMBER_FUNC(gt_iu, i, u, >, b)
 NUMBER_FUNC(gt_ui, u, i, >, b)
 NUMBER_FUNC(gt_uu, u, u, >, b)
 NUMBER_FUNC(gt_rr, r, r, >, b)
@@ -203,7 +200,7 @@ NUMBER_FUNC(gt_ur, u, r, >, b)
 NUMBER_FUNC(gt_cc, c, c, >, b)
 
 NUMBER_FUNC(ge_ii, i, i, >=, b)
-NUMBER_FUNC(ge_iu, i, i, >=, b)
+NUMBER_FUNC(ge_iu, i, u, >=, b)
 NUMBER_FUNC(ge_ui, u, i, >=, b)
 NUMBER_FUNC(ge_uu, u, u, >=, b)
 NUMBER_FUNC(ge_rr, r, r, >=, b)
@@ -214,12 +211,12 @@ NUMBER_FUNC(ge_ur, u, r, >=, b)
 NUMBER_FUNC(ge_cc, c, c, >=, b)
 
 NUMBER_FUNC(shl_ii, i, i, <<, i)
-NUMBER_FUNC(shl_iu, i, i, <<, i)
+NUMBER_FUNC(shl_iu, i, u, <<, i)
 NUMBER_FUNC(shl_ui, u, i, <<, u)
 NUMBER_FUNC(shl_uu, u, u, <<, u)
 
 NUMBER_FUNC(shr_ii, i, i, >>, i)
-NUMBER_FUNC(shr_iu, i, i, >>, i)
+NUMBER_FUNC(shr_iu, i, u, >>, i)
 NUMBER_FUNC(shr_ui, u, i, >>, u)
 NUMBER_FUNC(shr_uu, u, u, >>, u)
 
@@ -364,9 +361,9 @@ STRING_FUNC_SS(ge_ss, ps_string_ge, b)
 
 typedef struct s_ps_operator_binary_entry
 {
-    uint16_t k;        /** @brief TTTTTTTTAAAABBBB: operator token + left & right operand base types */
-    ps_value_type r;   /** @brief result base type */
-    ps_binary_func *f; /** @brief function to call for the operator */
+    uint16_t k;       /** @brief TTTTTTTTAAAABBBB: operator token + left & right operand base types */
+    ps_value_type r;  /** @brief result base type */
+    ps_binary_func f; /** @brief function to call for the operator */
 } /*__attribute__((__packed__))*/ ps_operator_binary_entry;
 
 // clang-format off
@@ -562,7 +559,8 @@ void ps_operator_binary_dump()
     }
 }
 
-bool ps_operator_binary_exec(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
+//ps_operator_binary_exec
+bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
                              ps_token_type token_type)
 {
     //           TTTTTTTTTT | AAAA                 | BBBB
@@ -577,11 +575,10 @@ bool ps_operator_binary_exec(ps_interpreter *interpreter, ps_value *a, ps_value 
             break;
         }
     }
-    if (entry.k != k)
+    if (entry.k == 0)
         RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE)
     if (!((*entry.f)(interpreter, a, b, result)))
         return false;
-    ps_value_type r = entry.r;
     if (result->type != NULL && result->type->base != PS_TYPE_NONE)
     {
         // check if the result type is compatible with the entry's result type
@@ -590,7 +587,7 @@ bool ps_operator_binary_exec(ps_interpreter *interpreter, ps_value *a, ps_value 
     }
     else
     {
-    // if we don't know what the result type is, we take entry's result type
+        // if we don't know what the result type is, we take entry's result type converting base type to the system type
         switch (entry.r)
         {
         case PS_TYPE_REAL:
@@ -615,4 +612,5 @@ bool ps_operator_binary_exec(ps_interpreter *interpreter, ps_value *a, ps_value 
             RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE)
         }
     }
+    return true;
 }
