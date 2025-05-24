@@ -6,11 +6,13 @@ Const
 Var
     a, b, c, d : Integer;
 Begin
-    WriteLn(Msg);
+    // WriteLn(Msg);
     a := Foo;
+    // WriteLn(a);
     b := 2;
+    // WriteLn(b);
     c := a + b;
-    Write(R);
+    // Write(R);
     WriteLn(c);
     d := a * b Div c;
     // Foo := 12;

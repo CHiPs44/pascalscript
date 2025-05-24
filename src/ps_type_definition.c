@@ -75,14 +75,14 @@ ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol 
 const char *ps_type_names[] = {
     // clang-format off
 //   12345678    12345678    12345678    12345678    12345678    12345678    12345678    12345678
-    "NONE"    , "TYPE_DEF", "REAL"    , "INTEGER" , "UNSIGNED", "BOOLEAN" , "CHAR"    , "ENUM"    ,
-    "SUBRANGE", "SET"     , "POINTER" , "STRING"  , "ARRAY"   , "RECORD"  , "FILE"    , "OBJECT"  ,
+    "NONE"    , "REAL"    , "INTEGER" , "UNSIGNED", "BOOLEAN" , "CHAR"    , "STRING"  , "TYPE_DEF", 
+    "SUBRANGE", "ENUM"    , "SET"     , "POINTER" , "ARRAY"   , "RECORD"  , "FILE"    , "OBJECT"  ,
     // clang-format on
 };
 
 char *ps_value_get_type_name(ps_value_type type)
 {
-    if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
+    // if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
         return (char *)ps_type_names[type];
     return NULL;
 }

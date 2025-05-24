@@ -31,6 +31,8 @@ extern "C"
     bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
                                ps_token_type token_type);
 
+    void ps_operator_binary_dump();
+
     /* clang-format off */
 
   bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result);

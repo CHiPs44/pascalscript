@@ -55,8 +55,8 @@ extern "C"
     ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data);
     void ps_value_free(ps_value *value);
 
-    bool ps_value_is_ordinal(ps_value *value);
-    bool ps_value_is_number(ps_value *value);
+    bool ps_value_is_scalar(ps_value *value);
+    bool ps_value_is_numeric(ps_value *value);
     ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
     ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
     ps_value *ps_value_set_real(ps_value *value, ps_real r);
