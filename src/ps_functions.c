@@ -487,6 +487,23 @@ bool ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
+/** @brief TAN - Get tangent of floating point value */
+bool ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    switch (value->type->base)
+    {
+    case PS_TYPE_REAL:
+        result->type = ps_system_real.value->data.t;
+        if (cos(value->data.r) == 0.0)
+            RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_RANGE);
+        result->data.r = sin(value->data.r) / cos(value->data.r);
+        break;
+    default:
+        RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_REAL);
+    }
+    return true;
+}
+
 /** @brief ARCTAN - Get arc tangent of floating point value */
 bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {

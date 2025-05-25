@@ -47,8 +47,8 @@ extern "C"
     {
         bool is_base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
         bool is_numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
-        bool is_scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ, e.g. integer, unsigned, subrange, enum) */
-        bool is_signed : 1;    /** @brief Signed value (integer, real) */
+        bool is_scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ, e.g. integer, unsigned, char, subrange, enum) */
+        bool is_signed : 1;    /** @brief Signed value (integer, real, subrange) */
         bool is_reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
     } /*__attribute__((__packed__))*/ ps_value_type_flag;
 

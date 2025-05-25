@@ -52,6 +52,7 @@ extern "C"
   
   bool ps_function_sin   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_cos   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  bool ps_function_tan   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_sqr   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_sqrt  (ps_interpreter *interpreter, ps_value *value, ps_value *result);

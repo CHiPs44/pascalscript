@@ -1,19 +1,20 @@
 Program Second;
 Const 
-    Foo = 1;
-    Msg = 'The Quick Brown Fox Jumps Over The Lazy Dog.';
-    R = 'The result is: ';
+    Foo = 100;
 Var
-    a, b, c, d : Integer;
+    a, b, c, d: Integer;
+    r: Real;
 Begin
-    // WriteLn(Msg);
     a := Foo;
-    // WriteLn(a);
-    b := 2;
-    // WriteLn(b);
-    c := a + b;
-    // Write(R);
-    WriteLn(c);
-    d := a * b Div c;
+    WriteLn('a=', a);
+    b := 20;
+    WriteLn('b=', b);
+    c := 234;
+    c := a + b + c;
+    WriteLn('c=', c);
+    d := (a * b) Div c;
+    WriteLn('d=', d);
+    r := (a * b) / c;
+    WriteLn('r=', r);
     // Foo := 12;
 End.

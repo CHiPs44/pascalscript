@@ -94,13 +94,7 @@ bool ps_xor_bb(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *
     return true;
 }
 
-// NUMBER_FUNC(add_ii, i, i, +, i)
-_Bool ps_add_ii(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
-{
-    result->data.i = a->data.i + b->data.i;
-    return 1;
-}
-
+NUMBER_FUNC(add_ii, i, i, +, i)
 NUMBER_FUNC(add_iu, i, u, +, i)
 NUMBER_FUNC(add_ui, u, i, +, u)
 NUMBER_FUNC(add_uu, u, u, +, u)
@@ -130,7 +124,18 @@ NUMBER_FUNC(mul_ru, r, u, *, r)
 NUMBER_FUNC(mul_ir, i, r, *, r)
 NUMBER_FUNC(mul_ur, u, r, *, r)
 
-NUMBER_FUNC_DIV_MOD(div_ii, i, i, /, i)
+_Bool ps_div_ii(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+{
+    if (b->data.i == 0)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_DIVISION_BY_ZERO;
+        return 0;
+    }
+    result->data.i = a->data.i / b->data.i;
+    return 1;
+}
+
+// NUMBER_FUNC_DIV_MOD(div_ii, i, i, /, i)
 NUMBER_FUNC_DIV_MOD(div_iu, i, u, /, i)
 NUMBER_FUNC_DIV_MOD(div_ui, u, i, /, u)
 NUMBER_FUNC_DIV_MOD(div_uu, u, u, /, u)
@@ -378,93 +383,85 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
 
     // ==================== BITWISE OPERATORS ====================
 
-    {PS_TOKEN_AND             << 8 | II, PS_TYPE_INTEGER , &ps_and_ii},
-    {PS_TOKEN_AND             << 8 | IU, PS_TYPE_INTEGER , &ps_and_iu},
-    {PS_TOKEN_AND             << 8 | UI, PS_TYPE_UNSIGNED, &ps_and_ui},
-    {PS_TOKEN_AND             << 8 | UU, PS_TYPE_UNSIGNED, &ps_and_uu},
-    {PS_TOKEN_AND             << 8 | BB, PS_TYPE_BOOLEAN , &ps_and_bb},
-
-    {PS_TOKEN_OR              << 8 | II, PS_TYPE_INTEGER , &ps_or_ii },
-    {PS_TOKEN_OR              << 8 | IU, PS_TYPE_INTEGER , &ps_or_iu },
-    {PS_TOKEN_OR              << 8 | UI, PS_TYPE_UNSIGNED, &ps_or_ui },
-    {PS_TOKEN_OR              << 8 | UU, PS_TYPE_UNSIGNED, &ps_or_uu },
-    {PS_TOKEN_OR              << 8 | BB, PS_TYPE_BOOLEAN , &ps_or_bb },
-
-    {PS_TOKEN_XOR             << 8 | II, PS_TYPE_INTEGER , &ps_xor_ii},
-    {PS_TOKEN_XOR             << 8 | IU, PS_TYPE_INTEGER , &ps_xor_iu},
-    {PS_TOKEN_XOR             << 8 | UI, PS_TYPE_UNSIGNED, &ps_xor_ui},
-    {PS_TOKEN_XOR             << 8 | UU, PS_TYPE_UNSIGNED, &ps_xor_uu},
-    {PS_TOKEN_XOR             << 8 | BB, PS_TYPE_BOOLEAN , &ps_xor_bb},
+    {PS_TOKEN_AND              << 8 | II, PS_TYPE_INTEGER , &ps_and_ii},
+    {PS_TOKEN_AND              << 8 | IU, PS_TYPE_INTEGER , &ps_and_iu},
+    {PS_TOKEN_AND              << 8 | UI, PS_TYPE_UNSIGNED, &ps_and_ui},
+    {PS_TOKEN_AND              << 8 | UU, PS_TYPE_UNSIGNED, &ps_and_uu},
+    {PS_TOKEN_AND              << 8 | BB, PS_TYPE_BOOLEAN , &ps_and_bb},
+    {PS_TOKEN_OR               << 8 | II, PS_TYPE_INTEGER , &ps_or_ii },
+    {PS_TOKEN_OR               << 8 | IU, PS_TYPE_INTEGER , &ps_or_iu },
+    {PS_TOKEN_OR               << 8 | UI, PS_TYPE_UNSIGNED, &ps_or_ui },
+    {PS_TOKEN_OR               << 8 | UU, PS_TYPE_UNSIGNED, &ps_or_uu },
+    {PS_TOKEN_OR               << 8 | BB, PS_TYPE_BOOLEAN , &ps_or_bb },
+    {PS_TOKEN_XOR              << 8 | II, PS_TYPE_INTEGER , &ps_xor_ii},
+    {PS_TOKEN_XOR              << 8 | IU, PS_TYPE_INTEGER , &ps_xor_iu},
+    {PS_TOKEN_XOR              << 8 | UI, PS_TYPE_UNSIGNED, &ps_xor_ui},
+    {PS_TOKEN_XOR              << 8 | UU, PS_TYPE_UNSIGNED, &ps_xor_uu},
+    {PS_TOKEN_XOR              << 8 | BB, PS_TYPE_BOOLEAN , &ps_xor_bb},
 
     // ==================== SHIFT OPERATORS ====================
 
-    {PS_TOKEN_SHL             << 8 | II, PS_TYPE_INTEGER , &ps_shl_ii},
-    {PS_TOKEN_SHL             << 8 | IU, PS_TYPE_INTEGER , &ps_shl_iu},
-    {PS_TOKEN_SHL             << 8 | UI, PS_TYPE_UNSIGNED, &ps_shl_ui},
-    {PS_TOKEN_SHL             << 8 | UU, PS_TYPE_UNSIGNED, &ps_shl_uu},
-    {PS_TOKEN_SHR             << 8 | II, PS_TYPE_UNSIGNED, &ps_shr_ii},
-    {PS_TOKEN_SHR             << 8 | IU, PS_TYPE_UNSIGNED, &ps_shr_iu},
-    {PS_TOKEN_SHR             << 8 | UI, PS_TYPE_UNSIGNED, &ps_shr_ui},
-    {PS_TOKEN_SHR             << 8 | UU, PS_TYPE_UNSIGNED, &ps_shr_uu},
+    {PS_TOKEN_SHL              << 8 | II, PS_TYPE_INTEGER , &ps_shl_ii},
+    {PS_TOKEN_SHL              << 8 | IU, PS_TYPE_INTEGER , &ps_shl_iu},
+    {PS_TOKEN_SHL              << 8 | UI, PS_TYPE_UNSIGNED, &ps_shl_ui},
+    {PS_TOKEN_SHL              << 8 | UU, PS_TYPE_UNSIGNED, &ps_shl_uu},
+    {PS_TOKEN_SHR              << 8 | II, PS_TYPE_UNSIGNED, &ps_shr_ii},
+    {PS_TOKEN_SHR              << 8 | IU, PS_TYPE_UNSIGNED, &ps_shr_iu},
+    {PS_TOKEN_SHR              << 8 | UI, PS_TYPE_UNSIGNED, &ps_shr_ui},
+    {PS_TOKEN_SHR              << 8 | UU, PS_TYPE_UNSIGNED, &ps_shr_uu},
 
     // ==================== ARITHMETIC OPERATORS ====================
 
-    {PS_TOKEN_PLUS            << 8 | II, PS_TYPE_INTEGER , &ps_add_ii},
-    {PS_TOKEN_PLUS            << 8 | IU, PS_TYPE_INTEGER , &ps_add_iu},
-    {PS_TOKEN_PLUS            << 8 | UI, PS_TYPE_UNSIGNED, &ps_add_ui},
-    {PS_TOKEN_PLUS            << 8 | UU, PS_TYPE_UNSIGNED, &ps_add_uu},
-    {PS_TOKEN_PLUS            << 8 | RR, PS_TYPE_REAL    , &ps_add_rr},
-    {PS_TOKEN_PLUS            << 8 | RI, PS_TYPE_REAL    , &ps_add_ri},
-    {PS_TOKEN_PLUS            << 8 | RU, PS_TYPE_REAL    , &ps_add_ru},
-    {PS_TOKEN_PLUS            << 8 | IR, PS_TYPE_REAL    , &ps_add_ir},
-    {PS_TOKEN_PLUS            << 8 | UR, PS_TYPE_REAL    , &ps_add_ur},
-    {PS_TOKEN_PLUS            << 8 | CC, PS_TYPE_STRING  , &ps_add_cc},
-    {PS_TOKEN_PLUS            << 8 | CS, PS_TYPE_STRING  , &ps_add_cs},
-    {PS_TOKEN_PLUS            << 8 | SC, PS_TYPE_STRING  , &ps_add_sc},
-    {PS_TOKEN_PLUS            << 8 | SS, PS_TYPE_STRING  , &ps_add_ss},
-        
-    {PS_TOKEN_MINUS           << 8 | II, PS_TYPE_INTEGER , &ps_sub_ii},
-    {PS_TOKEN_MINUS           << 8 | IU, PS_TYPE_INTEGER , &ps_sub_iu},
-    {PS_TOKEN_MINUS           << 8 | UI, PS_TYPE_UNSIGNED, &ps_sub_ui},
-    {PS_TOKEN_MINUS           << 8 | UU, PS_TYPE_UNSIGNED, &ps_sub_uu},
-    {PS_TOKEN_MINUS           << 8 | RR, PS_TYPE_REAL    , &ps_sub_rr},
-    {PS_TOKEN_MINUS           << 8 | RI, PS_TYPE_REAL    , &ps_sub_ri},
-    {PS_TOKEN_MINUS           << 8 | RU, PS_TYPE_REAL    , &ps_sub_ru},
-    {PS_TOKEN_MINUS           << 8 | IR, PS_TYPE_REAL    , &ps_sub_ir},
-    {PS_TOKEN_MINUS           << 8 | UR, PS_TYPE_REAL    , &ps_sub_ur},
-
-    {PS_TOKEN_STAR            << 8 | II, PS_TYPE_INTEGER , &ps_mul_ii},
-    {PS_TOKEN_STAR            << 8 | IU, PS_TYPE_INTEGER , &ps_mul_iu},
-    {PS_TOKEN_STAR            << 8 | UI, PS_TYPE_UNSIGNED, &ps_mul_ui},
-    {PS_TOKEN_STAR            << 8 | UU, PS_TYPE_UNSIGNED, &ps_mul_uu},
-    {PS_TOKEN_STAR            << 8 | RR, PS_TYPE_REAL    , &ps_mul_rr}             ,
-    {PS_TOKEN_STAR            << 8 | RI, PS_TYPE_REAL    , &ps_mul_ri}             ,
-    {PS_TOKEN_STAR            << 8 | RU, PS_TYPE_REAL    , &ps_mul_ru}             ,
-    {PS_TOKEN_STAR            << 8 | IR, PS_TYPE_REAL    , &ps_mul_ir},
-    {PS_TOKEN_STAR            << 8 | UR, PS_TYPE_REAL    , &ps_mul_ur},
-
-    {PS_TOKEN_DIV             << 8 | II, PS_TYPE_INTEGER , &ps_div_ii},
-    {PS_TOKEN_DIV             << 8 | IU, PS_TYPE_INTEGER , &ps_div_iu},
-    {PS_TOKEN_DIV             << 8 | UI, PS_TYPE_UNSIGNED, &ps_div_ui},
-    {PS_TOKEN_DIV             << 8 | UU, PS_TYPE_UNSIGNED, &ps_div_uu},
-
-    {PS_TOKEN_MOD             << 8 | II, PS_TYPE_INTEGER , &ps_mod_ii},
-    {PS_TOKEN_MOD             << 8 | IU, PS_TYPE_INTEGER , &ps_mod_iu},
-    {PS_TOKEN_MOD             << 8 | UI, PS_TYPE_UNSIGNED, &ps_mod_ui},
-    {PS_TOKEN_MOD             << 8 | UU, PS_TYPE_UNSIGNED, &ps_mod_uu},
-
-    {PS_TOKEN_SLASH           << 8 | II, PS_TYPE_REAL    , &ps_divr_ii},
-    {PS_TOKEN_SLASH           << 8 | IU, PS_TYPE_REAL    , &ps_divr_iu},
-    {PS_TOKEN_SLASH           << 8 | UI, PS_TYPE_REAL    , &ps_divr_ui},
-    {PS_TOKEN_SLASH           << 8 | UU, PS_TYPE_REAL    , &ps_divr_uu},
-    {PS_TOKEN_SLASH           << 8 | RR, PS_TYPE_REAL    , &ps_divr_rr},
-    {PS_TOKEN_SLASH           << 8 | RI, PS_TYPE_REAL    , &ps_divr_ri},
-    {PS_TOKEN_SLASH           << 8 | RU, PS_TYPE_REAL    , &ps_divr_ru},
-    {PS_TOKEN_SLASH           << 8 | IR, PS_TYPE_REAL    , &ps_divr_ir},
-    {PS_TOKEN_SLASH           << 8 | UR, PS_TYPE_REAL    , &ps_divr_ur},
+    {PS_TOKEN_PLUS             << 8 | II, PS_TYPE_INTEGER , &ps_add_ii},
+    {PS_TOKEN_PLUS             << 8 | IU, PS_TYPE_INTEGER , &ps_add_iu},
+    {PS_TOKEN_PLUS             << 8 | UI, PS_TYPE_UNSIGNED, &ps_add_ui},
+    {PS_TOKEN_PLUS             << 8 | UU, PS_TYPE_UNSIGNED, &ps_add_uu},
+    {PS_TOKEN_PLUS             << 8 | RR, PS_TYPE_REAL    , &ps_add_rr},
+    {PS_TOKEN_PLUS             << 8 | RI, PS_TYPE_REAL    , &ps_add_ri},
+    {PS_TOKEN_PLUS             << 8 | RU, PS_TYPE_REAL    , &ps_add_ru},
+    {PS_TOKEN_PLUS             << 8 | IR, PS_TYPE_REAL    , &ps_add_ir},
+    {PS_TOKEN_PLUS             << 8 | UR, PS_TYPE_REAL    , &ps_add_ur},
+    {PS_TOKEN_PLUS             << 8 | CC, PS_TYPE_STRING  , &ps_add_cc},
+    {PS_TOKEN_PLUS             << 8 | CS, PS_TYPE_STRING  , &ps_add_cs},
+    {PS_TOKEN_PLUS             << 8 | SC, PS_TYPE_STRING  , &ps_add_sc},
+    {PS_TOKEN_PLUS             << 8 | SS, PS_TYPE_STRING  , &ps_add_ss},
+    {PS_TOKEN_MINUS            << 8 | II, PS_TYPE_INTEGER , &ps_sub_ii},
+    {PS_TOKEN_MINUS            << 8 | IU, PS_TYPE_INTEGER , &ps_sub_iu},
+    {PS_TOKEN_MINUS            << 8 | UI, PS_TYPE_UNSIGNED, &ps_sub_ui},
+    {PS_TOKEN_MINUS            << 8 | UU, PS_TYPE_UNSIGNED, &ps_sub_uu},
+    {PS_TOKEN_MINUS            << 8 | RR, PS_TYPE_REAL    , &ps_sub_rr},
+    {PS_TOKEN_MINUS            << 8 | RI, PS_TYPE_REAL    , &ps_sub_ri},
+    {PS_TOKEN_MINUS            << 8 | RU, PS_TYPE_REAL    , &ps_sub_ru},
+    {PS_TOKEN_MINUS            << 8 | IR, PS_TYPE_REAL    , &ps_sub_ir},
+    {PS_TOKEN_MINUS            << 8 | UR, PS_TYPE_REAL    , &ps_sub_ur},
+    {PS_TOKEN_STAR             << 8 | II, PS_TYPE_INTEGER , &ps_mul_ii},
+    {PS_TOKEN_STAR             << 8 | IU, PS_TYPE_INTEGER , &ps_mul_iu},
+    {PS_TOKEN_STAR             << 8 | UI, PS_TYPE_UNSIGNED, &ps_mul_ui},
+    {PS_TOKEN_STAR             << 8 | UU, PS_TYPE_UNSIGNED, &ps_mul_uu},
+    {PS_TOKEN_STAR             << 8 | RR, PS_TYPE_REAL    , &ps_mul_rr}             ,
+    {PS_TOKEN_STAR             << 8 | RI, PS_TYPE_REAL    , &ps_mul_ri}             ,
+    {PS_TOKEN_STAR             << 8 | RU, PS_TYPE_REAL    , &ps_mul_ru}             ,
+    {PS_TOKEN_STAR             << 8 | IR, PS_TYPE_REAL    , &ps_mul_ir},
+    {PS_TOKEN_STAR             << 8 | UR, PS_TYPE_REAL    , &ps_mul_ur},
+    {PS_TOKEN_DIV              << 8 | II, PS_TYPE_INTEGER , &ps_div_ii},
+    {PS_TOKEN_DIV              << 8 | IU, PS_TYPE_INTEGER , &ps_div_iu},
+    {PS_TOKEN_DIV              << 8 | UI, PS_TYPE_UNSIGNED, &ps_div_ui},
+    {PS_TOKEN_DIV              << 8 | UU, PS_TYPE_UNSIGNED, &ps_div_uu},
+    {PS_TOKEN_MOD              << 8 | II, PS_TYPE_INTEGER , &ps_mod_ii},
+    {PS_TOKEN_MOD              << 8 | IU, PS_TYPE_INTEGER , &ps_mod_iu},
+    {PS_TOKEN_MOD              << 8 | UI, PS_TYPE_UNSIGNED, &ps_mod_ui},
+    {PS_TOKEN_MOD              << 8 | UU, PS_TYPE_UNSIGNED, &ps_mod_uu},
+    {PS_TOKEN_SLASH            << 8 | II, PS_TYPE_REAL    , &ps_divr_ii},
+    {PS_TOKEN_SLASH            << 8 | IU, PS_TYPE_REAL    , &ps_divr_iu},
+    {PS_TOKEN_SLASH            << 8 | UI, PS_TYPE_REAL    , &ps_divr_ui},
+    {PS_TOKEN_SLASH            << 8 | UU, PS_TYPE_REAL    , &ps_divr_uu},
+    {PS_TOKEN_SLASH            << 8 | RR, PS_TYPE_REAL    , &ps_divr_rr},
+    {PS_TOKEN_SLASH            << 8 | RI, PS_TYPE_REAL    , &ps_divr_ri},
+    {PS_TOKEN_SLASH            << 8 | RU, PS_TYPE_REAL    , &ps_divr_ru},
+    {PS_TOKEN_SLASH            << 8 | IR, PS_TYPE_REAL    , &ps_divr_ir},
+    {PS_TOKEN_SLASH            << 8 | UR, PS_TYPE_REAL    , &ps_divr_ur},
 
     // ==================== RELATIONAL OPERATORS ====================
-
     {PS_TOKEN_EQUAL            << 8 | II, PS_TYPE_BOOLEAN , &ps_eq_ii},
     {PS_TOKEN_EQUAL            << 8 | IU, PS_TYPE_BOOLEAN , &ps_eq_iu},
     {PS_TOKEN_EQUAL            << 8 | UI, PS_TYPE_BOOLEAN , &ps_eq_ui},
@@ -478,7 +475,6 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
     {PS_TOKEN_EQUAL            << 8 | CS, PS_TYPE_BOOLEAN , &ps_eq_cs},
     {PS_TOKEN_EQUAL            << 8 | SC, PS_TYPE_BOOLEAN , &ps_eq_sc},
     {PS_TOKEN_EQUAL            << 8 | SS, PS_TYPE_BOOLEAN , &ps_eq_ss},
-
     {PS_TOKEN_NOT_EQUAL        << 8 | II, PS_TYPE_BOOLEAN , &ps_ne_ii},
     {PS_TOKEN_NOT_EQUAL        << 8 | IU, PS_TYPE_BOOLEAN , &ps_ne_iu},
     {PS_TOKEN_NOT_EQUAL        << 8 | UI, PS_TYPE_BOOLEAN , &ps_ne_ui},
@@ -492,7 +488,6 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
     {PS_TOKEN_NOT_EQUAL        << 8 | CS, PS_TYPE_BOOLEAN , &ps_ne_cs},
     {PS_TOKEN_NOT_EQUAL        << 8 | SC, PS_TYPE_BOOLEAN , &ps_ne_sc},
     {PS_TOKEN_NOT_EQUAL        << 8 | SS, PS_TYPE_BOOLEAN , &ps_ne_ss},
-
     {PS_TOKEN_LESS_THAN        << 8 | II, PS_TYPE_BOOLEAN , &ps_lt_ii},
     {PS_TOKEN_LESS_THAN        << 8 | IU, PS_TYPE_BOOLEAN , &ps_lt_iu},
     {PS_TOKEN_LESS_THAN        << 8 | UI, PS_TYPE_BOOLEAN , &ps_lt_ui},
@@ -506,7 +501,6 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
     {PS_TOKEN_LESS_THAN        << 8 | CS, PS_TYPE_BOOLEAN , &ps_lt_cs},
     {PS_TOKEN_LESS_THAN        << 8 | SC, PS_TYPE_BOOLEAN , &ps_lt_sc},
     {PS_TOKEN_LESS_THAN        << 8 | SS, PS_TYPE_BOOLEAN , &ps_lt_ss},
-
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | II, PS_TYPE_BOOLEAN , &ps_le_ii},
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | IU, PS_TYPE_BOOLEAN , &ps_le_iu},
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | UI, PS_TYPE_BOOLEAN , &ps_le_ui},
@@ -520,7 +514,6 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | CS, PS_TYPE_BOOLEAN , &ps_le_cs},
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | SC, PS_TYPE_BOOLEAN , &ps_le_sc},
     {PS_TOKEN_LESS_OR_EQUAL    << 8 | SS, PS_TYPE_BOOLEAN , &ps_le_ss},
-
     {PS_TOKEN_GREATER_THAN     << 8 | II, PS_TYPE_BOOLEAN , &ps_gt_ii},
     {PS_TOKEN_GREATER_THAN     << 8 | IU, PS_TYPE_BOOLEAN , &ps_gt_iu},
     {PS_TOKEN_GREATER_THAN     << 8 | UI, PS_TYPE_BOOLEAN , &ps_gt_ui},
@@ -534,7 +527,6 @@ ps_operator_binary_entry ps_operator_binary_table[] = {
     {PS_TOKEN_GREATER_THAN     << 8 | CS, PS_TYPE_BOOLEAN , &ps_gt_cs},
     {PS_TOKEN_GREATER_THAN     << 8 | SC, PS_TYPE_BOOLEAN , &ps_gt_sc},
     {PS_TOKEN_GREATER_THAN     << 8 | SS, PS_TYPE_BOOLEAN , &ps_gt_ss},
-
     {PS_TOKEN_GREATER_OR_EQUAL << 8 | II, PS_TYPE_BOOLEAN , &ps_ge_ii},
     {PS_TOKEN_GREATER_OR_EQUAL << 8 | IU, PS_TYPE_BOOLEAN , &ps_ge_iu},
     {PS_TOKEN_GREATER_OR_EQUAL << 8 | UI, PS_TYPE_BOOLEAN , &ps_ge_ui},

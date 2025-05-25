@@ -1,7 +1,5 @@
 Program TestExpressions;
 
-Uses FreePascalCompatibility;
-
 Const
   AAA = 1234;
   BBB = -2345;

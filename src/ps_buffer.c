@@ -275,7 +275,7 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size)
     char line[PS_BUFFER_MAX_COLUMNS + 1];
 
     fprintf(stderr, "\n");
-    fprintf(stderr, "%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
+    // fprintf(stderr, "%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
     if (buffer->line_count == 0)
     {
         fprintf(stderr, "Buffer is EMPTY!\n");
@@ -291,7 +291,7 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size)
         line[buffer->line_lengths[line_number]] = '\0';
         fprintf(stderr, "%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
-    fprintf(stderr, "\n");
+    // fprintf(stderr, "\n");
 }
 
 char ps_buffer_peek_char(ps_buffer *buffer)

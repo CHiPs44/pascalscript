@@ -81,22 +81,24 @@ ps_value ps_value_function_trunc      = {.type = &ps_type_def_function, .data = 
 ps_value ps_value_function_round      = {.type = &ps_type_def_function, .data = {.v = &ps_function_round  }};
 ps_value ps_value_function_int        = {.type = &ps_type_def_function, .data = {.v = &ps_function_int    }};
 ps_value ps_value_function_frac       = {.type = &ps_type_def_function, .data = {.v = &ps_function_frac   }};
+ps_symbol ps_system_function_abs      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ABS"    , .value = &ps_value_function_abs   };
+ps_symbol ps_system_function_trunc    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "TRUNC"  , .value = &ps_value_function_trunc };
+ps_symbol ps_system_function_round    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ROUND"  , .value = &ps_value_function_round };
+ps_symbol ps_system_function_int      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "INT"    , .value = &ps_value_function_int   };
+ps_symbol ps_system_function_frac     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "FRAC"   , .value = &ps_value_function_frac  };
 /* functions with one real argument returning real type */
 ps_value ps_value_function_sin        = {.type = &ps_type_def_function, .data = {.v = &ps_function_sin    }};
 ps_value ps_value_function_cos        = {.type = &ps_type_def_function, .data = {.v = &ps_function_cos    }};
+ps_value ps_value_function_tan        = {.type = &ps_type_def_function, .data = {.v = &ps_function_tan    }};
 ps_value ps_value_function_arctan     = {.type = &ps_type_def_function, .data = {.v = &ps_function_arctan }};
 ps_value ps_value_function_sqr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_sqr    }};
 ps_value ps_value_function_sqrt       = {.type = &ps_type_def_function, .data = {.v = &ps_function_sqrt   }};
 ps_value ps_value_function_exp        = {.type = &ps_type_def_function, .data = {.v = &ps_function_exp    }};
 ps_value ps_value_function_ln         = {.type = &ps_type_def_function, .data = {.v = &ps_function_ln     }};
 ps_value ps_value_function_log        = {.type = &ps_type_def_function, .data = {.v = &ps_function_log    }};
-ps_symbol ps_system_function_abs      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ABS"    , .value = &ps_value_function_abs   };
-ps_symbol ps_system_function_trunc    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "TRUNC"  , .value = &ps_value_function_trunc };
-ps_symbol ps_system_function_round    = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ROUND"  , .value = &ps_value_function_round };
-ps_symbol ps_system_function_int      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "INT"    , .value = &ps_value_function_int   };
-ps_symbol ps_system_function_frac     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "FRAC"   , .value = &ps_value_function_frac  };
 ps_symbol ps_system_function_sin      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SIN"    , .value = &ps_value_function_sin   };
 ps_symbol ps_system_function_cos      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "COS"    , .value = &ps_value_function_cos   };
+ps_symbol ps_system_function_tan      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "TAN"    , .value = &ps_value_function_tan   };
 ps_symbol ps_system_function_arctan   = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "ARCTAN" , .value = &ps_value_function_arctan};
 ps_symbol ps_system_function_sqr      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SQR"    , .value = &ps_value_function_sqr   };
 ps_symbol ps_system_function_sqrt     = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind = PS_SYMBOL_KIND_FUNCTION , .name = "SQRT"   , .value = &ps_value_function_sqrt  };
@@ -115,14 +117,14 @@ ps_symbol ps_system_function_log      = {.scope = PS_SYMBOL_SCOPE_SYSTEM, .kind 
                                                      .value = &ps_value_##TYPE##_##VALUE};
 // clang-format off
 
-PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false);
-PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true );
-PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, PS_INTEGER_MAX);
-PS_SYSTEM_CONSTANT(integer , minint , "MININT" , i, PS_INTEGER_MIN);
-PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, PS_UNSIGNED_MAX);
-PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX);
-PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, PS_REAL_MIN);
-PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, PS_REAL_EPSILON);
+PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean) false                                );
+PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean) true                                 );
+PS_SYSTEM_CONSTANT(integer , maxint , "MAXINT" , i, (ps_integer)PS_INTEGER_MAX                        );
+PS_SYSTEM_CONSTANT(integer , minint , "MININT" , i, (ps_integer)PS_INTEGER_MIN                        );
+PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, (ps_unsigned)PS_UNSIGNED_MAX                      );
+PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX                              );
+PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                              );
+PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                          );
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, 3.141592653589793115997963468544185161590576171875);
 
 /* VERSION */
@@ -183,6 +185,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_function_frac);
     ps_symbol_table_add(symbols, &ps_system_function_sin);
     ps_symbol_table_add(symbols, &ps_system_function_cos);
+    ps_symbol_table_add(symbols, &ps_system_function_tan);
     ps_symbol_table_add(symbols, &ps_system_function_arctan);
     ps_symbol_table_add(symbols, &ps_system_function_sqr);
     ps_symbol_table_add(symbols, &ps_system_function_sqrt);
@@ -215,7 +218,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_minor);
     ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_patch);
     ps_symbol_table_add(symbols, &ps_system_constant_integer_ps_version_index);
-    char buffer[16];
+    char buffer[16]; // from 0.0.0.0 to 255.255.255.255
     snprintf(buffer, sizeof(buffer) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR, (uint8_t)PS_VERSION_MINOR,
              (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
     ps_string *ps_version_string = ps_string_create(buffer);
@@ -229,5 +232,9 @@ bool ps_system_init(ps_interpreter *interpreter)
 
 void ps_system_done(ps_interpreter *interpreter)
 {
-    // ???
+    if (ps_system_constant_string_ps_version.value->data.s != NULL)
+    {
+        ps_string_free(ps_system_constant_string_ps_version.value->data.s);
+        ps_system_constant_string_ps_version.value->data.s = NULL;
+    }
 }

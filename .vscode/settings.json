@@ -1,6 +1,9 @@
 {
     "files.associations": {
-        "LICENSE": "plaintext"
+        "LICENSE": "plaintext",
+        "ps_value.h": "c",
+        "stdbool.h": "c",
+        "ps_symbol_table.h": "c"
     },
     "makefile.configureOnOpen": false
 }

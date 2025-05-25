@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     interpreter->parser->trace = interpreter->trace;
     interpreter->parser->debug = interpreter->debug;
 
-    ps_operator_binary_dump();
+    // ps_operator_binary_dump();
 
     /* List symbols */
     if (dump_symbols)

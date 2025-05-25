@@ -57,7 +57,7 @@ ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol 
 {
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM);
     if (type_def == NULL)
-        return NULL;
+        return NULL; // errno = ENOMEM
     type_def->def.def_enum.count = count;
     type_def->def.def_enum.values = calloc(count, sizeof(ps_symbol *));
     if (type_def->def.def_enum.values == NULL)
@@ -82,7 +82,7 @@ const char *ps_type_names[] = {
 
 char *ps_value_get_type_name(ps_value_type type)
 {
-    // if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
+    if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
         return (char *)ps_type_names[type];
     return NULL;
 }

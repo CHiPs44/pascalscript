@@ -124,11 +124,10 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     {
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
         ps_buffer_dump(lexer->buffer, start, 5);
-        fprintf(stderr,
-                "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
-                lexer->buffer->current_line + 1, lexer->buffer->current_column + 1,
-                interpreter->error, ps_error_get_message(interpreter->error),
-                parser->error, ps_error_get_message(parser->error),
+        fprintf(stderr, "%*s\n", lexer->buffer->current_column + 14, "^");
+        fprintf(stderr, "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
+                lexer->buffer->current_line + 1, lexer->buffer->current_column + 1, interpreter->error,
+                ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),
                 lexer->error, ps_error_get_message(lexer->error));
         ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
         return false;

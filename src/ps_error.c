@@ -106,7 +106,7 @@ char *ps_error_get_message(ps_error error)
     case PS_RUNTIME_ERROR_EXPECTED_STRING:
         return "String expected";
     case PS_RUNTIME_ERROR_ASSIGN_TO_CONST:
-        return "Constant can't be changed";
+        return "Constants can't be changed";
     case PS_RUNTIME_ERROR_TYPE_MISMATCH:
         return "Type mismatch";
     case PS_RUNTIME_ERROR_DIVISION_BY_ZERO:

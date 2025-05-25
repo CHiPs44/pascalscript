@@ -86,12 +86,12 @@ const struct s_ps_symbol_kind_name
 } ps_symbol_kind_names[] = {
     // clang-format off
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
+    {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
     {PS_SYMBOL_KIND_CONSTANT       , "CONSTANT" },
     {PS_SYMBOL_KIND_VARIABLE       , "VARIABLE" },
     {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"     },
     {PS_SYMBOL_KIND_PROCEDURE      , "PROCEDURE"},
     {PS_SYMBOL_KIND_FUNCTION       , "FUNCTION" },
-    {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
     {PS_SYMBOL_KIND_UNIT           , "UNIT"     },
     // ...
     // clang-format on
@@ -100,20 +100,15 @@ const struct s_ps_symbol_kind_name
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 {
     static char kind_name[PS_IDENTIFIER_SIZE];
-    bool found = false;
     for (int i = 0; i < sizeof(ps_symbol_kind_names) / sizeof(struct s_ps_symbol_kind_name); i += 1)
     {
         if (ps_symbol_kind_names[i].kind == kind)
         {
             snprintf(kind_name, PS_IDENTIFIER_LEN, "%s", ps_symbol_kind_names[i].name);
-            found = true;
-            break;
+            return kind_name;
         }
     }
-    if (!found)
-    {
-        snprintf(kind_name, PS_IDENTIFIER_LEN, "?UNKNOWN-%d?", kind);
-    }
+    snprintf(kind_name, PS_IDENTIFIER_LEN, "?UNKNOWN-%d?", kind);
     return kind_name;
 }
 

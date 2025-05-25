@@ -30,9 +30,9 @@ extern "C"
         PS_SYMBOL_SCOPE_NONE = 0,   /** @brief No scope */
         PS_SYMBOL_SCOPE_SYSTEM,     /** @brief System defined: for things like MaxInt, False, True, StdOut, StdErr, ... */
         PS_SYMBOL_SCOPE_GLOBAL,     /** @brief For constants, types, variables, procedures and functions at top level */
-        PS_SYMBOL_SCOPE_UNIT,       /** @brief Same for units, 29 max */
+        PS_SYMBOL_SCOPE_UNIT,       /** @brief Same for units, 61 max */
         PS_SYMBOL_SCOPE_LOCAL = 64, /** @brief Same for local levels */
-        PS_SYMBOL_SCOPE_MAX = 255   /** @brief 96 levels of imbrication should be enough */
+        PS_SYMBOL_SCOPE_MAX = 255   /** @brief 191 levels of imbrication should be enough */
     } __attribute__((__packed__)) ps_symbol_scope;
 
 #define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
