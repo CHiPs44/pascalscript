@@ -43,16 +43,17 @@ extern "C"
         PS_TYPE_OBJECT,     // *FUTURE*
     } __attribute__((__packed__)) ps_value_type;
 
-    typedef struct s_ps_value_type_flag
+    typedef struct s_ps_value_type_flags
     {
         bool is_base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
         bool is_numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
-        bool is_scalar : 1;    /** @brief Scalar value (with Ord/Pred/Succ, e.g. integer, unsigned, char, subrange, enum) */
+        bool is_ordinal : 1;   /** @brief Ordinal value (integer, unsigned, char, subrange, enum) */
+        bool is_scalar : 1;    /** @brief Scalar value (integer, unsigned, char, subrange, enum) */
         bool is_signed : 1;    /** @brief Signed value (integer, real, subrange) */
         bool is_reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
-    } /*__attribute__((__packed__))*/ ps_value_type_flag;
+    } /*__attribute__((__packed__))*/ ps_value_type_flags;
 
-    extern ps_value_type_flag ps_value_type_flags[];
+    extern ps_value_type_flags ps_value_type_flags_all[];
 
     /** @brief Subranges, stored as integer values, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
@@ -68,7 +69,8 @@ extern "C"
         ps_symbol *values;
     } __attribute__((__packed__)) ps_type_definition_enum;
 
-    /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to 2^ord(enum_value) */ 
+    /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to
+     * 2^ord(enum_value) */
     typedef struct s_ps_type_definition_set
     {
         ps_unsigned count; // max: UINT8_MAX, UINT16_MAX, UINT32_MAX, UINT64_MAX
@@ -96,8 +98,8 @@ extern "C"
     /** @brief *FUTURE* => index goes from range->value->g.min to range->value->g.max */
     typedef struct s_ps_type_definition_array
     {
-        ps_symbol *range; /** @brief index range as subrange */
-        ps_integer count; /** @brief number of elements (max - min) + 1 */
+        ps_symbol *range;    /** @brief index range as subrange */
+        ps_integer count;    /** @brief number of elements (max - min) + 1 */
         ps_symbol *type_def; /** @brief type of elements */
     } __attribute__((__packed__)) ps_type_definition_array;
 

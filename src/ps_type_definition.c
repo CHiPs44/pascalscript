@@ -14,25 +14,29 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-ps_value_type_flag ps_value_type_flags[] = {
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_NONE
-    {.is_base = 1, .is_numeric = 1, .is_scalar = 0, .is_signed = 1, .is_reference = 0}, // PS_TYPE_REAL
-    {.is_base = 1, .is_numeric = 1, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, // PS_TYPE_INTEGER
-    {.is_base = 1, .is_numeric = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_UNSIGNED
-    {.is_base = 1, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_BOOLEAN
-    {.is_base = 1, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_CHAR
-    {.is_base = 1, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_STRING
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_DEFINITION
-    {.is_base = 0, .is_numeric = 1, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SUBRANGE
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_ENUM
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SET
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_POINTER
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_ARRAY
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_RECORD
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_FILE
-    {.is_base = 0, .is_numeric = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}  // PS_TYPE_OBJECT
+// TODO ordinal vs scalar disambiguation
+
+// clang-format off
+ps_value_type_flags ps_value_type_flags_all[] = {
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_NONE
+    {.is_base = 1, .is_numeric = 1, .is_ordinal = 0, .is_scalar = 0, .is_signed = 1, .is_reference = 0}, // PS_TYPE_REAL
+    {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, // PS_TYPE_INTEGER
+    {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_UNSIGNED
+    {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_BOOLEAN
+    {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_CHAR
+    {.is_base = 1, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 1, .is_signed = 0, .is_reference = 1}, // PS_TYPE_STRING
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_DEFINITION
+    {.is_base = 0, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SUBRANGE
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // PS_TYPE_ENUM
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // PS_TYPE_SET
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_POINTER
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_ARRAY
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_RECORD
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // PS_TYPE_FILE
+    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}  // PS_TYPE_OBJECT
 };
-#define PS_VALUE_TYPE_SIZE sizeof(ps_value_type_flags)
+// clang-format on
+#define PS_VALUE_TYPE_SIZE sizeof(ps_value_type_flags_all)
 
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
