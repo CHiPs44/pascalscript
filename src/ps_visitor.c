@@ -287,7 +287,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
 bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
 {
     static ps_token_type multiplicative_operators[] = {
-        PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD, PS_TOKEN_AND,
+        PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD //, PS_TOKEN_AND,
         // PS_TOKEN_SHL, PS_TOKEN_SHR, PS_TOKEN_AS
     };
     USE_LEXER;
@@ -336,7 +336,10 @@ bool ps_visit_term(ps_interpreter *interpreter, bool exec, ps_value *result)
  */
 bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
 {
-    static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS, PS_TOKEN_OR, PS_TOKEN_XOR};
+    static ps_token_type additive_operators[] = {
+        PS_TOKEN_PLUS, PS_TOKEN_MINUS,
+        // PS_TOKEN_OR, PS_TOKEN_XOR
+    };
     USE_LEXER;
     SET_VISITOR("SIMPLE_EXPRESSION");
     TRACE_BEGIN("");
@@ -360,8 +363,8 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
             return true;
         }
         READ_NEXT_TOKEN;
-        if (!ps_visit_factor(interpreter, exec, &right))
-            TRACE_ERROR("FACTOR");
+        if (!ps_visit_term(interpreter, exec, &right))
+            TRACE_ERROR("TERM");
         if (exec)
         {
             if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
@@ -380,7 +383,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, bool exec, ps_value
  * simple_expression ] ; relational_operator     =   '<' | '<=' | '>' | '>=' |
  * '=' | '<>' | 'IN' | 'IS' ;
  */
-bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
+bool ps_visit_relational_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
 {
     static ps_token_type relational_operators[] = {
         PS_TOKEN_LESS_THAN, PS_TOKEN_LESS_OR_EQUAL, PS_TOKEN_GREATER_THAN, PS_TOKEN_GREATER_OR_EQUAL,
@@ -388,7 +391,7 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
         PS_TOKEN_IN, // PS_TOKEN_IS,
     };
     USE_LEXER;
-    SET_VISITOR("EXPRESSION");
+    SET_VISITOR("RELATIONAL_EXPRESSION");
     TRACE_BEGIN("");
     ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
              right = {.type = ps_system_none.value->data.t, .data.v = NULL};
@@ -418,6 +421,144 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
     }
     TRACE_END("2");
     return true;
+}
+
+/**
+ * Visit
+ *      and_expression = relational_expression { 'AND' relational_expression }
+ */
+bool ps_visit_and_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
+{
+    static ps_token_type and_operators[] = {PS_TOKEN_AND};
+    USE_LEXER;
+    SET_VISITOR("AND_EXPRESSION");
+    TRACE_BEGIN("");
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_token_type and_operator = PS_TOKEN_NONE;
+    if (!ps_visit_relational_expression(interpreter, exec, &left))
+        TRACE_ERROR("RELATIONAL");
+    do
+    {
+        and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
+                                                    and_operators);
+        if (and_operator == PS_TOKEN_NONE)
+        {
+            if (exec)
+            {
+                result->type = left.type;
+                result->data = left.data;
+            }
+            TRACE_END("AND");
+            return true;
+        }
+        READ_NEXT_TOKEN;
+        if (!ps_visit_relational_expression(interpreter, exec, &right))
+            TRACE_ERROR("RELATIONAL2");
+        if (exec)
+        {
+            if (!ps_function_binary_op(interpreter, &left, &right, result, and_operator))
+                TRACE_ERROR("BINARY");
+            left.type = result->type;
+            left.data = result->data;
+        }
+    } while (true);
+    TRACE_END("AND2");
+    return true;
+}
+
+/**
+ * Visit
+ *      logical_expression = relational_expression { logical_operator relational_expression }
+ *      logical_operator   = 'AND' | 'OR' | 'XOR'
+ */
+bool ps_visit_logical_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
+{
+    static ps_token_type logical_operators[] = {PS_TOKEN_AND, PS_TOKEN_OR, PS_TOKEN_XOR};
+    USE_LEXER;
+    SET_VISITOR("LOGICAL_EXPRESSION");
+    TRACE_BEGIN("");
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_token_type logical_operator = PS_TOKEN_NONE;
+    if (!ps_visit_relational_expression(interpreter, exec, &left))
+        TRACE_ERROR("RELATIONAL");
+    do
+    {
+        logical_operator = ps_parser_expect_token_types(
+            interpreter->parser, sizeof(logical_operators) / sizeof(ps_token_type), logical_operators);
+        if (logical_operator == PS_TOKEN_NONE)
+        {
+            if (exec)
+            {
+                result->type = left.type;
+                result->data = left.data;
+            }
+            TRACE_END("1");
+            return true;
+        }
+        READ_NEXT_TOKEN;
+        if (!ps_visit_relational_expression(interpreter, exec, &right))
+            TRACE_ERROR("RELATIONAL2");
+        if (exec)
+        {
+            if (!ps_function_binary_op(interpreter, &left, &right, result, logical_operator))
+                TRACE_ERROR("BINARY");
+            left.type = result->type;
+            left.data = result->data;
+        }
+    } while (true);
+    TRACE_END("2");
+    return true;
+}
+
+/**
+ * Visit
+ *      or_expression = and_expression { ( 'OR' | 'XOR' ) and_expression }
+ */
+bool ps_visit_or_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
+{
+    static ps_token_type or_operators[] = {PS_TOKEN_OR, PS_TOKEN_XOR};
+    USE_LEXER;
+    SET_VISITOR("OR_EXPRESSION");
+    TRACE_BEGIN("");
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
+             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_token_type or_operator = PS_TOKEN_NONE;
+    if (!ps_visit_and_expression(interpreter, exec, &left))
+        TRACE_ERROR("AND");
+    do
+    {
+        or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
+                                                   or_operators);
+        if (or_operator == PS_TOKEN_NONE)
+        {
+            if (exec)
+            {
+                result->type = left.type;
+                result->data = left.data;
+            }
+            TRACE_END("OR");
+            return true;
+        }
+        READ_NEXT_TOKEN;
+        if (!ps_visit_and_expression(interpreter, exec, &right))
+            TRACE_ERROR("AND2");
+        if (exec)
+        {
+            if (!ps_function_binary_op(interpreter, &left, &right, result, or_operator))
+                TRACE_ERROR("BINARY");
+            left.type = result->type;
+            left.data = result->data;
+        }
+    } while (true);
+    TRACE_END("OR2");
+    return true;
+}
+
+bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *result)
+{
+    return ps_visit_or_expression(interpreter, exec, result);
 }
 
 /**
@@ -1015,7 +1156,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, bool exec)
                     TRACE_ERROR("STATEMENT_OR_COMPOUND2");
                 break;
             }
-            if (!ps_visit_statement_or_compound_statement(interpreter, true))
+            if (!ps_visit_statement_or_compound_statement(interpreter, exec))
                 TRACE_ERROR("STATEMENT_OR_COMPOUND2");
             // Restore "cursor" position
             lexer->buffer->current_line = line;

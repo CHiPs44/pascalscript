@@ -1,19 +1,30 @@
 Program Example06ForDo;
 Const
-    Limit = 30;
+    Limit = 99;
 Var
     I: Integer;
-    C: Char; 
+    C: Char;
+    BOL: Boolean;
 Begin
-    For I := -Limit To Limit Do
+    BOL := False;
+    For I := 0 To Limit Do
     Begin
+        if I < 10 Then
+            Write('0');
         Write(I);
-        // If I >= 0 And I Mod 10 = 0 Then
-        If (I >= 0) And (I Mod 10 = 0) Then
-            WriteLn
+        If I > 0 And (I + 1) Mod 10 = 0 Then
+        Begin
+            WriteLn;
+            BOL := True;
+        End
         Else
+        Begin
             Write(' ');
+            BOL := False;
+        End;
     End;
+    If Not BOL Then
+        WriteLn;    
     WriteLn('OK!');
     I := 0;
     For C := 'A' To 'Z' Do
