@@ -63,8 +63,6 @@ extern "C"
 
     bool ps_interpreter_run(ps_interpreter *interpreter, bool exec);
 
-    bool ps_visit_start(ps_interpreter *interpreter, bool exec);
-
 #ifdef __cplusplus
 }
 #endif
