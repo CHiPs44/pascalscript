@@ -18,7 +18,7 @@
     {                                                                                                                  \
         if (!ps_lexer_read_next_token(lexer))                                                                          \
             return false;                                                                                              \
-        if (interpreter->debug)                                                                                        \
+        if (interpreter->trace)                                                                                        \
         {                                                                                                              \
             fprintf(stderr, "%cTOKEN\t%-32s %-32s ", exec ? '*' : ' ', "", "");                                        \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
@@ -30,7 +30,7 @@
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
         interpreter->error = __PS_ERROR__;                                                                             \
-        if (interpreter->debug)                                                                                        \
+        if (interpreter->trace)                                                                                        \
         {                                                                                                              \
             fprintf(stderr, "%cRETURN\t%-32s %-8d ", exec ? '*' : ' ', visitor, __PS_ERROR__);                         \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
@@ -40,20 +40,20 @@
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
     strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 #define TRACE_BEGIN(__PLUS__)                                                                                          \
-    if (interpreter->debug)                                                                                            \
+    if (interpreter->trace)                                                                                            \
     {                                                                                                                  \
         fprintf(stderr, "%cBEGIN\t%-32s %-32s ", exec ? '*' : ' ', visitor, __PLUS__);                                 \
         ps_token_debug(stderr, "BEGIN", &lexer->current_token);                                                        \
     }
 #define TRACE_END(__PLUS__)                                                                                            \
-    if (interpreter->debug)                                                                                            \
+    if (interpreter->trace)                                                                                            \
     {                                                                                                                  \
         fprintf(stderr, "%cEND\t%-32s %-32s ", exec ? '*' : ' ', visitor, __PLUS__);                                   \
         ps_token_debug(stderr, "END", &lexer->current_token);                                                          \
     }
 #define TRACE_ERROR(__PLUS__)                                                                                          \
     {                                                                                                                  \
-        if (interpreter->debug)                                                                                        \
+        if (interpreter->trace)                                                                                        \
         {                                                                                                              \
             fprintf(stderr, "%cERROR\t%-32s %-32s ", exec ? '*' : ' ', visitor, __PLUS__);                             \
             ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
@@ -66,7 +66,7 @@ bool ps_visit_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
 /**
  * Visit
  *      function_call = identifier [ '(' , expression [ ',' , expression ]* ')' ]
- * only 1 parameter for now and "system" functions
+ *  only 1 parameter for now and "system" functions
  * TODO
  *  - get all parameters
  *  - check function signature
