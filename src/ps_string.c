@@ -13,27 +13,6 @@
 #include "ps_string.h"
 #include "ps_value.h"
 
-char *ps_string_dump(ps_string *s)
-{
-    const ps_string_len width = PS_IDENTIFIER_LEN;
-    static char buffer[128];
-    if (s == NULL)
-        sprintf(buffer, "NULL");
-    else
-        snprintf(buffer, sizeof(buffer) - 1, "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3,
-                 s->max, PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
-    return buffer;
-}
-
-void ps_string_debug(FILE *f, char *message, ps_string *s)
-{
-    if (f == NULL)
-        f = stderr;
-    if (message == NULL || 0 == strlen(message))
-        message = "PS_STRING: ";
-    fprintf(f, "DEBUG\t%s%s\n", message, ps_string_dump(s));
-}
-
 ps_string *ps_string_alloc(ps_string_len max)
 {
     // allocate sizeof(max) + sizeof(len) + (max + 1) chars
@@ -249,4 +228,25 @@ ps_string *ps_string_uppercase(ps_string *s)
     }
     t->len = s->len;
     return t;
+}
+
+char *ps_string_dump(ps_string *s)
+{
+    const ps_string_len width = PS_IDENTIFIER_LEN;
+    static char buffer[128];
+    if (s == NULL)
+        sprintf(buffer, "NULL");
+    else
+        snprintf(buffer, sizeof(buffer) - 1, "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3,
+                 s->max, PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
+    return buffer;
+}
+
+void ps_string_debug(FILE *f, char *message, ps_string *s)
+{
+    if (f == NULL)
+        f = stderr;
+    if (message == NULL || 0 == strlen(message))
+        message = "PS_STRING: ";
+    fprintf(f, "DEBUG\t%s%s\n", message, ps_string_dump(s));
 }

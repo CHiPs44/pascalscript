@@ -177,11 +177,12 @@ declaration_part        =   [
                             ]*
                         ;
 (*
-    Procedure Example1;
-    Procedure Example2();
-    Procedure Example3(A, B: Integer);
-    Procedure Example4(Var A: Integer);
-    ...
+    Examples:
+        Procedure Example1;
+        Procedure Example2();
+        Procedure Example3(A, B: Integer);
+        Procedure Example4(A: Integer, B: Char, Var C: String);
+        ...
 *)
 procedure_declaration   =   'PROCEDURE' identifier [ '(' [ formal_parameter_list ] ')' ] ';'
                             [ declaration_part ]

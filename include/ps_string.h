@@ -16,12 +16,6 @@ extern "C"
 {
 #endif
 
-    /// @brief Dump string to buffer
-    char *ps_string_dump(ps_string *s);
-
-    /// @brief Output string to stderr
-    void ps_string_debug(FILE *f, char *message, ps_string *s);
-
     /// @brief Allocate new string of max chars (+1)
     /// @return Newly allocated string or NULL (check errno for ENOMEM)
     ps_string *ps_string_alloc(ps_string_len max);
@@ -98,6 +92,12 @@ extern "C"
     /// @example uppercase('aBc') => 'ABC'
     /// @return New string or NULL if error
     ps_string *ps_string_uppercase(ps_string *s);
+
+    /// @brief Dump string to buffer
+    char *ps_string_dump(ps_string *s);
+
+    /// @brief Output string to stderr
+    void ps_string_debug(FILE *f, char *message, ps_string *s);
 
 #ifdef __cplusplus
 }

@@ -15,12 +15,12 @@ Var
   Test4: Unsigned;
 
 Begin
-  Test1 := AAA + 3 * 456 Div 234;
-  Test2 := BBB * 3 + CCC + 3 Div 4;
-  Test3 := Test1 * 12 >= Test2;
-  Test4 := (1 * 2 + 3 * 4) * HEX;
+  Test1 := AAA + 3 * 45 Div BIN;
   WriteLn(Test1);
+  Test2 := BBB * 3 + OCT + 3 Div 4;
   WriteLn(Test2);
+  Test3 := Test1 * 12 >= Test2;
   WriteLn(Test3);
+  Test4 := (1 * CCC + 3 * 4) + HEX;
   WriteLn(Test4);
 End.
