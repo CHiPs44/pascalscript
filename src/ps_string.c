@@ -16,7 +16,8 @@
 ps_string *ps_string_alloc(ps_string_len max)
 {
     // allocate sizeof(max) + sizeof(len) + (max + 1) chars
-    // maximum:          1   +         1   + 255 + 1  bytes for "short" strings
+    // maximum: 1           + 1           +  255 + 1  bytes for "short" strings
+    //       => 258
     ps_string *s = (ps_string *)malloc(2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
     if (s == NULL)
         return NULL; // errno = ENOMEM;
@@ -150,37 +151,37 @@ ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
 }
 
 /// @brief Compare two strings
-/// @return less than 0 if a<b, 0 if a=b, greater then 0 if a>b (same as C strcmp)
+/// @return less than 0 if a<b, 0 if a=b, greater than 0 if a>b (uses C strcmp)
 int ps_string_compare(ps_string *a, ps_string *b)
 {
-    // return strcmp(a->str, b->str);
-    int diff = 0;
-    ps_string_len len = a->len > b->len ? a->len : b->len;
-    for (ps_string_len i = 0; i < len; i++)
-    {
-        if (i < a->len)
-        {
-            if (i < b->len)
-            {
-                diff = (int)a->str[i] - (int)b->str[i];
-                if (diff == 0)
-                {
-                    continue;
-                }
-            }
-            else
-            {
-                diff = (int)a->str[i];
-                break;
-            }
-        }
-        else
-        {
-            diff = -(int)b->str[i];
-            break;
-        }
-    }
-    return diff;
+    return strcmp(a->str, b->str);
+    // int diff = 0;
+    // ps_string_len len = a->len > b->len ? a->len : b->len;
+    // for (ps_string_len i = 0; i < len; i++)
+    // {
+    //     if (i < a->len)
+    //     {
+    //         if (i < b->len)
+    //         {
+    //             diff = (int)a->str[i] - (int)b->str[i];
+    //             if (diff == 0)
+    //             {
+    //                 continue;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             diff = (int)a->str[i];
+    //             break;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         diff = -(int)b->str[i];
+    //         break;
+    //     }
+    // }
+    // return diff;
 }
 
 ps_string_len ps_string_position(ps_string *substr, ps_string *s)
@@ -206,7 +207,7 @@ ps_string *ps_string_lowercase(ps_string *s)
     for (ps_string_len i = 0; i < s->len; i++)
     {
         if (s->str[i] >= 'A' && s->str[i] <= 'Z')
-            t->str[i] = s->str[i] + ('a' - 'A');
+            t->str[i] = s->str[i] + ('a' - 'A'); // PLUS!
         else
             t->str[i] = s->str[i];
     }
@@ -222,7 +223,7 @@ ps_string *ps_string_uppercase(ps_string *s)
     for (ps_string_len i = 0; i < s->len; i++)
     {
         if (s->str[i] >= 'a' && s->str[i] <= 'z')
-            t->str[i] = s->str[i] - ('a' - 'A');
+            t->str[i] = s->str[i] - ('a' - 'A'); // MINUS!
         else
             t->str[i] = s->str[i];
     }

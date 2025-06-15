@@ -16,19 +16,25 @@ extern "C"
 {
 #endif
 
+#ifndef PS_STRING_HEAP_SIZE
 #define PS_STRING_HEAP_SIZE (32)
+#endif
 
     typedef struct s_ps_string_heap
     {
         size_t size;
         size_t used;
-        ps_string *data;
+        size_t more;
+        ps_string **data;
     } ps_string_heap;
+    #define PS_STRING_HEAP_SIZE sizeof(ps_string_heap)
 
-    ps_string_heap *ps_string_heap_init(ps_string_heap *heap, size_t size);
+    ps_string_heap *ps_string_heap_init(size_t size);
     void ps_string_heap_done(ps_string_heap *heap);
-    ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max);
-    ps_string *ps_string_heap_free(ps_string_heap *heap, ps_string *s);
+    ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max, char *z);
+    bool ps_string_heap_free(ps_string_heap *heap, ps_string *s);
+
+    void ps_string_heap_dump(ps_string_heap *heap, FILE *f);
 
 #ifdef __cplusplus
 }

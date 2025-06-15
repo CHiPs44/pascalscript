@@ -47,6 +47,7 @@ extern "C"
     bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
     bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
     bool ps_lexer_read_number(ps_lexer *lexer);
+    bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
 
     void ps_lexer_dump(ps_lexer *lexer);
 

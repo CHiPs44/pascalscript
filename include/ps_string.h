@@ -32,7 +32,7 @@ extern "C"
     ps_string *ps_string_create(char *z);
 
     /// @brief Allocate and set a new string from a char
-    /// @example create('A') => 'A'
+    /// @example create_char('A') => "A"
     /// @return new string if OK else NULL (check errno for ENOMEM)
     ps_string *ps_string_create_char(ps_char c);
 
@@ -42,18 +42,19 @@ extern "C"
     ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max);
 
     /// @brief Concatenate two chars into a new string
-    /// @example concat('A', 'B') => 'AB'
+    /// @example concat('A', 'B') => "AB"
     /// @return Newly allocated string or NULL (check errno for ENOMEM)
     ps_string *ps_string_concat_chars(ps_char a, ps_char b);
 
     /// @brief Append string b to string a if lengths are OK
+    /// @example append('ABC', 'DEF') => "ABCDEF"
     /// @return a or NULL if error
     ps_string *ps_string_append(ps_string *a, ps_string *b);
 
     /// @brief Get substring beginning at 'start' for 'length' chars (1 based)
-    /// @details substring('ABCDEFGHI',  3, 5) => 'CDEFG'/// @return New string or NULL if error
-    /// @example substring('ABCDEFGHI',  7, 1) => 'G'
-    /// @example substring('ABCDEFGHI',  1, 9) => 'ABCDEFGHI'
+    /// @example substring('ABCDEFGHI',  3, 5) => "CDEFG"
+    /// @example substring('ABCDEFGHI',  7, 1) => "G"
+    /// @example substring('ABCDEFGHI',  1, 9) => "ABCDEFGHI"
     /// @example substring('ABCDEFGHI', 10, 1) => NULL as 10 > 9
     /// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_copy(ps_string *a, ps_string_len start, ps_string_len length);

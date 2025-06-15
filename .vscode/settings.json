@@ -3,7 +3,11 @@
         "LICENSE": "plaintext",
         "ps_value.h": "c",
         "stdbool.h": "c",
-        "ps_symbol_table.h": "c"
+        "ps_symbol_table.h": "c",
+        "ps_symbol.h": "c",
+        "ps_parser.h": "c",
+        "ps_error.h": "c",
+        "ps_config.h": "c"
     },
     "makefile.configureOnOpen": false
 }

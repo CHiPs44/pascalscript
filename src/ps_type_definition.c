@@ -45,7 +45,7 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_subrange(ps_integer min, ps_integer max)
+ps_type_definition *ps_type_definition_create_subrange(ps_value min, ps_value max)
 {
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
@@ -75,11 +75,11 @@ ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol 
 }
 
 const char *ps_type_names[] = {
-    // clang-format off
+// clang-format off
 //   12345678    12345678    12345678    12345678    12345678    12345678    12345678    12345678
     "NONE"    , "REAL"    , "INTEGER" , "UNSIGNED", "BOOLEAN" , "CHAR"    , "STRING"  , "TYPE_DEF", 
     "SUBRANGE", "ENUM"    , "SET"     , "POINTER" , "ARRAY"   , "RECORD"  , "FILE"    , "OBJECT"  ,
-    // clang-format on
+// clang-format on
 };
 
 char *ps_value_get_type_name(ps_value_type type)

@@ -49,7 +49,7 @@ extern "C"
   bool ps_function_round (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_int   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_frac  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  
+
   bool ps_function_sin   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_cos   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   bool ps_function_tan   (ps_interpreter *interpreter, ps_value *value, ps_value *result);

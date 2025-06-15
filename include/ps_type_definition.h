@@ -50,22 +50,25 @@ extern "C"
         bool is_ordinal : 1;   /** @brief Ordinal value (integer, unsigned, char, subrange, enum) */
         bool is_scalar : 1;    /** @brief Scalar value (integer, unsigned, char, subrange, enum) */
         bool is_signed : 1;    /** @brief Signed value (integer, real, subrange) */
-        bool is_reference : 1; /** @brief Reference value (pointer, array, record, file, object) */
+        bool is_reference : 1; /** @brief Reference value (string, pointer, array, record, file, object) */
     } /*__attribute__((__packed__))*/ ps_value_type_flags;
 
     extern ps_value_type_flags ps_value_type_flags_all[];
 
-    /** @brief Subranges, stored as integer values, needed to implement arrays */
+    /** @brief Subranges, stored as scalar values, needed to implement arrays */
     typedef struct s_ps_type_definition_subrange
     {
-        ps_integer min;
-        ps_integer max;
+        ps_value_type base; /** @brief Base type of subrange: PS_TYPE_INTEGER, PS_TYPE_UNSIGNED, PS_TYPE_CHAR */
+        ps_value min;
+        ps_value max;
     } __attribute__((__packed__)) ps_type_definition_subrange;
 
     /** @brief Enums are stored as unsigned values (first=0, second=1, ...) */
+    /** @example Months: (January, February, March, April, ..., December) */
     typedef struct s_ps_type_definition_enum
     {
         ps_unsigned count;
+        /** @brief Array of symbols, each symbol is a value of the enum */
         ps_symbol *values;
     } __attribute__((__packed__)) ps_type_definition_enum;
 

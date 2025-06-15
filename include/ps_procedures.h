@@ -17,9 +17,11 @@ extern "C"
 {
 #endif
 
-    bool ps_function_read_text(ps_interpreter *interpreter, FILE *f, ps_value *value);
-    bool ps_procedure_write_text(ps_interpreter *interpreter, FILE *f, ps_value *value);
-    bool ps_procedure_randomize(ps_interpreter *interpreter);
+    bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_randomize(ps_interpreter *interpreter, unsigned int *seed);
 
 #ifdef __cplusplus
 }

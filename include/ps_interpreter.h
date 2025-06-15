@@ -9,6 +9,7 @@
 
 #include <string.h>
 
+#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_value.h"
@@ -18,44 +19,48 @@ extern "C"
 {
 #endif
 
-    // static ps_error interpreter_errno = PS_ERROR_ZERO;
-
-#define PS_INTERPRETER_SCOPE_COUNT (PS_SYMBOL_SCOPE_MAX + 1)
-
     typedef struct s_ps_interpreter
     {
+        ps_environment *environment;
         ps_parser *parser;
         ps_error error;
-        ps_symbol scopes[PS_INTERPRETER_SCOPE_COUNT];
-        uint8_t unit_scope;
-        uint8_t local_scope;
         // flags
-        bool trace : 1;
-        bool debug : 1;
-        bool range_check : 1;
-        bool allocated : 1;
+        bool trace;
+        bool debug;
+        bool from_string; // true if source is a string, false if file
+        // options
+        bool range_check; // range checking for integer and real values
+        bool bool_eval;   // short circuit boolean evaluation
     } ps_interpreter;
 
-    ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter);
-    void ps_interpreter_done(ps_interpreter *interpreter);
+#define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
     /**
-     * @brief Allocate new value
-     * @return NULL if no free memory (errno = ENOMEM)
+     * @brief Initialize interpreter
+     * @return NULL if no free memory (errno = ENOMEM) or the interpreter
      */
-    ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter);
+    ps_interpreter *ps_interpreter_init();
 
-    /** @brief Free existing value */
-    void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value);
+    /** @brief Release interpreter */
+    void ps_interpreter_done(ps_interpreter *interpreter);
 
-    /** @brief Get global symbol */
-    ps_symbol *ps_interpreter_global_get(ps_interpreter *interpreter, char *name);
+    // /**
+    //  * @brief Allocate new value
+    //  * @return NULL if no free memory (errno = ENOMEM)
+    //  */
+    // ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter);
 
-    /** @brief Add global symbol */
-    int ps_interpreter_global_add(ps_interpreter *interpreter, ps_symbol *symbol);
+    // /** @brief Free existing value */
+    // void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value);
 
-    /** @brief Delete global symbol */
-    int ps_interpreter_global_delete(ps_interpreter *interpreter, char *name);
+    // /** @brief Get global symbol */
+    // ps_symbol *ps_interpreter_global_get(ps_interpreter *interpreter, char *name);
+
+    // /** @brief Add global symbol */
+    // int ps_interpreter_global_add(ps_interpreter *interpreter, ps_symbol *symbol);
+
+    // /** @brief Delete global symbol */
+    // int ps_interpreter_global_delete(ps_interpreter *interpreter, char *name);
 
     bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length);
 

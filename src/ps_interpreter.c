@@ -14,17 +14,11 @@
 #include "ps_interpreter.h"
 #include "ps_visitor.h"
 
-ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
+ps_interpreter *ps_interpreter_init()
 {
+    ps_interpreter *interpreter = calloc(1, sizeof(ps_interpreter));
     if (interpreter == NULL)
-    {
-        interpreter = calloc(1, sizeof(ps_interpreter));
-        if (interpreter == NULL)
-            return NULL;
-        interpreter->allocated = true;
-    }
-    else
-        interpreter->allocated = false;
+        return NULL;
     interpreter->parser = ps_parser_init(NULL, NULL);
     if (interpreter->parser == NULL)
     {
@@ -36,16 +30,13 @@ ps_interpreter *ps_interpreter_init(ps_interpreter *interpreter)
         ps_interpreter_done(interpreter);
         return NULL;
     }
-    strncpy(interpreter->scopes[PS_SYMBOL_SCOPE_SYSTEM].name, "SYSTEM", PS_IDENTIFIER_LEN);
-    // interpreter->scopes[PS_SYMBOL_SCOPE_SYSTEM]->name = "SYSTEM";
-    strncpy(interpreter->scopes[PS_SYMBOL_SCOPE_GLOBAL].name, "GLOBAL", PS_IDENTIFIER_LEN);
-    // interpreter->scopes[PS_SYMBOL_SCOPE_GLOBAL]->name = "GLOBAL";
-    interpreter->unit_scope = PS_SYMBOL_SCOPE_UNIT;
-    interpreter->local_scope = PS_SYMBOL_SCOPE_LOCAL;
-    interpreter->debug = true;
-    interpreter->trace = true;
     interpreter->error = PS_RUNTIME_ERROR_NONE;
+    interpreter->debug = false;
+    interpreter->trace = false;
     interpreter->range_check = true;
+    interpreter->bool_eval = false;
+    interpreter->from_string = false;
+    interpreter->environment = ps_system_init(interpreter);
     return interpreter;
 }
 
@@ -56,8 +47,7 @@ void ps_interpreter_done(ps_interpreter *interpreter)
         ps_parser_done(interpreter->parser);
         interpreter->parser = NULL;
     }
-    if (!interpreter->allocated)
-        free(interpreter);
+    free(interpreter);
 }
 
 /** @brief Allocate new value */
@@ -77,24 +67,37 @@ void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
     free(value);
 }
 
-ps_symbol *ps_interpreter_auto_add_value(ps_interpreter *interpreter, ps_symbol_scope scope, ps_value *value)
+ps_symbol *ps_interpreter_add_auto_value(ps_interpreter *interpreter, ps_value *value)
 {
-    ps_symbol *symbol = ps_symbol_alloc(scope, PS_SYMBOL_KIND_AUTO, NULL, value);
+    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
+    if (symbol == NULL)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+        return NULL;
+    }
+    return ps_interpreter_add_symbol(interpreter, symbol);
+}
+
+ps_symbol *ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_value *symbol)
+{
+    ps_symbol_table *symbols = interpreter->parser->symbols;
+    if (!ps_symbol_table_add(symbols, symbol) == NULL)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
+        return NULL;
+    }
     return symbol;
 }
 
-/**
- * @brief Garbage collector: release free symbols
- *
- * @return Count of garbage collected symbols
- */
-int ps_interpreter_auto_gc(ps_interpreter *interpreter)
+ps_symbol *ps_interpreter_add_string_constant(ps_interpreter *interpreter, char *z)
 {
-    return 0;
-    // TODO?
-    // int count = ps_symbol_table_gc(interpreter->vm->symbols);
-    // fprintf(stderr, "*** VM_AUTO_GC: %d symbol%s freed\n", count, count > 0 ? "s" : "");
-    // return count;
+    ps_symbol *symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, z);
+    if (symbol == NULL)
+    {
+        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
+        return NULL;
+    }
+    return symbol;
 }
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
@@ -110,17 +113,23 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
     return ps_buffer_load_file(lexer->buffer, filename);
 }
 
-bool ps_interpreter_enter_scope(ps_interpreter *interpreter, ps_symbol_scope scope_base)
+bool ps_interpreter_enter_scope(ps_interpreter *interpreter)
 {
+    // TODO: implement scope management
+    return false;
+}
 
-    return true;
+bool ps_interpreter_exit_scope(ps_interpreter *interpreter)
+{
+    // TODO: implement scope management
+    return false;
 }
 
 bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 {
     ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
-    parser->debug = true;
+    // parser->debug = true;
     if (!ps_visit_start(interpreter, exec))
     {
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
