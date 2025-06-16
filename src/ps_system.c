@@ -77,64 +77,39 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 
 /* STANDARD + MATH LIBRARY */
 
-/* procedures */
-ps_value ps_value_procedure_randomize   = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_randomize}};
-ps_value ps_value_procedure_read        = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_read     }};
-ps_value ps_value_procedure_readln      = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_readln   }};
-ps_value ps_value_procedure_write       = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_write    }};
-ps_value ps_value_procedure_writeln     = {.type = &ps_type_def_procedure, .data = {.v = &ps_procedure_writeln  }};
-ps_symbol ps_system_procedure_randomize = {.kind = PS_SYMBOL_KIND_PROCEDURE, .name = "RANDOMIZE", .value = &ps_value_procedure_randomize};
-ps_symbol ps_system_procedure_read      = {.kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READ"     , .value = &ps_value_procedure_read     };
-ps_symbol ps_system_procedure_readln    = {.kind = PS_SYMBOL_KIND_PROCEDURE, .name = "READLN"   , .value = &ps_value_procedure_readln   };
-ps_symbol ps_system_procedure_write     = {.kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITE"    , .value = &ps_value_procedure_write    };
-ps_symbol ps_system_procedure_writeln   = {.kind = PS_SYMBOL_KIND_PROCEDURE, .name = "WRITELN"  , .value = &ps_value_procedure_writeln  };
+// clang-format on
+#define PS_SYSTEM_CALLABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
+    ps_symbol ps_system_##TYPE##_##VALUE = {                                                                  \
+        .kind = PS_SYMBOL_KIND_PROCEDURE, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+// clang-format off
 
-/* ordinal types functions */
-ps_value ps_value_function_chr    = {.type = &ps_type_def_function, .data = {.v = &ps_function_chr }};
-ps_value ps_value_function_even   = {.type = &ps_type_def_function, .data = {.v = &ps_function_even}};
-ps_value ps_value_function_odd    = {.type = &ps_type_def_function, .data = {.v = &ps_function_odd }};
-ps_value ps_value_function_ord    = {.type = &ps_type_def_function, .data = {.v = &ps_function_ord }};
-ps_value ps_value_function_pred   = {.type = &ps_type_def_function, .data = {.v = &ps_function_pred}};
-ps_value ps_value_function_succ   = {.type = &ps_type_def_function, .data = {.v = &ps_function_succ}};
-ps_symbol ps_system_function_chr  = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "CHR"    , .value = &ps_value_function_chr  };
-ps_symbol ps_system_function_even = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "EVEN"   , .value = &ps_value_function_even };
-ps_symbol ps_system_function_odd  = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "ODD"    , .value = &ps_value_function_odd  };
-ps_symbol ps_system_function_ord  = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "ORD"    , .value = &ps_value_function_ord  };
-ps_symbol ps_system_function_pred = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "PRED"   , .value = &ps_value_function_pred };
-ps_symbol ps_system_function_succ = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "SUCC"   , .value = &ps_value_function_succ };
-/* functions with zero or one integer/real argument returning integer/real type */
-ps_value ps_value_function_random       = {.type = &ps_type_def_function, .data = {.v = &ps_function_random}};
-ps_symbol ps_system_function_random   = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "RANDOM" , .value = &ps_value_function_random};
-/* functions with one integer/real argument returning integer/real type */
-ps_value ps_value_function_abs        = {.type = &ps_type_def_function, .data = {.v = &ps_function_abs    }};
-ps_value ps_value_function_frac       = {.type = &ps_type_def_function, .data = {.v = &ps_function_frac   }};
-ps_value ps_value_function_int        = {.type = &ps_type_def_function, .data = {.v = &ps_function_int    }};
-ps_value ps_value_function_round      = {.type = &ps_type_def_function, .data = {.v = &ps_function_round  }};
-ps_value ps_value_function_trunc      = {.type = &ps_type_def_function, .data = {.v = &ps_function_trunc  }};
-ps_symbol ps_system_function_abs      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "ABS"    , .value = &ps_value_function_abs   };
-ps_symbol ps_system_function_frac     = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "FRAC"   , .value = &ps_value_function_frac  };
-ps_symbol ps_system_function_int      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "INT"    , .value = &ps_value_function_int   };
-ps_symbol ps_system_function_round    = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "ROUND"  , .value = &ps_value_function_round };
-ps_symbol ps_system_function_trunc    = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "TRUNC"  , .value = &ps_value_function_trunc };
-/* functions with one real argument returning real type */
-ps_value ps_value_function_arctan     = {.type = &ps_type_def_function, .data = {.v = &ps_function_arctan }};
-ps_value ps_value_function_cos        = {.type = &ps_type_def_function, .data = {.v = &ps_function_cos    }};
-ps_value ps_value_function_exp        = {.type = &ps_type_def_function, .data = {.v = &ps_function_exp    }};
-ps_value ps_value_function_ln         = {.type = &ps_type_def_function, .data = {.v = &ps_function_ln     }};
-ps_value ps_value_function_log        = {.type = &ps_type_def_function, .data = {.v = &ps_function_log    }};
-ps_value ps_value_function_sin        = {.type = &ps_type_def_function, .data = {.v = &ps_function_sin    }};
-ps_value ps_value_function_sqr        = {.type = &ps_type_def_function, .data = {.v = &ps_function_sqr    }};
-ps_value ps_value_function_sqrt       = {.type = &ps_type_def_function, .data = {.v = &ps_function_sqrt   }};
-ps_value ps_value_function_tan        = {.type = &ps_type_def_function, .data = {.v = &ps_function_tan    }};
-ps_symbol ps_system_function_arctan   = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "ARCTAN" , .value = &ps_value_function_arctan};
-ps_symbol ps_system_function_cos      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "COS"    , .value = &ps_value_function_cos   };
-ps_symbol ps_system_function_exp      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "EXP"    , .value = &ps_value_function_exp   };
-ps_symbol ps_system_function_ln       = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "LN"     , .value = &ps_value_function_ln    };
-ps_symbol ps_system_function_log      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "LOG"    , .value = &ps_value_function_log   };
-ps_symbol ps_system_function_sin      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "SIN"    , .value = &ps_value_function_sin   };
-ps_symbol ps_system_function_sqr      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "SQR"    , .value = &ps_value_function_sqr   };
-ps_symbol ps_system_function_sqrt     = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "SQRT"   , .value = &ps_value_function_sqrt  };
-ps_symbol ps_system_function_tan      = {.kind = PS_SYMBOL_KIND_FUNCTION , .name = "TAN"    , .value = &ps_value_function_tan   };
+PS_SYSTEM_CALLABLE(function , abs      , "ABS"      , v, &ps_function_abs       );
+PS_SYSTEM_CALLABLE(function , arctan   , "ARCTAN"   , v, &ps_function_arctan    );
+PS_SYSTEM_CALLABLE(function , chr      , "CHR"      , v, &ps_function_chr       );
+PS_SYSTEM_CALLABLE(function , cos      , "COS"      , v, &ps_function_cos       );
+PS_SYSTEM_CALLABLE(function , even     , "EVEN"     , v, &ps_function_even      );
+PS_SYSTEM_CALLABLE(function , exp      , "EXP"      , v, &ps_function_exp       );
+PS_SYSTEM_CALLABLE(function , frac     , "FRAC"     , v, &ps_function_frac      );
+PS_SYSTEM_CALLABLE(function , int      , "INT"      , v, &ps_function_int       );
+PS_SYSTEM_CALLABLE(function , ln       , "LN"       , v, &ps_function_ln        );
+PS_SYSTEM_CALLABLE(function , log      , "LOG"      , v, &ps_function_log       );
+PS_SYSTEM_CALLABLE(function , odd      , "ODD"      , v, &ps_function_odd       );
+PS_SYSTEM_CALLABLE(function , ord      , "ORD"      , v, &ps_function_ord       );
+PS_SYSTEM_CALLABLE(function , pred     , "PRED"     , v, &ps_function_pred      );
+PS_SYSTEM_CALLABLE(function , random   , "RANDOM"   , v, &ps_function_random    );
+PS_SYSTEM_CALLABLE(function , round    , "ROUND"    , v, &ps_function_round     );
+PS_SYSTEM_CALLABLE(function , sin      , "SIN"      , v, &ps_function_sin       );
+PS_SYSTEM_CALLABLE(function , sqr      , "SQR"      , v, &ps_function_sqr       );   
+PS_SYSTEM_CALLABLE(function , sqrt     , "SQRT"     , v, &ps_function_sqrt      );
+PS_SYSTEM_CALLABLE(function , succ     , "SUCC"     , v, &ps_function_succ      );
+PS_SYSTEM_CALLABLE(function , tan      , "TAN"      , v, &ps_function_tan       );
+PS_SYSTEM_CALLABLE(function , trunc    , "TRUNC"    , v, &ps_function_trunc     );
+PS_SYSTEM_CALLABLE(procedure, randomize, "RANDOMIZE", v, &ps_procedure_randomize);
+PS_SYSTEM_CALLABLE(procedure, read     , "READ"     , v, &ps_procedure_read     );
+PS_SYSTEM_CALLABLE(procedure, readln   , "READLN"   , v, &ps_procedure_readln   );
+PS_SYSTEM_CALLABLE(procedure, write    , "WRITE"    , v, &ps_procedure_write    );
+PS_SYSTEM_CALLABLE(procedure, writeln  , "WRITELN"  , v, &ps_procedure_writeln  );
 
 /* clang-format on */
 
