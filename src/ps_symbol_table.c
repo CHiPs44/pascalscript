@@ -99,7 +99,7 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
             fprintf(stderr, "TRACE\tps_symbol_table_find: %s not found\n", (char *)name);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
-    if (strcmp((char *)(&table->symbols[index]->name), (char *)name) != 0)
+    if (strcmp((char *)(table->symbols[index]->name), (char *)name) != 0)
     {
         // Key collision: search for the symbol in the table
         ps_symbol_table_size start_index = index;
@@ -114,7 +114,15 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
                     fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
                 return PS_SYMBOL_TABLE_NOT_FOUND;
             }
-        } while (strcmp((char *)(&table->symbols[index]->name), (char *)name) != 0);
+            if (table->symbols[index] == NULL)
+                continue;
+            if (strcmp((char *)(table->symbols[index]->name), (char *)name) == 0)
+            {
+                if (table->trace)
+                    fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);
+                return index; // found
+            }
+        } while (true);
     }
     if (table->trace)
         fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);

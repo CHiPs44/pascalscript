@@ -49,15 +49,17 @@ PS_SYSTEM_TYPE(enum     , "#ENUM"    , PS_TYPE_ENUM    );
 PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE    );
 PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE    );
 
-/* CONSTANTS */
+/******************************************************************************/
+/* CONSTANTS                                                                  */
+/******************************************************************************/
 
 // clang-format on
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
-    // TYPE VALUE NAME FIELD VALUE2\
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
     ps_symbol ps_system_constant_##TYPE##_##VALUE = {                                                                  \
         .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
 // clang-format off
+
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean)false                                          );
 PS_SYSTEM_CONSTANT(boolean , true   , "TRUE"   , b, (ps_boolean)true                                           );
@@ -69,7 +71,10 @@ PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN        
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                   );
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.141592653589793115997963468544185161590576171875);
 
-/* BITNESS & VERSION */
+/******************************************************************************/
+/* BITNESS & VERSION                                                          */
+/******************************************************************************/
+
 PS_SYSTEM_CONSTANT(unsigned, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS      );
 PS_SYSTEM_CONSTANT(unsigned, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR);
 PS_SYSTEM_CONSTANT(unsigned, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_MINOR);
@@ -77,7 +82,9 @@ PS_SYSTEM_CONSTANT(unsigned, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION
 PS_SYSTEM_CONSTANT(unsigned, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX);
 PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL            );
 
-/* STANDARD + MATH LIBRARY */
+/******************************************************************************/
+/* STANDARD + MATH LIBRARY                                                    */
+/******************************************************************************/
 
 // clang-format on
 #define PS_SYSTEM_CALLABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
