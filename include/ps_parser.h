@@ -31,7 +31,7 @@ extern "C"
 #define PS_PARSER_SIZE sizeof(ps_parser)
 
     /** @brief Initialize parse */
-    ps_parser *ps_parser_init(ps_parser *parser);
+    ps_parser *ps_parser_init();
     /** @brief Free parser & symbol table */
     void ps_parser_done(ps_parser *parser);
     /** @brief Get current lexer */

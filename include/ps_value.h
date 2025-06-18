@@ -11,13 +11,15 @@
 #include <stdlib.h>
 
 #include "ps_type_definition.h"
+#include "ps_value_types.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    // Forward reference to parameters
+    // Forward references
+    typedef struct s_ps_type_definition ps_type_definition;
     typedef struct s_ps_parameters ps_parameters;
 
     /** @brief Value union */

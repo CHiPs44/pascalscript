@@ -6,8 +6,9 @@
 
 #include <stdlib.h>
 
-#include "ps_interpreter.h"
+#include "ps_environment.h"
 #include "ps_functions.h"
+#include "ps_interpreter.h"
 #include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_value.h"
@@ -26,7 +27,7 @@ ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type)
         return NULL;
     }
     signature->result_type = result_type;
-    signature->size = PS_SIGNATURE_PARAMETER_COUNT;
+    signature->size = size;
     signature->used = 0;
     return signature;
 }
@@ -58,27 +59,25 @@ bool ps_signature_compare(ps_signature *formal, ps_signature *actual)
     for (uint8_t i = 0; i < formal->used; i++)
     {
         // Same type?
-        if (formal->parameters[i].value->value->type !=
-            actual->parameters[i].value->value->type)
+        if (formal->parameters[i].value->value->type != actual->parameters[i].value->value->type)
             return false;
         // Byref parameters must go to a variable
-        if (formal->parameters[i].byref &&
-            actual->parameters[i].value->kind != PS_SYMBOL_KIND_VARIABLE)
+        if (formal->parameters[i].byref && actual->parameters[i].value->kind != PS_SYMBOL_KIND_VARIABLE)
             return false;
     }
     return true;
 }
 
-bool ps_signature_assign(ps_interpreter *interpreter, ps_symbol_scope scope, ps_signature *formal, ps_signature *actual)
+bool ps_signature_assign(ps_interpreter *interpreter, ps_signature *formal, ps_signature *actual)
 {
     ps_symbol *variable;
+    ps_environment *environment = ps_interpreter_get_environment(interpreter);
     for (uint8_t i = 0; i < formal->used; i++)
     {
-        variable = ps_symbol_alloc(
-            scope, PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
+        variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
         if (variable == NULL)
             return false;
-        if (ps_symbol_table_add(interpreter->parser->symbols, variable) == NULL)
+        if (!ps_environment_add_symbol(environment, variable))
         {
             ps_symbol_free(variable);
             return false;

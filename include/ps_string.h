@@ -27,9 +27,11 @@ extern "C"
     /// @return string NULL if len > max
     ps_string *ps_string_set(ps_string *s, char *z);
 
-    /// @brief Allocate and set a new string from a "C" string
+    /// @brief Allocate and set a new string from a null terminated "C" string
+    /// @example create("Hello") => "Hello"
+    /// @example create("...String longer than 255 chars...") =>  NULL with errno = EINVAL
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_create(char *z);
+    ps_string *ps_string_create(char *z, ps_string_len max);
 
     /// @brief Allocate and set a new string from a char
     /// @example create_char('A') => "A"

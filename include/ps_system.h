@@ -75,8 +75,8 @@ extern "C"
     extern ps_symbol ps_system_constant_unsigned_ps_version_minor;
     extern ps_symbol ps_system_constant_unsigned_ps_version_patch;
 
-    extern bool ps_system_init(ps_interpreter *interpreter);
-    extern void ps_system_done(ps_interpreter *interpreter);
+    bool ps_system_init(ps_interpreter *interpreter);
+    void ps_system_done(ps_interpreter *interpreter);
 
 #ifdef __cplusplus
 }

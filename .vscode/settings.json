@@ -7,7 +7,14 @@
         "ps_symbol.h": "c",
         "ps_parser.h": "c",
         "ps_error.h": "c",
-        "ps_config.h": "c"
+        "ps_config.h": "c",
+        "typeinfo": "c",
+        "ps_system_types.h": "c",
+        "ps_interpreter.h": "c",
+        "string.h": "c",
+        "ps_type_definition.h": "c",
+        "stdlib.h": "c",
+        "ps_visitor.h": "c"
     },
     "makefile.configureOnOpen": false
 }

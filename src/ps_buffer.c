@@ -270,12 +270,12 @@ bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
     return ps_buffer_scan_text(buffer);
 }
 
-void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size)
+void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
 {
     char line[PS_BUFFER_MAX_COLUMNS + 1];
 
     fprintf(stderr, "\n");
-    // fprintf(stderr, "%d => %d for %d lines\n", buffer->line_count, from_line, page_size);
+    // fprintf(stderr, "%d => %d for %d lines\n", buffer->line_count, from_line, line_count);
     if (buffer->line_count == 0)
     {
         fprintf(stderr, "Buffer is EMPTY!\n");
@@ -283,7 +283,7 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size)
     }
     fprintf(stderr, "            |         1         2         3         4         5         6         7         8|\n");
     fprintf(stderr, "Line  (Len) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
-    for (int line_number = from_line; line_number < from_line + page_size - 1; line_number += 1)
+    for (int line_number = from_line; line_number < from_line + line_count - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
             break;

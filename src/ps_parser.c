@@ -4,40 +4,23 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include "ps_parser.h"
 
-ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
+ps_parser *ps_parser_init()
 {
+    ps_parser *parser = calloc(1, sizeof(ps_parser));
     if (parser == NULL)
-    {
-        parser = calloc(1, sizeof(ps_parser));
-        if (parser == NULL)
-            return NULL;
-        parser->allocated_parser = true;
-    }
-    else
-    {
-        parser->allocated_parser = false;
-    }
-    for (uint8_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
-    {
-        parser->lexers[i] = ps_lexer_init(NULL);
-    }
-    parser->current_lexer = 0;
-    if (symbols == NULL)
-    {
-        parser->allocated_symbol_table = true;
-        parser->symbols = ps_symbol_table_init(NULL);
-    }
-    else
-    {
-        parser->allocated_symbol_table = false;
-        parser->symbols = symbols;
-    }
+        return NULL;
+    parser->lexer = ps_lexer_init();
+    // for (uint8_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
+    // {
+    //     parser->lexers[i] = ps_lexer_init(NULL);
+    // }
+    // parser->current_lexer = 0;
     parser->error = PS_PARSER_ERROR_NONE;
     parser->trace = false;
     parser->debug = false;
@@ -46,32 +29,25 @@ ps_parser *ps_parser_init(ps_parser *parser, ps_symbol_table *symbols)
 
 void ps_parser_done(ps_parser *parser)
 {
-    for (size_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
-        if (parser->lexers[i] != NULL)
-        {
-            ps_lexer_done(parser->lexers[i]);
-            parser->lexers[i] = NULL;
-        }
-    if (parser->allocated_symbol_table)
+    if (parser->lexer != NULL)
     {
-        ps_symbol_table_done(parser->symbols);
-        parser->symbols = NULL;
+        ps_lexer_done(parser->lexer);
+        parser->lexer = NULL;
     }
-    if (parser->allocated_parser)
-        free(parser);
+    free(parser);
 }
 
-bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
-{
-    if (current_lexer > PS_PARSER_LEXER_COUNT || parser->lexers[current_lexer] == NULL)
-        return false;
-    parser->current_lexer = current_lexer;
-    return true;
-}
+// bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
+// {
+//     if (current_lexer > PS_PARSER_LEXER_COUNT || parser->lexers[current_lexer] == NULL)
+//         return false;
+//     parser->current_lexer = current_lexer;
+//     return true;
+// }
 
 ps_lexer *ps_parser_get_lexer(ps_parser *parser)
 {
-    return parser->lexers[parser->current_lexer];
+    return parser->lexer;
 }
 
 void ps_parser_debug(ps_parser *parser, char *message)

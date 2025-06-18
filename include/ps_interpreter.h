@@ -19,15 +19,22 @@ extern "C"
 {
 #endif
 
+#ifndef PS_INTERPRETER_ENVIRONMENTS
+#define PS_INTERPRETER_ENVIRONMENTS 8
+#endif
+
+#define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0
+#define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1
+
     typedef struct s_ps_interpreter
     {
-        ps_environment *environment;
+        ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS];
+        int level;
         ps_parser *parser;
         ps_error error;
         // flags
         bool trace;
         bool debug;
-        bool from_string; // true if source is a string, false if file
         // options
         bool range_check; // range checking for integer and real values
         bool bool_eval;   // short circuit boolean evaluation
@@ -43,6 +50,18 @@ extern "C"
 
     /** @brief Release interpreter */
     void ps_interpreter_done(ps_interpreter *interpreter);
+
+    /** @brief Create a new environment for program, procedure or function */
+    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);
+
+    /** @brief Release current environment */
+    bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
+
+    /** @brief Get current environment */
+    ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
+
+    /** @brief Find symbol by name in current environment or its parents */
+    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name);
 
     // /**
     //  * @brief Allocate new value

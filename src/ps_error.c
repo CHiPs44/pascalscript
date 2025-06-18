@@ -75,6 +75,8 @@ char *ps_error_get_message(ps_error error)
         return "Symbol not added";
     case PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND:
         return "Symbol not found";
+    case PS_RUNTIME_ERROR_SYMBOL_EXISTS:
+        return "Symbol alreayd exists";
     case PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
         return "Unknown unary operator";
     case PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE:

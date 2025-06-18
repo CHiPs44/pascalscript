@@ -79,22 +79,27 @@ ps_symbol_hash_key ps_symbol_get_hash_key(char *name)
     // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
     // 33 * x => 32 * x + x => x << 5 + x
     ps_symbol_hash_key hash = 5381u;
-    while (*name)
-        hash = (hash << 5) + hash + *name++;
+    unsigned int c = (unsigned int)(*name);
+    while (c)
+    {
+        hash = (hash << 5) + hash + c;
+        name++;
+        c = (unsigned int)(*name);
+    }
     return hash;
 }
 
-ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, char *name)
+ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)name);
     ps_symbol_table_size index = hash % table->size;
     if (table->symbols[index] == NULL)
     {
         if (table->trace)
-            fprintf(stderr, "TRACE\tps_symbol_table_find: %s not found\n", name);
+            fprintf(stderr, "TRACE\tps_symbol_table_find: %s not found\n", (char *)name);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
-    if (strcmp(table->symbols[index]->name, name) != 0)
+    if (strcmp((char *)(&table->symbols[index]->name), (char *)name) != 0)
     {
         // Key collision: search for the symbol in the table
         ps_symbol_table_size start_index = index;
@@ -106,17 +111,17 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, char *name)
             if (index == start_index)
             {
                 if (table->trace)
-                    fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' not found\n", name);
+                    fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
                 return PS_SYMBOL_TABLE_NOT_FOUND;
             }
-        } while (strcmp(table->symbols[index]->name, name) != 0);
+        } while (strcmp((char *)(&table->symbols[index]->name), (char *)name) != 0);
     }
     if (table->trace)
-        fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' found at index %d\n", name, index);
+        fprintf(stderr, "TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);
     return index;
 }
 
-ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
+ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
@@ -124,25 +129,21 @@ ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name)
     return table->symbols[index];
 }
 
-ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
+ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
     // NB: refuse to add symbol if kind is AUTO or table is full
-    bool error = symbol->kind == PS_SYMBOL_KIND_AUTO || table->used >= table->size;
-    if (error)
+    if (symbol->kind == PS_SYMBOL_KIND_AUTO)
+        return PS_SYMBOL_TABLE_ERROR_INVALID;
+    if (table->used >= table->size)
     {
-        if (table->debug)
-            fprintf(stderr, "DEBUG\tps_symbol_table_add: '%s' => error: kind=%d, used=%d/%d\n", symbol->name,
-                    symbol->kind, table->used, table->size);
-        // table->error = table->used >= table->size ? PS_SYMBOL_TABLE_ERROR_FULL : PS_SYMBOL_TABLE_ERROR_INVALID;
-        return NULL;
+        return PS_SYMBOL_TABLE_ERROR_FULL;
     }
     // check if symbol already exists
-    if (ps_symbol_table_get(table, symbol->name) != NULL)
+    if (ps_symbol_table_get(table, &symbol->name) != NULL)
     {
-        // table->error = PS_SYMBOL_TABLE_ERROR_EXISTS;
-        return NULL;
+        return PS_SYMBOL_TABLE_ERROR_EXISTS;
     }
-    ps_symbol_hash_key hash = ps_symbol_get_hash_key(symbol->name);
+    ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;
     ps_symbol_table_size start_index = index;
     // Find an empty slot in the table
@@ -156,15 +157,14 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
             if (table->debug)
                 fprintf(stderr, "DEBUG\tps_symbol_table_add: %s => table is full\n", symbol->name);
             // table->error = PS_SYMBOL_TABLE_ERROR_FULL;
-            return NULL;
+            return PS_SYMBOL_TABLE_ERROR_FULL;
         }
     }
     table->symbols[index] = symbol;
     table->used += 1;
     if (table->trace)
         fprintf(stderr, "TRACE\tps_symbol_table_add: %d/%d %d '%s' \n", table->used, table->size, index, symbol->name);
-    // table->error = PS_SYMBOL_TABLE_ERROR_NONE;
-    return symbol;
+    return PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
 // ps_symbol *ps_symbol_table_add_auto(ps_symbol_table *table, ps_symbol *symbol)
@@ -173,67 +173,67 @@ ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 //     return NULL;
 // }
 
-ps_symbol *ps_symbol_table_find_string_constant(ps_symbol_table *table, char *z)
-{
-    ps_symbol_table_size hash = ps_symbol_get_hash_key(z);
-    ps_symbol_table_size index = 0;
-    ps_symbol *symbol;
-    while (index < table->size)
-    {
-        symbol = table->symbols[index];
-        if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_AUTO ||
-            symbol->value->type != ps_system_string.value->data.t)
-        {
-            index += 1;
-            continue;
-        }
-        if (strcmp(z, (char *)symbol->value->data.s->str) == 0)
-        {
-            // fprintf(stderr, "ps_symbol_table_find_string_constant: %d %s\n", index, symbol->name);
-            return symbol;
-        }
-        index += 1;
-    }
-    // fprintf(stderr, "ps_symbol_table_find_string_constant: %s not found\n", z);
-    return NULL;
-}
+// ps_symbol *ps_symbol_table_find_string_constant(ps_symbol_table *table, char *z)
+// {
+//     ps_symbol_table_size hash = ps_symbol_get_hash_key(z);
+//     ps_symbol_table_size index = 0;
+//     ps_symbol *symbol;
+//     while (index < table->size)
+//     {
+//         symbol = table->symbols[index];
+//         if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_AUTO ||
+//             symbol->value->type != ps_system_string.value->data.t)
+//         {
+//             index += 1;
+//             continue;
+//         }
+//         if (strcmp(z, (char *)symbol->value->data.s->str) == 0)
+//         {
+//             // fprintf(stderr, "ps_symbol_table_find_string_constant: %d %s\n", index, symbol->name);
+//             return symbol;
+//         }
+//         index += 1;
+//     }
+//     // fprintf(stderr, "ps_symbol_table_find_string_constant: %s not found\n", z);
+//     return NULL;
+// }
 
-ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z)
-{
-    ps_symbol *symbol;
-    ps_value *value;
-    ps_value_data data;
-    symbol = ps_symbol_table_find_string_constant(table, z);
-    if (symbol != NULL)
-    {
-        // fprintf(stderr, "ps_symbol_table_add_string_constant: OLD '%s' => %s\n", z, symbol->name);
-        return symbol;
-    }
-    data.s = ps_string_create(z);
-    if (data.s == NULL)
-        return NULL;
-    value = ps_value_alloc(ps_system_string.value->data.t, data);
-    if (value == NULL)
-    {
-        ps_string_free(data.s);
-        return NULL;
-    }
-    symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
-    if (symbol == NULL)
-    {
-        ps_value_free(value);
-        ps_string_free(data.s);
-        return NULL;
-    }
-    if (ps_symbol_table_add(table, symbol) == NULL)
-    {
-        ps_symbol_free(symbol);
-        ps_value_free(value);
-        ps_string_free(data.s);
-        return NULL;
-    }
-    return symbol;
-}
+// ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z)
+// {
+//     ps_symbol *symbol;
+//     ps_value *value;
+//     ps_value_data data;
+//     symbol = ps_symbol_table_find_string_constant(table, z);
+//     if (symbol != NULL)
+//     {
+//         // fprintf(stderr, "ps_symbol_table_add_string_constant: OLD '%s' => %s\n", z, symbol->name);
+//         return symbol;
+//     }
+//     data.s = ps_string_create(z);
+//     if (data.s == NULL)
+//         return NULL;
+//     value = ps_value_alloc(ps_system_string.value->data.t, data);
+//     if (value == NULL)
+//     {
+//         ps_string_free(data.s);
+//         return NULL;
+//     }
+//     symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
+//     if (symbol == NULL)
+//     {
+//         ps_value_free(value);
+//         ps_string_free(data.s);
+//         return NULL;
+//     }
+//     if (ps_symbol_table_add(table, symbol) == NULL)
+//     {
+//         ps_symbol_free(symbol);
+//         ps_value_free(value);
+//         ps_string_free(data.s);
+//         return NULL;
+//     }
+//     return symbol;
+// }
 
 void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
 {

@@ -16,22 +16,22 @@
 
 // clang-format off
 ps_value_type_flags ps_value_type_flags_all[] = {
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // 00 PS_TYPE_NONE
-    {.is_base = 1, .is_numeric = 1, .is_ordinal = 0, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, // 01 PS_TYPE_REAL
-    {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, // 02 PS_TYPE_INTEGER
-    {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // 03 PS_TYPE_UNSIGNED
-    {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // 04 PS_TYPE_BOOLEAN
-    {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // 05 PS_TYPE_CHAR
-    {.is_base = 1, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // 06 PS_TYPE_STRING
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // 07 PS_TYPE_DEFINITION
-    {.is_base = 0, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // 08 PS_TYPE_SUBRANGE
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, // 09 PS_TYPE_ENUM
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, // 10 PS_TYPE_SET
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // 11 PS_TYPE_POINTER
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // 12 PS_TYPE_ARRAY
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // 13 PS_TYPE_RECORD
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, // 14 PS_TYPE_FILE
-    {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}  // 15 PS_TYPE_OBJECT
+    /* 00 PS_TYPE_NONE       */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, 
+    /* 01 PS_TYPE_REAL       */ {.is_base = 1, .is_numeric = 1, .is_ordinal = 0, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, 
+    /* 02 PS_TYPE_INTEGER    */ {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 1, .is_reference = 0}, 
+    /* 03 PS_TYPE_UNSIGNED   */ {.is_base = 1, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, 
+    /* 04 PS_TYPE_BOOLEAN    */ {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, 
+    /* 05 PS_TYPE_CHAR       */ {.is_base = 1, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, 
+    /* 06 PS_TYPE_STRING     */ {.is_base = 1, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, 
+    /* 07 PS_TYPE_DEFINITION */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, 
+    /* 08 PS_TYPE_SUBRANGE   */ {.is_base = 0, .is_numeric = 1, .is_ordinal = 1, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, 
+    /* 09 PS_TYPE_ENUM       */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 1, .is_scalar = 1, .is_signed = 0, .is_reference = 0}, 
+    /* 10 PS_TYPE_SET        */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 0}, 
+    /* 11 PS_TYPE_POINTER    */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, 
+    /* 12 PS_TYPE_ARRAY      */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, 
+    /* 13 PS_TYPE_RECORD     */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, 
+    /* 14 PS_TYPE_FILE       */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1}, 
+    /* 15 PS_TYPE_OBJECT     */ {.is_base = 0, .is_numeric = 0, .is_ordinal = 0, .is_scalar = 0, .is_signed = 0, .is_reference = 1},  
 };
 // clang-format on
 #define PS_VALUE_TYPE_SIZE sizeof(ps_value_type_flags_all)
@@ -45,47 +45,48 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_subrange(ps_value min, ps_value max)
-{
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
-    if (type_def == NULL)
-        return NULL;
-    type_def->def.def_subrange.min = min;
-    type_def->def.def_subrange.max = max;
-    return type_def;
-}
+// ps_type_definition *ps_type_definition_create_subrange(ps_symbol *def, ps_value_data min, ps_value_data max)
+// {
+//     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
+//     if (type_def == NULL)
+//         return NULL;
+//     type_def->def.def_subrange.def = def;
+//     type_def->def.def_subrange.min = min;
+//     type_def->def.def_subrange.max = max;
+//     return type_def;
+// }
 
-ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol *values)
-{
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM);
-    if (type_def == NULL)
-        return NULL; // errno = ENOMEM
-    type_def->def.def_enum.count = count;
-    type_def->def.def_enum.values = calloc(count, sizeof(ps_symbol *));
-    if (type_def->def.def_enum.values == NULL)
-    {
-        free(type_def);
-        return NULL; // errno = ENOMEM
-    }
-    for (ps_unsigned i = 0; i < count; i++)
-    {
-        type_def->def.def_enum.values[i] = values[i];
-    }
-    return type_def;
-}
+// ps_type_definition *ps_type_definition_create_enum(ps_unsigned count, ps_symbol *values)
+// {
+//     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM);
+//     if (type_def == NULL)
+//         return NULL; // errno = ENOMEM
+//     type_def->def.def_enum.count = count;
+//     type_def->def.def_enum.values = calloc(count, sizeof(ps_symbol *));
+//     if (type_def->def.def_enum.values == NULL)
+//     {
+//         free(type_def);
+//         return NULL; // errno = ENOMEM
+//     }
+//     for (ps_unsigned i = 0; i < count; i++)
+//     {
+//         type_def->def.def_enum.values[i] = values[i];
+//     }
+//     return type_def;
+// }
 
-const char *ps_type_names[] = {
-// clang-format off
+char *ps_type_names[] = {
+    // clang-format off
 //   12345678    12345678    12345678    12345678    12345678    12345678    12345678    12345678
     "NONE"    , "REAL"    , "INTEGER" , "UNSIGNED", "BOOLEAN" , "CHAR"    , "STRING"  , "TYPE_DEF", 
     "SUBRANGE", "ENUM"    , "SET"     , "POINTER" , "ARRAY"   , "RECORD"  , "FILE"    , "OBJECT"  ,
-// clang-format on
+    // clang-format on
 };
 
 char *ps_value_get_type_name(ps_value_type type)
 {
     if (type >= PS_TYPE_NONE && type <= PS_TYPE_OBJECT)
-        return (char *)ps_type_names[type];
+        return ps_type_names[type];
     return NULL;
 }
 

@@ -13,6 +13,7 @@
 #include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_system_types.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 #include "ps_version.h"
 
@@ -52,6 +53,7 @@ PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE    );
 
 // clang-format on
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+    // TYPE VALUE NAME FIELD VALUE2\
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
     ps_symbol ps_system_constant_##TYPE##_##VALUE = {                                                                  \
         .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
@@ -80,7 +82,7 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 // clang-format on
 #define PS_SYSTEM_CALLABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
-    ps_symbol ps_system_##TYPE##_##VALUE = {                                                                  \
+    ps_symbol ps_system_##TYPE##_##VALUE = {                                                                           \
         .kind = PS_SYMBOL_KIND_PROCEDURE, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
 // clang-format off
 
@@ -113,108 +115,117 @@ PS_SYSTEM_CALLABLE(procedure, writeln  , "WRITELN"  , v, &ps_procedure_writeln  
 
 /* clang-format on */
 
-ps_environment *ps_system_init()
+bool ps_system_init(ps_interpreter *interpreter)
 {
-    ps_environment *environment = ps_environment_init(NULL, PS_ENVIRONMENT_TYPE_SYSTEM, "SYSTEM", 64);
+    bool error = false;
+    ps_identifier system_name = "SYSTEM";
+    ps_environment *environment = ps_environment_init(NULL, &system_name, 64);
     if (environment == NULL)
-        return NULL;
+        error = true;
 
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/
 
-    // Array: empty
-    ps_system_array.value->type->def.def_array.count = 0;
-    ps_system_array.value->type->def.def_array.range = NULL;
-    ps_system_array.value->type->def.def_array.type_def = NULL;
-    // String: max length
-    ps_system_string.value->type->def.def_string.max = PS_STRING_MAX_LEN;
-    // Subrange: 0..0 as integers
-    ps_system_subrange.value->type->def.def_subrange.base = PS_TYPE_INTEGER;
-    ps_system_subrange.value->type->def.def_subrange.max.type = &ps_system_integer;
-    ps_system_subrange.value->type->def.def_subrange.max.data.i = 0;
-    ps_system_subrange.value->type->def.def_subrange.min.type = &ps_system_integer;
-    ps_system_subrange.value->type->def.def_subrange.min.data.i = 0;
-    // Enum: empty
-    ps_system_enum.value->type->def.def_enum.count = 0;
-    ps_system_enum.value->type->def.def_enum.values = NULL;
+    // // Array: empty
+    // ps_system_array.value->type->def.def_array.count = 0;
+    // ps_system_array.value->type->def.def_array.range = NULL;
+    // ps_system_array.value->type->def.def_array.type_def = NULL;
+    // // String: max length
+    // ps_system_string.value->type->def.def_string.max = PS_STRING_MAX_LEN;
+    // // Subrange: 0..0 as integers
+    // ps_system_subrange.value->type->def.def_subrange.def = &ps_type_def_integer;
+    // ps_system_subrange.value->type->def.def_subrange.max.i = 0;
+    // ps_system_subrange.value->type->def.def_subrange.min.i = 0;
+    // // Enum: empty
+    // ps_system_enum.value->type->def.def_enum.count = 0;
+    // ps_system_enum.value->type->def.def_enum.values = NULL;
     // Register the system types
-    ps_environment_add_symbol(environment, &ps_system_none);
-    ps_environment_add_symbol(environment, &ps_system_type_def);
-    ps_environment_add_symbol(environment, &ps_system_boolean);
-    ps_environment_add_symbol(environment, &ps_system_char);
-    ps_environment_add_symbol(environment, &ps_system_integer);
-    ps_environment_add_symbol(environment, &ps_system_unsigned);
-    ps_environment_add_symbol(environment, &ps_system_real);
-    ps_environment_add_symbol(environment, &ps_system_string);
-    ps_environment_add_symbol(environment, &ps_system_subrange);
-    ps_environment_add_symbol(environment, &ps_system_enum);
-    ps_environment_add_symbol(environment, &ps_system_array);
-    ps_environment_add_symbol(environment, &ps_system_procedure);
-    ps_environment_add_symbol(environment, &ps_system_function);
+    error = error || ps_environment_add_symbol(environment, &ps_system_none);
+    error = error || ps_environment_add_symbol(environment, &ps_system_type_def);
+    error = error || ps_environment_add_symbol(environment, &ps_system_boolean);
+    error = error || ps_environment_add_symbol(environment, &ps_system_char);
+    error = error || ps_environment_add_symbol(environment, &ps_system_integer);
+    error = error || ps_environment_add_symbol(environment, &ps_system_unsigned);
+    error = error || ps_environment_add_symbol(environment, &ps_system_real);
+    error = error || ps_environment_add_symbol(environment, &ps_system_string);
+    // error = error || ps_environment_add_symbol(environment, &ps_system_subrange);
+    // error = error || ps_environment_add_symbol(environment, &ps_system_enum);
+    // error = error || ps_environment_add_symbol(environment, &ps_system_array);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function);
 
     /**************************************************************************/
     /* CONSTANTS                                                              */
     /**************************************************************************/
 
-    ps_environment_add_symbol(environment, &ps_system_constant_boolean_false);
-    ps_environment_add_symbol(environment, &ps_system_constant_boolean_true);
-    ps_environment_add_symbol(environment, &ps_system_constant_integer_maxint);
-    ps_environment_add_symbol(environment, &ps_system_constant_integer_minint);
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_maxuint);
-    ps_environment_add_symbol(environment, &ps_system_constant_real_maxreal);
-    ps_environment_add_symbol(environment, &ps_system_constant_real_minreal);
-    ps_environment_add_symbol(environment, &ps_system_constant_real_epsreal);
-    ps_environment_add_symbol(environment, &ps_system_constant_real_pi);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_boolean_false);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_boolean_true);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_integer_maxint);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_integer_minint);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_maxuint);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_real_maxreal);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_real_minreal);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_real_epsreal);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_real_pi);
 
     /**************************************************************************/
     /* BITNESS & VERSION                                                      */
     /**************************************************************************/
 
-    char version[16]; // from 0.0.0.0 (7) to 255.255.255.255 (15)
-    snprintf(version, sizeof(version) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR, (uint8_t)PS_VERSION_MINOR,
-             (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
-    ps_string *ps_version_string = ps_string_create(version);
+    char version[16]; // from 0.0.0.0 (4+3=7) to 255.255.255.255 (12+3=15)
+    int length = snprintf(version, sizeof(version) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR,
+                          (uint8_t)PS_VERSION_MINOR, (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
+    ps_string *ps_version_string = ps_string_create(version, length);
     if (ps_version_string == NULL)
-        return false;
+        error = true;
     ps_system_constant_string_ps_version.value->data.s = ps_version_string;
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
-    ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
-    ps_environment_add_symbol(environment, &ps_system_constant_string_ps_version);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
+    error = error || ps_environment_add_symbol(environment, &ps_system_constant_string_ps_version);
 
     /**************************************************************************/
     /* STANDARD PROCEDURES & FUNCTIONS                                        */
     /**************************************************************************/
 
-    ps_environment_add_symbol(environment, &ps_system_function_abs);
-    ps_environment_add_symbol(environment, &ps_system_function_arctan);
-    ps_environment_add_symbol(environment, &ps_system_function_chr);
-    ps_environment_add_symbol(environment, &ps_system_function_cos);
-    ps_environment_add_symbol(environment, &ps_system_function_even);
-    ps_environment_add_symbol(environment, &ps_system_function_exp);
-    ps_environment_add_symbol(environment, &ps_system_function_frac);
-    ps_environment_add_symbol(environment, &ps_system_function_int);
-    ps_environment_add_symbol(environment, &ps_system_function_ln);
-    ps_environment_add_symbol(environment, &ps_system_function_log);
-    ps_environment_add_symbol(environment, &ps_system_function_odd);
-    ps_environment_add_symbol(environment, &ps_system_function_ord);
-    ps_environment_add_symbol(environment, &ps_system_function_pred);
-    ps_environment_add_symbol(environment, &ps_system_function_random);
-    ps_environment_add_symbol(environment, &ps_system_function_round);
-    ps_environment_add_symbol(environment, &ps_system_function_sin);
-    ps_environment_add_symbol(environment, &ps_system_function_sqr);
-    ps_environment_add_symbol(environment, &ps_system_function_sqrt);
-    ps_environment_add_symbol(environment, &ps_system_function_succ);
-    ps_environment_add_symbol(environment, &ps_system_function_tan);
-    ps_environment_add_symbol(environment, &ps_system_function_trunc);
-    ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
-    ps_environment_add_symbol(environment, &ps_system_procedure_read);
-    ps_environment_add_symbol(environment, &ps_system_procedure_readln);
-    ps_environment_add_symbol(environment, &ps_system_procedure_write);
-    ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_abs);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_arctan);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_chr);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_cos);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_even);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_exp);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_frac);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_int);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_ln);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_log);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_odd);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_ord);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_pred);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_random);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_round);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_sin);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_sqr);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_sqrt);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_succ);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_tan);
+    error = error || ps_environment_add_symbol(environment, &ps_system_function_trunc);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure_read);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure_readln);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure_write);
+    error = error || ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
+
+    if (error)
+    {
+        ps_environment_done(environment);
+        ps_system_done(interpreter);
+        return false;
+    }
+
+    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = environment;
 
     return true;
 }
@@ -226,4 +237,6 @@ void ps_system_done(ps_interpreter *interpreter)
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);
         ps_system_constant_string_ps_version.value->data.s = NULL;
     }
+    ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
+    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
 }

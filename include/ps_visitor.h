@@ -16,7 +16,7 @@ extern "C"
 {
 #endif
 
-    bool ps_visit_start(ps_interpreter *interpreter, bool exec);
+    bool ps_parse_start(ps_interpreter *interpreter, bool exec);
 
 #ifdef __cplusplus
 }

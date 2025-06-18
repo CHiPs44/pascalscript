@@ -46,10 +46,12 @@ ps_string *ps_string_set(ps_string *s, char *z)
     return s;
 }
 
-ps_string *ps_string_create(char *z)
+ps_string *ps_string_create(char *z, ps_string_len max)
 {
     size_t len = strlen(z);
-    if (len > PS_STRING_MAX_LEN)
+    if (max == 0)
+        max = PS_STRING_MAX_LEN; // default max length
+    if (len > max)
     {
         errno = EINVAL;
         return NULL;
@@ -71,7 +73,7 @@ ps_string *ps_string_create_char(ps_char c)
     if (s == NULL)
         return NULL; // errno = ENOMEM
     s->str[0] = c;
-    s->str[1] = '\0'; // null terminate
+    s->str[1] = '\0'; // null terminator
     s->len = 1;
     return s;
 }
@@ -154,7 +156,7 @@ ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
 /// @return less than 0 if a<b, 0 if a=b, greater than 0 if a>b (uses C strcmp)
 int ps_string_compare(ps_string *a, ps_string *b)
 {
-    return strcmp(a->str, b->str);
+    return strcmp((char *)a->str, (char *)b->str);
     // int diff = 0;
     // ps_string_len len = a->len > b->len ? a->len : b->len;
     // for (ps_string_len i = 0; i < len; i++)

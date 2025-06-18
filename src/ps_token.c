@@ -9,35 +9,37 @@
 #include "ps_error.h"
 #include "ps_token.h"
 
+/// @brief PascalScript symbolic token types
+/// @note *MUST* be sorted in alphabetical order for dichotomic search below to work
 struct s_ps_reserved_symbol
 {
-    ps_token_type token_type;
     char *symbol;
+    ps_token_type token_type;
 } ps_reserved_symbols[] = {
     // clang-format off
-    { .token_type = PS_TOKEN_AT_SIGN,           .symbol = "@"  },
-    { .token_type = PS_TOKEN_CARET,             .symbol = "^"  },
-    { .token_type = PS_TOKEN_COLON,             .symbol = ":"  },
-    { .token_type = PS_TOKEN_COMMA,             .symbol = ","  },
-    { .token_type = PS_TOKEN_ASSIGN,            .symbol = ":=" },
-    { .token_type = PS_TOKEN_RANGE,             .symbol = ".." },
-    { .token_type = PS_TOKEN_DOT,               .symbol = "."  },
-    { .token_type = PS_TOKEN_EQUAL,             .symbol = "="  },
-    { .token_type = PS_TOKEN_GREATER_OR_EQUAL,  .symbol = ">=" },
-    { .token_type = PS_TOKEN_GREATER_THAN,      .symbol = ">"  },
-    { .token_type = PS_TOKEN_LEFT_BRACKET,      .symbol = "["  },
-    { .token_type = PS_TOKEN_LEFT_PARENTHESIS,  .symbol = "("  },
-    { .token_type = PS_TOKEN_LESS_OR_EQUAL,     .symbol = "<=" },
-    { .token_type = PS_TOKEN_LESS_THAN,         .symbol = "<"  },
-    { .token_type = PS_TOKEN_MINUS,             .symbol = "-"  },
-    { .token_type = PS_TOKEN_NOT_EQUAL,         .symbol = "<>" },
-    { .token_type = PS_TOKEN_PLUS,              .symbol = "+"  },
-    { .token_type = PS_TOKEN_POWER,             .symbol = "**" },
-    { .token_type = PS_TOKEN_RIGHT_BRACKET,     .symbol = "]"  },
-    { .token_type = PS_TOKEN_RIGHT_PARENTHESIS, .symbol = ")"  },
-    { .token_type = PS_TOKEN_SEMI_COLON,        .symbol = ";"  },
-    { .token_type = PS_TOKEN_SLASH,             .symbol = "/"  },
-    { .token_type = PS_TOKEN_STAR,              .symbol = "*"  },
+    { .symbol = "-"  ,.token_type = PS_TOKEN_MINUS             },
+    { .symbol = ","  ,.token_type = PS_TOKEN_COMMA             },
+    { .symbol = ";"  ,.token_type = PS_TOKEN_SEMI_COLON        },
+    { .symbol = ":"  ,.token_type = PS_TOKEN_COLON             },
+    { .symbol = ":=" ,.token_type = PS_TOKEN_ASSIGN            },
+    { .symbol = ".." ,.token_type = PS_TOKEN_RANGE             },
+    { .symbol = "."  ,.token_type = PS_TOKEN_DOT               },
+    { .symbol = "("  ,.token_type = PS_TOKEN_LEFT_PARENTHESIS  },
+    { .symbol = ")"  ,.token_type = PS_TOKEN_RIGHT_PARENTHESIS },
+    { .symbol = "["  ,.token_type = PS_TOKEN_LEFT_BRACKET      },
+    { .symbol = "]"  ,.token_type = PS_TOKEN_RIGHT_BRACKET     },
+    { .symbol = "@"  ,.token_type = PS_TOKEN_AT_SIGN           },
+    { .symbol = "*"  ,.token_type = PS_TOKEN_STAR              },
+    { .symbol = "**" ,.token_type = PS_TOKEN_POWER             },
+    { .symbol = "/"  ,.token_type = PS_TOKEN_SLASH             },
+    { .symbol = "^"  ,.token_type = PS_TOKEN_CARET             },
+    { .symbol = "+"  ,.token_type = PS_TOKEN_PLUS              },
+    { .symbol = "<"  ,.token_type = PS_TOKEN_LESS_THAN         },
+    { .symbol = "<=" ,.token_type = PS_TOKEN_LESS_OR_EQUAL     },
+    { .symbol = "<>" ,.token_type = PS_TOKEN_NOT_EQUAL         },
+    { .symbol = "="  ,.token_type = PS_TOKEN_EQUAL             },
+    { .symbol = ">"  ,.token_type = PS_TOKEN_GREATER_THAN      },
+    { .symbol = ">=" ,.token_type = PS_TOKEN_GREATER_OR_EQUAL  },
     // clang-format on
 };
 
@@ -150,7 +152,7 @@ char *ps_token_dump_value(ps_token *token)
     return buffer;
 }
 
-/// @brief Pascal keywords
+/// @brief PascalScript reserved keywords
 /// @note *MUST* be sorted in alphabetical order for dichotomic search below to work
 struct s_ps_keyword
 {
@@ -206,8 +208,6 @@ struct s_ps_keyword
     { .keyword = "WHILE"            , .token_type = PS_TOKEN_WHILE         },
     { .keyword = "WITH"             , .token_type = PS_TOKEN_WITH          },
     { .keyword = "XOR"              , .token_type = PS_TOKEN_XOR           },
-    // { .keyword = "AS"               , .token_type = PS_TOKEN_AS            },
-    // { .keyword = "IS"               , .token_type = PS_TOKEN_IS            },
     // clang-format on
 };
 
@@ -223,7 +223,7 @@ char *ps_token_get_keyword(ps_token_type token_type)
 
 ps_token_type ps_token_is_keyword(char *identifier)
 {
-    // NB: identifier should already be normalized to uppercase
+    // NB: identifier must already be normalized to uppercase
     int left = 0;
     int right = sizeof(ps_keywords) / sizeof(struct s_ps_keyword) - 1;
     int mid, cmp;

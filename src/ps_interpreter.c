@@ -19,24 +19,30 @@ ps_interpreter *ps_interpreter_init()
     ps_interpreter *interpreter = calloc(1, sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
-    interpreter->parser = ps_parser_init(NULL, NULL);
+
+    // Allocate parser
+    interpreter->parser = ps_parser_init();
     if (interpreter->parser == NULL)
     {
         ps_interpreter_done(interpreter);
         return NULL;
     }
+
+    // Allocate and initialize system environment
     if (!ps_system_init(interpreter))
     {
         ps_interpreter_done(interpreter);
         return NULL;
     }
+
+    // Set default state & options
+    interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_RUNTIME_ERROR_NONE;
     interpreter->debug = false;
     interpreter->trace = false;
     interpreter->range_check = true;
     interpreter->bool_eval = false;
-    interpreter->from_string = false;
-    interpreter->environment = ps_system_init(interpreter);
+
     return interpreter;
 }
 
@@ -47,52 +53,72 @@ void ps_interpreter_done(ps_interpreter *interpreter)
         ps_parser_done(interpreter->parser);
         interpreter->parser = NULL;
     }
+    for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
+    {
+        if (interpreter->environments[i] != NULL)
+        {
+            ps_environment_done(interpreter->environments[i]);
+            interpreter->environments[i] = NULL;
+        }
+    }
     free(interpreter);
 }
 
-/** @brief Allocate new value */
-ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter)
+bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
 {
-    ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
-    if (value == NULL)
+    if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
     {
         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-        return NULL;
+        return false;
     }
-    return value;
-}
-
-void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
-{
-    free(value);
-}
-
-ps_symbol *ps_interpreter_add_auto_value(ps_interpreter *interpreter, ps_value *value)
-{
-    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
-    if (symbol == NULL)
+    ps_environment *parent = interpreter->environments[interpreter->level];
+    ps_environment *environment = ps_environment_init(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
+    if (environment == NULL)
     {
         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-        return NULL;
+        return false;
     }
-    return ps_interpreter_add_symbol(interpreter, symbol);
+    interpreter->level += 1;
+    interpreter->environments[interpreter->level] = environment;
+    return true;
 }
 
-ps_symbol *ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_value *symbol)
+bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
-    ps_symbol_table *symbols = interpreter->parser->symbols;
-    if (!ps_symbol_table_add(symbols, symbol) == NULL)
+    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
     {
-        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
-        return NULL;
+        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
+        return false; // Cannot exit system environment
     }
-    return symbol;
+    ps_environment *environment = interpreter->environments[interpreter->level];
+    ps_environment_done(environment);
+    interpreter->environments[interpreter->level] = NULL;
+    interpreter->level -= 1;
+    return true;
 }
 
-ps_symbol *ps_interpreter_add_string_constant(ps_interpreter *interpreter, char *z)
+ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 {
-    ps_symbol *symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, z);
-    if (symbol == NULL)
+    return interpreter->environments[interpreter->level];
+}
+
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name)
+{
+    int level = interpreter->level;
+    do
+    {
+        ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
+        if (symbol != NULL)
+            return symbol;
+        level -= 1;
+    } while (interpreter->level >= PS_INTERPRETER_ENVIRONMENT_SYSTEM);
+    return NULL; // Symbol not found in any environment
+}
+
+ps_symbol *ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
+{
+    ps_environment *environment = ps_interpreter_get_environment(interpreter);
+    if (!ps_environment_add_symbol(environment, symbol))
     {
         interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
         return NULL;
@@ -113,24 +139,18 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
     return ps_buffer_load_file(lexer->buffer, filename);
 }
 
-bool ps_interpreter_enter_scope(ps_interpreter *interpreter)
-{
-    // TODO: implement scope management
-    return false;
-}
-
-bool ps_interpreter_exit_scope(ps_interpreter *interpreter)
-{
-    // TODO: implement scope management
-    return false;
-}
-
 bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 {
     ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
+    ps_lexer_reset(lexer);
+    if (!ps_buffer_read_next_char(lexer->buffer))
+    {
+        fprintf(stderr, "ERROR: %s\n", ps_lexer_show_error(lexer));
+        return false;
+    }
     // parser->debug = true;
-    if (!ps_visit_start(interpreter, exec))
+    if (!ps_parse_start(interpreter, exec))
     {
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
         ps_buffer_dump(lexer->buffer, start, 5);
@@ -144,3 +164,42 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     }
     return true;
 }
+
+// /** @brief Allocate new value */
+// ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter)
+// {
+//     ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
+//     if (value == NULL)
+//     {
+//         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+//         return NULL;
+//     }
+//     return value;
+// }
+
+// void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
+// {
+//     free(value);
+// }
+
+// ps_symbol *ps_interpreter_add_auto_value(ps_interpreter *interpreter, ps_value *value)
+// {
+//     ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
+//     if (symbol == NULL)
+//     {
+//         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+//         return NULL;
+//     }
+//     return ps_interpreter_add_symbol(interpreter, symbol);
+// }
+
+// ps_symbol *ps_interpreter_add_string_constant(ps_interpreter *interpreter, char *z)
+// {
+//     ps_symbol *symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, z);
+//     if (symbol == NULL)
+//     {
+//         interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
+//         return NULL;
+//     }
+//     return symbol;
+// }

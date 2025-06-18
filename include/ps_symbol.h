@@ -67,7 +67,7 @@ extern "C"
     void ps_symbol_normalize_name(ps_symbol *symbol);
 
     /** @brief Get hash key of symbol name (using DJB2's algorithm) */
-    ps_symbol_hash_key ps_symbol_get_hash_key(ps_symbol *symbol);
+    ps_symbol_hash_key ps_symbol_get_hash_key(char *name);
 
 #ifdef __cplusplus
 }

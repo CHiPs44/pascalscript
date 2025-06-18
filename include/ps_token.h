@@ -15,8 +15,8 @@ extern "C"
 {
 #endif
 
-#ifndef MAX_IDENTIFIER
-#define MAX_IDENTIFIER 31
+#ifndef PS_IDENTIFIER_MAX
+#define PS_IDENTIFIER_MAX 31
 #endif
 
     /*
@@ -38,7 +38,7 @@ extern "C"
             FOR             DOWNTO          TO
         5. Types
             type            array           of
-            file            nil         
+            file            nil
             record          with
         6. More types
             set             in
@@ -68,7 +68,7 @@ extern "C"
             INLINE
             OPERATOR
             PACKED
-            
+
 
         -file           -packed         -record             -nil        -with
         -absolute       -asm            -inline             -operator   -reintroduce
@@ -154,8 +154,6 @@ extern "C"
         PS_TOKEN_SHL, // shift left
         PS_TOKEN_SHR, // shift right
         PS_TOKEN_IN,  // FUTURE in operator for sets, i.e. 1 in [1,2,3]
-        // PS_TOKEN_IS,
-        // PS_TOKEN_AS,
         // Symbols
         PS_TOKEN_ASSIGN,            // :=  assignment
         PS_TOKEN_AT_SIGN,           // @   FUTURE address of
@@ -190,7 +188,7 @@ extern "C"
     {
         ps_token_type type;
         union {
-            char identifier[MAX_IDENTIFIER + 1];
+            char identifier[PS_IDENTIFIER_MAX + 1];
             ps_integer i;
             ps_unsigned u;
             ps_real r;

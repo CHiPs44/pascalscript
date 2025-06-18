@@ -142,14 +142,14 @@ int main(int argc, char *argv[])
         {
             example_path = "examples";
         }
-        // program_file = "00-hello.pas";
+        program_file = "00-hello.pas";
         // program_file = "01-first.pas";
         // program_file = "02-second.pas";
         // program_file = "03-if-then-else.pas";
         // program_file = "04-repeat-until.pas";
         // program_file = "04-repeat-until-real.pas";
         // program_file = "05-while-do.pas";
-        program_file = "06-for-do.pas";
+        // program_file = "06-for-do.pas";
         // program_file = "07-random.pas";
         // program_file = "08-math.pas";
         // program_file = "09-boolean.pas";
@@ -182,7 +182,8 @@ int main(int argc, char *argv[])
     /* List symbols */
     if (dump_symbols)
     {
-        ps_symbol_table_dump(interpreter->parser->symbols, "Initialization", stderr);
+        ps_symbol_table_dump(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols, "Initialization",
+                             stderr);
     }
 
     /* Load program source from string or file */
@@ -218,15 +219,13 @@ int main(int argc, char *argv[])
     /* Run program */
     if (verbose)
         printf("================================================================================\n");
-    ps_lexer_reset(lexer);
-    ps_buffer_read_next_char(lexer->buffer);
     bool ok = ps_interpreter_run(interpreter, true);
     if (verbose)
         printf("================================================================================\n");
 
     /* List symbols */
     if (dump_symbols)
-        ps_symbol_table_dump(interpreter->parser->symbols, "End", stderr);
+        ps_symbol_table_dump(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols, "End", stderr);
 
     /* Terminate interpreter */
     ps_interpreter_done(interpreter);

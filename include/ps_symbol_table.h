@@ -22,13 +22,13 @@ extern "C"
 
 #define PS_SYMBOL_TABLE_NOT_FOUND UINT16_MAX
 
-    // typedef enum e_ps_symbol_error
-    // {
-    //     PS_SYMBOL_TABLE_ERROR_NONE,
-    //     PS_SYMBOL_TABLE_ERROR_EXISTS,
-    //     PS_SYMBOL_TABLE_ERROR_FULL,
-    //     PS_SYMBOL_TABLE_ERROR_INVALID,
-    // } __attribute__((__packed__)) ps_symbol_error;
+    typedef enum e_ps_symbol_table_error
+    {
+        PS_SYMBOL_TABLE_ERROR_NONE,
+        PS_SYMBOL_TABLE_ERROR_EXISTS,
+        PS_SYMBOL_TABLE_ERROR_FULL,
+        PS_SYMBOL_TABLE_ERROR_INVALID,
+    } __attribute__((__packed__)) ps_symbol_table_error;
 
     typedef struct s_ps_symbol_table
     {
@@ -56,16 +56,16 @@ extern "C"
     ps_symbol_table_size ps_symbol_table_get_free(ps_symbol_table *table);
 
     /** @brief Find symbol's index in table by name or return PS_SYMBOL_TABLE_NOT_FOUND */
-    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, char *name);
+    ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier *name);
 
     /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_get(ps_symbol_table *table, char *name);
+    ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name);
 
-    /** @brief Add symbol, returning NULL if table is full or symbol already exists */
-    ps_symbol *ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
+    /** @brief Add symbol, returning error if table is full or symbol already exists */
+    ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
 
-    /** @brief Get or add a string constant */
-    ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z);
+    // /** @brief Get or add a string constant */
+    // ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z);
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output);

@@ -27,7 +27,7 @@ extern "C"
         size_t more;
         ps_string **data;
     } ps_string_heap;
-    #define PS_STRING_HEAP_SIZE sizeof(ps_string_heap)
+    #define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
 
     ps_string_heap *ps_string_heap_init(size_t size);
     void ps_string_heap_done(ps_string_heap *heap);

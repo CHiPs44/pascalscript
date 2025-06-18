@@ -66,8 +66,8 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, unsigned int *seed)
             fprintf(stderr, "RANDOMIZE\n");
         return true;
     }
-    srand(seed);
+    srand(*seed);
     if (interpreter->debug)
-        fprintf(stderr, "RANDOMIZE(%u)\n", seed);
+        fprintf(stderr, "RANDOMIZE(%u)\n", *seed);
     return true;
 }

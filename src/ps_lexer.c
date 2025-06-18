@@ -7,8 +7,8 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,19 +17,11 @@
 #include "ps_lexer.h"
 #include "ps_token.h"
 
-ps_lexer *ps_lexer_init(ps_lexer *lexer)
+ps_lexer *ps_lexer_init()
 {
+    ps_lexer *lexer = calloc(1, sizeof(ps_lexer));
     if (lexer == NULL)
-    {
-        lexer = calloc(1, sizeof(ps_lexer));
-        if (lexer == NULL)
-            return NULL;
-        lexer->allocated = true;
-    }
-    else
-    {
-        lexer->allocated = false;
-    }
+        return NULL;
     lexer->buffer = ps_buffer_init();
     if (lexer->buffer == NULL)
     {
@@ -44,8 +36,6 @@ void ps_lexer_done(ps_lexer *lexer)
 {
     if (lexer->buffer != NULL)
         ps_buffer_done(lexer->buffer);
-    if (!lexer->allocated)
-        return;
     free(lexer);
 }
 
@@ -58,19 +48,16 @@ void ps_lexer_reset(ps_lexer *lexer)
 
 char *ps_lexer_show_error(ps_lexer *lexer)
 {
-    static char error_message[128];
-    snprintf(error_message, sizeof(error_message) - 1,
-             "LEXER: %d %s, line %d, column %d",
-             lexer->error, ps_error_get_message(lexer->error),
-             lexer->buffer->current_line, lexer->buffer->current_column);
-    return error_message;
+    static char message[128];
+    snprintf(message, sizeof(message) - 1, "LEXER: Error %d %s, Line %d, Column %d", lexer->error,
+             ps_error_get_message(lexer->error), lexer->buffer->current_line, lexer->buffer->current_column);
+    return message;
 }
 
 bool ps_lexer_return_error(ps_lexer *lexer, ps_error error, char *message)
 {
     if (message != NULL)
-        fprintf(stderr, "%s: %d %s at line %d column %d %c\n",
-                message, error, ps_error_get_message(error),
+        fprintf(stderr, "%s: %d %s, Line %d, column %d %c\n", message, error, ps_error_get_message(error),
                 lexer->buffer->current_line, lexer->buffer->current_column,
                 lexer->buffer->current_char >= ' ' ? lexer->buffer->current_char : '_');
     lexer->current_token.type = PS_TOKEN_NONE;
@@ -195,16 +182,17 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
 
 bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
-    char buffer[PS_BUFFER_MAX_COLUMNS];
+    char buffer[PS_IDENTIFIER_MAX + 1];
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     if (isalpha(c))
     {
         do
         {
-            if (pos > MAX_IDENTIFIER)
+            if (pos > PS_IDENTIFIER_MAX)
             {
-                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_IDENTIFIER_TOO_LONG, "ps_lexer_read_identifier_or_keyword");
+                return ps_lexer_return_error(lexer, PS_LEXER_ERROR_IDENTIFIER_TOO_LONG,
+                                             "ps_lexer_read_identifier_or_keyword");
             }
             buffer[pos] = toupper(c);
             if (!ps_lexer_read_next_char(lexer))
@@ -214,7 +202,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             buffer[pos] = '\0';
         } while (isalnum(c) || c == '_');
         lexer->current_token.type = ps_token_is_keyword(buffer);
-        strncpy(lexer->current_token.value.identifier, buffer, MAX_IDENTIFIER);
+        strncpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_MAX);
         return true;
     }
     lexer->current_token.type = PS_TOKEN_NONE;
@@ -229,7 +217,9 @@ bool ps_lexer_read_number(ps_lexer *lexer)
     int base = 10;
     bool is_real = false;
     bool has_exp = false;
+    // Decimal
     char *digits = "0123456789";
+    // Binary?
     if (c == '%')
     {
         base = 2;
@@ -238,6 +228,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     }
+    // Octal?
     else if (c == '&')
     {
         base = 8;
@@ -246,6 +237,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     }
+    // Hexadecimal?
     else if (c == '$')
     {
         base = 16;
@@ -277,7 +269,8 @@ bool ps_lexer_read_number(ps_lexer *lexer)
                 else if ((c == 'e' || c == 'E'))
                 {
                     if (has_exp)
-                        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
+                        return ps_lexer_return_error(lexer, PS_LEXER_ERROR_UNEXPECTED_CHARACTER,
+                                                     "ps_lexer_read_number");
                     has_exp = true;
                     is_real = true;
                     buffer[pos++] = c;
@@ -387,8 +380,8 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     {
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
         strncpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN);
+        lexer->current_token.value.s[PS_STRING_MAX_LEN] = '\0';
     }
-
     lexer->error = PS_LEXER_ERROR_NONE;
     return true;
 }
@@ -399,7 +392,8 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
         return false;
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
-    // fprintf(stderr, "char=%d next=%d length=%d error=%d\n", current_char, next_char, lexer->buffer->length, lexer->buffer->error);
+    // fprintf(stderr, "char=%d next=%d length=%d error=%d\n", current_char, next_char, lexer->buffer->length,
+    // lexer->buffer->error);
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))
@@ -561,9 +555,8 @@ bool ps_lexer_read_next_token(ps_lexer *lexer)
                 return false;
             break;
         default:
-            printf("DEFAULT! %c %d at line %d column %d\n",
-                   current_char, current_char,
-                   lexer->buffer->current_line, lexer->buffer->current_column);
+            printf("DEFAULT! %c %d at line %d column %d\n", current_char, current_char, lexer->buffer->current_line,
+                   lexer->buffer->current_column);
             lexer->error = PS_LEXER_ERROR_UNEXPECTED_CHARACTER;
             return false;
         }

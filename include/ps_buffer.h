@@ -71,7 +71,7 @@ extern "C"
     bool ps_buffer_load_string(ps_buffer *buffer, char *source, size_t length);
 
     /** @brief Dump content from one line for one "page" */
-    void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t page_size);
+    void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count);
 
     /** @brief Read next char of buffer */
     bool ps_buffer_read_next_char(ps_buffer *buffer);

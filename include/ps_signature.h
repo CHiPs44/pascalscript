@@ -25,7 +25,7 @@ extern "C"
     {
         ps_symbol *value; // name & type
         bool byref;       // true if parameter is passed by reference
-    } __attribute__((__packed__)) ps_parameter;
+    } /*__attribute__((__packed__))*/ ps_parameter;
 
     #define PS_PARAMETER_SIZE sizeof(ps_parameter)
 

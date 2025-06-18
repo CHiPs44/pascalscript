@@ -60,6 +60,7 @@ ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max, char *z
 {
     if (heap->used >= heap->size && !ps_string_heap_grow(heap))
         return NULL;
+    size_t len = strlen(z);
     ps_string *s = (ps_string *)calloc(1, sizeof(ps_string_len) * 2 + max + 1); // +1 for null-terminator
     if (s == NULL)
         return NULL; // errno = ENOMEM
@@ -73,9 +74,9 @@ ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max, char *z
     else
     {
         // Copy the string if z is provided
-        strncpy(s->str, (ps_char *)z, max);
+        strncpy((char *)s->str, z, max);
         s->str[max] = '\0'; // Ensure null-termination
-        s->len = strlen(s->str);
+        s->len = strlen((char *)s->str);
     }
     // Find a free slot in the heap
     for (size_t i = 0; i < heap->size; i++)
