@@ -236,8 +236,8 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_CHAR:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "'%c' / 0x%02x", isprint(value->data.c) ? value->data.c : '.',
-                     value->data.c);
+            snprintf(buffer, sizeof(buffer) - 1, "'%c' / %03d / 0x%02x", isprint(value->data.c) ? value->data.c : '.',
+                     value->data.c, value->data.c);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
         break;

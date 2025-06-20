@@ -48,12 +48,27 @@ bool ps_string_heap_grow(ps_string_heap *heap)
 {
     if (heap->more == 0)
         return false;
-    ps_string **new_data = (ps_string **)realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
-    if (new_data == NULL)
+    ps_string **data = (ps_string **)realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
+    if (data == NULL)
         return false; // errno = ENOMEM
-    heap->data = new_data;
+    heap->data = data;
     heap->size += heap->more;
     return true;
+}
+
+unsigned int ps_string_heap_get_hash_key(char *z)
+{
+    // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
+    // 33 * x => 32 * x + x => x << 5 + x
+    unsigned int hash = 5381u;
+    unsigned int c = (unsigned int)(*z);
+    while (c)
+    {
+        hash = (hash << 5) + hash + c;
+        z++;
+        c = (unsigned int)(*z);
+    }
+    return hash;
 }
 
 ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max, char *z)

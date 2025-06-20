@@ -33,16 +33,19 @@ extern "C"
 
 #define PS_ENVIRONMENT_SIZE sizeof(ps_environment)
 
-    /** @brief Initialize environment */
+    /** @brief Initialize environment*/
+    /** @return NULL if no free memory (errno = ENOMEM) or the environment */
     ps_environment *ps_environment_init(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
 
     /** @brief Free environment */
     void ps_environment_done(ps_environment *environment);
 
     /** @brief Add symbol to environment */
+    /** @return true if OK, false otherwise */
     bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol);
 
     /** @brief Find symbol in environment */
+    /** @return NULL if not found */
     ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name);
 
 #ifdef __cplusplus

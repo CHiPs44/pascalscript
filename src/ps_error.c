@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "ps_error.h"
 
@@ -67,6 +67,10 @@ char *ps_error_get_message(ps_error error)
         return "None";
     case PS_RUNTIME_ERROR_OUT_OF_MEMORY:
         return "Out of memory";
+    case PS_RUNTIME_ERROR_ENVIRONMENT_UNDERFLOW:
+        return "Environment underflow";
+    case PS_RUNTIME_ERROR_ENVIRONMENT_OVERFLOW:
+        return "Environment overflow";
     case PS_RUNTIME_ERROR_STACK_UNDERFLOW:
         return "Stack empty";
     case PS_RUNTIME_ERROR_STACK_OVERFLOW:
@@ -107,6 +111,8 @@ char *ps_error_get_message(ps_error error)
         return "Char expected";
     case PS_RUNTIME_ERROR_EXPECTED_STRING:
         return "String expected";
+    case PS_RUNTIME_ERROR_EXPECTED_STRING_LENGTH:
+        return "String length expected";
     case PS_RUNTIME_ERROR_ASSIGN_TO_CONST:
         return "Constants can't be changed";
     case PS_RUNTIME_ERROR_TYPE_MISMATCH:

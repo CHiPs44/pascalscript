@@ -68,7 +68,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
 {
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
     {
-        interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+        interpreter->error = PS_RUNTIME_ERROR_ENVIRONMENT_OVERFLOW;
         return false;
     }
     ps_environment *parent = interpreter->environments[interpreter->level];
@@ -87,8 +87,8 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
     {
-        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND;
-        return false; // Cannot exit system environment
+        interpreter->error = PS_RUNTIME_ERROR_ENVIRONMENT_UNDERFLOW;
+        return false;
     }
     ps_environment *environment = interpreter->environments[interpreter->level];
     ps_environment_done(environment);
@@ -99,31 +99,39 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 
 ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 {
+    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM || interpreter->level >= PS_INTERPRETER_ENVIRONMENTS)
+    {
+        // interpreter->error = PS_RUNTIME_ERROR_INVALID_ENVIRONMENT;
+        return NULL; // Invalid environment level
+    }
     return interpreter->environments[interpreter->level];
 }
 
 ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name)
 {
+    char tmp[128];
     int level = interpreter->level;
     do
     {
+        snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
+        ps_symbol_table_dump(interpreter->environments[level]->symbols, tmp, stderr);
         ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
         if (symbol != NULL)
             return symbol;
         level -= 1;
-    } while (interpreter->level >= PS_INTERPRETER_ENVIRONMENT_SYSTEM);
+    } while (level >= PS_INTERPRETER_ENVIRONMENT_SYSTEM);
     return NULL; // Symbol not found in any environment
 }
 
-ps_symbol *ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
+bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 {
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (!ps_environment_add_symbol(environment, symbol))
     {
         interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
-        return NULL;
+        return false;
     }
-    return symbol;
+    return true;
 }
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)

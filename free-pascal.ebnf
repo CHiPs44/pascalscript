@@ -2,6 +2,10 @@
     Pascal EBNF, written from http://downloads.freepascal.org/fpc/docs-pdf/ref.pdf
     EBNF syntax from ???
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
+
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2024 Christophe 'CHiPs' Petit <chips44@gmail.com>
+    SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 
 (******************************************************************************)
@@ -44,26 +48,59 @@ identifier          =   letter | '_' , [ letter | dec_digit | '_' ]* ;
 (* PARSER RULES                                                               *)
 (******************************************************************************)
 
-label                   =   'LABEL' , dec_digit_sequence | identifier ;
+label                   =   'LABEL' , dec_digit_sequence | identifier
+                        ;
 
-constant_declaration    =   identifier = constant_expression ;
-(* omitted: typed_constant_declaration =   .. *)
+constant_declaration    =   identifier = constant_expression
+                        ;   (* omitted: typed_constant_declaration =   .. *)
+constant_expression     =   constant | constant_identifier | ordinal_constant | real_constant | string_constant
+                        ;
+constant                =   ordinal_constant | real_constant | string_constant | character_string | 'NIL'
+                        ;
+ordinal_constant        =   [ sign ] unsigned_integer
+                        |   char_constant
+                        ;
+char_constant           =   control_string
+                        |   "'" , ( string_character ) , "'"
+                        ;
+real_constant           =   [ sign ] unsigned_real;
 
 type_declaration        =   identifier '=' type ;
-type                    =   simple_type | string_type 
-                        |   structured_type | pointer_type
-                        |   procedural_type | generic_type | specialized_type | type_alias ;
+type                    =   simple_type
+                        |   string_type 
+                        |   structured_type
+                        |   pointer_type
+                        |   procedural_type
+                        ;
 simple_type             =   ordinal_type | real_type | boolean_type ;
 real_type               =   real_type_identifier ;
-real_type_identifier    =   'REAL' | 'SINGLE' | 'DOUBLE' | 'EXTENDED' | 'COMP' | 'CURRENCY' ; 
-ordinal_type            =   'INTEGER' | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'LONGWORD' | 'INT64' | 
-                            'BYTE' | 'WORD' | 'UNSIGNED' | 'QWORD' | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ;
+real_type_identifier    =   'REAL'
+                        ;   (* | 'SINGLE' | 'DOUBLE' | 'EXTENDED' | 'COMP' | 'CURRENCY' ; *)
+ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR'
+                        ;   (* | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'LONGWORD' | 'INT64' | 'BYTE' | 'WORD' | 'QWORD' 
+                               | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ; *)
 boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
-string_type             =   'STRING' [ '[' constant_expression ']' ] ;
-enumerated_type         =   '(' identifier_list_one ')' ;
+string_type             =   'STRING' [ '[' unsigned_integer | constant_identifier ']' ] ;
+enumerated_type         =   '(' identifier_list ')'
+                        ;
+structured_type         =   array_type | record_type | set_type | file_type | pointer_type
+                        ;   (* class_type | object_type | interface_type | variant_type *)
+array_type              =   'ARRAY' , '[' [ index_list ] ']' , 'OF' , type
+                        ;
+set_type                =   'SET' , 'OF' , type
+                        ;
+file_type               =   'FILE' , [ 'OF' , type ]
+                        |   'TEXT'
+                        ;
+pointer_type            =   '^' , type
+                        ;
+index_list              =   subrange_type { ',' subrange_type }*
+                        ;
+subrange_type           =   constant '..' constant
+                        ;
+identifier_list     =   identifier , [ ',' , identifier ]* 
+                        ;
 
-identifier_list_one     =   identifier , [ ',' , identifier ]* ;
-identifier_list_zero    =   [ identifier ] , [ ',' , identifier ]* ;
 (* omitted: assigned_enum_list, hint_directives, ansi strings, ... *)
 
 additive_operator       =   '+' | '-' ;
@@ -200,7 +237,7 @@ function_declaration    =   'FUNCTION' identifier [ '(' [ formal_parameter_list 
                             [ compound_statement ';']
                         ;
 formal_parameter_list   =   formal_parameter [ ',' formal_parameter ]* ;
-formal_parameter        =   [ 'VAR' | 'OUT' ] identifier_list_one ':' type
+formal_parameter        =   [ 'VAR' | 'OUT' ] identifier_list ':' type
                         ;
 
 (* omitted: class, interface, ... *)

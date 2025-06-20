@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2025 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
@@ -29,8 +29,9 @@ extern "C"
     typedef struct s_ps_interpreter
     {
         ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS];
-        int level;
         ps_parser *parser;
+        // state
+        uint8_t level;
         ps_error error;
         // flags
         bool trace;
@@ -38,7 +39,7 @@ extern "C"
         // options
         bool range_check; // range checking for integer and real values
         bool bool_eval;   // short circuit boolean evaluation
-    } ps_interpreter;
+    } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
@@ -62,6 +63,9 @@ extern "C"
 
     /** @brief Find symbol by name in current environment or its parents */
     ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name);
+
+    /** @brief Add symbol to current environment */
+    bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
     // /**
     //  * @brief Allocate new value

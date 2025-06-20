@@ -42,7 +42,7 @@ bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol)
 {
     // TODO store error in environment
     ps_symbol_table_error error = ps_symbol_table_add(environment->symbols, symbol);
-    return error != PS_SYMBOL_TABLE_ERROR_NONE;
+    return error == PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
 ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name)

@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
         {
             example_path = "examples";
         }
-        program_file = "00-hello.pas";
+        // program_file = "00-hello.pas";
+        program_file = "00-hello1.pas";
         // program_file = "01-first.pas";
         // program_file = "02-second.pas";
         // program_file = "03-if-then-else.pas";
@@ -168,7 +169,7 @@ int main(int argc, char *argv[])
                 PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
 
     /* Initialize interpreter */
-    interpreter = ps_interpreter_init(NULL);
+    interpreter = ps_interpreter_init();
     if (interpreter == NULL)
     {
         fprintf(stderr, "Could not initialize interpreter!\n");

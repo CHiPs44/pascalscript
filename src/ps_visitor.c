@@ -1,6 +1,6 @@
 /*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2025 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
@@ -648,13 +648,112 @@ bool ps_parse_const(ps_interpreter *interpreter, bool exec)
             constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
             if (constant == NULL)
                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-            if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), constant))
-                RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
+            if (!ps_interpreter_add_symbol(interpreter, constant))
+                RETURN_ERROR(interpreter->error);
         }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     PARSE_END("OK");
 }
+
+// /**
+//  * Parse
+//  *      TYPE IDENTIFIER '=' INTEGER | UNSIGNED | REAL | BOOLEAN | CHAR | STRING ';'
+//  *           ...
+//  * Next steps:
+//  *      TYPE IDENTIFIER = TYPE_DEFINITION ;
+//  *      TYPE_DEFINITION = SUBRANGE | ENUMERATION | POINTER | RECORD | ARRAY | FILE | STRING ;
+//  *       SUBRANGE = INTEGER | UNSIGNED | IDENTIFIER '..' INTEGER | UNSIGNED | IDENTIFIER ;
+//  */
+// bool ps_parse_type(ps_interpreter *interpreter, bool exec)
+// {
+//     PARSE_BEGIN("TYPE", "");
+//     ps_identifier identifier = {0};
+//     ps_type_definition *type = NULL;
+//     ps_value *value = NULL;
+//     ps_value_data data = {0};
+//     ps_symbol *symbol = NULL;
+//     ps_unsigned len = 0;
+
+//     EXPECT_TOKEN(PS_TOKEN_TYPE);
+//     READ_NEXT_TOKEN;
+//     do
+//     {
+//         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+//         COPY_IDENTIFIER(identifier);
+//         READ_NEXT_TOKEN;
+//         EXPECT_TOKEN(PS_TOKEN_EQUAL);
+//         READ_NEXT_TOKEN;
+//         switch (lexer->current_token.type)
+//         {
+//         case PS_TOKEN_INTEGER:
+//             type = ps_system_integer.value->data.t;
+//             break;
+//         case PS_TOKEN_UNSIGNED:
+//             type = ps_system_unsigned.value->data.t;
+//             break;
+//         case PS_TOKEN_REAL:
+//             type = ps_system_real.value->data.t;
+//             break;
+//         case PS_TOKEN_BOOLEAN:
+//             type = ps_system_boolean.value->data.t;
+//             break;
+//         case PS_TOKEN_CHAR:
+//             type = ps_system_char.value->data.t;
+//             break;
+//         case PS_TOKEN_STRING:
+//             type = ps_system_string.value->data.t;
+//             // if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+//             // {
+//             //     READ_NEXT_TOKEN;
+//             //     if (lexer->current_token.type == PS_TOKEN_UNSIGNED_VALUE)
+//             //     {
+//             //         len = lexer->current_token.value.u;
+//             //     }
+//             //     else if (lexer->current_token.type == PS_TOKEN_IDENTIFIER)
+//             //     {
+//             //         symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier);
+//             //         if (symbol == NULL)
+//             //             RETURN_ERROR(PS_PARSER_ERROR_UNKOWN_IDENTIFIER);
+//             //         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT ||
+//             //             symbol->value->type != ps_system_unsigned.value->data.t)
+//             //             RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_UNSIGNED);
+//             //         len = (ps_unsigned)lexer->current_token.value.i;
+//             //     }
+//             //     else
+//             //         RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+//             //     if (len < 1 || len > PS_STRING_MAX_LEN)
+//             //         RETURN_ERROR(PS_RUNTIME_ERROR_EXPECTED_STRING_LENGTH);
+//             // }
+//             break;
+//         // case PS_TOKEN_ARRAY:
+//         //     type = ps_system_array.value->data.t; // TODO: parse array definition
+//         //     data.s = NULL; // TODO: allocate array
+//         //     break;
+//         case PS_TOKEN_IDENTIFIER:
+//             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+//         default:
+//             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
+//         }
+//         READ_NEXT_TOKEN;
+//         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+//         READ_NEXT_TOKEN;
+
+//         if (exec)
+//         {
+//             value = ps_value_alloc(type, data);
+//             if (value == NULL)
+//                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+//             symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &identifier, value);
+//             if (symbol == NULL)
+//                 RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+//             if (!ps_interpreter_add_symbol(interpreter, symbol))
+//                 RETURN_ERROR(interpreter->error);
+//         }
+//     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+
+//     PARSE_END("OK");
+// }
 
 /**
  * Parse    VAR IDENTIFIER : TYPE;
@@ -742,8 +841,8 @@ bool ps_parse_var(ps_interpreter *interpreter, bool exec)
                 variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
                 if (variable == NULL)
                     RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-                if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), variable))
-                    RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
+                if (!ps_interpreter_add_symbol(interpreter, variable))
+                    RETURN_ERROR(interpreter->error);
             }
         }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
@@ -797,10 +896,12 @@ bool ps_parse_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
 
 /**
  * Parse
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) '(' expression ,
- * expression ]* ')' ; Next step: write_or_writeln        =   WRITE | WRITELN
- * '(' expression [ ':' width [ ':' precision ] ] [ ',' expression [ ':' width
- * [ ':' precision ] ] ]* ) ;
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
+ * Next step:
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' 
+ *                                            expression [ ':' width [ ':' precision ] ]
+ *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
+ *                                    ')' ] ;
  */
 bool ps_parse_write_or_writeln(ps_interpreter *interpreter, bool exec, bool newline)
 {
@@ -1310,10 +1411,10 @@ bool ps_parse_procedure(ps_interpreter *interpreter, bool exec)
         procedure = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
         if (procedure == NULL)
             RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-        if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), procedure))
+        if (!ps_interpreter_add_symbol(interpreter, procedure))
         {
             ps_symbol_free(procedure);
-            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
+            RETURN_ERROR(interpreter->error);
         }
     }
 
@@ -1340,10 +1441,10 @@ bool ps_parse_block(ps_interpreter *interpreter, bool exec)
                 TRACE_ERROR("CONST");
             break;
         case PS_TOKEN_TYPE:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
             // if (!ps_parse_type(interpreter, exec))
             //     TRACE_ERROR("TYPE");
             // break;
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         case PS_TOKEN_VAR:
             if (!ps_parse_var(interpreter, exec))
                 TRACE_ERROR("VAR");
@@ -1373,7 +1474,7 @@ bool ps_parse_block(ps_interpreter *interpreter, bool exec)
  *      PROGRAM IDENTIFIER ';'
  * * Next step:
  *  - skip optional parameters enclosed in parentheses, like
- *      PROGRAM IDENTIFIER '(' INPUT, OUTPUT ')' ';'
+ *      PROGRAM IDENTIFIER [ '(' INPUT, OUTPUT ')' ] ';'
  */
 bool ps_parse_program(ps_interpreter *interpreter, bool exec)
 {
@@ -1389,15 +1490,23 @@ bool ps_parse_program(ps_interpreter *interpreter, bool exec)
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
 
-    if (exec)
-    {
-        interpreter->environments[1] = ps_environment_init(interpreter->environments[0], &identifier, 256);
-        if (interpreter->environments[1] == NULL)
-            RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-        ps_symbol *program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
-        if (!ps_symbol_table_add(interpreter->environments[1]->symbols, program))
-            RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED);
-    }
+    // if (exec)
+    // {
+    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+        RETURN_ERROR(interpreter->error);
+    ps_symbol *program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
+    if (!ps_interpreter_add_symbol(interpreter, program))
+        RETURN_ERROR(interpreter->error);
+    // }
+    if (!ps_parse_block(interpreter, exec))
+        TRACE_ERROR("BLOCK");
+    ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "Before EXIT", stderr);
+    // if (exec)
+    // {
+    ps_interpreter_exit_environment(interpreter);
+    // }
+    EXPECT_TOKEN(PS_TOKEN_DOT);
+    // NB: text after '.' is not analyzed and has not to be
 
     PARSE_END("OK");
 }
@@ -1415,15 +1524,6 @@ bool ps_parse_start(ps_interpreter *interpreter, bool exec)
     READ_NEXT_TOKEN;
     if (!ps_parse_program(interpreter, exec))
         TRACE_ERROR("PROGRAM");
-    if (!ps_parse_block(interpreter, exec))
-        TRACE_ERROR("BLOCK");
-    if (exec)
-    {
-        ps_environment_done(interpreter->environments[1]);
-        interpreter->environments[1] = NULL; // no need to keep it
-    }
-    EXPECT_TOKEN(PS_TOKEN_DOT);
-    // NB: text after '.' is not analyzed and has not to be
 
     PARSE_END("OK");
 }
