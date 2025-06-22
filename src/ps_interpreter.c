@@ -19,22 +19,17 @@ ps_interpreter *ps_interpreter_init()
     ps_interpreter *interpreter = calloc(1, sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
-
+    // Allocate string heap
+    interpreter->string_heap = ps_string_heap_init(PS_STRING_HEAP_SIZE);
+    if (interpreter->string_heap == NULL)
+        return ps_interpreter_done(interpreter);
     // Allocate parser
     interpreter->parser = ps_parser_init();
     if (interpreter->parser == NULL)
-    {
-        ps_interpreter_done(interpreter);
-        return NULL;
-    }
-
+        return ps_interpreter_done(interpreter);
     // Allocate and initialize system environment
     if (!ps_system_init(interpreter))
-    {
-        ps_interpreter_done(interpreter);
-        return NULL;
-    }
-
+        return ps_interpreter_done(interpreter);
     // Set default state & options
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_RUNTIME_ERROR_NONE;
@@ -42,12 +37,16 @@ ps_interpreter *ps_interpreter_init()
     interpreter->trace = false;
     interpreter->range_check = true;
     interpreter->bool_eval = false;
-
     return interpreter;
 }
 
-void ps_interpreter_done(ps_interpreter *interpreter)
+ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter)
 {
+    if (interpreter->string_heap != NULL)
+    {
+        ps_string_heap_done(interpreter->string_heap);
+        interpreter->string_heap = NULL;
+    }
     if (interpreter->parser != NULL)
     {
         ps_parser_done(interpreter->parser);
@@ -62,6 +61,7 @@ void ps_interpreter_done(ps_interpreter *interpreter)
         }
     }
     free(interpreter);
+    return NULL;
 }
 
 bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
@@ -109,12 +109,12 @@ ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 
 ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name)
 {
-    char tmp[128];
+    // char tmp[128];
     int level = interpreter->level;
     do
     {
-        snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
-        ps_symbol_table_dump(interpreter->environments[level]->symbols, tmp, stderr);
+        // snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
+        // ps_symbol_table_dump(interpreter->environments[level]->symbols, tmp, stderr);
         ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
         if (symbol != NULL)
             return symbol;

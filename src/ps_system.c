@@ -87,38 +87,38 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 /******************************************************************************/
 
 // clang-format on
-#define PS_SYSTEM_CALLABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+#define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
     ps_symbol ps_system_##TYPE##_##VALUE = {                                                                           \
-        .kind = PS_SYMBOL_KIND_PROCEDURE, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+        .kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
 // clang-format off
 
-PS_SYSTEM_CALLABLE(function , abs      , "ABS"      , v, &ps_function_abs       );
-PS_SYSTEM_CALLABLE(function , arctan   , "ARCTAN"   , v, &ps_function_arctan    );
-PS_SYSTEM_CALLABLE(function , chr      , "CHR"      , v, &ps_function_chr       );
-PS_SYSTEM_CALLABLE(function , cos      , "COS"      , v, &ps_function_cos       );
-PS_SYSTEM_CALLABLE(function , even     , "EVEN"     , v, &ps_function_even      );
-PS_SYSTEM_CALLABLE(function , exp      , "EXP"      , v, &ps_function_exp       );
-PS_SYSTEM_CALLABLE(function , frac     , "FRAC"     , v, &ps_function_frac      );
-PS_SYSTEM_CALLABLE(function , int      , "INT"      , v, &ps_function_int       );
-PS_SYSTEM_CALLABLE(function , ln       , "LN"       , v, &ps_function_ln        );
-PS_SYSTEM_CALLABLE(function , log      , "LOG"      , v, &ps_function_log       );
-PS_SYSTEM_CALLABLE(function , odd      , "ODD"      , v, &ps_function_odd       );
-PS_SYSTEM_CALLABLE(function , ord      , "ORD"      , v, &ps_function_ord       );
-PS_SYSTEM_CALLABLE(function , pred     , "PRED"     , v, &ps_function_pred      );
-PS_SYSTEM_CALLABLE(function , random   , "RANDOM"   , v, &ps_function_random    );
-PS_SYSTEM_CALLABLE(function , round    , "ROUND"    , v, &ps_function_round     );
-PS_SYSTEM_CALLABLE(function , sin      , "SIN"      , v, &ps_function_sin       );
-PS_SYSTEM_CALLABLE(function , sqr      , "SQR"      , v, &ps_function_sqr       );   
-PS_SYSTEM_CALLABLE(function , sqrt     , "SQRT"     , v, &ps_function_sqrt      );
-PS_SYSTEM_CALLABLE(function , succ     , "SUCC"     , v, &ps_function_succ      );
-PS_SYSTEM_CALLABLE(function , tan      , "TAN"      , v, &ps_function_tan       );
-PS_SYSTEM_CALLABLE(function , trunc    , "TRUNC"    , v, &ps_function_trunc     );
-PS_SYSTEM_CALLABLE(procedure, randomize, "RANDOMIZE", v, &ps_procedure_randomize);
-PS_SYSTEM_CALLABLE(procedure, read     , "READ"     , v, &ps_procedure_read     );
-PS_SYSTEM_CALLABLE(procedure, readln   , "READLN"   , v, &ps_procedure_readln   );
-PS_SYSTEM_CALLABLE(procedure, write    , "WRITE"    , v, &ps_procedure_write    );
-PS_SYSTEM_CALLABLE(procedure, writeln  , "WRITELN"  , v, &ps_procedure_writeln  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , abs      , "ABS"      , v, &ps_function_abs       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , arctan   , "ARCTAN"   , v, &ps_function_arctan    );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , chr      , "CHR"      , v, &ps_function_chr       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , cos      , "COS"      , v, &ps_function_cos       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , even     , "EVEN"     , v, &ps_function_even      );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , exp      , "EXP"      , v, &ps_function_exp       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , frac     , "FRAC"     , v, &ps_function_frac      );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , int      , "INT"      , v, &ps_function_int       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ln       , "LN"       , v, &ps_function_ln        );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , log      , "LOG"      , v, &ps_function_log       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , odd      , "ODD"      , v, &ps_function_odd       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ord      , "ORD"      , v, &ps_function_ord       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , pred     , "PRED"     , v, &ps_function_pred      );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , random   , "RANDOM"   , v, &ps_function_random    );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , round    , "ROUND"    , v, &ps_function_round     );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sin      , "SIN"      , v, &ps_function_sin       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqr      , "SQR"      , v, &ps_function_sqr       );   
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqrt     , "SQRT"     , v, &ps_function_sqrt      );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , succ     , "SUCC"     , v, &ps_function_succ      );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , tan      , "TAN"      , v, &ps_function_tan       );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , trunc    , "TRUNC"    , v, &ps_function_trunc     );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, randomize, "RANDOMIZE", v, &ps_procedure_randomize);
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, read     , "READ"     , v, &ps_procedure_read     );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, readln   , "READLN"   , v, &ps_procedure_readln   );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, write    , "WRITE"    , v, &ps_procedure_write    );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln  , "WRITELN"  , v, &ps_procedure_writeln  );
 
 /* clang-format on */
 
@@ -148,33 +148,33 @@ bool ps_system_init(ps_interpreter *interpreter)
     // ps_system_enum.value->type->def.def_enum.count = 0;
     // ps_system_enum.value->type->def.def_enum.values = NULL;
     // Register the system types
-    error = error && ps_environment_add_symbol(environment, &ps_system_none);
-    error = error && ps_environment_add_symbol(environment, &ps_system_type_def);
-    error = error && ps_environment_add_symbol(environment, &ps_system_boolean);
-    error = error && ps_environment_add_symbol(environment, &ps_system_char);
-    error = error && ps_environment_add_symbol(environment, &ps_system_integer);
-    error = error && ps_environment_add_symbol(environment, &ps_system_unsigned);
-    error = error && ps_environment_add_symbol(environment, &ps_system_real);
-    error = error && ps_environment_add_symbol(environment, &ps_system_string);
-    // error = error && ps_environment_add_symbol(environment, &ps_system_subrange);
-    // error = error && ps_environment_add_symbol(environment, &ps_system_enum);
-    // error = error && ps_environment_add_symbol(environment, &ps_system_array);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_none);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_type_def);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_boolean);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_char);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_integer);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_unsigned);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_real);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_string);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_subrange);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_enum);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_array);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function);
 
     /**************************************************************************/
     /* CONSTANTS                                                              */
     /**************************************************************************/
 
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_boolean_false);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_boolean_true);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_integer_maxint);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_integer_minint);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_maxuint);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_real_maxreal);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_real_minreal);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_real_epsreal);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_real_pi);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_boolean_false);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_boolean_true);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_integer_maxint);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_integer_minint);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_maxuint);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_real_maxreal);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_real_minreal);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_real_epsreal);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_real_pi);
 
     /**************************************************************************/
     /* BITNESS & VERSION                                                      */
@@ -187,43 +187,43 @@ bool ps_system_init(ps_interpreter *interpreter)
     if (ps_version_string == NULL)
         error = true;
     ps_system_constant_string_ps_version.value->data.s = ps_version_string;
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
-    error = error && ps_environment_add_symbol(environment, &ps_system_constant_string_ps_version);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_string_ps_version);
 
     /**************************************************************************/
     /* STANDARD PROCEDURES & FUNCTIONS                                        */
     /**************************************************************************/
 
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_abs);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_arctan);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_chr);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_cos);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_even);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_exp);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_frac);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_int);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_ln);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_log);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_odd);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_ord);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_pred);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_random);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_round);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_sin);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_sqr);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_sqrt);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_succ);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_tan);
-    error = error && ps_environment_add_symbol(environment, &ps_system_function_trunc);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure_read);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure_readln);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure_write);
-    error = error && ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_abs);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_arctan);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_chr);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_cos);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_even);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_exp);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_frac);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_int);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_ln);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_log);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_odd);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_ord);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_pred);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_random);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_round);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_sin);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqr);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqrt);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_succ);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_tan);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_trunc);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_read);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_readln);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_write);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
 
     if (error)
     {

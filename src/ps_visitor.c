@@ -62,7 +62,11 @@
         return false;                                                                                                  \
     }
 
+/* Forward declarations */
 bool ps_parse_expression(ps_interpreter *interpreter, bool exec, ps_value *result);
+bool ps_parse_statement_list(ps_interpreter *interpreter, bool exec, ps_token_type stop);
+bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, bool exec);
+bool ps_parse_statement(ps_interpreter *interpreter, bool exec);
 
 /**
  * Parse
@@ -262,8 +266,15 @@ bool ps_parse_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
             //     RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
             // result->type = ps_system_string.value->data.t;
             // result->data.s = symbol->value->data.s;
-            interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-            TRACE_ERROR("STRING_VALUE");
+            // interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+            // TRACE_ERROR("STRING_VALUE");
+            result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+            if (result->data.s == NULL)
+            {
+                interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+                TRACE_ERROR("STRING_VALUE");
+            }
+            result->type = ps_system_string.value->data.t;
         }
         READ_NEXT_TOKEN;
         break;
@@ -626,14 +637,13 @@ bool ps_parse_const(ps_interpreter *interpreter, bool exec)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
-            // constant = ps_symbol_table_add_string_constant(interpreter->parser->symbols,
-            // lexer->current_token.value.s); if (constant == NULL)
-            //     RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
-            // type = ps_system_string.value->data.t;
-            // data.s = constant->value->data.s;
-            // break;
-            interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-            TRACE_ERROR("STRING_CONSTANT");
+            ps_string *s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+            if (s == NULL)
+                RETURN_ERROR(PS_RUNTIME_ERROR_OUT_OF_MEMORY);
+            type = ps_system_string.value->data.t;
+            data.s = s;
+            break;
+
         default:
             RETURN_ERROR(PS_PARSER_ERROR_UNEXPECTED_TOKEN);
         }
@@ -898,7 +908,7 @@ bool ps_parse_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
  * Parse
  *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
  * Next step:
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' 
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '('
  *                                            expression [ ':' width [ ':' precision ] ]
  *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *                                    ')' ] ;
@@ -963,7 +973,6 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
 
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
-    // symbol = ps_interpreter_find_symbol(interpreter,  &identifier);
     symbol = ps_interpreter_find_symbol(interpreter, &identifier);
     if (symbol == NULL)
         RETURN_ERROR(PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND);
@@ -997,11 +1006,6 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
 
     PARSE_END("OK");
 }
-
-/* Forward declarations */
-bool ps_parse_statement_list(ps_interpreter *interpreter, bool exec, ps_token_type stop);
-bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, bool exec);
-bool ps_parse_statement(ps_interpreter *interpreter, bool exec);
 
 /**
  * Parse BEGIN
@@ -1490,21 +1494,15 @@ bool ps_parse_program(ps_interpreter *interpreter, bool exec)
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
 
-    // if (exec)
-    // {
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
         RETURN_ERROR(interpreter->error);
     ps_symbol *program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
         RETURN_ERROR(interpreter->error);
-    // }
     if (!ps_parse_block(interpreter, exec))
         TRACE_ERROR("BLOCK");
-    ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "Before EXIT", stderr);
-    // if (exec)
-    // {
+    // ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "Before EXIT", stderr);
     ps_interpreter_exit_environment(interpreter);
-    // }
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: text after '.' is not analyzed and has not to be
 

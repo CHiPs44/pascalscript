@@ -15,7 +15,7 @@ ps_string_heap *ps_string_heap_init(size_t size)
     if (heap == NULL)
         return NULL; // errno = ENOMEM
     heap->size = size > 0 ? size : PS_STRING_HEAP_SIZE;
-    heap->more = heap->size;
+    // heap->more = heap->size;
     heap->used = 0;
     heap->data = (ps_string **)calloc(heap->size, sizeof(ps_string *));
     if (heap->data == NULL)
@@ -44,17 +44,17 @@ void ps_string_heap_done(ps_string_heap *heap)
     free(heap);
 }
 
-bool ps_string_heap_grow(ps_string_heap *heap)
-{
-    if (heap->more == 0)
-        return false;
-    ps_string **data = (ps_string **)realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
-    if (data == NULL)
-        return false; // errno = ENOMEM
-    heap->data = data;
-    heap->size += heap->more;
-    return true;
-}
+// bool ps_string_heap_grow(ps_string_heap *heap)
+// {
+//     if (heap->more == 0)
+//         return false;
+//     ps_string **data = (ps_string **)realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
+//     if (data == NULL)
+//         return false; // errno = ENOMEM
+//     heap->data = data;
+//     heap->size += heap->more;
+//     return true;
+// }
 
 unsigned int ps_string_heap_get_hash_key(char *z)
 {
@@ -71,57 +71,61 @@ unsigned int ps_string_heap_get_hash_key(char *z)
     return hash;
 }
 
-ps_string *ps_string_heap_alloc(ps_string_heap *heap, ps_string_len max, char *z)
+ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
 {
-    if (heap->used >= heap->size && !ps_string_heap_grow(heap))
-        return NULL;
-    ps_string *s = (ps_string *)calloc(1, sizeof(ps_string_len) * 2 + max + 1); // +1 for null-terminator
-    if (s == NULL)
-        return NULL; // errno = ENOMEM
-    s->max = max;
     if (z == NULL)
+        return NULL;
+    size_t len = strlen(z);
+    if (len > PS_STRING_MAX_LEN)
+        return NULL;
+    if (heap->used >= heap->size) // && !ps_string_heap_grow(heap))
+        return NULL;
+    unsigned int hash = ps_string_heap_get_hash_key(z);
+    size_t index = hash % heap->size;
+    size_t start = index;
+    // Loop until we find an empty slot or looped back to the start
+    do
     {
-        // Initialize to empty string
-        s->len = 0;
-        s->str[0] = '\0';
-    }
-    else
-    {
-        // Copy the string if z is provided
-        size_t len = strlen(z);
-        strncpy((char *)s->str, z, len > max ? max : len);
-        s->str[len > max ? max : len] = '\0'; // Ensure null-termination
-        s->len = len;
-    }
-    // Find a free slot in the heap
-    for (size_t i = 0; i < heap->size; i++)
-    {
-        if (heap->data[i] == NULL)
+        if (heap->data[index] == NULL)
         {
-            heap->data[i] = s;
+            ps_string *s = (ps_string *)calloc(1, sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
+            if (s == NULL)
+                return NULL; // errno = ENOMEM
+            s->max = len;
+            s->len = len;
+            strncpy((char *)s->str, z, len);
+            s->str[len] = '\0'; // Ensure null-termination
+            heap->data[index] = s;
             heap->used++;
+            // fprintf(stderr, "ps_string_heap_create: created string '%s' at index %zu\n", s->str, index);
             return s;
         }
-    }
-    free(s); // If we reach here, it means we didn't find a slot
+        else if (strcmp((char *)(heap->data[index]->str), z) == 0)
+        {
+            // fprintf(stderr, "ps_string_heap_create: found existing string '%s' at index %zu\n",
+            // heap->data[index]->str, index);
+            return heap->data[index];
+        }
+        index = (index + 1) % heap->size;
+    } while (index != start);
     return NULL;
 }
 
-bool ps_string_heap_free(ps_string_heap *heap, ps_string *s)
-{
-    for (size_t i = 0; i < heap->used; i++)
-    {
-        if (heap->data[i] == s)
-        {
-            ps_string_free(s);
-            heap->data[i] = NULL;
-            heap->used -= 1;
-            free(s);
-            return true;
-        }
-    }
-    return false; // String not found in the heap
-}
+// bool ps_string_heap_free(ps_string_heap *heap, ps_string *s)
+// {
+//     for (size_t i = 0; i < heap->used; i++)
+//     {
+//         if (heap->data[i] == s)
+//         {
+//             ps_string_free(s);
+//             heap->data[i] = NULL;
+//             heap->used -= 1;
+//             free(s);
+//             return true;
+//         }
+//     }
+//     return false; // String not found in the heap
+// }
 
 void ps_string_heap_dump(ps_string_heap *heap, FILE *f)
 {
@@ -129,7 +133,7 @@ void ps_string_heap_dump(ps_string_heap *heap, FILE *f)
     size_t used = 0;
     if (f == NULL)
         f = stderr;
-    fprintf(f, "String Heap: size=%zu, used=%zu, more=%zu\n", heap->size, heap->used, heap->more);
+    fprintf(f, "String Heap: size=%zu, used=%zu\n" /*, more=%zu\n"*/, heap->size, heap->used /*, heap->more*/);
     for (size_t i = 0; i < heap->size; i++)
     {
         if (heap->data[i] != NULL)

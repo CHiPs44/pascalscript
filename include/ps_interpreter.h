@@ -13,6 +13,7 @@
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_value.h"
+#include "ps_string_heap.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -30,6 +31,7 @@ extern "C"
     {
         ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS];
         ps_parser *parser;
+        ps_string_heap *string_heap;
         // state
         uint8_t level;
         ps_error error;
@@ -50,7 +52,7 @@ extern "C"
     ps_interpreter *ps_interpreter_init();
 
     /** @brief Release interpreter */
-    void ps_interpreter_done(ps_interpreter *interpreter);
+    ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter);
 
     /** @brief Create a new environment for program, procedure or function */
     bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);

@@ -14,7 +14,8 @@
         "string.h": "c",
         "ps_type_definition.h": "c",
         "stdlib.h": "c",
-        "ps_visitor.h": "c"
+        "ps_visitor.h": "c",
+        "ps_string_heap.h": "c"
     },
     "makefile.configureOnOpen": false
 }
