@@ -107,7 +107,7 @@ ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
     return interpreter->environments[interpreter->level];
 }
 
-ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name)
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local)
 {
     // char tmp[128];
     int level = interpreter->level;
@@ -118,6 +118,8 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
         ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
         if (symbol != NULL)
             return symbol;
+        if (local)
+            break;
         level -= 1;
     } while (level >= PS_INTERPRETER_ENVIRONMENT_SYSTEM);
     return NULL; // Symbol not found in any environment

@@ -23,6 +23,8 @@ extern "C"
     extern ps_symbol ps_system_unsigned;
     extern ps_symbol ps_system_real;
     extern ps_symbol ps_system_string;
+    extern ps_symbol ps_system_procedure;
+    extern ps_symbol ps_system_function;
 
     /* Derived types */
     extern ps_symbol ps_system_subrange;

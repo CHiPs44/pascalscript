@@ -68,7 +68,7 @@ extern "C"
     ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
 
     /** @brief Find symbol by name in current environment or its parents */
-    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name);
+    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local);
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);

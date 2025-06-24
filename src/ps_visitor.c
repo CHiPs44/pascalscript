@@ -47,8 +47,7 @@
             fprintf(stderr, "%cRETURN\t%-32s %-8d ", exec ? '*' : ' ', visit, __PS_ERROR__);                           \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        interpreter->error = __PS_ERROR__;                                                                             \
-        return false;                                                                                                  \
+        return ps_interpreter_return_error(interpreter, __PS_ERROR__);                                                 \
     }
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
     strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
@@ -67,6 +66,8 @@ bool ps_parse_expression(ps_interpreter *interpreter, bool exec, ps_value *resul
 bool ps_parse_statement_list(ps_interpreter *interpreter, bool exec, ps_token_type stop);
 bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, bool exec);
 bool ps_parse_statement(ps_interpreter *interpreter, bool exec);
+bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_symbol_kind kind, bool exec);
+bool ps_parse_block(ps_interpreter *interpreter, bool exec);
 
 /**
  * Parse
@@ -168,8 +169,7 @@ bool ps_parse_factor(ps_interpreter *interpreter, bool exec, ps_value *result)
     case PS_TOKEN_IDENTIFIER:
         // variable, constant, function
         COPY_IDENTIFIER(identifier);
-        // symbol = ps_interpreter_find_symbol(interpreter,  &identifier);
-        symbol = ps_interpreter_find_symbol(interpreter, &identifier);
+        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         switch (symbol->kind)
@@ -582,7 +582,7 @@ bool ps_parse_const(ps_interpreter *interpreter, bool exec)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_IDENTIFIER:
-            constant = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier);
+            constant = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true);
             if (constant == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
             if (constant->kind != PS_SYMBOL_KIND_CONSTANT)
@@ -828,18 +828,18 @@ bool ps_parse_var(ps_interpreter *interpreter, bool exec)
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
-        if (exec)
+        // if (exec)
+        // {
+        for (int i = 0; i <= var_count; i++)
         {
-            for (int i = 0; i <= var_count; i++)
-            {
-                value = ps_value_alloc(type, data);
-                variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
-                if (variable == NULL)
-                    RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-                if (!ps_interpreter_add_symbol(interpreter, variable))
-                    RETURN_ERROR(interpreter->error);
-            }
+            value = ps_value_alloc(type, data);
+            variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
+            if (variable == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            if (!ps_interpreter_add_symbol(interpreter, variable))
+                RETURN_ERROR(interpreter->error);
         }
+        // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
     PARSE_END("OK");
 }
@@ -858,7 +858,7 @@ bool ps_parse_assignment(ps_interpreter *interpreter, bool exec, ps_identifier *
 
     if (exec)
     {
-        variable = ps_interpreter_find_symbol(interpreter, identifier);
+        variable = ps_interpreter_find_symbol(interpreter, identifier, false);
         if (variable == NULL)
         {
             interpreter->error = PS_ERROR_SYMBOL_NOT_FOUND;
@@ -955,7 +955,7 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
 
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
-    symbol = ps_interpreter_find_symbol(interpreter, &identifier);
+    symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
@@ -1134,8 +1134,7 @@ bool ps_parse_for_do(ps_interpreter *interpreter, bool exec)
     if (exec)
     {
         COPY_IDENTIFIER(identifier);
-        // variable = ps_interpreter_find_symbol(interpreter,  &identifier);
-        variable = ps_interpreter_find_symbol(interpreter, &identifier);
+        variable = ps_interpreter_find_symbol(interpreter, &identifier, true);
         if (variable == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
@@ -1334,52 +1333,102 @@ bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, bool 
  *      END ;
  *  - allow procedure parameters
  */
-bool ps_parse_procedure(ps_interpreter *interpreter, bool exec)
+bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_symbol_kind kind, bool exec)
 {
-    PARSE_BEGIN("PROCEDURE", "");
+    PARSE_BEGIN("PROCEDURE_OR_FUNCTION", "");
     ps_identifier identifier;
-    ps_symbol *procedure;
+    ps_symbol *callable = NULL;
+    ps_value *value = NULL;
+    ps_executable *executable = NULL;
+    uint16_t line = 0;
+    uint8_t column = 0;
+    bool has_environment = false;
 
-    EXPECT_TOKEN(PS_TOKEN_PROCEDURE);
+    if (kind == PS_SYMBOL_KIND_FUNCTION)
+    {
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+    }
+
     READ_NEXT_TOKEN;
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(identifier);
-    READ_NEXT_TOKEN;
-    procedure = ps_interpreter_find_symbol(interpreter, &identifier);
-    if (procedure != NULL)
-    {
+    callable = ps_interpreter_find_symbol(interpreter, &identifier, true);
+    if (callable != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-    }
-    // // NB: procedure end is just a semi-colon for now
-    // EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-    // READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN;
+    // NB: no parameters for now
+    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+    READ_NEXT_TOKEN;
 
     if (exec)
     {
-        procedure = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
-        if (procedure == NULL)
+        if (!ps_lexer_get_cursor(lexer, &line, &column))
         {
-            ps_symbol_free(procedure);
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            interpreter->error = PS_ERROR_UNEXPECTED_TYPE; // TODO better error code
+            goto cleanup;
         }
-        if (!ps_interpreter_add_symbol(interpreter, procedure))
+        executable = calloc(1, sizeof(ps_executable)); // TODO ps_executable_alloc(NULL, NULL, line, column);
+        if (executable == NULL)
         {
-            ps_symbol_free(procedure);
-            RETURN_ERROR(interpreter->error);
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+        executable->signature = NULL;
+        executable->return_type = NULL;
+        executable->line = line;
+        executable->column = column;
+        callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
+        if (callable == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+        callable->kind = kind;
+        value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
+        if (value == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+        callable->value = value;
+        if (!ps_interpreter_add_symbol(interpreter, callable))
+        {
+            goto cleanup;
         }
         if (!ps_interpreter_enter_environment(interpreter, &identifier))
         {
-            ps_symbol_free(procedure);
-            RETURN_ERROR(interpreter->error);
+            goto cleanup;
         }
+        has_environment = true;
+    }
+    // Skip block
+    if (!ps_parse_block(interpreter, false))
+    {
+        goto cleanup;
+    }
+    if (exec)
+    {
         if (!ps_interpreter_exit_environment(interpreter))
         {
-            ps_symbol_free(procedure);
-            RETURN_ERROR(interpreter->error);
+            has_environment = false;
+            goto cleanup;
         }
     }
+    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+    READ_NEXT_TOKEN;
 
     PARSE_END("OK");
+
+cleanup:
+    if (callable != NULL)
+        ps_symbol_free(callable);
+    if (value != NULL)
+        ps_value_free(value);
+    if (executable != NULL)
+        free(executable); // TODO ps_executable_free(executable);
+    if (has_environment)
+        ps_interpreter_exit_environment(interpreter);
+    return false;
 }
 
 /**
@@ -1410,11 +1459,13 @@ bool ps_parse_block(ps_interpreter *interpreter, bool exec)
                 TRACE_ERROR("VAR");
             break;
         case PS_TOKEN_PROCEDURE:
-            if (!ps_parse_procedure(interpreter, exec))
+            if (!ps_parse_procedure_or_function(interpreter, PS_SYMBOL_KIND_PROCEDURE, exec))
                 TRACE_ERROR("PROCEDURE");
             break;
         case PS_TOKEN_FUNCTION:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            if (!ps_parse_procedure_or_function(interpreter, PS_SYMBOL_KIND_FUNCTION, exec))
+                TRACE_ERROR("FUNCTION");
+            break;
         case PS_TOKEN_BEGIN:
             loop = false;
             break;

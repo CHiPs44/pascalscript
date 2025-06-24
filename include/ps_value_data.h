@@ -12,6 +12,7 @@
 
 #include "ps_type_definition.h"
 #include "ps_value_types.h"
+#include "ps_executable.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -33,7 +34,7 @@ extern "C"
         ps_string          *s; // @brief  2  4  8  "s" is for "_s_tring"
         ps_type_definition *t; // @brief  2  4  8  "t" is for "_t_ype"
         void               *v; // @brief  2  4  8  "v" is for "_v_oid"
-        // ps_executable      *x; // @brief  2  4  8  "x" is for "e_x_ecutable"
+        ps_executable      *x; // @brief  2  4  8  "x" is for "e_x_ecutable"
         /*
         ps_subrange         g; // @brief  2  4  8  "g" is for "subran_g_e"
         ps_enum             e; // @brief  2  4  8  "e" is for "_e_num"
