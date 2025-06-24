@@ -114,7 +114,7 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
     ps_buffer_read_next_char(lexer->buffer);
-    if (lexer->error != PS_LEXER_ERROR_NONE || lexer->buffer->error != PS_BUFFER_ERROR_NONE)
+    if (lexer->error != PS_ERROR_NONE || lexer->buffer->error != PS_ERROR_NONE)
     {
         printf("TEST LEXER: ERROR %d %s / %d %s\n",
                lexer->error,

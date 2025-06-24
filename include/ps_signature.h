@@ -19,8 +19,6 @@ extern "C"
 {
 #endif
 
-#define PS_SIGNATURE_PARAMETER_COUNT (4)
-
     typedef struct s_ps_parameter
     {
         ps_symbol *value; // name & type
@@ -33,7 +31,6 @@ extern "C"
     {
         ps_symbol *result_type;   // NULL for procedures
         uint8_t size;            // size of the array
-        uint8_t used;            // number of parameters
         ps_parameter *parameters; // array of parameters
     } __attribute__((__packed__)) ps_signature;
 

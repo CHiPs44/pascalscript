@@ -83,7 +83,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 // {
 //     if (PS_TYPE_ENUM != type_def->base)
 //     {
-//         ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
 //         return NULL;
 //     }
 //     PS_VALUE_SET(type_def, e);
@@ -93,7 +93,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 // {
 //     if (PS_TYPE_ENUM != type_def->base)
 //     {
-//         ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
 //         return NULL;
 //     }
 //     PS_VALUE_SET(type_def, g);
@@ -116,7 +116,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //     max = len;
 //     // if (value == NULL && max == 0)
 //     // {
-//     //     ps_value_error = PS_RUNTIME_ERROR_INVALID_PARAMETERS;
+//     //     ps_value_error = PS_ERROR_INVALID_PARAMETERS;
 //     //     return NULL;
 //     // }
 //     // bool is_new = false;
@@ -126,7 +126,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //     value = calloc(1, sizeof(ps_value));
 //     //     if (value == NULL)
 //     //     {
-//     //         ps_value_error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+//     //         ps_value_error = PS_ERROR_OUT_OF_MEMORY;
 //     //         return NULL;
 //     //     }
 //     // }
@@ -141,8 +141,8 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //     if (value->data.s == NULL)
 //     //     {
 //     //         ps_value_error = errno == ENOMEM
-//     //                              ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
-//     //                              : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//     //                              ? PS_ERROR_OUT_OF_MEMORY
+//     //                              : PS_ERROR_OUT_OF_RANGE;
 //     //         if (is_new)
 //     //             free(value);
 //     //         return NULL;
@@ -155,8 +155,8 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //     if (p == NULL)
 //     //     {
 //     //         ps_value_error = errno == ENOMEM
-//     //                              ? PS_RUNTIME_ERROR_OUT_OF_MEMORY
-//     //                              : PS_RUNTIME_ERROR_OUT_OF_RANGE;
+//     //                              ? PS_ERROR_OUT_OF_MEMORY
+//     //                              : PS_ERROR_OUT_OF_RANGE;
 //     //         if (is_new)
 //     //         {
 //     //             ps_string_free(value->data.s);
@@ -172,7 +172,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 // {
 //     if (PS_TYPE_POINTER != type_def->base)
 //     {
-//         ps_value_error = PS_RUNTIME_ERROR_TYPE_MISMATCH;
+//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
 //         return NULL;
 //     }
 //     PS_VALUE_SET(type_def, p);

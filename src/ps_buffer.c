@@ -45,7 +45,7 @@ void ps_buffer_reset(ps_buffer *buffer)
     buffer->current_column = 0;
     buffer->current_char = '\0';
     buffer->next_char = '\0';
-    buffer->error = PS_BUFFER_ERROR_NONE;
+    buffer->error = PS_ERROR_NONE;
 }
 
 char *ps_buffer_show_error(ps_buffer *buffer)
@@ -117,7 +117,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     }
     if (buffer->line_count > PS_BUFFER_MAX_LINES)
     {
-        buffer->error = PS_BUFFER_ERROR_OVERFLOW_LINES;
+        buffer->error = PS_ERROR_OVERFLOW;
         return false;
     }
     // Allocate arrays for line starts and lengths
@@ -133,13 +133,13 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     }
     if (buffer->line_count == 0)
     {
-        buffer->error = PS_BUFFER_ERROR_NONE;
+        buffer->error = PS_ERROR_NONE;
         return true;
     }
     buffer->line_starts = calloc(buffer->line_count, sizeof(char *));
     if (buffer->line_starts == NULL)
     {
-        buffer->error = PS_BUFFER_ERROR_OUT_OF_MEMORY;
+        buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     }
     buffer->line_lengths = calloc(buffer->line_count, sizeof(uint8_t));
@@ -147,7 +147,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     {
         free(buffer->line_starts);
         buffer->line_starts = NULL;
-        buffer->error = PS_BUFFER_ERROR_OUT_OF_MEMORY;
+        buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     }
     // Find and memorize line starts
@@ -169,7 +169,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
                 buffer->line_starts = NULL;
                 free(buffer->line_lengths);
                 buffer->line_lengths = NULL;
-                buffer->error = PS_BUFFER_ERROR_OVERFLOW_COLUMNS;
+                buffer->error = PS_ERROR_OVERFLOW;
                 return false;
             }
             buffer->line_starts[line] = start;
@@ -191,7 +191,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             break;
         }
     }
-    buffer->error = PS_BUFFER_ERROR_NONE;
+    buffer->error = PS_ERROR_NONE;
     return true;
 }
 
@@ -203,14 +203,14 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     FILE *input = fopen(filename, "r");
     if (input == NULL)
     {
-        buffer->error = PS_BUFFER_ERROR_OPENING_FILE;
+        buffer->error = PS_ERROR_OPENING_FILE;
         buffer->file_errno = errno;
         return false;
     }
     // Check length of file
     if (fseek(input, 0, SEEK_END))
     {
-        buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        buffer->error = PS_ERROR_READING_FILE;
         buffer->file_errno = errno;
         fclose(input);
         return false;
@@ -218,14 +218,14 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     length = ftell(input);
     if (length > PS_BUFFER_MAX_SIZE)
     {
-        buffer->error = PS_BUFFER_ERROR_OVERFLOW;
+        buffer->error = PS_ERROR_OVERFLOW;
         fclose(input);
         return false;
     }
     if (fseek(input, 0, 0))
     {
         buffer->file_errno = errno;
-        buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        buffer->error = PS_ERROR_READING_FILE;
         fclose(input);
         return false;
     }
@@ -238,16 +238,16 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     case PS_READALL_OK:
         buffer->from_file = true;
         buffer->length = (uint16_t)length;
-        buffer->error = PS_BUFFER_ERROR_NONE;
+        buffer->error = PS_ERROR_NONE;
         return ps_buffer_scan_text(buffer);
     case PS_READALL_NOMEM:
-        buffer->error = PS_BUFFER_ERROR_OUT_OF_MEMORY;
+        buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     // case PS_READALL_ERROR:
-    //     buffer->error = PS_BUFFER_ERROR_READING_FILE;
+    //     buffer->error = PS_ERROR_READING_FILE;
     //     return false;
     default:
-        buffer->error = PS_BUFFER_ERROR_READING_FILE;
+        buffer->error = PS_ERROR_READING_FILE;
         return false;
     }
 }
@@ -296,12 +296,12 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
 
 char ps_buffer_peek_char(ps_buffer *buffer)
 {
-    return buffer->error == PS_BUFFER_ERROR_NONE ? buffer->current_char : '\0';
+    return buffer->error == PS_ERROR_NONE ? buffer->current_char : '\0';
 }
 
 char ps_buffer_peek_next_char(ps_buffer *buffer)
 {
-    return buffer->error == PS_BUFFER_ERROR_NONE ? buffer->next_char : '\0';
+    return buffer->error == PS_ERROR_NONE ? buffer->next_char : '\0';
 }
 
 bool ps_buffer_read_next_char(ps_buffer *buffer)
@@ -310,12 +310,12 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     buffer->current_char = '\0';
     buffer->next_char = '\0';
     // already at end of buffer?
-    if (buffer->error == PS_BUFFER_ERROR_EOF)
+    if (buffer->error == PS_ERROR_EOF)
         return false;
     // already after end of buffer?
     if (buffer->current_line >= buffer->line_count)
     {
-        buffer->error = PS_BUFFER_ERROR_EOF;
+        buffer->error = PS_ERROR_EOF;
         return false;
     }
     // we point to current char already

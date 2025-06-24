@@ -14,6 +14,7 @@
 #include "ps_symbol.h"
 #include "ps_system_types.h"
 #include "ps_value.h"
+#include "ps_value_data.h"
 #include "ps_value_types.h"
 
 #ifdef __cplusplus
@@ -35,6 +36,23 @@ extern "C"
     } /*__attribute__((__packed__))*/ ps_value_type_flags;
 
     extern ps_value_type_flags ps_value_type_flags_all[];
+
+    // /** @brief Executable: function or procedure */
+    // typedef struct s_ps_type_definition_executable
+    // {
+    //     ps_symbol *symbol;               /** @brief Symbol of the executable */
+    //     ps_parameters *params;           /** @brief Parameters of the executable */
+    //     ps_type_definition *return_type; /** @brief Return type of the executable, NULL for procedures */
+    //     uint16_t line;                   /** @brief Line number in the source code */
+    //     uint8_t column;                  /** @brief Column number in the source code */
+    // } __attribute__((__packed__)) ps_type_definition_executable;
+
+    typedef struct s_ps_type_definition_subrange
+    {
+        ps_value_type def; /** @brief type of subrange: integer, unsigned, char, enum */
+        ps_value_data min; /** @brief Minimum value of the subrange */
+        ps_value_data max; /** @brief Maximum value of the subrange */
+    } __attribute__((__packed__)) ps_type_definition_subrange;
 
     // /** @brief Subranges, stored as scalar values, needed to implement arrays */
     // typedef struct s_ps_type_definition_subrange

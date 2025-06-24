@@ -15,30 +15,23 @@ extern "C"
 {
 #endif
 
-    // typedef enum e_ps_environment_type
-    // {
-    //     PS_ENVIRONMENT_TYPE_SYSTEM = 0,
-    //     PS_ENVIRONMENT_TYPE_PROGRAM,
-    //     PS_ENVIRONMENT_TYPE_UNIT,
-    //     PS_ENVIRONMENT_TYPE_CALLABLE, // function or procedure (or method if we support OOP)
-    // } ps_environment_type;
-
+    /** @brief For now, just a name, a symbol table and a parent for nested scopes */
     typedef struct s_ps_environment
     {
-        struct s_ps_environment *parent; // parent environment (NULL for system environment)
-        // ps_environment_type type;
+        struct s_ps_environment *parent; // NULL for system environment
+        ps_symbol_table_error error;
         ps_identifier name;
         ps_symbol_table *symbols;
     } ps_environment;
 
 #define PS_ENVIRONMENT_SIZE sizeof(ps_environment)
 
-    /** @brief Initialize environment*/
+    /** @brief Initialize environment */
     /** @return NULL if no free memory (errno = ENOMEM) or the environment */
     ps_environment *ps_environment_init(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
 
     /** @brief Free environment */
-    void ps_environment_done(ps_environment *environment);
+    ps_environment *ps_environment_done(ps_environment *environment);
 
     /** @brief Add symbol to environment */
     /** @return true if OK, false otherwise */

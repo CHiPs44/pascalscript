@@ -18,10 +18,6 @@ extern "C"
     // Forward reference to value
     typedef struct s_ps_value ps_value;
 
-// #ifndef PS_SYMBOL_KIND_BITS
-// #define PS_SYMBOL_KIND_BITS 3
-// #endif
-
     typedef enum e_ps_symbol_kind
     {
         PS_SYMBOL_KIND_AUTO,
@@ -35,7 +31,7 @@ extern "C"
         // ...
     } __attribute__((__packed__)) ps_symbol_kind;
 
-    /** @brief Symbol is a named typed value within a scope */
+    /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
     {
         ps_symbol_kind kind;

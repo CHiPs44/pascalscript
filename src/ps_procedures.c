@@ -32,7 +32,7 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
     char *display_value = ps_value_get_display_string(value);
     if (display_value == NULL)
     {
-        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_STRING;
+        interpreter->error = PS_ERROR_EXPECTED_STRING;
         return false;
     }
     if (interpreter->debug)
@@ -47,7 +47,7 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value)
     char *display_value = ps_value_get_display_string(value);
     if (display_value == NULL)
     {
-        interpreter->error = PS_RUNTIME_ERROR_EXPECTED_STRING;
+        interpreter->error = PS_ERROR_EXPECTED_STRING;
         return false;
     }
     if (interpreter->debug)

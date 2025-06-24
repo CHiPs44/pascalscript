@@ -19,13 +19,6 @@ extern "C"
 
     typedef bool (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
-    /**
-     *  @brief Copy value of "from" into "to", converting unsigned to integer and
-     * vice versa sets error to PS_RUNTIME_ERROR_OUT_OF_RANGE or
-     * PS_RUNTIME_ERROR_TYPE_MISMATCH
-     */
-    bool ps_function_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
-
     bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
 
     bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,

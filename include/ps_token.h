@@ -187,7 +187,7 @@ extern "C"
     typedef struct s_ps_token
     {
         ps_token_type type;
-        union {
+        union u_ps_token_value {
             char identifier[PS_IDENTIFIER_MAX + 1];
             ps_integer i;
             ps_unsigned u;

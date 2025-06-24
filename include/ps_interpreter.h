@@ -12,8 +12,8 @@
 #include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_parser.h"
-#include "ps_value.h"
 #include "ps_string_heap.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -38,6 +38,7 @@ extern "C"
         // flags
         bool trace;
         bool debug;
+        bool dump;
         // options
         bool range_check; // range checking for integer and real values
         bool bool_eval;   // short circuit boolean evaluation
@@ -54,6 +55,9 @@ extern "C"
     /** @brief Release interpreter */
     ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter);
 
+    /** @brief Set error & return false */
+    bool ps_interpreter_return_error(ps_interpreter *interpreter, ps_error error);
+
     /** @brief Create a new environment for program, procedure or function */
     bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);
 
@@ -68,6 +72,13 @@ extern "C"
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
+
+    /**
+     *  @brief Copy value of "from" into "to", converting unsigned to integer and
+     * vice versa, may set error to PS_ERROR_OUT_OF_RANGE or
+     * PS_ERROR_TYPE_MISMATCH
+     */
+    bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
 
     // /**
     //  * @brief Allocate new value

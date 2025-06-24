@@ -16,14 +16,6 @@
 #include "ps_token.h"
 #include "ps_value.h"
 
-#define RETURN_ERROR(__PS_ERROR__)                                                                                     \
-    {                                                                                                                  \
-        interpreter->error = __PS_ERROR__;                                                                             \
-        return false;                                                                                                  \
-    }
-
-// typedef bool (*ps_binary_func)(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result);
-
 /* clang-format off */
 #define II (PS_TYPE_INTEGER  << 4 | PS_TYPE_INTEGER )
 #define IU (PS_TYPE_INTEGER  << 4 | PS_TYPE_UNSIGNED)
@@ -50,7 +42,7 @@
 #define NUMBER_CASE_DIV_MOD(__KEY__, __A__, __B__, __OP__, __R__, __TYPE__)                                            \
     case (__KEY__):                                                                                                    \
         if (b->data.__B__ == 0)                                                                                        \
-            RETURN_ERROR(PS_RUNTIME_ERROR_DIVISION_BY_ZERO)                                                            \
+            return ps_interpreter_return_error(interpreter, PS_ERROR_DIVISION_BY_ZERO);                        \
         result->data.__R__ = a->data.__A__ __OP__ b->data.__B__;                                                       \
         r = __TYPE__;                                                                                                  \
         break;
@@ -58,7 +50,7 @@
 #define NUMBER_CASE_DIV_REAL(__KEY__, __A__, __B__)                                                                    \
     case (__KEY__):                                                                                                    \
         if ((ps_real)(b->data.__B__) == 0.0)                                                                           \
-            RETURN_ERROR(PS_RUNTIME_ERROR_DIVISION_BY_ZERO)                                                            \
+            return ps_interpreter_return_error(interpreter, PS_ERROR_DIVISION_BY_ZERO);                        \
         result->data.r = (ps_real)(a->data.__A__) / (ps_real)(b->data.__B__);                                          \
         r = PS_TYPE_REAL;                                                                                              \
         break;
@@ -139,7 +131,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     //     }
     // }
     // if (entry.k == 0)
-    //     RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE)
+    //     return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE)
     // if (!((*entry.f)(interpreter, a, b, result)))
     //     return false;
     ps_value_type r = PS_TYPE_NONE;
@@ -335,7 +327,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                     ps_token_get_keyword(token_type), ps_value_get_type_name(a->type->base),
                     ps_value_get_type_name(b->type->base));
         }
-        RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE);
+        return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
     if (result->type != NULL && result->type->base != PS_TYPE_NONE)
     {
@@ -348,7 +340,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                         ps_token_get_keyword(token_type), ps_value_get_type_name(a->type->base),
                         ps_value_get_type_name(b->type->base));
             }
-            RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE)
+            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
     }
     else
@@ -381,7 +373,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                         ps_token_get_keyword(token_type), ps_value_get_type_name(a->type->base),
                         ps_value_get_type_name(b->type->base));
             }
-            RETURN_ERROR(PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE)
+            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
     }
     return true;

@@ -21,7 +21,7 @@ ps_parser *ps_parser_init()
     //     parser->lexers[i] = ps_lexer_init(NULL);
     // }
     // parser->current_lexer = 0;
-    parser->error = PS_PARSER_ERROR_NONE;
+    parser->error = PS_ERROR_NONE;
     parser->trace = false;
     parser->debug = false;
     return parser;
@@ -62,7 +62,7 @@ bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
 {
     if (ps_parser_get_lexer(parser)->current_token.type != token_type)
     {
-        parser->error = PS_PARSER_ERROR_UNEXPECTED_TOKEN;
+        parser->error = PS_ERROR_UNEXPECTED_TOKEN;
         if (parser->debug)
             ps_parser_debug(parser, NULL);
         return false;

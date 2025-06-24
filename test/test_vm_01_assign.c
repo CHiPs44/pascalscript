@@ -46,7 +46,7 @@ int main(void)
     ps_vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "2 POP?");
     ps_symbol_table_dump(&vm->symbols, "I=3?", stdout);
-    printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
+    printf("TEST VM #01 ASSIGN: I := 3; %s %d\n", code == PS_ERROR_NONE ? "OK" : "KO", code);
 
     ps_symbol constant_k = {"K", PS_SYMBOL_KIND_CONSTANT, PS_TYPE_INTEGER, sizeof(ps_integer), {1234}};
     result = ps_vm_global_add(vm, &constant_k);
@@ -61,7 +61,7 @@ int main(void)
     ps_vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "2 POP?");
     ps_symbol_table_dump(&vm->symbols, "K=1234?", stdout);
-    printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == PS_RUNTIME_ERROR_TYPE_MISMATCH ? "OK" : "KO", code);
+    printf("TEST VM #01 ASSIGN: K := 5678; %s %d\n", code == PS_ERROR_TYPE_MISMATCH ? "OK" : "KO", code);
 
     printf("TEST VM #01 ASSIGN: END\n");
     return 0;

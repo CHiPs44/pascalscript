@@ -15,115 +15,97 @@ char *ps_error_get_message(ps_error error)
     switch (error)
     {
     /* ==================== GENERAL  ==================== */
-    case PS_ERROR_ZERO:
+    case PS_ERROR_NONE:
         return "None";
     case PS_ERROR_NOT_IMPLEMENTED:
         return "Not implemented";
-    /* ==================== BUFFER  ==================== */
-    case PS_BUFFER_ERROR_NONE:
-        return "None";
-    case PS_BUFFER_ERROR_OPENING_FILE:
-        return "Opening file";
-    case PS_BUFFER_ERROR_READING_FILE:
-        return "Reading file";
-    case PS_BUFFER_ERROR_OUT_OF_MEMORY:
+    case PS_ERROR_OUT_OF_MEMORY:
         return "Out of memory";
-    case PS_BUFFER_ERROR_OVERFLOW:
-        return "Overflow: too much text";
-    case PS_BUFFER_ERROR_OVERFLOW_COLUMNS:
-        return "Overflow: line too long";
-    case PS_BUFFER_ERROR_OVERFLOW_LINES:
-        return "Overflow: too much lines";
-    case PS_BUFFER_ERROR_EOF:
-        return "Unexpected end of file";
-    /* ====================LEXER  ==================== */
-    case PS_LEXER_ERROR_NONE:
-        return "None";
-    case PS_LEXER_ERROR_UNEXPECTED_CHARACTER:
-        return "Unexpected character";
-    case PS_LEXER_ERROR_UNEXPECTED_EOF:
-        return "Unexpected end of file";
-    case PS_LEXER_ERROR_IDENTIFIER_TOO_LONG:
-        return "Identifier too long";
-    case PS_LEXER_ERROR_OVERFLOW:
+    case PS_ERROR_OVERFLOW:
         return "Overflow";
-    case PS_LEXER_ERROR_STRING_TOO_LONG:
+    /* ==================== BUFFER  ==================== */
+    case PS_ERROR_EOF:
+        return "Unexpected end of file";
+    case PS_ERROR_OPENING_FILE:
+        return "Opening file";
+    case PS_ERROR_READING_FILE:
+        return "Reading file";
+    /* ====================LEXER  ==================== */
+    case PS_ERROR_UNEXPECTED_CHARACTER:
+        return "Unexpected character";
+    case PS_ERROR_UNEXPECTED_EOF:
+        return "Unexpected end of file";
+    case PS_ERROR_IDENTIFIER_TOO_LONG:
+        return "Identifier too long";
+    case PS_ERROR_STRING_TOO_LONG:
         return "String too long";
-    case PS_LEXER_ERROR_STRING_NOT_MULTI_LINE:
+    case PS_ERROR_STRING_NOT_MULTI_LINE:
         return "String not multiline";
     /* ==================== PARSER  ==================== */
-    case PS_PARSER_ERROR_NONE:
-        return "None";
-    case PS_PARSER_ERROR_SYNTAX:
+    case PS_ERROR_SYNTAX:
         return "Syntax";
-    case PS_PARSER_ERROR_UNEXPECTED_TOKEN:
+    case PS_ERROR_UNEXPECTED_TOKEN:
         return "Unexpected";
-    case PS_PARSER_ERROR_UNKOWN_IDENTIFIER:
+    case PS_ERROR_UNKOWN_IDENTIFIER:
         return "Unknown identifier";
-    case PS_PARSER_ERROR_CONSTANT_VALUE:
+    case PS_ERROR_CONSTANT_VALUE:
         return "Constant value";
     /* ==================== RUNTIME  ==================== */
-    case PS_RUNTIME_ERROR_NONE:
-        return "None";
-    case PS_RUNTIME_ERROR_OUT_OF_MEMORY:
-        return "Out of memory";
-    case PS_RUNTIME_ERROR_ENVIRONMENT_UNDERFLOW:
+    case PS_ERROR_ENVIRONMENT_UNDERFLOW:
         return "Environment underflow";
-    case PS_RUNTIME_ERROR_ENVIRONMENT_OVERFLOW:
+    case PS_ERROR_ENVIRONMENT_OVERFLOW:
         return "Environment overflow";
-    case PS_RUNTIME_ERROR_STACK_UNDERFLOW:
+    case PS_ERROR_STACK_UNDERFLOW:
         return "Stack empty";
-    case PS_RUNTIME_ERROR_STACK_OVERFLOW:
+    case PS_ERROR_STACK_OVERFLOW:
         return "Stack overflow";
-    case PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED:
+    case PS_ERROR_SYMBOL_NOT_ADDED:
         return "Symbol not added";
-    case PS_RUNTIME_ERROR_SYMBOL_NOT_FOUND:
+    case PS_ERROR_SYMBOL_NOT_FOUND:
         return "Symbol not found";
-    case PS_RUNTIME_ERROR_SYMBOL_EXISTS:
+    case PS_ERROR_SYMBOL_EXISTS:
         return "Symbol alreayd exists";
-    case PS_RUNTIME_ERROR_UNKNOWN_UNARY_OPERATOR:
-        return "Unknown unary operator";
-    case PS_RUNTIME_ERROR_OPERATOR_NOT_APPLICABLE:
+    case PS_ERROR_OPERATOR_NOT_APPLICABLE:
         return "Unapplicable operator";
-    case PS_RUNTIME_ERROR_UNEXPECTED_TYPE:
+    case PS_ERROR_UNEXPECTED_TYPE:
         return "Unexpected type";
-    case PS_RUNTIME_ERROR_EXPECTED_VARIABLE:
+    case PS_ERROR_EXPECTED_VARIABLE:
         return "Variable expected";
-    case PS_RUNTIME_ERROR_EXPECTED_CONSTANT:
+    case PS_ERROR_EXPECTED_CONSTANT:
         return "Constant expected";
-    case PS_RUNTIME_ERROR_EXPECTED_VALUE:
+    case PS_ERROR_EXPECTED_VALUE:
         return "Value expected";
-    case PS_RUNTIME_ERROR_EXPECTED_NUMBER:
+    case PS_ERROR_EXPECTED_NUMBER:
         return "Number expected";
-    case PS_RUNTIME_ERROR_EXPECTED_ORDINAL:
+    case PS_ERROR_EXPECTED_ORDINAL:
         return "Scalar expected";
-    case PS_RUNTIME_ERROR_EXPECTED_INTEGER:
+    case PS_ERROR_EXPECTED_INTEGER:
         return "Integer expected";
-    case PS_RUNTIME_ERROR_EXPECTED_UNSIGNED:
+    case PS_ERROR_EXPECTED_UNSIGNED:
         return "Unsigned expected";
-    case PS_RUNTIME_ERROR_EXPECTED_INTEGER_OR_UNSIGNED:
+    case PS_ERROR_EXPECTED_INTEGER_OR_UNSIGNED:
         return "Integer or unsigned expected";
-    case PS_RUNTIME_ERROR_EXPECTED_REAL:
+    case PS_ERROR_EXPECTED_REAL:
         return "Real expected";
-    case PS_RUNTIME_ERROR_EXPECTED_BOOLEAN:
+    case PS_ERROR_EXPECTED_BOOLEAN:
         return "Boolean expected";
-    case PS_RUNTIME_ERROR_EXPECTED_CHAR:
+    case PS_ERROR_EXPECTED_CHAR:
         return "Char expected";
-    case PS_RUNTIME_ERROR_EXPECTED_STRING:
+    case PS_ERROR_EXPECTED_STRING:
         return "String expected";
-    case PS_RUNTIME_ERROR_EXPECTED_STRING_LENGTH:
+    case PS_ERROR_EXPECTED_STRING_LENGTH:
         return "String length expected";
-    case PS_RUNTIME_ERROR_ASSIGN_TO_CONST:
+    case PS_ERROR_ASSIGN_TO_CONST:
         return "Constants can't be changed";
-    case PS_RUNTIME_ERROR_TYPE_MISMATCH:
+    case PS_ERROR_TYPE_MISMATCH:
         return "Type mismatch";
-    case PS_RUNTIME_ERROR_DIVISION_BY_ZERO:
+    case PS_ERROR_DIVISION_BY_ZERO:
         return "Division by zero";
-    case PS_RUNTIME_ERROR_OUT_OF_RANGE:
+    case PS_ERROR_OUT_OF_RANGE:
         return "Out of range";
-    case PS_RUNTIME_ERROR_INVALID_PARAMETERS:
+    case PS_ERROR_INVALID_PARAMETERS:
         return "Invalid parameters";
-    case PS_PARSER_ERROR_TOO_MANY_VARIABLES:
+    case PS_ERROR_TOO_MANY_VARIABLES:
         return "Too many variables in declaration";
     case PS_ERROR_MAX:
         return "MAX error?";

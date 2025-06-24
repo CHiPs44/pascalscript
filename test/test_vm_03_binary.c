@@ -40,12 +40,12 @@ int main(void)
     ps_vm_push(vm, n5678);
     ps_symbol_stack_dump(&vm->stack, "3 PUSH?");
     code = vm_exec_op_binary(vm, OP_ADD);
-    printf("TEST VM #03 BINARY: 6912; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
+    printf("TEST VM #03 BINARY: 6912; %s %d\n", code == PS_ERROR_NONE ? "OK" : "KO", code);
     code = ps_vm_exec_assign(vm);
     ps_vm_auto_gc(vm);
     ps_symbol_stack_dump(&vm->stack, "3 POP?");
     ps_symbol_table_dump(&vm->symbols, "I=6912?", stdout);
-    printf("TEST VM #03 BINARY: I := 1234 + 5678 = 6912; %s %d\n", code == PS_ERROR_ZERO ? "OK" : "KO", code);
+    printf("TEST VM #03 BINARY: I := 1234 + 5678 = 6912; %s %d\n", code == PS_ERROR_NONE ? "OK" : "KO", code);
     printf("TEST VM #03 BINARY: END\n");
     return 0;
 }

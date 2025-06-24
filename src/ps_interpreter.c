@@ -32,9 +32,12 @@ ps_interpreter *ps_interpreter_init()
         return ps_interpreter_done(interpreter);
     // Set default state & options
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
-    interpreter->error = PS_RUNTIME_ERROR_NONE;
+    interpreter->error = PS_ERROR_NONE;
+    // flags
     interpreter->debug = false;
     interpreter->trace = false;
+    interpreter->dump = false;
+    // options
     interpreter->range_check = true;
     interpreter->bool_eval = false;
     return interpreter;
@@ -64,20 +67,20 @@ ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter)
     return NULL;
 }
 
+bool ps_interpreter_return_error(ps_interpreter *interpreter, ps_error error)
+{
+    interpreter->error = error;
+    return false;
+}
+
 bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
 {
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
-    {
-        interpreter->error = PS_RUNTIME_ERROR_ENVIRONMENT_OVERFLOW;
-        return false;
-    }
+        return ps_interpreter_return_error(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
     ps_environment *environment = ps_environment_init(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
     if (environment == NULL)
-    {
-        interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
-        return false;
-    }
+        return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
     return true;
@@ -86,10 +89,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
 bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
-    {
-        interpreter->error = PS_RUNTIME_ERROR_ENVIRONMENT_UNDERFLOW;
-        return false;
-    }
+        return ps_interpreter_return_error(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
     ps_environment *environment = interpreter->environments[interpreter->level];
     ps_environment_done(environment);
     interpreter->environments[interpreter->level] = NULL;
@@ -101,7 +101,7 @@ ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 {
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM || interpreter->level >= PS_INTERPRETER_ENVIRONMENTS)
     {
-        // interpreter->error = PS_RUNTIME_ERROR_INVALID_ENVIRONMENT;
+        // interpreter->error = PS_ERROR_INVALID_ENVIRONMENT;
         return NULL; // Invalid environment level
     }
     return interpreter->environments[interpreter->level];
@@ -127,11 +127,52 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 {
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (!ps_environment_add_symbol(environment, symbol))
-    {
-        interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
-        return false;
-    }
+        return ps_interpreter_return_error(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
     return true;
+}
+
+bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
+{
+    // ps_value_debug(stderr, "FROM\t", from);
+    // ps_value_debug(stderr, "TO\t", to);
+    if (to->type == NULL || to->type->base == PS_TYPE_NONE)
+        to->type = from->type;
+    if (from->type == to->type)
+    {
+        to->data = from->data;
+        return true;
+    }
+    // Integer => Unsigned?
+    if (from->type->base == PS_TYPE_INTEGER && to->type->base == PS_TYPE_UNSIGNED)
+    {
+        if (interpreter->range_check && from->data.i < 0)
+            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+        to->data.u = from->data.i;
+        return true;
+    }
+    // Unsigned => Integer?
+    if (from->type->base == PS_TYPE_UNSIGNED && to->type->base == PS_TYPE_INTEGER)
+    {
+        if (interpreter->range_check && from->data.u > PS_INTEGER_MAX)
+            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+        to->data.i = from->data.u;
+        return true;
+    }
+    // Integer => Real?
+    if (from->type->base == PS_TYPE_INTEGER && to->type->base == PS_TYPE_REAL)
+    {
+        // NB: no range check needed, as real can hold all integer values
+        to->data.r = (ps_real)from->data.i;
+        return true;
+    }
+    // Unsigned => Real?
+    if (from->type->base == PS_TYPE_UNSIGNED && to->type->base == PS_TYPE_REAL)
+    {
+        // NB: no range check needed, as real can hold all unsigned values
+        to->data.r = (ps_real)from->data.u;
+        return true;
+    }
+    return ps_interpreter_return_error(interpreter, PS_ERROR_TYPE_MISMATCH);
 }
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
@@ -179,7 +220,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 //     ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
 //     if (value == NULL)
 //     {
-//         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+//         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
 //         return NULL;
 //     }
 //     return value;
@@ -195,7 +236,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 //     ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
 //     if (symbol == NULL)
 //     {
-//         interpreter->error = PS_RUNTIME_ERROR_OUT_OF_MEMORY;
+//         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
 //         return NULL;
 //     }
 //     return ps_interpreter_add_symbol(interpreter, symbol);
@@ -206,7 +247,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 //     ps_symbol *symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, z);
 //     if (symbol == NULL)
 //     {
-//         interpreter->error = PS_RUNTIME_ERROR_SYMBOL_NOT_ADDED;
+//         interpreter->error = PS_ERROR_SYMBOL_NOT_ADDED;
 //         return NULL;
 //     }
 //     return symbol;

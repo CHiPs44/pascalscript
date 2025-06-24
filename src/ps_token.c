@@ -9,50 +9,6 @@
 #include "ps_error.h"
 #include "ps_token.h"
 
-/// @brief PascalScript symbolic token types
-/// @note *MUST* be sorted in alphabetical order for dichotomic search below to work
-struct s_ps_reserved_symbol
-{
-    char *symbol;
-    ps_token_type token_type;
-} ps_reserved_symbols[] = {
-    // clang-format off
-    { .symbol = "-"  ,.token_type = PS_TOKEN_MINUS             },
-    { .symbol = ","  ,.token_type = PS_TOKEN_COMMA             },
-    { .symbol = ";"  ,.token_type = PS_TOKEN_SEMI_COLON        },
-    { .symbol = ":"  ,.token_type = PS_TOKEN_COLON             },
-    { .symbol = ":=" ,.token_type = PS_TOKEN_ASSIGN            },
-    { .symbol = ".." ,.token_type = PS_TOKEN_RANGE             },
-    { .symbol = "."  ,.token_type = PS_TOKEN_DOT               },
-    { .symbol = "("  ,.token_type = PS_TOKEN_LEFT_PARENTHESIS  },
-    { .symbol = ")"  ,.token_type = PS_TOKEN_RIGHT_PARENTHESIS },
-    { .symbol = "["  ,.token_type = PS_TOKEN_LEFT_BRACKET      },
-    { .symbol = "]"  ,.token_type = PS_TOKEN_RIGHT_BRACKET     },
-    { .symbol = "@"  ,.token_type = PS_TOKEN_AT_SIGN           },
-    { .symbol = "*"  ,.token_type = PS_TOKEN_STAR              },
-    { .symbol = "**" ,.token_type = PS_TOKEN_POWER             },
-    { .symbol = "/"  ,.token_type = PS_TOKEN_SLASH             },
-    { .symbol = "^"  ,.token_type = PS_TOKEN_CARET             },
-    { .symbol = "+"  ,.token_type = PS_TOKEN_PLUS              },
-    { .symbol = "<"  ,.token_type = PS_TOKEN_LESS_THAN         },
-    { .symbol = "<=" ,.token_type = PS_TOKEN_LESS_OR_EQUAL     },
-    { .symbol = "<>" ,.token_type = PS_TOKEN_NOT_EQUAL         },
-    { .symbol = "="  ,.token_type = PS_TOKEN_EQUAL             },
-    { .symbol = ">"  ,.token_type = PS_TOKEN_GREATER_THAN      },
-    { .symbol = ">=" ,.token_type = PS_TOKEN_GREATER_OR_EQUAL  },
-    // clang-format on
-};
-
-char *ps_token_get_reserved_symbol(ps_token_type token_type)
-{
-    for (size_t i = 0; i < sizeof(ps_reserved_symbols) / sizeof(struct s_ps_reserved_symbol); i++)
-    {
-        if (ps_reserved_symbols[i].token_type == token_type)
-            return ps_reserved_symbols[i].symbol;
-    }
-    return NULL;
-}
-
 void ps_token_debug(FILE *output, char *message, ps_token *token)
 {
     if (output == NULL)
@@ -152,8 +108,52 @@ char *ps_token_dump_value(ps_token *token)
     return buffer;
 }
 
-/// @brief PascalScript reserved keywords
+/// @brief PascalScript symbolic token types
 /// @note *MUST* be sorted in alphabetical order for dichotomic search below to work
+struct s_ps_reserved_symbol
+{
+    char *symbol;
+    ps_token_type token_type;
+} ps_reserved_symbols[] = {
+    // clang-format off
+    { .symbol = "-"  ,.token_type = PS_TOKEN_MINUS             },
+    { .symbol = ","  ,.token_type = PS_TOKEN_COMMA             },
+    { .symbol = ";"  ,.token_type = PS_TOKEN_SEMI_COLON        },
+    { .symbol = ":"  ,.token_type = PS_TOKEN_COLON             },
+    { .symbol = ":=" ,.token_type = PS_TOKEN_ASSIGN            },
+    { .symbol = ".." ,.token_type = PS_TOKEN_RANGE             },
+    { .symbol = "."  ,.token_type = PS_TOKEN_DOT               },
+    { .symbol = "("  ,.token_type = PS_TOKEN_LEFT_PARENTHESIS  },
+    { .symbol = ")"  ,.token_type = PS_TOKEN_RIGHT_PARENTHESIS },
+    { .symbol = "["  ,.token_type = PS_TOKEN_LEFT_BRACKET      },
+    { .symbol = "]"  ,.token_type = PS_TOKEN_RIGHT_BRACKET     },
+    { .symbol = "@"  ,.token_type = PS_TOKEN_AT_SIGN           },
+    { .symbol = "*"  ,.token_type = PS_TOKEN_STAR              },
+    { .symbol = "**" ,.token_type = PS_TOKEN_POWER             },
+    { .symbol = "/"  ,.token_type = PS_TOKEN_SLASH             },
+    { .symbol = "^"  ,.token_type = PS_TOKEN_CARET             },
+    { .symbol = "+"  ,.token_type = PS_TOKEN_PLUS              },
+    { .symbol = "<"  ,.token_type = PS_TOKEN_LESS_THAN         },
+    { .symbol = "<=" ,.token_type = PS_TOKEN_LESS_OR_EQUAL     },
+    { .symbol = "<>" ,.token_type = PS_TOKEN_NOT_EQUAL         },
+    { .symbol = "="  ,.token_type = PS_TOKEN_EQUAL             },
+    { .symbol = ">"  ,.token_type = PS_TOKEN_GREATER_THAN      },
+    { .symbol = ">=" ,.token_type = PS_TOKEN_GREATER_OR_EQUAL  },
+    // clang-format on
+};
+
+char *ps_token_get_reserved_symbol(ps_token_type token_type)
+{
+    for (size_t i = 0; i < sizeof(ps_reserved_symbols) / sizeof(struct s_ps_reserved_symbol); i++)
+    {
+        if (ps_reserved_symbols[i].token_type == token_type)
+            return ps_reserved_symbols[i].symbol;
+    }
+    return NULL;
+}
+
+/** @brief PascalScript reserved keywords */
+/** @note *MUST* be sorted in alphabetical order for dichotomic search below to work */
 struct s_ps_keyword
 {
     char *keyword;

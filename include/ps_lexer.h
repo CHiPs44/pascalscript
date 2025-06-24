@@ -48,6 +48,8 @@ extern "C"
     bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
     bool ps_lexer_read_number(ps_lexer *lexer);
     bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
+    bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column);
+    bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column);
 
     void ps_lexer_dump(ps_lexer *lexer);
 
