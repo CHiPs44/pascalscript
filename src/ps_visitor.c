@@ -947,6 +947,87 @@ bool ps_parse_write_or_writeln(ps_interpreter *interpreter, bool exec, bool newl
     PARSE_END("OK");
 }
 
+bool ps_parse_procedure_call(ps_interpreter *interpreter, bool exec, ps_symbol *symbol)
+{
+    PARSE_BEGIN("PROCEDURE_CALL", "");
+    ps_identifier identifier;
+    uint16_t line = 0;
+    uint8_t column = 0;
+    bool has_environment = false;
+
+    READ_NEXT_TOKEN;
+    if (symbol == &ps_system_procedure_write || symbol == &ps_system_procedure_writeln)
+    {
+        // Write or Writeln
+        if (!ps_parse_write_or_writeln(interpreter, exec, symbol == &ps_system_procedure_writeln))
+            TRACE_ERROR("WRITE!");
+    }
+    else if (symbol == &ps_system_procedure_randomize)
+    {
+        // Randomize
+        if (exec)
+            if (!ps_procedure_randomize(interpreter, NULL))
+                TRACE_ERROR("RANDOMIZE!");
+    }
+    else
+    {
+        // User defined procedure call
+        // Enter environment for procedure call
+        if (!ps_interpreter_enter_environment(interpreter, symbol->name))
+            RETURN_ERROR(interpreter->error);
+        has_environment = true;
+        // TODO Parse parameters
+        // for now, check for statement terminators
+        ps_token_type token_type = ps_parser_expect_token_types(
+            interpreter->parser, 1,
+            (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
+        if (token_type == PS_TOKEN_NONE)
+        {
+            interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+            goto cleanup;
+        }
+        READ_NEXT_TOKEN;
+        // Save "cursor" position
+        if (!ps_lexer_get_cursor(lexer, &line, &column))
+        {
+            interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+            goto cleanup;
+        }
+        // Execute procedure
+        if (exec)
+        {
+            // Set cursor to the beginning of the procedure body
+            if (!ps_lexer_set_cursor(lexer, symbol->value->data.x->line, symbol->value->data.x->column))
+            {
+                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                goto cleanup;
+            }
+            // Parse procedure body
+            if (!ps_parse_block(interpreter, exec))
+                goto cleanup;
+            // Restore cursor position
+            if (!ps_lexer_set_cursor(lexer, line, column))
+            {
+                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                goto cleanup;
+            }
+        }
+        // Exit environment
+        if (!ps_interpreter_exit_environment(interpreter))
+            RETURN_ERROR(interpreter->error);
+    }
+
+    PARSE_END("OK");
+
+cleanup:
+    if (has_environment)
+        ps_interpreter_exit_environment(interpreter);
+    if (interpreter->error == PS_ERROR_NONE)
+        interpreter->error = PS_ERROR_GENERIC;
+    TRACE_ERROR("CLEANUP");
+    return false;
+}
+
 bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exec)
 {
     PARSE_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
@@ -967,20 +1048,8 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (symbol == &ps_system_procedure_write || symbol == &ps_system_procedure_writeln)
-        {
-            if (!ps_parse_write_or_writeln(interpreter, exec, symbol == &ps_system_procedure_writeln))
-                TRACE_ERROR("WRITE!");
-        }
-        else if (symbol == &ps_system_procedure_randomize)
-        {
-            if (!ps_procedure_randomize(interpreter, NULL))
-                TRACE_ERROR("RANDOMIZE!");
-        }
-        else
-        {
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-        }
+        if (!ps_parse_procedure_call(interpreter, exec, symbol))
+            RETURN_ERROR(interpreter->error);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -993,7 +1062,7 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, bool exe
  * Parse BEGIN
  *         [ STATEMENT ... ] [ ; ]
  *       END
- * NB: ; or . or whatever after END is analyzed in the caller
+ * NB: ';' or '.' or whatever after END is analyzed in the caller
  */
 bool ps_parse_compound_statement(ps_interpreter *interpreter, bool exec)
 {
@@ -1420,6 +1489,8 @@ bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_symbol_kind 
     PARSE_END("OK");
 
 cleanup:
+    if (has_environment)
+        ps_interpreter_exit_environment(interpreter);
     if (callable != NULL)
         ps_symbol_free(callable);
     if (value != NULL)
@@ -1428,6 +1499,9 @@ cleanup:
         free(executable); // TODO ps_executable_free(executable);
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
+    if (interpreter->error == PS_ERROR_NONE)
+        interpreter->error = PS_ERROR_GENERIC;
+    TRACE_ERROR("CLEANUP");
     return false;
 }
 
