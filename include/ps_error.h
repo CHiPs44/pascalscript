@@ -20,6 +20,7 @@ extern "C"
     {
         /* -------------------- GENERAL -------------------- */
         PS_ERROR_NONE = 0,
+        PS_ERROR_GENERIC,
         PS_ERROR_NOT_IMPLEMENTED,
         PS_ERROR_OUT_OF_MEMORY,
         PS_ERROR_OVERFLOW,

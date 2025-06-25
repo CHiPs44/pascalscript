@@ -17,6 +17,8 @@ char *ps_error_get_message(ps_error error)
     /* ==================== GENERAL  ==================== */
     case PS_ERROR_NONE:
         return "None";
+    case PS_ERROR_GENERIC:
+        return "Generic";
     case PS_ERROR_NOT_IMPLEMENTED:
         return "Not implemented";
     case PS_ERROR_OUT_OF_MEMORY:
