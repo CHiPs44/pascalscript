@@ -2,9 +2,18 @@
 # SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-CC 		 = LANG=C gcc
-# CFLAGS   = -std=c17 -Wall -Iinclude -ggdb
-CFLAGS   = -std=c17 -Wall -Iinclude -ggdb -m32
+# x64 32 bits: 
+#CC		= LANG=C gcc
+#CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
+#CFLAGS	= -std=c17 -Wall -Iinclude -ggdb -m32
+
+# ARM 32 bits:
+# (requires apt install qemu-user gcc-arm-linux-gnueabi)
+# (and export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi or -static)
+CC		= arm-linux-gnueabi-gcc
+#CC		= arm-none-eabi-gcc
+CFLAGS	= -static -std=c17 -Wall -Iinclude -ggdb
+
 CLIBS    = -lm
 PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)
