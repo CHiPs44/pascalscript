@@ -484,11 +484,35 @@ int main(void)
     setrlimit(RLIMIT_AS, &rl);
 ```
 
+### Tests with cross-compilation to ARM 32 bits + QEMU
+
+For the Raspberry Pi Pico, we use `arm-none-eabi-gcc` and `newlib`, on Linux, we need `arm-linux-gnueabi-gcc` as we use `stdio` and `libc` for now:
+
+```bash
+sudo apt install qemu-user gcc-arm-linux-gnueabi
+```
+
+NB: this uninstalls `gcc-multilib` and `g++-multilib`.
+
+To run a program within QEMU, either `export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi` or compile with `-static`.
+
+See `Makefile`:
+
+```Makefile
+# ARM 32 bits:
+# (requires apt install qemu-user gcc-arm-linux-gnueabi)
+# (and export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi or -static)
+# (incompatible with gcc-multilib / g++-multilib)
+CC = arm-linux-gnueabi-gcc
+#CC = arm-none-eabi-gcc
+CFLAGS = -static -std=c17 -Wall -Iinclude -ggdb
+```
+
 ## License
 
 This project is licensed under GNU Lesser General Public License 3.0 or later, see file `LICENSE`.
 
-Each file should contains this header:
+Each file should contains this header, this example is for C:
 
 ```c
 /*
