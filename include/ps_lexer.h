@@ -9,8 +9,6 @@
 
 #include <stdbool.h>
 
-// #include "ps_config.h"
-// #include "ps_error.h"
 #include "ps_buffer.h"
 #include "ps_token.h"
 
@@ -24,32 +22,15 @@ extern "C"
         ps_buffer *buffer;
         ps_error error;
         ps_token current_token;
-        bool allocated;
     } ps_lexer;
 
-    /**
-     * @brief Initialize a lexer
-     */
     ps_lexer *ps_lexer_init();
-
-    /**
-     * @brief Release a lexer
-     */
-    void ps_lexer_done(ps_lexer *lexer);
-    /**
-     * @brief Reset lexer:
-     *  - reset "cursor" position to beginning of buffer
-     *  - clear current token and error
-     */
+    ps_lexer *ps_lexer_done(ps_lexer *lexer);
     void ps_lexer_reset(ps_lexer *lexer);
     char *ps_lexer_show_error(ps_lexer *lexer);
-    bool ps_lexer_read_next_token(ps_lexer *lexer);
-    bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
-    bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
-    bool ps_lexer_read_number(ps_lexer *lexer);
-    bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
-    bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column);
-    bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column);
+    bool ps_lexer_read_token(ps_lexer *lexer);
+    // bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column);
+    // bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column);
 
     void ps_lexer_dump(ps_lexer *lexer);
 

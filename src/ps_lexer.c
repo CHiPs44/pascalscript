@@ -17,6 +17,11 @@
 #include "ps_lexer.h"
 #include "ps_token.h"
 
+bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
+bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
+bool ps_lexer_read_number(ps_lexer *lexer);
+bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
+
 ps_lexer *ps_lexer_init()
 {
     ps_lexer *lexer = calloc(1, sizeof(ps_lexer));
@@ -32,11 +37,12 @@ ps_lexer *ps_lexer_init()
     return lexer;
 }
 
-void ps_lexer_done(ps_lexer *lexer)
+ps_lexer *ps_lexer_done(ps_lexer *lexer)
 {
     if (lexer->buffer != NULL)
         ps_buffer_done(lexer->buffer);
     free(lexer);
+    return NULL;
 }
 
 void ps_lexer_reset(ps_lexer *lexer)
@@ -44,6 +50,7 @@ void ps_lexer_reset(ps_lexer *lexer)
     ps_buffer_reset(lexer->buffer);
     lexer->error = PS_ERROR_NONE;
     lexer->current_token.type = PS_TOKEN_NONE;
+    memset(&lexer->current_token.value, 0, sizeof(lexer->current_token.value));
 }
 
 char *ps_lexer_show_error(ps_lexer *lexer)
@@ -269,8 +276,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
                 else if ((c == 'e' || c == 'E'))
                 {
                     if (has_exp)
-                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
-                                                     "ps_lexer_read_number");
+                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
                     has_exp = true;
                     is_real = true;
                     buffer[pos++] = c;
@@ -386,7 +392,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     return true;
 }
 
-bool ps_lexer_read_next_token(ps_lexer *lexer)
+bool ps_lexer_read_token(ps_lexer *lexer)
 {
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;

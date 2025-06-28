@@ -126,7 +126,7 @@ void test_lexer(char *name, char *source, ps_token_type *expected, int count)
     do
     {
         // printf("TEST LEXER: %02d/%02d BEGIN\n", index + 1, count);
-        if (!ps_lexer_read_next_token(lexer))
+        if (!ps_lexer_read_token(lexer))
         {
             printf("TEST LEXER: %02d/%02d ERROR %d %s / %d %s\n",
                    index + 1, count,

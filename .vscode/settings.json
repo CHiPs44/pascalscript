@@ -17,7 +17,9 @@
         "ps_visitor.h": "c",
         "ps_string_heap.h": "c",
         "cstdlib": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "ps_lexer.h": "c",
+        "ctype.h": "c"
     },
     "makefile.configureOnOpen": false
 }
