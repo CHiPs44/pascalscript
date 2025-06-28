@@ -251,6 +251,19 @@ char *ps_value_to_string(ps_value *value, bool debug)
             memcpy(buffer, value->data.s->str, value->data.s->len);
         }
         break;
+    case PS_TYPE_EXECUTABLE:
+        if (debug)
+            if (value->data.x == NULL)
+                snprintf(buffer, sizeof(buffer) - 1, "NULL!");
+            else
+                snprintf(buffer, sizeof(buffer) - 1, "%s@%05d/%03d",
+                         value->data.x->return_type == NULL ? "PROCEDURE" : "FUNCTION", value->data.x->line,
+                         value->data.x->column);
+        else if (value->data.x == NULL)
+            snprintf(buffer, sizeof(buffer) - 1, "NULL");
+        else
+            snprintf(buffer, sizeof(buffer) - 1, "TODO?");
+        break;
     // case PS_TYPE_POINTER:
     //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
     //     break;

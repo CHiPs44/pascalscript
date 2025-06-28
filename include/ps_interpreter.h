@@ -27,6 +27,13 @@ extern "C"
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0
 #define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1
 
+    typedef enum e_ps_interpreter_mode
+    {
+        MODE_EXEC, /** @brief Execute instructions */
+        MODE_SKIP, /** @brief Skip execution but keep declarations */
+        MODE_OUT,  /** @brief *FUTURE* Output AST / intermediate language / whatever */
+    } ps_interpreter_mode;
+
     typedef struct s_ps_interpreter
     {
         ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS];

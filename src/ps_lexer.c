@@ -576,7 +576,7 @@ bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column)
 bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column)
 {
     if (lexer == NULL || lexer->buffer == NULL || line >= lexer->buffer->line_count ||
-        column >= lexer->buffer->line_lengths[line])
+        column > lexer->buffer->line_lengths[line])
         return false;
     lexer->buffer->current_line = line;
     lexer->buffer->current_column = column;

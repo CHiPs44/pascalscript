@@ -90,7 +90,7 @@ extern "C"
             PS_TOKEN_PERCENT,           % => Binary
      */
 
-    typedef enum _token_type_t
+    typedef enum e_ps_token_type
     {
         PS_TOKEN_NONE = 0,
         PS_TOKEN_END_OF_FILE,

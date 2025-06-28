@@ -6,18 +6,21 @@
 Unit FreePascalCompatibility32;
 
 {
-    This unit provides compatibility definitions to ensure that code written
-    for 32 bits PascalScript can be compiled with Free Pascal
-    Use
-      fpc -FaFreePascalCompatibility32 <yourfile>.pas
-    to compile from examples directory
+  This unit provides compatibility definitions to ensure that code written
+  for 32 bits PascalScript can be compiled with Free Pascal
+  To compile from examples directory, use
+    fpc -FaFreePascalCompatibility32 <yourfile>.pas
 }
 
 Interface
 
 Const
   { PascalScript version }
-  PS_VERSION = '0.1.2.3';
+  PS_VERSION = '1.2.3.4';
+  PS_VERSION_MAJOR = 1;
+  PS_VERSION_MINOR = 2;
+  PS_VERSION_PATCH = 3;
+  PS_VERSION_INDEX = 4;
   PS_BITNESS = 32;
   { Maximum unsigned integer }
   MaxUint    = $FFFFFFFF;

@@ -17,48 +17,45 @@
 #include "ps_value.h"
 #include "ps_version.h"
 
-/* clang-format off */
-
 /******************************************************************************/
 /* SYSTEM TYPE DEFINITIONS AND CONSTANTS                                      */
 /******************************************************************************/
-
-ps_type_definition  ps_type_def_type_def    = {.type = PS_TYPE_DEFINITION, .base = PS_TYPE_DEFINITION};
-ps_value            ps_value_type_def       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}};
-ps_symbol           ps_system_type_def      = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = &ps_value_type_def};
-
-// clang-format on
 
 #define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
     ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
     ps_value ps_value_##__name__ = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};            \
     ps_symbol ps_system_##__name__ = {                                                                                 \
         .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
-// clang-format off
 
-PS_SYSTEM_TYPE(none     , "#NONE"    , PS_TYPE_NONE    );
-PS_SYSTEM_TYPE(integer  , "INTEGER"  , PS_TYPE_INTEGER );
-PS_SYSTEM_TYPE(unsigned , "UNSIGNED" , PS_TYPE_UNSIGNED);
-PS_SYSTEM_TYPE(boolean  , "BOOLEAN"  , PS_TYPE_BOOLEAN );
-PS_SYSTEM_TYPE(char     , "CHAR"     , PS_TYPE_CHAR    );
-PS_SYSTEM_TYPE(real     , "REAL"     , PS_TYPE_REAL    );
-PS_SYSTEM_TYPE(string   , "STRING"   , PS_TYPE_STRING  );
-PS_SYSTEM_TYPE(array    , "#ARRAY"   , PS_TYPE_ARRAY   );
-PS_SYSTEM_TYPE(subrange , "#SUBRANGE", PS_TYPE_SUBRANGE);
-PS_SYSTEM_TYPE(enum     , "#ENUM"    , PS_TYPE_ENUM    );
-PS_SYSTEM_TYPE(procedure, "PROCEDURE", PS_TYPE_NONE    );
-PS_SYSTEM_TYPE(function , "FUNCTION" , PS_TYPE_NONE    );
+/* clang-format off */
+
+ps_type_definition  ps_type_def_type_def    = {.type = PS_TYPE_DEFINITION, .base = PS_TYPE_DEFINITION};
+ps_value            ps_value_type_def       = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}};
+ps_symbol           ps_system_type_def      = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = &ps_value_type_def};
+
+PS_SYSTEM_TYPE(none     , "#NONE"     , PS_TYPE_NONE      );
+PS_SYSTEM_TYPE(integer  , "INTEGER"   , PS_TYPE_INTEGER   );
+PS_SYSTEM_TYPE(unsigned , "UNSIGNED"  , PS_TYPE_UNSIGNED  );
+PS_SYSTEM_TYPE(boolean  , "BOOLEAN"   , PS_TYPE_BOOLEAN   );
+PS_SYSTEM_TYPE(char     , "CHAR"      , PS_TYPE_CHAR      );
+PS_SYSTEM_TYPE(real     , "REAL"      , PS_TYPE_REAL      );
+PS_SYSTEM_TYPE(string   , "STRING"    , PS_TYPE_STRING    );
+PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY     );
+PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE  );
+PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM      );
+PS_SYSTEM_TYPE(procedure, "#PROCEDURE", PS_TYPE_EXECUTABLE);
+PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE);
 
 /******************************************************************************/
 /* CONSTANTS                                                                  */
 /******************************************************************************/
 
-// clang-format on
+/* clang-format on */
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
     ps_symbol ps_system_constant_##TYPE##_##VALUE = {                                                                  \
         .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
-// clang-format off
+/* clang-format off */
 
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean)false                                          );
@@ -86,12 +83,11 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 /* STANDARD + MATH LIBRARY                                                    */
 /******************************************************************************/
 
-// clang-format on
-#define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, FIELD, VALUE2)                                                           \
+/* clang-format on */
+#define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, FIELD, VALUE2)                                                     \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
-    ps_symbol ps_system_##TYPE##_##VALUE = {                                                                           \
-        .kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
-// clang-format off
+    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+/* clang-format off */
 
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , abs      , "ABS"      , v, &ps_function_abs       );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , arctan   , "ARCTAN"   , v, &ps_function_arctan    );

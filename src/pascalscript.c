@@ -78,7 +78,7 @@ char *minimal_source = "Program Minimal;\n"
 
 int main(int argc, char *argv[])
 {
-    bool trace = true; // false;
+    bool trace = true;
     bool debug = trace;
     bool verbose = false;
     bool dump_symbols = false;

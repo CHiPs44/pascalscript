@@ -5,14 +5,22 @@
 *)
 Program Example20Procedure1;
 
+// Var
+//     Variable1: Integer;
+
 Procedure Procedure1;
 Var
     Variable1: Integer;
 Begin
     Variable1 := 42;
-    WriteLn('This is Procedure1, Variable1=', Variable1);
+    // Write('This is Procedure1, Variable1=', Variable1, Chr(10));
 End;
 
 Begin
+    // Variable1 := 1;
+    // WriteLn('1. This is Program, Variable1=', Variable1);
+    WriteLn('1. This is Program');
     Procedure1;
+    // WriteLn('2. This is Program, Variable1=', Variable1);
+    WriteLn('2. This is Program');
 End.

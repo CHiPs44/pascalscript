@@ -31,6 +31,7 @@ extern "C"
         PS_TYPE_CHAR,       // char
         PS_TYPE_STRING,     // string, Pascal style
         PS_TYPE_DEFINITION, // Type definition
+        PS_TYPE_EXECUTABLE, // procedure or function
         PS_TYPE_SUBRANGE,   // *FUTURE*
         PS_TYPE_ENUM,       // *FUTURE*
         PS_TYPE_SET,        // *FUTURE*
@@ -38,7 +39,6 @@ extern "C"
         PS_TYPE_ARRAY,      // *FUTURE*
         PS_TYPE_RECORD,     // *FUTURE*
         PS_TYPE_FILE,       // *FUTURE*
-        PS_TYPE_OBJECT,     // *FUTURE*
     } __attribute__((__packed__)) ps_value_type;
 
 #ifdef __cplusplus

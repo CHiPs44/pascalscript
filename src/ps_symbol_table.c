@@ -254,9 +254,9 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
     //                        1         2         3         4         5         6         7         8
     //               12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
     //                1234 1234567890123456789012345678901 123456789 12345678 1234567890123456789012345678901
-    fprintf(output, "     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "     ┃Name                           ┃Kind     ┃Type    ┃Value                          ┃\n");
-    fprintf(output, "┏━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output, "     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(output, "     ┃Name                           ┃Kind     ┃Type      ┃Value                          ┃\n");
+    fprintf(output, "┏━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -268,11 +268,11 @@ void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *type_name = symbol->value == NULL ? "NULL!" : ps_value_get_type_definition_name(symbol->value->type);
             char *value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
-            fprintf(output, "┃%04d┃%-*s┃%-9s┃%-8s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,
+            fprintf(output, "┃%04d┃%-*s┃%-9s┃%-10s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,
                     PS_IDENTIFIER_LEN, value);
         }
     }
-    fprintf(output, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(output, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }

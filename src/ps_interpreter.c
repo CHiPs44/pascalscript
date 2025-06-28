@@ -83,6 +83,9 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
         return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
+    fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    fprintf(stderr, "=> ENTER %d: %s\n", interpreter->level, (char *)name);
+    fprintf(stderr, "--------------------------------------------------------------------------------\n");
     return true;
 }
 
@@ -93,6 +96,9 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
     ps_environment *environment = interpreter->environments[interpreter->level];
     ps_environment_done(environment);
     interpreter->environments[interpreter->level] = NULL;
+    fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    fprintf(stderr, "=> EXIT %d\n", interpreter->level);
+    fprintf(stderr, "--------------------------------------------------------------------------------\n");
     interpreter->level -= 1;
     return true;
 }
@@ -201,7 +207,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
         return false;
     }
     // parser->debug = true;
-    if (!ps_parse_start(interpreter, exec))
+    if (!ps_parse_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
     {
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
         ps_buffer_dump(lexer->buffer, start, 5);
