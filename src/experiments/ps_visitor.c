@@ -31,7 +31,7 @@
     return true;
 #define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
-        if (!ps_lexer_read_next_token(lexer))                                                                          \
+        if (!ps_lexer_read_token(lexer))                                                                          \
             return false;                                                                                              \
         if (interpreter->trace)                                                                                        \
         {                                                                                                              \
