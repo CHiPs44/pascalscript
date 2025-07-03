@@ -11,43 +11,44 @@
 #include "ps_procedures.h"
 #include "ps_string.h"
 #include "ps_system.h"
+#include "ps_vm.h"
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \
-    ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);                                                        \
+    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __VISIT__;                                                                                    \
-    if (interpreter->trace)                                                                                            \
+    if (compiler->trace)                                                                                               \
     {                                                                                                                  \
-        fprintf(stderr, "%*cBEGIN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',     \
-                visit, __PLUS__);                                                                                      \
+        fprintf(stderr, "%*cBEGIN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', visit, \
+                __PLUS__);                                                                                             \
         ps_token_debug(stderr, "BEGIN", &lexer->current_token);                                                        \
     }
 #define VISIT_END(__PLUS__)                                                                                            \
-    if (interpreter->trace)                                                                                            \
+    if (compiler->trace)                                                                                               \
     {                                                                                                                  \
-        fprintf(stderr, "%*cEND\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',       \
-                visit, __PLUS__);                                                                                      \
+        fprintf(stderr, "%*cEND\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', visit,   \
+                __PLUS__);                                                                                             \
         ps_token_debug(stderr, "END", &lexer->current_token);                                                          \
     }                                                                                                                  \
     return true;
 #define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
-        if (!ps_lexer_read_token(lexer))                                                                          \
+        if (!ps_lexer_read_token(lexer))                                                                               \
             return false;                                                                                              \
-        if (interpreter->trace)                                                                                        \
+        if (compiler->trace)                                                                                           \
         {                                                                                                              \
-            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     "", "");                                                                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
     }
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__)                                                                                \
-    if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
+    if (!ps_parser_expect_token_type(compiler->parser, __PS_TOKEN_TYPE__))                                             \
     return false
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
-        if (interpreter->trace)                                                                                        \
+        if (compiler->trace)                                                                                           \
         {                                                                                                              \
-            fprintf(stderr, "%*cRETURN\t%-32s %-8d ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+            fprintf(stderr, "%*cRETURN\t%-32s %-8d ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, __PS_ERROR__);                                                                              \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
@@ -57,33 +58,33 @@
     strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 #define TRACE_ERROR(__PLUS__)                                                                                          \
     {                                                                                                                  \
-        if (interpreter->trace)                                                                                        \
+        if (compiler->trace)                                                                                           \
         {                                                                                                              \
-            fprintf(stderr, "%*cERROR\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+            fprintf(stderr, "%*cERROR\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, __PLUS__);                                                                                  \
             ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
         }                                                                                                              \
         return false;                                                                                                  \
     }
 #define TRACE_CURSOR                                                                                                   \
-    if (interpreter->trace)                                                                                            \
+    if (compiler->trace)                                                                                               \
     {                                                                                                                  \
         uint16_t line = 0;                                                                                             \
         uint8_t column = 0;                                                                                            \
         if (!ps_lexer_get_cursor(lexer, &line, &column))                                                               \
             TRACE_ERROR("CURSOR!");                                                                                    \
-        fprintf(stderr, "%*cCURSOR\t*** LINE=%d, COLUMN=%d ***\n", (interpreter->level - 1) * 8 - 1,                   \
+        fprintf(stderr, "%*cCURSOR\t*** LINE=%d, COLUMN=%d ***\n", (compiler->level - 1) * 8 - 1,                      \
                 mode == MODE_EXEC ? '*' : ' ', line, column);                                                          \
         ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
     }
 
 /* Forward declarations */
-bool ps_parse_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-bool ps_parse_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
-bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-bool ps_parse_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind);
-bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode);
+bool ps_parse_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result);
+bool ps_parse_statement_list(ps_compiler *compiler, ps_interpreter_mode mode, ps_token_type stop);
+bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_interpreter_mode mode);
+bool ps_parse_statement(ps_compiler *compiler, ps_interpreter_mode mode);
+bool ps_parse_procedure_or_function(ps_compiler *compiler, ps_interpreter_mode mode, ps_symbol_kind kind);
+bool ps_parse_block(ps_compiler *compiler, ps_interpreter_mode mode);
 
 /**
  * Parse
@@ -94,7 +95,7 @@ bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode);
  *  - check function signature
  *  - check function return type
  */
-bool ps_parse_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *symbol, ps_value *result)
+bool ps_parse_function_call(ps_compiler *compiler, ps_interpreter_mode mode, ps_symbol *symbol, ps_value *result)
 {
     VISIT_BEGIN("FUNCTION_CALL", "");
     ps_value arg = {.type = ps_system_none.value->data.t, .data.v = NULL};
@@ -165,7 +166,7 @@ bool ps_parse_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
  *          | nil
  *          ;
  */
-bool ps_parse_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_factor(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     VISIT_BEGIN("FACTOR", "");
     ps_value factor = {.type = ps_system_none.value->data.t, .data.v = NULL};
@@ -195,7 +196,7 @@ bool ps_parse_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_VARIABLE:
             if (mode == MODE_EXEC)
             {
-                if (interpreter->debug)
+                if (compiler->debug)
                 {
                     ps_symbol_debug(stderr, "SYMBOL\t", symbol);
                     ps_value_debug(stderr, "RESULT\t", result);
@@ -272,10 +273,10 @@ bool ps_parse_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_STRING_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+            result->data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
             if (result->data.s == NULL)
             {
-                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                compiler->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("STRING_VALUE");
             }
             result->type = ps_system_string.value->data.t;
@@ -283,10 +284,10 @@ bool ps_parse_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_NIL:
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+        compiler->error = PS_ERROR_NOT_IMPLEMENTED;
         TRACE_ERROR("NIL");
     default:
-        interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+        compiler->error = PS_ERROR_UNEXPECTED_TOKEN;
         TRACE_ERROR("?");
     }
 
@@ -298,7 +299,7 @@ bool ps_parse_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
  *      term                    =   factor [ multiplicative_operator , factor ]* ;
  *      multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS'
  */
-bool ps_parse_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_term(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type multiplicative_operators[] = {
         PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD,
@@ -315,7 +316,7 @@ bool ps_parse_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
     do
     {
         multiplicative_operator = ps_parser_expect_token_types(
-            interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
+            compiler->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
             if (mode == MODE_EXEC)
@@ -346,7 +347,7 @@ bool ps_parse_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
  *      additive_operator       =   '+' | '-'
  *                                  //  | 'OR' | 'XOR' ;
  */
-bool ps_parse_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_simple_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type additive_operators[] = {
         PS_TOKEN_PLUS, PS_TOKEN_MINUS,
@@ -362,7 +363,7 @@ bool ps_parse_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
     do
     {
         additive_operator = ps_parser_expect_token_types(
-            interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
+            compiler->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
             if (mode == MODE_EXEC)
@@ -391,7 +392,7 @@ bool ps_parse_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
  *      expression              =   simple_expression [ relational_operator , simple_expression ] ;
  *      relational_operator     =   '<' | '<=' | '>' | '>=' | '=' | '<>' ;
  */
-bool ps_parse_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_relational_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type relational_operators[] = {
         PS_TOKEN_LESS_THAN,        PS_TOKEN_LESS_OR_EQUAL, PS_TOKEN_GREATER_THAN,
@@ -406,7 +407,7 @@ bool ps_parse_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     if (!ps_parse_simple_expression(interpreter, mode, &left))
         TRACE_ERROR("SIMPLE_LEFT");
     relational_operator = ps_parser_expect_token_types(
-        interpreter->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
+        compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
         if (mode == MODE_EXEC)
@@ -432,7 +433,7 @@ bool ps_parse_relational_expression(ps_interpreter *interpreter, ps_interpreter_
  * Parse
  *      and_expression = relational_expression { 'AND' relational_expression }
  */
-bool ps_parse_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_and_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type and_operators[] = {PS_TOKEN_AND};
 
@@ -444,7 +445,7 @@ bool ps_parse_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         TRACE_ERROR("RELATIONAL1");
     do
     {
-        and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
+        and_operator = ps_parser_expect_token_types(compiler->parser, sizeof(and_operators) / sizeof(ps_token_type),
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
@@ -474,7 +475,7 @@ bool ps_parse_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
  *      logical_expression = relational_expression { logical_operator relational_expression }
  *      logical_operator   = 'AND' | 'OR' | 'XOR'
  */
-bool ps_parse_logical_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_logical_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type logical_operators[] = {PS_TOKEN_AND, PS_TOKEN_OR, PS_TOKEN_XOR};
 
@@ -487,7 +488,7 @@ bool ps_parse_logical_expression(ps_interpreter *interpreter, ps_interpreter_mod
     do
     {
         logical_operator = ps_parser_expect_token_types(
-            interpreter->parser, sizeof(logical_operators) / sizeof(ps_token_type), logical_operators);
+            compiler->parser, sizeof(logical_operators) / sizeof(ps_token_type), logical_operators);
         if (logical_operator == PS_TOKEN_NONE)
         {
             if (mode == MODE_EXEC)
@@ -515,7 +516,7 @@ bool ps_parse_logical_expression(ps_interpreter *interpreter, ps_interpreter_mod
  * Parse
  *      or_expression = and_expression { ( 'OR' | 'XOR' ) and_expression }
  */
-bool ps_parse_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_or_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     static ps_token_type or_operators[] = {PS_TOKEN_OR, PS_TOKEN_XOR};
 
@@ -527,8 +528,8 @@ bool ps_parse_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
         TRACE_ERROR("AND");
     do
     {
-        or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
-                                                   or_operators);
+        or_operator =
+            ps_parser_expect_token_types(compiler->parser, sizeof(or_operators) / sizeof(ps_token_type), or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
             if (mode == MODE_EXEC)
@@ -552,7 +553,7 @@ bool ps_parse_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
     VISIT_END("RIGHT");
 }
 
-bool ps_parse_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_expression(ps_compiler *compiler, ps_interpreter_mode mode, ps_value *result)
 {
     return ps_parse_or_expression(interpreter, mode, result);
 }
@@ -565,7 +566,7 @@ bool ps_parse_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, 
  *       IDENTIFIER = IDENTIFIER | VALUE ;
  *       IDENTIFIER = CONSTANT_EXPRESSION ;
  */
-bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_const(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("CONST", "");
     ps_identifier identifier;
@@ -639,7 +640,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
-            ps_string *s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+            ps_string *s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
             if (s == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
             type = ps_system_string.value->data.t;
@@ -661,7 +662,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (constant == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
             if (!ps_interpreter_add_symbol(interpreter, constant))
-                RETURN_ERROR(interpreter->error);
+                RETURN_ERROR(compiler->error);
         }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
@@ -677,7 +678,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 //  *      TYPE_DEFINITION = SUBRANGE | ENUMERATION | POINTER | RECORD | ARRAY | FILE | STRING ;
 //  *       SUBRANGE = INTEGER | UNSIGNED | IDENTIFIER '..' INTEGER | UNSIGNED | IDENTIFIER ;
 //  */
-// bool ps_parse_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
+// bool ps_parse_type(ps_compiler *compiler, ps_interpreter_mode mode)
 // {
 //     VISIT_BEGIN("TYPE", "");
 //     ps_identifier identifier = {0};
@@ -760,7 +761,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 //             if (symbol == NULL)
 //                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
 //             if (!ps_interpreter_add_symbol(interpreter, symbol))
-//                 RETURN_ERROR(interpreter->error);
+//                 RETURN_ERROR(compiler->error);
 //         }
 //     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
@@ -774,7 +775,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
  * Next step: allow identifier list with commas
  *              IDENTIFIER, IDENTIFIER, ... : TYPE ;
  */
-bool ps_parse_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_var(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("VAR", "");
     ps_identifier identifier[8];
@@ -853,7 +854,7 @@ bool ps_parse_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (variable == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
             if (!ps_interpreter_add_symbol(interpreter, variable))
-                RETURN_ERROR(interpreter->error);
+                RETURN_ERROR(compiler->error);
         }
         // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
@@ -863,7 +864,7 @@ bool ps_parse_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Parse IDENTIFIER := EXPRESSION
  */
-bool ps_parse_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier)
+bool ps_parse_assignment(ps_compiler *compiler, ps_interpreter_mode mode, ps_identifier *identifier)
 {
     VISIT_BEGIN("ASSIGNMENT", "");
     ps_symbol *variable;
@@ -877,23 +878,23 @@ bool ps_parse_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         variable = ps_interpreter_find_symbol(interpreter, identifier, false);
         if (variable == NULL)
         {
-            interpreter->error = PS_ERROR_SYMBOL_NOT_FOUND;
+            compiler->error = PS_ERROR_SYMBOL_NOT_FOUND;
             TRACE_ERROR("VARIABLE1");
         }
         if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
         {
-            interpreter->error = PS_ERROR_ASSIGN_TO_CONST;
+            compiler->error = PS_ERROR_ASSIGN_TO_CONST;
             TRACE_ERROR("CONST");
         }
         if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
         {
-            interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
+            compiler->error = PS_ERROR_EXPECTED_VARIABLE;
             TRACE_ERROR("VARIABLE2");
         }
         result.type = variable->value->type;
         if (!ps_parse_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION1");
-        if (interpreter->debug)
+        if (compiler->debug)
             ps_value_debug(stderr, "ASSIGN => ", &result);
         if (!ps_interpreter_copy_value(interpreter, &result, variable->value))
             TRACE_ERROR("COPY");
@@ -913,7 +914,7 @@ bool ps_parse_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
  *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *                                    ')' ] ;
  */
-bool ps_parse_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
+bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_interpreter_mode mode, bool newline)
 {
     VISIT_BEGIN("WRITE_OR_WRITELN", "");
     ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
@@ -963,8 +964,8 @@ bool ps_parse_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     VISIT_END("OK");
 }
 
-bool ps_parse_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
-                             uint16_t line, uint8_t column)
+bool ps_parse_procedure_call(ps_compiler *compiler, ps_interpreter_mode mode, ps_symbol *executable, uint16_t line,
+                             uint8_t column)
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
     bool has_environment = false;
@@ -987,16 +988,15 @@ bool ps_parse_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // User defined procedure call
         // Enter environment for procedure call
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
-            RETURN_ERROR(interpreter->error);
+            RETURN_ERROR(compiler->error);
         has_environment = true;
         // TODO Parse parameters (needs environment)
         // for now, just check for statement terminators
         ps_token_type token_type = ps_parser_expect_token_types(
-            interpreter->parser, 4,
-            (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
+            compiler->parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
         if (token_type == PS_TOKEN_NONE)
         {
-            interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+            compiler->error = PS_ERROR_UNEXPECTED_TOKEN;
             goto cleanup;
         }
         // READ_NEXT_TOKEN;
@@ -1008,7 +1008,7 @@ bool ps_parse_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
             // Set cursor to the beginning of the procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
-                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                compiler->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
@@ -1019,14 +1019,14 @@ bool ps_parse_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
             // Restore cursor position
             if (!ps_lexer_set_cursor(lexer, line, column))
             {
-                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                compiler->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
         }
         // Exit environment
         if (!ps_interpreter_exit_environment(interpreter))
-            RETURN_ERROR(interpreter->error);
+            RETURN_ERROR(compiler->error);
     }
 
     VISIT_END("OK");
@@ -1034,12 +1034,12 @@ bool ps_parse_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
 cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    if (interpreter->error == PS_ERROR_NONE)
-        interpreter->error = PS_ERROR_GENERIC;
+    if (compiler->error == PS_ERROR_NONE)
+        compiler->error = PS_ERROR_GENERIC;
     TRACE_ERROR("CLEANUP");
 }
 
-bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
     uint16_t line = 0;
@@ -1066,7 +1066,7 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_parse_procedure_call(interpreter, mode, symbol, line, column))
-            RETURN_ERROR(interpreter->error);
+            RETURN_ERROR(compiler->error);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -1081,7 +1081,7 @@ bool ps_parse_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
  *       END
  * NB: ';' or '.' or whatever after END is analyzed in the caller
  */
-bool ps_parse_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_compound_statement(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("COMPOUND_STATEMENT", "");
 
@@ -1102,7 +1102,7 @@ bool ps_parse_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  * Parse
  *      if_statement = 'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
  */
-bool ps_parse_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_if_then_else(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("IF_THEN_ELSE", "");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
@@ -1130,7 +1130,7 @@ bool ps_parse_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
  * Parse
  *      repeat_statement = 'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
  */
-bool ps_parse_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_repeat_until(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("REPEAT_UNTIL", "");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
@@ -1166,7 +1166,7 @@ bool ps_parse_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
  * Parse
  *      'WHILE' expression 'DO' statement
  */
-bool ps_parse_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_while_do(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("WHILE_DO", "");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
@@ -1202,7 +1202,7 @@ bool ps_parse_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *      for_statement = 'FOR' control_variable ':=' expression ( 'TO' |
  * 'DOWNTO' ) expression 'DO' statement ;
  */
-bool ps_parse_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_for_do(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("FOR_DO", "");
     ps_value start = {.type = ps_system_none.value->data.t, .data.v = NULL};
@@ -1310,7 +1310,7 @@ bool ps_parse_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *                              |   for_statement
  *                              ;
  */
-bool ps_parse_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_statement(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("STATEMENT", "");
 
@@ -1350,7 +1350,7 @@ bool ps_parse_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Parse statement sequence, stopping at "stop" token (e.g. END, ELSE, UNTIL)
  */
-bool ps_parse_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop)
+bool ps_parse_statement_list(ps_compiler *compiler, ps_interpreter_mode mode, ps_token_type stop)
 {
     VISIT_BEGIN("STATEMENT_LIST", "");
 
@@ -1386,7 +1386,7 @@ bool ps_parse_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
     VISIT_END("OK");
 }
 
-bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("STATEMENT_OR_COMPOUND_STATEMENT", "");
 
@@ -1420,7 +1420,7 @@ bool ps_parse_statement_or_compound_statement(ps_interpreter *interpreter, ps_in
  *      END ;
  *  - allow procedure parameters
  */
-bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
+bool ps_parse_procedure_or_function(ps_compiler *compiler, ps_interpreter_mode mode, ps_symbol_kind kind)
 {
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
     ps_identifier identifier;
@@ -1446,7 +1446,7 @@ bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     TRACE_CURSOR;
     if (!ps_lexer_get_cursor(lexer, &line, &column))
     {
-        interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+        compiler->error = PS_ERROR_GENERIC; // TODO better error code
         goto cleanup;
     }
     READ_NEXT_TOKEN;
@@ -1458,7 +1458,7 @@ bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         executable = calloc(1, sizeof(ps_executable)); // TODO ps_executable_alloc(NULL, NULL, line, column);
         if (executable == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            compiler->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
         executable->signature = NULL;
@@ -1468,14 +1468,14 @@ bool ps_parse_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
         if (callable == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            compiler->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
         callable->kind = kind;
         value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
         if (value == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            compiler->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
         callable->value = value;
@@ -1522,8 +1522,8 @@ cleanup:
         free(executable); // TODO ps_executable_free(executable);
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    if (interpreter->error == PS_ERROR_NONE)
-        interpreter->error = PS_ERROR_GENERIC;
+    if (compiler->error == PS_ERROR_NONE)
+        compiler->error = PS_ERROR_GENERIC;
     TRACE_ERROR("CLEANUP");
 }
 
@@ -1532,7 +1532,7 @@ cleanup:
  *       COMPOUND_STATEMENT
  * NB: ; or . or whatever after END is analyzed in the caller
  */
-bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_block(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("BLOCK", "");
 
@@ -1586,7 +1586,7 @@ bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *  - skip optional parameters enclosed in parentheses, like
  *      PROGRAM IDENTIFIER [ '(' INPUT, OUTPUT ')' ] ';'
  */
-bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_program(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("PROGRAM", "");
     ps_identifier identifier;
@@ -1601,10 +1601,10 @@ bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     READ_NEXT_TOKEN;
 
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
-        RETURN_ERROR(interpreter->error);
+        RETURN_ERROR(compiler->error);
     ps_symbol *program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
-        RETURN_ERROR(interpreter->error);
+        RETURN_ERROR(compiler->error);
     if (!ps_parse_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
     // ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "Before EXIT", stderr);
@@ -1621,7 +1621,7 @@ bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *  BLOCK
  *  '.'
  */
-bool ps_parse_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_start(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("START", "");
 

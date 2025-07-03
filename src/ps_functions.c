@@ -328,7 +328,7 @@ bool ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *
     return true;
 }
 
-/** @brief ABS - Get absolute value of integer / unsigned / real */
+/** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer / unsigned / real */
 bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->type)
@@ -350,7 +350,7 @@ bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief TRUNC - Truncate real as integer */
+/** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
 bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->type)
@@ -367,7 +367,7 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
     return true;
 }
 
-/** @brief ROUND - Round real as integer */
+/** @brief ROUND(REAL): INTEGER - Round real as integer */
 bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double r;
@@ -386,7 +386,7 @@ bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *r
     return true;
 }
 
-/** @brief INT - Get integer part of floating point value */
+/** @brief INT(REAL): REAL - Get integer part of floating point value */
 bool ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double r;
@@ -403,7 +403,7 @@ bool ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief FRAC - Get fractional part of floating point value */
+/** @brief FRAC(REAL): REAL - Get fractional part of floating point value */
 bool ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double int_part;
@@ -419,7 +419,7 @@ bool ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *re
     return true;
 }
 
-/** @brief SIN - Get sinus of floating point value */
+/** @brief SIN(REAL): REAL - Get sinus of floating point value */
 bool ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -434,7 +434,7 @@ bool ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief COS - Get cosinus of floating point value */
+/** @brief COS(REAL): REAL - Get cosinus of floating point value */
 bool ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -449,16 +449,18 @@ bool ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief TAN - Get tangent of floating point value */
+/** @brief TAN(REAL): REAL - Get tangent of floating point value */
 bool ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    double c;
     switch (value->type->base)
     {
     case PS_TYPE_REAL:
         result->type = ps_system_real.value->data.t;
-        if (cos(value->data.r) == 0.0)
+        c = cos(value->data.r);
+        if (c == 0.0)
             return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
-        result->data.r = sin(value->data.r) / cos(value->data.r);
+        result->data.r = sin(value->data.r) / c;
         break;
     default:
         return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
@@ -466,7 +468,7 @@ bool ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief ARCTAN - Get arc tangent of floating point value */
+/** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
 bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -481,7 +483,7 @@ bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *
     return true;
 }
 
-/** @brief SQR - Get square of floating point value */
+/** @brief SQR(REAL): REAL - Get square of floating point value */
 bool ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -496,7 +498,7 @@ bool ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief SQRT - Get square root of floating point value */
+/** @brief SQRT(REAL): REAL - Get square root of floating point value */
 bool ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -513,7 +515,7 @@ bool ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *re
     return true;
 }
 
-/** @brief EXP - Get exponential of floating point value */
+/** @brief EXP(REAL): REAL - Get exponential of floating point value */
 bool ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -528,7 +530,7 @@ bool ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *res
     return true;
 }
 
-/** @brief LN - Get logarithm of floating point value */
+/** @brief LN(REAL): REAL - Get logarithm of floating point value */
 bool ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)
@@ -545,7 +547,7 @@ bool ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *resu
     return true;
 }
 
-/** @brief LOG - Get base 10 logarithm of floating point value */
+/** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
 bool ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->base)

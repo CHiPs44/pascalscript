@@ -19,7 +19,8 @@
         "cstdlib": "c",
         "type_traits": "c",
         "ps_lexer.h": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "ps_system.h": "c"
     },
     "makefile.configureOnOpen": false
 }
