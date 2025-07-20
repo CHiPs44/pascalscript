@@ -16,78 +16,11 @@
 #include "ps_token.h"
 #include "ps_value.h"
 
-/******************************************************************************/
-/* BASE                                                                       */
-/******************************************************************************/
-
-/**
- * @brief Compute
- *  - bitwise not for integer / unsigned,
- *  - logical not for boolean,
- *  - negative for integer / real
- *  and return true
- *  otherwise return false and set PS_ERROR_OPERATOR_NOT_APPLICABLE
- */
-bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type)
-{
-    result->type = value->type;
-    // NB: with FPC, not(subrange) or not(enum) yields integer result without range checking
-    switch (value->type->base)
-    {
-    case PS_TYPE_INTEGER:
-        switch (token_type)
-        {
-        case PS_TOKEN_NOT:
-            result->data.i = ~value->data.i;
-            break;
-        case PS_TOKEN_MINUS:
-            result->data.i = -value->data.i;
-            break;
-        default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
-        }
-        break;
-    case PS_TYPE_UNSIGNED:
-        switch (token_type)
-        {
-        case PS_TOKEN_NOT:
-            result->data.u = ~value->data.u;
-            break;
-        default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
-        }
-        break;
-    case PS_TYPE_REAL:
-        switch (token_type)
-        {
-        case PS_TOKEN_MINUS:
-            result->data.r = -value->data.r;
-            break;
-        default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
-        }
-        break;
-    case PS_TYPE_BOOLEAN:
-        switch (token_type)
-        {
-        case PS_TOKEN_NOT:
-            result->data.b = !value->data.b;
-            break;
-        default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
-        }
-        break;
-    default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_TYPE_MISMATCH);
-    }
-    return true;
-}
-
 bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
     ps_function_1arg function = symbol->value->data.v;
     if (function == NULL)
-        return ps_interpreter_return_error(interpreter, PS_ERROR_NOT_IMPLEMENTED);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_NOT_IMPLEMENTED);
     return function(interpreter, value, result);
 }
 
@@ -108,7 +41,7 @@ bool ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.b = (ps_boolean)((value->data.i & 1) != 0);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     return true;
 }
@@ -126,7 +59,7 @@ bool ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *re
         result->data.b = (ps_boolean)((value->data.i & 1) == 0);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     return true;
 }
@@ -157,7 +90,7 @@ bool ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.u = (ps_unsigned)(value->data.c);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     return true;
 }
@@ -170,17 +103,17 @@ bool ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *res
     case PS_TYPE_UNSIGNED:
         if (interpreter->range_check && value->data.u > PS_CHAR_MAX)
         {
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         }
         result->data.c = (ps_char)(value->data.u);
         break;
     case PS_TYPE_INTEGER:
         if (interpreter->range_check && (value->data.i < 0 || value->data.i > PS_CHAR_MAX))
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.c = (ps_char)(value->data.i);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     result->type = ps_system_char.value->data.t;
     return true;
@@ -194,7 +127,7 @@ bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_INTEGER:
         // pred(min) => error / pred(i) => i - 1
         if (interpreter->range_check && value->data.i == PS_INTEGER_MIN)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.i = value->data.i - 1;
         break;
     // case PS_TYPE_SUBRANGE:
@@ -202,7 +135,7 @@ bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_UNSIGNED:
         // pred(0) => error / pred(u) => u - 1
         if (interpreter->range_check && value->data.u == 0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.u = value->data.u - 1;
         break;
     // case PS_TYPE_ENUM:
@@ -210,18 +143,18 @@ bool ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_BOOLEAN:
         // pred(true) => false / pred(false) => error
         if (interpreter->range_check && value->data.b == false)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         // this will make pred(false) = false
         result->data.b = (ps_boolean) false;
         break;
     case PS_TYPE_CHAR:
         // pred(NUL) => error / pred(c) => c - 1
         if (interpreter->range_check && value->data.c == 0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.c = value->data.c - 1;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     result->type = value->type;
     return true;
@@ -235,7 +168,7 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_INTEGER:
         // succ(max) => error / succ(i) => i + 1
         if (interpreter->range_check && value->data.u == PS_INTEGER_MAX)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.i = value->data.i + 1;
         break;
     // case PS_TYPE_SUBRANGE:
@@ -243,7 +176,7 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_UNSIGNED:
         // succ(max) => error / succ(u) => u + 1
         if (interpreter->range_check && value->data.u == PS_UNSIGNED_MAX)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.u = value->data.u + 1;
         break;
     // case PS_TYPE_ENUM:
@@ -251,18 +184,18 @@ bool ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *re
     case PS_TYPE_BOOLEAN:
         // succ(true) => error / succ(false) => true
         if (interpreter->range_check && value->data.b == true)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         // this will make succ(true) = true
         result->data.b = true;
         break;
     case PS_TYPE_CHAR:
         // succ(char_max) => error / succ(c) => c + 1
         if (interpreter->range_check && value->data.c == PS_CHAR_MAX)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.c = value->data.c + 1;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
     result->type = value->type;
     return true;
@@ -322,7 +255,7 @@ bool ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *
             result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u);
             break;
         default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_UNEXPECTED_TYPE);
         }
     }
     return true;
@@ -344,7 +277,7 @@ bool ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = (ps_real)fabs(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_NUMBER);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_NUMBER);
     }
     result->type = value->type;
     return true;
@@ -357,12 +290,12 @@ bool ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *r
     {
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->type = ps_system_integer.value->data.t;
         result->data.i = (ps_integer)trunc(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -376,12 +309,12 @@ bool ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *r
     case PS_TYPE_REAL:
         r = round(value->data.r);
         if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->type = ps_system_integer.value->data.t;
         result->data.i = (ps_integer)r;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -398,7 +331,7 @@ bool ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = r;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -414,7 +347,7 @@ bool ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *re
         result->data.r = modf(value->data.r, &int_part);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -429,7 +362,7 @@ bool ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = sin(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -444,7 +377,7 @@ bool ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = cos(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -459,11 +392,11 @@ bool ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->type = ps_system_real.value->data.t;
         c = cos(value->data.r);
         if (c == 0.0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->data.r = sin(value->data.r) / c;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -478,7 +411,7 @@ bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *
         result->data.r = atan(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -493,7 +426,7 @@ bool ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = value->data.r * value->data.r;
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -505,12 +438,12 @@ bool ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *re
     {
     case PS_TYPE_REAL:
         if (value->data.r < 0.0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->type = ps_system_real.value->data.t;
         result->data.r = sqrt(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -525,7 +458,7 @@ bool ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *res
         result->data.r = exp(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -537,12 +470,12 @@ bool ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *resu
     {
     case PS_TYPE_REAL:
         if (value->data.r <= 0.0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->type = ps_system_real.value->data.t;
         result->data.r = log(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }
@@ -554,12 +487,12 @@ bool ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value *res
     {
     case PS_TYPE_REAL:
         if (value->data.r <= 0.0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return false; // ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
         result->type = ps_system_real.value->data.t;
         result->data.r = log10(value->data.r);
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return true;
 }

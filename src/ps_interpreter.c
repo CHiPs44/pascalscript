@@ -12,7 +12,7 @@
 #include "ps_value.h"
 
 #include "ps_interpreter.h"
-#include "ps_visitor.h"
+#include "ps_compile.h"
 
 ps_interpreter *ps_interpreter_init()
 {

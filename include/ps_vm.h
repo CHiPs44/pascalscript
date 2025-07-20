@@ -15,144 +15,110 @@ extern "C"
 {
 #endif
 
-    /*
-        #
-        1   OPCODE
-        1+1 OPCODE
-    */
+#define PS_VM_OPCODE_BITS 5
+#define PS_VM_OPCODE_MASK 0b11111000
+#define PS_VM_TYPE_BITS 3
+#define PS_VM_TYPE_MASK 0b000000111
 
     typedef enum e_ps_vm_opcode
     {
-        OP_NOP,        // do nothing
-        OP_LOAD,       // load constant value (C/I/U/B/R/S) into stack
-        OP_JUMP,       // jump inconditionnally
-        OP_JUMP_TRUE,  // jump to if top of stack is strictly boolean true
-        OP_JUMP_FALSE, // jump to if top of stack top of stack is strictly boolean false
-        OP_CALL,       // call procedure or function
-        OP_RETURN,     // return from procedure or function
-        OP_ENTER,      // enter into environment
-        OP_EXIT,       // exit from environment
-        OP_HALT,       // stop VM
-        OP_DEBUG,      // stop to debugger
+        // clang-format off
+        /*  */
+        OP_NOP      = (0x00 << PS_VM_TYPE_BITS), // do nothing
+        OP_LIT      = (0x01 << PS_VM_TYPE_BITS), // load literal/constant value (C/I/U/B/R/S) into stack
+        OP_JMP      = (0x02 << PS_VM_TYPE_BITS), // jump inconditionnally
+        OP_JPT      = (0x03 << PS_VM_TYPE_BITS), // jump to if top of stack is strictly boolean true
+        OP_JPF      = (0x04 << PS_VM_TYPE_BITS), // jump to if top of stack top of stack is strictly boolean false
+        OP_CUP      = (0x05 << PS_VM_TYPE_BITS), // call subroutine: procedure or function
+        OP_RET      = (0x06 << PS_VM_TYPE_BITS), // return from procedure or function
+        OP_ENTER    = (0x07 << PS_VM_TYPE_BITS), // enter into environment
+        OP_EXIT     = (0x08 << PS_VM_TYPE_BITS), // exit from environment
+        OP_HLT      = (0x09 << PS_VM_TYPE_BITS), // stop VM
+        OP_DBG      = (0x0a << PS_VM_TYPE_BITS), // stop to debugger
         /* Unary operators */
-        OP_NEG, // + (int/real)
-        OP_NOT, // ! (integer/unsigned/boolean)
+        OP_NEG      = (0x0b << PS_VM_TYPE_BITS), // + (int/real)
+        OP_NOT      = (0x0c << PS_VM_TYPE_BITS), // ! (integer/unsigned/boolean)
         /* Binary operators */
-        OP_ADD, // + (integer/unsigned/real/string/char)
-        OP_SUB, // - (integer/unsigned/real)
-        OP_MUL, // * (integer/unsigned/real)
-        OP_DIV, // / (integer/unsigned/real)
-        OP_MOD, // % (integer/unsigned)
-        OP_AND, // & (integer/unsigned)
-        OP_OR,  // | (integer/unsigned)
-        OP_XOR, // ^ (integer/unsigned)
-        OP_SHL, // << (integer/unsigned)
-        OP_SHR, // >> (integer/unsigned)
-        /* Comparison operators => boolean */
-        OP_TEST_EQ, // == (boolean/integer/unsigned/real/string)
-        OP_TEST_NE, // <> (boolean/integer/unsigned/real/string)
-        OP_TEST_GT, // >  (integer/unsigned/real/string)
-        OP_TEST_GE, // >= (integer/unsigned/real/string)
-        OP_TEST_LT, // <  (integer/unsigned/real/string)
-        OP_TEST_LE, // <= (integer/unsigned/real/string)
-        // Run Time Library
-        OP_RTL,
+        OP_ADD      = (0x0d << PS_VM_TYPE_BITS), // + (integer/unsigned/real/string/char)
+        OP_SUB      = (0x0e << PS_VM_TYPE_BITS), // - (integer/unsigned/real)
+        OP_MUL      = (0x0f << PS_VM_TYPE_BITS), // * (integer/unsigned/real)
+        OP_DIV      = (0x10 << PS_VM_TYPE_BITS), // / (integer/unsigned/real)
+        OP_MOD      = (0x11 << PS_VM_TYPE_BITS), // % (integer/unsigned)
+        OP_AND      = (0x12 << PS_VM_TYPE_BITS), // & (integer/unsigned)
+        OP_OR       = (0x13 << PS_VM_TYPE_BITS), // | (integer/unsigned)
+        OP_XOR      = (0x14 << PS_VM_TYPE_BITS), // ^ (integer/unsigned)
+        OP_SHL      = (0x15 << PS_VM_TYPE_BITS), // << (integer/unsigned)
+        OP_SHR      = (0x16 << PS_VM_TYPE_BITS), // >> (integer/unsigned)
+        /* Comparison operators (=> boolean) */
+        OP_CEQ      = (0x17 << PS_VM_TYPE_BITS), // == (boolean/integer/unsigned/real/char/string)
+        OP_CNE      = (0x18 << PS_VM_TYPE_BITS), // <> (boolean/integer/unsigned/real/char/string)
+        OP_CGT      = (0x19 << PS_VM_TYPE_BITS), // >  (integer/unsigned/real/char/string)
+        OP_CGE      = (0x1a << PS_VM_TYPE_BITS), // >= (integer/unsigned/real/char/string)
+        OP_CLT      = (0x1b << PS_VM_TYPE_BITS), // <  (integer/unsigned/real/char/string)
+        OP_CLE      = (0x1c << PS_VM_TYPE_BITS), // <= (integer/unsigned/real/char/string)
+        /* Run Time Library */
+        OP_SYS      = (0x1d << PS_VM_TYPE_BITS), // next byte is RTL prodedure/function number
+        // clang-format on
     } __attribute__((__packed__)) ps_vm_opcode;
 
 #define PS_VM_OPCODE_SIZE sizeof(ps_vm_opcode)
 
-    typedef enum e_ps_vm_rtl
+    // clang-format off
+    typedef enum e_ps_vm_sys
     {
-        // Pascal
-        RTL_FUNC_SUCC,
-        RTL_FUNC_PRED,
-        RTL_FUNC_ORD,
-        RTL_FUNC_CHR,
-        RTL_PROC_INC,
-        RTL_PROC_DEC,
-        // I/O procedures & functions
-        RTL_FUNC_EOF,
-        RTL_FUNC_EOLN,
-        RTL_FUNC_FILEPOS,
-        RTL_FUNC_FILESIZE,
-        RTL_FUNC_SEEKEOF,
-        RTL_FUNC_SEEKEOLN,
-        RTL_PROC_ASSIGN,
-        RTL_PROC_BLOCKREAD,
-        RTL_PROC_BLOCKWRITE,
-        RTL_PROC_CLOSE,
-        RTL_PROC_ERASE,
-        RTL_PROC_FLUSH,
-        RTL_PROC_READ,
-        RTL_PROC_READLN,
-        RTL_PROC_RENAME,
-        RTL_PROC_RESET,
-        RTL_PROC_REWRITE,
-        RTL_PROC_SEEK,
-        RTL_PROC_TRUNCATE,
-        RTL_PROC_WRITE,
-        RTL_PROC_WRITELN,
-        // Standard procedures & functions
-        RTL_PROC_RANDOMIZE,
-        RTL_FUNC_ODD,
-        RTL_FUNC_EVEN,
-        RTL_FUNC_ORD,
-        RTL_FUNC_CHR,
-        RTL_FUNC_PRED,
-        RTL_FUNC_SUCC,
-        RTL_FUNC_RANDOM,
-        RTL_FUNC_ABS,
-        RTL_FUNC_TRUNC,
-        RTL_FUNC_ROUND,
-        RTL_FUNC_INT,
-        RTL_FUNC_FRAC,
-        RTL_FUNC_SIN,
-        RTL_FUNC_COS,
-        RTL_FUNC_TAN,
-        RTL_FUNC_ARCTAN,
-        RTL_FUNC_SQR,
-        RTL_FUNC_SQRT,
-        RTL_FUNC_EXP,
-        RTL_FUNC_LN,
-        RTL_FUNC_LOG,
+        SYS_FILE_ASSIGN,   SYS_FILE_BLOCKREAD, SYS_FILE_BLOCKWRITE,
+        SYS_FILE_CLOSE,    SYS_FILE_EOF,       SYS_FILE_EOLN,
+        SYS_FILE_ERASE,    SYS_FILE_FILEPOS,   SYS_FILE_FILESIZE,
+        SYS_FILE_FLUSH,    SYS_FILE_READ,      SYS_FILE_READLN,
+        SYS_FILE_RENAME,   SYS_FILE_RESET,     SYS_FILE_REWRITE,
+        SYS_FILE_SEEK,     SYS_FILE_SEEKEOF,   SYS_FILE_SEEKEOLN,
+        SYS_FILE_TRUNCATE, SYS_FILE_WRITE,     SYS_FILE_WRITELN,
+        SYS_MATH_ABS,      SYS_MATH_ARCTAN,    SYS_MATH_COS,
+        SYS_MATH_EVEN,     SYS_MATH_EXP,       SYS_MATH_FRAC,
+        SYS_MATH_INT,      SYS_MATH_LN,        SYS_MATH_LOG,
+        SYS_MATH_ODD,      SYS_MATH_RANDOM,    SYS_MATH_RANDOMIZE,
+        SYS_MATH_ROUND,    SYS_MATH_SIN,       SYS_MATH_SQR,
+        SYS_MATH_SQRT,     SYS_MATH_TAN,       SYS_MATH_TRUNC,
+        SYS_TYPE_CHR,      SYS_TYPE_DEC,       SYS_TYPE_INC,
+        SYS_TYPE_ORD,      SYS_TYPE_PRED,      SYS_TYPE_SUCC,
     } __attribute__((__packed__)) ps_vm_sys_command;
-
-    typedef union u_ps_vm_instruction {
-        uint8_t byte;
-        struct
-        {
-            ps_vm_opcode opcode : 5; // 00-31
-            uint8_t size : 3;        // 00-07
-        } instruction;
-    } ps_vm_instruction;
+    // clang-format on
 
     typedef struct s_ps_vm
     {
-        uint32_t size;
-        uint32_t used;
-        uint8_t *code;
-        uint32_t pc;
-        ps_value_stack *stack;
-        ps_error error;
-        bool range_check;
-    } __attribute__((__packed__)) ps_vm;
+        uint32_t size;         /** @brief Code total size */
+        uint32_t used;         /** @brief Code used size */
+        uint8_t *code;         /** @brief Code */
+        uint32_t pc;           /** @brief Program counter */
+        ps_value_stack *stack; /** @brief Value stack */
+        ps_error error;        /** @brief Error code */
+        bool debug;            /** @brief Debug mode */
+        bool trace;            /** @brief Trace mode */
+        bool range_check;      /** @brief Range checking mode */
+    } /*__attribute__((__packed__))*/ ps_vm;
 
 #define PS_VM_SIZE sizeof(ps_vm)
 
-    ps_vm *ps_vm_init();
+    bool ps_vm_return_false(ps_vm *vm, ps_error error);
+    void *ps_vm_return_null(ps_vm *vm, ps_error error);
+    char *ps_vm_get_opcode_name(ps_vm_opcode opcode);
+
+    ps_vm *ps_vm_init(uint32_t size);
     ps_vm *ps_vm_free(ps_vm *vm);
     void ps_vm_reset(ps_vm *vm);
     bool ps_vm_exec(ps_vm *vm);
 
     /** @brief Append opcode to code array and increment PC */
-    bool ps_vm_emit_opcode(ps_vm *vm, ps_vm_opcode opcode);
-    /** @brief Append OP_LOAD + sizeof(value) bytes of value and sets PC accordingly */
+    bool ps_vm_emit(ps_vm *vm, ps_vm_opcode opcode, ps_value_type type);
+    /** @brief Append OP_LIT + sizeof(value) bytes of value and sets PC accordingly */
     bool ps_vm_emit_load(ps_vm *vm, ps_value *value);
 
     /** @brief Push symbol on top of stack */
     bool ps_vm_push(ps_vm *vm, ps_value *value);
     /** @brief Pop symbol from top of stack */
-    ps_value *ps_vm_pop(ps_vm *vm);
+    bool ps_vm_pop(ps_vm *vm, ps_value *value);
+
+    void ps_vm_dump(ps_vm *vm, char *title);
 
 #ifdef __cplusplus
 }

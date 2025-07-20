@@ -118,7 +118,7 @@ PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln  , "WRITELN"  , 
 
 /* clang-format on */
 
-bool ps_system_init(ps_interpreter *interpreter)
+ps_environment *ps_system_init()
 {
     bool error = false;
     ps_identifier system_name = "SYSTEM";
@@ -176,13 +176,16 @@ bool ps_system_init(ps_interpreter *interpreter)
     /* BITNESS & VERSION                                                      */
     /**************************************************************************/
 
-    char version[16]; // from 0.0.0.0 (4+3=7) to 255.255.255.255 (12+3=15)
-    int length = snprintf(version, sizeof(version) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR,
-                          (uint8_t)PS_VERSION_MINOR, (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
-    ps_string *ps_version_string = ps_string_create(version, length);
-    if (ps_version_string == NULL)
-        error = true;
-    ps_system_constant_string_ps_version.value->data.s = ps_version_string;
+    if (!error)
+    {
+        char version[16]; // from 0.0.0.0 (4+3=7) to 255.255.255.255 (12+3=15)
+        int length = snprintf(version, sizeof(version) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR,
+                              (uint8_t)PS_VERSION_MINOR, (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
+        ps_string *ps_version_string = ps_string_create(version, length);
+        if (ps_version_string == NULL)
+            error = true;
+        ps_system_constant_string_ps_version.value->data.s = ps_version_string;
+    }
     error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
     error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
     error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
@@ -224,22 +227,22 @@ bool ps_system_init(ps_interpreter *interpreter)
     if (error)
     {
         ps_environment_done(environment);
-        ps_system_done(interpreter);
-        return false;
+        ps_system_done();
+        return NULL;
     }
 
-    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = environment;
+    // interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = environment;
 
-    return true;
+    return environment;
 }
 
-void ps_system_done(ps_interpreter *interpreter)
+void ps_system_done()
 {
     if (ps_system_constant_string_ps_version.value->data.s != NULL)
     {
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);
         ps_system_constant_string_ps_version.value->data.s = NULL;
     }
-    ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
-    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
+    // ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
+    // interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
 }

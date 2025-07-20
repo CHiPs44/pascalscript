@@ -32,19 +32,19 @@ extern "C"
     } ps_value_stack;
 
     // clang-format off
-    ps_value_stack  *ps_value_stack_init(ps_value_stack *stack);
-    void             ps_value_stack_done(ps_value_stack *stack);
-    void             ps_value_stack_dump(ps_value_stack *stack, char *title);
-    ps_value_stack_size           ps_value_stack_get_size(ps_value_stack *stack);
-    bool             ps_value_stack_is_full(ps_value_stack *stack);
+    ps_value_stack     *ps_value_stack_alloc();
+    ps_value_stack     *ps_value_stack_free(ps_value_stack *stack);
+    void                ps_value_stack_dump(ps_value_stack *stack, char *title);
+    ps_value_stack_size ps_value_stack_get_size(ps_value_stack *stack);
+    bool                ps_value_stack_is_full(ps_value_stack *stack);
     /** @brief Push to stack if not full */
-    bool             ps_value_stack_push(ps_value_stack *stack, ps_value *value);
+    bool                ps_value_stack_push(ps_value_stack *stack, ps_value *value);
     /** @brief Pop top of stack if any */
-    ps_value        *ps_value_stack_pop (ps_value_stack *stack);
+    bool                ps_value_stack_pop (ps_value_stack *stack, ps_value *value);
     /** @brief Replace top of stack if any */
-    bool             ps_value_stack_poke(ps_value_stack *stack, ps_value *value);
+    bool                ps_value_stack_poke(ps_value_stack *stack, ps_value *value);
     /** @brief Read top of stack if any */
-    ps_value        *ps_value_stack_peek(ps_value_stack *stack);
+    bool                ps_value_stack_peek(ps_value_stack *stack, ps_value *value);
     // clang-format on
 
 #ifdef __cplusplus

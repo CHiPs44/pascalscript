@@ -16,7 +16,8 @@ extern "C"
 {
 #endif
 
-    bool ps_parse_start(ps_interpreter *interpreter, bool exec);
+    // bool ps_parse_start(ps_interpreter *interpreter, bool exec);
+    bool ps_parse_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
 #ifdef __cplusplus
 }

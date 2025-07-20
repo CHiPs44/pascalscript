@@ -13,9 +13,9 @@
 #include "ps_value.h"
 #include "ps_value_stack.h"
 
-ps_value_stack *ps_value_stack_alloc(ps_value_stack *stack)
+ps_value_stack *ps_value_stack_alloc()
 {
-    stack = calloc(1, sizeof(ps_value_stack));
+    ps_value_stack *stack = calloc(1, sizeof(ps_value_stack));
     if (stack == NULL)
         return NULL;
     /* use SIZE_MAX for an empty stack */
@@ -47,9 +47,7 @@ bool ps_value_stack_full(ps_value_stack *stack)
 bool ps_value_stack_push(ps_value_stack *stack, ps_value *value)
 {
     if (ps_value_stack_full(stack))
-    {
         return false;
-    }
     stack->sp += 1;
     stack->values[stack->sp].type = value->type;
     stack->values[stack->sp].data = value->data;
@@ -59,9 +57,7 @@ bool ps_value_stack_push(ps_value_stack *stack, ps_value *value)
 bool ps_value_stack_pop(ps_value_stack *stack, ps_value *value)
 {
     if (ps_value_stack_get_size(stack) == 0)
-    {
         return false;
-    }
     value->type = stack->values[stack->sp].type;
     value->data = stack->values[stack->sp].data;
     stack->values[stack->sp].type = NULL;
@@ -73,9 +69,7 @@ bool ps_value_stack_pop(ps_value_stack *stack, ps_value *value)
 bool ps_value_stack_poke(ps_value_stack *stack, ps_value *value)
 {
     if (ps_value_stack_get_size(stack) == 0)
-    {
         return false;
-    }
     stack->values[stack->sp].type = value->type;
     stack->values[stack->sp].data = value->data;
     return true;
@@ -84,9 +78,7 @@ bool ps_value_stack_poke(ps_value_stack *stack, ps_value *value)
 bool ps_value_stack_peek(ps_value_stack *stack, ps_value *value)
 {
     if (ps_value_stack_get_size(stack) == 0)
-    {
         return false;
-    }
     value->type = stack->values[stack->sp].type;
     value->data = stack->values[stack->sp].data;
     return true;
@@ -94,7 +86,7 @@ bool ps_value_stack_peek(ps_value_stack *stack, ps_value *value)
 
 void ps_value_stack_dump(ps_value_stack *stack, char *title)
 {
-    fprintf(stderr, "*** Value stack %s (%ld)%s ***\n", title, ps_value_stack_get_size(stack),
+    fprintf(stderr, "*** Value stack %s (%u)%s ***\n", title, ps_value_stack_get_size(stack),
             ps_value_stack_full(stack) ? " (FULL)" : "");
     fprintf(stderr, "┏━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(stderr, "┃  #  ┃%-*s┃%-*s┃\n", PS_IDENTIFIER_LEN, "Name", PS_IDENTIFIER_LEN, "Value");
@@ -105,11 +97,11 @@ void ps_value_stack_dump(ps_value_stack *stack, char *title)
         if (value.type != NULL)
         {
             char *type_name = ps_value_get_type_definition_name(value.type);
-            char *buffer = ps_value_get_debug_value(&value.data);
+            char *buffer = ps_value_get_debug_value(&value);
             fprintf(stderr, "┃%05d┃%-*s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, type_name, PS_IDENTIFIER_LEN, buffer);
         }
     }
-    fprintf(stderr, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(stderr, "┗━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 }
 
 /* EOF */

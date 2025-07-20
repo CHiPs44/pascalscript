@@ -20,7 +20,9 @@
         "type_traits": "c",
         "ps_lexer.h": "c",
         "ctype.h": "c",
-        "ps_system.h": "c"
+        "ps_system.h": "c",
+        "ps_vm.h": "c",
+        "ps_environment.h": "c"
     },
     "makefile.configureOnOpen": false
 }

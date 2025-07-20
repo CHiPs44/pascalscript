@@ -19,10 +19,9 @@ extern "C"
 
     typedef bool (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
-    bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
+    bool ps_function_unary_op(ps_vm *vm, ps_value *value, ps_value *result, ps_vm_opcode opcode);
 
-    bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
-                               ps_token_type token_type);
+    bool ps_function_binary_op(ps_vm *vm, ps_value *a, ps_value *b, ps_value *result, ps_vm_opcode opcode);
 
     void ps_operator_binary_dump();
 

@@ -29,10 +29,10 @@
             ]
         },
         {
-            "name": "(gdb) Launch test_lexer",
+            "name": "(gdb) Launch test_vm_00",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/test/test_lexer",
+            "program": "${workspaceFolder}/test/test_vm_00",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
