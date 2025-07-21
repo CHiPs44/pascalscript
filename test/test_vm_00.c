@@ -42,8 +42,7 @@ int main(void)
     ps_value value = {.type = ps_system_integer.value->data.t, .data.i = 0};
     ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
 
-    // ps_environment *environment =
-    ps_system_init();
+    ps_environment *environment = ps_system_init();
 
     // initialize VM
     vm = ps_vm_init(256);
@@ -56,9 +55,9 @@ int main(void)
     fprintf(stderr, "byte=%02x, opcode=%02x / %s, type=%d / %d\n", i, i & PS_VM_OPCODE_MASK, ps_vm_get_opcode_name(i),
             i & PS_VM_TYPE_MASK, ps_vm_get_type_size(vm, i & PS_VM_TYPE_MASK));
 
-    // 4 + 5
+    // 40 + 2
     value.type = ps_system_integer.value->data.t;
-    value.data.i = 4;
+    value.data.i = 40;
     LOAD(&value);
     fprintf(stderr, "pc=%04x, used=%d\n", vm->pc, vm->used);
 
@@ -66,12 +65,12 @@ int main(void)
     fprintf(stderr, "byte=%02x, opcode=%02x / %s, type=%d / %d\n", i, i & PS_VM_OPCODE_MASK, ps_vm_get_opcode_name(i),
             i & PS_VM_TYPE_MASK, ps_vm_get_type_size(vm, i & PS_VM_TYPE_MASK));
 
-    value.data.i = 5;
+    value.data.i = 2;
     LOAD(&value);
     EMIT(OP_ADD, PS_TYPE_INTEGER);
     EMIT(OP_HLT, PS_TYPE_NONE);
 
-    ps_vm_dump(vm, "VM TEST 00: 4+5=9?");
+    ps_vm_dump(vm, "VM TEST 00: 40+2=42?");
 
     // execute "program"
     ps_vm_reset(vm);
@@ -81,14 +80,18 @@ int main(void)
     // => 9?
     if (!ps_vm_pop(vm, &result))
         goto failure;
-    if (result.type != ps_system_integer.value->data.t || result.data.i != 9)
+    if (result.type != ps_system_integer.value->data.t || result.data.i != 42)
         goto failure;
-    fprintf(stderr, "OK: 4+5=%s\n", ps_value_get_debug_value(&result));
+    fprintf(stderr, "OK: 40+2=%s\n", ps_value_get_debug_value(&result));
 
     vm = ps_vm_free(vm);
+    ps_system_done();
+    ps_environment_done(environment);
     return EXIT_SUCCESS;
 
 failure:
     vm = ps_vm_free(vm);
+    ps_system_done();
+    ps_environment_done(environment);
     return EXIT_FAILURE;
 }

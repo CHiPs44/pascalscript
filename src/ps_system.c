@@ -231,8 +231,6 @@ ps_environment *ps_system_init()
         return NULL;
     }
 
-    // interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = environment;
-
     return environment;
 }
 
