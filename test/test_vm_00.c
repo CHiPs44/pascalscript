@@ -3,18 +3,13 @@
 #include "../include/ps_system.h"
 #include "../include/ps_vm.h"
 
-// #include "../include/ps_interpreter.h"
-// bool ps_parse_start(ps_interpreter *interpreter, bool exec);
-
 #include "../src/ps_buffer.c"
-// #include "../src/ps_compile.c"
 #include "../src/ps_environment.c"
 #include "../src/ps_error.c"
 #include "../src/ps_functions.c"
-// #include "../src/ps_interpreter.c"
 #include "../src/ps_lexer.c"
 #include "../src/ps_operator.c"
-#include "../src/ps_parser.c"
+// #include "../src/ps_parser.c"
 #include "../src/ps_procedures.c"
 #include "../src/ps_readall.c"
 #include "../src/ps_string.c"
@@ -77,7 +72,7 @@ int main(void)
     if (!ps_vm_exec(vm))
         goto failure;
 
-    // => 9?
+    // => 42?
     if (!ps_vm_pop(vm, &result))
         goto failure;
     if (result.type != ps_system_integer.value->data.t || result.data.i != 42)
