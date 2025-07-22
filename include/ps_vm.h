@@ -86,15 +86,16 @@ extern "C"
 
     typedef struct s_ps_vm
     {
-        uint32_t size;         /** @brief Code total size */
-        uint32_t used;         /** @brief Code used size */
-        uint8_t *code;         /** @brief Code */
-        uint32_t pc;           /** @brief Program counter */
-        ps_value_stack *stack; /** @brief Value stack */
-        ps_error error;        /** @brief Error code */
-        bool debug;            /** @brief Debug mode */
-        bool trace;            /** @brief Trace mode */
-        bool range_check;      /** @brief Range checking mode */
+        uint32_t size;         /** @brief Code total size  */
+        uint32_t used;         /** @brief Code used size   */
+        uint8_t *code;         /** @brief Code itself      */
+        uint32_t pc;           /** @brief Program counter  */
+        ps_value_stack *stack; /** @brief Value stack      */
+        ps_error error;        /** @brief Error code       */
+        bool debug;            /** @brief Debug mode       */
+        bool trace;            /** @brief Trace mode       */
+        bool range_check;      /** @brief Range check mode */
+        bool io_check;         /** @brief I/O check mode   */
     } /*__attribute__((__packed__))*/ ps_vm;
 
 #define PS_VM_SIZE sizeof(ps_vm)

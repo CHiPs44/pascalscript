@@ -197,9 +197,13 @@ ps_environment *ps_system_init()
     /* STANDARD PROCEDURES & FUNCTIONS                                        */
     /**************************************************************************/
 
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_read);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_readln);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_write);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
+
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_abs);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_arctan);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_function_chr);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_cos);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_even);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_exp);
@@ -208,21 +212,19 @@ ps_environment *ps_system_init()
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_ln);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_log);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_odd);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_function_ord);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_function_pred);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_random);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_round);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_sin);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqr);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqrt);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_function_succ);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_tan);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_trunc);
     error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_read);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_readln);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_write);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_writeln);
+
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_chr);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_ord);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_pred);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_succ);
 
     if (error)
     {
