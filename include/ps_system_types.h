@@ -32,14 +32,23 @@ extern "C"
     /** @brief string length */
     typedef PS_STRING_LEN_TYPE ps_string_len;
 
-    /** @brief string: max chars + actuel length + string itself, zero terminated */
-    // NB: should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars
+    /** @brief string: max chars + actuel length + string itself, zero terminated    */
+    /** @note should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars */
     typedef struct s_ps_string
     {
-        ps_string_len max;
-        ps_string_len len;
-        ps_char str[1];
+        ps_string_len max;                  /** @brief max length                     */
+        ps_string_len len;                  /** @brief actual length                  */
+        ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated */
     } __attribute__((__packed__)) ps_string;
+
+    typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
+
+    typedef struct s_ps_file
+    {
+        ps_type_definition *type; /** @brief Type definition of the file */
+        FILE *f;                  /** @brief "C" file pointer */
+        bool is_text : 1;         /** @brief true if text file, false if binary */
+    } ps_file;
 
     /** @brief  */
     typedef void *ps_pointer;
@@ -56,6 +65,7 @@ extern "C"
 #define PS_BOOLEAN_SIZE sizeof(ps_boolean)
 #define PS_CHAR_SIZE sizeof(ps_char)
 #define PS_STRING_SIZE sizeof(ps_string)
+#define PS_FILE_SIZE sizeof(ps_file)
 
 #ifdef __cplusplus
 }

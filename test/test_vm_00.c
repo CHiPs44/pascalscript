@@ -33,6 +33,7 @@
 
 int main(void)
 {
+    int exit_code;
     ps_vm *vm;
     ps_value value = {.type = ps_system_integer.value->data.t, .data.i = 0};
     ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
@@ -79,14 +80,15 @@ int main(void)
         goto failure;
     fprintf(stderr, "OK: 40+2=%s\n", ps_value_get_debug_value(&result));
 
-    vm = ps_vm_free(vm);
-    ps_system_done();
-    ps_environment_done(environment);
-    return EXIT_SUCCESS;
+    exit_code = EXIT_SUCCESS;
+    goto cleanup;
 
 failure:
+    exit_code = EXIT_FAILURE;
+
+cleanup:
     vm = ps_vm_free(vm);
     ps_system_done();
     ps_environment_done(environment);
-    return EXIT_FAILURE;
+    return exit_code;
 }
