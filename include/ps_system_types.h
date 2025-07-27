@@ -29,16 +29,16 @@ extern "C"
     /** @brief character */
     typedef PS_CHAR ps_char;
 
-    /** @brief string length */
+    /** @brief string length type */
     typedef PS_STRING_LEN_TYPE ps_string_len;
 
-    /** @brief string: max chars + actuel length + string itself, zero terminated    */
+    /** @brief string: max chars + actual length + string itself, zero terminated */
     /** @note should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars */
     typedef struct s_ps_string
     {
-        ps_string_len max;                  /** @brief max length                     */
-        ps_string_len len;                  /** @brief actual length                  */
-        ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated */
+        ps_string_len max;                  /** @brief max length */
+        ps_string_len len;                  /** @brief actual length */
+        ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
     } __attribute__((__packed__)) ps_string;
 
     typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
@@ -47,17 +47,11 @@ extern "C"
     {
         ps_type_definition *type; /** @brief Type definition of the file */
         FILE *f;                  /** @brief "C" file pointer */
-        bool is_text : 1;         /** @brief true if text file, false if binary */
-    } ps_file;
+        bool is_text;             /** @brief true if text file, false if binary */
+    } __attribute__((__packed__)) ps_file;
 
     /** @brief  */
     typedef void *ps_pointer;
-
-    /*typedef struct s_ps_file
-    {
-        bool is_text;
-        FILE *handle;
-    } ps_file;*/
 
 #define PS_INTEGER_SIZE sizeof(ps_integer)
 #define PS_UNSIGNED_SIZE sizeof(ps_unsigned)

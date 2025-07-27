@@ -25,17 +25,19 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-    typedef struct s_ps_value_type_flags
-    {
-        bool is_base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
-        bool is_numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
-        bool is_ordinal : 1;   /** @brief Ordinal value (integer, unsigned, char, subrange, enum) */
-        bool is_scalar : 1;    /** @brief Scalar value (integer, unsigned, char, subrange, enum) */
-        bool is_signed : 1;    /** @brief Signed value (integer, real, subrange) */
-        bool is_reference : 1; /** @brief Reference value (string, pointer, array, record, file, object) */
-    } /*__attribute__((__packed__))*/ ps_value_type_flags;
+    // typedef struct s_ps_value_type_flags
+    // {
+    //     bool is_base : 1;      /** @brief Base type (integer, real, boolean, char, string) */
+    //     bool is_numeric : 1;   /** @brief Numeric value (integer, unsigned, real, subrange) */
+    //     bool is_ordinal : 1;   /** @brief Ordinal value (integer, unsigned, char, subrange, enum) */
+    //     bool is_scalar : 1;    /** @brief Scalar value (integer, unsigned, char, subrange, enum) */
+    //     bool is_signed : 1;    /** @brief Signed value (integer, real, subrange) */
+    //     bool is_reference : 1; /** @brief Reference value (string, pointer, array, record, file, object) */
+    // } /*__attribute__((__packed__))*/ ps_value_type_flags;
 
-    extern ps_value_type_flags ps_value_type_flags_all[];
+    // #define PS_VALUE_TYPE_FLAGS_SIZE sizeof(ps_value_type_flags)
+
+    // extern ps_value_type_flags ps_value_type_flags_all[];
 
     // /** @brief Executable: function or procedure */
     // typedef struct s_ps_type_definition_executable

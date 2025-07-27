@@ -22,7 +22,8 @@
         "ctype.h": "c",
         "ps_system.h": "c",
         "ps_vm.h": "c",
-        "ps_environment.h": "c"
+        "ps_environment.h": "c",
+        "ps_value_data.h": "c"
     },
     "makefile.configureOnOpen": false
 }

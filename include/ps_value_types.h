@@ -21,8 +21,8 @@ extern "C"
         PS_TYPE_UNSIGNED,   /** @brief [U]nsigned integer                    */
         PS_TYPE_BOOLEAN,    /** @brief [B]oolean                             */
         PS_TYPE_CHAR,       /** @brief [C]har                                */
-        PS_TYPE_SET,        /** @brief [Z] Set                      *FUTURE* */
         PS_TYPE_STRING,     /** @brief [S]tring                              */
+        PS_TYPE_SET,        /** @brief [Z] Set                      *FUTURE* */
         PS_TYPE_DEFINITION, /** @brief [T]ype definition                     */
         PS_TYPE_EXECUTABLE, /** @brief [X] executable: procedure or function */
         PS_TYPE_SUBRANGE,   /** @brief [G] subrange                 *FUTURE* */
