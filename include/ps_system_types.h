@@ -8,11 +8,14 @@
 #define _PS_SYSTEM_TYPES_H
 
 #include "ps_config.h"
+#include "ps_type_definition.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+    typedef struct s_ps_type_definition ps_type_definition;
 
     /** @brief signed integer */
     typedef PS_INTEGER ps_integer;

@@ -34,21 +34,23 @@ extern "C"
         MODE_OUT,  /** @brief *FUTURE* Output AST / intermediate language / whatever */
     } ps_interpreter_mode;
 
+    typedef enum e_ps_interpreter_mode
+    {
+        DEBUG_NONE,    /** @brief No debug */
+        DEBUG_TRACE,   /** @brief Output to stderr */
+        DEBUG_VERBOSE, /** @brief More traces */
+    } ps_interpreter_debug;
+
     typedef struct s_ps_interpreter
     {
-        ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS];
-        ps_parser *parser;
-        ps_string_heap *string_heap;
-        // state
-        uint8_t level;
-        ps_error error;
-        // flags
-        bool trace;
-        bool debug;
-        bool dump;
-        // options
-        bool range_check; // range checking for integer and real values
-        bool bool_eval;   // short circuit boolean evaluation
+        ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief TODO */
+        ps_parser *parser;                                         /** @brief TODO */
+        ps_string_heap *string_heap;                               /** @brief TODO */
+        uint8_t level;              /** @brief Current environment index : 1 for program, ... */
+        ps_error error;             /** @brief Current error */
+        ps_interpreter_debug debug; /** @brief Debug level */
+        bool range_check;           /** @brief Range checking for integer and real values */
+        bool bool_eval;             /** @brief *FUTURE* Short circuit boolean evaluation */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
@@ -65,7 +67,7 @@ extern "C"
     /** @brief Set error & return false */
     bool ps_interpreter_return_error(ps_interpreter *interpreter, ps_error error);
 
-    /** @brief Create a new environment for program, procedure or function */
+    /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
     bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);
 
     /** @brief Release current environment */

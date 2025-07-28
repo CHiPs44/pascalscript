@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "ps_executable.h"
-#include "ps_type_definition.h"
+#include "ps_system_types.h"
 #include "ps_value_types.h"
 
 #ifdef __cplusplus

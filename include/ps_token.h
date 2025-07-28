@@ -184,21 +184,24 @@ extern "C"
         PS_TOKEN_MAX = UINT8_MAX
     } ps_token_type;
 
+    typedef union u_ps_token_value {
+        char identifier[PS_IDENTIFIER_MAX + 1];
+        ps_integer i;
+        ps_unsigned u;
+        ps_real r;
+        ps_char c;
+        ps_boolean b;
+        char s[PS_STRING_MAX_LEN + 1];
+    } ps_token_value;
+
     typedef struct s_ps_token
     {
         ps_token_type type;
-        union u_ps_token_value {
-            char identifier[PS_IDENTIFIER_MAX + 1];
-            ps_integer i;
-            ps_unsigned u;
-            ps_real r;
-            ps_char c;
-            ps_boolean b;
-            char s[PS_STRING_MAX_LEN + 1];
-        } value;
+        ps_token_value value;
     } ps_token;
 
 #define PS_TOKEN_TYPE_SIZE sizeof(ps_token_type)
+#define PS_TOKEN_VALUE_SIZE sizeof(ps_token_value)
 #define PS_TOKEN_SIZE sizeof(ps_token)
 
     char *ps_token_get_reserved_symbol(ps_token_type token_type);

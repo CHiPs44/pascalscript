@@ -12,7 +12,7 @@
 #include "ps_value.h"
 
 #include "ps_interpreter.h"
-#include "ps_compile.h"
+#include "ps_visit.h"
 
 ps_interpreter *ps_interpreter_init()
 {
@@ -207,7 +207,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
         return false;
     }
     // parser->debug = true;
-    if (!ps_parse_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
+    if (!ps_visit_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
     {
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
         ps_buffer_dump(lexer->buffer, start, 5);
@@ -221,42 +221,3 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     }
     return true;
 }
-
-// /** @brief Allocate new value */
-// ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter)
-// {
-//     ps_value *value = (ps_value *)calloc(1, sizeof(ps_value));
-//     if (value == NULL)
-//     {
-//         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-//         return NULL;
-//     }
-//     return value;
-// }
-
-// void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value)
-// {
-//     free(value);
-// }
-
-// ps_symbol *ps_interpreter_add_auto_value(ps_interpreter *interpreter, ps_value *value)
-// {
-//     ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_AUTO, NULL, value);
-//     if (symbol == NULL)
-//     {
-//         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-//         return NULL;
-//     }
-//     return ps_interpreter_add_symbol(interpreter, symbol);
-// }
-
-// ps_symbol *ps_interpreter_add_string_constant(ps_interpreter *interpreter, char *z)
-// {
-//     ps_symbol *symbol = ps_symbol_table_add_string_constant(interpreter->parser->symbols, z);
-//     if (symbol == NULL)
-//     {
-//         interpreter->error = PS_ERROR_SYMBOL_NOT_ADDED;
-//         return NULL;
-//     }
-//     return symbol;
-// }
