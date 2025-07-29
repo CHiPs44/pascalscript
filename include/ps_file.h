@@ -27,6 +27,10 @@ extern "C"
 
     } __attribute__((__packed__)) ps_file;
 
+    extern ps_value *ps_ioresult;
+
+#define PS_FILE_SIZE sizeof(ps_file)
+
     /** @brief Allocate new file with specified type */
     /** @returns New ps_file struct */
     ps_file *ps_file_alloc(ps_type_definition *type);
@@ -97,8 +101,6 @@ extern "C"
     /** @brief Write data to text file, then output end of line */
     /** @see https://www.freepascal.org/docs-html/rtl/system/writeln.html */
     bool ps_file_writeln(ps_file *file, uint8_t count, ps_value *args, ps_unsigned *num_chars, ps_unsigned *decimals);
-
-#define PS_FILE_SIZE sizeof(ps_file)
 
 #ifdef __cplusplus
 }
