@@ -85,7 +85,7 @@ char *ps_symbol_dump_value(ps_symbol *symbol)
     static char buffer[256];
     snprintf(buffer, sizeof(buffer) - 1, "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", PS_IDENTIFIER_LEN + 1,
              symbol->name, ps_symbol_get_kind_name(symbol->kind),
-             ps_value_get_type_definition_name(symbol->value->type), ps_value_get_debug_value(symbol->value));
+             ps_type_definition_get_name(symbol->value->type), ps_value_get_debug_value(symbol->value));
     return buffer;
 }
 

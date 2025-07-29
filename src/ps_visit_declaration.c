@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_executable.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_visit.h"
@@ -169,7 +170,9 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (negate)
             {
                 type = ps_system_integer.value->data.t;
-                data.i = -lexer->current_token.value.i;
+                if (lexer->current_token.value.u > PS_INTEGER_MAX)
+                    RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
+                data.i = -lexer->current_token.value.u;
             }
             else
             {
@@ -190,13 +193,16 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
-            ps_string *s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
-            if (s == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            ps_string *s = NULL;
+            if (mode == MODE_EXEC)
+            {
+                s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+                if (s == NULL)
+                    RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            }
             type = ps_system_string.value->data.t;
             data.s = s;
             break;
-
         default:
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
@@ -438,6 +444,11 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     uint8_t column = 0;
     bool has_environment = false;
 
+    if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
+    {
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    }
+
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
@@ -457,21 +468,17 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         goto cleanup;
     }
     READ_NEXT_TOKEN;
-    // NB: no parameters for now
+    // NB: no parameters nor parenthesis for now
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
 
     if (mode == MODE_EXEC)
     {
-        executable = calloc(1, sizeof(ps_executable)); // TODO ps_executable_alloc(NULL, NULL, line, column);
+        executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
         if (executable == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
-        executable->signature = NULL;
-        executable->return_type = NULL;
-        executable->line = line;
-        executable->column = column;
         callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
         if (callable == NULL)
         {
@@ -499,6 +506,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     // Skip block
     fprintf(stderr, "================================================================================\n");
     ps_token_debug(stderr, "CURRENT", &lexer->current_token);
+    ps_executable_debug(stderr, "EXECUTABLE", executable);
     READ_NEXT_TOKEN;
     fprintf(stderr, "================================================================================\n");
     if (!ps_visit_block(interpreter, MODE_SKIP))

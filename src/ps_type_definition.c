@@ -53,34 +53,17 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 //     return type_def;
 // }
 
-char *ps_type_names[] = {
-    // clang-format off
-//   1234567890    1234567890    1234567890    1234567890
-    "NONE"      , "REAL"      , "INTEGER"   , "UNSIGNED"  , 
-    "BOOLEAN"   , "CHAR"      , "STRING"    , "TYPE_DEF"  , 
-    "EXECUTABLE", "SUBRANGE"  , "ENUM"      , "SET"       , 
-    "POINTER"   , "ARRAY"     , "RECORD"    , "FILE"
-    // clang-format on
-};
-
-char *ps_value_get_type_name(ps_value_type type)
-{
-    if (type >= PS_TYPE_NONE && type <= PS_TYPE_FILE)
-        return ps_type_names[type];
-    return NULL;
-}
-
-char *ps_value_get_type_definition_name(ps_type_definition *type_def)
+char *ps_type_definition_get_name(ps_type_definition *type_def)
 {
     static char buffer[PS_IDENTIFIER_SIZE * 4];
     if (type_def == NULL)
         return "NULL";
-    char *type_name = ps_value_get_type_name(type_def->type);
+    char *type_name = ps_value_type_get_name(type_def->type);
     if (type_name == NULL)
         return "UNKNOWN";
     if (type_def->type == type_def->base)
         return type_name;
-    char *base_name = ps_value_get_type_name(type_def->base);
+    char *base_name = ps_value_type_get_name(type_def->base);
     if (base_name == NULL)
     {
         snprintf(buffer, sizeof(buffer), "%s with unknown base!", type_name);
@@ -125,4 +108,17 @@ char *ps_value_get_type_definition_name(ps_type_definition *type_def)
     //     break;
     // }
     return buffer;
+}
+
+void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def)
+{
+    if (output== NULL)
+        output = stderr;
+    if (message == NULL)
+    if (type_def == NULL)
+    {
+        fprintf(output, "%s: NULL\n", message);
+        return;
+    }
+    fprintf(output, "%s: %s\n", message, ps_type_definition_get_name(type_def));
 }

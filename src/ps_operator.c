@@ -365,8 +365,8 @@ bool ps_function_binary_op(ps_vm *vm, ps_value *a, ps_value *b, ps_value *result
         if (vm->debug)
         {
             fprintf(stderr, "*** ERROR: [1] binary operator %s not applicable for types %s and %s\n",
-                    ps_vm_get_opcode_name(opcode), ps_value_get_type_name(a->type->base),
-                    ps_value_get_type_name(b->type->base));
+                    ps_vm_get_opcode_name(opcode), ps_value_type_get_name(a->type->base),
+                    ps_value_type_get_name(b->type->base));
         }
         return ps_vm_return_false(vm, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
@@ -378,8 +378,8 @@ bool ps_function_binary_op(ps_vm *vm, ps_value *a, ps_value *b, ps_value *result
             if (vm->debug)
             {
                 fprintf(stderr, "*** ERROR: [2] binary operator %s not applicable for types %s and %s\n",
-                        ps_vm_get_opcode_name(opcode), ps_value_get_type_name(a->type->base),
-                        ps_value_get_type_name(b->type->base));
+                        ps_vm_get_opcode_name(opcode), ps_value_type_get_name(a->type->base),
+                        ps_value_type_get_name(b->type->base));
             }
             return ps_vm_return_false(vm, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
@@ -411,8 +411,8 @@ bool ps_function_binary_op(ps_vm *vm, ps_value *a, ps_value *b, ps_value *result
             if (vm->debug)
             {
                 fprintf(stderr, "*** ERROR: [3] Unknown binary operator %s for types %s and %s\n",
-                        ps_token_get_keyword(opcode), ps_value_get_type_name(a->type->base),
-                        ps_value_get_type_name(b->type->base));
+                        ps_token_get_keyword(opcode), ps_value_type_get_name(a->type->base),
+                        ps_value_type_get_name(b->type->base));
             }
             return ps_vm_return_false(vm, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }

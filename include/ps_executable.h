@@ -30,6 +30,12 @@ extern "C"
         uint8_t column;                  /** @brief Column number in the source code */
     } __attribute__((__packed__)) ps_executable;
 
+#define PS_EXECUTABLE_SIZE sizeof(ps_executable)
+
+    ps_executable *ps_executable_alloc(ps_signature *signature, ps_type_definition *return_type, uint16_t line, uint8_t column);
+    void ps_executable_free(ps_executable *executable);
+    void ps_executable_debug(FILE *output, char *message, ps_executable *executable);
+
 #ifdef __cplusplus
 }
 #endif

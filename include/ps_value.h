@@ -34,7 +34,7 @@ extern "C"
 #define PS_VALUE_SIZE sizeof(ps_value)
 
     ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data);
-    void ps_value_free(ps_value *value);
+    ps_value *ps_value_free(ps_value *value);
 
     // bool ps_value_is_scalar(ps_value *value);
     // bool ps_value_is_numeric(ps_value *value);
@@ -52,8 +52,6 @@ extern "C"
 
     char *ps_value_get_display_string(ps_value *value);
 
-    char *ps_value_get_type_name(ps_value_type type);
-    char *ps_value_get_type_definition_name(ps_type_definition *type_def);
     char *ps_value_get_debug_value(ps_value *value);
     void ps_value_debug(FILE *output, char *message, ps_value *value);
 

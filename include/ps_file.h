@@ -9,6 +9,7 @@
 
 #include "ps_config.h"
 #include "ps_type_definition.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"

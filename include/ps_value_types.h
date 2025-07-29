@@ -33,6 +33,10 @@ extern "C"
         PS_TYPE_FILE,       /** @brief [F]ile                       *FUTURE* */
     } __attribute__((__packed__)) ps_value_type;
 
+#define PS_VALUE_TYPE_SIZE sizeof(ps_value_type)
+
+    char *ps_value_type_get_name(ps_value_type type);
+
 #ifdef __cplusplus
 }
 #endif

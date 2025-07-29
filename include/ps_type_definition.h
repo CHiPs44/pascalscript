@@ -127,6 +127,10 @@ extern "C"
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
+    char *ps_type_definition_get_name(ps_type_definition *type_def);
+
+    void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
+
 #ifdef __cplusplus
 }
 #endif

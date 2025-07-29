@@ -26,9 +26,10 @@ ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data)
     return value;
 }
 
-void ps_value_free(ps_value *value)
+ps_value *ps_value_free(ps_value *value)
 {
     free(value);
+    return NULL;
 }
 
 // bool ps_value_is_scalar(ps_value *value)
@@ -210,7 +211,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_DEFINITION:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s", ps_value_get_type_definition_name(value->type));
+            snprintf(buffer, sizeof(buffer) - 1, "%s", ps_type_definition_get_name(value->type));
         else
             return NULL;
         break;
@@ -290,9 +291,7 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL         ? "NULL!"
-                 : value->type == NULL ? "TYPE!"
-                                       : ps_value_get_type_definition_name(value->type);
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : ps_type_definition_get_name(value->type);
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
     return buffer;
