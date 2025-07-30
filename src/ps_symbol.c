@@ -11,6 +11,8 @@
 #include "ps_symbol.h"
 #include "ps_value.h"
 
+static uint32_t ps_symbol_auto_index = 0;
+
 ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value)
 {
     ps_symbol *symbol = (ps_symbol *)calloc(1, sizeof(ps_symbol));
@@ -20,7 +22,10 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
     if (name != NULL)
         memcpy(&symbol->name, name, PS_IDENTIFIER_LEN + 1);
     else
+    {
         memset(&symbol->name, 0, PS_IDENTIFIER_LEN + 1);
+        snprintf(&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
+    }
     symbol->allocated = true;
     symbol->value = value;
     return symbol;
@@ -48,6 +53,7 @@ const struct s_ps_symbol_kind_name
     char *name;
 } ps_symbol_kind_names[] = {
     // clang-format off
+    //                                123456789
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
     {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
     {PS_SYMBOL_KIND_CONSTANT       , "CONSTANT" },
@@ -84,8 +90,8 @@ char *ps_symbol_dump_value(ps_symbol *symbol)
 {
     static char buffer[256];
     snprintf(buffer, sizeof(buffer) - 1, "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", PS_IDENTIFIER_LEN + 1,
-             symbol->name, ps_symbol_get_kind_name(symbol->kind),
-             ps_type_definition_get_name(symbol->value->type), ps_value_get_debug_value(symbol->value));
+             symbol->name, ps_symbol_get_kind_name(symbol->kind), ps_type_definition_get_name(symbol->value->type),
+             ps_value_get_debug_value(symbol->value));
     return buffer;
 }
 

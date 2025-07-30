@@ -43,7 +43,7 @@ extern "C"
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
-#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%04X"
+#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%08X"
 
     typedef uint32_t ps_symbol_hash_key;
 

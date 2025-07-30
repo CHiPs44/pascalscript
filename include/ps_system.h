@@ -15,6 +15,9 @@ extern "C"
 {
 #endif
 
+    /** @brief Type definition type defintion (!) */
+    extern ps_symbol ps_system_type_def;
+
     /* System types (with type==base) */
     extern ps_symbol ps_system_none;
     extern ps_symbol ps_system_boolean;

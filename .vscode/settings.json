@@ -26,7 +26,8 @@
         "ps_value_data.h": "c",
         "ps_string.h": "c",
         "ps_value_types.h": "c",
-        "ps_executable.h": "c"
+        "ps_executable.h": "c",
+        "compare": "c"
     },
     "makefile.configureOnOpen": false
 }
