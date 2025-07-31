@@ -44,7 +44,8 @@ extern "C"
         ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
     } __attribute__((__packed__)) ps_string;
 
-    typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
+    // typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
+    typedef uint8_t ps_set[8]; /** @brief Set */
 
     typedef struct s_ps_file
     {

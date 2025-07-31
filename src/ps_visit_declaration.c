@@ -231,8 +231,14 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *      'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
  * Next steps:
  *      IDENTIFIER
- *      'SUBRANGE'
- *      'ENUMERATION'
+ *      'SUBRANGE' = LOW '..' HIGH
+ *      'ENUMERATION' = '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
+ *      'POINTER'
+ *      'FILE'
+ *      'SET' = 'OF' TYPE
+ *      'RECORD' = 'RECORD' FIELD_DEFINITION [ ';' FIELD_DEFINITION ]* 'END'
+ *      'FIELD_DEFINITION' = IDENTIFIER ':' TYPE
+ *      'ARRAY' = '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE
  *      'POINTER'
  *      'RECORD'
  *      'ARRAY'
@@ -246,6 +252,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     ps_value_data data = {0};
     ps_value *value = NULL;
     ps_unsigned len = 0;
+    ps_symbol *symbol = NULL;
     type_symbol = NULL;
 
     switch (lexer->current_token.type)
@@ -253,20 +260,26 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
         /* ********** Base types ********** */
     case PS_TOKEN_INTEGER:
         type_symbol = &ps_system_integer;
+        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_UNSIGNED:
         type_symbol = &ps_system_unsigned;
+        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_REAL:
         type_symbol = &ps_system_real;
+        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_BOOLEAN:
         type_symbol = &ps_system_boolean;
+        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_CHAR:
         type_symbol = &ps_system_char;
+        READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_STRING:
+        READ_NEXT_TOKEN;
         if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
         {
             READ_NEXT_TOKEN;
@@ -276,11 +289,16 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
             }
             else if (lexer->current_token.type == PS_TOKEN_IDENTIFIER)
             {
-                type_symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier);
-                if (type_symbol == NULL)
+                symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier);
+                if (symbol == NULL)
                     RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
-                if (type_symbol->kind != PS_SYMBOL_KIND_CONSTANT ||
-                    type_symbol->value->type != ps_system_unsigned.value->data.t)
+                if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
+                    RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
+                if (symbol->value->type == ps_system_integer.value->data.t && symbol->value->data.i <= 0)
+                {
+                    RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED);
+                }
+                else if (symbol->value->type != ps_system_unsigned.value->data.t)
                     RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED);
                 len = type_symbol->value->data.u;
             }
@@ -288,7 +306,8 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
             if (len < 1 || len > PS_STRING_MAX_LEN)
                 RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
-            type_def = ps_value_alloc(PS_TYPE_STRING, PS_TYPE_STRING, len);
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            // type_def = ps_value_alloc(&ps_system_type_def, data);
         }
         else
         {
@@ -309,7 +328,6 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
     }
-    READ_NEXT_TOKEN;
 
     if (mode == MODE_EXEC)
     {
