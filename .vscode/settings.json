@@ -27,7 +27,9 @@
         "ps_string.h": "c",
         "ps_value_types.h": "c",
         "ps_executable.h": "c",
-        "compare": "c"
+        "compare": "c",
+        "ps_visit.h": "c",
+        "ps_token.h": "c"
     },
     "makefile.configureOnOpen": false
 }

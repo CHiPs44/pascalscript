@@ -24,9 +24,6 @@ INCLUDES = $(wildcard include/*.h)
 all: $(PROJECT)
 
 $(PROJECT): $(SOURCES) $(INCLUDES)
-	/bin/echo "Compiling $(PROJECT) with $(CC) using flags: $(CFLAGS)"
-	/bin/echo "Source files: $(SOURCES)"
-	/bin/echo "Include files: $(INCLUDES)"
 	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES) $(CLIBS)
 
 clean:

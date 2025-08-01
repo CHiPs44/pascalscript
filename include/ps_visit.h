@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_COMPILE_H
-#define _PS_COMPILE_H
+#ifndef _PS_VISIT_H
+#define _PS_VISIT_H
 
 #include <stdint.h>
 
@@ -18,6 +18,7 @@ extern "C"
 
     /* src/ps_visit.c*/
     bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode);
+
     /* src/ps_visit_declaration.c */
     bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode);
@@ -25,15 +26,21 @@ extern "C"
     bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind);
+
     /* src/ps_visit_expression.c */
     bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    /* */
+
+    /* src/ps_visit_statement.c */
+    bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
+    bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
+    bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
+                                 uint16_t line, uint8_t column);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
+    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \
@@ -111,4 +118,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_COMPILE_H */
+#endif /* _PS_VISIT_H */

@@ -289,7 +289,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
             }
             else if (lexer->current_token.type == PS_TOKEN_IDENTIFIER)
             {
-                symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier);
+                symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
                 if (symbol == NULL)
                     RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
                 if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
