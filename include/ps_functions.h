@@ -17,7 +17,7 @@ extern "C"
 {
 #endif
 
-    typedef bool (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    typedef ps_error (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
     bool ps_function_unary_op(ps_vm *vm, ps_value *value, ps_value *result, ps_vm_opcode opcode);
 

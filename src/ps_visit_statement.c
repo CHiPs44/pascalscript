@@ -10,15 +10,14 @@
 #include "ps_visit.h"
 
 /**
- * Visit statement
- *      compound_statement      =   'BEGIN' statement_list [ ';' ] 'END' ;
- *      statement               =   assignment_statement
- *                              |   procedure_call
- *                              |   if_statement
- *                              |   repeat_statement
- *                              |   while_statement
- *                              |   for_statement
- *                              ;
+ * Visit statement:
+ *      'BEGIN' statement_list [ ';' ] 'END'
+ *      assignment_statement
+ *      procedure_call_statement
+ *      if_then_else_statement
+ *      repeat_until_statement
+ *      while_do_statement
+ *      for_to_downto_do_statement
  */
 bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
@@ -58,7 +57,40 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
 }
 
 /**
- * Visit IDENTIFIER := EXPRESSION
+ * Visit compound statement:
+ *      'BEGIN'
+ *          [ STATEMENT [ ';' STATEMENT ]* ] [ ';' ]
+ *      'END'
+ * NB: ';' or '.' or whatever after END is analyzed in the caller
+ */
+bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("COMPOUND_STATEMENT", "");
+
+    EXPECT_TOKEN(PS_TOKEN_BEGIN);
+    READ_NEXT_TOKEN;
+    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
+        READ_NEXT_TOKEN;
+    if (lexer->current_token.type != PS_TOKEN_END)
+    {
+        if (!ps_visit_statement_list(interpreter, mode, PS_TOKEN_END))
+            TRACE_ERROR("STATEMENTS");
+    }
+    EXPECT_TOKEN(PS_TOKEN_END);
+    READ_NEXT_TOKEN;
+
+    VISIT_END("OK");
+}
+
+/**
+ * Visit assignment:
+ *      IDENTIFIER := EXPRESSION
+ * Next steps:
+ *  Array access:
+ *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' := EXPRESSION
+ *  Pointer dereference:
+ *      IDENTIFIER '^' = EXPRESSION
+ *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier)
 {
@@ -97,91 +129,6 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     }
     else if (!ps_visit_expression(interpreter, MODE_SKIP, &result))
         TRACE_ERROR("EXPRESSION2");
-
-    VISIT_END("OK");
-}
-
-/**
- * Visit compound statement:
- *      'BEGIN'
- *          [ STATEMENT [ ';' STATEMENT ]* ] [ ';' ]
- *      'END'
- * NB: ';' or '.' or whatever after END is analyzed in the caller
- */
-bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
-{
-    VISIT_BEGIN("COMPOUND_STATEMENT", "");
-
-    EXPECT_TOKEN(PS_TOKEN_BEGIN);
-    READ_NEXT_TOKEN;
-    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
-        READ_NEXT_TOKEN;
-    if (lexer->current_token.type != PS_TOKEN_END)
-    {
-        if (!ps_visit_statement_list(interpreter, mode, PS_TOKEN_END))
-            TRACE_ERROR("STATEMENTS");
-    }
-    EXPECT_TOKEN(PS_TOKEN_END);
-    READ_NEXT_TOKEN;
-
-    VISIT_END("OK");
-}
-
-/**
- * Visit
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
- * Next step:
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '('
- *                                            expression [ ':' width [ ':' precision ] ]
- *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
- *                                    ')' ] ;
- */
-bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
-{
-    VISIT_BEGIN("WRITE_OR_WRITELN", "");
-    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    bool loop = true;
-
-    // "Write[Ln];" or "Write[Ln] Else|End|Until"?
-    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON || lexer->current_token.type == PS_TOKEN_ELSE ||
-        lexer->current_token.type == PS_TOKEN_END || lexer->current_token.type == PS_TOKEN_UNTIL)
-    {
-        if (mode == MODE_EXEC && newline)
-            fprintf(stdout, "\n");
-        VISIT_END("EMPTY1");
-    }
-    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-    READ_NEXT_TOKEN;
-    // "Write[Ln]()"?
-    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-    {
-        if (mode == MODE_EXEC && newline)
-            fprintf(stdout, "\n");
-        READ_NEXT_TOKEN;
-        loop = false;
-    }
-
-    while (loop)
-    {
-        if (!ps_visit_expression(interpreter, mode, &result))
-            TRACE_ERROR("EXPR");
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_procedure_write(interpreter, stdout, &result))
-                TRACE_ERROR("WRITE");
-        }
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
-            READ_NEXT_TOKEN;
-            continue;
-        }
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
-        loop = false;
-    }
-
-    if (mode == MODE_EXEC && newline)
-        fprintf(stdout, "\n");
 
     VISIT_END("OK");
 }
@@ -272,6 +219,71 @@ cleanup:
     TRACE_ERROR("CLEANUP");
 }
 
+/**
+ * Visit
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
+ * Next step:
+ *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '('
+ *                                            expression [ ':' width [ ':' precision ] ]
+ *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
+ *                                    ')' ] ;
+ */
+bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
+{
+    VISIT_BEGIN("WRITE_OR_WRITELN", "");
+    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    bool loop = true;
+
+    // "Write[Ln];" or "Write[Ln] Else|End|Until"?
+    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON || lexer->current_token.type == PS_TOKEN_ELSE ||
+        lexer->current_token.type == PS_TOKEN_END || lexer->current_token.type == PS_TOKEN_UNTIL)
+    {
+        if (mode == MODE_EXEC && newline)
+            fprintf(stdout, "\n");
+        VISIT_END("EMPTY1");
+    }
+    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+    READ_NEXT_TOKEN;
+    // "Write[Ln]()"?
+    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+    {
+        if (mode == MODE_EXEC && newline)
+            fprintf(stdout, "\n");
+        READ_NEXT_TOKEN;
+        loop = false;
+    }
+
+    while (loop)
+    {
+        if (!ps_visit_expression(interpreter, mode, &result))
+            TRACE_ERROR("EXPR");
+        if (mode == MODE_EXEC)
+        {
+            if (!ps_procedure_write(interpreter, stdout, &result))
+                TRACE_ERROR("WRITE");
+        }
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            READ_NEXT_TOKEN;
+            continue;
+        }
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+        READ_NEXT_TOKEN;
+        loop = false;
+    }
+
+    if (mode == MODE_EXEC && newline)
+        fprintf(stdout, "\n");
+
+    VISIT_END("OK");
+}
+
+/**
+ * Visit assignment or procedure call:
+ *  this is determined by the symbol kind:
+ *      - variable: assignment
+ *      - procedure: procedure call
+ */
 bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
@@ -293,13 +305,13 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     {
     case PS_SYMBOL_KIND_VARIABLE:
         if (!ps_visit_assignment(interpreter, mode, &identifier))
-            TRACE_ERROR("ASSIGN!");
+            TRACE_ERROR("ASSIGNMENT");
         break;
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_visit_procedure_call(interpreter, mode, symbol, line, column))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("PROCEDURE_CALL");
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -310,7 +322,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
 
 /**
  * Visit
- *      'IF' expression 'THEN' statement [ 'ELSE' statement ] ;
+ *      'IF' expression 'THEN' statement [ 'ELSE' statement ]
  */
 bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {

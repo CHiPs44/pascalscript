@@ -419,7 +419,6 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     }
     else
     {
-        // printf("%c\n", c);
         sprintf(lexer->current_token.value.identifier, "%c", current_char);
         switch (current_char)
         {
@@ -452,7 +451,6 @@ bool ps_lexer_read_token(ps_lexer *lexer)
                 return false;
             break;
         case '.':
-            next_char = ps_buffer_peek_next_char(lexer->buffer);
             if (next_char == '.')
             {
                 sprintf(lexer->current_token.value.identifier, "..");
@@ -488,11 +486,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
         case ';':
             lexer->current_token.type = PS_TOKEN_SEMI_COLON;
             if (!ps_lexer_read_next_char(lexer))
-            {
-                printf("TOKEN_SEMI_COLON: error=%d\n", lexer->error);
                 return false;
-            }
-            // ps_lexer_dump(lexer);
             break;
         case '+':
             lexer->current_token.type = PS_TOKEN_PLUS;

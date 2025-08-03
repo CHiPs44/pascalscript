@@ -29,8 +29,20 @@ extern "C"
 
     /* src/ps_visit_expression.c */
     bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *function,
+                                ps_value *result);
 
     /* src/ps_visit_statement.c */
+    bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
     bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
@@ -39,9 +51,6 @@ extern "C"
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
-    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);                                                        \
@@ -78,6 +87,9 @@ extern "C"
     if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
     return false
 
+#define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
+    strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
+
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
@@ -89,8 +101,6 @@ extern "C"
         return ps_interpreter_return_error(interpreter, __PS_ERROR__);                                                 \
     }
 
-#define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
-    strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 #define TRACE_ERROR(__PLUS__)                                                                                          \
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
