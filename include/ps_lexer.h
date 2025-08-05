@@ -32,6 +32,7 @@ extern "C"
     // bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column);
     // bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column);
 
+    char *ps_lexer_get_debug_value(ps_lexer *lexer);
     void ps_lexer_dump(ps_lexer *lexer);
 
 #ifdef __cplusplus

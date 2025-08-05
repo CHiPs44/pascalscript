@@ -576,12 +576,13 @@ bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column)
 }
 
 /**
- * Dump the current state of the lexer.
+ * Get a debug-friendly string representation of the current token's value.
  */
-void ps_lexer_dump(ps_lexer *lexer)
+char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
-    char value[128] = {0};
+    static char value[128] = {0};
     int len = 0;
+
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_NONE:
@@ -616,7 +617,17 @@ void ps_lexer_dump(ps_lexer *lexer)
                  ps_token_get_keyword(lexer->current_token.type));
         break;
     }
-    fprintf(stderr, "LEXER: token=%d %s, error=%d %s\n", value, lexer->error, ps_error_get_message(lexer->error));
+
+    return value;
+}
+
+/**
+ * Dump the current state of the lexer.
+ */
+void ps_lexer_dump(ps_lexer *lexer)
+{
+    fprintf(stderr, "LEXER: token=%s, error=%d %s\n", ps_lexer_get_debug_value(lexer), lexer->error,
+            ps_error_get_message(lexer->error));
 }
 
 /* EOF */
