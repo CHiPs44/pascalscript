@@ -16,7 +16,7 @@ extern "C"
 {
 #endif
 
-    /* src/ps_visit.c*/
+    /* src/ps_visit.c */
     bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
     /* src/ps_visit_declaration.c */
@@ -25,6 +25,8 @@ extern "C"
     bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode);
+
+    /* src/ps_visit_executable.c */
     bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind);
 
     /* src/ps_visit_expression.c */

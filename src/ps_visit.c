@@ -11,8 +11,8 @@
 #include "ps_procedures.h"
 #include "ps_string.h"
 #include "ps_system.h"
-#include "ps_vm.h"
 #include "ps_visit.h"
+#include "ps_vm.h"
 
 /**
  * Visit
@@ -25,8 +25,18 @@ bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
     VISIT_BEGIN("START", "");
 
     READ_NEXT_TOKEN;
-    if (!ps_visit_program(interpreter, mode))
-        TRACE_ERROR("PROGRAM");
+    switch (lexer->current_token.type)
+    {
+    case PS_TOKEN_PROGRAM:
+        if (!ps_visit_program(interpreter, mode))
+            TRACE_ERROR("PROGRAM");
+        break;
+    case PS_TOKEN_UNIT:
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    }
 
     VISIT_END("OK");
     return false;

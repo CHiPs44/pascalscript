@@ -56,9 +56,15 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
 /**
  * Visit block:
- *       [ CONST ... TYPE ... VAR ... PROCEDURE ... FUNCTION ... ]*
- *       COMPOUND_STATEMENT
- * NB: ; or . or whatever after END is analyzed in the caller
+ *      [
+ *         CONST ...
+ *          TYPE ...
+ *          VAR ...
+ *          PROCEDURE ...
+ *          FUNCTION ...
+ *      ]*
+ *      COMPOUND_STATEMENT
+ * NB: ; or . or whatever after END is analyzed by the caller
  */
 bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
@@ -67,7 +73,6 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
     VISIT_BEGIN("BLOCK", "");
 
     TRACE_CURSOR;
-
     do
     {
         switch (lexer->current_token.type)
@@ -111,21 +116,20 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Visit constant declaration:
  *  CONST
- *      IDENTIFIER '=' IDENTIFIER | [ '-' ] VALUE ';'
- *      ...
+ *      [ IDENTIFIER '=' IDENTIFIER | [ '-' ] VALUE ';' ]*
  * Next step:
  *       IDENTIFIER '=' CONSTANT_EXPRESSION ';'
  */
 bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
+    VISIT_BEGIN("CONST", "");
+
     ps_identifier identifier;
     ps_type_definition *type;
     ps_value *value;
     ps_value_data data;
     ps_symbol *constant;
     bool negate = false;
-
-    VISIT_BEGIN("CONST", "");
 
     EXPECT_TOKEN(PS_TOKEN_CONST);
     READ_NEXT_TOKEN;
@@ -142,10 +146,11 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         {
             negate = true;
             READ_NEXT_TOKEN;
-        }
-        else
-        {
-            negate = false;
+            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER &&
+                lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
+                lexer->current_token.type != PS_TOKEN_REAL_VALUE &&
+                lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
         switch (lexer->current_token.type)
         {
@@ -157,6 +162,27 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
             type = constant->value->type;
             data = constant->value->data;
+            if (negate)
+            {
+                switch (type->base)
+                {
+                case PS_TYPE_INTEGER:
+                    data.i = -data.i;
+                    break;
+                case PS_TYPE_UNSIGNED:
+                    if (data.u > PS_INTEGER_MAX)
+                        RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
+                    type = ps_system_integer.value->data.t;
+                    data.i = -data.u;
+                    break;
+                case PS_TYPE_REAL:
+                    type = ps_system_real.value->data.t;
+                    data.r = -data.r;
+                    break;
+                default:
+                    RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER);
+                }
+            }
             break;
         case PS_TOKEN_INTEGER_VALUE:
             type = ps_system_integer.value->data.t;
@@ -169,9 +195,9 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         case PS_TOKEN_UNSIGNED_VALUE:
             if (negate)
             {
-                type = ps_system_integer.value->data.t;
                 if (lexer->current_token.value.u > PS_INTEGER_MAX)
                     RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
+                type = ps_system_integer.value->data.t;
                 data.i = -lexer->current_token.value.u;
             }
             else
@@ -181,14 +207,10 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             }
             break;
         case PS_TOKEN_CHAR_VALUE:
-            if (negate)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             type = ps_system_char.value->data.t;
             data.c = lexer->current_token.value.c;
             break;
         case PS_TOKEN_BOOLEAN_VALUE:
-            if (negate)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             type = ps_system_boolean.value->data.t;
             data.b = lexer->current_token.value.b;
             break;
@@ -469,129 +491,4 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
         // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
     VISIT_END("OK");
-}
-
-/**
- * Visit
- *      PROCEDURE IDENTIFIER ;
- * Next steps:
- *  - allow procedure block with empty body:
- *      PROCEDURE IDENTIFIER ;
- *      BEGIN
- *      END ;
- *  - allow procedure block (constants, variables, body):
- *      PROCEDURE IDENTIFIER
- *      [ CONST ... TYPE ... VAR ... ]*
- *      BEGIN
- *          COMPOUND_STATEMENT [ ; ]
- *      END ;
- *  - allow procedure parameters
- */
-bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
-{
-    VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
-    ps_identifier identifier;
-    ps_symbol *callable = NULL;
-    ps_value *value = NULL;
-    ps_executable *executable = NULL;
-    uint16_t line = 0;
-    uint8_t column = 0;
-    bool has_environment = false;
-
-    if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
-    {
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    }
-
-    if (kind == PS_SYMBOL_KIND_FUNCTION)
-    {
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-    }
-
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-    COPY_IDENTIFIER(identifier);
-    callable = ps_interpreter_find_symbol(interpreter, &identifier, true);
-    if (callable != NULL)
-        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-
-    TRACE_CURSOR;
-    if (!ps_lexer_get_cursor(lexer, &line, &column))
-    {
-        interpreter->error = PS_ERROR_GENERIC; // TODO better error code
-        goto cleanup;
-    }
-    READ_NEXT_TOKEN;
-    // NB: no parameters nor parenthesis for now
-    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-
-    if (mode == MODE_EXEC)
-    {
-        executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
-        if (executable == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
-        if (callable == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable->kind = kind;
-        value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
-        if (value == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable->value = value;
-        if (!ps_interpreter_add_symbol(interpreter, callable))
-        {
-            goto cleanup;
-        }
-        if (!ps_interpreter_enter_environment(interpreter, &identifier))
-        {
-            goto cleanup;
-        }
-        has_environment = true;
-    }
-    // Skip block
-    fprintf(stderr, "================================================================================\n");
-    ps_token_debug(stderr, "CURRENT", &lexer->current_token);
-    ps_executable_debug(stderr, "EXECUTABLE", executable);
-    READ_NEXT_TOKEN;
-    fprintf(stderr, "================================================================================\n");
-    if (!ps_visit_block(interpreter, MODE_SKIP))
-    {
-        goto cleanup;
-    }
-    if (mode == MODE_EXEC)
-    {
-        if (!ps_interpreter_exit_environment(interpreter))
-        {
-            has_environment = false;
-            goto cleanup;
-        }
-    }
-    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-    READ_NEXT_TOKEN;
-
-    VISIT_END("OK");
-
-cleanup:
-    if (has_environment)
-        ps_interpreter_exit_environment(interpreter);
-    if (callable != NULL)
-        ps_symbol_free(callable);
-    if (value != NULL)
-        ps_value_free(value);
-    if (executable != NULL)
-        free(executable); // TODO ps_executable_free(executable);
-    if (has_environment)
-        ps_interpreter_exit_environment(interpreter);
-    if (interpreter->error == PS_ERROR_NONE)
-        interpreter->error = PS_ERROR_GENERIC;
-    TRACE_ERROR("CLEANUP");
 }
