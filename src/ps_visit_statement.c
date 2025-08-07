@@ -4,6 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_functions.h"
+#include "ps_procedures.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
 #include "ps_token.h"
@@ -144,7 +146,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
  *      'VAR' IDENTIFIER
  */
 bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
-                             uint16_t line, uint8_t column)
+                             uint16_t line, uint16_t column)
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
     bool has_environment = false;
@@ -288,7 +290,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
 {
     VISIT_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
     ps_identifier identifier;
     ps_symbol *symbol;
 
@@ -357,7 +359,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
     VISIT_BEGIN("REPEAT_UNTIL", "");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
 
     ps_lexer_get_cursor(lexer, &line, &column);
     READ_NEXT_TOKEN;
@@ -393,7 +395,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     VISIT_BEGIN("WHILE_DO", "");
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
 
     // Save "cursor" position
     if (!ps_lexer_get_cursor(lexer, &line, &column))
@@ -434,7 +436,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_identifier identifier;
     ps_symbol *variable;
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
 
     // FOR
     READ_NEXT_TOKEN;
@@ -545,7 +547,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     ps_value *value = NULL;
     ps_executable *executable = NULL;
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
     bool has_environment = false;
 
     if (kind == PS_SYMBOL_KIND_FUNCTION)

@@ -11,7 +11,7 @@
 #include "ps_executable.h"
 
 ps_executable *ps_executable_alloc(ps_signature *signature, ps_type_definition *return_type, uint16_t line,
-                                   uint8_t column)
+                                   uint16_t column)
 {
     ps_executable *executable = malloc(sizeof(ps_executable));
     if (executable == NULL)
@@ -26,9 +26,9 @@ ps_executable *ps_executable_alloc(ps_signature *signature, ps_type_definition *
 ps_executable *ps_executable_free(ps_executable *executable)
 {
     if (executable == NULL)
-        return;
+        return NULL;
     if (executable->signature != NULL)
-        ps_signature_free(executable->signature);
+        ps_signature_done(executable->signature);
     // if (executable->return_type != NULL)
     //     ps_type_definition_free(executable->return_type);
     free(executable);

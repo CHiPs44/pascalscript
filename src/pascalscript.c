@@ -176,10 +176,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not initialize interpreter!\n");
         return EXIT_FAILURE;
     }
-    interpreter->trace = trace;
+    interpreter->debug = DEBUG_TRACE;
     interpreter->debug = debug;
-    interpreter->parser->trace = interpreter->trace;
-    interpreter->parser->debug = interpreter->debug;
+    interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
+    interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
 
     /* List symbols */
     if (dump_symbols)

@@ -12,7 +12,6 @@
 
 #include "ps_config.h"
 #include "ps_symbol.h"
-#include "ps_system_types.h"
 #include "ps_value.h"
 #include "ps_value_data.h"
 #include "ps_value_types.h"
@@ -32,7 +31,7 @@ extern "C"
     //     ps_parameters *params;           /** @brief Parameters of the executable */
     //     ps_type_definition *return_type; /** @brief Return type of the executable, NULL for procedures */
     //     uint16_t line;                   /** @brief Line number in the source code */
-    //     uint8_t column;                  /** @brief Column number in the source code */
+    //     uint16_t column;                  /** @brief Column number in the source code */
     // } __attribute__((__packed__)) ps_type_definition_executable;
 
     // typedef struct s_ps_type_definition_subrange

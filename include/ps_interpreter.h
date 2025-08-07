@@ -34,7 +34,7 @@ extern "C"
         MODE_OUT,  /** @brief *FUTURE* Output AST / intermediate language / whatever */
     } ps_interpreter_mode;
 
-    typedef enum e_ps_interpreter_mode
+    typedef enum e_ps_interpreter_debug
     {
         DEBUG_NONE,    /** @brief No debug */
         DEBUG_TRACE,   /** @brief Output to stderr */

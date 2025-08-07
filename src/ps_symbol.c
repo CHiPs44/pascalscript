@@ -24,7 +24,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
     else
     {
         memset(&symbol->name, 0, PS_IDENTIFIER_LEN + 1);
-        snprintf(&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
+        snprintf((char *)&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
     }
     symbol->allocated = true;
     symbol->value = value;

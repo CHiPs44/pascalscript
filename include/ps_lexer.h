@@ -29,8 +29,8 @@ extern "C"
     void ps_lexer_reset(ps_lexer *lexer);
     char *ps_lexer_show_error(ps_lexer *lexer);
     bool ps_lexer_read_token(ps_lexer *lexer);
-    // bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column);
-    // bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column);
+    bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint16_t *column);
+    bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column);
 
     char *ps_lexer_get_debug_value(ps_lexer *lexer);
     void ps_lexer_dump(ps_lexer *lexer);

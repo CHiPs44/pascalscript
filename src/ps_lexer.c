@@ -551,7 +551,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
 /**
  * Get the current cursor position in lexer's buffer.
  */
-bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column)
+bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint16_t *column)
 {
     if (lexer == NULL || lexer->buffer == NULL)
         return false;
@@ -563,7 +563,7 @@ bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint8_t *column)
 /**
  * Set the cursor position in lexer's buffer.
  */
-bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column)
+bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column)
 {
     if (lexer == NULL || lexer->buffer == NULL || line >= lexer->buffer->line_count ||
         column > lexer->buffer->line_lengths[line])
@@ -581,6 +581,7 @@ bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint8_t column)
 char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
     static char value[128] = {0};
+    static char string[96] = {0};
     int len = 0;
 
     switch (lexer->current_token.type)
@@ -592,13 +593,13 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         snprintf(value, sizeof(value) - 1, "EOF");
         break;
     case PS_TOKEN_INTEGER_VALUE:
-        snprintf(value, sizeof(value) - 1, "INTEGER %ld", lexer->current_token.value.i);
+        snprintf(value, sizeof(value) - 1, "INTEGER %" PS_INTEGER_FMT_10, lexer->current_token.value.i);
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        snprintf(value, sizeof(value) - 1, "UNSIGNED %lu", lexer->current_token.value.u);
+        snprintf(value, sizeof(value) - 1, "UNSIGNED %" PS_UNSIGNED_FMT_10, lexer->current_token.value.u);
         break;
     case PS_TOKEN_REAL_VALUE:
-        snprintf(value, sizeof(value) - 1, "REAL %f", lexer->current_token.value.r);
+        snprintf(value, sizeof(value) - 1, "REAL %" PS_REAL_FMT, lexer->current_token.value.r);
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
         snprintf(value, sizeof(value) - 1, "BOOLEAN %s", lexer->current_token.value.b ? "TRUE" : "FALSE");
@@ -607,7 +608,11 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         snprintf(value, sizeof(value) - 1, "CHAR '%c'", lexer->current_token.value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
-        snprintf(value, sizeof(value) - 1, "STRING \"%s\"", lexer->current_token.value.s);
+        len = strlen(lexer->current_token.value.s);
+        if (len > sizeof(string) - 1)
+            len = sizeof(string) - 1;
+        snprintf(string, sizeof(string) - 1, "%.*s", len, lexer->current_token.value.s);
+        snprintf(value, sizeof(value) - 1, "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:
         snprintf(value, sizeof(value) - 1, "IDENTIFIER \"%s\"", lexer->current_token.value.identifier);

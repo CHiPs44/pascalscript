@@ -19,37 +19,37 @@ extern "C"
 
     typedef ps_error (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
-    bool ps_function_unary_op(ps_vm *vm, ps_value *value, ps_value *result, ps_vm_opcode opcode);
+    bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
 
-    bool ps_function_binary_op(ps_vm *vm, ps_value *a, ps_value *b, ps_value *result, ps_vm_opcode opcode);
+    bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
+                               ps_token_type token_type);
 
     void ps_operator_binary_dump();
 
     /* clang-format off */
 
-  bool ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result);
-
-  bool ps_function_odd   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_even  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_ord   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_chr   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_pred  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_succ  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_abs   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_trunc (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_round (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_int   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_frac  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_sin   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_cos   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_tan   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_sqr   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_sqrt  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_exp   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_ln    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
-  bool ps_function_log   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_exec  (ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result);
+  ps_error ps_function_odd   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_even  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_ord   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_chr   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_pred  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_succ  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_abs   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_trunc (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_round (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_int   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_frac  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_sin   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_cos   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_tan   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_sqr   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_sqrt  (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_exp   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_ln    (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_log   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
     /* clang-format on */
 

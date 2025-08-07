@@ -375,8 +375,6 @@ bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("TYPE", "");
     ps_identifier identifier = {0};
-    ps_type_definition *type_def = NULL;
-    ps_value *value = NULL;
     ps_symbol *symbol = NULL;
 
     EXPECT_TOKEN(PS_TOKEN_TYPE);
@@ -391,7 +389,7 @@ bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
         if (symbol != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-        if (!ps_visit_type_definition(interpreter, mode, identifier, symbol))
+        if (!ps_visit_type_definition(interpreter, mode, &identifier, symbol))
             TRACE_ERROR("TYPE_DEFINITION");
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;

@@ -30,14 +30,10 @@ ps_interpreter *ps_interpreter_init()
     // Allocate and initialize system environment
     if (!ps_system_init(interpreter))
         return ps_interpreter_done(interpreter);
-    // Set default state & options
+    // Set default state
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_ERROR_NONE;
-    // flags
-    interpreter->debug = false;
-    interpreter->trace = false;
-    interpreter->dump = false;
-    // options
+    interpreter->debug = DEBUG_NONE;
     interpreter->range_check = true;
     interpreter->bool_eval = false;
     return interpreter;

@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "ps_interpreter.h"
+#include "ps_lexer.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -44,11 +45,13 @@ extern "C"
     /* src/ps_visit_statement.c */
     bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
+    bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
-    bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
-                                 uint16_t line, uint8_t column);
+                                 uint16_t line, uint16_t column);
+    bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
@@ -118,7 +121,7 @@ extern "C"
     if (interpreter->debug >= DEBUG_TRACE)                                                                             \
     {                                                                                                                  \
         uint16_t line = 0;                                                                                             \
-        uint8_t column = 0;                                                                                            \
+        uint16_t column = 0;                                                                                           \
         if (!ps_lexer_get_cursor(lexer, &line, &column))                                                               \
             TRACE_ERROR("CURSOR!");                                                                                    \
         fprintf(stderr, "%*cCURSOR\t*** LINE=%d, COLUMN=%d ***\n", (interpreter->level - 1) * 8 - 1,                   \

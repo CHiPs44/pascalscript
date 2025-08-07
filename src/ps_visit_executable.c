@@ -5,6 +5,7 @@
 */
 
 #include "ps_executable.h"
+#include "ps_lexer.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_visit.h"
@@ -30,7 +31,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     ps_value *value = NULL;
     ps_executable *executable = NULL;
     uint16_t line = 0;
-    uint8_t column = 0;
+    uint16_t column = 0;
     bool has_environment = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
