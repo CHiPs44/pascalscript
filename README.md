@@ -174,7 +174,9 @@ Features are:
 - A single integer parameter procedure: `WriteLn`
 - Comments
 
-Integer type will be the default of C `int` type.
+~~Integer type will be the default of C `int` type.~~
+
+Integer type will be set from a 16/32/64 bits "model".
 
 Language elements are limited to:
 
