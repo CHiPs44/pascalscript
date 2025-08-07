@@ -176,7 +176,7 @@ Features are:
 
 ~~Integer type will be the default of C `int` type.~~
 
-Integer type will be set from a 16/32/64 bits "model".
+Integer type will be set from a 16/32/64 bits "bitness", cf. <https://en.wiktionary.org/wiki/bitness>.
 
 Language elements are limited to:
 
