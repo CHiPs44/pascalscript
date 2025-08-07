@@ -32,16 +32,6 @@ ps_value *ps_value_free(ps_value *value)
     return NULL;
 }
 
-// bool ps_value_is_scalar(ps_value *value)
-// {
-//     return ps_value_type_flags_all[value->type->base].is_scalar;
-// }
-
-// bool ps_value_is_numeric(ps_value *value)
-// {
-//     return ps_value_type_flags_all[value->type->base].is_numeric;
-// }
-
 #define PS_VALUE_SET(type_def, x)                                                                                      \
     if (value == NULL)                                                                                                 \
     {                                                                                                                  \

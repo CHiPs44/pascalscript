@@ -10,20 +10,16 @@
 #include "ps_visit.h"
 
 /**
- * Visit
- *      PROCEDURE IDENTIFIER ;
- * Next steps:
- *  - allow procedure block with empty body:
- *      PROCEDURE IDENTIFIER ;
- *      BEGIN
- *      END ;
- *  - allow procedure block (constants, variables, body):
+ * Visit procedure or function declaration:
  *      PROCEDURE IDENTIFIER
  *      [ CONST ... TYPE ... VAR ... ]*
  *      BEGIN
  *          COMPOUND_STATEMENT [ ; ]
  *      END ;
+ * Next steps:
  *  - allow procedure parameters
+ *  - allow by reference parameters
+ *  - functions with return type
  */
 bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
 {
