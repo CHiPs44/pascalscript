@@ -180,7 +180,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         NUMBER_CASE(PS_TOKEN_OR << 8 | UI, u, i, |, i, PS_TYPE_INTEGER)
         NUMBER_CASE(PS_TOKEN_OR << 8 | UU, u, u, |, u, PS_TYPE_UNSIGNED)
         // XOR.U/I/B
-    case OP_XOR << 8 | BB:
+    case PS_TOKEN_XOR << 8 | BB:
         result->data.b = !(a->data.b) != !(b->data.b);
         r = PS_TYPE_BOOLEAN;
         break;
@@ -189,7 +189,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         NUMBER_CASE(PS_TOKEN_XOR << 8 | UI, u, i, ^, u, PS_TYPE_UNSIGNED)
         NUMBER_CASE(PS_TOKEN_XOR << 8 | UU, u, u, ^, u, PS_TYPE_UNSIGNED)
         // ADD.I/U/R/C/S
-    case OP_ADD << 8 | CC: // char + char => string
+    case PS_TOKEN_PLUS << 8 | CC: // char + char => string
         s = ps_string_alloc(2);
         if (s == NULL)
             return false;
@@ -199,7 +199,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         result->data.s = s;
         r = PS_TYPE_STRING;
         break;
-    case OP_ADD << 8 | CS: // char + string => string
+    case PS_TOKEN_PLUS << 8 | CS: // char + string => string
         s = ps_string_alloc(1);
         if (s == NULL)
             return false;
@@ -209,7 +209,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         ps_string_free(s);
         r = PS_TYPE_STRING;
         break;
-    case OP_ADD << 8 | SC: // string + char => string
+    case PS_TOKEN_PLUS << 8 | SC: // string + char => string
         s = ps_string_alloc(1);
         if (s == NULL)
             return false;
@@ -219,7 +219,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         ps_string_free(s);
         r = PS_TYPE_STRING;
         break;
-    case OP_ADD << 8 | SS: // string + string => string
+    case PS_TOKEN_PLUS << 8 | SS: // string + string => string
         s = ps_string_concat(a->data.s, b->data.s, PS_STRING_MAX_LEN);
         if (s == NULL)
             return false;

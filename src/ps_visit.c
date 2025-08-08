@@ -12,7 +12,6 @@
 #include "ps_string.h"
 #include "ps_system.h"
 #include "ps_visit.h"
-#include "ps_vm.h"
 
 /**
  * Visit
