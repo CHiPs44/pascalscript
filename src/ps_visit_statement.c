@@ -257,6 +257,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     while (loop)
     {
+        result.type = ps_system_none.value->data.t;
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPR");
         if (mode == MODE_EXEC)
