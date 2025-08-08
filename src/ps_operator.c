@@ -365,7 +365,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     default:
         if (interpreter->debug >= DEBUG_TRACE)
         {
-            fprintf(stderr, "*** ERROR: [1] binary operator %s not applicable for types %s and %s\n",
+            fprintf(stderr, "*** ERROR: [1] binary operator %d/%s not applicable for types %s and %s\n", token_type,
                     ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                     ps_value_type_get_name(b->type->base));
         }
@@ -378,7 +378,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         {
             if (interpreter->debug >= DEBUG_TRACE)
             {
-                fprintf(stderr, "*** ERROR: [2] binary operator %s not applicable for types %s and %s\n",
+                fprintf(stderr, "*** ERROR: [2] binary operator %d/%s not applicable for types %s and %s\n", token_type,
                         ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                         ps_value_type_get_name(b->type->base));
             }
@@ -411,7 +411,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         default:
             if (interpreter->debug >= DEBUG_TRACE)
             {
-                fprintf(stderr, "*** ERROR: [3] Unknown binary operator %s for types %s and %s\n",
+                fprintf(stderr, "*** ERROR: [3] Unknown binary operator %d/%s for types %s and %s\n", token_type,
                         ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                         ps_value_type_get_name(b->type->base));
             }

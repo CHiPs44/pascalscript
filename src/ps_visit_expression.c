@@ -32,8 +32,8 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
     VISIT_BEGIN("OR_EXPRESSION", "");
 
     static ps_token_type or_operators[] = {PS_TOKEN_OR, PS_TOKEN_XOR};
-    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value left = {.type = result->type, .data.v = NULL};
+    ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type or_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_and_expression(interpreter, mode, &left))
@@ -78,8 +78,8 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     static ps_token_type and_operators[] = {PS_TOKEN_AND};
 
-    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value left = {.type = result->type, .data.v = NULL};
+    ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type and_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_relational_expression(interpreter, mode, &left))
@@ -124,8 +124,8 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         PS_TOKEN_LESS_THAN,        PS_TOKEN_LESS_OR_EQUAL, PS_TOKEN_GREATER_THAN,
         PS_TOKEN_GREATER_OR_EQUAL, PS_TOKEN_EQUAL,         PS_TOKEN_NOT_EQUAL,
     };
-    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value left = {.type = result->type, .data.v = NULL};
+    ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type relational_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_simple_expression(interpreter, mode, &left))
@@ -167,10 +167,10 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         PS_TOKEN_PLUS, PS_TOKEN_MINUS,
         // PS_TOKEN_OR, PS_TOKEN_XOR
     };
-    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value left = {.type = result->type, .data.v = NULL};
+    ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type additive_operator = PS_TOKEN_NONE;
-    
+
     if (!ps_visit_term(interpreter, mode, &left))
         TRACE_ERROR("TERM");
     do
@@ -197,7 +197,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
             left.data = result->data;
         }
     } while (true);
-    
+
     VISIT_END("SIMPLE2");
 }
 
@@ -214,8 +214,8 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 
     VISIT_BEGIN("TERM", "");
 
-    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL},
-             right = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value left = {.type = result->type, .data.v = NULL};
+    ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, mode, &left))
         TRACE_ERROR("FACTOR");

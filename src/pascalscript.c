@@ -78,7 +78,7 @@ char *minimal_source = "Program Minimal;\n"
 
 int main(int argc, char *argv[])
 {
-    bool trace = true;
+    bool trace = false;
     bool debug = trace;
     bool verbose = false;
     bool dump_symbols = false;
@@ -144,8 +144,9 @@ int main(int argc, char *argv[])
         }
         // program_file = "00-hello.pas";
         // program_file = "00-hello1.pas";
+        // program_file = "00-minimal.pas";
         // program_file = "01-first.pas";
-        // program_file = "02-second.pas";
+        program_file = "02-second.pas";
         // program_file = "03-if-then-else.pas";
         // program_file = "04-repeat-until.pas";
         // program_file = "04-repeat-until-real.pas";
@@ -155,19 +156,20 @@ int main(int argc, char *argv[])
         // program_file = "08-math.pas";
         // program_file = "09-boolean.pas";
         // program_file = "10-strings.pas";
-        program_file = "20-procedure1.pas";
+        // program_file = "20-procedure1.pas";
         // program_file = "41-circle.pas";
     }
     snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
     free(current_path);
     current_path = NULL;
-    if (verbose)
-        fprintf(stderr, "Source file: %s\n", source_file);
 
     /* Display banner */
     if (verbose)
+    {
         fprintf(stdout, "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION_MAJOR,
                 PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+        fprintf(stderr, "Source file: %s\n", source_file);
+    }
 
     /* Initialize interpreter */
     interpreter = ps_interpreter_init();
@@ -176,17 +178,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not initialize interpreter!\n");
         return EXIT_FAILURE;
     }
-    interpreter->debug = DEBUG_TRACE;
-    interpreter->debug = debug;
+    interpreter->debug = debug ? DEBUG_TRACE : trace ? DEBUG_VERBOSE : DEBUG_NONE;
     interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
     interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
 
     /* List symbols */
     if (dump_symbols)
-    {
-        ps_symbol_table_dump(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols, "Initialization",
-                             stderr);
-    }
+        ps_symbol_table_dump(NULL, "Initialization",
+                             interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
     /* Load program source from string or file */
     if (false)
@@ -227,7 +226,7 @@ int main(int argc, char *argv[])
 
     /* List symbols */
     if (dump_symbols)
-        ps_symbol_table_dump(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols, "End", stderr);
+        ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
     /* Terminate interpreter */
     ps_interpreter_done(interpreter);

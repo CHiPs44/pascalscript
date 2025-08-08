@@ -36,17 +36,17 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (lexer->current_token.type == PS_TOKEN_COMMA)
                 continue;
         } while (true);
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
     }
+    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+    READ_NEXT_TOKEN;
+    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+        RETURN_ERROR(interpreter->error);
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
         RETURN_ERROR(interpreter->error);
-    if (!ps_interpreter_enter_environment(interpreter, &identifier))
-        RETURN_ERROR(interpreter->error);
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
-    // ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "Before EXIT", stderr);
+    // ps_symbol_table_dump(NULL, "Before EXIT", ps_interpreter_get_environment(interpreter)->symbols);
     ps_interpreter_exit_environment(interpreter);
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: text after '.' is not analyzed and has not to be
@@ -93,7 +93,7 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
         case PS_TOKEN_PROCEDURE:
             if (!ps_visit_procedure_or_function(interpreter, mode, PS_SYMBOL_KIND_PROCEDURE))
                 TRACE_ERROR("PROCEDURE");
-            ps_symbol_table_dump(ps_interpreter_get_environment(interpreter)->symbols, "PROCEDURE1?", stderr);
+            // ps_symbol_table_dump(NULL, "PROCEDURE1?", ps_interpreter_get_environment(interpreter)->symbols);
             break;
         case PS_TOKEN_FUNCTION:
             if (!ps_visit_procedure_or_function(interpreter, mode, PS_SYMBOL_KIND_FUNCTION))

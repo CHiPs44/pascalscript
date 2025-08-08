@@ -68,7 +68,7 @@ char *ps_error_get_message(ps_error error)
     case PS_ERROR_SYMBOL_EXISTS:
         return "Symbol alreayd exists";
     case PS_ERROR_OPERATOR_NOT_APPLICABLE:
-        return "Unapplicable operator";
+        return "Operator not applicable";
     case PS_ERROR_UNEXPECTED_TYPE:
         return "Unexpected type";
     case PS_ERROR_EXPECTED_VARIABLE:

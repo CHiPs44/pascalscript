@@ -243,7 +243,7 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
 //     return symbol;
 // }
 
-void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output)
+void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
 {
     if (output == NULL)
         output = stderr;

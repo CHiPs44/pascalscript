@@ -68,7 +68,7 @@ extern "C"
     // ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z);
 
     /** @brief Dump symbol table to stderr */
-    void ps_symbol_table_dump(ps_symbol_table *table, char *title, FILE *output);
+    void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table);
 
 #ifdef __cplusplus
 }

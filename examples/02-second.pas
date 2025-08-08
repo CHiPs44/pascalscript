@@ -19,7 +19,7 @@ Begin
     WriteLn('c=', c);
     d := (a * b) Div c;
     WriteLn('d=', d);
-    r := (a * b) / c;
+    r := (a * b * 1.0) / (c * 1.0);
     WriteLn('r=', r);
     // Foo := 12;
 End.

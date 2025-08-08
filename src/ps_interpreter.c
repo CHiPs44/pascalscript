@@ -116,7 +116,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
     do
     {
         // snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
-        // ps_symbol_table_dump(interpreter->environments[level]->symbols, tmp, stderr);
+        // ps_symbol_table_dump(NULL, tmp, interpreter->environments[level]->symbols);
         ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
         if (symbol != NULL)
             return symbol;

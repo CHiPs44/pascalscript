@@ -132,7 +132,7 @@ PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln  , "WRITELN"  , 
 
 /* clang-format on */
 
-ps_environment *ps_system_init()
+bool ps_system_init(ps_interpreter *interpreter)
 {
     bool error = false;
     ps_identifier system_name = "SYSTEM";
@@ -248,20 +248,21 @@ ps_environment *ps_system_init()
     if (error)
     {
         ps_environment_done(environment);
-        ps_system_done();
-        return NULL;
+        ps_system_done(interpreter);
+        return false;
     }
 
-    return environment;
+    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = environment;
+    return true;
 }
 
-void ps_system_done()
+void ps_system_done(ps_interpreter *interpreter)
 {
     if (ps_system_constant_string_ps_version.value->data.s != NULL)
     {
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);
         ps_system_constant_string_ps_version.value->data.s = NULL;
     }
-    // ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
-    // interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
+    ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
+    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
 }

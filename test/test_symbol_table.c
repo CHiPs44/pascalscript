@@ -8,9 +8,9 @@
 #include <sys/resource.h>
 
 #define PS_SYMBOL_TABLE_SIZE 3
-#include "../include/ps_value.h"
 #include "../include/ps_symbol.h"
 #include "../include/ps_symbol_table.h"
+#include "../include/ps_value.h"
 
 ps_symbol_table table;
 ps_symbol constant1 = {.name = "CONSTANT1", .kind = PS_SYMBOL_KIND_CONSTANT};
@@ -19,9 +19,9 @@ ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO};
 ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_KIND_CONSTANT};
 
 // Poor man's Makefile ;-)
-#include "../src/ps_value.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
+#include "../src/ps_value.c"
 
 int main(void)
 {
@@ -44,7 +44,7 @@ int main(void)
     printf("TEST SYMBOL TABLE: ADD CONSTANT1 %s %d\n", result == 0 ? "OK" : "KO", result);
     result = ps_symbol_table_add(&table, &variable2);
     printf("TEST SYMBOL TABLE: ADD VARIABLE2 %s %d\n", result == 1 ? "OK" : "KO", result);
-    ps_symbol_table_dump(&table, "Test", stdout);
+    ps_symbol_table_dump(stdout, "Test", &table);
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     // Re-add constant1 => EXISTS
     symbol = ps_symbol_table_add(&table, &constant1);
@@ -56,7 +56,7 @@ int main(void)
     result = ps_symbol_table_add(&table, &constant4);
     printf("TEST SYMBOL TABLE: ADD CONSTANT4 %s %d\n", result == PS_SYMBOL_TABLE_ERROR_FULL ? "OK" : "KO", result);
     // This is the end
-    ps_symbol_table_dump(&table, "Test", stdout);
+    ps_symbol_table_dump(stdout, "Test", &table);
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     printf("TEST SYMBOL TABLE: END\n");
     return 0;
