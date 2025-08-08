@@ -47,8 +47,8 @@ extern "C"
         ps_parser *parser;                                         /** @brief TODO */
         ps_string_heap *string_heap;                               /** @brief TODO */
         uint8_t level;              /** @brief Current environment index : 1 for program, ... */
-        ps_error error;             /** @brief Current error */
-        ps_interpreter_debug debug; /** @brief Debug level */
+        ps_error error;             /** @brief Current error PS_ERROR_XXXXX */
+        ps_interpreter_debug debug; /** @brief Debug level: NONE, TRACE, VERBOSE */
         bool range_check;           /** @brief Range checking for integer and real values */
         bool bool_eval;             /** @brief *FUTURE* Short circuit boolean evaluation */
     } /*__attribute__((__packed__))*/ ps_interpreter;

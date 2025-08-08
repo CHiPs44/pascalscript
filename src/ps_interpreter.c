@@ -79,22 +79,31 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
         return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
-    fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    fprintf(stderr, "=> ENTER %d: %s\n", interpreter->level, (char *)name);
-    fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+    {
+        fprintf(stderr, "--------------------------------------------------------------------------------\n");
+        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
+                (char *)name);
+        fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    }
     return true;
 }
 
 bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
+    ps_identifier name = {0};
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
         return ps_interpreter_return_error(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
     ps_environment *environment = interpreter->environments[interpreter->level];
+    strncpy(name, environment->name, PS_IDENTIFIER_SIZE - 1);
     ps_environment_done(environment);
     interpreter->environments[interpreter->level] = NULL;
-    fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    fprintf(stderr, "=> EXIT %d\n", interpreter->level);
-    fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+    {
+        fprintf(stderr, "--------------------------------------------------------------------------------\n");
+        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS, name);
+        fprintf(stderr, "--------------------------------------------------------------------------------\n");
+    }
     interpreter->level -= 1;
     return true;
 }

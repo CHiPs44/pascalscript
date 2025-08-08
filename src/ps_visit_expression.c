@@ -124,8 +124,8 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         PS_TOKEN_LESS_THAN,        PS_TOKEN_LESS_OR_EQUAL, PS_TOKEN_GREATER_THAN,
         PS_TOKEN_GREATER_OR_EQUAL, PS_TOKEN_EQUAL,         PS_TOKEN_NOT_EQUAL,
     };
-    ps_value left = {.type = result->type, .data.v = NULL};
-    ps_value right = {.type = result->type, .data.v = NULL};
+    ps_value left = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value right = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_token_type relational_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_simple_expression(interpreter, mode, &left))

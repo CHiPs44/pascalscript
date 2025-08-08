@@ -330,6 +330,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
 bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("IF", "");
+
     ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
 
     READ_NEXT_TOKEN;
@@ -339,12 +340,12 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
     EXPECT_TOKEN(PS_TOKEN_THEN);
     READ_NEXT_TOKEN;
-    if (!ps_visit_statement(interpreter, mode && result.data.b))
+    if (!ps_visit_statement(interpreter, mode == MODE_EXEC && result.data.b ? MODE_EXEC : MODE_SKIP))
         TRACE_ERROR("THEN");
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
         READ_NEXT_TOKEN;
-        if (!ps_visit_statement(interpreter, mode && !result.data.b))
+        if (!ps_visit_statement(interpreter, mode == MODE_EXEC && !result.data.b ? MODE_EXEC : MODE_SKIP))
             TRACE_ERROR("ELSE");
     }
 
