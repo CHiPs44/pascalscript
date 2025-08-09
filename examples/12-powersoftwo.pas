@@ -12,7 +12,7 @@ Program PowersofTwo;
 
 Const 
   numperline = 5;
-  maxnum = 20000;
+  maxnum = 40000000;
   base = 2;
 
 Var 
@@ -48,9 +48,7 @@ Begin
     End;
   (* while *)
   writeln;
-
    (* This program can also be written using a
       REPEAT..UNTIL loop. *)
-
 End.
 (* Main *)

@@ -6,6 +6,7 @@
 Program Example06ForDo;
 Const 
   Limit = 99;
+  PerLine = 27;
 Var 
   I: Integer;
   C: Char;
@@ -13,7 +14,7 @@ Var
 Begin
   WriteLn('Example 06: For-Do Loop');
   WriteLn('--------------------------------------------------------------------------------');
-  WriteLn('From 0 to ', Limit, ' with leading zeroes:');
+  WriteLn('From 0 to ', Limit, ' with leading zeroes, ', PerLine, ' per line:');
   WriteLn('--------------------------------------------------------------------------------');
   BOL := False;
   For I := 0 To Limit Do
@@ -21,7 +22,7 @@ Begin
       If I < 10 Then
           Write('0');
       Write(I);
-      If I > 0 And (I + 1) Mod 10 = 0 Then
+      If I > 0 And (I + 1) Mod PerLine = 0 Then
       Begin
           WriteLn;
           BOL := True;
@@ -36,7 +37,7 @@ Begin
       WriteLn;    
   WriteLn('OK!');
   WriteLn('--------------------------------------------------------------------------------');
-  WriteLn('From A to Z with ordinal values:');
+  WriteLn('From ''A'' to ''Z'' with ordinal values:');
   I := 0;
   For C := 'A' To 'Z' Do
     Begin
