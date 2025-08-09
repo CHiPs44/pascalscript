@@ -511,12 +511,14 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             // VARIABLE := SUCC/PRED(VARIABLE)
             if (step.data.i > 0)
             {
-                if (!ps_function_succ(interpreter, variable->value, variable->value))
+                interpreter->error = ps_function_succ(interpreter, variable->value, variable->value);
+                if (interpreter->error != PS_ERROR_NONE)
                     TRACE_ERROR("STEP/SUCC");
             }
             else
             {
-                if (!ps_function_pred(interpreter, variable->value, variable->value))
+                interpreter->error = ps_function_pred(interpreter, variable->value, variable->value);
+                if (interpreter->error != PS_ERROR_NONE)
                     TRACE_ERROR("STEP/PRED");
             }
         } while (true);
