@@ -38,8 +38,10 @@ ps_executable *ps_executable_free(ps_executable *executable)
 void ps_executable_debug(FILE *output, char *message, ps_executable *executable)
 {
     if (output == NULL)
-        output= stderr;
+        output = stderr;
     fprintf(output, "%s: Executable at %p:\n", message, (void *)executable);
+    if (executable == NULL)
+        return;
     fprintf(output, "  Signature: %p\n", (void *)executable->signature);
     // if (executable->signature != NULL)
     //     ps_signature_debug(output, "  Signature", executable->signature);

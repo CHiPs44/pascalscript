@@ -57,7 +57,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Visit block:
  *      [
- *         CONST ...
+ *          CONST ...
  *          TYPE ...
  *          VAR ...
  *          PROCEDURE ...
@@ -91,12 +91,12 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 TRACE_ERROR("VAR");
             break;
         case PS_TOKEN_PROCEDURE:
-            if (!ps_visit_procedure_or_function(interpreter, mode, PS_SYMBOL_KIND_PROCEDURE))
+            if (!ps_visit_procedure_or_function(interpreter, MODE_SKIP, PS_SYMBOL_KIND_PROCEDURE))
                 TRACE_ERROR("PROCEDURE");
             // ps_symbol_table_dump(NULL, "PROCEDURE1?", ps_interpreter_get_environment(interpreter)->symbols);
             break;
         case PS_TOKEN_FUNCTION:
-            if (!ps_visit_procedure_or_function(interpreter, mode, PS_SYMBOL_KIND_FUNCTION))
+            if (!ps_visit_procedure_or_function(interpreter, MODE_SKIP, PS_SYMBOL_KIND_FUNCTION))
                 TRACE_ERROR("FUNCTION");
             break;
         case PS_TOKEN_BEGIN:

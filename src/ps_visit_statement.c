@@ -145,10 +145,13 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
  *      or
  *      'VAR' IDENTIFIER
  */
-bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
-                             uint16_t line, uint16_t column)
+bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable/*,
+                             uint16_t line, uint16_t column*/)
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
+
+    uint16_t line = 0;
+    uint16_t column = 0;
     bool has_environment = false;
 
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
@@ -173,6 +176,10 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         has_environment = true;
         // TODO Parse parameters (needs environment)
         // for now, just check for statement terminators
+        TRACE_CURSOR;
+        // Save "cursor" position
+        if (!ps_lexer_get_cursor(lexer, &line, &column))
+            RETURN_ERROR(PS_ERROR_GENERIC); // TODO better error code
         ps_token_type token_type = ps_parser_expect_token_types(
             interpreter->parser, 4,
             (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
@@ -181,12 +188,12 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
             interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
             goto cleanup;
         }
-        // READ_NEXT_TOKEN;
         // Execute procedure
         if (mode == MODE_EXEC)
         {
-            fprintf(stderr, "================================================================================\n");
-            ps_token_debug(stderr, "CURRENT", &lexer->current_token);
+            // fprintf(stderr, "================================================================================\n");
+            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line, column);
+            // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
             // Set cursor to the beginning of the procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
@@ -194,7 +201,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
-            fprintf(stderr, "================================================================================\n");
+            // fprintf(stderr, "================================================================================\n");
             // Parse procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;
@@ -204,7 +211,6 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
-            READ_NEXT_TOKEN;
         }
         // Exit environment
         if (!ps_interpreter_exit_environment(interpreter))
@@ -290,15 +296,9 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
-    uint16_t line = 0;
-    uint16_t column = 0;
     ps_identifier identifier;
     ps_symbol *symbol;
 
-    TRACE_CURSOR;
-    // Save "cursor" position
-    if (!ps_lexer_get_cursor(lexer, &line, &column))
-        RETURN_ERROR(PS_ERROR_GENERIC); // TODO better error code
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
     symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
@@ -313,7 +313,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (!ps_visit_procedure_call(interpreter, mode, symbol, line, column))
+        if (!ps_visit_procedure_call(interpreter, mode, symbol /*, line, column*/))
             TRACE_ERROR("PROCEDURE_CALL");
         break;
     default:

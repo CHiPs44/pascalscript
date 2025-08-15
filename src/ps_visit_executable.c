@@ -46,6 +46,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     if (callable != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
 
+    // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
+    // ps_interpreter_debug debug = interpreter->debug;
+    // interpreter->debug = DEBUG_TRACE;
     TRACE_CURSOR;
     if (!ps_lexer_get_cursor(lexer, &line, &column))
     {
@@ -55,56 +58,50 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     READ_NEXT_TOKEN;
     // NB: no parameters nor parenthesis for now
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+    // interpreter->debug = debug;
 
-    if (mode == MODE_EXEC)
+    executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
+    if (executable == NULL)
     {
-        executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
-        if (executable == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
-        if (callable == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable->kind = kind;
-        value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
-        if (value == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        callable->value = value;
-        if (!ps_interpreter_add_symbol(interpreter, callable))
-        {
-            goto cleanup;
-        }
-        if (!ps_interpreter_enter_environment(interpreter, &identifier))
-        {
-            goto cleanup;
-        }
-        has_environment = true;
+        interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+        goto cleanup;
     }
+    callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
+    if (callable == NULL)
+    {
+        interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+        goto cleanup;
+    }
+    callable->kind = kind;
+    value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
+    if (value == NULL)
+    {
+        interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+        goto cleanup;
+    }
+    callable->value = value;
+    if (!ps_interpreter_add_symbol(interpreter, callable))
+    {
+        goto cleanup;
+    }
+    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+    {
+        goto cleanup;
+    }
+    has_environment = true;
     // Skip block
-    fprintf(stderr, "================================================================================\n");
-    ps_token_debug(stderr, "CURRENT", &lexer->current_token);
-    ps_executable_debug(stderr, "EXECUTABLE", executable);
+    // fprintf(stderr, "================================================================================\n");
+    // ps_executable_debug(stderr, "EXECUTABLE", executable);
     READ_NEXT_TOKEN;
-    fprintf(stderr, "================================================================================\n");
+    // fprintf(stderr, "================================================================================\n");
     if (!ps_visit_block(interpreter, MODE_SKIP))
     {
         goto cleanup;
     }
-    if (mode == MODE_EXEC)
+    if (!ps_interpreter_exit_environment(interpreter))
     {
-        if (!ps_interpreter_exit_environment(interpreter))
-        {
-            has_environment = false;
-            goto cleanup;
-        }
+        has_environment = false;
+        goto cleanup;
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
