@@ -132,6 +132,11 @@ Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fp
   - <http://pascal.hansotten.com/uploads/pbh/brinch%20hansen%20on%20pascal%20compilers%20OCR.pdf>
   - <https://github.com/Jtkozzy/BHK>
 - "Rascal - A simple Pascal interpreter written in rust, by Tyler LaBerge (MIT license)." <https://github.com/tylerlaberge/rascal>
+- "Learn Pascal Tutorial" by Tao Yue
+  - <https://www.taoyue.com/tutorials/pascal/>
+  - <https://wiki.freepascal.org/Basic_Pascal_Tutorial>
+- "A tiny pascal compiler" <https://github.com/siddeshwarnavink/micropascal>
+- "Interpreter of a subset of the Pascal programming language" <https://github.com/peskaf/MicroPascal-Interpreter>
 
 ### Other sources about compilers and interpreters
 

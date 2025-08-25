@@ -97,6 +97,8 @@ char *ps_error_get_message(ps_error error)
         return "String expected";
     case PS_ERROR_EXPECTED_STRING_LENGTH:
         return "String length expected";
+    case PS_ERROR_EXPECTED_TYPE:
+        return "Type expected";
     case PS_ERROR_ASSIGN_TO_CONST:
         return "Constants can't be changed";
     case PS_ERROR_TYPE_MISMATCH:
@@ -109,6 +111,8 @@ char *ps_error_get_message(ps_error error)
         return "Invalid parameters";
     case PS_ERROR_TOO_MANY_VARIABLES:
         return "Too many variables in declaration";
+    case PS_ERROR_PARAMETER_COUNT_MISMATCH:
+        return "Parameter count mismatch";
     case PS_ERROR_MAX:
         return "MAX error?";
     }

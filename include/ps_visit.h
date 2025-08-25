@@ -92,6 +92,22 @@ extern "C"
     if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
     return false
 
+#define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
+    {                                                                                                                  \
+        if (!ps_lexer_read_token(lexer))                                                                               \
+            goto cleanup;                                                                                              \
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+                    "", "");                                                                                           \
+            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
+        }                                                                                                              \
+    }
+
+#define EXPECT_TOKEN_OR_CLEANUP(__PS_TOKEN_TYPE__)                                                                     \
+    if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
+        goto cleanup;
+
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
     strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
 
@@ -103,7 +119,19 @@ extern "C"
                     visit, __PS_ERROR__);                                                                              \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        return ps_interpreter_return_error(interpreter, __PS_ERROR__);                                                 \
+        return ps_interpreter_return_false(interpreter, __PS_ERROR__);                                                 \
+    }
+
+#define RETURN_ERROR_OR_CLEANUP(__PS_ERROR__)                                                                          \
+    {                                                                                                                  \
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cRETURN\t%-32s %-8d ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+                    visit, __PS_ERROR__);                                                                              \
+            ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
+        }                                                                                                              \
+        interpreter->error = _PS_ERROR_;                                                                               \
+        goto cleanup;                                                                                                  \
     }
 
 #define TRACE_ERROR(__PLUS__)                                                                                          \
@@ -123,7 +151,7 @@ extern "C"
         uint16_t line = 0;                                                                                             \
         uint16_t column = 0;                                                                                           \
         if (!ps_lexer_get_cursor(lexer, &line, &column))                                                               \
-            TRACE_ERROR("CURSOR!");                                                                                    \
+            TRACE_ERROR("CURSOR");                                                                                     \
         fprintf(stderr, "%*cCURSOR\t*** LINE=%d, COLUMN=%d ***\n", (interpreter->level - 1) * 8 - 1,                   \
                 mode == MODE_EXEC ? '*' : ' ', line, column);                                                          \
         ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \

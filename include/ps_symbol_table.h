@@ -15,7 +15,7 @@ extern "C"
 #endif
 
 #ifndef PS_SYMBOL_TABLE_DEFAULT_SIZE
-#define PS_SYMBOL_TABLE_DEFAULT_SIZE (16)
+#define PS_SYMBOL_TABLE_DEFAULT_SIZE 16
 #endif
 
     typedef uint16_t ps_symbol_table_size;
@@ -34,14 +34,13 @@ extern "C"
     {
         ps_symbol_table_size size;
         ps_symbol_table_size used;
-        // ps_symbol_error error;
-        // bool allocated;
-        bool trace;
-        bool debug;
         ps_symbol **symbols;
     } __attribute__((__packed__)) ps_symbol_table;
 
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
+
+    /** @brief Enable/disable trace logging */
+    extern bool ps_symbol_table_trace;
 
     /** @brief Allocate and initialize symbol table, use 0 for default size (PS_SYMBOL_TABLE_DEFAULT_SIZE) */
     ps_symbol_table *ps_symbol_table_init(ps_symbol_table_size size);
@@ -63,9 +62,6 @@ extern "C"
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
     ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
-
-    // /** @brief Get or add a string constant */
-    // ps_symbol *ps_symbol_table_add_string_constant(ps_symbol_table *table, char *z);
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table);

@@ -80,3 +80,9 @@ ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_
     }
     return PS_TOKEN_NONE;
 }
+
+ps_token_type ps_parser_expect_end_statement_token(ps_parser *parser)
+{
+    return ps_parser_expect_token_types(
+        parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
+}

@@ -63,20 +63,26 @@ ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter)
     return NULL;
 }
 
-bool ps_interpreter_return_error(ps_interpreter *interpreter, ps_error error)
+bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error)
 {
     interpreter->error = error;
     return false;
 }
 
+void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error)
+{
+    interpreter->error = error;
+    return NULL;
+}
+
 bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
 {
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
-        return ps_interpreter_return_error(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
     ps_environment *environment = ps_environment_init(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
     if (environment == NULL)
-        return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_MEMORY);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
     if (interpreter->debug >= DEBUG_VERBOSE)
@@ -93,7 +99,7 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
     ps_identifier name = {0};
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
-        return ps_interpreter_return_error(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
     ps_environment *environment = interpreter->environments[interpreter->level];
     strncpy(name, environment->name, PS_IDENTIFIER_SIZE - 1);
     ps_environment_done(environment);
@@ -122,11 +128,12 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
 {
     // char tmp[128];
     int level = interpreter->level;
+    ps_symbol *symbol;
     do
     {
         // snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
         // ps_symbol_table_dump(NULL, tmp, interpreter->environments[level]->symbols);
-        ps_symbol *symbol = ps_environment_find_symbol(interpreter->environments[level], name);
+        symbol = ps_environment_find_symbol(interpreter->environments[level], name);
         if (symbol != NULL)
             return symbol;
         if (local)
@@ -140,7 +147,7 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 {
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (!ps_environment_add_symbol(environment, symbol))
-        return ps_interpreter_return_error(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
     return true;
 }
 
@@ -159,7 +166,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     if (from->type->base == PS_TYPE_INTEGER && to->type->base == PS_TYPE_UNSIGNED)
     {
         if (interpreter->range_check && from->data.i < 0)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
         to->data.u = from->data.i;
         return true;
     }
@@ -167,7 +174,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     if (from->type->base == PS_TYPE_UNSIGNED && to->type->base == PS_TYPE_INTEGER)
     {
         if (interpreter->range_check && from->data.u > PS_INTEGER_MAX)
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OUT_OF_RANGE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
         to->data.i = from->data.u;
         return true;
     }
@@ -185,7 +192,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
         to->data.r = (ps_real)from->data.u;
         return true;
     }
-    return ps_interpreter_return_error(interpreter, PS_ERROR_TYPE_MISMATCH);
+    return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
 }
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)

@@ -8,20 +8,23 @@ Program Example20Procedure1;
 
 Var
     Variable1: Integer;
+    Parameter: Integer;
+    I: Integer;
 
 Procedure Procedure1;
 Var
     Variable1: Integer;
 Begin
-    Variable1 := 42;
+    Variable1 := Parameter * 2;
     WriteLn('    a. This is Procedure1, Variable1=', Variable1);
 End;
 
 Begin
     Variable1 := 1;
-    WriteLn('1. This is Program, Variable1=', Variable1);
-    Procedure1;
-    WriteLn('2. This is Program, Variable1=', Variable1);
-    Procedure1;
-    WriteLn('3. This is Program, Variable1=', Variable1);
+    For I := 1 to 3 Do
+    Begin
+        Parameter := I * 10;
+        WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', Parameter);
+        Procedure1;
+    End;
 End.

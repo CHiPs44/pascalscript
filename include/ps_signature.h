@@ -10,40 +10,66 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ps_interpreter.h"
 #include "ps_symbol.h"
-// #include "ps_value.h"
-// #include "ps_interpreter.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    typedef struct s_ps_parameter
+    typedef struct s_ps_formal_parameter
     {
-        ps_symbol *value; // name & type
-        bool byref;       // true if parameter is passed by reference
-    } /*__attribute__((__packed__))*/ ps_parameter;
+        bool by_ref; // true if parameter is passed by reference
+        ps_identifier name;
+        ps_symbol *type;
+    } ps_formal_parameter;
 
-    #define PS_PARAMETER_SIZE sizeof(ps_parameter)
-
-    typedef struct s_ps_signature
+    typedef struct s_ps_formal_signature
     {
-        ps_symbol *result_type;   // NULL for procedures
-        uint8_t size;            // size of the array
-        ps_parameter *parameters; // array of parameters
-    } __attribute__((__packed__)) ps_signature;
+        ps_symbol *result_type; // NULL for procedures
+        uint8_t parameter_count;
+        ps_formal_parameter *parameters;
+    } __attribute__((__packed__)) ps_formal_signature;
 
-    #define PS_SIGNATURE_SIZE sizeof(ps_signature)
+#define PS_FORMAL_PARAMETER_SIZE sizeof(ps_formal_parameter)
+#define PS_FORMAL_SIGNATURE_SIZE sizeof(ps_formal_signature)
 
-    /** @brief Initialize a new procedure or function signature */
-    ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type);
+    typedef union s_ps_actual_parameter {
+        bool by_ref;         // true if parameter is passed by reference
+        ps_value *value;     // for by value parameters
+        ps_symbol *variable; // for byref parameters
+    } ps_actual_parameter;
 
-    /** @brief Release a procedure or function signature */
-    void ps_signature_done(ps_signature *signature);
+    typedef struct s_ps_actual_signature
+    {
+        ps_symbol *result_type; // NULL for procedures
+        uint8_t parameter_count;
+        ps_formal_parameter *parameters;
+    } __attribute__((__packed__)) ps_actual_signature;
+
+#define PS_ACTUAL_PARAMETER_SIZE sizeof(ps_actual_parameter)
+#define PS_ACTUAL_SIGNATURE_SIZE sizeof(ps_actual_signature)
+
+    /** @brief Initialize a new procedure or function formal signature */
+    ps_formal_signature *ps_formal_signature_alloc(uint8_t size, ps_symbol *result_type);
+
+    /** @brief Release a procedure or function formal signature */
+    ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature);
+
+    /** @brief Add parameter to formal signature */
+    bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool by_ref, ps_identifier *name,
+                                           ps_symbol *type);
+
+    /** @brief Add byval parameter to actual signature */
+    bool ps_actual_signature_add_byval_parameter(ps_actual_signature *signature, ps_value value);
+
+    /** @brief Add byref parameter to actual signature */
+    bool ps_actual_signature_add_byref_parameter(ps_actual_signature *signature, ps_symbol *variable);
 
     /** @brief Compare formal and actual parameters */
-    bool ps_signature_compare(ps_signature *formal_parameters, ps_signature *actual_parameters);
+    bool ps_signature_compare(ps_formal_signature *formal, ps_actual_signature *actual);
 
 #ifdef __cplusplus
 }

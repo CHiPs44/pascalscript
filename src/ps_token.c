@@ -31,10 +31,6 @@ char *ps_token_dump_value(ps_token *token)
         type = "NONE";
         snprintf(value, sizeof(value) - 1, "%04d: NONE", token->type);
         break;
-    case PS_TOKEN_END_OF_FILE:
-        type = "EOF";
-        snprintf(value, sizeof(value) - 1, "%04d: END_OF_FILE", token->type);
-        break;
     case PS_TOKEN_INTEGER_VALUE:
         type = "INTEGER";
         snprintf(value, sizeof(value) - 1, "%04d: %" PS_INTEGER_FMT_10, token->type, token->value.i);
@@ -64,29 +60,31 @@ char *ps_token_dump_value(ps_token *token)
         type = "IDENTIFIER";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
+    // 1 character symbols
     case PS_TOKEN_AT_SIGN:           // @
     case PS_TOKEN_CARET:             // ^
     case PS_TOKEN_COLON:             // :
     case PS_TOKEN_COMMA:             // ,
-    case PS_TOKEN_ASSIGN:            // :=
-    case PS_TOKEN_RANGE:             // ..
     case PS_TOKEN_DOT:               // .
     case PS_TOKEN_EQUAL:             // =
-    case PS_TOKEN_GREATER_OR_EQUAL:  // >=
     case PS_TOKEN_GREATER_THAN:      // >
     case PS_TOKEN_LEFT_BRACKET:      // [
     case PS_TOKEN_LEFT_PARENTHESIS:  // (
-    case PS_TOKEN_LESS_OR_EQUAL:     // <=
     case PS_TOKEN_LESS_THAN:         // <
     case PS_TOKEN_MINUS:             // -
-    case PS_TOKEN_NOT_EQUAL:         // <>
     case PS_TOKEN_PLUS:              // +
-    case PS_TOKEN_POWER:             // **
     case PS_TOKEN_RIGHT_BRACKET:     // ]
     case PS_TOKEN_RIGHT_PARENTHESIS: // )
     case PS_TOKEN_SEMI_COLON:        // ;
     case PS_TOKEN_SLASH:             // /
     case PS_TOKEN_STAR:              // *
+    // 2 characters symbols
+    case PS_TOKEN_ASSIGN:           // :=
+    case PS_TOKEN_GREATER_OR_EQUAL: // >=
+    case PS_TOKEN_LESS_OR_EQUAL:    // <=
+    case PS_TOKEN_NOT_EQUAL:        // <>
+    case PS_TOKEN_POWER:            // **
+    case PS_TOKEN_RANGE:            // ..
         type = "RESERVED";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
@@ -116,29 +114,29 @@ struct s_ps_reserved_symbol
     ps_token_type token_type;
 } ps_reserved_symbols[] = {
     // clang-format off
-    { .symbol = "-"  ,.token_type = PS_TOKEN_MINUS             },
-    { .symbol = ","  ,.token_type = PS_TOKEN_COMMA             },
-    { .symbol = ";"  ,.token_type = PS_TOKEN_SEMI_COLON        },
-    { .symbol = ":"  ,.token_type = PS_TOKEN_COLON             },
-    { .symbol = ":=" ,.token_type = PS_TOKEN_ASSIGN            },
-    { .symbol = ".." ,.token_type = PS_TOKEN_RANGE             },
-    { .symbol = "."  ,.token_type = PS_TOKEN_DOT               },
-    { .symbol = "("  ,.token_type = PS_TOKEN_LEFT_PARENTHESIS  },
-    { .symbol = ")"  ,.token_type = PS_TOKEN_RIGHT_PARENTHESIS },
-    { .symbol = "["  ,.token_type = PS_TOKEN_LEFT_BRACKET      },
-    { .symbol = "]"  ,.token_type = PS_TOKEN_RIGHT_BRACKET     },
-    { .symbol = "@"  ,.token_type = PS_TOKEN_AT_SIGN           },
-    { .symbol = "*"  ,.token_type = PS_TOKEN_STAR              },
-    { .symbol = "**" ,.token_type = PS_TOKEN_POWER             },
-    { .symbol = "/"  ,.token_type = PS_TOKEN_SLASH             },
-    { .symbol = "^"  ,.token_type = PS_TOKEN_CARET             },
-    { .symbol = "+"  ,.token_type = PS_TOKEN_PLUS              },
-    { .symbol = "<"  ,.token_type = PS_TOKEN_LESS_THAN         },
-    { .symbol = "<=" ,.token_type = PS_TOKEN_LESS_OR_EQUAL     },
-    { .symbol = "<>" ,.token_type = PS_TOKEN_NOT_EQUAL         },
-    { .symbol = "="  ,.token_type = PS_TOKEN_EQUAL             },
-    { .symbol = ">"  ,.token_type = PS_TOKEN_GREATER_THAN      },
-    { .symbol = ">=" ,.token_type = PS_TOKEN_GREATER_OR_EQUAL  },
+    { .symbol = "-" , .token_type = PS_TOKEN_MINUS             },
+    { .symbol = "," , .token_type = PS_TOKEN_COMMA             },
+    { .symbol = ";" , .token_type = PS_TOKEN_SEMI_COLON        },
+    { .symbol = ":" , .token_type = PS_TOKEN_COLON             },
+    { .symbol = ":=", .token_type = PS_TOKEN_ASSIGN            },
+    { .symbol = "..", .token_type = PS_TOKEN_RANGE             },
+    { .symbol = "." , .token_type = PS_TOKEN_DOT               },
+    { .symbol = "(" , .token_type = PS_TOKEN_LEFT_PARENTHESIS  },
+    { .symbol = ")" , .token_type = PS_TOKEN_RIGHT_PARENTHESIS },
+    { .symbol = "[" , .token_type = PS_TOKEN_LEFT_BRACKET      },
+    { .symbol = "]" , .token_type = PS_TOKEN_RIGHT_BRACKET     },
+    { .symbol = "@" , .token_type = PS_TOKEN_AT_SIGN           },
+    { .symbol = "*" , .token_type = PS_TOKEN_STAR              },
+    { .symbol = "**", .token_type = PS_TOKEN_POWER             },
+    { .symbol = "/" , .token_type = PS_TOKEN_SLASH             },
+    { .symbol = "^" , .token_type = PS_TOKEN_CARET             },
+    { .symbol = "+" , .token_type = PS_TOKEN_PLUS              },
+    { .symbol = "<" , .token_type = PS_TOKEN_LESS_THAN         },
+    { .symbol = "<=", .token_type = PS_TOKEN_LESS_OR_EQUAL     },
+    { .symbol = "<>", .token_type = PS_TOKEN_NOT_EQUAL         },
+    { .symbol = "=" , .token_type = PS_TOKEN_EQUAL             },
+    { .symbol = ">" , .token_type = PS_TOKEN_GREATER_THAN      },
+    { .symbol = ">=", .token_type = PS_TOKEN_GREATER_OR_EQUAL  },
     // clang-format on
 };
 

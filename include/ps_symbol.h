@@ -18,6 +18,7 @@ extern "C"
     // Forward reference to value
     typedef struct s_ps_value ps_value;
 
+    /** @brief Only?! 8 kinds of symbols for now... */
     typedef enum e_ps_symbol_kind
     {
         PS_SYMBOL_KIND_AUTO,
@@ -48,7 +49,7 @@ extern "C"
     typedef uint32_t ps_symbol_hash_key;
 
     ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value);
-    void ps_symbol_free(ps_symbol *symbol);
+    ps_symbol *ps_symbol_free(ps_symbol *symbol);
 
     /** @brief Get name of symbol kind */
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);

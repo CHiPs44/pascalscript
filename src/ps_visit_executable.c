@@ -11,12 +11,85 @@
 #include "ps_visit.h"
 
 /**
- * Visit procedure or function declaration:
- *      PROCEDURE IDENTIFIER
+ * Visit parameter definition:
+ *      IDENTIFIER ':' TYPE_REFERENCE
+ * Next steps:
+ *   - allow VAR parameters:
+ *      'VAR' IDENTIFIER ':' TYPE_REFERENCE
+ */
+bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *name,
+                                   ps_identifier *type, bool *by_reference)
+{
+    VISIT_BEGIN("PARAMETER_DEFINITION", "");
+
+    ps_identifier parameter_name = {0};
+    ps_symbol *parameter_type = NULL;
+    ps_symbol *symbol = NULL;
+
+    // Default is "by value"
+    *by_reference = false;
+    if (lexer->current_token.type == PS_TOKEN_VAR)
+    {
+        *by_reference = true;
+        READ_NEXT_TOKEN;
+    }
+
+    // Parameter name
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    COPY_IDENTIFIER(parameter_name);
+    if (mode == MODE_EXEC)
+    {
+        symbol = ps_interpreter_find_symbol(interpreter, &parameter_name, true);
+        if (symbol != NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+        memcpy(*name, &parameter_name, sizeof(ps_identifier));
+    }
+    READ_NEXT_TOKEN;
+    // Then :
+    EXPECT_TOKEN(PS_TOKEN_COLON);
+    // Then parameter type
+    if (!ps_visit_type_reference(interpreter, mode, &parameter_type))
+        RETURN_ERROR(interpreter->error);
+    if (mode == MODE_EXEC)
+    {
+        // Add symbol to the current environment
+        symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, NULL);
+        if (symbol == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            return false;
+        }
+        ps_value *value = ps_value_alloc(ps_system_none.value->data.t, (ps_value_data){.v = NULL});
+        if (value == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            ps_symbol_free(symbol);
+            return false;
+        }
+        symbol->value = value;
+        if (!ps_interpreter_add_symbol(interpreter, symbol))
+        {
+            ps_symbol_free(symbol);
+            return false;
+        }
+    }
+
+    VISIT_END("OK");
+}
+
+/**
+ * Visit procedure declaration:
+ *      PROCEDURE IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] ;
  *      [ CONST ... TYPE ... VAR ... ]*
  *      BEGIN
  *          COMPOUND_STATEMENT [ ; ]
  *      END ;
+ *      FUNCTION IDENTIFIER [ ( ) ] : TYPE ;
+ *      [ CONST ... TYPE ... VAR ... ]*
+ *      BEGIN
+ *          COMPOUND_STATEMENT [ ; ]
+ *      END ;
+ *      PARAMETER_DEFINITION = IDENTIFIER [ ':' TYPE ] [ 'VAR' ] ;
  * Next steps:
  *  - allow procedure parameters
  *  - allow by reference parameters
@@ -32,6 +105,10 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     ps_executable *executable = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
+    ps_value result = {0};
+    ps_identifier parameter_name = {0};
+    ps_identifier parameter_type = {0};
+    uint8_t parameter_count = 0;
     bool has_environment = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
@@ -39,8 +116,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     if (kind == PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
 
-    READ_NEXT_TOKEN;
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    READ_NEXT_TOKEN_OR_CLEANUP;
+    EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(identifier);
     callable = ps_interpreter_find_symbol(interpreter, &identifier, true);
     if (callable != NULL)
@@ -56,9 +133,44 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         goto cleanup;
     }
     READ_NEXT_TOKEN;
-    // NB: no parameters nor parenthesis for now
-    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+
+    // Skip parameters for now
+    if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
+    {
+        do
+        {
+            READ_NEXT_TOKEN_OR_CLEANUP;
+            if (!ps_lexer_get_cursor(lexer, &line, &column))
+            {
+                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                goto cleanup;
+            }
+            if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+                break;
+            // NB; no VAR parameters for now
+            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+            {
+                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+                goto cleanup;
+            }
+
+            parameter_count += 1;
+            if (lexer->current_token.type == PS_TOKEN_COMMA)
+                continue;
+            if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
+            {
+                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+                goto cleanup;
+            }
+        } while (true);
+    }
     // interpreter->debug = debug;
+
+    if (PS_TOKEN_NONE == ps_parser_expect_end_statement_token(interpreter->parser))
+    {
+        interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+        goto cleanup;
+    }
 
     executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
     if (executable == NULL)

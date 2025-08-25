@@ -40,6 +40,8 @@ extern "C"
     bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type);
     /** @brief Expect token types */
     ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[]);
+    /** @brief Expect end of statement token: ';', END, ELSE, UNTIL */
+    ps_token_type ps_parser_expect_end_statement_token(ps_parser *parser);
 
 #ifdef __cplusplus
 }

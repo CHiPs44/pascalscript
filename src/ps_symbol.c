@@ -20,10 +20,10 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
         return NULL;
     symbol->kind = kind;
     if (name != NULL)
-        memcpy(&symbol->name, name, PS_IDENTIFIER_LEN + 1);
+        memcpy(&symbol->name, name, PS_IDENTIFIER_SIZE);
     else
     {
-        memset(&symbol->name, 0, PS_IDENTIFIER_LEN + 1);
+        memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);
         snprintf((char *)&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
     }
     symbol->allocated = true;
@@ -31,11 +31,12 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
     return symbol;
 }
 
-void ps_symbol_free(ps_symbol *symbol)
+ps_symbol *ps_symbol_free(ps_symbol *symbol)
 {
-    if (!symbol->allocated)
-        return; // not allocated, do not free
-    free(symbol);
+    // free only allocated symbols
+    if (symbol->allocated)
+        free(symbol);
+    return NULL;
 }
 
 void ps_symbol_normalize_name(ps_symbol *symbol)

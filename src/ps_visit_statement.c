@@ -180,9 +180,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // Save "cursor" position
         if (!ps_lexer_get_cursor(lexer, &line, &column))
             RETURN_ERROR(PS_ERROR_GENERIC); // TODO better error code
-        ps_token_type token_type = ps_parser_expect_token_types(
-            interpreter->parser, 4,
-            (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
+        ps_token_type token_type = ps_parser_expect_end_statement_token(interpreter->parser);
         if (token_type == PS_TOKEN_NONE)
         {
             interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
@@ -192,9 +190,9 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (mode == MODE_EXEC)
         {
             // fprintf(stderr, "================================================================================\n");
-            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line, column);
-            // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
-            // Set cursor to the beginning of the procedure body
+            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line,
+            // column); ps_token_debug(stderr, "CURRENT", &lexer->current_token); Set cursor to the beginning of the
+            // procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
@@ -243,8 +241,8 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     bool loop = true;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
-    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON || lexer->current_token.type == PS_TOKEN_ELSE ||
-        lexer->current_token.type == PS_TOKEN_END || lexer->current_token.type == PS_TOKEN_UNTIL)
+    // (Write without parameters is legal but is a no-op)
+    if (PS_TOKEN_NONE != ps_parser_expect_end_statement_token(interpreter->parser))
     {
         if (mode == MODE_EXEC && newline)
             fprintf(stdout, "\n");

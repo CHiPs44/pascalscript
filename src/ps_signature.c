@@ -13,75 +13,87 @@
 #include "ps_symbol.h"
 #include "ps_value.h"
 
-ps_signature *ps_signature_init(uint8_t size, ps_symbol *result_type)
+ps_signature *ps_signature_init(uint8_t parameter_count, ps_symbol *result_type)
 {
     ps_signature *signature = calloc(1, sizeof(ps_signature));
     if (signature == NULL)
         return NULL;
-    signature->parameters = calloc(size, sizeof(ps_parameter));
+    signature->parameters = calloc(parameter_count, sizeof(ps_formal_parameter));
     if (signature->parameters == NULL)
     {
         ps_signature_done(signature);
         return NULL;
     }
     signature->result_type = result_type;
-    signature->size = size;
+    signature->parameter_count = parameter_count;
     return signature;
 }
 
-void ps_signature_done(ps_signature *signature)
+ps_signature *ps_signature_done(ps_signature *signature)
 {
-    if (signature == NULL)
-        return;
-    if (signature->parameters != NULL)
-        free(signature->parameters);
-    free(signature);
+    if (signature != NULL)
+    {
+        if (signature->parameters != NULL)
+            free(signature->parameters);
+        free(signature);
+    }
+    return NULL;
 }
 
-bool ps_signature_compare(ps_signature *formal, ps_signature *actual)
+ps_error ps_signature_compare(ps_signature *formal, ps_signature *actual)
 {
-    // Same number of parameters?
-    if (formal->size != actual->size)
-        return false;
-    for (uint8_t i = 0; i < formal->size; i++)
-    {
-        // Same type?
-        if (formal->parameters[i].value->value->type != actual->parameters[i].value->value->type)
-            return false;
-        // Byref parameters must go to a variable
-        if (formal->parameters[i].byref && actual->parameters[i].value->kind != PS_SYMBOL_KIND_VARIABLE)
-            return false;
-    }
-    return true;
+    return PS_ERROR_NOT_IMPLEMENTED;
+    // ps_type_definition *formal_type, *actual_type;
+
+    // // Same number of parameters?
+    // if (formal->parameter_count != actual->parameter_count)
+    //     return PS_ERROR_PARAMETER_COUNT_MISMATCH;
+    // // Compare parameters one by one
+    // for (int i = 0; i < formal->parameter_count; i++)
+    // {
+    //     // Same type?
+    //     formal_type = formal->parameters[i].data.actual.type->value->type;
+    //     actual_type = formal->parameters[i].data.formal.value->data.t;
+    //     if (formal_type != actual_type)
+    //         return PS_ERROR_UNEXPECTED_TYPE;
+    //     // Byref parameters must go to a variable
+    //     if (formal->parameters[i].by_ref && !actual->parameters[i].by_ref)
+    //         return PS_ERROR_EXPECTED_VARIABLE;
+    //     if (actual->parameters[i].kind != PS_SYMBOL_KIND_VARIABLE)
+    //         return PS_ERROR_EXPECTED_VARIABLE;
+    // }
+
+    // return PS_ERROR_NONE;
 }
 
 bool ps_signature_assign(ps_interpreter *interpreter, ps_signature *formal, ps_signature *actual)
 {
-    ps_symbol *variable;
-    ps_environment *environment = ps_interpreter_get_environment(interpreter);
-    for (uint8_t i = 0; i < formal->size; i++)
-    {
-        variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
-        if (variable == NULL)
-            return false;
-        if (!ps_environment_add_symbol(environment, variable))
-        {
-            ps_symbol_free(variable);
-            return false;
-        }
-        if (formal->parameters[i].byref)
-        {
-            // 2 variables point to the same value
-            variable->value = actual->parameters[i].value->value;
-        }
-        else
-        {
-            if (!ps_interpreter_copy_value(interpreter, actual->parameters[i].value->value, variable->value))
-            {
-                ps_symbol_free(variable);
-                return false;
-            }
-        }
-    }
-    return true;
+    return false;
+    // ps_symbol *variable;
+    // ps_environment *environment = ps_interpreter_get_environment(interpreter);
+    // for (uint8_t i = 0; i < formal->parameter_count; i++)
+    // {
+    //     variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &formal->parameters[i].value->name, NULL);
+    //     if (variable == NULL)
+    //         return false;
+    //     if (!ps_environment_add_symbol(environment, variable))
+    //     {
+    //         ps_symbol_free(variable);
+    //         return false;
+    //     }
+    //     if (formal->parameters[i].by_ref)
+    //     {
+    //         // 2 variables point to the same value
+    //         variable->value = actual->parameters[i].value->value;
+    //     }
+    //     else
+    //     {
+    //         if (!ps_interpreter_copy_value(interpreter, actual->parameters[i].value->value, variable->value))
+    //         {
+    //             ps_symbol_free(variable);
+    //             return false;
+    //         }
+    //     }
+    // }
+    // return true;
 }

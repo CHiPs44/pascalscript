@@ -65,7 +65,10 @@ extern "C"
     ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter);
 
     /** @brief Set error & return false */
-    bool ps_interpreter_return_error(ps_interpreter *interpreter, ps_error error);
+    bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error);
+
+    /** @brief Set error & return NULL */
+    void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error);
 
     /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
     bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);

@@ -589,9 +589,6 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
     case PS_TOKEN_NONE:
         snprintf(value, sizeof(value) - 1, "NONE");
         break;
-    case PS_TOKEN_END_OF_FILE:
-        snprintf(value, sizeof(value) - 1, "EOF");
-        break;
     case PS_TOKEN_INTEGER_VALUE:
         snprintf(value, sizeof(value) - 1, "INTEGER %" PS_INTEGER_FMT_10, lexer->current_token.value.i);
         break;

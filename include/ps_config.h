@@ -169,6 +169,7 @@ extern "C"
 #endif
 
 #define PS_IDENTIFIER_SIZE (PS_IDENTIFIER_LEN + 1)
+
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 
 #ifdef __cplusplus

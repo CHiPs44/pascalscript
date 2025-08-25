@@ -424,7 +424,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = value->data.r * value->data.r;
         break;
     default:
-        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return PS_ERROR_NONE;
 }
@@ -441,7 +441,7 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value
         result->data.r = sqrt(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return PS_ERROR_NONE;
 }
@@ -456,7 +456,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = exp(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return PS_ERROR_NONE;
 }
@@ -473,7 +473,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *
         result->data.r = log(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return PS_ERROR_NONE;
 }
@@ -490,7 +490,7 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = log10(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_error(interpreter, PS_ERROR_EXPECTED_REAL);
+        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
     }
     return PS_ERROR_NONE;
 }

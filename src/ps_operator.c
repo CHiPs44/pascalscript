@@ -39,7 +39,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.i = -value->data.i;
             break;
         default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         break;
     case PS_TYPE_UNSIGNED:
@@ -49,7 +49,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.u = ~value->data.u;
             break;
         default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         break;
     case PS_TYPE_REAL:
@@ -59,7 +59,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.r = -value->data.r;
             break;
         default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         break;
     case PS_TYPE_BOOLEAN:
@@ -69,11 +69,11 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
             result->data.b = !value->data.b;
             break;
         default:
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         break;
     default:
-        return ps_interpreter_return_error(interpreter, PS_ERROR_TYPE_MISMATCH);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
     }
     return true;
 }
@@ -104,7 +104,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
 #define NUMBER_CASE_DIV_MOD(__KEY__, __A__, __B__, __OP__, __R__, __TYPE__)                                            \
     case (__KEY__):                                                                                                    \
         if (b->data.__B__ == 0)                                                                                        \
-            return ps_interpreter_return_error(interpreter, PS_ERROR_DIVISION_BY_ZERO);                                \
+            return ps_interpreter_return_false(interpreter, PS_ERROR_DIVISION_BY_ZERO);                                \
         result->data.__R__ = a->data.__A__ __OP__ b->data.__B__;                                                       \
         r = __TYPE__;                                                                                                  \
         break;
@@ -112,7 +112,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
 #define NUMBER_CASE_DIV_REAL(__KEY__, __A__, __B__)                                                                    \
     case (__KEY__):                                                                                                    \
         if ((ps_real)(b->data.__B__) == 0.0)                                                                           \
-            return ps_interpreter_return_error(interpreter, PS_ERROR_DIVISION_BY_ZERO);                                \
+            return ps_interpreter_return_false(interpreter, PS_ERROR_DIVISION_BY_ZERO);                                \
         result->data.r = (ps_real)(a->data.__A__) / (ps_real)(b->data.__B__);                                          \
         r = PS_TYPE_REAL;                                                                                              \
         break;
@@ -369,7 +369,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                     ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                     ps_value_type_get_name(b->type->base));
         }
-        return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
     if (result->type != NULL && result->type->base != PS_TYPE_NONE)
     {
@@ -382,7 +382,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                         ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                         ps_value_type_get_name(b->type->base));
             }
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
     }
     else
@@ -415,7 +415,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
                         ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
                         ps_value_type_get_name(b->type->base));
             }
-            return ps_interpreter_return_error(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
     }
     return true;
