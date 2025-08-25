@@ -48,7 +48,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     // Then :
     EXPECT_TOKEN(PS_TOKEN_COLON);
     // Then parameter type
-    if (!ps_visit_type_reference(interpreter, mode, &parameter_type))
+    if (!ps_visit_type_reference(interpreter, mode, parameter_type))
         RETURN_ERROR(interpreter->error);
     if (mode == MODE_EXEC)
     {
@@ -102,12 +102,13 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     ps_identifier identifier;
     ps_symbol *callable = NULL;
     ps_value *value = NULL;
+    ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
-    ps_value result = {0};
-    ps_identifier parameter_name = {0};
-    ps_identifier parameter_type = {0};
+    // ps_value result = {0};
+    // ps_identifier parameter_name = {0};
+    // ps_identifier parameter_type = {0};
     uint8_t parameter_count = 0;
     bool has_environment = false;
 
@@ -134,7 +135,12 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     }
     READ_NEXT_TOKEN;
 
-    // Skip parameters for now
+    signature = ps_formal_signature_alloc(0, &ps_system_none);
+    if (signature == NULL)
+    {
+        interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+        goto cleanup;
+    }
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
         do
@@ -153,7 +159,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
                 interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
                 goto cleanup;
             }
-
             parameter_count += 1;
             if (lexer->current_token.type == PS_TOKEN_COMMA)
                 continue;
@@ -166,13 +171,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     }
     // interpreter->debug = debug;
 
-    if (PS_TOKEN_NONE == ps_parser_expect_end_statement_token(interpreter->parser))
-    {
-        interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-        goto cleanup;
-    }
+    EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
 
-    executable = ps_executable_alloc(NULL, ps_system_none.value->type, line, column);
+    executable = ps_executable_alloc(signature, line, column);
     if (executable == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;

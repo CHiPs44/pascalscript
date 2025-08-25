@@ -70,10 +70,10 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 {
     VISIT_BEGIN("TYPE_REFERENCE", "");
 
-    ps_unsigned len = 0;
+    // ps_unsigned len = 0;
     ps_symbol *symbol = NULL;
-    ps_value_data data = {.t = ps_system_none.value->data.t};
-    ps_type_definition *type_def = NULL;
+    // ps_value_data data = {.t = ps_system_none.value->data.t};
+    // ps_type_definition *type_def = NULL;
     bool advance = true;
 
     type_symbol = NULL;

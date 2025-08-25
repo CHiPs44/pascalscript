@@ -243,24 +243,25 @@ char *ps_value_to_string(ps_value *value, bool debug)
         }
         break;
     case PS_TYPE_EXECUTABLE:
-        if (debug)
-            if (value->data.x == NULL)
-                snprintf(buffer, sizeof(buffer) - 1, "NULL!");
-            else
-                snprintf(buffer, sizeof(buffer) - 1, "%s@%05d/%03d",
-                         value->data.x->return_type == NULL ? "PROCEDURE" : "FUNCTION", value->data.x->line,
-                         value->data.x->column);
-        else if (value->data.x == NULL)
-            snprintf(buffer, sizeof(buffer) - 1, "NULL");
+        ps_executable *executable = value->data.x;
+        ps_formal_signature *signature;
+        if (executable == NULL)
+            snprintf(buffer, sizeof(buffer) - 1, "NULL!");
         else
-            snprintf(buffer, sizeof(buffer) - 1, "TODO?");
+        {
+            signature = executable->signature;
+            snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",
+                     signature->result_type == NULL || signature->result_type == &ps_system_none ? "PROCEDURE"
+                                                                                                 : "FUNCTION",
+                     executable->line + 1, executable->column + 1);
+        }
         break;
     // case PS_TYPE_POINTER:
     //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
     //     break;
     default:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "[? TYPE %d ?]", value->type->base);
+            snprintf(buffer, sizeof(buffer) - 1, "[? BASE %d ?]", value->type->base);
         else
             return NULL;
         break;

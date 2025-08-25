@@ -15,7 +15,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-static bool ps_symbol_table_trace = false;
+bool ps_symbol_table_trace = false;
 
 void ps_symbol_table_log(const char *format, ...)
 {
@@ -119,7 +119,7 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
                 index = 0; // wrap around
             if (index == start_index)
             {
-                ps_symbol_table_log(stderr, "TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
+                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
                 return PS_SYMBOL_TABLE_NOT_FOUND;
             }
             if (table->symbols[index] == NULL)
@@ -127,7 +127,7 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
             if (strcmp((char *)(table->symbols[index]->name), (char *)name) == 0)
             {
                 ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);
-                return index; // found
+                return index;
             }
         } while (true);
     }

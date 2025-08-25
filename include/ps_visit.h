@@ -49,13 +49,17 @@ extern "C"
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
-    bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable/*,
-                                 uint16_t line, uint16_t column*/);
+    bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable);
     bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
+
+    /* src/ps_visit_type.c */
+    bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *type_symbol);
+    bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);                                                        \
