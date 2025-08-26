@@ -67,12 +67,18 @@ ps_actual_signature *ps_actual_signature_free(ps_actual_signature *signature)
     return NULL;
 }
 
-bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name,
-                                       ps_symbol *type)
+bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name, ps_symbol *type)
 {
-    // TODO double size and realloc if needed
+    ps_formal_parameter *new_parameters;
     if (signature->parameter_count >= signature->size)
-        return false;
+    {
+        // Increment size and realloc if needed
+        new_parameters = realloc(signature->parameters, (signature->size + 1) * sizeof(ps_formal_parameter));
+        if (new_parameters == NULL)
+            return false;
+        signature->size = signature->size + 1;
+        signature->parameters = new_parameters;
+    }
     signature->parameters[signature->parameter_count].byref = byref;
     memcpy(&signature->parameters[signature->parameter_count].name, name, PS_IDENTIFIER_SIZE);
     signature->parameters[signature->parameter_count].type = type;

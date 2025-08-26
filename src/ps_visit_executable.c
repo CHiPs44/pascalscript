@@ -107,9 +107,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     uint16_t line = 0;
     uint16_t column = 0;
     // ps_value result = {0};
-    // ps_identifier parameter_name = {0};
-    // ps_identifier parameter_type = {0};
-    uint8_t parameter_count = 0;
+    ps_identifier parameter_name = {0};
+    ps_identifier parameter_type = {0};
+    bool by_reference = false;
     bool has_environment = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
@@ -153,13 +153,18 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
             }
             if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 break;
-            // NB; no VAR parameters for now
+            if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, &parameter_type, &by_reference))
+                goto cleanup;
+            if (!ps_formal_signature_add_parameter(signature, &parameter_name, &parameter_type, by_reference))
+            {
+                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                goto cleanup;
+            }
             if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
             {
                 interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
                 goto cleanup;
             }
-            parameter_count += 1;
             if (lexer->current_token.type == PS_TOKEN_COMMA)
                 continue;
             if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
