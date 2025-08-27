@@ -12,19 +12,16 @@
 
 /**
  * Visit parameter definition:
- *      IDENTIFIER ':' TYPE_REFERENCE
- * Next steps:
- *   - allow VAR parameters:
- *      'VAR' IDENTIFIER ':' TYPE_REFERENCE
+ *      [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
  */
 bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *name,
-                                   ps_identifier *type, bool *by_reference)
+                                   ps_symbol *type_symbol, bool *by_reference)
 {
     VISIT_BEGIN("PARAMETER_DEFINITION", "");
 
     ps_identifier parameter_name = {0};
-    ps_symbol *parameter_type = NULL;
     ps_symbol *symbol = NULL;
+    ps_value *value = NULL;
 
     // Default is "by value"
     *by_reference = false;
@@ -39,38 +36,41 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     COPY_IDENTIFIER(parameter_name);
     if (mode == MODE_EXEC)
     {
+        // Check that the parameter name does not already exist in the current environment
         symbol = ps_interpreter_find_symbol(interpreter, &parameter_name, true);
         if (symbol != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         memcpy(*name, &parameter_name, sizeof(ps_identifier));
     }
     READ_NEXT_TOKEN;
-    // Then :
+
+    // Then ':'
     EXPECT_TOKEN(PS_TOKEN_COLON);
+    READ_NEXT_TOKEN;
+
     // Then parameter type
-    if (!ps_visit_type_reference(interpreter, mode, parameter_type))
+    if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
+    
+    // If in execution mode, add the parameter variable to the current environment
     if (mode == MODE_EXEC)
     {
-        // Add symbol to the current environment
         symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, NULL);
         if (symbol == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            return false;
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         }
-        ps_value *value = ps_value_alloc(ps_system_none.value->data.t, (ps_value_data){.v = NULL});
+        value = ps_value_alloc(ps_system_none.value->data.t, (ps_value_data){.v = NULL});
         if (value == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
             ps_symbol_free(symbol);
-            return false;
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         }
         symbol->value = value;
         if (!ps_interpreter_add_symbol(interpreter, symbol))
         {
             ps_symbol_free(symbol);
-            return false;
+            RETURN_ERROR(interpreter->error);
         }
     }
 
@@ -108,7 +108,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     uint16_t column = 0;
     // ps_value result = {0};
     ps_identifier parameter_name = {0};
-    ps_identifier parameter_type = {0};
+    ps_symbol *parameter_type = NULL;
     bool by_reference = false;
     bool has_environment = false;
 
@@ -153,9 +153,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
             }
             if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 break;
-            if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, &parameter_type, &by_reference))
+            if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, parameter_type, &by_reference))
                 goto cleanup;
-            if (!ps_formal_signature_add_parameter(signature, &parameter_name, &parameter_type, by_reference))
+            if (!ps_formal_signature_add_parameter(signature, by_reference, &parameter_name, parameter_type))
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 goto cleanup;

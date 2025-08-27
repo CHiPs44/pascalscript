@@ -195,6 +195,7 @@ struct s_ps_keyword
     { .keyword = "SHL"              , .token_type = PS_TOKEN_SHL           },
     { .keyword = "SHR"              , .token_type = PS_TOKEN_SHR           },
     { .keyword = "STRING"           , .token_type = PS_TOKEN_STRING        },
+    { .keyword = "TEXT"             , .token_type = PS_TOKEN_TEXT          },
     { .keyword = "THEN"             , .token_type = PS_TOKEN_THEN          },
     { .keyword = "TO"               , .token_type = PS_TOKEN_TO            },
     { .keyword = "TYPE"             , .token_type = PS_TOKEN_TYPE          },

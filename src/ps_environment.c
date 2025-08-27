@@ -41,7 +41,7 @@ bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol)
     return environment->error == PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
-ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name)
+ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name, bool local)
 {
     ps_symbol *symbol;
     do
@@ -49,6 +49,8 @@ ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier
         symbol = ps_symbol_table_get(environment->symbols, name);
         if (symbol != NULL)
             return symbol;
+        if (local)
+            break;
         environment = environment->parent;
     } while (environment != NULL);
     return NULL;

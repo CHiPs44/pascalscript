@@ -277,10 +277,11 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
     ps_identifier identifier[8];
     int var_count;
-    ps_type_definition *type;
-    ps_value *value;
-    ps_value_data data;
-    ps_symbol *variable;
+    ps_symbol *type = NULL;
+    ps_value *value = NULL;
+    ps_value_data data = {0};
+    ps_symbol *variable = NULL;
+
     EXPECT_TOKEN(PS_TOKEN_VAR);
     READ_NEXT_TOKEN;
     do
@@ -305,52 +306,16 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 continue;
             }
         } while (true);
-        EXPECT_TOKEN(PS_TOKEN_COLON);
         READ_NEXT_TOKEN;
-        switch (lexer->current_token.type)
-        {
-        case PS_TOKEN_BOOLEAN:
-            type = ps_system_boolean.value->data.t;
-            data.b = (ps_boolean) false;
-            break;
-        case PS_TOKEN_CHAR:
-            type = ps_system_char.value->data.t;
-            data.c = '\0';
-            break;
-        case PS_TOKEN_INTEGER:
-            type = ps_system_integer.value->data.t;
-            data.i = 0;
-            break;
-        case PS_TOKEN_UNSIGNED:
-            type = ps_system_unsigned.value->data.t;
-            data.u = 0;
-            break;
-        case PS_TOKEN_REAL:
-            type = ps_system_real.value->data.t;
-            data.r = 0.0;
-            break;
-        case PS_TOKEN_STRING:
-            type = ps_system_string.value->data.t;
-            data.s = NULL;
-            break;
-        case PS_TOKEN_ARRAY:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-            // type = ps_system_array.value->data.t;
-            // data.s = NULL;
-            // break;
-        case PS_TOKEN_IDENTIFIER:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-        }
-        READ_NEXT_TOKEN;
+        if (!ps_visit_type_reference(interpreter, mode, &type))
+            RETURN_ERROR(interpreter->error);
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
         // if (mode==MODE_EXEC)
         // {
         for (int i = 0; i <= var_count; i++)
         {
-            value = ps_value_alloc(type, data);
+            value = ps_value_alloc(type->value->data.t, data);
             variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
             if (variable == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);

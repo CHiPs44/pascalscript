@@ -7,9 +7,7 @@
 Program Example20Procedure1;
 
 Var
-    Variable1: Integer;
-    Parameter: Integer;
-    I: Integer;
+    Variable1, Parameter, I: Integer;
 
 Procedure Procedure1;
 Var

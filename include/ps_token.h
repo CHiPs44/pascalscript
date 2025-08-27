@@ -150,6 +150,7 @@ extern "C"
         PS_TOKEN_RECORD, // *FUTURE*
         PS_TOKEN_WITH,   // *FUTURE*
         PS_TOKEN_FILE,   // *FUTURE*
+        PS_TOKEN_TEXT,   // *FUTURE*
         PS_TOKEN_IF,
         PS_TOKEN_THEN,
         PS_TOKEN_ELSE,

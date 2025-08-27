@@ -66,7 +66,7 @@ char *ps_error_get_message(ps_error error)
     case PS_ERROR_SYMBOL_NOT_FOUND:
         return "Symbol not found";
     case PS_ERROR_SYMBOL_EXISTS:
-        return "Symbol alreayd exists";
+        return "Symbol already exists";
     case PS_ERROR_OPERATOR_NOT_APPLICABLE:
         return "Operator not applicable";
     case PS_ERROR_UNEXPECTED_TYPE:

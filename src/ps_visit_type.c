@@ -10,11 +10,12 @@
 #include "ps_visit.h"
 
 /**
- * Visit type reference, for now, only base types:
- *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR' 
+ * @details
+ *  Visit type reference, for now, only base types:
+ *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
  *      | 'STRING'
  *      | IDENTIFIER
- * Next steps:
+ *  Next steps:
  *      'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
  *      ENUMERATION =   '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
  *        Examples:
@@ -66,7 +67,7 @@
  * ???:
  *      POINTER     =   'POINTER'
  */
-bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *type_symbol)
+bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
 {
     VISIT_BEGIN("TYPE_REFERENCE", "");
 
@@ -76,24 +77,24 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     // ps_type_definition *type_def = NULL;
     bool advance = true;
 
-    type_symbol = NULL;
+    *type_symbol = NULL;
     switch (lexer->current_token.type)
     {
         /* ********** Base types ********** */
     case PS_TOKEN_INTEGER:
-        type_symbol = &ps_system_integer;
+        *type_symbol = &ps_system_integer;
         break;
     case PS_TOKEN_UNSIGNED:
-        type_symbol = &ps_system_unsigned;
+        *type_symbol = &ps_system_unsigned;
         break;
     case PS_TOKEN_REAL:
-        type_symbol = &ps_system_real;
+        *type_symbol = &ps_system_real;
         break;
     case PS_TOKEN_BOOLEAN:
-        type_symbol = &ps_system_boolean;
+        *type_symbol = &ps_system_boolean;
         break;
     case PS_TOKEN_CHAR:
-        type_symbol = &ps_system_char;
+        *type_symbol = &ps_system_char;
         break;
     case PS_TOKEN_STRING:
         READ_NEXT_TOKEN;
@@ -131,16 +132,17 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         }
         else
         {
-            type_symbol = &ps_system_string;
+            *type_symbol = &ps_system_string;
         }
         break;
     case PS_TOKEN_IDENTIFIER:
+        // TODO could be a subrange definition, too
         symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
         if (symbol->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
             RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
-        type_symbol = symbol;
+        *type_symbol = symbol;
         /* ********** Other types ********** */
     case PS_TOKEN_ARRAY:
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
@@ -149,15 +151,16 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         // type = ps_system_array.value->data.t; // TODO: parse array definition
         // data.s = NULL; // TODO: allocate array
         // break;
-    case PS_TOKEN_LEFT_PARENTHESIS:
-    case PS_TOKEN_UNSIGNED_VALUE:
-    case PS_TOKEN_INTEGER_VALUE:
-    case PS_TOKEN_CHAR_VALUE:
-    case PS_TOKEN_BOOLEAN_VALUE:
-    case PS_TOKEN_SET:
-    case PS_TOKEN_FILE:
-    case PS_TOKEN_RECORD:
-    case PS_TOKEN_CARET:
+    case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
+    case PS_TOKEN_INTEGER_VALUE:    // subrange
+    case PS_TOKEN_UNSIGNED_VALUE:   // subrange
+    case PS_TOKEN_CHAR_VALUE:       // subrange
+    case PS_TOKEN_BOOLEAN_VALUE:    // subrange
+    case PS_TOKEN_SET:              // set
+    case PS_TOKEN_FILE:             // file
+    case PS_TOKEN_TEXT:             // text
+    case PS_TOKEN_RECORD:           // record
+    case PS_TOKEN_CARET:            // pointer
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -192,7 +195,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     EXPECT_TOKEN(PS_TOKEN_EQUAL);
     READ_NEXT_TOKEN;
     // TYPE_REFERENCE
-    if (!ps_visit_type_reference(interpreter, mode, type_symbol))
+    if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
 
     if (mode == MODE_EXEC)

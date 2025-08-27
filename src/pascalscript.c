@@ -76,6 +76,16 @@ char *minimal_source = "Program Minimal;\n"
     "  writeln('test=', test);\n"
     "end.\n";*/
 
+void usage(char *program_name)
+{
+    fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
+    fprintf(stderr, "  -t : trace execution\n");
+    fprintf(stderr, "  -d : debug (more verbose trace)\n");
+    fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
+    fprintf(stderr, "  -b : dump source buffer after loading\n");
+    fprintf(stderr, "  -v : verbose (display banner and other infos)\n");
+}
+
 int main(int argc, char *argv[])
 {
     bool trace = false;
@@ -115,7 +125,7 @@ int main(int argc, char *argv[])
             arg++;
             break;
         default:
-            fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", argv[0]);
+            usage(argv[0]);
             exit(EXIT_FAILURE);
         }
     }
