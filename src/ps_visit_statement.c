@@ -409,7 +409,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         EXPECT_TOKEN(PS_TOKEN_DO);
         READ_NEXT_TOKEN;
-        if (!ps_visit_statement(interpreter, mode && result.data.b))
+        if (!ps_visit_statement(interpreter, result.data.b ? mode : MODE_SKIP))
             TRACE_ERROR("STATEMENT");
         if (mode != MODE_EXEC || !result.data.b)
             break;
