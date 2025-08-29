@@ -13,6 +13,9 @@
 /**
  * Visit parameter definition:
  *      [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
+ * Next steps:
+ *  - allow several identifiers before ':'
+ *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
  */
 bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *name,
                                    ps_symbol *type_symbol, bool *by_reference)
@@ -51,7 +54,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
-    
+
     // If in execution mode, add the parameter variable to the current environment
     if (mode == MODE_EXEC)
     {
@@ -141,40 +144,46 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
+    // Parameters?
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
-        do
+        READ_NEXT_TOKEN_OR_CLEANUP;
+        // Empty parameter list?
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
             READ_NEXT_TOKEN_OR_CLEANUP;
-            if (!ps_lexer_get_cursor(lexer, &line, &column))
+        }
+        else
+        {
+            do
             {
-                interpreter->error = PS_ERROR_GENERIC; // TODO better error code
-                goto cleanup;
-            }
-            if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-                break;
-            if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, parameter_type, &by_reference))
-                goto cleanup;
-            if (!ps_formal_signature_add_parameter(signature, by_reference, &parameter_name, parameter_type))
-            {
-                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                goto cleanup;
-            }
-            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-            {
-                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-                goto cleanup;
-            }
-            if (lexer->current_token.type == PS_TOKEN_COMMA)
-                continue;
-            if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
-            {
-                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-                goto cleanup;
-            }
-        } while (true);
+                if (!ps_lexer_get_cursor(lexer, &line, &column))
+                {
+                    interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+                    goto cleanup;
+                }
+                if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, parameter_type, &by_reference))
+                    goto cleanup;
+                if (!ps_formal_signature_add_parameter(signature, by_reference, &parameter_name, parameter_type))
+                {
+                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                    goto cleanup;
+                }
+                // `,` introduces another parameter
+                if (lexer->current_token.type == PS_TOKEN_COMMA)
+                    continue;
+                // `)` ends the parameter list
+                if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+                {
+                    READ_NEXT_TOKEN_OR_CLEANUP;
+                    break;
+                }
+                RETURN_ERROR_OR_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN);
+            } while (true);
+        }
     }
     // interpreter->debug = debug;
+    ps_formal_signature_debug(stderr, "SIGNATURE", signature);
 
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
 

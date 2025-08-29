@@ -27,13 +27,12 @@ extern "C"
         // size_t more;
         ps_string **data;
     } ps_string_heap;
-    #define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
+#define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
 
-    ps_string_heap *ps_string_heap_init(size_t size);
-    void ps_string_heap_done(ps_string_heap *heap);
+    ps_string_heap *ps_string_heap_alloc(size_t size);
+    ps_string_heap *ps_string_heap_free(ps_string_heap *heap);
     ps_string *ps_string_heap_create(ps_string_heap *heap, char *z);
-    // bool ps_string_heap_free(ps_string_heap *heap, ps_string *s);
-
+    // bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
     void ps_string_heap_dump(ps_string_heap *heap, FILE *f);
 
 #ifdef __cplusplus

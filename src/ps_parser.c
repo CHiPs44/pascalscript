@@ -10,31 +10,40 @@
 
 #include "ps_parser.h"
 
-ps_parser *ps_parser_init()
+ps_parser *ps_parser_alloc()
 {
     ps_parser *parser = calloc(1, sizeof(ps_parser));
     if (parser == NULL)
         return NULL;
-    parser->lexer = ps_lexer_init();
-    // for (uint8_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
-    // {
-    //     parser->lexers[i] = ps_lexer_init(NULL);
-    // }
-    // parser->current_lexer = 0;
+    parser->lexers[0] = ps_lexer_alloc();
+    if (parser->lexers[0] == NULL)
+    {
+        free(parser);
+        return NULL;
+    }
+    for (uint8_t i = 1; i < PS_PARSER_LEXER_COUNT; i++)
+    {
+        parser->lexers[i] = NULL;
+    }
+    parser->current_lexer = 0;
     parser->error = PS_ERROR_NONE;
     parser->trace = false;
     parser->debug = false;
     return parser;
 }
 
-void ps_parser_done(ps_parser *parser)
+ps_parser *ps_parser_free(ps_parser *parser)
 {
-    if (parser->lexer != NULL)
+    for (uint8_t i = 0; i < PS_PARSER_LEXER_COUNT; i++)
     {
-        ps_lexer_done(parser->lexer);
-        parser->lexer = NULL;
+        if (parser->lexers[i] != NULL)
+        {
+            ps_lexer_free(parser->lexers[i]);
+            parser->lexers[i] = NULL;
+        }
     }
     free(parser);
+    return NULL;
 }
 
 // bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
@@ -47,7 +56,7 @@ void ps_parser_done(ps_parser *parser)
 
 ps_lexer *ps_parser_get_lexer(ps_parser *parser)
 {
-    return parser->lexer;
+    return parser->lexers[parser->current_lexer];
 }
 
 void ps_parser_debug(ps_parser *parser, char *message)
@@ -81,7 +90,7 @@ ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_
     return PS_TOKEN_NONE;
 }
 
-ps_token_type ps_parser_expect_end_statement_token(ps_parser *parser)
+ps_token_type ps_parser_expect_statement_end_token(ps_parser *parser)
 {
     return ps_parser_expect_token_types(
         parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});

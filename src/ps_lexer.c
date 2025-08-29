@@ -26,7 +26,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
     if (!ps_lexer_read_next_char(lexer))                                                                               \
         return false;
 
-ps_lexer *ps_lexer_init()
+ps_lexer *ps_lexer_alloc()
 {
     ps_lexer *lexer = calloc(1, sizeof(ps_lexer));
     if (lexer == NULL)
@@ -34,14 +34,14 @@ ps_lexer *ps_lexer_init()
     lexer->buffer = ps_buffer_init();
     if (lexer->buffer == NULL)
     {
-        ps_lexer_done(lexer);
+        ps_lexer_free(lexer);
         return NULL;
     }
     ps_lexer_reset(lexer);
     return lexer;
 }
 
-ps_lexer *ps_lexer_done(ps_lexer *lexer)
+ps_lexer *ps_lexer_free(ps_lexer *lexer)
 {
     if (lexer->buffer != NULL)
         ps_buffer_done(lexer->buffer);
@@ -57,7 +57,7 @@ void ps_lexer_reset(ps_lexer *lexer)
     memset(&lexer->current_token.value, 0, sizeof(lexer->current_token.value));
 }
 
-char *ps_lexer_show_error(ps_lexer *lexer)
+char *ps_lexer_get_error_message(ps_lexer *lexer)
 {
     static char message[128];
     snprintf(message, sizeof(message) - 1, "LEXER: Error %d %s, Line %d, Column %d", lexer->error,
@@ -575,9 +575,6 @@ bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column)
     return ps_buffer_read_next_char(lexer->buffer);
 }
 
-/**
- * Get a debug-friendly string representation of the current token's value.
- */
 char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
     static char value[128] = {0};
@@ -623,13 +620,11 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
     return value;
 }
 
-/**
- * Dump the current state of the lexer.
- */
 void ps_lexer_dump(ps_lexer *lexer)
 {
-    fprintf(stderr, "LEXER: token=%s, error=%d %s\n", ps_lexer_get_debug_value(lexer), lexer->error,
-            ps_error_get_message(lexer->error));
+    fprintf(stderr, "LEXER: line=%04d, column=%04d, char=%03d/%c, token=%s, error=%d %s\n", lexer->buffer->current_line,
+            lexer->buffer->current_column, lexer->buffer->current_char, lexer->buffer->current_char,
+            ps_lexer_get_debug_value(lexer), lexer->error, ps_error_get_message(lexer->error));
 }
 
 /* EOF */

@@ -180,7 +180,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // Save "cursor" position
         if (!ps_lexer_get_cursor(lexer, &line, &column))
             RETURN_ERROR(PS_ERROR_GENERIC); // TODO better error code
-        ps_token_type token_type = ps_parser_expect_end_statement_token(interpreter->parser);
+        ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
         if (token_type == PS_TOKEN_NONE)
         {
             interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
@@ -242,7 +242,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is legal but is a no-op)
-    if (PS_TOKEN_NONE != ps_parser_expect_end_statement_token(interpreter->parser))
+    if (PS_TOKEN_NONE != ps_parser_expect_statement_end_token(interpreter->parser))
     {
         if (mode == MODE_EXEC && newline)
             fprintf(stdout, "\n");

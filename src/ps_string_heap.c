@@ -8,7 +8,7 @@
 
 #include "ps_string_heap.h"
 
-ps_string_heap *ps_string_heap_init(size_t size)
+ps_string_heap *ps_string_heap_alloc(size_t size)
 {
     ps_string_heap *heap;
     heap = (ps_string_heap *)calloc(1, sizeof(ps_string_heap));
@@ -26,22 +26,24 @@ ps_string_heap *ps_string_heap_init(size_t size)
     return heap;
 }
 
-void ps_string_heap_done(ps_string_heap *heap)
+ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
 {
-    if (heap == NULL)
-        return;
-    if (heap->data != NULL)
+    if (heap != NULL)
     {
-        for (size_t i = 0; i < heap->size; i++)
+        if (heap->data != NULL)
         {
-            if (heap->data[i] != NULL)
+            for (size_t i = 0; i < heap->size; i++)
             {
-                ps_string_free(heap->data[i]);
+                if (heap->data[i] != NULL)
+                {
+                    ps_string_free(heap->data[i]);
+                }
             }
+            free(heap->data);
         }
-        free(heap->data);
+        free(heap);
     }
-    free(heap);
+    return NULL;
 }
 
 // bool ps_string_heap_grow(ps_string_heap *heap)

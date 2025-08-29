@@ -134,7 +134,7 @@ extern "C"
                     visit, __PS_ERROR__);                                                                              \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        interpreter->error = _PS_ERROR_;                                                                               \
+        interpreter->error = __PS_ERROR__;                                                                               \
         goto cleanup;                                                                                                  \
     }
 

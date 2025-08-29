@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #ifndef PS_INTERPRETER_ENVIRONMENTS
-#define PS_INTERPRETER_ENVIRONMENTS 8
+#define PS_INTERPRETER_ENVIRONMENTS 64
 #endif
 
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0
@@ -43,11 +43,12 @@ extern "C"
 
     typedef struct s_ps_interpreter
     {
-        ps_environment *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief TODO */
-        ps_parser *parser;                                         /** @brief TODO */
-        ps_string_heap *string_heap;                               /** @brief TODO */
-        uint8_t level;              /** @brief Current environment index : 1 for program, ... */
-        ps_error error;             /** @brief Current error PS_ERROR_XXXXX */
+        ps_environment
+            *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
+        ps_parser *parser;                              /** @brief Parser with lexer with source code buffer */
+        ps_string_heap *string_heap;                    /** @brief Strings heap to hold string constants at least */
+        uint8_t level;              /** @brief Current environment index : 0 fo system, 1 for program, ... */
+        ps_error error;             /** @brief Current error PS_ERROR_XXX */
         ps_interpreter_debug debug; /** @brief Debug level: NONE, TRACE, VERBOSE */
         bool range_check;           /** @brief Range checking for integer and real values */
         bool bool_eval;             /** @brief *FUTURE* Short circuit boolean evaluation */

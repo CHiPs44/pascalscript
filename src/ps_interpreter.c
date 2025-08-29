@@ -20,11 +20,11 @@ ps_interpreter *ps_interpreter_init()
     if (interpreter == NULL)
         return NULL;
     // Allocate string heap
-    interpreter->string_heap = ps_string_heap_init(PS_STRING_HEAP_SIZE);
+    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
     if (interpreter->string_heap == NULL)
         return ps_interpreter_done(interpreter);
     // Allocate parser
-    interpreter->parser = ps_parser_init();
+    interpreter->parser = ps_parser_alloc();
     if (interpreter->parser == NULL)
         return ps_interpreter_done(interpreter);
     // Allocate and initialize system environment
@@ -41,25 +41,22 @@ ps_interpreter *ps_interpreter_init()
 
 ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter)
 {
-    if (interpreter->string_heap != NULL)
+    if (interpreter != NULL)
     {
-        ps_string_heap_done(interpreter->string_heap);
-        interpreter->string_heap = NULL;
-    }
-    if (interpreter->parser != NULL)
-    {
-        ps_parser_done(interpreter->parser);
-        interpreter->parser = NULL;
-    }
-    for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
-    {
-        if (interpreter->environments[i] != NULL)
+        if (interpreter->string_heap != NULL)
+            interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
+        if (interpreter->parser != NULL)
+            interpreter->parser = ps_parser_free(interpreter->parser);
+        for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
-            ps_environment_done(interpreter->environments[i]);
-            interpreter->environments[i] = NULL;
+            if (interpreter->environments[i] != NULL)
+            {
+                ps_environment_done(interpreter->environments[i]);
+                interpreter->environments[i] = NULL;
+            }
         }
+        free(interpreter);
     }
-    free(interpreter);
     return NULL;
 }
 
@@ -97,19 +94,17 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
 
 bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
-    ps_identifier name = {0};
-    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
     ps_environment *environment = interpreter->environments[interpreter->level];
-    strncpy(name, environment->name, PS_IDENTIFIER_SIZE - 1);
-    ps_environment_done(environment);
-    interpreter->environments[interpreter->level] = NULL;
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS, name);
+        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
+                environment->name);
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
     }
+    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
+    interpreter->environments[interpreter->level] = ps_environment_done(environment);
     interpreter->level -= 1;
     return true;
 }
@@ -215,15 +210,17 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     ps_lexer_reset(lexer);
     if (!ps_buffer_read_next_char(lexer->buffer))
     {
-        fprintf(stderr, "ERROR: %s\n", ps_lexer_show_error(lexer));
+        fprintf(stderr, "ERROR: %s\n", ps_lexer_free(lexer));
         return false;
     }
-    // parser->debug = true;
     if (!ps_visit_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
     {
+        // Display up to 5 lines around the error
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
-        ps_buffer_dump(lexer->buffer, start, 5);
-        fprintf(stderr, "%*s\n", lexer->buffer->current_column + 14, "^");
+        int margin = ps_buffer_dump(lexer->buffer, start, 5);
+        // Try to align the '^' under the right column
+        fprintf(stderr, "%*s\n", margin + lexer->buffer->current_column, "^");
+        // Make line and column 1-based
         fprintf(stderr, "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
                 lexer->buffer->current_line + 1, lexer->buffer->current_column + 1, interpreter->error,
                 ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),

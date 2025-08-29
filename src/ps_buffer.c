@@ -6,14 +6,14 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_buffer.h"
 #include "ps_error.h"
 #include "ps_readall.h"
-#include "ps_buffer.h"
 
 ps_buffer *ps_buffer_init()
 {
@@ -51,10 +51,8 @@ void ps_buffer_reset(ps_buffer *buffer)
 char *ps_buffer_show_error(ps_buffer *buffer)
 {
     static char error_message[128];
-    snprintf(error_message, sizeof(error_message) - 1,
-             "BUFFER: %d %s, line %d, column %d",
-             buffer->error, ps_error_get_message(buffer->error),
-             buffer->current_line, buffer->current_column);
+    snprintf(error_message, sizeof(error_message) - 1, "BUFFER: %d %s, line %d, column %d", buffer->error,
+             ps_error_get_message(buffer->error), buffer->current_line, buffer->current_column);
     return error_message;
 }
 
@@ -82,12 +80,8 @@ void ps_buffer_debug(ps_buffer *buffer, char *message, FILE *f)
 {
     if (f == NULL)
         f = stderr;
-    fprintf(f,
-            "%s line=%05d col=%03d current=%s, next=%s, error=%d %s\n",
-            message,
-            buffer->current_line, buffer->current_column,
-            ps_buffer_debug_char(buffer->current_char),
-            ps_buffer_debug_char(buffer->next_char),
+    fprintf(f, "%s line=%05d col=%03d current=%s, next=%s, error=%d %s\n", message, buffer->current_line,
+            buffer->current_column, ps_buffer_debug_char(buffer->current_char), ps_buffer_debug_char(buffer->next_char),
             buffer->error, ps_error_get_message(buffer->error));
 }
 
@@ -270,7 +264,7 @@ bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
     return ps_buffer_scan_text(buffer);
 }
 
-void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
+int ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
 {
     char line[PS_BUFFER_MAX_COLUMNS + 1];
 
@@ -279,10 +273,11 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
     if (buffer->line_count == 0)
     {
         fprintf(stderr, "Buffer is EMPTY!\n");
-        return;
+        return 0;
     }
     fprintf(stderr, "            |         1         2         3         4         5         6         7         8|\n");
     fprintf(stderr, "Line  (Len) |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
+    //               12345678901234 => 14 chars
     for (int line_number = from_line; line_number < from_line + line_count - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
@@ -292,6 +287,7 @@ void ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
         fprintf(stderr, "%05d (%03d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     // fprintf(stderr, "\n");
+    return 14;
 }
 
 char ps_buffer_peek_char(ps_buffer *buffer)

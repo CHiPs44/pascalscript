@@ -19,11 +19,15 @@ extern "C"
 {
 #endif
 
+#ifndef PS_PARSER_LEXER_COUNT
+#define PS_PARSER_LEXER_COUNT 8
+#endif
+
     typedef struct ps_parser
     {
-        ps_lexer *lexer;
+        ps_lexer *lexers[PS_PARSER_LEXER_COUNT];
+        int current_lexer;
         ps_error error;
-        bool allocated; // : 1;
         bool trace;     // : 1;
         bool debug;     // : 1;
     } ps_parser;
@@ -31,9 +35,9 @@ extern "C"
 #define PS_PARSER_SIZE sizeof(ps_parser)
 
     /** @brief Initialize parse */
-    ps_parser *ps_parser_init();
-    /** @brief Free parser & symbol table */
-    void ps_parser_done(ps_parser *parser);
+    ps_parser *ps_parser_alloc();
+    /** @brief Free parser & lexers */
+    ps_parser *ps_parser_free(ps_parser *parser);
     /** @brief Get current lexer */
     ps_lexer *ps_parser_get_lexer(ps_parser *parser);
     /** @brief Expect token type */
@@ -41,7 +45,7 @@ extern "C"
     /** @brief Expect token types */
     ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[]);
     /** @brief Expect end of statement token: ';', END, ELSE, UNTIL */
-    ps_token_type ps_parser_expect_end_statement_token(ps_parser *parser);
+    ps_token_type ps_parser_expect_statement_end_token(ps_parser *parser);
 
 #ifdef __cplusplus
 }

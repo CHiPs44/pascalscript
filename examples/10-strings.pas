@@ -21,10 +21,10 @@ Begin
   s2 := 'World';
   WriteLn('s2 = ', s2);
   s3 := s1 + ', ' + s2 + '!';
-  WriteLn('s3 = ', s3);
+  WriteLn('s3 = s1, s2! = ', s3);
   s4 := '';
   For I := 1 to 10 do
-    s4 := s4 + '()';
+    s4 := s4 + '-_';
   WriteLn('s4 = ', s4);
   // *FUTURE*
   // WriteLn('Length(s1) = ', Length(s1));
