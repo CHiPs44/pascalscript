@@ -26,7 +26,7 @@ The first two need to be able to compare formal parameter list and actual parame
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired __interpreted__ language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
+`PascalScript` should be a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
@@ -112,7 +112,7 @@ Hello, world!
 
 In the future, it should be embeddable in other projects, like [Lua](https://lua.org/) is for example.
 
-Examples __must__ be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
+Examples **must** be compilable with Free Pascal `fpc`, in default FPC mode (`fpc -MFPC source.pas`), so we have sort of an authoritative reference implementation.
 
 ## Links to seemingly useful documentations
 
@@ -298,51 +298,50 @@ NB:
 This means we have input ("by value") and output ("by reference") parameters, local variables, and recursive calls.
 
 ```pascal
-program step4a;
+Program Step4a;
 
-var a: integer;
+Var
+  r: Integer;
 
-procedure sum(a: integer, b: integer, var c: integer);
-var     sum: integer;
-begin
-        sum := a + b;
-        c := sum;
-end;
+Procedure Sum(a: Integer, b: Integer, var c: Integer);
+Begin
+  c := a + b;
+End;
 
-begin
-  sum(12, 34, a);
-  WriteLn(a);
-end.
+Begin
+  Sum(12, 34, r);
+  WriteLn(r);
+End.
 ```
 
 ### Functions
 
 ```pascal
-program step4b;
+Program step4b;
 
-var a: integer;
+Var r: Integer;
 
 (* The "de-facto" standard of recursive functions *)
-function fact(n: integer): integer;
-var f: integer;
-begin
-  if n <= 1 then
+Function Fact(n: Integer): Integer;
+Var f: Integer;
+Begin
+  If n <= 1 Then
     f := 1
-  else
-    f := n * fact(n - 1);
-  fact := f;
-end;
+  Else
+    f := n * Fact(n - 1);
+  Fact := f;
+End;
 
-begin
-  a := fact(5);
-  WriteLn(a);
-end.
+Begin
+  r:= Fact(5);
+  WriteLn(r);
+End.
 ```
 
 ### Base types
 
-- `integer` is 32 bits signed type
-- `real` is `double`, not `float`
+- `Integer` is 32 bits signed type
+- `Real` is `float`, but may be `double`
 
 ### Other features
 
@@ -354,14 +353,14 @@ end.
   - 16 bits: `Word` / `Smallint`
   - 32 bits: `Longword` / `Longint` => `UNSIGNED`
   - 64 bits: `QWord` / `Int64`
-- Ranges: `Min .. Max` for chars `'A'..'Z'`, unsigned `0.999` & signed integers `-100..100`
+- Ranges: `Min .. Max` for chars `'A'..'Z'`, unsigned `0..999` & signed integers `-100..100`
 - Enums: `(One, Two, Three, Four)`
-- Arrays: `Array[1..10] Of Integer`
+- Arrays: `Array[1..10] Of Integer` or `Array[1..10,1..10] Of Integer`
 - Char (see below)
 - Strings (not really arrays of chars)
 - Sets: as bitfields (256 values max?)
 - Records
-- Pointers (operators: `^`, `@`, ...)
+- Pointers and addresses (operators: `^`, `@`, ...)
 
 #### Case statement
 
@@ -369,13 +368,13 @@ This will wait until we have implemented range types.
 
 ```pascal
   ...
-  case x of
+  Case x Of
     1: a := 1;
     2: a := 2;
     3..5: a := 3;
-  else
+  Else
     a := 34;
-  end;
+  End;
   ...
 ```
 
@@ -408,7 +407,7 @@ This will wait until we have implemented range types.
   - fixed length make string operations easy
   - maximum length: 4,294,967,295 (length is a 32 bits word, too)
 
-Things one can say against Unicode on our 256KB / 512KB RAM target (and even with 8MB of PSRAM):
+Things one can say against Unicode on our 256KB / 512KB RAM target (even with 8MB of PSRAM):
 
 - Unicode, be it encoded as UTF-8, UTF-16 or UTF-32 is a nightmare
   - even fixed width fonts can have glyphs that are wider
@@ -421,7 +420,8 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (and even wit
 #### I/O
 
 - Compatible:
-  - Write / WriteLn for all base types, with variable number of arguments
+  - `Write` / `WriteLn` for all base types, with variable number of arguments
+  - formatting with `:X` and `:X:Y`
 - File I/O with more POSIX like calls instead of standard Pascal?
   - `fopen` / `fclose` / `fread` / `fwrite` / `lseek` / ...
 - Format function with `{}` placeholders?
@@ -429,7 +429,7 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (and even wit
 
 #### Mathematical functions and constant(s)
 
-- `sqrt` `pow` or `^`?
+- `sqrt` `pow` or `**`?
 - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
 - `ln` `log` `exp`
 - ...
@@ -529,4 +529,7 @@ Each file should contains this header, this example is for C:
 */
 ```
 
-NB: year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
+NB:
+
+- year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
+- some files coming from other sources like Tao Yue's examples from his site and Free Pascal Wiki have their own license.
