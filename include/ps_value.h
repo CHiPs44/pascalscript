@@ -19,14 +19,11 @@ extern "C"
 {
 #endif
 
-    // // Forward references
-    // typedef struct s_ps_type_definition ps_type_definition;
-    // typedef struct s_ps_parameters ps_parameters;
-
     /** @brief Value: type + data */
     typedef struct s_ps_value
     {
-        ps_type_definition *type;
+        // ps_type_definition *type;
+        ps_symbol *type;
         ps_value_data data;
     } __attribute__((__packed__)) ps_value;
 

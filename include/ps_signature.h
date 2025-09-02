@@ -19,21 +19,19 @@ extern "C"
 {
 #endif
 
-    // Forward references
-    // typedef struct s_ps_symbol ps_symbol;
-    // typedef struct s_ps_value ps_value;
+    // Forward reference
     typedef struct s_ps_interpreter ps_interpreter;
 
     typedef struct s_ps_formal_parameter
     {
-        bool byref; // true if parameter is passed by reference
+        bool byref;         // true if parameter is passed by reference
         ps_identifier name; // TODO? allocate dynamically
         ps_symbol *type;
     } ps_formal_parameter;
 
     typedef struct s_ps_formal_signature
     {
-        ps_symbol *result_type; // NULL for procedures
+        ps_symbol *result_type; // NULL or ps_system_none for procedures
         uint8_t parameter_count;
         uint8_t size;
         ps_formal_parameter *parameters;
@@ -42,10 +40,13 @@ extern "C"
 #define PS_FORMAL_PARAMETER_SIZE sizeof(ps_formal_parameter)
 #define PS_FORMAL_SIGNATURE_SIZE sizeof(ps_formal_signature)
 
-    typedef union s_ps_actual_parameter {
-        bool byref;         // true if parameter is passed by reference
-        ps_value *value;     // for by value parameters
-        ps_symbol *variable; // for byref parameters
+    typedef struct s_ps_actual_parameter
+    {
+        bool byref; // true if parameter is passed by reference
+        union {
+            ps_value *value;     // for by value parameters
+            ps_symbol *variable; // for byref parameters
+        } data;
     } ps_actual_parameter;
 
     typedef struct s_ps_actual_signature
@@ -89,7 +90,7 @@ extern "C"
 
     /** @brief Debug a formal signature */
     void ps_formal_signature_debug(FILE *output, char *message, ps_formal_signature *signature);
-    
+
     /** @brief Debug an actual signature */
     void ps_actual_signature_debug(FILE *output, char *message, ps_actual_signature *signature);
 

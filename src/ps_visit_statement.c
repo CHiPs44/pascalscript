@@ -329,12 +329,12 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
 {
     VISIT_BEGIN("IF", "");
 
-    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    ps_value result = {.type = &ps_system_boolean, .data.b = false};
 
     READ_NEXT_TOKEN;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("TEST");
-    if (result.type != ps_system_boolean.value->data.t)
+    if (result.type != &ps_system_boolean)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
     EXPECT_TOKEN(PS_TOKEN_THEN);
     READ_NEXT_TOKEN;
@@ -357,7 +357,7 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
 bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("REPEAT_UNTIL", "");
-    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    ps_value result = {.type = &ps_system_boolean, .data.b = false};
     uint16_t line = 0;
     uint16_t column = 0;
 
@@ -374,7 +374,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
         READ_NEXT_TOKEN;
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
-        if (result.type != ps_system_boolean.value->data.t)
+        if (result.type != &ps_system_boolean)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         if (mode != MODE_EXEC || result.data.b)
             break;
@@ -393,7 +393,7 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
 bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("WHILE_DO", "");
-    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    ps_value result = {.type = &ps_system_boolean, .data.b = false};
     uint16_t line = 0;
     uint16_t column = 0;
 
@@ -405,7 +405,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     {
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
-        if (result.type != ps_system_boolean.value->data.t)
+        if (result.type != &ps_system_boolean)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         EXPECT_TOKEN(PS_TOKEN_DO);
         READ_NEXT_TOKEN;
@@ -432,7 +432,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_value start = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_value finish = {.type = ps_system_none.value->data.t, .data.v = NULL};
     ps_value step = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value result = {.type = ps_system_boolean.value->data.t, .data.b = false};
+    ps_value result = {.type = &ps_system_boolean, .data.b = false};
     ps_identifier identifier;
     ps_symbol *variable;
     uint16_t line = 0;
@@ -492,7 +492,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (!ps_function_binary_op(interpreter, variable->value, &finish, &result,
                                        step.data.i > 0 ? PS_TOKEN_LESS_OR_EQUAL : PS_TOKEN_GREATER_OR_EQUAL))
                 TRACE_ERROR("BINARY");
-            if (result.type != ps_system_boolean.value->data.t)
+            if (result.type != &ps_system_boolean)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             if (!result.data.b)
             {

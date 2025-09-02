@@ -187,11 +187,11 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 case PS_TYPE_UNSIGNED:
                     if (data.u > PS_INTEGER_MAX)
                         RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
-                    type = ps_system_integer.value->data.t;
+                    type = &ps_system_integer;
                     data.i = -data.u;
                     break;
                 case PS_TYPE_REAL:
-                    type = ps_system_real.value->data.t;
+                    type = &ps_system_real;
                     data.r = -data.r;
                     break;
                 default:
@@ -200,11 +200,11 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             }
             break;
         case PS_TOKEN_INTEGER_VALUE:
-            type = ps_system_integer.value->data.t;
+            type = &ps_system_integer;
             data.i = negate ? -lexer->current_token.value.i : lexer->current_token.value.i;
             break;
         case PS_TOKEN_REAL_VALUE:
-            type = ps_system_real.value->data.t;
+            type = &ps_system_real;
             data.r = negate ? -lexer->current_token.value.r : lexer->current_token.value.r;
             break;
         case PS_TOKEN_UNSIGNED_VALUE:
@@ -212,21 +212,21 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             {
                 if (lexer->current_token.value.u > PS_INTEGER_MAX)
                     RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
-                type = ps_system_integer.value->data.t;
+                type = &ps_system_integer;
                 data.i = -lexer->current_token.value.u;
             }
             else
             {
-                type = ps_system_unsigned.value->data.t;
+                type = &ps_system_unsigned;
                 data.u = lexer->current_token.value.u;
             }
             break;
         case PS_TOKEN_CHAR_VALUE:
-            type = ps_system_char.value->data.t;
+            type = &ps_system_char;
             data.c = lexer->current_token.value.c;
             break;
         case PS_TOKEN_BOOLEAN_VALUE:
-            type = ps_system_boolean.value->data.t;
+            type = &ps_system_boolean;
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
@@ -237,7 +237,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 if (s == NULL)
                     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
             }
-            type = ps_system_string.value->data.t;
+            type = &ps_system_string;
             data.s = s;
             break;
         default:

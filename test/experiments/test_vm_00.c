@@ -35,8 +35,8 @@ int main(void)
 {
     int exit_code;
     ps_vm *vm;
-    ps_value value = {.type = ps_system_integer.value->data.t, .data.i = 0};
-    ps_value result = {.type = ps_system_integer.value->data.t, .data.i = 0};
+    ps_value value = {.type = &ps_system_integer, .data.i = 0};
+    ps_value result = {.type = &ps_system_integer, .data.i = 0};
 
     ps_environment *environment = ps_system_init();
 
@@ -52,7 +52,7 @@ int main(void)
             i & PS_VM_TYPE_MASK, ps_vm_get_type_size(vm, i & PS_VM_TYPE_MASK));
 
     // 40 + 2
-    value.type = ps_system_integer.value->data.t;
+    value.type = &ps_system_integer;
     value.data.i = 40;
     LOAD(&value);
     fprintf(stderr, "pc=%04x, used=%d\n", vm->pc, vm->used);
@@ -76,7 +76,7 @@ int main(void)
     // => 42?
     if (!ps_vm_pop(vm, &result))
         goto failure;
-    if (result.type != ps_system_integer.value->data.t || result.data.i != 42)
+    if (result.type != &ps_system_integer || result.data.i != 42)
         goto failure;
     fprintf(stderr, "OK: 40+2=%s\n", ps_value_get_debug_value(&result));
 

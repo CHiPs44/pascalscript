@@ -146,7 +146,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         TRACE_ERROR("RELATIONAL2");
     if (mode == MODE_EXEC)
     {
-        result->type = ps_system_boolean.value->data.t;
+        result->type = &ps_system_boolean;
         if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
             TRACE_ERROR("BINARY");
     }
@@ -311,7 +311,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_CHAR_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->type = ps_system_char.value->data.t;
+            result->type = &ps_system_char;
             result->data.c = lexer->current_token.value.c;
         }
         READ_NEXT_TOKEN;
@@ -319,7 +319,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_INTEGER_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->type = ps_system_integer.value->data.t;
+            result->type = &ps_system_integer;
             result->data.i = lexer->current_token.value.i;
         }
         READ_NEXT_TOKEN;
@@ -327,7 +327,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_UNSIGNED_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->type = ps_system_unsigned.value->data.t;
+            result->type = &ps_system_unsigned;
             result->data.u = lexer->current_token.value.u;
         }
         READ_NEXT_TOKEN;
@@ -335,7 +335,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_REAL_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->type = ps_system_real.value->data.t;
+            result->type = &ps_system_real;
             result->data.r = lexer->current_token.value.r;
         }
         READ_NEXT_TOKEN;
@@ -343,7 +343,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_BOOLEAN_VALUE:
         if (mode == MODE_EXEC)
         {
-            result->type = ps_system_boolean.value->data.t;
+            result->type = &ps_system_boolean;
             result->data.b = lexer->current_token.value.b;
         }
         READ_NEXT_TOKEN;
@@ -371,7 +371,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("STRING_VALUE");
             }
-            result->type = ps_system_string.value->data.t;
+            result->type = &ps_system_string;
         }
         READ_NEXT_TOKEN;
         break;

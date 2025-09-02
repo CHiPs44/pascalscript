@@ -21,9 +21,9 @@ extern "C"
     {
         FILE *f;                  /** @brief "C" file pointer */
         ps_string *filename;      /** @brief File name */
-        ps_type_definition *type; /** @brief Type definition of the file : File, Text, File Of Type */
+        ps_type_definition *type; /** @brief Type definition of the file : File (binary), Text, File Of Type (structured) */
         ps_unsigned record_size;  /** @brief Record size for binary files */
-        bool is_text;             /** @brief true if text file, false if binary */
+        bool is_text;             /** @brief true if text file, false if binary or structured */
         bool is_open;             /** @brief true if file is open */
 
     } __attribute__((__packed__)) ps_file;

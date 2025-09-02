@@ -151,11 +151,11 @@ ps_type_definition *ps_vm_get_type_def(ps_vm *vm, ps_value_type type)
     switch (type)
     {
     case /* 0 */ PS_TYPE_NONE:      return ps_system_none.value->data.t;
-    case /* 1 */ PS_TYPE_REAL:      return ps_system_real.value->data.t;
-    case /* 2 */ PS_TYPE_INTEGER:   return ps_system_integer.value->data.t;
-    case /* 3 */ PS_TYPE_UNSIGNED:  return ps_system_unsigned.value->data.t;
-    case /* 4 */ PS_TYPE_BOOLEAN:   return ps_system_boolean.value->data.t;
-    case /* 5 */ PS_TYPE_CHAR:      return ps_system_char.value->data.t;
+    case /* 1 */ PS_TYPE_REAL:      return &ps_system_real;
+    case /* 2 */ PS_TYPE_INTEGER:   return &ps_system_integer;
+    case /* 3 */ PS_TYPE_UNSIGNED:  return &ps_system_unsigned;
+    case /* 4 */ PS_TYPE_BOOLEAN:   return &ps_system_boolean;
+    case /* 5 */ PS_TYPE_CHAR:      return &ps_system_char;
     case /* 6 */ PS_TYPE_STRING:    return ps_vm_return_null(vm, PS_ERROR_NOT_IMPLEMENTED);
     default:                        return ps_vm_return_null(vm, PS_ERROR_UNEXPECTED_TYPE);
     }

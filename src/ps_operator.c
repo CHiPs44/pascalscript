@@ -27,7 +27,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
 {
     result->type = value->type;
     // NB: with FPC, not(subrange) or not(enum) yields integer result without range checking
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_INTEGER:
         switch (token_type)
@@ -159,9 +159,9 @@ bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_compare(a, b) >
 bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,
                            ps_token_type token_type)
 {
-    //                    OOOOOOOO | AAAA                 | BBBB
-    //             ----------------+----------------------+--------------
-    uint16_t key = token_type << 8 | (a->type->base << 4) | b->type->base;
+    //                    OOOOOOOO | AAAA                                | BBBB
+    //             ----------------+-------------------------------------+-----------------------------
+    uint16_t key = token_type << 8 | (a->type->value->data.t->base << 4) | b->type->value->data.t->base;
     ps_value_type r = PS_TYPE_NONE;
     ps_string *s = NULL;
 
@@ -366,21 +366,21 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         if (interpreter->debug >= DEBUG_TRACE)
         {
             fprintf(stderr, "*** ERROR: [1] binary operator %d/%s not applicable for types %s and %s\n", token_type,
-                    ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
-                    ps_value_type_get_name(b->type->base));
+                    ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
+                    ps_value_type_get_name(b->type->value->data.t->base));
         }
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
-    if (result->type != NULL && result->type->base != PS_TYPE_NONE)
+    if (result->type != NULL && result->type->value->data.t->base != PS_TYPE_NONE)
     {
         // check if the expected result type is compatible with the result type
-        if (result->type->base != r)
+        if (result->type->value->data.t->base != r)
         {
             if (interpreter->debug >= DEBUG_TRACE)
             {
                 fprintf(stderr, "*** ERROR: [2] binary operator %d/%s not applicable for types %s and %s\n", token_type,
-                        ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
-                        ps_value_type_get_name(b->type->base));
+                        ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
+                        ps_value_type_get_name(b->type->value->data.t->base));
             }
             return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
@@ -391,29 +391,29 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         switch (r)
         {
         case PS_TYPE_REAL:
-            result->type = ps_system_real.value->data.t;
+            result->type = &ps_system_real;
             break;
         case PS_TYPE_INTEGER:
-            result->type = ps_system_integer.value->data.t;
+            result->type = &ps_system_integer;
             break;
         case PS_TYPE_UNSIGNED:
-            result->type = ps_system_unsigned.value->data.t;
+            result->type = &ps_system_unsigned;
             break;
         case PS_TYPE_BOOLEAN:
-            result->type = ps_system_boolean.value->data.t;
+            result->type = &ps_system_boolean;
             break;
         case PS_TYPE_CHAR:
-            result->type = ps_system_char.value->data.t;
+            result->type = &ps_system_char;
             break;
         case PS_TYPE_STRING:
-            result->type = ps_system_string.value->data.t;
+            result->type = &ps_system_string;
             break;
         default:
             if (interpreter->debug >= DEBUG_TRACE)
             {
                 fprintf(stderr, "*** ERROR: [3] Unknown binary operator %d/%s for types %s and %s\n", token_type,
-                        ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->base),
-                        ps_value_type_get_name(b->type->base));
+                        ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
+                        ps_value_type_get_name(b->type->value->data.t->base));
             }
             return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }

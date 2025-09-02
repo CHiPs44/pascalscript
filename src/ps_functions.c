@@ -31,8 +31,8 @@ ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_val
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
 ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_boolean.value->data.t;
-    switch (value->type->base)
+    result->type = &ps_system_boolean;
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
         result->data.b = (ps_boolean)((value->data.u & 1) != 0);
@@ -49,8 +49,8 @@ ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
 ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    result->type = ps_system_boolean.value->data.t;
-    switch (value->type->base)
+    result->type = &ps_system_boolean;
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
         result->data.b = (ps_boolean)((value->data.u & 1) == 0);
@@ -67,26 +67,26 @@ ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief ORD - Get ordinal value of boolean / char */
 ps_error ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
         // case PS_TYPE_ENUM:
-        result->type = ps_system_unsigned.value->data.t;
+        result->type = &ps_system_unsigned;
         result->data.u = value->data.u;
         break;
     case PS_TYPE_INTEGER:
         // case PS_TYPE_SUBRANGE:
-        result->type = ps_system_integer.value->data.t;
+        result->type = &ps_system_integer;
         result->data.i = value->data.i;
         break;
     case PS_TYPE_BOOLEAN:
         // ord(false) => 0 / ord(true) => 1
-        result->type = ps_system_integer.value->data.t;
+        result->type = &ps_system_integer;
         result->data.i = value->data.b ? 1 : 0;
         break;
     case PS_TYPE_CHAR:
         // ord('0') => 48 / ord('A') => 65 / ...
-        result->type = ps_system_unsigned.value->data.t;
+        result->type = &ps_system_unsigned;
         result->data.u = (ps_unsigned)(value->data.c);
         break;
     default:
@@ -98,7 +98,7 @@ ps_error ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
 ps_error ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
         if (interpreter->range_check && value->data.u > PS_CHAR_MAX)
@@ -113,14 +113,14 @@ ps_error ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value 
     default:
         return PS_ERROR_UNEXPECTED_TYPE;
     }
-    result->type = ps_system_char.value->data.t;
+    result->type = &ps_system_char;
     return PS_ERROR_NONE;
 }
 
 /** @brief PRED - Get previous value (predecessor) of scalar value */
 ps_error ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_INTEGER:
         // pred(min) => error / pred(i) => i - 1
@@ -161,7 +161,7 @@ ps_error ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief SUCC - Get next value (successor) of ordinal value */
 ps_error ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_INTEGER:
         // succ(max) => error / succ(i) => i + 1
@@ -233,7 +233,7 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
     if (value == NULL)
     {
         // no argument, return random real between 0.0 and 1.0 excluded
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         do
         {
             result->data.r = (double)rand() / (double)RAND_MAX;
@@ -242,14 +242,14 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
     else
     {
         // one argument, return random integer / unsigned
-        switch (value->type->base)
+        switch (value->type->value->data.t->base)
         {
         case PS_TYPE_INTEGER:
-            result->type = ps_system_integer.value->data.t;
+            result->type = &ps_system_integer;
             result->data.i = (ps_integer)rand_range_integer(value->data.i);
             break;
         case PS_TYPE_UNSIGNED:
-            result->type = ps_system_unsigned.value->data.t;
+            result->type = &ps_system_unsigned;
             result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u);
             break;
         default:
@@ -262,7 +262,7 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
 /** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer / unsigned / real */
 ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->type)
+    switch (value->type->value->data.t->type)
     {
     case PS_TYPE_UNSIGNED:
         // abs(u) => u
@@ -284,12 +284,12 @@ ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
 ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->type)
+    switch (value->type->value->data.t->type)
     {
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_integer.value->data.t;
+        result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);
         break;
     default:
@@ -302,13 +302,13 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
 ps_error ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double r;
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         r = round(value->data.r);
         if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_integer.value->data.t;
+        result->type = &ps_system_integer;
         result->data.i = (ps_integer)r;
         break;
     default:
@@ -321,10 +321,10 @@ ps_error ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_valu
 ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double r;
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         modf(value->data.r, &r);
         result->data.r = r;
         break;
@@ -338,10 +338,10 @@ ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value 
 ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double int_part;
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = modf(value->data.r, &int_part);
         break;
     default:
@@ -353,10 +353,10 @@ ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief SIN(REAL): REAL - Get sinus of floating point value */
 ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = sin(value->data.r);
         break;
     default:
@@ -368,10 +368,10 @@ ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief COS(REAL): REAL - Get cosinus of floating point value */
 ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = cos(value->data.r);
         break;
     default:
@@ -384,13 +384,13 @@ ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value 
 ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     double c;
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         c = cos(value->data.r);
         if (c == 0.0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = sin(value->data.r) / c;
         break;
     default:
@@ -402,14 +402,14 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
 ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = atan(value->data.r);
         break;
     default:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
     }
     return PS_ERROR_NONE;
 }
@@ -417,10 +417,10 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
 /** @brief SQR(REAL): REAL - Get square of floating point value */
 ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = value->data.r * value->data.r;
         break;
     default:
@@ -432,12 +432,12 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief SQRT(REAL): REAL - Get square root of floating point value */
 ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         if (value->data.r < 0.0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = sqrt(value->data.r);
         break;
     default:
@@ -449,10 +449,10 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief EXP(REAL): REAL - Get exponential of floating point value */
 ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = exp(value->data.r);
         break;
     default:
@@ -464,12 +464,12 @@ ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief LN(REAL): REAL - Get logarithm of floating point value */
 ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         if (value->data.r <= 0.0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = log(value->data.r);
         break;
     default:
@@ -481,12 +481,12 @@ ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *
 /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
 ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    switch (value->type->base)
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         if (value->data.r <= 0.0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = ps_system_real.value->data.t;
+        result->type = &ps_system_real;
         result->data.r = log10(value->data.r);
         break;
     default:

@@ -31,7 +31,7 @@
 
 ps_type_definition ps_type_def_type_def = {.type = PS_TYPE_DEFINITION, .base = PS_TYPE_DEFINITION                                 };
 ps_value           ps_value_type_def    = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}                    };
-ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = &ps_value_type_def};
+ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = { &ps_value_type_def}};
 
 PS_SYSTEM_TYPE(none     , "#NONE"     , PS_TYPE_NONE                                                                  );
 PS_SYSTEM_TYPE(integer  , "INTEGER"   , PS_TYPE_INTEGER                                                               );

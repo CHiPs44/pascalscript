@@ -92,7 +92,7 @@ bool ps_actual_signature_add_byval_parameter(ps_actual_signature *signature, ps_
     if (signature->parameter_count >= signature->size)
         return false;
     signature->parameters[signature->parameter_count].byref = false;
-    signature->parameters[signature->parameter_count].value = value;
+    signature->parameters[signature->parameter_count].data.value = value;
     signature->parameter_count += 1;
     return true;
 }
@@ -103,7 +103,7 @@ bool ps_actual_signature_add_byref_parameter(ps_actual_signature *signature, ps_
     if (signature->parameter_count >= signature->size)
         return false;
     signature->parameters[signature->parameter_count].byref = true;
-    signature->parameters[signature->parameter_count].variable = variable;
+    signature->parameters[signature->parameter_count].data.variable = variable;
     signature->parameter_count += 1;
     return true;
 }
@@ -179,7 +179,7 @@ void ps_formal_signature_debug(FILE *output, char *message, ps_formal_signature 
         return;
     fprintf(output, "\tResult type: %p\n", (void *)signature->result_type);
     if (signature->result_type != NULL)
-        ps_symbol_debug(output, "  Result type", signature->result_type);
+        ps_symbol_debug(output, "  Result type: ", signature->result_type);
     fprintf(output, "\tParameter count: %u\n", signature->parameter_count);
     for (int i = 0; i < signature->parameter_count; i++)
     {
@@ -200,16 +200,16 @@ void ps_actual_signature_debug(FILE *output, char *message, ps_actual_signature 
         return;
     fprintf(output, "\tResult type: %p\n", (void *)signature->result_type);
     if (signature->result_type != NULL)
-        ps_symbol_debug(output, "  Result type", signature->result_type);
+        ps_symbol_debug(output, "  Result type: ", signature->result_type);
     fprintf(output, "\tParameter count: %u\n", signature->parameter_count);
     for (int i = 0; i < signature->parameter_count; i++)
     {
         parameter = &signature->parameters[i];
         fprintf(output, "\tParameter %d: %s of type %p\n", i, parameter->byref ? "ref" : "val",
-                (void *)(parameter->byref ? (void *)parameter->variable : (void *)parameter->value));
-        if (parameter->byref && parameter->variable != NULL)
-            ps_symbol_debug(output, "  Parameter variable", parameter->variable);
-        else if (!parameter->byref && parameter->value != NULL)
-            ps_value_debug(output, "  Parameter value", parameter->value);
+                (void *)(parameter->byref ? (void *)parameter->data.variable : (void *)parameter->data.value));
+        if (parameter->byref && parameter->data.variable != NULL)
+            ps_symbol_debug(output, "  Parameter variable", parameter->data.variable);
+        else if (!parameter->byref && parameter->data.value != NULL)
+            ps_value_debug(output, "  Parameter value", parameter->data.value);
     }
 }

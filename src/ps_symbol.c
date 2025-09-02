@@ -82,17 +82,13 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
     return kind_name;
 }
 
-char *ps_symbol_dump_header()
-{
-    return "TODO?";
-}
-
 char *ps_symbol_dump_value(ps_symbol *symbol)
 {
     static char buffer[256];
     snprintf(buffer, sizeof(buffer) - 1, "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", PS_IDENTIFIER_LEN + 1,
-             symbol->name, ps_symbol_get_kind_name(symbol->kind), ps_type_definition_get_name(symbol->value->type),
-             ps_value_get_debug_value(symbol->value));
+             symbol == NULL ? "NULL!" : symbol->name, symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
+             symbol == NULL ? "NULL!" : ps_type_definition_get_name(symbol->value->type->value->data.t),
+             symbol == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value));
     return buffer;
 }
 

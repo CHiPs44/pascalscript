@@ -197,7 +197,8 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
             used += 1;
             symbol = table->symbols[i];
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
-            char *type_name = symbol->value == NULL ? "NULL!" : ps_type_definition_get_name(symbol->value->type);
+            char *type_name =
+                symbol->value == NULL ? "NULL!" : ps_type_definition_get_name(symbol->value->type->value->data.t);
             char *value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
             fprintf(output, "┃%04d┃%-*s┃%-10s┃%-10s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,
                     PS_IDENTIFIER_LEN, value);

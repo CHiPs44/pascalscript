@@ -37,14 +37,11 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     // Parameter name
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(parameter_name);
-    if (mode == MODE_EXEC)
-    {
-        // Check that the parameter name does not already exist in the current environment
-        symbol = ps_interpreter_find_symbol(interpreter, &parameter_name, true);
-        if (symbol != NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-        memcpy(*name, &parameter_name, sizeof(ps_identifier));
-    }
+    // Check that the parameter name does not already exist in the current environment
+    symbol = ps_interpreter_find_symbol(interpreter, &parameter_name, true);
+    if (symbol != NULL)
+        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+    memcpy(*name, &parameter_name, sizeof(ps_identifier));
     READ_NEXT_TOKEN;
 
     // Then ':'
@@ -55,26 +52,21 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
 
-    // If in execution mode, add the parameter variable to the current environment
-    if (mode == MODE_EXEC)
+    // Add the parameter variable to the current environment
+    value = ps_value_alloc(type_symbol->value->data.t, (ps_value_data){.v = NULL});
+    if (value == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, value);
+    if (symbol == NULL)
     {
-        symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, NULL);
-        if (symbol == NULL)
-        {
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        }
-        value = ps_value_alloc(ps_system_none.value->data.t, (ps_value_data){.v = NULL});
-        if (value == NULL)
-        {
-            ps_symbol_free(symbol);
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        }
-        symbol->value = value;
-        if (!ps_interpreter_add_symbol(interpreter, symbol))
-        {
-            ps_symbol_free(symbol);
-            RETURN_ERROR(interpreter->error);
-        }
+        ps_value_free(value);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    }
+    if (!ps_interpreter_add_symbol(interpreter, symbol))
+    {
+        ps_symbol_free(symbol);
+        ps_value_free(value);
+        RETURN_ERROR(interpreter->error);
     }
 
     VISIT_END("OK");

@@ -116,10 +116,10 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             //         RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
             //     if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
             //         RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
-            //     if (symbol->value->type != ps_system_unsigned.value->data.t ||
-            //         symbol->value->type != ps_system_integer.value->data.t || symbol->value->data.i <= 0)
+            //     if (symbol->value->type != &ps_system_unsigned ||
+            //         symbol->value->type != &ps_system_integer || symbol->value->data.i <= 0)
             //         RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED);
-            //     len = symbol->value->type != ps_system_unsigned.value->data.t ? symbol->value->data.u
+            //     len = symbol->value->type != &ps_system_unsigned ? symbol->value->data.u
             //                                                                   : symbol->value->data.i;
             // }
             // else
