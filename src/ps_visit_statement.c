@@ -98,7 +98,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
 {
     VISIT_BEGIN("ASSIGNMENT", "");
     ps_symbol *variable;
-    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value result = {.type = &ps_system_none, .data.v = NULL};
 
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     READ_NEXT_TOKEN;
@@ -237,7 +237,7 @@ cleanup:
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
 {
     VISIT_BEGIN("WRITE_OR_WRITELN", "");
-    ps_value result = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value result = {.type = &ps_system_none, .data.v = NULL};
     bool loop = true;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
@@ -261,7 +261,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     while (loop)
     {
-        result.type = ps_system_none.value->data.t;
+        result.type = &ps_system_none;
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPR");
         if (mode == MODE_EXEC)
@@ -429,9 +429,9 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("FOR_DO", "");
-    ps_value start = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value finish = {.type = ps_system_none.value->data.t, .data.v = NULL};
-    ps_value step = {.type = ps_system_none.value->data.t, .data.v = NULL};
+    ps_value start = {.type = &ps_system_none, .data.v = NULL};
+    ps_value finish = {.type = &ps_system_none, .data.v = NULL};
+    ps_value step = {.type = &ps_system_none, .data.v = NULL};
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
     ps_identifier identifier;
     ps_symbol *variable;

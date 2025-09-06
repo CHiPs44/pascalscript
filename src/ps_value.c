@@ -16,13 +16,14 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data)
+ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 {
     ps_value *value = calloc(1, sizeof(ps_value));
     if (value == NULL)
         return NULL;
     value->type = type;
     value->data = data;
+    value->allocated = true;
     return value;
 }
 
@@ -190,8 +191,16 @@ char *ps_value_to_string(ps_value *value, bool debug)
         }
         return NULL;
     }
-    // TODO? if (value->type->type!=value->type->base)
-    switch (value->type->base)
+    if (value->type->value == NULL)
+    {
+        if (debug)
+        {
+            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE VALUE");
+            return buffer;
+        }
+        return NULL;
+    }
+    switch (value->type->value->data.t->base)
     {
     case PS_TYPE_NONE:
         if (debug)
@@ -201,7 +210,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_DEFINITION:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s", ps_type_definition_get_name(value->type));
+            snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->name);
         else
             return NULL;
         break;
@@ -244,24 +253,27 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_EXECUTABLE:
         ps_executable *executable = value->data.x;
-        ps_formal_signature *signature;
         if (executable == NULL)
             snprintf(buffer, sizeof(buffer) - 1, "NULL!");
+        else if (executable->system != NULL)
+        {
+            snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", executable->system);
+        }
         else
         {
-            signature = executable->signature;
             snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",
-                     signature->result_type == NULL || signature->result_type == &ps_system_none ? "PROCEDURE"
-                                                                                                 : "FUNCTION",
+                     executable->signature->result_type == NULL || executable->signature->result_type == &ps_system_none
+                         ? "PROCEDURE"
+                         : "FUNCTION",
                      executable->line + 1, executable->column + 1);
         }
         break;
-    // case PS_TYPE_POINTER:
-    //     snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
-    //     break;
+    case PS_TYPE_POINTER:
+        snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);
+        break;
     default:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "[? BASE %d ?]", value->type->base);
+            snprintf(buffer, sizeof(buffer) - 1, "[? %s ?]", value->type->name);
         else
             return NULL;
         break;
@@ -282,7 +294,7 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : ps_type_definition_get_name(value->type);
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
     return buffer;

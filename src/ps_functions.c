@@ -18,7 +18,7 @@
 
 ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
-    ps_function_1arg function = symbol->value->data.v;
+    ps_function_1arg function = symbol->value->data.x->system;
     if (function == NULL)
         return PS_ERROR_NOT_IMPLEMENTED;
     return function(interpreter, value, result);

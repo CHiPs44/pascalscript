@@ -24,6 +24,7 @@ extern "C"
 
     typedef struct s_ps_executable
     {
+        void *system;                   /** @brief Pointer to system function (NULL for user defined functions) */
         ps_formal_signature *signature; /** @brief Parameters and return type (NULL for procedures) of the executable */
         uint16_t line;                  /** @brief Line number in the source code */
         uint16_t column;                /** @brief Column number in the source code */

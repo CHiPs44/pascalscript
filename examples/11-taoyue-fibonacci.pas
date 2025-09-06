@@ -10,21 +10,21 @@
 Program Fibonacci;
 Var 
   Fibonacci1, Fibonacci2 : integer;
-  temp : integer;
-  count : integer;
+  Temp : integer;
+  Count : integer;
 
 Begin (* Main *)
   writeln ('First ten Fibonacci numbers are:');
-  count := 0;
+  Count := 0;
   Fibonacci1 := 0;
   Fibonacci2 := 1;
   Repeat
-    write(Fibonacci2(*:7*), ' ');
-    temp := Fibonacci2;
+    Write(Fibonacci2(*:7*), ' ');
+    Temp := Fibonacci2;
     Fibonacci2 := Fibonacci1 + Fibonacci2;
     Fibonacci1 := Temp;
-    count := count + 1
-  Until count = 10;
-  writeln;
+    Count := Count + 1
+  Until Count = 10;
+  WriteLn;
 (* Of course, you could use a FOR loop or a WHILE loop to solve this problem. *)
 End. (* Main *)

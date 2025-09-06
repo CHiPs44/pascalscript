@@ -21,17 +21,21 @@
 /* SYSTEM TYPE DEFINITIONS AND CONSTANTS                                      */
 /**********************************************************************************************************************/
 
-#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
-    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
-    ps_value ps_value_##__name__ = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_##__name__}};            \
-    ps_symbol ps_system_##__name__ = {                                                                                 \
-        .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
-
 /* clang-format off */
 
-ps_type_definition ps_type_def_type_def = {.type = PS_TYPE_DEFINITION, .base = PS_TYPE_DEFINITION                                 };
-ps_value           ps_value_type_def    = {.type = &ps_type_def_type_def, .data = {.t = &ps_type_def_type_def}                    };
-ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "TYPE_DEF", .value = { &ps_value_type_def}};
+ps_type_definition ps_type_def_type_def = {.type = PS_TYPE_DEFINITION            , .base = PS_TYPE_DEFINITION                      };
+ps_symbol          ps_symbol_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "##TYPE_DEF", .value = NULL              };
+ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def           , .data = {.t = &ps_type_def_type_def}            };
+ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def};
+
+/* clang-format on */
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
+    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
+    ps_value ps_value_##__name__ = {                                                                                   \
+        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
+    ps_symbol ps_system_##__name__ = {                                                                                 \
+        .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
+/* clang-format off */
 
 PS_SYSTEM_TYPE(none     , "#NONE"     , PS_TYPE_NONE                                                                  );
 PS_SYSTEM_TYPE(integer  , "INTEGER"   , PS_TYPE_INTEGER                                                               );
@@ -52,7 +56,7 @@ PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE                      
 
 /* clang-format on */
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
     ps_symbol ps_system_constant_##TYPE##_##VALUE = {                                                                  \
         .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
 /* clang-format off */
@@ -73,7 +77,7 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979311
 
 /* clang-format on */
 #define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
     ps_symbol ps_system_variable_##TYPE##_##VALUE = {                                                                  \
         .kind = PS_SYMBOL_KIND_VARIABLE, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
 /* clang-format off */
@@ -97,38 +101,38 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, FIELD, VALUE2)                                                     \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_type_def_##TYPE, .data = {.FIELD = VALUE2}};                     \
+#define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, CALLABLE)                                                          \
+    ps_executable ps_executable_##TYPE##_##VALUE = {.system = CALLABLE, .signature = NULL, .line = 0, .column = 0};    \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
     ps_symbol ps_system_##TYPE##_##VALUE = {.kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
-
 /* clang-format off */
 
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , abs      , "ABS"      , v, &ps_function_abs                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , arctan   , "ARCTAN"   , v, &ps_function_arctan                );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , chr      , "CHR"      , v, &ps_function_chr                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , cos      , "COS"      , v, &ps_function_cos                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , even     , "EVEN"     , v, &ps_function_even                  );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , exp      , "EXP"      , v, &ps_function_exp                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , frac     , "FRAC"     , v, &ps_function_frac                  );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , int      , "INT"      , v, &ps_function_int                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ln       , "LN"       , v, &ps_function_ln                    );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , log      , "LOG"      , v, &ps_function_log                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , odd      , "ODD"      , v, &ps_function_odd                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ord      , "ORD"      , v, &ps_function_ord                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , pred     , "PRED"     , v, &ps_function_pred                  );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , random   , "RANDOM"   , v, &ps_function_random                );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , round    , "ROUND"    , v, &ps_function_round                 );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sin      , "SIN"      , v, &ps_function_sin                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqr      , "SQR"      , v, &ps_function_sqr                   );   
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqrt     , "SQRT"     , v, &ps_function_sqrt                  );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , succ     , "SUCC"     , v, &ps_function_succ                  );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , tan      , "TAN"      , v, &ps_function_tan                   );
-PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , trunc    , "TRUNC"    , v, &ps_function_trunc                 );
-PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, randomize, "RANDOMIZE", v, &ps_procedure_randomize            );
-PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, read     , "READ"     , v, &ps_procedure_read                 );
-PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, readln   , "READLN"   , v, &ps_procedure_readln               );
-PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, write    , "WRITE"    , v, &ps_procedure_write                );
-PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln  , "WRITELN"  , v, &ps_procedure_writeln              );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , abs      , "ABS"      , &ps_function_abs                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , arctan   , "ARCTAN"   , &ps_function_arctan                );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , chr      , "CHR"      , &ps_function_chr                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , cos      , "COS"      , &ps_function_cos                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , even     , "EVEN"     , &ps_function_even                  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , exp      , "EXP"      , &ps_function_exp                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , frac     , "FRAC"     , &ps_function_frac                  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , int      , "INT"      , &ps_function_int                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ln       , "LN"       , &ps_function_ln                    );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , log      , "LOG"      , &ps_function_log                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , odd      , "ODD"      , &ps_function_odd                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ord      , "ORD"      , &ps_function_ord                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , pred     , "PRED"     , &ps_function_pred                  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , random   , "RANDOM"   , &ps_function_random                );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , round    , "ROUND"    , &ps_function_round                 );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sin      , "SIN"      , &ps_function_sin                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqr      , "SQR"      , &ps_function_sqr                   );   
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqrt     , "SQRT"     , &ps_function_sqrt                  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , succ     , "SUCC"     , &ps_function_succ                  );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , tan      , "TAN"      , &ps_function_tan                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , trunc    , "TRUNC"    , &ps_function_trunc                 );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, randomize, "RANDOMIZE", &ps_procedure_randomize            );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, read     , "READ"     , &ps_procedure_read                 );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, readln   , "READLN"   , &ps_procedure_readln               );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, write    , "WRITE"    , &ps_procedure_write                );
+PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln  , "WRITELN"  , &ps_procedure_writeln              );
 
 /* clang-format on */
 
@@ -244,6 +248,8 @@ bool ps_system_init(ps_interpreter *interpreter)
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_ord);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_pred);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_succ);
+
+    // ps_symbol_table_dump(NULL, "SYSTEM INIT", environment->symbols);
 
     if (error)
     {

@@ -23,32 +23,31 @@ extern "C"
     typedef struct s_ps_value
     {
         // ps_type_definition *type;
-        ps_symbol *type;
-        ps_value_data data;
+        ps_symbol *type;    /** @brief symbol with type definition */
+        ps_value_data data; /** @brief current value */
+        bool allocated : 1; /** @brief true if value was allocated (and must be freed) */
     } __attribute__((__packed__)) ps_value;
 
-#define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 #define PS_VALUE_SIZE sizeof(ps_value)
 
-    ps_value *ps_value_alloc(ps_type_definition *type, ps_value_data data);
+    ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data);
     ps_value *ps_value_free(ps_value *value);
 
-    // bool ps_value_is_scalar(ps_value *value);
-    // bool ps_value_is_numeric(ps_value *value);
-    ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
+    /* clang-format off */
+    ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
     ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
-    ps_value *ps_value_set_real(ps_value *value, ps_real r);
-    ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b);
-    ps_value *ps_value_set_char(ps_value *value, ps_char c);
+    ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
+    ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
+    ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
+    ps_value *ps_value_set_string  (ps_value *value, ps_string  *s);
     /*
-    ps_value  *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def);
-    ps_value  *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_type_definition *type_def);
-    ps_value  *ps_value_set_string  (ps_value *value, ps_string  *s);
-    ps_value  *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_type_definition *type_def);
+    ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_symbol *type);
+    ps_value *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_symbol *type);
+    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_symbol *type);
     */
+    /* clang-format on */
 
     char *ps_value_get_display_string(ps_value *value);
-
     char *ps_value_get_debug_value(ps_value *value);
     void ps_value_debug(FILE *output, char *message, ps_value *value);
 

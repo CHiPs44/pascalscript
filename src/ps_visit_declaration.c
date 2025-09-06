@@ -140,7 +140,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
     VISIT_BEGIN("CONST", "");
 
     ps_identifier identifier;
-    ps_type_definition *type;
+    ps_symbol *type;
     ps_value *value;
     ps_value_data data;
     ps_symbol *constant;
@@ -179,7 +179,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             data = constant->value->data;
             if (negate)
             {
-                switch (type->base)
+                switch (type->value->type->value->data.t->base)
                 {
                 case PS_TYPE_INTEGER:
                     data.i = -data.i;
@@ -315,7 +315,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
         // {
         for (int i = 0; i <= var_count; i++)
         {
-            value = ps_value_alloc(type->value->data.t, data);
+            value = ps_value_alloc(type, data);
             variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
             if (variable == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);

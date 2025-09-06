@@ -15,7 +15,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_symbol_table_trace = false;
+bool ps_symbol_table_trace = true;
 
 void ps_symbol_table_log(const char *format, ...)
 {
@@ -105,7 +105,9 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
     ps_symbol_table_size index = hash % table->size;
     if (table->symbols[index] == NULL)
     {
-        ps_symbol_table_log("TRACE\tps_symbol_table_find: %s not found\n", (char *)name);
+        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
+        // if (ps_symbol_table_trace)
+        //     ps_symbol_table_dump(NULL, "NOT FOUND", table);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
     if (strcmp((char *)(table->symbols[index]->name), (char *)name) != 0)
@@ -176,18 +178,26 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
 
 void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
 {
-    if (output == NULL)
-        output = stderr;
     ps_symbol *symbol;
     ps_symbol_table_size free = 0;
     ps_symbol_table_size used = 0;
+    ps_symbol_hash_key hash;
+    char *kind_name;
+    char *type_name;
+    char *value;
+
+    if (output == NULL)
+        output = stderr;
     fprintf(output, "*** Symbol table %s (%d/%d) ***\n", title, table->used, table->size);
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(output, "┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "┃   #┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
-    fprintf(output, "┣━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output,
+            "┏━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(output,
+            "┃   #┃Hash    ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
+    fprintf(output,
+            "┣━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -196,15 +206,16 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
         {
             used += 1;
             symbol = table->symbols[i];
-            char *kind_name = ps_symbol_get_kind_name(symbol->kind);
-            char *type_name =
-                symbol->value == NULL ? "NULL!" : ps_type_definition_get_name(symbol->value->type->value->data.t);
-            char *value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
-            fprintf(output, "┃%04d┃%-*s┃%-10s┃%-10s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,
-                    PS_IDENTIFIER_LEN, value);
+            hash = ps_symbol_get_hash_key((char *)symbol->name);
+            kind_name = ps_symbol_get_kind_name(symbol->kind);
+            type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
+            value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
+            fprintf(output, "┃%04d┃%08x┃%-*s┃%-10s┃%-10s┃%-*s┃\n", i, hash, PS_IDENTIFIER_LEN, symbol->name, kind_name,
+                    type_name, PS_IDENTIFIER_LEN, value);
         }
     }
-    fprintf(output, "┗━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(output,
+            "┗━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }

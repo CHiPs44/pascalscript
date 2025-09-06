@@ -180,7 +180,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
 {
     VISIT_BEGIN("TYPE_DEFINITION", "");
 
-    ps_type_definition *type_def = NULL;
+    ps_symbol *type = NULL;
     ps_value *value = NULL;
     ps_symbol *type_symbol = NULL;
     ps_identifier type_name = {0};
@@ -202,7 +202,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     {
         // Register new type definition in symbol table
         data.t = type_symbol->value->data.t;
-        value = ps_value_alloc(type_def, data);
+        value = ps_value_alloc(type, data);
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);

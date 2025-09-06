@@ -53,7 +53,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         RETURN_ERROR(interpreter->error);
 
     // Add the parameter variable to the current environment
-    value = ps_value_alloc(type_symbol->value->data.t, (ps_value_data){.v = NULL});
+    value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
     if (value == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
     symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, value);
@@ -192,7 +192,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         goto cleanup;
     }
     callable->kind = kind;
-    value = ps_value_alloc(ps_system_procedure.value->data.t, (ps_value_data){.x = executable});
+    value = ps_value_alloc(&ps_system_procedure, (ps_value_data){.x = executable});
     if (value == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;

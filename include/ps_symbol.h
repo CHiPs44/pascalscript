@@ -24,7 +24,7 @@ extern "C"
         PS_SYMBOL_KIND_AUTO,
         PS_SYMBOL_KIND_TYPE_DEFINITION,
         PS_SYMBOL_KIND_PROGRAM,
-        PS_SYMBOL_KIND_UNIT,
+        PS_SYMBOL_KIND_UNIT, /* *FUTURE* */
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
         PS_SYMBOL_KIND_PROCEDURE,
@@ -35,10 +35,10 @@ extern "C"
     /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
     {
-        ps_symbol_kind kind;
-        bool allocated;
-        ps_identifier name;
-        ps_value *value; // must be a pointer as it is a forward reference
+        ps_identifier name;      /** @brief Symbol name in uppercase */
+        ps_value *value;         /** @brief current value, must be a pointer as it is a forward reference */
+        ps_symbol_kind kind : 7; /** @brief Auto, type definition, program, ... */
+        bool allocated : 1;      /** @brief true if symbol was allocated (and must be freed) */
     } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)

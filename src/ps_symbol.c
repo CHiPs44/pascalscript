@@ -33,9 +33,15 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
 
 ps_symbol *ps_symbol_free(ps_symbol *symbol)
 {
-    // free only allocated symbols
-    if (symbol->allocated)
-        free(symbol);
+    if (symbol != NULL)
+    {
+        // free only allocated symbols
+        if (symbol->allocated)
+        {
+            symbol->value = ps_value_free(symbol->value);
+            free(symbol);
+        }
+    }
     return NULL;
 }
 
@@ -56,13 +62,13 @@ const struct s_ps_symbol_kind_name
     // clang-format off
     //                                123456789
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
+    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"     },
     {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
+    {PS_SYMBOL_KIND_UNIT           , "UNIT"     },
     {PS_SYMBOL_KIND_CONSTANT       , "CONSTANT" },
     {PS_SYMBOL_KIND_VARIABLE       , "VARIABLE" },
-    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"     },
     {PS_SYMBOL_KIND_PROCEDURE      , "PROCEDURE"},
     {PS_SYMBOL_KIND_FUNCTION       , "FUNCTION" },
-    {PS_SYMBOL_KIND_UNIT           , "UNIT"     },
     // ...
     // clang-format on
 };
