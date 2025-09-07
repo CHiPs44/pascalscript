@@ -170,7 +170,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_IDENTIFIER:
-            constant = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true);
+            constant = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
             if (constant == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
             if (constant->kind != PS_SYMBOL_KIND_CONSTANT)

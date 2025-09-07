@@ -15,7 +15,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_symbol_table_trace = true;
+bool ps_symbol_table_trace = false;
 
 void ps_symbol_table_log(const char *format, ...)
 {

@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "ps_symbol.h"
+#include "ps_system.h"
 #include "ps_value.h"
 
 static uint32_t ps_symbol_auto_index = 0;
@@ -91,10 +92,16 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 char *ps_symbol_dump_value(ps_symbol *symbol)
 {
     static char buffer[256];
-    snprintf(buffer, sizeof(buffer) - 1, "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", PS_IDENTIFIER_LEN + 1,
-             symbol == NULL ? "NULL!" : symbol->name, symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
-             symbol == NULL ? "NULL!" : ps_type_definition_get_name(symbol->value->type->value->data.t),
-             symbol == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value));
+    // clang-format off
+    snprintf(buffer, sizeof(buffer) - 1, 
+        "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", 
+        PS_IDENTIFIER_LEN + 1,
+        symbol == NULL ? "NULL!" : symbol->name, 
+        symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
+        symbol == NULL ? "NULL!" : symbol->value->type->name,
+        symbol == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value)
+    );
+    // clang-format on
     return buffer;
 }
 
