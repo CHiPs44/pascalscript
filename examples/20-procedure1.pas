@@ -10,22 +10,22 @@ Program Example20Procedure1;
 Var
     Variable1: Integer;
     I: Integer;
-    // Variable2: Integer;
+    Variable2: Integer;
 
-// Procedure Procedure1(Parameter: Integer);
-// Var
-//     Variable1: Integer;
-// Begin
-//     Variable1 := Parameter * 2;
-//     WriteLn('    a. This is Procedure1, Parameter=', Parameter,'Variable1=', Variable1);
-// End;
-
-Procedure Procedure2(Variable2: Integer);
+Procedure Procedure1(Parameter: Integer);
+Var
+    Variable1: Integer;
 Begin
-    WriteLn('    1. This is Procedure2, Variable2=', Variable2);
-    Variable2 := 12;
-    WriteLn('    2. This is Procedure2, Variable2=', Variable2);
+    Variable1 := Parameter * 2;
+    WriteLn('    a. This is Procedure1, Parameter=', Parameter,'Variable1=', Variable1);
 End;
+
+// Procedure Procedure2(Variable2: Integer);
+// Begin
+//     WriteLn('    1. This is Procedure2, Variable2=', Variable2);
+//     Variable2 := 12;
+//     WriteLn('    2. This is Procedure2, Variable2=', Variable2);
+// End;
 
 Begin
     Variable1 := 1;

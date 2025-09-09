@@ -219,7 +219,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             buffer[pos] = '\0';
         } while (isalnum(c) || c == '_');
         lexer->current_token.type = ps_token_is_keyword(buffer);
-        strncpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
+        memcpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
         return true;
     }
     lexer->current_token.type = PS_TOKEN_NONE;

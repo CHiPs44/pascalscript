@@ -4,6 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <string.h>
+
 #include "ps_executable.h"
 #include "ps_lexer.h"
 #include "ps_system.h"
@@ -12,61 +14,85 @@
 
 /**
  * Visit parameter definition:
- *      [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
- * Next steps:
- *  - allow several identifiers before ':'
  *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
  */
-bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *name,
-                                   ps_symbol *type_symbol, bool *by_reference)
+bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                   ps_formal_signature *signature)
 {
     VISIT_BEGIN("PARAMETER_DEFINITION", "");
 
-    ps_identifier parameter_name = {0};
+    ps_identifier names[8] = {0};
+    int index = -1;
     ps_symbol *symbol = NULL;
-    ps_value *value = NULL;
+    ps_symbol __attribute__((aligned(4))) *type_symbol = NULL;
+    bool by_reference;
 
     // Default is "by value"
-    *by_reference = false;
+    by_reference = false;
     if (lexer->current_token.type == PS_TOKEN_VAR)
     {
-        *by_reference = true;
+        by_reference = true;
         READ_NEXT_TOKEN;
     }
 
-    // Parameter name
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-    COPY_IDENTIFIER(parameter_name);
-    // Check that the parameter name does not already exist in the current environment
-    symbol = ps_interpreter_find_symbol(interpreter, &parameter_name, true);
-    if (symbol != NULL)
-        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-    memcpy(*name, &parameter_name, sizeof(ps_identifier));
-    READ_NEXT_TOKEN;
-
-    // Then ':'
-    EXPECT_TOKEN(PS_TOKEN_COLON);
-    READ_NEXT_TOKEN;
+    // One or more parameter names
+    do
+    {
+        // Parameter name
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+        index += 1;
+        if (index > 7)
+            RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
+        COPY_IDENTIFIER(names[index]);
+        // Check that the parameter name does not already exist in the other parameters
+        for (int i = 0; i < index; i++)
+        {
+            if (0 == strncmp((char *)names[i], (char *)names[index], PS_IDENTIFIER_LEN))
+                RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+        }
+        // Check that the parameter name does not already exist in the signature
+        if (ps_formal_signature_find_parameter(signature, &names[index]) != NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+        READ_NEXT_TOKEN;
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_COMMA:
+            // ',' introduces another parameter name
+            READ_NEXT_TOKEN;
+            continue;
+        case PS_TOKEN_COLON:
+            // ':' introduces the parameter(s) type
+            READ_NEXT_TOKEN;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        }
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
 
-    // Add the parameter variable to the current environment
-    value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
-    if (value == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter_name, value);
-    if (symbol == NULL)
+    // Add the parameters to the signature
+    for (int i = 0; i <= index; i++)
     {
-        ps_value_free(value);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    if (!ps_interpreter_add_symbol(interpreter, symbol))
-    {
-        ps_symbol_free(symbol);
-        ps_value_free(value);
-        RETURN_ERROR(interpreter->error);
+        // value = ps_value_alloc(symbol, (ps_value_data){.v = NULL});
+        // if (value == NULL)
+        //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        // symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, names[i], value);
+        // if (symbol == NULL)
+        // {
+        //     ps_value_free(value);
+        //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        // }
+        // if (!ps_interpreter_add_symbol(interpreter, symbol))
+        // {
+        //     ps_symbol_free(symbol);
+        //     ps_value_free(value);
+        //     RETURN_ERROR(interpreter->error);
+        // }
+        if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_symbol))
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
     }
 
     VISIT_END("OK");
@@ -109,31 +135,24 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    // For now, only procedures
     if (kind == PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
 
+    // Get procedure/function name
     READ_NEXT_TOKEN_OR_CLEANUP;
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
+    // Does it already exist in the current environment?
     COPY_IDENTIFIER(identifier);
     callable = ps_interpreter_find_symbol(interpreter, &identifier, true);
     if (callable != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-
+    // Create new environment for the procedure/function
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
     {
         goto cleanup;
     }
     has_environment = true;
-
-    // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
-    // ps_interpreter_debug debug = interpreter->debug;
-    // interpreter->debug = DEBUG_TRACE;
-    TRACE_CURSOR;
-    if (!ps_lexer_get_cursor(lexer, &line, &column))
-    {
-        interpreter->error = PS_ERROR_GENERIC; // TODO better error code
-        goto cleanup;
-    }
     READ_NEXT_TOKEN;
 
     // Initialize signature
@@ -143,6 +162,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
+
     // Parameters?
     ps_interpreter_debug debug = interpreter->debug;
     interpreter->debug = DEBUG_TRACE;
@@ -158,13 +178,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         {
             do
             {
-                if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, parameter_type, &by_reference))
+                if (!ps_visit_parameter_definition(interpreter, mode, signature))
                     goto cleanup;
-                if (!ps_formal_signature_add_parameter(signature, by_reference, &parameter_name, parameter_type))
-                {
-                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                    goto cleanup;
-                }
                 // `,` introduces another parameter
                 if (lexer->current_token.type == PS_TOKEN_COMMA)
                     continue;

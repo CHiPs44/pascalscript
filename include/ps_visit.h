@@ -113,7 +113,7 @@ extern "C"
         goto cleanup;
 
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
-    strncpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_LEN)
+    memcpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE)
 
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \

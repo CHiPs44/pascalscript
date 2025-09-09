@@ -67,6 +67,16 @@ ps_actual_signature *ps_actual_signature_free(ps_actual_signature *signature)
     return NULL;
 }
 
+ps_formal_parameter * ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name)
+{
+    for (int i = 0; i < signature->parameter_count; i++)
+    {
+        if (0 == strncmp((char *)signature->parameters[i].name, (char *)name, PS_IDENTIFIER_LEN))
+            return &signature->parameters[i];
+    }
+    return NULL;
+}
+
 bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name, ps_symbol *type)
 {
     ps_formal_parameter *new_parameters;

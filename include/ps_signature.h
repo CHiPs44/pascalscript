@@ -72,6 +72,9 @@ extern "C"
     /** @brief Release a procedure or function *actual* signature */
     ps_actual_signature *ps_actual_signature_free(ps_actual_signature *signature);
 
+    /** @brief Find a parameter in a formal signature by name */
+    ps_formal_parameter * ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name);
+
     /** @brief Add parameter to formal signature */
     bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name,
                                            ps_symbol *type);
