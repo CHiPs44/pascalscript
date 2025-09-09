@@ -119,6 +119,12 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     if (callable != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
 
+    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+    {
+        goto cleanup;
+    }
+    has_environment = true;
+
     // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
     // ps_interpreter_debug debug = interpreter->debug;
     // interpreter->debug = DEBUG_TRACE;
@@ -130,6 +136,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     }
     READ_NEXT_TOKEN;
 
+    // Initialize signature
     signature = ps_formal_signature_alloc(0, &ps_system_none);
     if (signature == NULL)
     {
@@ -137,6 +144,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         goto cleanup;
     }
     // Parameters?
+    ps_interpreter_debug debug = interpreter->debug;
+    interpreter->debug = DEBUG_TRACE;
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
         READ_NEXT_TOKEN_OR_CLEANUP;
@@ -149,11 +158,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         {
             do
             {
-                if (!ps_lexer_get_cursor(lexer, &line, &column))
-                {
-                    interpreter->error = PS_ERROR_GENERIC; // TODO better error code
-                    goto cleanup;
-                }
                 if (!ps_visit_parameter_definition(interpreter, mode, &parameter_name, parameter_type, &by_reference))
                     goto cleanup;
                 if (!ps_formal_signature_add_parameter(signature, by_reference, &parameter_name, parameter_type))
@@ -174,9 +178,14 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
             } while (true);
         }
     }
-    // interpreter->debug = debug;
+    interpreter->debug = debug;
     ps_formal_signature_debug(stderr, "SIGNATURE", signature);
 
+    if (!ps_lexer_get_cursor(lexer, &line, &column))
+    {
+        interpreter->error = PS_ERROR_GENERIC; // TODO better error code
+        goto cleanup;
+    }
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
 
     executable = ps_executable_alloc(signature, line, column);
@@ -203,11 +212,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     {
         goto cleanup;
     }
-    if (!ps_interpreter_enter_environment(interpreter, &identifier))
-    {
-        goto cleanup;
-    }
-    has_environment = true;
     // Skip block
     // fprintf(stderr, "================================================================================\n");
     // ps_executable_debug(stderr, "EXECUTABLE", executable);
