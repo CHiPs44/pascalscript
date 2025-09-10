@@ -12,12 +12,12 @@ Var
     I: Integer;
     Variable2: Integer;
 
-Procedure Procedure1(Parameter: Integer);
+Procedure Procedure1(Parameter1, Parameter2: Integer);
 Var
     Variable1: Integer;
 Begin
-    Variable1 := Parameter * 2;
-    WriteLn('    a. This is Procedure1, Parameter=', Parameter,'Variable1=', Variable1);
+    Variable1 := Parameter1 * 2;
+    WriteLn('    a. This is Procedure1, Parameter1=', Parameter1,'Variable1=', Variable1);
 End;
 
 // Procedure Procedure2(Variable2: Integer);
@@ -32,11 +32,11 @@ Begin
     For I := 1 to 3 Do
     Begin
         WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', I*10);
-        // Procedure1(I*10);
+        // Procedure1(I*10, 42);
     End;
     // WriteLn('------------------------------');
-    Variable2 := 0;
-    WriteLn('1. This is Program, Variable2=', Variable2);
+    // Variable2 := 0;
+    // WriteLn('1. This is Program, Variable2=', Variable2);
     // Procedure2(Variable2);
-    WriteLn('2. This is Program, Variable2=', Variable2);
+    // WriteLn('2. This is Program, Variable2=', Variable2);
 End.

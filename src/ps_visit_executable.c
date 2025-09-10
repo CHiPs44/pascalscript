@@ -26,6 +26,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     ps_symbol *symbol = NULL;
     ps_symbol __attribute__((aligned(4))) *type_symbol = NULL;
     bool by_reference;
+    ps_value *value = NULL;
 
     // Default is "by value"
     by_reference = false;
@@ -45,54 +46,53 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
         COPY_IDENTIFIER(names[index]);
         // Check that the parameter name does not already exist in the other parameters
+        // e.g. procedure P(a, b, a: Integer);
         for (int i = 0; i < index; i++)
         {
             if (0 == strncmp((char *)names[i], (char *)names[index], PS_IDENTIFIER_LEN))
                 RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         }
         // Check that the parameter name does not already exist in the signature
+        // e.g. procedure P(a: Integer; a: Boolean);
         if (ps_formal_signature_find_parameter(signature, &names[index]) != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         READ_NEXT_TOKEN;
-        switch (lexer->current_token.type)
+        // ',' introduces another parameter name
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-        case PS_TOKEN_COMMA:
-            // ',' introduces another parameter name
             READ_NEXT_TOKEN;
             continue;
-        case PS_TOKEN_COLON:
-            // ':' introduces the parameter(s) type
+        }
+        // ':' introduces the parameter(s) type
+        if (lexer->current_token.type == PS_TOKEN_COLON)
+        {
             READ_NEXT_TOKEN;
             break;
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
-    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+        // Anything else is an error
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    } while (true);
 
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         RETURN_ERROR(interpreter->error);
 
-    // Add the parameters to the signature
+    // Add the parameters to the signature and to the current environment if executing
     for (int i = 0; i <= index; i++)
     {
-        // value = ps_value_alloc(symbol, (ps_value_data){.v = NULL});
-        // if (value == NULL)
-        //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        // symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, names[i], value);
-        // if (symbol == NULL)
-        // {
-        //     ps_value_free(value);
-        //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        // }
-        // if (!ps_interpreter_add_symbol(interpreter, symbol))
-        // {
-        //     ps_symbol_free(symbol);
-        //     ps_value_free(value);
-        //     RETURN_ERROR(interpreter->error);
-        // }
         if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_symbol))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        if (mode == MODE_EXEC)
+        {
+            value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
+            if (value == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
+            if (symbol == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            if (!ps_interpreter_add_symbol(interpreter, symbol))
+                RETURN_ERROR(interpreter->error);
+        }
     }
 
     VISIT_END("OK");
@@ -128,9 +128,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     uint16_t line = 0;
     uint16_t column = 0;
     // ps_value result = {0};
-    ps_identifier parameter_name = {0};
-    ps_symbol *parameter_type = NULL;
-    bool by_reference = false;
     bool has_environment = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)

@@ -89,7 +89,7 @@ extern "C"
             // ps_type_definition_record def_record;
             // ps_type_definition_file def_file;
         } def; /** @brief  */
-    } __attribute__((__packed__)) ps_type_definition;
+    } /*__attribute__((__packed__))*/ ps_type_definition;
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
