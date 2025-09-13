@@ -46,7 +46,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
         RETURN_ERROR(interpreter->error);
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
-    // ps_symbol_table_dump(NULL, "Before EXIT", ps_interpreter_get_environment(interpreter)->symbols);
+    ps_symbol_table_dump(NULL, "Before EXIT", ps_interpreter_get_environment(interpreter)->symbols);
     ps_interpreter_exit_environment(interpreter);
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: text after '.' is not analyzed and has not to be

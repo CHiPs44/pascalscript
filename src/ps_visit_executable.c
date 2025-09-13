@@ -82,17 +82,17 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     {
         if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_symbol))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        if (mode == MODE_EXEC)
-        {
-            value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
-            if (value == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-            symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
-            if (symbol == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-            if (!ps_interpreter_add_symbol(interpreter, symbol))
-                RETURN_ERROR(interpreter->error);
-        }
+        // if (mode == MODE_EXEC)
+        // {
+        value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
+        if (value == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        if (!ps_interpreter_add_symbol(interpreter, symbol))
+            RETURN_ERROR(interpreter->error);
+        // }
     }
 
     VISIT_END("OK");
@@ -105,16 +105,16 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
  *      BEGIN
  *          COMPOUND_STATEMENT [ ; ]
  *      END ;
- *      FUNCTION IDENTIFIER [ ( ) ] : TYPE ;
- *      [ CONST ... TYPE ... VAR ... ]*
- *      BEGIN
- *          COMPOUND_STATEMENT [ ; ]
- *      END ;
- *      PARAMETER_DEFINITION = IDENTIFIER [ ':' TYPE ] [ 'VAR' ] ;
+ *      PARAMETER_DEFINITION = IDENTIFIER [ ':' TYPE_REFERENCE ] [ 'VAR' ] ;
  * Next steps:
  *  - allow procedure parameters
  *  - allow by reference parameters
  *  - functions with return type
+ *      FUNCTION IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] : TYPE_REFERENCE ;
+ *      [ CONST ... TYPE ... VAR ... ]*
+ *      BEGIN
+ *          COMPOUND_STATEMENT [ ; ]
+ *      END ;
  */
 bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
 {
@@ -161,8 +161,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     }
 
     // Parameters?
-    ps_interpreter_debug debug = interpreter->debug;
-    interpreter->debug = DEBUG_TRACE;
+    // ps_interpreter_debug debug = interpreter->debug;
+    // interpreter->debug = DEBUG_TRACE;
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
         READ_NEXT_TOKEN_OR_CLEANUP;
@@ -190,8 +190,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
             } while (true);
         }
     }
-    interpreter->debug = debug;
-    ps_formal_signature_debug(stderr, "SIGNATURE", signature);
+    // interpreter->debug = debug;
+    // ps_formal_signature_debug(stderr, "SIGNATURE", signature);
 
     if (!ps_lexer_get_cursor(lexer, &line, &column))
     {
@@ -206,6 +206,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
+    // fprintf(stderr, "================================================================================\n");
+    // ps_executable_debug(stderr, "EXECUTABLE", executable);
+    // fprintf(stderr, "================================================================================\n");
     callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
     if (callable == NULL)
     {
@@ -220,15 +223,15 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         goto cleanup;
     }
     callable->value = value;
-    if (!ps_interpreter_add_symbol(interpreter, callable))
+    // Add the procedure/function to the parent environment
+    ps_environment *parent_environment = ps_interpreter_get_environment(interpreter)->parent;
+    // if (!ps_interpreter_add_symbol(interpreter, callable))
+    if (parent_environment == NULL || !ps_environment_add_symbol(parent_environment, callable))
     {
         goto cleanup;
     }
     // Skip block
-    // fprintf(stderr, "================================================================================\n");
-    // ps_executable_debug(stderr, "EXECUTABLE", executable);
     READ_NEXT_TOKEN;
-    // fprintf(stderr, "================================================================================\n");
     if (!ps_visit_block(interpreter, MODE_SKIP))
     {
         goto cleanup;
@@ -247,9 +250,14 @@ cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
     if (callable != NULL)
-        ps_symbol_free(callable);
+    {
+        callable = ps_symbol_free(callable);
+        value = NULL;
+    }
     if (value != NULL)
-        ps_value_free(value);
+    {
+        value = ps_value_free(value);
+    }
     if (executable != NULL)
         free(executable); // TODO ps_executable_free(executable);
     if (has_environment)
