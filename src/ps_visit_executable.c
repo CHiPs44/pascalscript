@@ -15,6 +15,9 @@
 /**
  * Visit parameter definition:
  *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
+ * 
+ * Add the parameter(s) to the signature and to the current environment.
+ * Up to 8 parameters at once.
  */
 bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_mode mode,
                                    ps_formal_signature *signature)
@@ -23,8 +26,8 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
 
     ps_identifier names[8] = {0};
     int index = -1;
-    ps_symbol *symbol = NULL;
-    ps_symbol __attribute__((aligned(4))) *type_symbol = NULL;
+    ps_symbol *parameter = NULL;
+    ps_symbol __attribute__((aligned(4))) *type_reference = NULL;
     bool by_reference;
     ps_value *value = NULL;
 
@@ -74,23 +77,23 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     } while (true);
 
     // Then parameter type
-    if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
+    if (!ps_visit_type_reference(interpreter, mode, &type_reference))
         RETURN_ERROR(interpreter->error);
 
     // Add the parameters to the signature and to the current environment if executing
     for (int i = 0; i <= index; i++)
     {
-        if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_symbol))
+        if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         // if (mode == MODE_EXEC)
         // {
-        value = ps_value_alloc(type_symbol, (ps_value_data){.v = NULL});
+        value = ps_value_alloc(type_reference, (ps_value_data){.v = NULL});
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
-        if (symbol == NULL)
+        parameter = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
+        if (parameter == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        if (!ps_interpreter_add_symbol(interpreter, symbol))
+        if (!ps_interpreter_add_symbol(interpreter, parameter))
             RETURN_ERROR(interpreter->error);
         // }
     }
@@ -106,9 +109,10 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
  *          COMPOUND_STATEMENT [ ; ]
  *      END ;
  *      PARAMETER_DEFINITION = IDENTIFIER [ ':' TYPE_REFERENCE ] [ 'VAR' ] ;
- * Next steps:
+ * Done:
  *  - allow procedure parameters
  *  - allow by reference parameters
+ * Next steps:
  *  - functions with return type
  *      FUNCTION IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] : TYPE_REFERENCE ;
  *      [ CONST ... TYPE ... VAR ... ]*
