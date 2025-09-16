@@ -135,10 +135,100 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     VISIT_END("OK");
 }
 
+bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *procedure,
+                               ps_formal_signature *actual)
+{
+    VISIT_BEGIN("ACTUAL_SIGNATURE", "");
+
+    ps_formal_signature *formal_signature = procedure->value->data.x->signature;
+    ps_formal_parameter *parameter = NULL;
+    ps_symbol *argument = NULL;
+    ps_value *value = NULL;
+    // ps_symbol *variable = NULL;
+    ps_value result;
+    uint8_t i = 0;
+
+    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+
+    // No parameters?
+    READ_NEXT_TOKEN;
+    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+    {
+        if (formal_signature->parameter_count != 0)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        READ_NEXT_TOKEN;
+        VISIT_END("NO_PARAMETERS");
+    }
+    if (formal_signature->parameter_count == 0)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+
+    // Parse actual parameters
+    do
+    {
+        parameter = &formal_signature->parameters[i];
+        if (parameter->byref)
+        {
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            // if (!ps_visit_variable_reference(interpreter, mode, procedure, variable))
+            //     TRACE_ERROR("VARIABLE");
+            // TODO associate variable to parameter
+        }
+        else
+        {
+            result.type = &ps_system_none;
+            result.data.v = NULL;
+            if (!ps_visit_expression(interpreter, mode, &result))
+                TRACE_ERROR("EXPRESSION");
+            if (mode == MODE_EXEC)
+            {
+                if (result.type != parameter->type)
+                {
+                    // TODO allow compatible types
+                    RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+                }
+                value = ps_value_alloc(parameter->type, result.data);
+                if (value == NULL)
+                {
+                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                    TRACE_ERROR("VALUE");
+                }
+                argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, value);
+                if (argument == NULL)
+                {
+                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                    TRACE_ERROR("ARGUMENT");
+                }
+                if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
+                {
+                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                    TRACE_ERROR("ADD");
+                }
+            }
+        }
+        i += 1;
+        if (i >= formal_signature->parameter_count)
+        {
+            if (lexer->current_token.type == PS_TOKEN_COMMA)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            break;
+        }
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            READ_NEXT_TOKEN;
+            continue;
+        }
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        {
+            READ_NEXT_TOKEN;
+            break;
+        }
+    } while (true);
+
+    VISIT_END("OK");
+}
+
 /**
  * Visit procedure call:
- *    IDENTIFIER [ '(' ')' ]
- * Next step:
  *    IDENTIFIER [ '(' actual_parameter [ ',' actual_parameter ]* ')' ]
  *    where actual_parameter is:
  *      expression
@@ -174,12 +264,14 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
             RETURN_ERROR(interpreter->error);
         has_environment = true;
-        // TODO Parse parameters (needs environment)
-        // for now, just check for statement terminators
-        TRACE_CURSOR;
-        // Save "cursor" position
-        if (!ps_lexer_get_cursor(lexer, &line, &column))
-            RETURN_ERROR(PS_ERROR_GENERIC); // TODO better error code
+        // Parse parameters
+        if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+        {
+            if (!ps_visit_actual_signature(interpreter, mode, executable, executable->value->data.x->signature))
+                TRACE_ERROR("SIGNATURE");
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+        }
+        SAVE_CURSOR(line, column);
         ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
         if (token_type == PS_TOKEN_NONE)
         {
@@ -190,16 +282,16 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (mode == MODE_EXEC)
         {
             // fprintf(stderr, "================================================================================\n");
-            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line,
-            // column); ps_token_debug(stderr, "CURRENT", &lexer->current_token); Set cursor to the beginning of the
-            // procedure body
+            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line, column);
+            // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
+            // Set cursor to the beginning of the procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
-            // fprintf(stderr, "================================================================================\n");
+            fprintf(stderr, "================================================================================\n");
             // Parse procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;

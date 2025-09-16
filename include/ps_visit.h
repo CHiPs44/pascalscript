@@ -94,23 +94,34 @@ extern "C"
 
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__)                                                                                \
     if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
-    return false
+    {                                                                                                                  \
+        interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                \
+        return false;                                                                                                  \
+    }
 
 #define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
+    if (!ps_lexer_read_token(lexer))                                                                                   \
     {                                                                                                                  \
-        if (!ps_lexer_read_token(lexer))                                                                               \
-            goto cleanup;                                                                                              \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
         {                                                                                                              \
             fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
                     "", "");                                                                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
+        goto cleanup;                                                                                                  \
     }
 
 #define EXPECT_TOKEN_OR_CLEANUP(__PS_TOKEN_TYPE__)                                                                     \
     if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
-        goto cleanup;
+    {                                                                                                                  \
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
+                    "", "");                                                                                           \
+            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
+        }                                                                                                              \
+        goto cleanup;                                                                                                  \
+    }
 
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
     memcpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE)
@@ -134,7 +145,7 @@ extern "C"
                     visit, __PS_ERROR__);                                                                              \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        interpreter->error = __PS_ERROR__;                                                                               \
+        interpreter->error = __PS_ERROR__;                                                                             \
         goto cleanup;                                                                                                  \
     }
 
@@ -148,6 +159,14 @@ extern "C"
         }                                                                                                              \
         return false;                                                                                                  \
     }
+
+#define SAVE_CURSOR(__LINE__, __COLUMN__)                                                                              \
+    if (!ps_lexer_get_cursor(lexer, &__LINE__, &__COLUMN__))                                                           \
+        TRACE_ERROR("CURSOR!");
+
+#define RESTORE_CURSOR(__LINE__, __COLUMN__)                                                                           \
+    if (!ps_lexer_set_cursor(lexer, __LINE__, __COLUMN__))                                                             \
+        TRACE_ERROR("CURSOR!");
 
 #define TRACE_CURSOR                                                                                                   \
     if (interpreter->debug >= DEBUG_TRACE)                                                                             \
