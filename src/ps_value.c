@@ -173,6 +173,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 char *ps_value_to_string(ps_value *value, bool debug)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
+    ps_executable *executable;
     if (value == NULL)
     {
         if (debug)
@@ -252,7 +253,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
         }
         break;
     case PS_TYPE_EXECUTABLE:
-        ps_executable *executable = value->data.x;
+        executable = value->data.x;
         if (executable == NULL)
             snprintf(buffer, sizeof(buffer) - 1, "NULL!");
         else if (executable->system != NULL)

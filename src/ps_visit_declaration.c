@@ -145,6 +145,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_value_data data;
     ps_symbol *constant;
     bool negate = false;
+    ps_string *s = NULL;
 
     EXPECT_TOKEN(PS_TOKEN_CONST);
     READ_NEXT_TOKEN;
@@ -230,7 +231,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             data.b = lexer->current_token.value.b;
             break;
         case PS_TOKEN_STRING_VALUE:
-            ps_string *s = NULL;
+            s = NULL;
             if (mode == MODE_EXEC)
             {
                 s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
