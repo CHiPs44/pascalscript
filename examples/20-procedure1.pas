@@ -54,11 +54,14 @@ Begin
     WriteLn('Nested procedures');
     For I := 1 to 2 Do
     Begin
+        WriteLn('Begin ', I);
         Procedure0a;
-        Procedure0b;
+        Procedure0b();
+        WriteLn('End ', I);
     End;
     WriteLn('Nested procedures');
     WriteLn('----------------------------------------------------------------------');
+    (*
     Variable1 := 1;
     For I := 1 to 3 Do
     Begin
@@ -71,4 +74,5 @@ Begin
     // Procedure2(Variable2);
     WriteLn('2. This is Program, Variable2=', Variable2);
     WriteLn('----------------------------------------------------------------------');
+    *)
 End.

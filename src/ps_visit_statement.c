@@ -156,7 +156,6 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
     {
         if (formal_signature->parameter_count != 0)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-        READ_NEXT_TOKEN;
         VISIT_END("NO_PARAMETERS");
     }
     if (formal_signature->parameter_count == 0)
@@ -231,12 +230,11 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  * Visit procedure call:
  *    IDENTIFIER [ '(' actual_parameter [ ',' actual_parameter ]* ')' ]
  *    where actual_parameter is:
- *      expression
- *      or
- *      'VAR' IDENTIFIER
+ *      expression or variable_reference
  */
-bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable/*,
-                             uint16_t line, uint16_t column*/)
+bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable /*,
+                              uint16_t line, uint16_t column*/
+)
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
 
@@ -267,9 +265,13 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // Parse parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
+            // interpreter->debug = DEBUG_VERBOSE;
+            // fprintf(stderr, "*** AFTER '('\n");
             if (!ps_visit_actual_signature(interpreter, mode, executable, executable->value->data.x->signature))
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+            // fprintf(stderr, "*** AFTER ')'\n");
+            READ_NEXT_TOKEN;
         }
         SAVE_CURSOR(line, column);
         ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
@@ -291,7 +293,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
-            fprintf(stderr, "================================================================================\n");
+            // fprintf(stderr, "================================================================================\n");
             // Parse procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;
@@ -403,7 +405,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (!ps_visit_procedure_call(interpreter, mode, symbol /*, line, column*/))
+        if (!ps_visit_procedure_call(interpreter, mode, symbol))
             TRACE_ERROR("PROCEDURE_CALL");
         break;
     default:
