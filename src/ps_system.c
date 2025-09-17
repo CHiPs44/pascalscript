@@ -127,6 +127,7 @@ PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqr      , "SQR"      , 
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , sqrt     , "SQRT"     , &ps_function_sqrt                  );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , succ     , "SUCC"     , &ps_function_succ                  );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , tan      , "TAN"      , &ps_function_tan                   );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ticks    , "TICKS"    , &ps_function_ticks                 );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , trunc    , "TRUNC"    , &ps_function_trunc                 );
 PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, randomize, "RANDOMIZE", &ps_procedure_randomize            );
 PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, read     , "READ"     , &ps_procedure_read                 );
@@ -242,6 +243,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqr);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_sqrt);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_tan);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function_ticks);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_trunc);
     error = error || !ps_environment_add_symbol(environment, &ps_system_procedure_randomize);
     error = error || !ps_environment_add_symbol(environment, &ps_system_function_chr);

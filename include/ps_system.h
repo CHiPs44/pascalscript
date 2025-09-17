@@ -49,13 +49,13 @@ extern "C"
     extern ps_symbol ps_system_function_ord;
     extern ps_symbol ps_system_function_pred;
     extern ps_symbol ps_system_function_random;
-    extern ps_symbol ps_system_function_random;
     extern ps_symbol ps_system_function_round;
     extern ps_symbol ps_system_function_sin;
     extern ps_symbol ps_system_function_sqr;
     extern ps_symbol ps_system_function_sqrt;
     extern ps_symbol ps_system_function_succ;
     extern ps_symbol ps_system_function_tan;
+    extern ps_symbol ps_system_function_ticks;
     extern ps_symbol ps_system_function_trunc;
     extern ps_symbol ps_system_procedure_randomize;
     extern ps_symbol ps_system_procedure_read;

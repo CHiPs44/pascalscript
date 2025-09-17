@@ -38,6 +38,7 @@ extern "C"
   ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_ticks (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_abs   (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+  ps_error ps_function_ticks (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_trunc (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_round (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_int   (ps_interpreter *interpreter, ps_value *value, ps_value *result);

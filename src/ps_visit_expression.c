@@ -438,6 +438,33 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
     }
+    else if (function == &ps_system_function_ticks)
+    {
+        // Random function can be called with 2 signatures:
+        //  1. Random or Random() => Real
+        //  2. Random(Integer|Unsigned) => Integer|Unsigned
+        // interpreter->debug = DEBUG_VERBOSE;
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_LEFT_PARENTHESIS:
+            // Skip '(' and ')'
+            READ_NEXT_TOKEN;
+            if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            null_arg = true;
+            READ_NEXT_TOKEN;
+            break;
+        case PS_TOKEN_SEMI_COLON:
+        case PS_TOKEN_ELSE:
+        case PS_TOKEN_END:
+        case PS_TOKEN_UNTIL:
+            // Statement terminators => OK
+            null_arg = true;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        }
+    }
     else
     {
         // all other functions have one argument for now

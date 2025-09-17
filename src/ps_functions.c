@@ -259,15 +259,6 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_ticks(ps_interpreter *interpreter, ps_value *value, ps_value *result)
-{
-    // NB: value is not used
-    result->type = &ps_system_unsigned;
-    clock_t c = clock();
-    result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
-    return PS_ERROR_NONE;
-}
-
 /** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer / unsigned / real */
 ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
@@ -287,6 +278,15 @@ ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value 
         return PS_ERROR_EXPECTED_NUMBER;
     }
     result->type = value->type;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_function_ticks(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    // NB: value is not used
+    result->type = &ps_system_unsigned;
+    clock_t c = clock();
+    result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
     return PS_ERROR_NONE;
 }
 
