@@ -20,7 +20,6 @@ ps_environment *ps_environment_init(ps_environment *parent, ps_identifier *name,
         return ps_environment_done(environment);
     environment->parent = parent;
     memcpy(environment->name, name, PS_IDENTIFIER_SIZE);
-    environment->name[PS_IDENTIFIER_SIZE - 1] = '\0'; // Ensure null-termination
     return environment;
 }
 

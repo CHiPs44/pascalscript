@@ -30,7 +30,6 @@ Const
   EpsReal    = 1.19209289550781250000000000000000000e-7;
 
 Type
-  { Could be Cardinal, too, but MaXUint is already defined }
   Unsigned = 0..MaxUint;
 
 { Supplemental functions }
@@ -38,8 +37,11 @@ Type
 Function Even(N: Integer): Boolean;
 Function Even(N: Unsigned): Boolean;
 Function Tan(X: Real): Real;
+Function Ticks: Unsigned;
 
 Implementation
+
+Uses SysUtils;
 
 Function Even(N: Integer): Boolean;
 Begin
@@ -56,4 +58,17 @@ Begin
   Tan := Sin(X) / Cos(X);
 End;
 
+Var
+  StartTicks: QWord;
+
+Function Ticks: Unsigned;
+Var
+  Ticks64: QWord;
+Begin
+  Ticks64 := GetTickCount64 - StartTicks;
+  Ticks := Unsigned(Ticks64 And MaxUint);
+End;
+
+Begin
+  StartTicks := GetTickCount64;
 End.

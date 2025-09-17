@@ -265,12 +265,9 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // Parse parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
-            // interpreter->debug = DEBUG_VERBOSE;
-            // fprintf(stderr, "*** AFTER '('\n");
             if (!ps_visit_actual_signature(interpreter, mode, executable, executable->value->data.x->signature))
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            // fprintf(stderr, "*** AFTER ')'\n");
             READ_NEXT_TOKEN;
         }
         SAVE_CURSOR(line, column);

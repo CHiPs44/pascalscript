@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     bool verbose = false;
     bool dump_symbols = false;
     bool dump_buffer = false;
+    bool exec = true;
     char *current_path = NULL;
     char *example_path = NULL;
     char *program_file = NULL;
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
 
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "tdsbv")) != -1)
+    while ((opt = getopt(argc, argv, "tdsbvn")) != -1)
     {
         switch (opt)
         {
@@ -122,6 +123,10 @@ int main(int argc, char *argv[])
             break;
         case 'v':
             verbose = true;
+            arg++;
+            break;
+        case 'n':
+            exec = false;
             arg++;
             break;
         default:
@@ -183,7 +188,7 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize interpreter */
-    interpreter = ps_interpreter_init();
+    interpreter = ps_interpreter_alloc();
     if (interpreter == NULL)
     {
         fprintf(stderr, "Could not initialize interpreter!\n");
@@ -231,7 +236,7 @@ int main(int argc, char *argv[])
     /* Run program */
     if (verbose)
         printf("================================================================================\n");
-    bool ok = ps_interpreter_run(interpreter, true);
+    bool ok = ps_interpreter_run(interpreter, exec);
     if (verbose)
         printf("================================================================================\n");
 
@@ -240,7 +245,7 @@ int main(int argc, char *argv[])
         ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
     /* Terminate interpreter */
-    ps_interpreter_done(interpreter);
+    ps_interpreter_free(interpreter);
     interpreter = NULL;
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

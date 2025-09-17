@@ -14,7 +14,7 @@
 #include "ps_interpreter.h"
 #include "ps_visit.h"
 
-ps_interpreter *ps_interpreter_init()
+ps_interpreter *ps_interpreter_alloc()
 {
     ps_interpreter *interpreter = calloc(1, sizeof(ps_interpreter));
     if (interpreter == NULL)
@@ -22,14 +22,14 @@ ps_interpreter *ps_interpreter_init()
     // Allocate string heap
     interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
     if (interpreter->string_heap == NULL)
-        return ps_interpreter_done(interpreter);
+        return ps_interpreter_free(interpreter);
     // Allocate parser
     interpreter->parser = ps_parser_alloc();
     if (interpreter->parser == NULL)
-        return ps_interpreter_done(interpreter);
+        return ps_interpreter_free(interpreter);
     // Allocate and initialize system environment
     if (!ps_system_init(interpreter))
-        return ps_interpreter_done(interpreter);
+        return ps_interpreter_free(interpreter);
     // Set default state
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_ERROR_NONE;
@@ -39,7 +39,7 @@ ps_interpreter *ps_interpreter_init()
     return interpreter;
 }
 
-ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter)
+ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
 {
     if (interpreter != NULL)
     {
@@ -150,7 +150,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
 {
     // ps_value_debug(stderr, "FROM\t", from);
     // ps_value_debug(stderr, "TO\t", to);
-    if (to->type == NULL || to->type->value->data.t->base == PS_TYPE_NONE)
+    if (to->type == NULL || to->type == &ps_system_none || to->type->value->data.t->base == PS_TYPE_NONE)
         to->type = from->type;
     if (from->type == to->type)
     {
@@ -193,8 +193,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-    bool ok = ps_buffer_load_string(lexer->buffer, source, length);
-    return ok;
+    return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
 bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)

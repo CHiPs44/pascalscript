@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #ifndef PS_INTERPRETER_ENVIRONMENTS
-#define PS_INTERPRETER_ENVIRONMENTS 64
+#define PS_INTERPRETER_ENVIRONMENTS 256
 #endif
 
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0
@@ -46,8 +46,8 @@ extern "C"
         ps_environment
             *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
         ps_parser *parser;                              /** @brief Parser with lexer with source code buffer */
-        ps_string_heap *string_heap;                    /** @brief Strings heap to hold string constants at least */
-        uint8_t level;              /** @brief Current environment index : 0 fo system, 1 for program, ... */
+        ps_string_heap *string_heap;                    /** @brief Strings heap to hold string constants */
+        uint8_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;             /** @brief Current error PS_ERROR_XXX */
         ps_interpreter_debug debug; /** @brief Debug level: NONE, TRACE, VERBOSE */
         bool range_check;           /** @brief Range checking for integer and real values */
@@ -60,10 +60,10 @@ extern "C"
      * @brief Initialize interpreter
      * @return NULL if no free memory (errno = ENOMEM) or the interpreter
      */
-    ps_interpreter *ps_interpreter_init();
+    ps_interpreter *ps_interpreter_alloc();
 
     /** @brief Release interpreter */
-    ps_interpreter *ps_interpreter_done(ps_interpreter *interpreter);
+    ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter);
 
     /** @brief Set error & return false */
     bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error);
@@ -80,16 +80,15 @@ extern "C"
     /** @brief Get current environment */
     ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
 
-    /** @brief Find symbol by name in current environment or its parents */
+    /** @brief Find symbol by name in current environment (or its parents if not local) */
     ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local);
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
     /**
-     *  @brief Copy value of "from" into "to", converting unsigned to integer and
-     * vice versa, may set error to PS_ERROR_OUT_OF_RANGE or
-     * PS_ERROR_TYPE_MISMATCH
+     *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa, 
+     *         may set error to PS_ERROR_OUT_OF_RANGE or PS_ERROR_TYPE_MISMATCH
      */
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
 
