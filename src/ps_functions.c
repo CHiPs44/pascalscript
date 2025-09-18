@@ -281,7 +281,7 @@ ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value 
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_ticks(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     // NB: value is not used
     result->type = &ps_system_unsigned;

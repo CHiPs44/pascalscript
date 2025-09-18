@@ -37,7 +37,7 @@ Type
 Function Even(N: Integer): Boolean;
 Function Even(N: Unsigned): Boolean;
 Function Tan(X: Real): Real;
-Function Ticks: Unsigned;
+Function GetTickCount: Unsigned;
 
 Implementation
 
@@ -58,17 +58,18 @@ Begin
   Tan := Sin(X) / Cos(X);
 End;
 
-Var
-  StartTicks: QWord;
+// Var
+//   StartTicks: QWord;
 
-Function Ticks: Unsigned;
-Var
-  Ticks64: QWord;
+Function GetTickCount: Unsigned;
+// Var
+//   Ticks64: QWord;
 Begin
-  Ticks64 := GetTickCount64 - StartTicks;
-  Ticks := Unsigned(Ticks64 And MaxUint);
+  // Ticks64 := GetTickCount64 - StartTicks;
+  // GetTickCount := Unsigned(Ticks64 And MaxUint);
+  GetTickCount := SysUtils.GetTickCount;
 End;
 
 Begin
-  StartTicks := GetTickCount64;
+  // StartTicks := GetTickCount64;
 End.

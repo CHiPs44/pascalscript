@@ -438,7 +438,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
     }
-    else if (function == &ps_system_function_ticks)
+    else if (function == &ps_system_function_get_tick_count)
     {
         // Random function can be called with 2 signatures:
         //  1. Random or Random() => Real

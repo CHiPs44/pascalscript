@@ -8,41 +8,44 @@ Const
   MaxLoops = 100000;
 Var
   I: Integer;
-  T1, T2: Unsigned;
+  T0, T1, T2, T3: Unsigned;
 Begin
+  T0 := GetTickCount();
   WriteLn('Starting big loops...');
   WriteLn('----------------------------------------------------------------------');
-  T1 := Ticks();
+  T1 := GetTickCount();
   WriteLn('T1=', T1);
   For I := 1 To MaxLoops Do
   Begin
     // Just a big loop
   End;
-  T2 := Ticks();
+  T2 := GetTickCount();
   WriteLn('T2=', T2);
-  WriteLn('*FOR* loop took ', T2 - T1, ' ms for ', I - 1, ' iterations');
+  WriteLn('*FOR* loop took ', T2 - T1, ' ms for ', MaxLoops, ' iterations');
   WriteLn('----------------------------------------------------------------------');
-  T1 := Ticks();
+  T1 := GetTickCount();
   WriteLn('T1=', T1);
   I := 1;
   Repeat
     I := I + 1;
   Until I > MaxLoops;
-  T2 := Ticks();
+  T2 := GetTickCount();
   WriteLn('T2=', T2);
-  WriteLn('*REPEAT* loop took ', T2 - T1, ' ms for ', I - 1, ' iterations');
+  WriteLn('*REPEAT* loop took ', T2 - T1, ' ms for ', MaxLoops, ' iterations');
   WriteLn('----------------------------------------------------------------------');
-  T1 := Ticks();
+  T1 := GetTickCount();
   WriteLn('T1=', T1);
   I := 1;
   While I <= MaxLoops Do
   Begin
     I := I + 1;
   End;
-  T2 := Ticks();
+  T2 := GetTickCount();
   WriteLn('T2=', T2);
-  WriteLn('*WHILE* loop took ', T2 - T1, ' ms for ', I - 1, ' iterations');
+  WriteLn('*WHILE* loop took ', T2 - T1, ' ms for ', MaxLoops, ' iterations');
   WriteLn('----------------------------------------------------------------------');
   WriteLn('Finished big loops.');
+  T3 := GetTickCount();
+  WriteLn('Overall time: ', T3 - T0, ' ms');
   WriteLn('OK!');
 End.

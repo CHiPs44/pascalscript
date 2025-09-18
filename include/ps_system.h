@@ -42,6 +42,7 @@ extern "C"
     extern ps_symbol ps_system_function_even;
     extern ps_symbol ps_system_function_exp;
     extern ps_symbol ps_system_function_frac;
+    extern ps_symbol ps_system_function_get_tick_count;
     extern ps_symbol ps_system_function_int;
     extern ps_symbol ps_system_function_ln;
     extern ps_symbol ps_system_function_log;
@@ -55,7 +56,6 @@ extern "C"
     extern ps_symbol ps_system_function_sqrt;
     extern ps_symbol ps_system_function_succ;
     extern ps_symbol ps_system_function_tan;
-    extern ps_symbol ps_system_function_ticks;
     extern ps_symbol ps_system_function_trunc;
     extern ps_symbol ps_system_procedure_randomize;
     extern ps_symbol ps_system_procedure_read;
