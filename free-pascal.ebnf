@@ -1,7 +1,9 @@
 (* 
-    Pascal EBNF, written from http://downloads.freepascal.org/fpc/docs-pdf/ref.pdf
+    Free Pascal EBNF, written from http://downloads.freepascal.org/fpc/docs-pdf/ref.pdf
     EBNF syntax from ???
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
+    "Official" version: https://gitlab.com/freepascal.org/fpc/documentation/-/blob/main/ObjectPascal.ebnf?ref_type=heads
+        (which cites this one ;-))
 
     This file is part of the PascalScript Pascal interpreter.
     SPDX-FileCopyrightText: 2024 Christophe 'CHiPs' Petit <chips44@gmail.com>
