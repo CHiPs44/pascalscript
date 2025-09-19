@@ -64,6 +64,7 @@ extern "C"
 #define PS_CHAR_SIZE sizeof(ps_char)
 #define PS_STRING_SIZE sizeof(ps_string)
 #define PS_FILE_SIZE sizeof(ps_file)
+#define PS_POINTER_SIZE sizeof(ps_pointer)
 
 #ifdef __cplusplus
 }

@@ -197,7 +197,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not initialize interpreter!\n");
         return EXIT_FAILURE;
     }
-    interpreter->debug = debug ? DEBUG_TRACE : trace ? DEBUG_VERBOSE : DEBUG_NONE;
+    interpreter->debug = debug ? DEBUG_TRACE : trace ? DEBUG_VERBOSE
+                                                     : DEBUG_NONE;
     interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
     interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
 
@@ -207,7 +208,7 @@ int main(int argc, char *argv[])
                              interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
     /* Load program source from string or file */
-    if (false)
+    /*if (false)
     {
         if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
         // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
@@ -217,13 +218,13 @@ int main(int argc, char *argv[])
         }
     }
     else
+    {*/
+    if (!ps_interpreter_load_file(interpreter, source_file))
     {
-        if (!ps_interpreter_load_file(interpreter, source_file))
-        {
-            fprintf(stderr, "File %s not loaded!\n", source_file);
-            return EXIT_FAILURE;
-        }
+        fprintf(stderr, "File %s not loaded!\n", source_file);
+        return EXIT_FAILURE;
     }
+    // }
     if (verbose)
         fprintf(stderr, "Loaded %s!\n", source_file);
 

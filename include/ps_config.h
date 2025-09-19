@@ -147,7 +147,7 @@ extern "C"
 #ifndef PS_STRING_MAX_LEN
 // "Short" strings
 #define PS_STRING_LEN_TYPE uint8_t
-#define PS_STRING_MAX_LEN UINT8_MAX
+#define PS_STRING_MAX_LEN 255u
 // "Wide" strings
 // #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX_LEN UINT16_MAX
@@ -165,7 +165,7 @@ extern "C"
 #endif
 
 #ifndef PS_IDENTIFIER_LEN
-#define PS_IDENTIFIER_LEN 31
+#define PS_IDENTIFIER_LEN 31u
 #endif
 
 #define PS_IDENTIFIER_SIZE (PS_IDENTIFIER_LEN + 1)

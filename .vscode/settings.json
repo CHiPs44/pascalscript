@@ -32,7 +32,8 @@
         "ps_token.h": "c",
         "ps_functions.h": "c",
         "ps_procedures.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "stdint.h": "c"
     },
     "makefile.configureOnOpen": false
 }
