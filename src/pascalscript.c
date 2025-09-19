@@ -20,7 +20,7 @@
 
 ps_interpreter *interpreter = NULL;
 
-char *minimal_source = "Program Minimal;\n"
+/* char *minimal_source = "Program Minimal;\n"
                        "Const Int1 = 1073741824;\n"
                        "Const Num1 = 123.45;\n"
                        "      MinReal2 = 1.17549435082228750796873653722224568e-38;\n"
@@ -39,8 +39,8 @@ char *minimal_source = "Program Minimal;\n"
                        "      C : Char;\n"
                        "      B: Boolean;\n"
                        "Begin\n"
-                       // "   WriteLn;\n"
-                       // "   WriteLn();\n"
+                       "   WriteLn;\n"
+                       "   WriteLn();\n"
                        "   { No strings yet! }\n"
                        "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
                        "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
@@ -59,8 +59,9 @@ char *minimal_source = "Program Minimal;\n"
                        "   C := Chr(65);\n"
                        "   WriteLn('C', '=', C);\n"
                        "End.\n";
+*/
 
-/*char *hello_source =
+/* char *hello_source =
     "program hello;\n"
     "{ comment with curly brackets }\n"
     "const\n"
@@ -74,15 +75,17 @@ char *minimal_source = "Program Minimal;\n"
     "*)\n"
     "  test := 1 + chips;\n"
     "  writeln('test=', test);\n"
-    "end.\n";*/
+    "end.\n";
+*/
 
 void usage(char *program_name)
 {
     fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
-    fprintf(stderr, "  -t : trace execution\n");
-    fprintf(stderr, "  -d : debug (more verbose trace)\n");
-    fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
     fprintf(stderr, "  -b : dump source buffer after loading\n");
+    fprintf(stderr, "  -d : debug (more verbose trace)\n");
+    fprintf(stderr, "  -n : do not execute program, just parse source code\n");
+    fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
+    fprintf(stderr, "  -t : trace execution\n");
     fprintf(stderr, "  -v : verbose (display banner and other infos)\n");
 }
 

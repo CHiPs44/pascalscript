@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 # x86 32 bits:
-# (requires sudo apt install gcc-multilib g++-multilib) 
+# (requires sudo apt install gcc-multilib g++-multilib)
 CC		= LANG=C gcc
 #CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
 CFLAGS	= -std=c17 -Wall -Iinclude -ggdb -m32
@@ -12,9 +12,9 @@ CFLAGS	= -std=c17 -Wall -Iinclude -ggdb -m32
 # (requires apt install qemu-user gcc-arm-linux-gnueabi)
 # (and export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi or -static)
 # (incompatible with gcc-multilib / g++-multilib)
-# CC		= arm-linux-gnueabi-gcc
+#CC		= arm-linux-gnueabi-gcc
 #CC		= arm-none-eabi-gcc
-# CFLAGS	= -static -std=c17 -Wall -Iinclude -ggdb
+#CFLAGS	= -static -std=c17 -Wall -Iinclude -ggdb
 
 CLIBS    = -lm
 PROJECT  = pascalscript
