@@ -4,25 +4,29 @@
 
 As of 2025-04-13, with commit [4b4d50deb3612a4dc46d7ca710066829414ced22](https://github.com/CHiPs44/pascalscript/tree/4b4d50deb3612a4dc46d7ca710066829414ced22), I changed license from GPL 3.0 or later to LGPL 3.0 or later in order to make it easier to embed in other projects.
 
-The interpreter itself now implements:
+As of 2025-09-19, the interpreter itself implements:
 
-- assignment to variable from an arithmetic expression with `:=`
+- assignment to variable from an expression with `:=`
 - writing its value to standard output with `Write` / `WriteLn`
-- `if` / `then` / `else`
-- `repeat` / `until`
-- `while` / `do`
-- `for` / `to` / `downto` / `do`
-
-There is much more to do, but it's another achievement I'm glad to see!
+- `If` / `Then` / `Else`
+- `Repeat` / `Until`
+- `While` / `Do`
+- `For` / `To` / `Downto` / `Do`
+- `Procedure` definition and procedure calls (parameters are WIP), imbrication works, too
+- many functions (scalar / ordinal / math) in the `System` library
+- strings, but without memory management, just filling the heap...
 
 Next steps should be implementing:
 
-- function calls (and extend system library with `Odd`, `Ord`, `Chr`, `Abs`, ...)
-- procedure definition (with local variables and recursion)
+- `Function` definition and user function calls with parameters
 - function definition (with proper handling of `Result` pseudo variable?)
-- strings, at least constants
+- `Case` `Of` `Else` (and/or `Otherwise`?) `End` statement
+- arrays
+- records
+- files
+- units
 
-The first two need to be able to compare formal parameter list and actual parameter list, which is not trivial.
+Performance is not too bad but far less than Python or Lua, and there are big differences between `For` and `Repeat` / `While` loops.
 
 ## Introduction
 
