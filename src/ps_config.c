@@ -5,6 +5,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+/*
 #include <stdio.h>
 
 #include "ps_config.h"
@@ -73,3 +74,4 @@ void ps_config_report()
     REPORT_FORMAT(PS_POINTER_SIZE, "u");
     printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 }
+*/

@@ -1,19 +1,20 @@
+# This file is part of the PascalScript Pascal interpreter.
+# SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 import time
 
-# Boucle for
 start_for = time.time()
-for i in range(1, 100001):
+for i in range(0, 100000):
     pass
 elapsed_for = (time.time() - start_for) * 1000
 
-# Boucle while
 start_while = time.time()
 i = 1
 while i <= 100000:
     i += 1
 elapsed_while = (time.time() - start_while) * 1000
 
-# Boucle repeat-until simulée (do...while)
 start_repeat = time.time()
 i = 1
 while True:
@@ -22,8 +23,7 @@ while True:
         break
 elapsed_repeat = (time.time() - start_repeat) * 1000
 
-# Affichage des résultats
-print("Comparaison des temps d'exécution pour 100000 itérations :")
-print(f"- Boucle for : {elapsed_for:.2f} ms")
-print(f"- Boucle while : {elapsed_while:.2f} ms")
-print(f"- Boucle repeat-until simulée : {elapsed_repeat:.2f} ms")
+print("Python - Comparison of execution times for 100000 iterations:")
+print(f" - for                   : {elapsed_for:.2f} ms")
+print(f" - while                 : {elapsed_while:.2f} ms")
+print(f" - simulated repeat-until: {elapsed_repeat:.2f} ms")

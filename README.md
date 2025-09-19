@@ -2,39 +2,66 @@
 
 ## Status
 
-As of 2025-04-13, with commit [4b4d50deb3612a4dc46d7ca710066829414ced22](https://github.com/CHiPs44/pascalscript/tree/4b4d50deb3612a4dc46d7ca710066829414ced22), I changed license from GPL 3.0 or later to LGPL 3.0 or later in order to make it easier to embed in other projects.
-
 As of 2025-09-19, the interpreter itself implements:
 
-- assignment to variable from an expression with `:=`
-- writing its value to standard output with `Write` / `WriteLn`
+- Assignment to variable from an expression with `:=`
+- Expressions
+- Writing values to standard output with `Write` / `WriteLn`
 - `If` / `Then` / `Else`
 - `Repeat` / `Until`
 - `While` / `Do`
 - `For` / `To` / `Downto` / `Do`
-- `Procedure` definition and procedure calls (parameters are WIP), imbrication works, too
-- many functions (scalar / ordinal / math) in the `System` library
-- strings, but without memory management, just filling the heap...
+- `Procedure` definition and procedure calls
+  - parameters by value and reference are WIP)
+  - imbrication works, too
+  - did not try recursivity
+- Many functions (scalar / ordinal / math) in the `System` library
+- Strings, but without memory management, just filling the heap...
+
+## TODO
 
 Next steps should be implementing:
 
 - `Function` definition and user function calls with parameters
-- function definition (with proper handling of `Result` pseudo variable?)
-- `Case` `Of` `Else` (and/or `Otherwise`?) `End` statement
-- arrays
-- records
-- files
-- units
+  - with proper handling of `Result` pseudo variable?
+- 'Type' definition
+- Other missing features:
+  - Enumerations
+  - Subranges
+  - `Case` ... `Of` ... `Else` (and/or `Otherwise`?) `End` statement
+  - Arrays
+  - Sets
+  - Records
+  - Files
+  - Units
 
-Performance is not too bad but far less than Python or Lua, and there are big differences between `For` and `Repeat` / `While` loops.
+## Performance
+
+As of 2025-09-19, it is not too bad but far less than Lua or Python.
+
+For 100,000 iterations:
+
+| Interpreter   |     For |    While |  Repeat¹ |
+| ------------- | ------: | -------: | -------: |
+| PascalScript  |  121 ms |   407 ms |   344 ms |
+| Lua 5.4.6     | 0.37 ms |  0.85 ms |  0.92 ms |
+| Python 3.12.3 | 4.87 ms | 15.27 ms | 12.27 ms |
+
+There are big differences between `For` and `Repeat` / `While` loops for each language.
+
+¹ simulated with `while` for Python
 
 ## Introduction
 
-`PascalScript` should be a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
+`PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
-As of july 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
+As of July 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
+
+A self-made lexer and parser was then developed.
+
+## Examples
 
 The traditional `hello.pas` will be like:
 
@@ -171,7 +198,7 @@ Examples **must** be compilable with Free Pascal `fpc`, in default FPC mode (`fp
 
 There will be many steps before we get a "final" product.
 
-### Step 1: integer only calculator, without any flow control
+### Step 1a: integer only calculator, without any flow control
 
 This will make the base for the lexer, the tokenizer and the interpreter itself.
 
@@ -183,9 +210,7 @@ Features are:
 - A single integer parameter procedure: `WriteLn`
 - Comments
 
-~~Integer type will be the default of C `int` type.~~
-
-Integer type will be set from a 16/32/64 bits "bitness", cf. <https://en.wiktionary.org/wiki/bitness>.
+Integer type is set from a 16/32/64 bits "bitness", cf. <https://en.wiktionary.org/wiki/bitness>.
 
 Language elements are limited to:
 
@@ -219,7 +244,7 @@ Remarks:
 - Comments will be paired, beginning with `{` means we go until `}`, no mix with `(*` and `*)`, so they can be imbricated on one level
 - `//` one line comments came essentially for free when digging an already made set of rules for the lexical analyzer
 
-Improvements to this first sight:
+### Step 1b: improvements to this first sight:
 
 - `var a, b, c: integer;` should be implemented
 - `Write` variant to output without a line break
@@ -240,7 +265,7 @@ begin
 end.
 ```
 
-### Step 2: Conditional
+### Step 3: Conditional
 
 New keywords: `if` `then` `else`
 
@@ -295,7 +320,7 @@ end.
 NB:
 
 - Implement `break` and `continue`?
-- `for` loops will be improved later with `in` keyword for arrays and sets
+- `For` loops will be improved later with `in` keyword for arrays and sets
 
 ### Procedures
 
@@ -520,6 +545,8 @@ CFLAGS = -static -std=c17 -Wall -Iinclude -ggdb
 ```
 
 ## License
+
+As of 2025-04-13, with commit [4b4d50deb3612a4dc46d7ca710066829414ced22](https://github.com/CHiPs44/pascalscript/tree/4b4d50deb3612a4dc46d7ca710066829414ced22), I changed license from GPL 3.0 or later to LGPL 3.0 or later in order to make it easier to embed in other projects.
 
 This project is licensed under GNU Lesser General Public License 3.0 or later, see file `LICENSE`.
 
