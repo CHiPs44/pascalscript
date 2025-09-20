@@ -281,9 +281,10 @@ ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value 
     return PS_ERROR_NONE;
 }
 
+/** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
 ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
-    // NB: value is not used
+    // NB: value parameter is not used
     result->type = &ps_system_unsigned;
     clock_t c = clock();
     result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
@@ -298,7 +299,6 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);
         break;
     default:
@@ -398,7 +398,7 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
     case PS_TYPE_REAL:
         c = cos(value->data.r);
         if (c == 0.0)
-            return PS_ERROR_OUT_OF_RANGE;
+            return PS_ERROR_DIVISION_BY_ZERO;
         result->type = &ps_system_real;
         result->data.r = sin(value->data.r) / c;
         break;
@@ -418,7 +418,7 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
         result->data.r = atan(value->data.r);
         break;
     default:
-        result->type = &ps_system_real;
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }
@@ -433,7 +433,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = value->data.r * value->data.r;
         break;
     default:
-        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }
@@ -450,7 +450,7 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value
         result->data.r = sqrt(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }
@@ -465,7 +465,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = exp(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }
@@ -482,7 +482,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *
         result->data.r = log(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }
@@ -499,7 +499,7 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
         result->data.r = log10(value->data.r);
         break;
     default:
-        return false; // ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_REAL);
+        return PS_ERROR_EXPECTED_REAL;
     }
     return PS_ERROR_NONE;
 }

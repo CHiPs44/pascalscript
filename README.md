@@ -39,17 +39,19 @@ Next steps should be implementing:
 
 As of 2025-09-19, it is not too bad but far less than Lua or Python.
 
-For 100,000 iterations:
+For 100,000 iterations, see `examples/13-big-loops.*`¹:
 
-| Interpreter   |     For |    While |  Repeat¹ |
+| Interpreter   |     For |    While |  Repeat² |
 | ------------- | ------: | -------: | -------: |
 | PascalScript  |  121 ms |   407 ms |   344 ms |
 | Lua 5.4.6     | 0.37 ms |  0.85 ms |  0.92 ms |
 | Python 3.12.3 | 4.87 ms | 15.27 ms | 12.27 ms |
 
-There are big differences between `For` and `Repeat` / `While` loops for each language.
+There are big differences between `For` and `Repeat` / `While` loops for each language, and Lua runs faster.
 
-¹ simulated with `while` for Python
+¹ on my Lenovo Thinkpad P70 / Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
+
+² simulated with `while` for Python
 
 ## Introduction
 
