@@ -103,17 +103,17 @@ extern "C"
         PS_TOKEN_STRING_VALUE,
         // Identifier
         PS_TOKEN_IDENTIFIER,
-        // Single character tokens
+        // Single character tokens: ASCII value
         PS_TOKEN_AT_SIGN = '@',           // @  *FUTURE* address of
         PS_TOKEN_CARET = '^',             // ^  *FUTURE* pointer to
         PS_TOKEN_COLON = ':',             // :  various uses: type definition, field access, etc.
         PS_TOKEN_COMMA = ',',             // ,  various uses: separating identifiers, parameters, etc.
         PS_TOKEN_DOT = '.',               // .  various uses: final dot of program / unit, field access, etc.
         PS_TOKEN_EQUAL = '=',             // =  equals to
-        PS_TOKEN_GREATER_THAN = '>',      // >  greater than
+        PS_TOKEN_GT = '>',                // >  greater than
         PS_TOKEN_LEFT_BRACKET = '[',      // [  *FUTURE* array access: opening
-        PS_TOKEN_LEFT_PARENTHESIS = '(', // (  various uses: opening in expressions, function calls, etc.
-        PS_TOKEN_LESS_THAN = '<',         // <  less than
+        PS_TOKEN_LEFT_PARENTHESIS = '(',  // (  various uses: opening in expressions, function calls, etc.
+        PS_TOKEN_LT = '<',                // <  less than
         PS_TOKEN_MINUS = '-',             // -  substraction / negation (integer or real)
         PS_TOKEN_PLUS = '+',              // +  addition (integer or real) / unary plus
         PS_TOKEN_RIGHT_BRACKET = ']',     // ]  *FUTURE* array access: closing
@@ -121,15 +121,25 @@ extern "C"
         PS_TOKEN_SEMI_COLON = ';',        // ;  various uses: end of statement, etc.
         PS_TOKEN_SLASH = '/',             // /  division (real)
         PS_TOKEN_STAR = '*',              // *  multiplication (integer or real)
-        // 2 characters symbols
-        PS_TOKEN_ASSIGN = 0x80,    // :=  assignment
-        PS_TOKEN_RANGE,            // ..  *FUTURE* ranges, i.e. 1..10
-        PS_TOKEN_POWER,            // **  *FUTURE* exponentiation
-        PS_TOKEN_NOT_EQUAL,        // <>
-        PS_TOKEN_LESS_OR_EQUAL,    // <=
-        PS_TOKEN_GREATER_OR_EQUAL, // >=
-        // Reserved words
-        PS_TOKEN_PROGRAM,
+        // 2 characters symbols: more than 0x7f to avoid conflict with single char tokens
+        PS_TOKEN_ASSIGN = 0x80, // :=  assignment
+        PS_TOKEN_GE,            // >= greater or equal
+        PS_TOKEN_LE,            // <= less or equal
+        PS_TOKEN_NE,            // <> not equal
+        PS_TOKEN_POWER,         // **  *FUTURE* exponentiation
+        PS_TOKEN_RANGE,         // ..  *FUTURE* ranges, i.e. 1..10 or Monday..Friday
+        // Operators
+        PS_TOKEN_DIV, // division (integer)
+        PS_TOKEN_MOD, // modulo (integer)
+        PS_TOKEN_AND, // logical or binary and
+        PS_TOKEN_OR,  // logical or binary or
+        PS_TOKEN_XOR, // logical or binary exclusive or
+        PS_TOKEN_NOT, // logical or binary not
+        PS_TOKEN_SHL, // shift left
+        PS_TOKEN_SHR, // shift right
+        PS_TOKEN_IN,  // *FUTURE* in operator for sets, i.e. 1 in [1,2,3]
+        // Reserved words: more than 0x8f to avoid conflict with 2 char symbols & operators
+        PS_TOKEN_PROGRAM = 0x90,
         PS_TOKEN_CONST,
         PS_TOKEN_TYPE,
         PS_TOKEN_VAR,
@@ -169,16 +179,6 @@ extern "C"
         PS_TOKEN_USES,           // *FUTURE*
         PS_TOKEN_INTERFACE,      // *FUTURE*
         PS_TOKEN_IMPLEMENTATION, // *FUTURE*
-        // Operators
-        PS_TOKEN_DIV, // division (integer)
-        PS_TOKEN_MOD, // modulo (integer)
-        PS_TOKEN_AND, // logical or binary and
-        PS_TOKEN_OR,  // logical or binary or
-        PS_TOKEN_XOR, // logical or binary exclusive or
-        PS_TOKEN_NOT, // logical or binary not
-        PS_TOKEN_SHL, // shift left
-        PS_TOKEN_SHR, // shift right
-        PS_TOKEN_IN,  // *FUTURE* in operator for sets, i.e. 1 in [1,2,3]
         // Make sure token value fits in one byte
         PS_TOKEN_MAX = UINT8_MAX
     } ps_token_type;
@@ -203,7 +203,7 @@ extern "C"
 #define PS_TOKEN_VALUE_SIZE sizeof(ps_token_value)
 #define PS_TOKEN_SIZE sizeof(ps_token)
 
-    char *ps_token_get_reserved_symbol(ps_token_type token_type);
+    // char *ps_token_get_reserved_symbol(ps_token_type token_type);
     void ps_token_debug(FILE *output, char *message, ps_token *token);
     char *ps_token_dump_value(ps_token *token);
     char *ps_token_get_keyword(ps_token_type token_type);

@@ -104,10 +104,13 @@ int main(int argc, char *argv[])
 
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "tdsbvn")) != -1)
+    while ((opt = getopt(argc, argv, "ctdsbvn")) != -1)
     {
         switch (opt)
         {
+        case 'c':
+            ps_config_report();
+            exit(0);
         case 't':
             trace = true;
             arg++;

@@ -581,7 +581,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         do
         {
             if (!ps_function_binary_op(interpreter, variable->value, &finish, &result,
-                                       step.data.i > 0 ? PS_TOKEN_LESS_OR_EQUAL : PS_TOKEN_GREATER_OR_EQUAL))
+                                       step.data.i > 0 ? PS_TOKEN_LE : PS_TOKEN_GE))
                 TRACE_ERROR("BINARY");
             if (result.type != &ps_system_boolean)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);

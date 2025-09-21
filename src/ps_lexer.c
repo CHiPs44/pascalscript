@@ -22,9 +22,15 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
 bool ps_lexer_read_number(ps_lexer *lexer);
 bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
 
-#define READ_NEXT_CHAR                                                                                                 \
+#define ADVANCE                                                                                                        \
     if (!ps_lexer_read_next_char(lexer))                                                                               \
         return false;
+
+#define GET_NEXT_CHAR(c)                                                                                               \
+    {                                                                                                                  \
+        ADVANCE;                                                                                                       \
+        c = ps_buffer_peek_char(lexer->buffer);                                                                        \
+    }
 
 ps_lexer *ps_lexer_alloc()
 {
@@ -89,9 +95,8 @@ bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
     *changed = false;
     while (isspace(c) || c == '\n')
     {
-        READ_NEXT_CHAR;
+        GET_NEXT_CHAR(c);
         *changed = true;
-        c = ps_buffer_peek_char(lexer->buffer);
     }
     return true;
 }
@@ -108,12 +113,11 @@ bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
         *changed = true;
         while (c != '}')
         {
-            READ_NEXT_CHAR;
-            c = lexer->buffer->current_char;
+            GET_NEXT_CHAR(c);
             if (c == '\0')
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment1");
         }
-        READ_NEXT_CHAR;
+        ADVANCE;
     }
     return true;
 }
@@ -131,7 +135,7 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
         *changed = true;
         do
         {
-            READ_NEXT_CHAR;
+            ADVANCE;
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
             if (c1 == '\0' || c2 == '\0')
@@ -142,9 +146,9 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
             }
         } while (true);
         // Skip )
-        READ_NEXT_CHAR;
+        ADVANCE;
         // Advance after )
-        READ_NEXT_CHAR;
+        ADVANCE;
     }
     return true;
 }
@@ -162,12 +166,12 @@ bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
         *changed = true;
         while (c1 != '\n')
         {
-            READ_NEXT_CHAR;
+            ADVANCE;
             c1 = ps_buffer_peek_char(lexer->buffer);
             if (c1 == '\0')
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment3");
         }
-        READ_NEXT_CHAR;
+        ADVANCE;
     }
     return true;
 }
@@ -213,8 +217,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
                                              "ps_lexer_read_identifier_or_keyword");
             }
             buffer[pos] = toupper(c);
-            READ_NEXT_CHAR;
-            c = ps_buffer_peek_char(lexer->buffer);
+            GET_NEXT_CHAR(c);
             pos += 1;
             buffer[pos] = '\0';
         } while (isalnum(c) || c == '_');
@@ -238,31 +241,26 @@ bool ps_lexer_read_number(ps_lexer *lexer)
     int base = 10;
     bool is_real = false;
     bool has_exp = false;
-    // Decimal
-    char *digits = "0123456789";
-    // Binary?
-    if (c == '%')
+    char *end;
+
+    char *digits = "0123456789"; // Decimal
+    if (c == '%')                // Binary?
     {
         base = 2;
         digits = "01";
-        READ_NEXT_CHAR;
-        c = ps_buffer_peek_char(lexer->buffer);
+        GET_NEXT_CHAR(c);
     }
-    // Octal?
-    else if (c == '&')
+    else if (c == '&') // Octal?
     {
         base = 8;
         digits = "01234567";
-        READ_NEXT_CHAR;
-        c = ps_buffer_peek_char(lexer->buffer);
+        GET_NEXT_CHAR(c);
     }
-    // Hexadecimal?
-    else if (c == '$')
+    else if (c == '$') // Hexadecimal?
     {
         base = 16;
         digits = "01234567abcdefABCDEF";
-        READ_NEXT_CHAR;
-        c = ps_buffer_peek_char(lexer->buffer);
+        GET_NEXT_CHAR(c);
     }
     if (strchr(digits, c) != NULL)
     {
@@ -271,16 +269,14 @@ bool ps_lexer_read_number(ps_lexer *lexer)
             if (pos > PS_BUFFER_MAX_COLUMNS)
                 return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_number");
             buffer[pos++] = c;
-            READ_NEXT_CHAR;
-            c = ps_buffer_peek_char(lexer->buffer);
+            GET_NEXT_CHAR(c);
             if (base == 10)
             {
                 if (c == '.' && !is_real)
                 {
                     is_real = true;
                     buffer[pos++] = c;
-                    READ_NEXT_CHAR;
-                    c = ps_buffer_peek_char(lexer->buffer);
+                    GET_NEXT_CHAR(c);
                 }
                 else if ((c == 'e' || c == 'E'))
                 {
@@ -289,20 +285,17 @@ bool ps_lexer_read_number(ps_lexer *lexer)
                     has_exp = true;
                     is_real = true;
                     buffer[pos++] = c;
-                    READ_NEXT_CHAR;
-                    c = ps_buffer_peek_char(lexer->buffer);
+                    GET_NEXT_CHAR(c);
                     if (c == '+' || c == '-')
                     {
                         buffer[pos++] = c;
-                        READ_NEXT_CHAR;
-                        c = ps_buffer_peek_char(lexer->buffer);
+                        GET_NEXT_CHAR(c);
                     }
                 }
             }
         } while (strchr(digits, c) != NULL || strchr(".eE+-", c) != NULL);
         buffer[pos] = '\0';
         // TODO? use even better conversion from string to real or unsigned integer
-        char *end;
         if (is_real)
         {
             double d = strtod(buffer, &end);
@@ -346,7 +339,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     if (c != '\'')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_char_or_string_value");
     // Consume the opening quote
-    READ_NEXT_CHAR;
+    ADVANCE;
     while (true)
     {
         c = ps_buffer_peek_char(lexer->buffer);
@@ -362,13 +355,13 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
                     return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
 
                 buffer[pos++] = '\'';
-                READ_NEXT_CHAR; // Consume the first quote
-                READ_NEXT_CHAR; // Consume the second quote
+                ADVANCE; // Consume the first quote
+                ADVANCE; // Consume the second quote
             }
             else
             {
                 // End of the string
-                READ_NEXT_CHAR; // Consume the closing quote
+                ADVANCE; // Consume the closing quote
                 break;
             }
         }
@@ -378,7 +371,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
                 return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
 
             buffer[pos++] = c;
-            READ_NEXT_CHAR;
+            ADVANCE;
         }
     }
     buffer[pos] = '\0';
@@ -434,109 +427,109 @@ bool ps_lexer_read_token(ps_lexer *lexer)
             {
                 sprintf(lexer->current_token.value.identifier, ":=");
                 lexer->current_token.type = PS_TOKEN_ASSIGN;
-                READ_NEXT_CHAR;
+                ADVANCE;
             }
             else
                 lexer->current_token.type = PS_TOKEN_COLON;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '@':
             lexer->current_token.type = PS_TOKEN_AT_SIGN;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '^':
             lexer->current_token.type = PS_TOKEN_CARET;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case ',':
             lexer->current_token.type = PS_TOKEN_COMMA;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '.':
             if (next_char == '.')
             {
                 sprintf(lexer->current_token.value.identifier, "..");
                 lexer->current_token.type = PS_TOKEN_RANGE;
-                READ_NEXT_CHAR;
+                ADVANCE;
             }
             else
                 lexer->current_token.type = PS_TOKEN_DOT;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '(':
             lexer->current_token.type = PS_TOKEN_LEFT_PARENTHESIS;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case ')':
             lexer->current_token.type = PS_TOKEN_RIGHT_PARENTHESIS;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '[':
             lexer->current_token.type = PS_TOKEN_LEFT_BRACKET;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case ']':
             lexer->current_token.type = PS_TOKEN_RIGHT_BRACKET;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case ';':
             lexer->current_token.type = PS_TOKEN_SEMI_COLON;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '+':
             lexer->current_token.type = PS_TOKEN_PLUS;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '-':
             lexer->current_token.type = PS_TOKEN_MINUS;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '*':
             if (next_char == '*')
             {
                 sprintf(lexer->current_token.value.identifier, "**");
                 lexer->current_token.type = PS_TOKEN_POWER;
-                READ_NEXT_CHAR;
+                ADVANCE;
             }
             else
                 lexer->current_token.type = PS_TOKEN_STAR;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '/':
             lexer->current_token.type = PS_TOKEN_SLASH;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '=':
             lexer->current_token.type = PS_TOKEN_EQUAL;
-            READ_NEXT_CHAR;
+            ADVANCE;
             break;
         case '<':
             if (next_char == '>')
             {
                 sprintf(lexer->current_token.value.identifier, "<>");
-                lexer->current_token.type = PS_TOKEN_NOT_EQUAL;
-                READ_NEXT_CHAR;
+                lexer->current_token.type = PS_TOKEN_NE;
+                ADVANCE;
             }
             else if (next_char == '=')
             {
                 sprintf(lexer->current_token.value.identifier, "<=");
-                lexer->current_token.type = PS_TOKEN_LESS_OR_EQUAL;
-                READ_NEXT_CHAR;
+                lexer->current_token.type = PS_TOKEN_LE;
+                ADVANCE;
             }
             else
-                lexer->current_token.type = PS_TOKEN_LESS_THAN;
-            READ_NEXT_CHAR;
+                lexer->current_token.type = PS_TOKEN_LT;
+            ADVANCE;
             break;
         case '>':
             if (next_char == '=')
             {
                 sprintf(lexer->current_token.value.identifier, ">=");
-                lexer->current_token.type = PS_TOKEN_GREATER_OR_EQUAL;
-                READ_NEXT_CHAR;
+                lexer->current_token.type = PS_TOKEN_GE;
+                ADVANCE;
             }
             else
-                lexer->current_token.type = PS_TOKEN_GREATER_THAN;
-            READ_NEXT_CHAR;
+                lexer->current_token.type = PS_TOKEN_GT;
+            ADVANCE;
             break;
         default:
             printf("DEFAULT! %c %d at line %d column %d\n", current_char, current_char, lexer->buffer->current_line,

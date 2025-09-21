@@ -12,6 +12,7 @@
 
 #include "ps_config.h"
 #include "ps_symbol.h"
+#include "ps_system_types.h"
 #include "ps_value.h"
 #include "ps_value_data.h"
 #include "ps_value_types.h"
@@ -31,20 +32,23 @@ extern "C"
         ps_value_data max; /** @brief Maximum value of the subrange */
     } __attribute__((__packed__)) ps_type_definition_subrange;
 
-    /** @brief Enumerations are stored as unsigned values (first=0, second=1, ...) */
+    /** @brief Enumerations are stored as unsigned bytes (first=0, second=1, ...) */
     /** @example Months: (January, February, March, April, ..., December) */
     typedef struct s_ps_type_definition_enum
     {
-        ps_unsigned count;
         /** @brief Array of symbols for each item in the enumeration */
         ps_symbol *values;
+        /** @brief Number of items in the enumeration */
+        uint8_t count;
     } __attribute__((__packed__)) ps_type_definition_enum;
 
-    /** @brief Sets are stored in unsigned value as a bit field, each value of referenced enum is corresponding to
-     * 2^ord(enum_value) */
+    /** @brief Sets are stored in 32 bytes as a 256 bits field,
+     *         each value of referenced enum is corresponding
+     *         to 2^ord(enum_value)
+     *         Set Of Char is special case */
     typedef struct s_ps_type_definition_set
     {
-        ps_symbol *symbol_enum;
+        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the set values, NULL for Set Of Char */
     } __attribute__((__packed__)) ps_type_definition_set;
 
     /** @brief Pointer type is stored in a symbol */

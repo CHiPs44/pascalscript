@@ -172,6 +172,8 @@ extern "C"
 
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 
+    void ps_config_report();
+
 #ifdef __cplusplus
 }
 #endif
