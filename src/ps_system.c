@@ -134,7 +134,7 @@ PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, read          , "READ"  
 PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, readln        , "READLN"      , &ps_procedure_readln          );
 PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, write         , "WRITE"       , &ps_procedure_write           );
 PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln       , "WRITELN"     , &ps_procedure_writeln         );
-    
+
 /* clang-format on */
 
 bool ps_system_init(ps_interpreter *interpreter)
@@ -204,10 +204,7 @@ bool ps_system_init(ps_interpreter *interpreter)
 
     if (!error)
     {
-        char version[16]; // from 0.0.0.0 (4+3=7) to 255.255.255.255 (12+3=15)
-        int length = snprintf(version, sizeof(version) - 1, "%d.%d.%d.%d", (uint8_t)PS_VERSION_MAJOR,
-                              (uint8_t)PS_VERSION_MINOR, (uint8_t)PS_VERSION_PATCH, (uint8_t)PS_VERSION_INDEX);
-        ps_string *ps_version_string = ps_string_create(version, length);
+        ps_string *ps_version_string = ps_string_create(PS_VERSION, strlen(PS_VERSION));
         if (ps_version_string == NULL)
             error = true;
         ps_system_constant_string_ps_version.value->data.s = ps_version_string;

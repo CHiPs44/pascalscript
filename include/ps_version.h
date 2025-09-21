@@ -26,8 +26,8 @@ extern "C"
 #endif
 
 #define STR0(x) #x
-#define STR(x) STR0(x)
-#define PS_VERSION STR(PS_VERSION_MAJOR) "." STR(PS_VERSION_MINOR) "." STR(PS_VERSION_PATCH) "." STR(PS_VERSION_INDEX)
+#define STR1(x) STR0(x)
+#define PS_VERSION STR1(PS_VERSION_MAJOR) "." STR1(PS_VERSION_MINOR) "." STR1(PS_VERSION_PATCH) "." STR1(PS_VERSION_INDEX)
 
 #ifdef __cplusplus
 }

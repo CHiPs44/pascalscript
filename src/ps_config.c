@@ -32,6 +32,10 @@ void ps_config_report()
     printf("┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     // REPORT_SECTION("*** CONFIGURATION ***");
     REPORT_FORMAT(PS_VERSION, "s");
+    REPORT_FORMAT(PS_VERSION_MAJOR, "d");
+    REPORT_FORMAT(PS_VERSION_MINOR, "d");
+    REPORT_FORMAT(PS_VERSION_PATCH, "d");
+    REPORT_FORMAT(PS_VERSION_INDEX, "d");
     REPORT_FORMAT(PS_BITNESS, "d");
     REPORT_SECTION("*** INTEGER TYPE ***");
     REPORT_STRING(PS_INTEGER);
