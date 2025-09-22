@@ -15,7 +15,7 @@
 /**
  * Visit parameter definition:
  *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
- * 
+ *
  * Add the parameter(s) to the signature and to the current environment.
  * Up to 8 parameters at once.
  */
@@ -177,13 +177,18 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         }
         else
         {
+            // interpreter->debug = DEBUG_TRACE;
             do
             {
                 if (!ps_visit_parameter_definition(interpreter, mode, signature))
                     goto cleanup;
+
                 // `,` introduces another parameter
                 if (lexer->current_token.type == PS_TOKEN_COMMA)
+                {
+                    READ_NEXT_TOKEN_OR_CLEANUP;
                     continue;
+                }
                 // `)` ends the parameter list
                 if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 {

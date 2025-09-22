@@ -38,7 +38,7 @@ extern "C"
         ps_file            *f; /** @brief "f" is for "_f_ile"       */
         void               *v; /** @brief "v" is for "_v_oid"       */
         // clang-format on
-    } __attribute__((__packed__)) ps_value_data;
+    } /*__attribute__((__packed__))*/ ps_value_data;
 
 #define PS_VALUE_DATA_SIZE sizeof(ps_value_data)
 

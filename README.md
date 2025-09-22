@@ -59,7 +59,7 @@ There are big differences between `For` and `Repeat` / `While` loops for each la
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 
-As of July 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
+During July 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
 
 A self-made lexer and parser was then developed.
 

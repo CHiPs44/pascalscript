@@ -10,11 +10,22 @@
 
 char *ps_type_names[] = {
     // clang-format off
-//   1234567890    1234567890    1234567890    1234567890
-    "NONE"      , "REAL"      , "INTEGER"   , "UNSIGNED"  , 
-    "BOOLEAN"   , "CHAR"      , "STRING"    , "SET"       , 
-    "TYPE_DEF"  , "EXECUTABLE", "SUBRANGE"  , "ENUM"      , 
-    "POINTER"   , "ARRAY"     , "RECORD"    , "FILE"
+    "NONE",
+    "REAL",
+    "INTEGER",
+    "UNSIGNED",
+    "BOOLEAN",
+    "CHAR", 
+    "STRING",
+    "SET",
+    "TYPE_DEF",
+    "EXECUTABLE",
+    "SUBRANGE",
+    "ENUM",
+    "POINTER",
+    "ARRAY",
+    "RECORD",
+    "FILE"
     // clang-format on
 };
 
