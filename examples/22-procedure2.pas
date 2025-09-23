@@ -6,15 +6,14 @@
 Program Example22Procedure2;
 
 Var
-    Variable1, I: Integer;
-    Variable2: Integer;
+    Global1: Unsigned;
 
-Procedure WriteLine(Width: Unsigned);
+Procedure WriteLine(Ch: Char, Width: Unsigned);
 Var
     I: Unsigned;
 Begin
     For I := 1 to Width Do
-        Write('-');
+        Write(Ch);
     WriteLn;
 End;
 
@@ -24,11 +23,10 @@ Begin
 End;
 
 Begin
-    WriteLine(80);
-    Variable1 := 0;
-    WriteLn('Before Sum, Variable1=', Variable1);
-    Sum(10, 32, Variable1);
-    WriteLn('After Sum, Variable1=', Variable1);
-    WriteLn('Sum procedure');
-    WriteLine(80);
+    WriteLine('-', 80);
+    Global1 := 0;
+    WriteLn('Before Sum, Global1=', Global1);
+    Sum(10, 32, Global1);
+    WriteLn('After Sum, Global1=', Global1);
+    WriteLine('-', 80);
 End.

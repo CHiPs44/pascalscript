@@ -32,8 +32,8 @@ Begin
     Variable1 := 1;
     For I := 1 to 3 Do
     Begin
-        WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', I*10);
-        Procedure1(I*10, 42);
+        WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', I * 10);
+        Procedure1(I * 10, 42);
     End;
     WriteLn('----------------------------------------------------------------------');
     WriteLn('Procedure with 2 parameters:');

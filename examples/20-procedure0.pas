@@ -42,6 +42,5 @@ Begin
         Procedure0b();
         WriteLn('End ', I);
     End;
-    WriteLn('Nested procedures');
     WriteLn('----------------------------------------------------------------------');
 End.
