@@ -20,19 +20,23 @@ End;
 
 Procedure Sum(A, B: Unsigned, Var C: Unsigned);
 Begin
-    // C := A + B;
+    WriteLn('    In Sum, Global1=', Global1);
+    WriteLn('        A=', A, ' B=', B, ' C=', C);
+    C := A + B;
+    WriteLn('        A=', A, ' B=', B, ' C=', C);
+    WriteLn('    In Sum, Global1=', Global1);
 End;
 
 Begin
     Start := GetTickCount();
     WriteLn('Started at ', Start, ' ms');
     WriteLine('-', 80);
-    Global1 := 0;
+    Global1 := 1234567890;
     WriteLn('Before Sum, Global1=', Global1);
-    // Sum(10, 32, Global1);
+    Sum(10, 32, Global1);
     WriteLn('After  Sum, Global1=', Global1);
     WriteLine('-', 80);
     Stop := GetTickCount();
     WriteLn('Stopped at ', Stop, ' ms');
-    WriteLn('ElapsedTime=', Stop - Start, ' ms');
+    WriteLn('Elapsed time ', Stop - Start, ' ms');
 End.

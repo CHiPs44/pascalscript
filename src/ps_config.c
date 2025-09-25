@@ -10,6 +10,7 @@
 #include "ps_symbol.h"
 #include "ps_system_types.h"
 #include "ps_value.h"
+#include "ps_value_data.h"
 #include "ps_version.h"
 
 #define STRING(Z) #Z
@@ -27,6 +28,7 @@ void ps_config_report()
 {
     //               1         2         3         4         5         6         7         8
     //      12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    //                 1         2         3         4         5         6         7
     //      ┃ 1234567890123456789012345678901234567890123456789012345678901234567890123456 ┃
     //      ┃ 123456789012345678901234567890123456 ┃ 1234567890123456789012345678901234567 ┃
     printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
@@ -58,9 +60,10 @@ void ps_config_report()
     REPORT_SECTION("*** REAL TYPE ***");
     REPORT_STRING(PS_REAL);
     REPORT_FORMAT(PS_REAL_SIZE, "u");
-    REPORT_FORMAT(PS_REAL_MIN, "G" /*PS_REAL_FMT*/);
-    REPORT_FORMAT(PS_REAL_MAX, "G" /*PS_REAL_FMT*/);
-    REPORT_FORMAT(PS_REAL_EPSILON, "G" /*PS_REAL_FMT*/);
+    REPORT_FORMAT(PS_REAL_MIN, "G");
+    REPORT_FORMAT(PS_REAL_MIN, "G");
+    REPORT_FORMAT(PS_REAL_MAX, "G");
+    REPORT_FORMAT(PS_REAL_EPSILON, "G");
     REPORT_FORMAT(PS_REAL_FMT, "s");
     REPORT_SECTION("*** CHARACTER TYPE ***");
     REPORT_STRING(PS_CHAR);
@@ -77,6 +80,7 @@ void ps_config_report()
     REPORT_SECTION("*** SIZES ***");
     // REPORT_FORMAT(PS_FILE_SIZE, "u");
     // REPORT_FORMAT(PS_POINTER_SIZE, "u");
+    REPORT_FORMAT(PS_VALUE_DATA_SIZE, "u");
     REPORT_FORMAT(PS_VALUE_SIZE, "u");
     REPORT_FORMAT(PS_SYMBOL_SIZE, "u");
     printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");

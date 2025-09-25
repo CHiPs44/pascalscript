@@ -95,24 +95,27 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  *  Pointer dereference:
  *      VARIABLE_REFERENCE '^'
  */
-bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
+bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **variable)
 {
     VISIT_BEGIN("VARIABLE_REFERENCE", "");
     ps_identifier identifier;
+    ps_symbol *symbol;
 
+    *variable = NULL;
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(identifier);
     if (mode == MODE_EXEC)
     {
-        variable = ps_interpreter_find_symbol(interpreter, &identifier, false);
-        if (variable == NULL)
+        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        if (symbol == NULL)
         {
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         }
-        if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+        if (symbol->kind != PS_SYMBOL_KIND_VARIABLE)
         {
             RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE);
         }
+        *variable = symbol;
     }
     READ_NEXT_TOKEN;
 
@@ -204,10 +207,20 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         parameter = &formal_signature->parameters[i];
         if (parameter->byref)
         {
-            if (!ps_visit_variable_reference(interpreter, mode, variable))
+            if (!ps_visit_variable_reference(interpreter, mode, &variable))
                 TRACE_ERROR("VARIABLE");
-            // TODO associate variable to parameter
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, variable->value);
+            if (argument == NULL)
+            {
+                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                TRACE_ERROR("ARGUMENT_BYREF");
+            }
+            if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
+            {
+                ps_symbol_free(argument);
+                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                TRACE_ERROR("ADD_BYREF");
+            }
         }
         else
         {
@@ -233,20 +246,20 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 {
                     value = ps_value_free(value);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                    TRACE_ERROR("ARGUMENT");
+                    TRACE_ERROR("ARGUMENT_BYVAL");
                 }
                 if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
                 {
                     ps_symbol_free(argument);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                    TRACE_ERROR("ADD");
+                    TRACE_ERROR("ADD_BYVAL");
                 }
             }
         }
         i += 1;
         if (i >= parameter_count)
         {
-            if (lexer->current_token.type == PS_TOKEN_COMMA)
+            if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
             break;
         }
@@ -350,7 +363,21 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
 
 cleanup:
     if (has_environment)
+    {
+        // Empty byref parameters to avoid freeing values still used in the caller environment
+        for (uint8_t i = 0; i < executable->value->data.x->signature->parameter_count; i++)
+        {
+            ps_formal_parameter *param = &executable->value->data.x->signature->parameters[i];
+            if (param->byref)
+            {
+                ps_symbol *symbol =
+                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &param->name, true);
+                if (symbol != NULL)
+                    symbol->value = NULL;
+            }
+        }
         ps_interpreter_exit_environment(interpreter);
+    }
     if (interpreter->error == PS_ERROR_NONE)
         interpreter->error = PS_ERROR_GENERIC;
     TRACE_ERROR("CLEANUP");
