@@ -165,8 +165,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     }
 
     // Parameters?
-    // ps_interpreter_debug debug = interpreter->debug;
-    // interpreter->debug = DEBUG_TRACE;
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
         READ_NEXT_TOKEN_OR_CLEANUP;
@@ -199,7 +197,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
             } while (true);
         }
     }
-    // interpreter->debug = debug;
     // ps_formal_signature_debug(stderr, "SIGNATURE", signature);
 
     if (!ps_lexer_get_cursor(lexer, &line, &column))

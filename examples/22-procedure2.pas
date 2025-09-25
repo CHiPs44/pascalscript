@@ -17,16 +17,16 @@ Begin
     WriteLn;
 End;
 
-Procedure Sum(A, B: Integer, Var C: Unsigned);
+Procedure Sum(A, B: Unsigned, Var C: Unsigned);
 Begin
-    C := A + B;
+    // C := A + B;
 End;
 
 Begin
     WriteLine('-', 80);
     Global1 := 0;
     WriteLn('Before Sum, Global1=', Global1);
-    Sum(10, 32, Global1);
-    WriteLn('After Sum, Global1=', Global1);
+    // Sum(10, 32, Global1);
+    WriteLn('After  Sum, Global1=', Global1);
     WriteLine('-', 80);
 End.

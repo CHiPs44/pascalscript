@@ -85,6 +85,41 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
 }
 
 /**
+ * Visit variable reference:
+ *      IDENTIFIER
+ * Next steps:
+ *  Array access:
+ *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']'
+ *  "Namespace" access (System.MaxInt, System.Sin, <Program>.Variable, ...):
+ *      IDENTIFIER '.' IDENTIFIER
+ *  Pointer dereference:
+ *      VARIABLE_REFERENCE '^'
+ */
+bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
+{
+    VISIT_BEGIN("VARIABLE_REFERENCE", "");
+    ps_identifier identifier;
+
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    COPY_IDENTIFIER(identifier);
+    if (mode == MODE_EXEC)
+    {
+        variable = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        if (variable == NULL)
+        {
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        }
+        if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+        {
+            RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE);
+        }
+    }
+    READ_NEXT_TOKEN;
+
+    VISIT_END("OK");
+}
+
+/**
  * Visit assignment:
  *      IDENTIFIER := EXPRESSION
  * Next steps:
@@ -97,6 +132,7 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier)
 {
     VISIT_BEGIN("ASSIGNMENT", "");
+
     ps_symbol *variable;
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
 
@@ -136,7 +172,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
 }
 
 bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *procedure,
-                               ps_formal_signature *actual)
+                               ps_actual_signature *actual)
 {
     VISIT_BEGIN("ACTUAL_SIGNATURE", "");
 
@@ -144,8 +180,9 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
     ps_formal_parameter *parameter = NULL;
     ps_symbol *argument = NULL;
     ps_value *value = NULL;
-    // ps_symbol *variable = NULL;
+    ps_symbol *variable = NULL;
     ps_value result;
+    uint8_t parameter_count = formal_signature->parameter_count;
     uint8_t i = 0;
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
@@ -154,11 +191,11 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
     READ_NEXT_TOKEN;
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
-        if (formal_signature->parameter_count != 0)
+        if (parameter_count != 0)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         VISIT_END("NO_PARAMETERS");
     }
-    if (formal_signature->parameter_count == 0)
+    if (parameter_count == 0)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
 
     // Parse actual parameters
@@ -167,10 +204,11 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         parameter = &formal_signature->parameters[i];
         if (parameter->byref)
         {
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-            // if (!ps_visit_variable_reference(interpreter, mode, procedure, variable))
-            //     TRACE_ERROR("VARIABLE");
+            // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+            if (!ps_visit_variable_reference(interpreter, mode, variable))
+                TRACE_ERROR("VARIABLE");
             // TODO associate variable to parameter
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         }
         else
         {
@@ -205,7 +243,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
             }
         }
         i += 1;
-        if (i >= formal_signature->parameter_count)
+        if (i >= parameter_count)
         {
             if (lexer->current_token.type == PS_TOKEN_COMMA)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -238,6 +276,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
 
+    ps_actual_signature *actual_signature = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
     bool has_environment = false;
@@ -265,7 +304,7 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         // Parse parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
-            if (!ps_visit_actual_signature(interpreter, mode, executable, executable->value->data.x->signature))
+            if (!ps_visit_actual_signature(interpreter, mode, executable, actual_signature))
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
@@ -281,9 +320,9 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (mode == MODE_EXEC)
         {
             // fprintf(stderr, "================================================================================\n");
-            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line, column);
-            // ps_token_debug(stderr, "CURRENT", &lexer->current_token);
-            // Set cursor to the beginning of the procedure body
+            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line,
+            // column); ps_token_debug(stderr, "CURRENT", &lexer->current_token); Set cursor to the beginning of the
+            // procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
@@ -328,6 +367,7 @@ cleanup:
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
 {
     VISIT_BEGIN("WRITE_OR_WRITELN", "");
+
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
     bool loop = true;
 

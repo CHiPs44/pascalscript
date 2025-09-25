@@ -178,8 +178,9 @@ int main(int argc, char *argv[])
         // program_file = "09-boolean.pas";
         // program_file = "10-strings.pas";
         // program_file = "12-toayue-powersoftwo.pas";
-        // program_file = "20-procedure1.pas";
-        program_file = "21-procedure2.pas";
+        // program_file = "20-procedure0.pas";
+        // program_file = "21-procedure1.pas";
+        program_file = "22-procedure2.pas";
         // program_file = "41-circle.pas";
     }
     snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
