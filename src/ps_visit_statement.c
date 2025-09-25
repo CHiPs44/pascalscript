@@ -204,7 +204,6 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         parameter = &formal_signature->parameters[i];
         if (parameter->byref)
         {
-            // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
             if (!ps_visit_variable_reference(interpreter, mode, variable))
                 TRACE_ERROR("VARIABLE");
             // TODO associate variable to parameter
@@ -218,25 +217,27 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 TRACE_ERROR("EXPRESSION");
             if (mode == MODE_EXEC)
             {
-                if (result.type != parameter->type)
-                {
-                    // TODO allow compatible types
-                    RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
-                }
-                value = ps_value_alloc(parameter->type, result.data);
+                value = ps_value_alloc(parameter->type, (ps_value_data){.v = NULL});
                 if (value == NULL)
                 {
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("VALUE");
                 }
+                if (!ps_interpreter_copy_value(interpreter, &result, value))
+                {
+                    value = ps_value_free(value);
+                    TRACE_ERROR("COPY");
+                }
                 argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, value);
                 if (argument == NULL)
                 {
+                    value = ps_value_free(value);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("ARGUMENT");
                 }
                 if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
                 {
+                    ps_symbol_free(argument);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("ADD");
                 }

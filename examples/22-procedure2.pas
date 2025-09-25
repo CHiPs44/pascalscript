@@ -6,6 +6,7 @@
 Program Example22Procedure2;
 
 Var
+    Start, Stop: Unsigned;
     Global1: Unsigned;
 
 Procedure WriteLine(Ch: Char, Width: Unsigned);
@@ -23,10 +24,15 @@ Begin
 End;
 
 Begin
+    Start := GetTickCount();
+    WriteLn('Started at ', Start, ' ms');
     WriteLine('-', 80);
     Global1 := 0;
     WriteLn('Before Sum, Global1=', Global1);
     // Sum(10, 32, Global1);
     WriteLn('After  Sum, Global1=', Global1);
     WriteLine('-', 80);
+    Stop := GetTickCount();
+    WriteLn('Stopped at ', Stop, ' ms');
+    WriteLn('ElapsedTime=', Stop - Start, ' ms');
 End.
