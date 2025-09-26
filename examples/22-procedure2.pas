@@ -7,7 +7,7 @@ Program Example22Procedure2;
 
 Var
     Start, Stop: Unsigned;
-    Global1: Unsigned;
+    Global1, Global2: Unsigned;
 
 Procedure WriteLine(Ch: Char, Width: Unsigned);
 Var
@@ -18,23 +18,25 @@ Begin
     WriteLn;
 End;
 
-Procedure Sum(A, B: Unsigned, Var C: Unsigned);
+Procedure Sum(A, B: Unsigned, Var C, D: Unsigned);
 Begin
-    WriteLn('    In Sum, Global1=', Global1);
-    WriteLn('        A=', A, ' B=', B, ' C=', C);
+    WriteLn('    In Sum, Global1=', Global1, ' Global2=', Global2);
+    WriteLn('        A=', A, ' B=', B, ' C=', C, ' D=', D);
     C := A + B;
-    WriteLn('        A=', A, ' B=', B, ' C=', C);
-    WriteLn('    In Sum, Global1=', Global1);
+    D := A * B;
+    WriteLn('        A=', A, ' B=', B, ' C=', C, ' D=', D);
+    WriteLn('    In Sum, Global1=', Global1, ' Global2=', Global2);
 End;
 
 Begin
     Start := GetTickCount();
     WriteLn('Started at ', Start, ' ms');
     WriteLine('-', 80);
-    Global1 := 1234567890;
-    WriteLn('Before Sum, Global1=', Global1);
-    Sum(10, 32, Global1);
-    WriteLn('After  Sum, Global1=', Global1);
+    Global1 := 123456789;
+    Global2 := 987654321;
+    WriteLn('Before Sum, Global1=', Global1, ' Global2=', Global2);
+    Sum(10, 32, Global1, Global2);
+    WriteLn('After  Sum, Global1=', Global1, ' Global2=', Global2);
     WriteLine('-', 80);
     Stop := GetTickCount();
     WriteLn('Stopped at ', Stop, ' ms');
