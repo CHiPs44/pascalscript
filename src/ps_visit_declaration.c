@@ -133,6 +133,9 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *      IDENTIFIER '=' IDENTIFIER | CONSTANT_EXPRESSION ';'
  * Examples:
  *      Const
+ *          ImageWidth  = 320;
+ *          ImageHeight = 200;
+ *          ImageDepth  = 8;
  *          ImageSize    = (ImageWidth * ImageHeight * ImageDepth) div 8;
  */
 bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)

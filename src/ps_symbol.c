@@ -27,6 +27,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
         memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);
         snprintf((char *)&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
     }
+    symbol->system = false;
     symbol->allocated = true;
     symbol->value = value;
     return symbol;
@@ -91,7 +92,7 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 
 char *ps_symbol_dump_value(ps_symbol *symbol)
 {
-    static char buffer[256];
+    static char buffer[128];
     // clang-format off
     snprintf(buffer, sizeof(buffer) - 1, 
         "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", 

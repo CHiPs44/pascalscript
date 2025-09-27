@@ -288,11 +288,6 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_VARIABLE:
             if (mode == MODE_EXEC)
             {
-                if (interpreter->debug)
-                {
-                    ps_symbol_debug(stderr, "SYMBOL\t", symbol);
-                    ps_value_debug(stderr, "RESULT\t", result);
-                }
                 if (!ps_interpreter_copy_value(interpreter, symbol->value, result))
                     TRACE_ERROR("COPY");
             }

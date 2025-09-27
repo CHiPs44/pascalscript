@@ -18,23 +18,26 @@
 #include "ps_version.h"
 
 /**********************************************************************************************************************/
-/* SYSTEM TYPE DEFINITIONS AND CONSTANTS                                      */
+/* SYSTEM TYPE DEFINITIONS AND CONSTANTS                                                                              */
 /**********************************************************************************************************************/
 
 /* clang-format off */
 
-ps_type_definition ps_type_def_type_def = {.type = PS_TYPE_DEFINITION            , .base = PS_TYPE_DEFINITION                                           };
-ps_symbol          ps_symbol_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "##TYPE_DEF", .value = NULL              , .allocated = false};
-ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def           , .data = {.t = &ps_type_def_type_def}             , .allocated = false};
-ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .allocated = false};
+ps_type_definition ps_type_def_type_def = {.type = PS_TYPE_DEFINITION            , .base = PS_TYPE_DEFINITION                                                           };
+ps_symbol          ps_symbol_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "##TYPE_DEF", .value = NULL              , .system = true, .allocated = false};
+ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def           , .data = {.t = &ps_type_def_type_def}                             , .allocated = false};
+ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .system = true, .allocated = false};
 
 /* clang-format on */
 #define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
     ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
     ps_value ps_value_##__name__ = {                                                                                   \
         .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
-    ps_symbol ps_system_##__name__ = {                                                                                 \
-        .kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = __NAME__, .value = &ps_value_##__name__};
+    ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
+                                      .name = __NAME__,                                                                \
+                                      .value = &ps_value_##__name__,                                                   \
+                                      .system = true,                                                                  \
+                                      .allocated = false};
 /* clang-format off */
 
 PS_SYSTEM_TYPE(none     , "#NONE"     , PS_TYPE_NONE                                                                  );
@@ -57,8 +60,11 @@ PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE                      
 /* clang-format on */
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
-    ps_symbol ps_system_constant_##TYPE##_##VALUE = {                                                                  \
-        .kind = PS_SYMBOL_KIND_CONSTANT, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,                                  \
+                                                     .name = NAME,                                                     \
+                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
+                                                     .system = true,                                                   \
+                                                     .allocated = false};
 /* clang-format off */
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean)false                                                 );
@@ -78,8 +84,11 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979311
 /* clang-format on */
 #define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
-    ps_symbol ps_system_variable_##TYPE##_##VALUE = {                                                                  \
-        .kind = PS_SYMBOL_KIND_VARIABLE, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+    ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,                                  \
+                                                     .name = NAME,                                                     \
+                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
+                                                     .system = true,                                                   \
+                                                     .allocated = false};
 /* clang-format off */
 
 PS_SYSTEM_VARIABLE(integer, ioresult, "IORESULT", i, (ps_integer)0                                                    );
@@ -90,10 +99,10 @@ PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", i, (ps_integer)0              
 /**********************************************************************************************************************/
 
 PS_SYSTEM_CONSTANT(unsigned, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS                                      );
-PS_SYSTEM_CONSTANT(unsigned, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR                                );
-PS_SYSTEM_CONSTANT(unsigned, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_MINOR                                );
-PS_SYSTEM_CONSTANT(unsigned, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION_PATCH                                );
-PS_SYSTEM_CONSTANT(unsigned, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX                                );
+// PS_SYSTEM_CONSTANT(unsigned, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR                                );
+// PS_SYSTEM_CONSTANT(unsigned, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_MINOR                                );
+// PS_SYSTEM_CONSTANT(unsigned, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION_PATCH                                );
+// PS_SYSTEM_CONSTANT(unsigned, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX                                );
 PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL                                            );
 
 /**********************************************************************************************************************/
@@ -104,7 +113,8 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 #define PS_SYSTEM_CALLABLE(TYPE, KIND, VALUE, NAME, CALLABLE)                                                          \
     ps_executable ps_executable_##TYPE##_##VALUE = {.system = CALLABLE, .signature = NULL, .line = 0, .column = 0};    \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
-    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE};
+    ps_symbol ps_system_##TYPE##_##VALUE = {                                                                           \
+        .kind = KIND, .name = NAME, .value = &ps_value_##TYPE##_##VALUE, .system = true, .allocated = false};
 /* clang-format off */
 
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , abs           , "ABS"         , &ps_function_abs              );
@@ -202,6 +212,7 @@ bool ps_system_init(ps_interpreter *interpreter)
     /* BITNESS & VERSION                                                      */
     /**************************************************************************/
 
+    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
     if (!error)
     {
         ps_string *ps_version_string = ps_string_create(PS_VERSION, strlen(PS_VERSION));
@@ -209,11 +220,10 @@ bool ps_system_init(ps_interpreter *interpreter)
             error = true;
         ps_system_constant_string_ps_version.value->data.s = ps_version_string;
     }
-    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_bitness);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_major);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_minor);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_patch);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_constant_unsigned_ps_version_index);
     error = error || !ps_environment_add_symbol(environment, &ps_system_constant_string_ps_version);
 
     /**************************************************************************/

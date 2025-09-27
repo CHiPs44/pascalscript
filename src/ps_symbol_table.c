@@ -192,12 +192,15 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(output,
-            "┏━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output,
-            "┃   #┃Hash    ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
-    fprintf(output,
-            "┣━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(
+        output,
+        "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(
+        output,
+        "┃      #┃Hash          ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
+    fprintf(
+        output,
+        "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -210,12 +213,22 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
             kind_name = ps_symbol_get_kind_name(symbol->kind);
             type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
             value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
-            fprintf(output, "┃%04d┃%08x┃%-*s┃%-10s┃%-10s┃%-*s┃\n", i, hash, PS_IDENTIFIER_LEN, symbol->name, kind_name,
-                    type_name, PS_IDENTIFIER_LEN, value);
+            // clang-format off
+            fprintf(output, 
+                    "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-10s┃%-*s┃\n", 
+                    symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i, 
+                    hash, hash % table->size == i ? '=' : '!', hash % table->size,
+                    PS_IDENTIFIER_LEN, symbol->name, 
+                    kind_name, 
+                    type_name,
+                    PS_IDENTIFIER_LEN, value
+            );
+            // clang-format on
         }
     }
-    fprintf(output,
-            "┗━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(
+        output,
+        "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }

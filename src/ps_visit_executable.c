@@ -136,9 +136,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    // For now, only procedures
-    if (kind == PS_SYMBOL_KIND_FUNCTION)
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
 
     // Get procedure/function name
     READ_NEXT_TOKEN_OR_CLEANUP;
@@ -198,6 +195,17 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         }
     }
     // ps_formal_signature_debug(stderr, "SIGNATURE", signature);
+
+    if (kind == PS_SYMBOL_KIND_FUNCTION)
+    {
+        // Function must have a return type
+        EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_COLON);
+        READ_NEXT_TOKEN_OR_CLEANUP;
+        ps_symbol *type_reference = NULL;
+        if (!ps_visit_type_reference(interpreter, mode, &type_reference))
+            goto cleanup;
+        signature->result_type = type_reference;
+    }
 
     if (!ps_lexer_get_cursor(lexer, &line, &column))
     {

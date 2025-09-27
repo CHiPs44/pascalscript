@@ -9,6 +9,7 @@ Var
     Start, Stop: Unsigned;
     Global1, Global2: Unsigned;
 
+{ "Real" usable proceduree }
 Procedure WriteLine(Ch: Char, Width: Unsigned);
 Var
     I: Unsigned;
@@ -18,27 +19,28 @@ Begin
     WriteLn;
 End;
 
-Procedure Sum(A, B: Unsigned, Var C, D: Unsigned);
+{ Not so usable procedure, just to show parameters passing }
+Procedure Ops(A, B: Unsigned, Var C, D: Unsigned);
 Begin
-    WriteLn('    In Sum, Global1=', Global1, ' Global2=', Global2);
+    WriteLn('    In Ops, Global1=', Global1, ' Global2=', Global2);
     WriteLn('        A=', A, ' B=', B, ' C=', C, ' D=', D);
     C := A + B;
     D := A * B;
     WriteLn('        A=', A, ' B=', B, ' C=', C, ' D=', D);
-    WriteLn('    In Sum, Global1=', Global1, ' Global2=', Global2);
+    WriteLn('     In Ops, Global1=', Global1, ' Global2=', Global2);
 End;
 
 Begin
     Start := GetTickCount();
-    WriteLn('Started at ', Start, ' ms');
     WriteLine('-', 80);
     Global1 := 123456789;
     Global2 := 987654321;
-    WriteLn('Before Sum, Global1=', Global1, ' Global2=', Global2);
-    Sum(10, 32, Global1, Global2);
-    WriteLn('After  Sum, Global1=', Global1, ' Global2=', Global2);
+    WriteLn('Before Ops, Global1=', Global1, ' Global2=', Global2);
+    Ops(10, 32, Global1, Global2);
+    WriteLn('After  Ops, Global1=', Global1, ' Global2=', Global2);
     WriteLine('-', 80);
     Stop := GetTickCount();
+    WriteLn('Started at ', Start, ' ms');
     WriteLn('Stopped at ', Stop, ' ms');
     WriteLn('Elapsed time ', Stop - Start, ' ms');
 End.
