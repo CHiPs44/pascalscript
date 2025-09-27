@@ -49,7 +49,8 @@ extern "C"
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
-    bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable);
+    bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                             ps_symbol *executable, ps_value *result);
     bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);

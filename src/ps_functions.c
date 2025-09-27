@@ -200,66 +200,10 @@ ps_error ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value
 }
 
 /******************************************************************************/
-/* "MATH"                                                                     */
+/* MATH                                                                       */
 /******************************************************************************/
 
-// from https://www.cs.yale.edu/homes/aspnes/pinewiki/C(2f)Randomization.html
-//   => correct "bias" introduced by modulus operator
-int rand_range_integer(int n)
-{
-    int r;
-    int limit;
-
-    limit = RAND_MAX - (RAND_MAX % n);
-    while ((r = rand()) >= limit)
-        ;
-
-    return r % n;
-}
-
-unsigned int rand_range_unsigned(unsigned int n)
-{
-    // use rand_range_integer() for small values
-    if (n <= RAND_MAX)
-    {
-        return (unsigned int)rand_range_integer((int)n);
-    }
-    // use double for larger values
-    return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX);
-}
-
-ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
-{
-    if (value == NULL)
-    {
-        // no argument, return random real between 0.0 and 1.0 excluded
-        result->type = &ps_system_real;
-        do
-        {
-            result->data.r = (double)rand() / (double)RAND_MAX;
-        } while (result->data.r >= 1.0);
-    }
-    else
-    {
-        // one argument, return random integer / unsigned
-        switch (value->type->value->data.t->base)
-        {
-        case PS_TYPE_INTEGER:
-            result->type = &ps_system_integer;
-            result->data.i = (ps_integer)rand_range_integer(value->data.i);
-            break;
-        case PS_TYPE_UNSIGNED:
-            result->type = &ps_system_unsigned;
-            result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u);
-            break;
-        default:
-            return PS_ERROR_UNEXPECTED_TYPE;
-        }
-    }
-    return PS_ERROR_NONE;
-}
-
-/** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer / unsigned / real */
+/** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer, unsigned or real */
 ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->type)
@@ -278,16 +222,6 @@ ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value 
         return PS_ERROR_EXPECTED_NUMBER;
     }
     result->type = value->type;
-    return PS_ERROR_NONE;
-}
-
-/** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
-ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
-{
-    // NB: value parameter is not used
-    result->type = &ps_system_unsigned;
-    clock_t c = clock();
-    result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
     return PS_ERROR_NONE;
 }
 
@@ -500,6 +434,79 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
+    }
+    return PS_ERROR_NONE;
+}
+
+/******************************************************************************/
+/* OTHER                                                                      */
+/******************************************************************************/
+
+/** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
+
+/** @brief GETTICKCOUNT: UNSIGNED - Get milliseconds since program start */
+ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    // NB: value parameter is not used
+    result->type = &ps_system_unsigned;
+    clock_t c = clock();
+    result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
+    return PS_ERROR_NONE;
+}
+
+// from https://www.cs.yale.edu/homes/aspnes/pinewiki/C(2f)Randomization.html
+//   => correct "bias" introduced by modulus operator
+int rand_range_integer(int n)
+{
+    int r;
+    int limit;
+
+    limit = RAND_MAX - (RAND_MAX % n);
+    while ((r = rand()) >= limit)
+        ;
+
+    return r % n;
+}
+unsigned int rand_range_unsigned(unsigned int n)
+{
+    // use rand_range_integer() for small values
+    if (n <= RAND_MAX)
+    {
+        return (unsigned int)rand_range_integer((int)n);
+    }
+    // use double for larger values
+    return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX);
+}
+
+/** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value */
+/** @brief either real between 0 and 1 (excluded) or between 0 and N - 1 */
+ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    if (value == NULL)
+    {
+        // no argument, return random real between 0.0 and 1.0 excluded
+        result->type = &ps_system_real;
+        do
+        {
+            result->data.r = (double)rand() / (double)RAND_MAX;
+        } while (result->data.r >= 1.0);
+    }
+    else
+    {
+        // one argument, return random integer / unsigned
+        switch (value->type->value->data.t->base)
+        {
+        case PS_TYPE_INTEGER:
+            result->type = &ps_system_integer;
+            result->data.i = (ps_integer)rand_range_integer(value->data.i);
+            break;
+        case PS_TYPE_UNSIGNED:
+            result->type = &ps_system_unsigned;
+            result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u);
+            break;
+        default:
+            return PS_ERROR_UNEXPECTED_TYPE;
+        }
     }
     return PS_ERROR_NONE;
 }

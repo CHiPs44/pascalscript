@@ -284,9 +284,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  *    where actual_parameter is:
  *      expression or variable_reference
  */
-bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable /*,
-                              uint16_t line, uint16_t column*/
-)
+bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable, ps_value *result)
 {
     VISIT_BEGIN("PROCEDURE_CALL", "");
 
@@ -299,14 +297,14 @@ bool ps_visit_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mo
     {
         // Write or Writeln
         if (!ps_visit_write_or_writeln(interpreter, mode, executable == &ps_system_procedure_writeln))
-            TRACE_ERROR("WRITE!");
+            TRACE_ERROR("WRITE[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)
     {
         // Randomize
         if (mode == MODE_EXEC)
             if (!ps_procedure_randomize(interpreter, NULL))
-                TRACE_ERROR("RANDOMIZE!");
+                TRACE_ERROR("RANDOMIZE");
     }
     else
     {
@@ -470,7 +468,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     case PS_SYMBOL_KIND_CONSTANT:
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (!ps_visit_procedure_call(interpreter, mode, symbol))
+        if (!ps_visit_procedure_or_function_call(interpreter, mode, symbol, NULL))
             TRACE_ERROR("PROCEDURE_CALL");
         break;
     default:

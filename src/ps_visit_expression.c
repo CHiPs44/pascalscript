@@ -121,8 +121,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
-        PS_TOKEN_LT,        PS_TOKEN_LE, PS_TOKEN_GT,
-        PS_TOKEN_GE, PS_TOKEN_EQUAL,         PS_TOKEN_NE,
+        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQUAL, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -399,82 +398,78 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
     bool null_arg = false;
 
     READ_NEXT_TOKEN;
-    if (function == &ps_system_function_random)
+    if (function->system)
     {
-        // Random function can be called with 2 signatures:
-        //  1. Random or Random() => Real
-        //  2. Random(Integer|Unsigned) => Integer|Unsigned
-        switch (lexer->current_token.type)
+        // System functions
+        if (function == &ps_system_function_random)
         {
-        case PS_TOKEN_LEFT_PARENTHESIS:
-            // Skip '(' and ')' or get parameter enclosed in parentheses
-            READ_NEXT_TOKEN;
-            if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+            // Random function can be called with 2 signatures:
+            //  1. Random or Random() => Real from 0.0 to 1.0 excluded
+            //  2. Random(Integer|Unsigned) => Integer|Unsigned
+            if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
             {
+                // Skip '(' and ')' or get parameter enclosed in parentheses
                 READ_NEXT_TOKEN;
-                null_arg = true;
+                if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+                {
+                    READ_NEXT_TOKEN;
+                    null_arg = true;
+                    result->type = &ps_system_real;
+                }
+                else
+                {
+                    if (!ps_visit_expression(interpreter, mode, &arg))
+                        TRACE_ERROR("PARAMETER");
+                    if (arg.type != &ps_system_integer && arg.type != &ps_system_unsigned)
+                        RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+                    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+                    result->type = arg.type;
+                    READ_NEXT_TOKEN;
+                }
             }
             else
             {
-                if (!ps_visit_expression(interpreter, mode, &arg))
-                    TRACE_ERROR("PARAMETER");
-                EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+                null_arg = true;
+                result->type = &ps_system_real;
+            }
+        }
+        else if (function == &ps_system_function_get_tick_count)
+        {
+            // Skip '(' and ')'
+            if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+            {
+                READ_NEXT_TOKEN;
+                if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
+                    RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
                 READ_NEXT_TOKEN;
             }
-            break;
-        case PS_TOKEN_SEMI_COLON:
-        case PS_TOKEN_ELSE:
-        case PS_TOKEN_END:
-        case PS_TOKEN_UNTIL:
-            // Statement terminators => OK
             null_arg = true;
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            result->type = &ps_system_unsigned;
         }
-    }
-    else if (function == &ps_system_function_get_tick_count)
-    {
-        // Random function can be called with 2 signatures:
-        //  1. Random or Random() => Real
-        //  2. Random(Integer|Unsigned) => Integer|Unsigned
-        // interpreter->debug = DEBUG_VERBOSE;
-        switch (lexer->current_token.type)
+        else
         {
-        case PS_TOKEN_LEFT_PARENTHESIS:
-            // Skip '(' and ')'
+            // all other functions have one argument for now
+            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
-            if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-            null_arg = true;
+            if (!ps_visit_expression(interpreter, mode, &arg))
+                TRACE_ERROR("PARAMETER");
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
-            break;
-        case PS_TOKEN_SEMI_COLON:
-        case PS_TOKEN_ELSE:
-        case PS_TOKEN_END:
-        case PS_TOKEN_UNTIL:
-            // Statement terminators => OK
-            null_arg = true;
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        }
+        if (mode == MODE_EXEC)
+        {
+            interpreter->error = ps_function_exec(interpreter, function, null_arg ? NULL : &arg, result);
+            if (interpreter->error != PS_ERROR_NONE)
+                TRACE_ERROR("FUNCTION");
         }
     }
     else
     {
-        // all other functions have one argument for now
-        EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-        READ_NEXT_TOKEN;
-        if (!ps_visit_expression(interpreter, mode, &arg))
-            TRACE_ERROR("PARAMETER");
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
-    }
-    if (mode == MODE_EXEC)
-    {
-        interpreter->error = ps_function_exec(interpreter, function, null_arg ? NULL : &arg, result);
-        if (interpreter->error != PS_ERROR_NONE)
-            TRACE_ERROR("FUNCTION");
+        // User defined function
+        if (!ps_visit_procedure_or_function_call(interpreter, mode, function, result))
+        {
+            TRACE_ERROR("FUNCTION_CALL");
+        }
     }
 
     VISIT_END("OK");
