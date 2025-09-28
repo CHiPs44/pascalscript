@@ -5,24 +5,33 @@
 *)
 Program Example30Function0;
 
-Var
-    Global1: Unsigned;
+// Var
+    // Strength: Unsigned;
+    // Global1: Unsigned;
 
-Function SumU(A: Unsigned, B: Unsigned): Unsigned;
-Var
-    C: Unsigned;
+Function d100: Unsigned;
 Begin
-    WriteLn('In SumU A=', A, ' B=', B);
-    C := A + B;
-    WriteLn('In SumU C=', C);
-    // SumU := C;
+    // d100 := Random(100) + 1;
+    Result := Random(100) + 1;
 End;
+
+// Function SumU(A: Unsigned, B: Unsigned): Unsigned;
+// Var
+//     C: Unsigned;
+// Begin
+//     WriteLn('In SumU A=', A, ' B=', B);
+//     C := A + B;
+//     WriteLn('In SumU C=', C);
+//     // SumU := C;
+// End;
 
 Begin
     WriteLn('--------------------------------------------------------------------------------');
-    Global1 := 123456789;
-    WriteLn('Global1=', Global1);
+    // Strength := d100;
+    // WriteLn('Strength=', Strength);
+    // Global1 := 123456789;
+    // WriteLn('Global1=', Global1);
     // Global1 := SumU(123456789, 987654321);
-    WriteLn('Global1=', Global1);
+    // WriteLn('Global1=', Global1);
     WriteLn('--------------------------------------------------------------------------------');
 End.

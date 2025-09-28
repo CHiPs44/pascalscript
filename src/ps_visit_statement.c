@@ -284,14 +284,16 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  *    where actual_parameter is:
  *      expression or variable_reference
  */
-bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable, ps_value *result)
+bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
+                                         ps_value *result_value)
 {
-    VISIT_BEGIN("PROCEDURE_CALL", "");
+    VISIT_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "");
 
     ps_actual_signature *actual_signature = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
     bool has_environment = false;
+    ps_symbol *result_symbol = NULL;
 
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
     {
@@ -313,7 +315,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
             RETURN_ERROR(interpreter->error);
         has_environment = true;
-        // Parse parameters
+        // Parse actual parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
             if (!ps_visit_actual_signature(interpreter, mode, executable, actual_signature))
@@ -328,7 +330,27 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
             goto cleanup;
         }
-        // Execute procedure
+        // Function have a return value
+        if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
+        {
+            result_value->type = executable->value->data.x->signature->result_type;
+            result_value->data.v = NULL;
+            result_value->allocated = false;
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE,
+                                            &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'}, result_value);
+            if (result_symbol == NULL)
+            {
+                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                goto cleanup;
+            }
+            if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
+            {
+                result_symbol = ps_symbol_free(result_symbol);
+                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                goto cleanup;
+            }
+        }
+        // Execute procedure or function
         if (mode == MODE_EXEC)
         {
             // fprintf(stderr, "================================================================================\n");

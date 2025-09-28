@@ -130,7 +130,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
 
     ps_identifier identifier;
-    ps_symbol *callable = NULL;
+    ps_symbol *symbol = NULL;
     ps_value *value = NULL;
     ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
@@ -138,17 +138,19 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     uint16_t column = 0;
     // ps_value result = {0};
     bool has_environment = false;
+    ps_symbol *result_symbol = NULL;
+    ps_value result_value = {0};
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
 
-    // Get procedure/function name
+    // Get procedure or function name
     READ_NEXT_TOKEN_OR_CLEANUP;
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     // Does it already exist in the current environment?
     COPY_IDENTIFIER(identifier);
-    callable = ps_interpreter_find_symbol(interpreter, &identifier, true);
-    if (callable != NULL)
+    symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
+    if (symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
     // Create new environment for the procedure/function
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
@@ -225,30 +227,52 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    // fprintf(stderr, "================================================================================\n");
-    // ps_executable_debug(stderr, "EXECUTABLE", executable);
-    // fprintf(stderr, "================================================================================\n");
-    callable = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
-    if (callable == NULL)
+    fprintf(stderr, "================================================================================\n");
+    ps_executable_debug(stderr, "EXECUTABLE", executable);
+    fprintf(stderr, "================================================================================\n");
+
+    symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
+    if (symbol == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    callable->kind = kind;
+    symbol->kind = kind;
     value = ps_value_alloc(&ps_system_procedure, (ps_value_data){.x = executable});
     if (value == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    callable->value = value;
+    symbol->value = value;
     // Add the procedure/function to the parent environment
     ps_environment *parent_environment = ps_interpreter_get_environment(interpreter)->parent;
     // if (!ps_interpreter_add_symbol(interpreter, callable))
-    if (parent_environment == NULL || !ps_environment_add_symbol(parent_environment, callable))
+    if (parent_environment == NULL || !ps_environment_add_symbol(parent_environment, symbol))
     {
         goto cleanup;
     }
+    // Function have a return value
+    if (kind == PS_SYMBOL_KIND_FUNCTION)
+    {
+        result_value.type = signature->result_type;
+        result_value.data.v = NULL;
+        result_value.allocated = false;
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'},
+                                        &result_value);
+        if (result_symbol == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+        if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
+        {
+            result_symbol = ps_symbol_free(result_symbol);
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+    }
+
     // Skip block
     READ_NEXT_TOKEN;
     if (!ps_visit_block(interpreter, MODE_SKIP))
@@ -268,9 +292,11 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
 cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    if (callable != NULL)
+    if (result_symbol != NULL)
+        result_symbol = ps_symbol_free(result_symbol);
+    if (symbol != NULL)
     {
-        callable = ps_symbol_free(callable);
+        symbol = ps_symbol_free(symbol);
         value = NULL;
     }
     if (value != NULL)
