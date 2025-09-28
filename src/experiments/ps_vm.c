@@ -116,7 +116,7 @@ void ps_vm_reset(ps_vm *vm)
 bool ps_vm_push(ps_vm *vm, ps_value *value)
 {
     if (vm->trace)
-        fprintf(stderr, "VM\tPUSH %s\n", ps_value_get_debug_value(value));
+        fprintf(stderr, "VM\tPUSH %s\n", ps_value_get_debug_string(value));
     if (!ps_value_stack_push(vm->stack, value))
         return ps_vm_return_false(vm, PS_ERROR_STACK_OVERFLOW);
     return true;
@@ -191,7 +191,7 @@ bool ps_vm_emit_load(ps_vm *vm, ps_value *value)
     uint8_t instruction = OP_LIT | value->type->base;
     if (vm->debug)
         fprintf(stderr, "EMIT1\t%04x %02x %s.%u %s (used=%u, type=%d, size=%d)\n", vm->pc, instruction,
-                ps_vm_get_opcode_name(instruction), instruction & PS_VM_TYPE_MASK, ps_value_get_debug_value(value),
+                ps_vm_get_opcode_name(instruction), instruction & PS_VM_TYPE_MASK, ps_value_get_debug_string(value),
                 vm->used, value->type->base, size);
     vm->code[vm->pc++] = instruction;
     memcpy(&vm->code[vm->pc], &value->data, size);
@@ -200,7 +200,7 @@ bool ps_vm_emit_load(ps_vm *vm, ps_value *value)
     if (vm->debug)
         fprintf(stderr, "EMIT2\t%04x %02x %s.%u %s (used=%u, type=%d, size=%d)\n", vm->pc, instruction,
                 ps_vm_get_opcode_name(instruction & PS_VM_OPCODE_MASK), instruction & PS_VM_TYPE_MASK,
-                ps_value_get_debug_value(value), vm->used, value->type->base, size);
+                ps_value_get_debug_string(value), vm->used, value->type->base, size);
     return true;
 }
 
@@ -308,7 +308,7 @@ void ps_vm_dump(ps_vm *vm, char *title)
             {
                 memcpy(&value.data, &vm->code[i + 1], size);
                 fprintf(stderr, "  %04X %02X %s %s\n", i, instruction, ps_vm_get_opcode_name(instruction),
-                        ps_value_get_debug_value(&value));
+                        ps_value_get_debug_string(&value));
                 i += size;
             }
             break;

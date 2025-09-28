@@ -29,22 +29,25 @@ ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 
 ps_value *ps_value_free(ps_value *value)
 {
+    if (value == NULL || !value->allocated)
+        return NULL;
     free(value);
     return NULL;
 }
 
-#define PS_VALUE_SET(type_def, x)                                                                                      \
+#define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
     if (value == NULL)                                                                                                 \
     {                                                                                                                  \
-        value = calloc(1, sizeof(ps_value));                                                                           \
+        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__});                                            \
         if (value == NULL)                                                                                             \
-        {                                                                                                              \
             return NULL;                                                                                               \
-        }                                                                                                              \
     }                                                                                                                  \
-    value->type = type_def;                                                                                            \
-    value->data.x = x;                                                                                                 \
-    return value
+    else                                                                                                               \
+    {                                                                                                                  \
+        value->type = &__TYPE__;                                                                                       \
+        value->data.__X__ = __X__;                                                                                     \
+        return value;                                                                                                  \
+    }
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
@@ -187,7 +190,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
     {
         if (debug)
         {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
+            snprintf(buffer, sizeof(buffer) - 1, "NULL __TYPE__");
             return buffer;
         }
         return NULL;
@@ -196,7 +199,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
     {
         if (debug)
         {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE VALUE");
+            snprintf(buffer, sizeof(buffer) - 1, "NULL __TYPE__ VALUE");
             return buffer;
         }
         return NULL;
@@ -287,7 +290,7 @@ char *ps_value_get_display_string(ps_value *value)
     return ps_value_to_string(value, false);
 }
 
-char *ps_value_get_debug_value(ps_value *value)
+char *ps_value_get_debug_string(ps_value *value)
 {
     return ps_value_to_string(value, true);
 }
@@ -295,8 +298,8 @@ char *ps_value_get_debug_value(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
-    char *data = value == NULL ? "NULL!" : ps_value_get_debug_value(value);
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "__TYPE__!" : value->type->name;
+    char *data = value == NULL ? "NULL!" : ps_value_get_debug_string(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
     return buffer;
 }

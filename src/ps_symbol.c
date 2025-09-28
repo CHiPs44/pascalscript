@@ -100,7 +100,7 @@ char *ps_symbol_dump_value(ps_symbol *symbol)
         symbol == NULL ? "NULL!" : symbol->name, 
         symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
         symbol == NULL ? "NULL!" : symbol->value->type->name,
-        symbol == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value)
+        symbol == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value)
     );
     // clang-format on
     return buffer;

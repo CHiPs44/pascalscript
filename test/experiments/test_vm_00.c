@@ -78,7 +78,7 @@ int main(void)
         goto failure;
     if (result.type != &ps_system_integer || result.data.i != 42)
         goto failure;
-    fprintf(stderr, "OK: 40+2=%s\n", ps_value_get_debug_value(&result));
+    fprintf(stderr, "OK: 40+2=%s\n", ps_value_get_debug_string(&result));
 
     exit_code = EXIT_SUCCESS;
     goto cleanup;
@@ -89,6 +89,6 @@ failure:
 cleanup:
     vm = ps_vm_free(vm);
     ps_system_done();
-    ps_environment_done(environment);
+    ps_environment_free(environment);
     return exit_code;
 }

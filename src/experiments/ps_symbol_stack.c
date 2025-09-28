@@ -107,7 +107,7 @@ void ps_symbol_stack_dump(ps_symbol_stack *stack, char *title)
             char *kind_name = ps_symbol_get_kind_name(symbol->kind);
             char *scope_name = ps_symbol_get_scope_name(symbol->scope);
             char *type_name = ps_type_definition_get_name(symbol->value->type);
-            char *buffer = ps_value_get_debug_value(symbol->value);
+            char *buffer = ps_value_get_debug_string(symbol->value);
             fprintf(stderr, "┃%03d┃%-*s┃%-8s┃%-8s┃%-8s┃%-*s┃\n",
                     i, PS_IDENTIFIER_LEN, symbol->name, kind_name, scope_name, type_name, PS_IDENTIFIER_LEN, buffer);
         }

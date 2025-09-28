@@ -8,8 +8,13 @@
 
 #include "ps_executable.h"
 #include "ps_lexer.h"
+#include "ps_signature.h"
+#include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
+#include "ps_value.h"
 #include "ps_visit.h"
 
 /**
@@ -28,14 +33,14 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     int index = -1;
     ps_symbol *parameter = NULL;
     ps_symbol __attribute__((aligned(4))) *type_reference = NULL;
-    bool by_reference;
+    bool byref;
     ps_value *value = NULL;
 
     // Default is "by value"
-    by_reference = false;
+    byref = false;
     if (lexer->current_token.type == PS_TOKEN_VAR)
     {
-        by_reference = true;
+        byref = true;
         READ_NEXT_TOKEN;
     }
 
@@ -83,7 +88,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     // Add the parameters to the signature and to the current environment if executing
     for (int i = 0; i <= index; i++)
     {
-        if (!ps_formal_signature_add_parameter(signature, by_reference, &names[i], type_reference))
+        if (!ps_formal_signature_add_parameter(signature, byref, &names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         // if (mode == MODE_EXEC)
         // {
@@ -273,7 +278,7 @@ cleanup:
         value = ps_value_free(value);
     }
     if (executable != NULL)
-        free(executable); // TODO ps_executable_free(executable);
+        executable = ps_executable_free(executable);
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
     if (interpreter->error == PS_ERROR_NONE)

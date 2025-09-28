@@ -10,20 +10,20 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
-ps_environment *ps_environment_init(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
+ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
 {
     ps_environment *environment = calloc(1, sizeof(ps_environment));
     if (environment == NULL)
         return NULL; // errno = ENOMEM
     environment->symbols = ps_symbol_table_init(size);
     if (environment->symbols == NULL)
-        return ps_environment_done(environment);
+        return ps_environment_free(environment);
     environment->parent = parent;
     memcpy(environment->name, name, PS_IDENTIFIER_SIZE);
     return environment;
 }
 
-ps_environment *ps_environment_done(ps_environment *environment)
+ps_environment *ps_environment_free(ps_environment *environment)
 {
     if (environment->symbols != NULL)
     {

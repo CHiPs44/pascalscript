@@ -48,7 +48,7 @@ extern "C"
     /* clang-format on */
 
     char *ps_value_get_display_string(ps_value *value);
-    char *ps_value_get_debug_value(ps_value *value);
+    char *ps_value_get_debug_string(ps_value *value);
     void ps_value_debug(FILE *output, char *message, ps_value *value);
 
 #ifdef __cplusplus

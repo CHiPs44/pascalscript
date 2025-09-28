@@ -28,10 +28,10 @@ extern "C"
 
     /** @brief Initialize environment */
     /** @return NULL if no free memory (errno = ENOMEM) or the environment */
-    ps_environment *ps_environment_init(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
+    ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
 
     /** @brief Free environment */
-    ps_environment *ps_environment_done(ps_environment *environment);
+    ps_environment *ps_environment_free(ps_environment *environment);
 
     /** @brief Add symbol to environment */
     /** @return true if OK, false otherwise */

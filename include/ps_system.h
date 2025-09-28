@@ -15,6 +15,10 @@ extern "C"
 {
 #endif
 
+#ifndef PS_SYSTEM_SYMBOL_TABLE_SIZE
+#define PS_SYSTEM_SYMBOL_TABLE_SIZE 64
+#endif
+
     /** @brief Type definition type defintion (!) */
     extern ps_symbol ps_system_type_def;
 

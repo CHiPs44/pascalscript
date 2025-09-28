@@ -51,7 +51,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
         {
             if (interpreter->environments[i] != NULL)
             {
-                ps_environment_done(interpreter->environments[i]);
+                ps_environment_free(interpreter->environments[i]);
                 interpreter->environments[i] = NULL;
             }
         }
@@ -77,7 +77,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
-    ps_environment *environment = ps_environment_init(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
+    ps_environment *environment = ps_environment_alloc(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
     if (environment == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;
@@ -104,7 +104,7 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
     }
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
-    interpreter->environments[interpreter->level] = ps_environment_done(environment);
+    interpreter->environments[interpreter->level] = ps_environment_free(environment);
     interpreter->level -= 1;
     return true;
 }

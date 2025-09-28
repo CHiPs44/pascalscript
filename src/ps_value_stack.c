@@ -96,7 +96,7 @@ void ps_value_stack_dump(ps_value_stack *stack, char *title)
         ps_value value = stack->values[i];
         if (value.type != NULL)
         {
-            char *buffer = ps_value_get_debug_value(&value);
+            char *buffer = ps_value_get_debug_string(&value);
             fprintf(stderr, "┃%05d┃%-*s┃%-*s┃\n", i, PS_IDENTIFIER_LEN, value.type->name, PS_IDENTIFIER_LEN, buffer);
         }
     }

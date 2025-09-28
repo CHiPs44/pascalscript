@@ -22,44 +22,43 @@ extern "C"
 
     /* src/ps_visit_declaration.c */
     bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
     /* src/ps_visit_executable.c */
     bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind);
 
     /* src/ps_visit_expression.c */
-    bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
     bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
-    bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
     bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
     bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *function,
                                 ps_value *result);
+    bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
 
     /* src/ps_visit_statement.c */
-    bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_identifier *identifier);
+    bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode,
                                              ps_symbol *executable, ps_value *result);
-    bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
-    bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
+    bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
 
     /* src/ps_visit_type.c */
-    bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol);
     bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol);
     bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \

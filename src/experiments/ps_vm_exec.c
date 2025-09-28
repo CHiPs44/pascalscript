@@ -39,7 +39,7 @@ ps_error ps_vm_exec_assign(ps_vm *vm)
     if (variable->value->type->base != value->value->type->base)
         return PS_ERROR_TYPE_MISMATCH;
     memcpy(variable->value, value->value, sizeof(ps_value));
-    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %s\n", variable->name, ps_value_get_debug_value(variable->value));
+    fprintf(stderr, "*** VM_EXEC_ASSIGN: %s := %s\n", variable->name, ps_value_get_debug_string(variable->value));
     return PS_ERROR_NONE;
 }
 

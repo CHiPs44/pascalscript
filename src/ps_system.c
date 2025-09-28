@@ -151,9 +151,12 @@ bool ps_system_init(ps_interpreter *interpreter)
 {
     bool error = false;
     ps_identifier system_name = "SYSTEM";
-    ps_environment *environment = ps_environment_init(NULL, &system_name, 64);
+    ps_environment *environment = ps_environment_alloc(NULL, &system_name, PS_SYSTEM_SYMBOL_TABLE_SIZE);
     if (environment == NULL)
-        error = true;
+    {
+        interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+        return false;
+    }
 
     /**************************************************************************/
     /* TYPES                                                                  */
@@ -262,7 +265,7 @@ bool ps_system_init(ps_interpreter *interpreter)
 
     if (error)
     {
-        ps_environment_done(environment);
+        ps_environment_free(environment);
         ps_system_done(interpreter);
         return false;
     }
@@ -278,6 +281,6 @@ void ps_system_done(ps_interpreter *interpreter)
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);
         ps_system_constant_string_ps_version.value->data.s = NULL;
     }
-    ps_environment_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
+    ps_environment_free(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
     interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
 }

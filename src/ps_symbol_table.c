@@ -212,7 +212,7 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
             hash = ps_symbol_get_hash_key((char *)symbol->name);
             kind_name = ps_symbol_get_kind_name(symbol->kind);
             type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
-            value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_value(symbol->value);
+            value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
             // clang-format off
             fprintf(output, 
                     "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-10s┃%-*s┃\n", 
