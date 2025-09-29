@@ -10,8 +10,8 @@
 
 program TowersofHanoi;
 
-var
-   numdiscs : integer;
+// var
+//    numdiscs : integer;
 
 (********************************************************)
 
@@ -26,7 +26,7 @@ procedure DoTowers (NumDiscs, OrigPeg, NewPeg, TempPeg : integer);
 begin
    (* Take care of the base case -- one disc *)
    if NumDiscs = 1 then
-      writeln (OrigPeg, ' ---> ', NewPeg)
+      writeln (OrigPeg, ' ---> ', NewPeg, ' (one disc)')
    (* Take care of all other cases *)
    else
       begin
@@ -36,7 +36,7 @@ begin
          DoTowers (NumDiscs-1, OrigPeg, TempPeg, NewPeg);
          (* Now, move the bottommost disc from OrigPeg
             to NewPeg *)
-         writeln (OrigPeg, ' ---> ', NewPeg);
+         writeln (OrigPeg, ' ---> ', NewPeg, ' (moving disc #', NumDiscs, ')');
          (* Finally, move the discs which are currently on
             TempPeg to NewPeg, using OrigPeg as the temporary
             peg for this transfer *)
@@ -48,8 +48,10 @@ end;
 
 
 begin    (* Main *)
-   write ('Please enter the number of discs in the tower ===> ');
-   readln (numdiscs);
-   writeln;
-   DoTowers (numdiscs, 1, 3, 2)
+   // write ('Please enter the number of discs in the tower ===> ');
+   // readln (numdiscs);
+   // numdiscs := 2;
+   // writeln;
+   DoTowers (3, 1, 3, 2)
 end.     (* Main *)
+
