@@ -6,45 +6,32 @@
 Program Example30Function0;
 
 Var
-    Strength: Unsigned;
-    // Global1: Unsigned;
+    Characteristic: Unsigned;
+    I: Unsigned;
 
 Function Dice(Count: Unsigned, Sides: Unsigned): Unsigned;
 Begin
     Result := 0;
     While Count > 0 Do
     Begin
-        Result := Result + 1 + Random(Sides);
+        Result := Result + Random(Sides) + 1;
         Count := Count - 1;
     End;
 End;
 
-Function d6(Count: Unsigned): Unsigned;
+Function D6(Count: Unsigned): Unsigned;
 Begin
-    // d100 := Random(100) + 1;
+    // D6 := Dice(Count, 6);
     Result := Dice(Count, 6);
 End;
-
-// Function SumU(A: Unsigned, B: Unsigned): Unsigned;
-// Var
-//     C: Unsigned;
-// Begin
-//     WriteLn('In SumU A=', A, ' B=', B);
-//     C := A + B;
-//     WriteLn('In SumU C=', C);
-//     // SumU := C;
-// End;
 
 Begin
     WriteLn('--------------------------------------------------------------------------------');
     Randomize;
-    // Strength := Random(100) + 1;
-    // WriteLn('Strength=', Strength);
-    Strength := d6(3);
-    WriteLn('Strength=', Strength);
-    // Global1 := 123456789;
-    // WriteLn('Global1=', Global1);
-    // Global1 := SumU(123456789, 987654321);
-    // WriteLn('Global1=', Global1);
+    For I := 1 To 10 Do
+    Begin
+        Characteristic := D6(3);
+        WriteLn('Characteristic=', Characteristic);
+    End;
     WriteLn('--------------------------------------------------------------------------------');
 End.
