@@ -25,6 +25,8 @@ char *ps_error_get_message(ps_error error)
         return "Out of memory";
     case PS_ERROR_OVERFLOW:
         return "Overflow";
+    case PS_ERROR_UNDERFLOW:
+        return "Underflow";
     /* ==================== BUFFER  ==================== */
     case PS_ERROR_EOF:
         return "Unexpected end of file";

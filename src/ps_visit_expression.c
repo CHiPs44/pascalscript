@@ -44,9 +44,9 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
                                                    or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
+            result->type = left.type;
             if (mode == MODE_EXEC)
             {
-                result->type = left.type;
                 result->data = left.data;
             }
             VISIT_END("LEFT");
@@ -90,9 +90,9 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
+            result->type = left.type;
             if (mode == MODE_EXEC)
             {
-                result->type = left.type;
                 result->data = left.data;
             }
             VISIT_END("AND1");
@@ -121,7 +121,12 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
-        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQUAL, PS_TOKEN_NE,
+        PS_TOKEN_LT,
+        PS_TOKEN_LE,
+        PS_TOKEN_GT,
+        PS_TOKEN_GE,
+        PS_TOKEN_EQUAL,
+        PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -133,9 +138,9 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         interpreter->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
+        result->type = left.type;
         if (mode == MODE_EXEC)
         {
-            result->type = left.type;
             result->data = left.data;
         }
         VISIT_END("RELATIONAL1");
@@ -178,9 +183,9 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
             interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
+            result->type = left.type;
             if (mode == MODE_EXEC)
             {
-                result->type = left.type;
                 result->data = left.data;
             }
             VISIT_END("SIMPLE1");
@@ -224,9 +229,9 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
             interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
+            result->type = left.type;
             if (mode == MODE_EXEC)
             {
-                result->type = left.type;
                 result->data = left.data;
             }
             VISIT_END("1");
@@ -303,41 +308,41 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
 
         break;
     case PS_TOKEN_CHAR_VALUE:
+        result->type = &ps_system_char;
         if (mode == MODE_EXEC)
         {
-            result->type = &ps_system_char;
             result->data.c = lexer->current_token.value.c;
         }
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_INTEGER_VALUE:
+        result->type = &ps_system_integer;
         if (mode == MODE_EXEC)
         {
-            result->type = &ps_system_integer;
             result->data.i = lexer->current_token.value.i;
         }
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
+        result->type = &ps_system_unsigned;
         if (mode == MODE_EXEC)
         {
-            result->type = &ps_system_unsigned;
             result->data.u = lexer->current_token.value.u;
         }
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_REAL_VALUE:
+        result->type = &ps_system_real;
         if (mode == MODE_EXEC)
         {
-            result->type = &ps_system_real;
             result->data.r = lexer->current_token.value.r;
         }
         READ_NEXT_TOKEN;
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
+        result->type = &ps_system_boolean;
         if (mode == MODE_EXEC)
         {
-            result->type = &ps_system_boolean;
             result->data.b = lexer->current_token.value.b;
         }
         READ_NEXT_TOKEN;
@@ -357,6 +362,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             TRACE_ERROR("UNARY");
         break;
     case PS_TOKEN_STRING_VALUE:
+        result->type = &ps_system_string;
         if (mode == MODE_EXEC)
         {
             result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
@@ -365,7 +371,6 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("STRING_VALUE");
             }
-            result->type = &ps_system_string;
         }
         READ_NEXT_TOKEN;
         break;

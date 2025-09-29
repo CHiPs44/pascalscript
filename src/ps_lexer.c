@@ -353,7 +353,6 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             {
                 if (pos >= PS_STRING_MAX_LEN)
                     return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
-
                 buffer[pos++] = '\'';
                 ADVANCE; // Consume the first quote
                 ADVANCE; // Consume the second quote

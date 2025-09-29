@@ -24,6 +24,7 @@ extern "C"
         PS_ERROR_NOT_IMPLEMENTED,
         PS_ERROR_OUT_OF_MEMORY,
         PS_ERROR_OVERFLOW,
+        PS_ERROR_UNDERFLOW,
         /* -------------------- BUFFER  -------------------- */
         PS_ERROR_EOF,
         PS_ERROR_OPENING_FILE,

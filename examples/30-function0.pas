@@ -6,23 +6,28 @@
 Program Example30Function0;
 
 Var
-    Strength: Integer;
-    // Global1: Integer;
+    Strength: Unsigned;
+    // Global1: Unsigned;
 
-Function d100: Integer;
-Var
-    foo: Integer;
+Function Dice(Count: Unsigned, Sides: Unsigned): Unsigned;
 Begin
-    // d100 := Random(100) + 1;
-    // Result := Random(100) + 1;
-    foo := 1 + Random(100);
-    Result := foo;
-    // Result := 42; // chosen by fair dice roll.
+    Result := 0;
+    While Count > 0 Do
+    Begin
+        Result := Result + 1 + Random(Sides);
+        Count := Count - 1;
+    End;
 End;
 
-// Function SumU(A: Integer, B: Integer): Integer;
+Function d6(Count: Unsigned): Unsigned;
+Begin
+    // d100 := Random(100) + 1;
+    Result := Dice(Count, 6);
+End;
+
+// Function SumU(A: Unsigned, B: Unsigned): Unsigned;
 // Var
-//     C: Integer;
+//     C: Unsigned;
 // Begin
 //     WriteLn('In SumU A=', A, ' B=', B);
 //     C := A + B;
@@ -33,9 +38,9 @@ End;
 Begin
     WriteLn('--------------------------------------------------------------------------------');
     Randomize;
-    Strength := Random(100) + 1;
-    WriteLn('Strength=', Strength);
-    Strength := d100;
+    // Strength := Random(100) + 1;
+    // WriteLn('Strength=', Strength);
+    Strength := d6(3);
     WriteLn('Strength=', Strength);
     // Global1 := 123456789;
     // WriteLn('Global1=', Global1);

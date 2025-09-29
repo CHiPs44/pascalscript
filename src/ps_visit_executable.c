@@ -227,10 +227,13 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    fprintf(stderr, "================================================================================\n");
-    ps_executable_debug(stderr, "EXECUTABLE", executable);
-    ps_formal_signature_debug(stderr, "SIGNATURE", signature);
-    fprintf(stderr, "================================================================================\n");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+    {
+        fprintf(stderr, "================================================================================\n");
+        ps_executable_debug(stderr, "EXECUTABLE", executable);
+        ps_formal_signature_debug(stderr, "SIGNATURE", signature);
+        fprintf(stderr, "================================================================================\n");
+    }
 
     symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
     if (symbol == NULL)
