@@ -38,13 +38,13 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
 
     if (!ps_visit_and_expression(interpreter, mode, &left))
         TRACE_ERROR("AND");
+    result->type = left.type;
     do
     {
         or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
                                                    or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            result->type = left.type;
             if (mode == MODE_EXEC)
             {
                 result->data = left.data;
@@ -84,13 +84,13 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (!ps_visit_relational_expression(interpreter, mode, &left))
         TRACE_ERROR("RELATIONAL1");
+    result->type = left.type;
     do
     {
         and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            result->type = left.type;
             if (mode == MODE_EXEC)
             {
                 result->data = left.data;
@@ -121,12 +121,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
-        PS_TOKEN_LT,
-        PS_TOKEN_LE,
-        PS_TOKEN_GT,
-        PS_TOKEN_GE,
-        PS_TOKEN_EQUAL,
-        PS_TOKEN_NE,
+        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQUAL, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -177,13 +172,13 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
 
     if (!ps_visit_term(interpreter, mode, &left))
         TRACE_ERROR("TERM");
+    result->type = left.type;
     do
     {
         additive_operator = ps_parser_expect_token_types(
             interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            result->type = left.type;
             if (mode == MODE_EXEC)
             {
                 result->data = left.data;
@@ -223,13 +218,13 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
     if (!ps_visit_factor(interpreter, mode, &left))
         TRACE_ERROR("FACTOR");
+    result->type = left.type;
     do
     {
         multiplicative_operator = ps_parser_expect_token_types(
             interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            result->type = left.type;
             if (mode == MODE_EXEC)
             {
                 result->data = left.data;
@@ -290,6 +285,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
+            result->type = symbol->value->type;
             if (mode == MODE_EXEC)
             {
                 if (!ps_interpreter_copy_value(interpreter, symbol->value, result))
