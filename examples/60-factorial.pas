@@ -52,7 +52,7 @@ Begin
   // Until N > 0;
   // N := 31;
   WriteLn('Factorial:');
-  For N := 0 To 15 Do
+  For N := 0 To 12 Do
   Begin
     Recursive := RecursiveFactorial(N);
     // WriteLn(' - Recursive: ', N, '! = ', Recursive);

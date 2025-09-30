@@ -5,11 +5,7 @@
 *)
 Program Example30Function0;
 
-Var
-    Characteristic: Unsigned;
-    I: Unsigned;
-
-Function Dice(Count: Unsigned, Sides: Unsigned): Unsigned;
+Function Dice(Count, Sides: Unsigned): Unsigned;
 Begin
     Result := 0;
     While Count > 0 Do
@@ -25,13 +21,26 @@ Begin
     Result := Dice(Count, 6);
 End;
 
+Const
+    Count = 1000;
+
+Var
+    Characteristic, Min, Max, I: Unsigned;
+
 Begin
     WriteLn('--------------------------------------------------------------------------------');
     Randomize;
-    For I := 1 To 10 Do
+    Min := MaxUInt;
+    Max := 0;
+    For I := 1 To Count Do
     Begin
         Characteristic := D6(3);
-        WriteLn('Characteristic=', Characteristic);
+        if Characteristic < Min then Min := Characteristic;
+        if Characteristic > Max then Max := Characteristic;
+        Write(Characteristic, ' ');
     End;
+    WriteLn;
+    WriteLn('Min = ', Min);
+    WriteLn('Max = ', Max);
     WriteLn('--------------------------------------------------------------------------------');
 End.
