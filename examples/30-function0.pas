@@ -2,10 +2,12 @@
     This file is part of the PascalScript Pascal interpreter.
     SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
-*)
+*)        fprintf(stderr, "INFO: Assignment to local function '%s'?\n", (char *)identifier);
+
 Program Example30Function0;
 
-Function Dice(Count, Sides: Unsigned): Unsigned;
+Function Dice(Count, Sides: Integer): Integer;
+V
 Begin
     Result := 0;
     While Count > 0 Do
@@ -15,32 +17,36 @@ Begin
     End;
 End;
 
-Function D6(Count: Unsigned): Unsigned;
+Function D6(Count: Integer): Integer;
 Begin
-    // D6 := Dice(Count, 6);
-    Result := Dice(Count, 6);
+    D6 := Dice(Count, 6);
+    // Result := Dice(Count, 6);
 End;
 
 Const
-    Count = 1000;
+    Count = 256;
 
 Var
-    Characteristic, Min, Max, I: Unsigned;
+    Characteristic, Min, Max, I: Integer;
+    Total: Real;
 
 Begin
     WriteLn('--------------------------------------------------------------------------------');
     Randomize;
     Min := MaxUInt;
     Max := 0;
+    Total := 0;
     For I := 1 To Count Do
     Begin
         Characteristic := D6(3);
-        if Characteristic < Min then Min := Characteristic;
-        if Characteristic > Max then Max := Characteristic;
+        Total := Total + Characteristic;
+        If Characteristic < Min Then Min := Characteristic;
+        If Characteristic > Max Then Max := Characteristic;
+        if Characteristic < 10 Then Write(' ');
         Write(Characteristic, ' ');
+        If I Mod 16 = 0 Then WriteLn(' Mean = ', Total / I);
     End;
     WriteLn;
-    WriteLn('Min = ', Min);
-    WriteLn('Max = ', Max);
+    WriteLn('Min = ', Min, ', Max = ', Max, ', Mean = ', Total / Count);
     WriteLn('--------------------------------------------------------------------------------');
 End.

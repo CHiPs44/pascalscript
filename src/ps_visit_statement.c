@@ -478,7 +478,25 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
 
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
-    symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+    // Check if identifier is *the* current function
+    symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
+    if (symbol != NULL)
+    {
+        fprintf(stderr, "INFO: Assignment to local function '%s'?\n", (char *)identifier);
+        ps_symbol_debug(stderr, "FOUND", symbol);
+        if (symbol->kind == PS_SYMBOL_KIND_FUNCTION &&
+            strcmp((char *)identifier, ps_interpreter_get_environment(interpreter)->name) == 0)
+        {
+            fprintf(stderr, "INFO: Assignment to local function '%s' as Result\n", (char *)identifier);
+            // Assign to the implicit Result variable
+            symbol =
+                ps_interpreter_find_symbol(interpreter, &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'}, false);
+            if (symbol == NULL)
+                RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        }
+    }
+    else
+        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)

@@ -51,13 +51,13 @@ Begin
   //   ReadLn(N);
   // Until N > 0;
   // N := 31;
-  WriteLn('Factorial:');
+  WriteLn('Factorial - Recursive and Iterative:');
   For N := 0 To 12 Do
   Begin
     Recursive := RecursiveFactorial(N);
     // WriteLn(' - Recursive: ', N, '! = ', Recursive);
     iterative := IterativeFactorial(N);
     // WriteLn(' - Iterative: ', N, '! = ', iterative);
-    WriteLn(' - ', N, '! = ', Recursive, ' = ', iterative);
+    WriteLn(N, '! = ', Recursive, ' = ', iterative);
   End;
 End.
