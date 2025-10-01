@@ -2,19 +2,21 @@
     This file is part of the PascalScript Pascal interpreter.
     SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
-*)        fprintf(stderr, "INFO: Assignment to local function '%s'?\n", (char *)identifier);
+*)
 
 Program Example30Function0;
 
 Function Dice(Count, Sides: Integer): Integer;
-V
+Var
+    Total: Integer;
 Begin
-    Result := 0;
+    Total := 0;
     While Count > 0 Do
     Begin
-        Result := Result + Random(Sides) + 1;
+        Total := Total + Random(Sides) + 1;
         Count := Count - 1;
     End;
+    Dice := Total;
 End;
 
 Function D6(Count: Integer): Integer;
