@@ -32,15 +32,15 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
             TRACE_ERROR("COMPOUND");
         break;
     case PS_TOKEN_IDENTIFIER:
-        if (strcmp(lexer->current_token.value.identifier, "D6") == 0)
-            interpreter->debug = DEBUG_VERBOSE;
-        fprintf(stderr, "INFO\tIDENTIFIER %s\n", lexer->current_token.value.identifier);
+        // if (strcmp(lexer->current_token.value.identifier, "D6") == 0)
+        //     interpreter->debug = DEBUG_VERBOSE;
+        // fprintf(stderr, "INFO\tIDENTIFIER %s\n", lexer->current_token.value.identifier);
         if (!ps_visit_assignment_or_procedure_call(interpreter, mode))
         {
-            interpreter->debug = DEBUG_NONE;
+            // interpreter->debug = DEBUG_NONE;
             TRACE_ERROR("ASSIGNMENT/PROCEDURE");
         }
-        interpreter->debug = DEBUG_NONE;
+        // interpreter->debug = DEBUG_NONE;
         break;
     case PS_TOKEN_IF:
         if (!ps_visit_if_then_else(interpreter, mode))
@@ -479,12 +479,14 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     symbol = ps_environment_find_symbol(env->parent, &identifier, true);
     if (symbol != NULL)
     {
-        fprintf(stderr, "INFO\tAssignment to local function '%s'?\n", (char *)identifier);
-        ps_symbol_debug(stderr, "FOUND\t", symbol);
-        fprintf(stderr, "INFO\tEnvironment %s\n", env->name);
+        // fprintf(stderr, "INFO\tAssignment to local function '%s'?\n", (char *)identifier);
+        // ps_symbol_debug(stderr, "FOUND\t", symbol);
+        // fprintf(stderr, "INFO\tEnvironment %s\n", env->name);
         if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, env->name) == 0)
         {
-            fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
+            // ps_symbol_debug(stderr, "FOUND\t", symbol);
+            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
+                    (char *)identifier);
             // Assign to the "implicit" Result variable
             symbol =
                 ps_interpreter_find_symbol(interpreter, &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'}, false);

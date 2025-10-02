@@ -6,28 +6,34 @@
 
 Program Example30Function0;
 
-Function Dice(Count, Sides: Integer): Integer;
+Function FooBarBaz(Count2, Sides: Integer): Integer;
 Var
     Total: Integer;
 Begin
+    // Write(' FooBarBaz: Count2=', Count2);
     Total := 0;
-    While Count > 0 Do
+    While Count2 > 0 Do
     Begin
         Total := Total + Random(Sides) + 1;
-        Count := Count - 1;
+        Count2 := Count2 - 1;
     End;
-    // Dice := Total;
-    Result := Total;
+    FooBarBaz := Total;
+    // Result := Total;
 End;
 
-Function D6(Count: Integer): Integer;
+Function D6(Count1: Integer): Integer;
+Var
+    Temp: Integer;
 Begin
-    D6 := Dice(Count, 6);
-    // Result := Dice(Count, 6);
+    // Write(' D6: Count1=', Count1);
+    // D6 := FooBarBaz(Count1, 6);
+    // Result := FooBarBaz(Count1, 6);
+    Temp := FooBarBaz(Count1, 6);
+    D6 := Temp;
 End;
 
 Const
-    Count = 1;
+    Count0 = 16;
 
 Var
     Characteristic, Min, Max, I: Integer;
@@ -39,9 +45,10 @@ Begin
     Min := MaxInt;
     Max := 0;
     Total := 0;
-    For I := 1 To Count Do
+    For I := 1 To Count0 Do
     Begin
-        Characteristic := D6(3);
+        // Characteristic := D6(3);
+        Characteristic := FooBarBaz(3, 6);
         Total := Total + Characteristic;
         If Characteristic < Min Then Min := Characteristic;
         If Characteristic > Max Then Max := Characteristic;
@@ -50,6 +57,6 @@ Begin
         If I Mod 16 = 0 Then WriteLn(' Mean = ', Total / I);
     End;
     WriteLn;
-    WriteLn('Min = ', Min, ', Max = ', Max, ', Mean = ', Total / Count);
+    WriteLn('Min = ', Min, ', Max = ', Max, ', Mean = ', Total / Count0);
     WriteLn('--------------------------------------------------------------------------------');
 End.
