@@ -35,7 +35,7 @@ Var
 Begin
     WriteLn('--------------------------------------------------------------------------------');
     Randomize;
-    Min := MaxUInt;
+    Min := MaxInt;
     Max := 0;
     Total := 0;
     For I := 1 To Count Do
