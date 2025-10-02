@@ -16,7 +16,8 @@ Begin
         Total := Total + Random(Sides) + 1;
         Count := Count - 1;
     End;
-    Dice := Total;
+    // Dice := Total;
+    Result := Total;
 End;
 
 Function D6(Count: Integer): Integer;
@@ -26,7 +27,7 @@ Begin
 End;
 
 Const
-    Count = 256;
+    Count = 1;
 
 Var
     Characteristic, Min, Max, I: Integer;
