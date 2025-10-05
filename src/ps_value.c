@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "ps_error.h"
+#include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
@@ -18,7 +19,7 @@
 
 ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 {
-    ps_value *value = calloc(1, sizeof(ps_value));
+    ps_value *value = ps_memory_malloc( sizeof(ps_value));
     if (value == NULL)
         return NULL;
     value->type = type;
@@ -31,7 +32,7 @@ ps_value *ps_value_free(ps_value *value)
 {
     if (value == NULL || !value->allocated)
         return NULL;
-    free(value);
+    ps_memory_free(value);
     return NULL;
 }
 
@@ -118,7 +119,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     // if (value == NULL)
 //     // {
 //     //     is_new = true;
-//     //     value = calloc(1, sizeof(ps_value));
+//     //     value = ps_memory_malloc( sizeof(ps_value));
 //     //     if (value == NULL)
 //     //     {
 //     //         ps_value_error = PS_ERROR_OUT_OF_MEMORY;
@@ -139,7 +140,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //                              ? PS_ERROR_OUT_OF_MEMORY
 //     //                              : PS_ERROR_OUT_OF_RANGE;
 //     //         if (is_new)
-//     //             free(value);
+//     //             ps_memory_free(value);
 //     //         return NULL;
 //     //     }
 //     // }
@@ -155,7 +156,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     //         if (is_new)
 //     //         {
 //     //             ps_string_free(value->data.s);
-//     //             free(value);
+//     //             ps_memory_free(value);
 //     //         }
 //     //         return NULL;
 //     //     }

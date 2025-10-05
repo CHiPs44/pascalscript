@@ -16,7 +16,7 @@ ps_symbol_stack *ps_symbol_stack_init(ps_symbol_stack *stack)
 {
     if (stack == NULL)
     {
-        stack = calloc(1, sizeof(ps_symbol_stack));
+        stack = ps_memory_malloc( sizeof(ps_symbol_stack));
         if (stack == NULL)
             return NULL;
     }
@@ -31,7 +31,7 @@ ps_symbol_stack *ps_symbol_stack_init(ps_symbol_stack *stack)
 
 void ps_symbol_stack_free(ps_symbol_stack *stack)
 {
-    free(stack);
+    ps_memory_free(stack);
 }
 
 size_t ps_symbol_stack_size(ps_symbol_stack *stack)

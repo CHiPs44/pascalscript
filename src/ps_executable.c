@@ -9,10 +9,11 @@
 #include <time.h>
 
 #include "ps_executable.h"
+#include "ps_memory.h"
 
 ps_executable *ps_executable_alloc(ps_formal_signature *signature, uint16_t line, uint16_t column)
 {
-    ps_executable *executable = malloc(sizeof(ps_executable));
+    ps_executable *executable = ps_memory_malloc( sizeof(ps_executable));
     if (executable == NULL)
         return NULL;
     executable->system = NULL;
@@ -28,7 +29,7 @@ ps_executable *ps_executable_free(ps_executable *executable)
         return NULL;
     if (executable->signature != NULL)
         executable->signature = ps_formal_signature_free(executable->signature);
-    free(executable);
+    ps_memory_free(executable);
     return NULL;
 }
 

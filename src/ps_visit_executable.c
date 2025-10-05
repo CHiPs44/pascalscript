@@ -262,8 +262,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         result_value.type = signature->result_type;
         result_value.data.v = NULL;
         result_value.allocated = false;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'},
-                                        &result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", &result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;

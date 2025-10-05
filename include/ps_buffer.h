@@ -28,7 +28,7 @@ extern "C"
 #endif
 
 #ifndef PS_BUFFER_MAX_COLUMNS
-#define PS_BUFFER_MAX_COLUMNS UINT8_MAX
+#define PS_BUFFER_MAX_COLUMNS UINT16_MAX
 #endif
 
     typedef struct s_ps_buffer
@@ -37,9 +37,9 @@ extern "C"
         uint16_t length;
         uint16_t line_count;
         char **line_starts;
-        uint8_t *line_lengths;
+        uint16_t *line_lengths;
         uint16_t current_line;
-        uint8_t current_column;
+        uint16_t current_column;
         char current_char;
         char next_char;
         ps_error error;
@@ -50,15 +50,15 @@ extern "C"
 #define PS_BUFFER_SIZE sizeof(ps_buffer)
 
     /** @brief Initialize buffer */
-    ps_buffer *ps_buffer_init();
+    ps_buffer *ps_buffer_alloc();
 
     /** @brief Release buffer */
-    void ps_buffer_done(ps_buffer *buffer);
+    void ps_buffer_free(ps_buffer *buffer);
 
     /** @brief Reset buffer */
     void ps_buffer_reset(ps_buffer *buffer);
 
-    /** @brief Get error message */
+    /** @brief Show error message */
     char *ps_buffer_show_error(ps_buffer *buffer);
 
     /** @brief Scan source for line starts & lengths */
@@ -71,7 +71,7 @@ extern "C"
     bool ps_buffer_load_string(ps_buffer *buffer, char *source, size_t length);
 
     /** @brief Dump content from given line for one "page", returning left margin */
-    int ps_buffer_dump(ps_buffer *buffer, uint16_t from_line, uint16_t line_count);
+    int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t line_count);
 
     /** @brief Read next char of buffer */
     bool ps_buffer_read_next_char(ps_buffer *buffer);
@@ -83,7 +83,7 @@ extern "C"
     char ps_buffer_peek_next_char(ps_buffer *buffer);
 
     /** @brief Send debug message for buffer to file (stderr if NULL)  */
-    void ps_buffer_debug(ps_buffer *buffer, char *message, FILE *f);
+    void ps_buffer_debug(FILE *output, ps_buffer *buffer, char *message);
 
 #ifdef __cplusplus
 }

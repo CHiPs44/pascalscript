@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
 #include "ps_value.h"
@@ -16,7 +17,7 @@ static uint32_t ps_symbol_auto_index = 0;
 
 ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value)
 {
-    ps_symbol *symbol = (ps_symbol *)calloc(1, sizeof(ps_symbol));
+    ps_symbol *symbol = (ps_symbol *)ps_memory_malloc( sizeof(ps_symbol));
     if (symbol == NULL)
         return NULL;
     symbol->kind = kind;
@@ -41,7 +42,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
         if (symbol->allocated)
         {
             symbol->value = ps_value_free(symbol->value);
-            free(symbol);
+            ps_memory_free(symbol);
         }
     }
     return NULL;

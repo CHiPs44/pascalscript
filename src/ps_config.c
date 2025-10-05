@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ps_config.h"
 #include "ps_symbol.h"
@@ -15,31 +16,35 @@
 
 #define STRING(Z) #Z
 
-#define REPORT_FORMAT(__MACRO__, __FORMAT__) printf("┃ %-36s ┃ %-37" __FORMAT__ " ┃\n", #__MACRO__, __MACRO__)
+#define REPORT_FORMAT(__MACRO__, __FORMAT__) fprintf(output, "┃ %-36s ┃ %-37" __FORMAT__ " ┃\n", #__MACRO__, __MACRO__)
 
-#define REPORT_STRING(__MACRO__) printf("┃ %-36s ┃ %-37s ┃\n", #__MACRO__, STRING(__MACRO__))
+#define REPORT_STRING(__MACRO__) fprintf(output, "┃ %-36s ┃ %-37s ┃\n", #__MACRO__, STRING(__MACRO__))
 
-#define REPORT_SECTION(__TITLE__)                                                                 \
-    printf("┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n"); \
-    printf("┃ %-76s ┃\n", __TITLE__);                                                             \
-    printf("┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n")
+#define REPORT_SECTION(__TITLE__)                                                                                      \
+    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");             \
+    fprintf(output, "┃ %-76s ┃\n", __TITLE__);                                                                         \
+    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n")
 
-void ps_config_report()
+#define PS_SIZE_T_SIZE sizeof(size_t)
+
+void ps_config_report(FILE *output)
 {
+    if (output == NULL)
+        output = stderr;
     //               1         2         3         4         5         6         7         8
     //      12345678901234567890123456789012345678901234567890123456789012345678901234567890
     //                 1         2         3         4         5         6         7
     //      ┃ 1234567890123456789012345678901234567890123456789012345678901234567890123456 ┃
     //      ┃ 123456789012345678901234567890123456 ┃ 1234567890123456789012345678901234567 ┃
-    printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    printf("┃ KEY                                  ┃ VALUE                                 ┃\n");
-    printf("┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    // fprintf(output, "┃ KEY                                  ┃ VALUE                                 ┃\n");
+    // fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     // REPORT_SECTION("*** CONFIGURATION ***");
     REPORT_FORMAT(PS_VERSION, "s");
-    REPORT_FORMAT(PS_VERSION_MAJOR, "d");
-    REPORT_FORMAT(PS_VERSION_MINOR, "d");
-    REPORT_FORMAT(PS_VERSION_PATCH, "d");
-    REPORT_FORMAT(PS_VERSION_INDEX, "d");
+    // REPORT_FORMAT(PS_VERSION_MAJOR, "d");
+    // REPORT_FORMAT(PS_VERSION_MINOR, "d");
+    // REPORT_FORMAT(PS_VERSION_PATCH, "d");
+    // REPORT_FORMAT(PS_VERSION_INDEX, "d");
     REPORT_FORMAT(PS_BITNESS, "d");
     REPORT_SECTION("*** INTEGER TYPE ***");
     REPORT_STRING(PS_INTEGER);
@@ -60,7 +65,6 @@ void ps_config_report()
     REPORT_SECTION("*** REAL TYPE ***");
     REPORT_STRING(PS_REAL);
     REPORT_FORMAT(PS_REAL_SIZE, "u");
-    REPORT_FORMAT(PS_REAL_MIN, "G");
     REPORT_FORMAT(PS_REAL_MIN, "G");
     REPORT_FORMAT(PS_REAL_MAX, "G");
     REPORT_FORMAT(PS_REAL_EPSILON, "G");
@@ -83,5 +87,6 @@ void ps_config_report()
     REPORT_FORMAT(PS_VALUE_DATA_SIZE, "u");
     REPORT_FORMAT(PS_VALUE_SIZE, "u");
     REPORT_FORMAT(PS_SYMBOL_SIZE, "u");
-    printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    REPORT_FORMAT(PS_SIZE_T_SIZE, "u");
+    fprintf(output, "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 }

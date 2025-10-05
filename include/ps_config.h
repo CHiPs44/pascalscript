@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -172,7 +173,7 @@ extern "C"
 
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 
-    void ps_config_report();
+    void ps_config_report(FILE *output);
 
 #ifdef __cplusplus
 }

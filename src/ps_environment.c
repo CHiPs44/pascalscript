@@ -7,15 +7,16 @@
 #include <string.h>
 
 #include "ps_environment.h"
+#include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
 ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
 {
-    ps_environment *environment = calloc(1, sizeof(ps_environment));
+    ps_environment *environment = ps_memory_malloc(sizeof(ps_environment));
     if (environment == NULL)
         return NULL; // errno = ENOMEM
-    environment->symbols = ps_symbol_table_init(size);
+    environment->symbols = ps_symbol_table_alloc(size);
     if (environment->symbols == NULL)
         return ps_environment_free(environment);
     environment->parent = parent;
@@ -25,12 +26,13 @@ ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name
 
 ps_environment *ps_environment_free(ps_environment *environment)
 {
-    if (environment->symbols != NULL)
+    if (environment != NULL)
     {
-        ps_symbol_table_done(environment->symbols);
-        environment->symbols = NULL;
+        if (environment->symbols != NULL)
+            environment->symbols = ps_symbol_table_free(environment->symbols);
+        environment->parent = NULL;
+        ps_memory_free(environment);
     }
-    free(environment);
     return NULL;
 }
 

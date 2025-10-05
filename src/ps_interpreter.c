@@ -12,11 +12,12 @@
 #include "ps_value.h"
 
 #include "ps_interpreter.h"
+#include "ps_memory.h"
 #include "ps_visit.h"
 
 ps_interpreter *ps_interpreter_alloc()
 {
-    ps_interpreter *interpreter = calloc(1, sizeof(ps_interpreter));
+    ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
     // Allocate string heap
@@ -31,6 +32,8 @@ ps_interpreter *ps_interpreter_alloc()
     if (!ps_system_init(interpreter))
         return ps_interpreter_free(interpreter);
     // Set default state
+    for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
+        interpreter->environments[i] = NULL;
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_ERROR_NONE;
     interpreter->debug = DEBUG_NONE;
@@ -47,15 +50,13 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
         if (interpreter->parser != NULL)
             interpreter->parser = ps_parser_free(interpreter->parser);
+        ps_system_done(interpreter);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
             if (interpreter->environments[i] != NULL)
-            {
-                ps_environment_free(interpreter->environments[i]);
-                interpreter->environments[i] = NULL;
-            }
+                interpreter->environments[i] = ps_environment_free(interpreter->environments[i]);
         }
-        free(interpreter);
+        ps_memory_free(interpreter);
     }
     return NULL;
 }
@@ -216,7 +217,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     {
         // Display up to 5 lines around the error
         uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
-        int margin = ps_buffer_dump(lexer->buffer, start, 5);
+        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 5);
         // Try to align the '^' under the right column
         fprintf(stderr, "%*s\n", margin + lexer->buffer->current_column, "^");
         // Make line and column 1-based

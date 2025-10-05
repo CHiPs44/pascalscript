@@ -475,21 +475,16 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
     // Check if identifier is the current function as defined in its parent environment
-    ps_environment *env = ps_interpreter_get_environment(interpreter);
-    symbol = ps_environment_find_symbol(env->parent, &identifier, true);
+    ps_environment *environment = ps_interpreter_get_environment(interpreter);
+    symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
     if (symbol != NULL)
     {
-        // fprintf(stderr, "INFO\tAssignment to local function '%s'?\n", (char *)identifier);
-        // ps_symbol_debug(stderr, "FOUND\t", symbol);
-        // fprintf(stderr, "INFO\tEnvironment %s\n", env->name);
-        if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, env->name) == 0)
+        if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
         {
-            // ps_symbol_debug(stderr, "FOUND\t", symbol);
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
                     (char *)identifier);
             // Assign to the "implicit" Result variable
-            symbol =
-                ps_interpreter_find_symbol(interpreter, &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'}, false);
+            symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         }

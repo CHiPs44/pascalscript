@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -44,30 +45,35 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
     table->used = 0;
 }
 
-ps_symbol_table *ps_symbol_table_init(ps_symbol_table_size size)
+ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 {
     ps_symbol_table *table;
-    table = calloc(1, sizeof(ps_symbol_table));
+    table = ps_memory_malloc(sizeof(ps_symbol_table));
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
-    table->symbols = calloc(table->size, sizeof(ps_symbol *));
+    table->symbols = ps_memory_calloc(table->size, sizeof(ps_symbol *));
     if (table->symbols == NULL)
     {
-        free(table);
+        ps_memory_free(table);
         return NULL; // errno = ENOMEM
     }
     ps_symbol_table_reset(table, false);
     return table;
 }
 
-void ps_symbol_table_done(ps_symbol_table *table)
+void *ps_symbol_table_free(ps_symbol_table *table)
 {
-    if (table == NULL)
-        return;
-    if (table->symbols != NULL)
-        free(table->symbols);
-    free(table);
+    if (table != NULL)
+    {
+        if (table->symbols != NULL)
+        {
+            ps_symbol_table_reset(table, true);
+            ps_memory_free(table->symbols);
+        }
+        ps_memory_free(table);
+    }
+    return NULL;
 }
 
 ps_symbol_table_size ps_symbol_table_get_used(ps_symbol_table *table)
@@ -192,15 +198,12 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(
-        output,
-        "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(
-        output,
-        "┃      #┃Hash          ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
-    fprintf(
-        output,
-        "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output, "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┓\n");
+    fprintf(output, "┃      #┃Hash          ┃Name                           ┃Kind      ┃Type      ┃Value               "
+                    "           ┃\n");
+    fprintf(output, "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┫\n");
     for (int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -226,9 +229,8 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
             // clang-format on
         }
     }
-    fprintf(
-        output,
-        "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(output, "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }

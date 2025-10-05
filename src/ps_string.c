@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_value.h"
 
@@ -18,7 +19,7 @@ ps_string *ps_string_alloc(ps_string_len max)
     // allocate sizeof(max) + sizeof(len) + (max + 1) chars
     // maximum: 1           + 1           +  255 + 1  bytes for "short" strings
     //       => 258
-    ps_string *s = (ps_string *)malloc(2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
+    ps_string *s = (ps_string *)ps_memory_malloc(2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
     if (s == NULL)
         return NULL; // errno = ENOMEM;
     s->max = max;
@@ -28,7 +29,7 @@ ps_string *ps_string_alloc(ps_string_len max)
 
 void ps_string_free(ps_string *s)
 {
-    free(s);
+    ps_memory_free(s);
 }
 
 ps_string *ps_string_set(ps_string *s, char *z)

@@ -13,6 +13,7 @@
 #include "ps_config.h"
 #include "ps_interpreter.h"
 #include "ps_lexer.h"
+#include "ps_memory.h"
 #include "ps_parser.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
     bool dump_symbols = false;
     bool dump_buffer = false;
     bool exec = true;
+    bool memory = false;
     char *current_path = NULL;
     char *example_path = NULL;
     char *program_file = NULL;
@@ -104,12 +106,12 @@ int main(int argc, char *argv[])
 
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "ctdsbvn")) != -1)
+    while ((opt = getopt(argc, argv, "ctdsbvnm")) != -1)
     {
         switch (opt)
         {
         case 'c':
-            ps_config_report();
+            ps_config_report(stdout);
             exit(0);
         case 't':
             trace = true;
@@ -135,6 +137,10 @@ int main(int argc, char *argv[])
             exec = false;
             arg++;
             break;
+        case 'm':
+            memory = true;
+            arg++;
+            break;
         default:
             usage(argv[0]);
             exit(EXIT_FAILURE);
@@ -149,6 +155,7 @@ int main(int argc, char *argv[])
     if (arg + 1 < argc)
     {
         program_file = argv[argc - 1];
+        snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
     }
     else
     {
@@ -163,8 +170,10 @@ int main(int argc, char *argv[])
         {
             example_path = "examples";
         }
+        if (verbose)
+            fprintf(stderr, "Example path: %s\n", example_path);
         // program_file = "00-hello.pas";
-        // program_file = "00-hello1.pas";
+        program_file = "00-hello1.pas";
         // program_file = "00-minimal.pas";
         // program_file = "01-first.pas";
         // program_file = "02-second.pas";
@@ -181,11 +190,11 @@ int main(int argc, char *argv[])
         // program_file = "20-procedure0.pas";
         // program_file = "21-procedure1.pas";
         // program_file = "22-procedure2.pas";
-        program_file = "30-function0.pas";
+        // program_file = "30-function0.pas";
         // program_file = "41-circle.pas";
+        snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
     }
-    snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
-    free(current_path);
+    ps_memory_free(current_path);
     current_path = NULL;
 
     /* Display banner */
@@ -222,6 +231,10 @@ int main(int argc, char *argv[])
     if (!ps_interpreter_load_file(interpreter, source_file))
     {
         fprintf(stderr, "File %s not loaded!\n", source_file);
+        fprintf(stderr, "Error %d %s\n", interpreter->error, ps_error_get_message(interpreter->error));
+        fprintf(stderr, "Error %d %s\n", interpreter->parser->error, ps_error_get_message(interpreter->parser->error));
+        fprintf(stderr, "Error %d %s\n", interpreter->parser->lexers[0]->error,
+                ps_error_get_message(interpreter->parser->lexers[0]->error));
         return EXIT_FAILURE;
     }
     if (verbose)
@@ -231,7 +244,7 @@ int main(int argc, char *argv[])
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     if (dump_buffer)
     {
-        ps_buffer_dump(lexer->buffer, 0, PS_BUFFER_MAX_LINES);
+        ps_buffer_dump(stderr, lexer->buffer, 0, PS_BUFFER_MAX_LINES);
         if (verbose)
             fprintf(stderr, "Listed!\n");
     }
@@ -247,9 +260,11 @@ int main(int argc, char *argv[])
     if (dump_symbols)
         ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
+    if (memory)
+        ps_memory_debug(stderr);
+
     /* Terminate interpreter */
-    ps_interpreter_free(interpreter);
-    interpreter = NULL;
+    interpreter = ps_interpreter_free(interpreter);
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

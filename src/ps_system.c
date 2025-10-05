@@ -47,9 +47,10 @@ PS_SYSTEM_TYPE(boolean  , "BOOLEAN"   , PS_TYPE_BOOLEAN                         
 PS_SYSTEM_TYPE(char     , "CHAR"      , PS_TYPE_CHAR                                                                  );
 PS_SYSTEM_TYPE(real     , "REAL"      , PS_TYPE_REAL                                                                  );
 PS_SYSTEM_TYPE(string   , "STRING"    , PS_TYPE_STRING                                                                );
-PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY                                                                 );
-PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE                                                              );
-PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM                                                                  );
+// PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY                                                                 );
+// PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE                                                              );
+// PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM                                                                  );
+// PS_SYSTEM_TYPE(record   , "#RECORD"   , PS_TYPE_RECORD                                                                );
 PS_SYSTEM_TYPE(procedure, "#PROCEDURE", PS_TYPE_EXECUTABLE                                                            );
 PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE                                                            );
 
@@ -150,8 +151,8 @@ PS_SYSTEM_CALLABLE(procedure, PS_SYMBOL_KIND_PROCEDURE, writeln       , "WRITELN
 bool ps_system_init(ps_interpreter *interpreter)
 {
     bool error = false;
-    ps_identifier system_name = "SYSTEM";
-    ps_environment *environment = ps_environment_alloc(NULL, &system_name, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+
+    ps_environment *environment = ps_environment_alloc(NULL, (ps_identifier *)"SYSTEM", PS_SYSTEM_SYMBOL_TABLE_SIZE);
     if (environment == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -184,11 +185,12 @@ bool ps_system_init(ps_interpreter *interpreter)
     error = error || !ps_environment_add_symbol(environment, &ps_system_unsigned);
     error = error || !ps_environment_add_symbol(environment, &ps_system_real);
     error = error || !ps_environment_add_symbol(environment, &ps_system_string);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure);
+    error = error || !ps_environment_add_symbol(environment, &ps_system_function);
     // error = error || !ps_environment_add_symbol(environment, &ps_system_subrange);
     // error = error || !ps_environment_add_symbol(environment, &ps_system_enum);
     // error = error || !ps_environment_add_symbol(environment, &ps_system_array);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_procedure);
-    error = error || !ps_environment_add_symbol(environment, &ps_system_function);
+    // error = error || !ps_environment_add_symbol(environment, &ps_system_record);
 
     /**************************************************************************/
     /* VARIABLES                                                              */
@@ -281,6 +283,7 @@ void ps_system_done(ps_interpreter *interpreter)
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);
         ps_system_constant_string_ps_version.value->data.s = NULL;
     }
-    ps_environment_free(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
-    interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] = NULL;
+    if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] != NULL)
+        interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] =
+            ps_environment_free(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
 }

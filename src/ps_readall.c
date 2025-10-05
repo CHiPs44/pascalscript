@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ps_memory.h"
 #include "ps_readall.h"
 
 /* This function returns one of the READALL_ constants above.
@@ -41,13 +42,13 @@ int ps_readall(FILE *in, char **dataptr, size_t *sizeptr)
             /* Overflow check. Some ANSI C compilers may optimize this away, though. */
             if (size <= used)
             {
-                free(data);
+                ps_memory_free(data);
                 return PS_READALL_TOOMUCH;
             }
-            temp = realloc(data, size);
+            temp = ps_memory_realloc(data, size);
             if (temp == NULL)
             {
-                free(data);
+                ps_memory_free(data);
                 return PS_READALL_NOMEM;
             }
             data = temp;
@@ -59,13 +60,13 @@ int ps_readall(FILE *in, char **dataptr, size_t *sizeptr)
     }
     if (ferror(in))
     {
-        free(data);
+        ps_memory_free(data);
         return PS_READALL_ERROR;
     }
-    temp = realloc(data, used + 1);
+    temp = ps_memory_realloc(data, used + 1);
     if (temp == NULL)
     {
-        free(data);
+        ps_memory_free(data);
         return PS_READALL_NOMEM;
     }
     data = temp;

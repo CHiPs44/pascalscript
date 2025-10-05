@@ -8,9 +8,11 @@
 #include <string.h>
 #include <sys/resource.h>
 
+#include "../include/ps_memory.h"
 #include "../include/ps_value.h"
 
 // #include "../src/ps_string.c"
+#include "../src/ps_memory.c"
 #include "../src/ps_value.c"
 
 int main(void)
@@ -21,7 +23,7 @@ int main(void)
     ps_value *value;
 
     printf("TEST VALUE: BEGIN\n");
-    value = calloc(1, sizeof(ps_value));
+    value = ps_memory_malloc( sizeof(ps_value));
     ps_value_debug(stdout, "N=", value);
 
     printf("TEST VALUE: INTEGER\n");
@@ -64,7 +66,7 @@ int main(void)
     // ps_value_set_pointer(value, (void *)0x55AA55AA);
     // ps_value_debug(stdout, "P=", value);
 
-    free(value);
+    ps_memory_free(value);
 
     printf("TEST VALUE: END\n");
     return 0;

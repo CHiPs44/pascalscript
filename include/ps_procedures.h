@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PSPROCEDURES_H
-#define _PSPROCEDURES_H
+#ifndef _PS_PROCEDURES_H
+#define _PS_PROCEDURES_H
 
 #include <stdio.h>
 
@@ -27,4 +27,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PSPROCEDURES_H */
+#endif /* _PS_PROCEDURES_H */

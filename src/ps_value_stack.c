@@ -9,13 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_system.h"
 #include "ps_value.h"
 #include "ps_value_stack.h"
 
 ps_value_stack *ps_value_stack_alloc()
 {
-    ps_value_stack *stack = calloc(1, sizeof(ps_value_stack));
+    ps_value_stack *stack = ps_memory_malloc( sizeof(ps_value_stack));
     if (stack == NULL)
         return NULL;
     /* use SIZE_MAX for an empty stack */
@@ -30,7 +31,7 @@ ps_value_stack *ps_value_stack_alloc()
 
 ps_value_stack *ps_value_stack_free(ps_value_stack *stack)
 {
-    free(stack);
+    ps_memory_free(stack);
     return NULL;
 }
 

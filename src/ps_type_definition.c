@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "ps_error.h"
+#include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_type_definition.h"
@@ -16,7 +17,7 @@
 
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
-    ps_type_definition *type_def = calloc(1, sizeof(ps_type_definition));
+    ps_type_definition *type_def = ps_memory_malloc( sizeof(ps_type_definition));
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
     type_def->type = type_def->base = type;
@@ -40,10 +41,10 @@ ps_type_definition *ps_type_definition_create(ps_value_type type)
 //     if (type_def == NULL)
 //         return NULL; // errno = ENOMEM
 //     type_def->def.def_enum.count = count;
-//     type_def->def.def_enum.values = calloc(count, sizeof(ps_symbol *));
+//     type_def->def.def_enum.values = ps_memory_calloc(count, sizeof(ps_symbol *));
 //     if (type_def->def.def_enum.values == NULL)
 //     {
-//         free(type_def);
+//         ps_memory_free(type_def);
 //         return NULL; // errno = ENOMEM
 //     }
 //     for (ps_unsigned i = 0; i < count; i++)
@@ -112,13 +113,13 @@ char *ps_type_definition_get_name(ps_type_definition *type_def)
 
 void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def)
 {
-    if (output== NULL)
+    if (output == NULL)
         output = stderr;
     if (message == NULL)
-    if (type_def == NULL)
-    {
-        fprintf(output, "%s: NULL\n", message);
-        return;
-    }
+        if (type_def == NULL)
+        {
+            fprintf(output, "%s: NULL\n", message);
+            return;
+        }
     fprintf(output, "%s: %s\n", message, ps_type_definition_get_name(type_def));
 }

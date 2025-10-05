@@ -2,7 +2,12 @@
     "files.associations": {
         "LICENSE": "plaintext",
         "ps_visit.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "ps_symbol.h": "c",
+        "ps_symbol_table.h": "c",
+        "ps_environment.h": "c",
+        "ps_interpreter.h": "c",
+        "ps_parser.h": "c"
     },
     "makefile.configureOnOpen": false,
     "workbench.iconTheme": "fira-code-material-minimal",

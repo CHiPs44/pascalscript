@@ -6,21 +6,22 @@
 
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_string_heap.h"
 
 ps_string_heap *ps_string_heap_alloc(size_t size)
 {
     ps_string_heap *heap;
-    heap = (ps_string_heap *)calloc(1, sizeof(ps_string_heap));
+    heap = (ps_string_heap *)ps_memory_malloc( sizeof(ps_string_heap));
     if (heap == NULL)
         return NULL; // errno = ENOMEM
     heap->size = size > 0 ? size : PS_STRING_HEAP_SIZE;
     // heap->more = heap->size;
     heap->used = 0;
-    heap->data = (ps_string **)calloc(heap->size, sizeof(ps_string *));
+    heap->data = (ps_string **)ps_memory_calloc(heap->size, sizeof(ps_string *));
     if (heap->data == NULL)
     {
-        free(heap);
+        ps_memory_free(heap);
         return NULL; // errno = ENOMEM
     }
     return heap;
@@ -39,9 +40,9 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
                     ps_string_free(heap->data[i]);
                 }
             }
-            free(heap->data);
+            ps_memory_free(heap->data);
         }
-        free(heap);
+        ps_memory_free(heap);
     }
     return NULL;
 }
@@ -50,7 +51,7 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
 // {
 //     if (heap->more == 0)
 //         return false;
-//     ps_string **data = (ps_string **)realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
+//     ps_string **data = (ps_string **)ps_memory_realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
 //     if (data == NULL)
 //         return false; // errno = ENOMEM
 //     heap->data = data;
@@ -90,7 +91,8 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
     {
         if (heap->data[index] == NULL)
         {
-            ps_string *s = (ps_string *)calloc(1, sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
+            ps_string *s =
+                (ps_string *)ps_memory_malloc( sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
             if (s == NULL)
                 return NULL; // errno = ENOMEM
             s->max = len;
@@ -122,7 +124,7 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
 //             ps_string_free(s);
 //             heap->data[i] = NULL;
 //             heap->used -= 1;
-//             free(s);
+//             ps_memory_free(s);
 //             return true;
 //         }
 //     }

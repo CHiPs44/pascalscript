@@ -70,10 +70,10 @@ char *ps_vm_get_opcode_name(ps_vm_opcode opcode)
 
 ps_vm *ps_vm_init(uint32_t size)
 {
-    ps_vm *vm = calloc(1, sizeof(ps_vm));
+    ps_vm *vm = ps_memory_malloc( sizeof(ps_vm));
     if (vm == NULL)
         return NULL;
-    vm->code = calloc(size, sizeof(uint8_t));
+    vm->code = ps_memory_calloc(size, sizeof(uint8_t));
     if (vm->code == NULL)
         return ps_vm_free(vm);
     vm->stack = ps_value_stack_alloc();
@@ -94,14 +94,14 @@ ps_vm *ps_vm_free(ps_vm *vm)
         return NULL;
     if (vm->code != NULL)
     {
-        free(vm->code);
+        ps_memory_free(vm->code);
         vm->code = NULL;
     }
     if (vm->stack != NULL)
     {
         vm->stack = ps_value_stack_free(vm->stack);
     }
-    free(vm);
+    ps_memory_free(vm);
     return NULL;
 }
 

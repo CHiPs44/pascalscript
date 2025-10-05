@@ -8,17 +8,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_memory.h"
 #include "ps_parser.h"
 
 ps_parser *ps_parser_alloc()
 {
-    ps_parser *parser = calloc(1, sizeof(ps_parser));
+    ps_parser *parser = ps_memory_malloc( sizeof(ps_parser));
     if (parser == NULL)
         return NULL;
     parser->lexers[0] = ps_lexer_alloc();
     if (parser->lexers[0] == NULL)
     {
-        free(parser);
+        ps_memory_free(parser);
         return NULL;
     }
     for (uint8_t i = 1; i < PS_PARSER_LEXER_COUNT; i++)
@@ -42,7 +43,7 @@ ps_parser *ps_parser_free(ps_parser *parser)
             parser->lexers[i] = NULL;
         }
     }
-    free(parser);
+    ps_memory_free(parser);
     return NULL;
 }
 

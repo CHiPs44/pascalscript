@@ -18,9 +18,10 @@ extern "C"
 #define PS_SYMBOL_TABLE_DEFAULT_SIZE 16
 #endif
 
-    typedef uint16_t ps_symbol_table_size;
-
 #define PS_SYMBOL_TABLE_NOT_FOUND UINT16_MAX
+
+    /** @brief up to 65,535 symbols in a table as UINT16_MAX is used for "not found" */
+    typedef uint16_t ps_symbol_table_size;
 
     typedef enum e_ps_symbol_table_error
     {
@@ -30,11 +31,12 @@ extern "C"
         PS_SYMBOL_TABLE_ERROR_INVALID,
     } __attribute__((__packed__)) ps_symbol_table_error;
 
+    /** @brief Symbol table holding names & their values */
     typedef struct s_ps_symbol_table
     {
-        ps_symbol_table_size size;
-        ps_symbol_table_size used;
-        ps_symbol **symbols;
+        ps_symbol_table_size size; /** @brief max count of symbols */
+        ps_symbol_table_size used; /** @brief current count of symbols */
+        ps_symbol **symbols;       /** @brief symbols array */
     } __attribute__((__packed__)) ps_symbol_table;
 
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
@@ -43,10 +45,10 @@ extern "C"
     extern bool ps_symbol_table_trace;
 
     /** @brief Allocate and initialize symbol table, use 0 for default size (PS_SYMBOL_TABLE_DEFAULT_SIZE) */
-    ps_symbol_table *ps_symbol_table_init(ps_symbol_table_size size);
+    ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size);
 
     /** @brief Free symbol table */
-    void ps_symbol_table_done(ps_symbol_table *table);
+    void *ps_symbol_table_free(ps_symbol_table *table);
 
     /** @brief How many used symbols? */
     ps_symbol_table_size ps_symbol_table_get_used(ps_symbol_table *table);

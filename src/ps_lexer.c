@@ -15,6 +15,7 @@
 #include "ps_buffer.h"
 #include "ps_error.h"
 #include "ps_lexer.h"
+#include "ps_memory.h"
 #include "ps_token.h"
 
 bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
@@ -34,10 +35,10 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
 
 ps_lexer *ps_lexer_alloc()
 {
-    ps_lexer *lexer = calloc(1, sizeof(ps_lexer));
+    ps_lexer *lexer = ps_memory_malloc( sizeof(ps_lexer));
     if (lexer == NULL)
         return NULL;
-    lexer->buffer = ps_buffer_init();
+    lexer->buffer = ps_buffer_alloc();
     if (lexer->buffer == NULL)
     {
         ps_lexer_free(lexer);
@@ -50,8 +51,8 @@ ps_lexer *ps_lexer_alloc()
 ps_lexer *ps_lexer_free(ps_lexer *lexer)
 {
     if (lexer->buffer != NULL)
-        ps_buffer_done(lexer->buffer);
-    free(lexer);
+        ps_buffer_free(lexer->buffer);
+    ps_memory_free(lexer);
     return NULL;
 }
 

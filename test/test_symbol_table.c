@@ -37,7 +37,7 @@ int main(void)
     ps_value_set_integer(&constant4.value, 0x87654321);
 
     printf("TEST SYMBOL TABLE: BEGIN\n");
-    ps_symbol_table_init(&table);
+    ps_symbol_table_alloc(&table);
     printf("TEST SYMBOL TABLE: INIT OK\n");
     // Add constant1 & variable2 => 0 & 1
     result = ps_symbol_table_add(&table, &constant1);

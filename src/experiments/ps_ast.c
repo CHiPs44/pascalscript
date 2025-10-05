@@ -11,7 +11,7 @@
 #define PS_AST_CREATE_NODE(KIND, TYPE, COUNT)             \
     if (kind == KIND)                                     \
     {                                                     \
-        TYPE *node = (TYPE *)calloc(COUNT, sizeof(TYPE)); \
+        TYPE *node = (TYPE *)ps_memory_calloc(COUNT, sizeof(TYPE)); \
         if (node != NULL)                                 \
             node->kind = kind;                            \
         return node;                                      \
@@ -45,7 +45,7 @@ bool ps_ast_free_node(ps_ast_node *node)
     default:
         fprintf(stderr, "ps_ast_free_node: unknown kind %d!\n", node->kind);
     }
-    free(node);
+    ps_memory_free(node);
 }
 
 bool ps_ast_visit_node(ps_ast_node *node)
@@ -69,23 +69,23 @@ ps_ast_node_program *ps_ast_create_program(size_t n_consts, size_t n_types, size
     if (node == NULL)
         return NULL;
     node->n_consts = n_consts;
-    node->consts = calloc(n_consts, sizeof(ps_symbol));
+    node->consts = ps_memory_calloc(n_consts, sizeof(ps_symbol));
     if (node->consts==NULL)
     {
         ps_ast_free_program(node);
         return NULL;
     }
     node->n_types = 0;  // n_types;
-    node->types = NULL; // calloc(n_, sizeof(???));
+    node->types = NULL; // ps_memory_calloc(n_, sizeof(???));
     node->n_vars = n_vars;
-    node->vars = calloc(n_vars, sizeof(ps_symbol));
+    node->vars = ps_memory_calloc(n_vars, sizeof(ps_symbol));
     if (node->vars==NULL)
     {
         ps_ast_free_program(node);
         return NULL;
     }
     node->n_statements = n_statements;
-    node->statements = calloc(n_statements, sizeof(ps_ast_node_statement));
+    node->statements = ps_memory_calloc(n_statements, sizeof(ps_ast_node_statement));
     if (node->statements==NULL)
     {
         ps_ast_free_program(node);
@@ -97,14 +97,14 @@ ps_ast_node_program *ps_ast_create_program(size_t n_consts, size_t n_types, size
 bool ps_ast_free_program(ps_ast_node_program *node)
 {
     // TODO? cleanup symbols?
-    free(node->consts);
-    // free(node->types);
+    ps_memory_free(node->consts);
+    // ps_memory_free(node->types);
     // TODO? cleanup symbols?
-    free(node->vars);
+    ps_memory_free(node->vars);
     // cleanup statements
     for (size_t i = 0; i < node->n_statements; i++)
         ps_ast_free_node(&node->statements[i]);
-    free(node->statements);
+    ps_memory_free(node->statements);
     return true;
 }
 

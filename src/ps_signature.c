@@ -9,16 +9,17 @@
 #include "ps_environment.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
+#include "ps_memory.h"
 #include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_value.h"
 
 ps_formal_signature *ps_formal_signature_alloc(uint8_t parameter_count, ps_symbol *result_type)
 {
-    ps_formal_signature *signature = calloc(1, sizeof(ps_formal_signature));
+    ps_formal_signature *signature = ps_memory_malloc( sizeof(ps_formal_signature));
     if (signature == NULL)
         return NULL;
-    signature->parameters = calloc(parameter_count, sizeof(ps_formal_parameter));
+    signature->parameters = ps_memory_calloc(parameter_count, sizeof(ps_formal_parameter));
     if (signature->parameters == NULL)
     {
         ps_formal_signature_free(signature);
@@ -34,18 +35,18 @@ ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature)
     if (signature != NULL)
     {
         if (signature->parameters != NULL)
-            free(signature->parameters);
-        free(signature);
+            ps_memory_free(signature->parameters);
+        ps_memory_free(signature);
     }
     return NULL;
 }
 
 ps_actual_signature *ps_actual_signature_alloc(uint8_t parameter_count, ps_symbol *result_type)
 {
-    ps_actual_signature *signature = calloc(1, sizeof(ps_actual_signature));
+    ps_actual_signature *signature = ps_memory_malloc( sizeof(ps_actual_signature));
     if (signature == NULL)
         return NULL;
-    signature->parameters = calloc(parameter_count, sizeof(ps_actual_parameter));
+    signature->parameters = ps_memory_calloc(parameter_count, sizeof(ps_actual_parameter));
     if (signature->parameters == NULL)
     {
         ps_actual_signature_free(signature);
@@ -61,13 +62,13 @@ ps_actual_signature *ps_actual_signature_free(ps_actual_signature *signature)
     if (signature != NULL)
     {
         if (signature->parameters != NULL)
-            free(signature->parameters);
-        free(signature);
+            ps_memory_free(signature->parameters);
+        ps_memory_free(signature);
     }
     return NULL;
 }
 
-ps_formal_parameter * ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name)
+ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name)
 {
     for (int i = 0; i < signature->parameter_count; i++)
     {
@@ -82,8 +83,8 @@ bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byre
     ps_formal_parameter *new_parameters;
     if (signature->parameter_count >= signature->size)
     {
-        // Increment size and realloc if needed
-        new_parameters = realloc(signature->parameters, (signature->size + 1) * sizeof(ps_formal_parameter));
+        // Increment size and ps_memory_realloc if needed
+        new_parameters = ps_memory_realloc(signature->parameters, (signature->size + 1) * sizeof(ps_formal_parameter));
         if (new_parameters == NULL)
             return false;
         signature->size = signature->size + 1;
@@ -98,7 +99,7 @@ bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byre
 
 bool ps_actual_signature_add_byval_parameter(ps_actual_signature *signature, ps_value *value)
 {
-    // TODO double size and realloc if needed
+    // TODO double size and ps_memory_realloc if needed
     if (signature->parameter_count >= signature->size)
         return false;
     signature->parameters[signature->parameter_count].byref = false;
@@ -109,7 +110,7 @@ bool ps_actual_signature_add_byval_parameter(ps_actual_signature *signature, ps_
 
 bool ps_actual_signature_add_byref_parameter(ps_actual_signature *signature, ps_symbol *variable)
 {
-    // TODO double size and realloc if needed
+    // TODO double size and ps_memory_realloc if needed
     if (signature->parameter_count >= signature->size)
         return false;
     signature->parameters[signature->parameter_count].byref = true;
