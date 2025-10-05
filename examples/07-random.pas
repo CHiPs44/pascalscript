@@ -6,14 +6,14 @@
 Program Example07Random;
 Var
     I: Integer;
-    D20, Min, Max: Integer;
-    R, MinR, MaxR: Real;
+    D20, Min, Max, Total: Integer;
+    R, MinR, MaxR, TotalR: Real;
 Begin
     Randomize;
     WriteLn('--------------------------------------------------------------------------------');
     Min := MaxInt;
     Max := 0;
-    For I := 0 To 29 Do
+    For I := 0 To 7*5 Do
     Begin
         D20 := Random(10 + 10) + 1;
         Write('d20(');
@@ -21,26 +21,29 @@ Begin
         Write(I, ')=');
         If D20 < 10 Then Write(' ');
         Write(D20);
-        If (I+1) Mod 5 = 0 Then WriteLn Else Write(' ');
+        If (I+1) Mod 7 = 0 Then WriteLn Else Write(' ');
         if D20 < Min Then Min := D20;
         if D20 > Max Then Max := D20;
+        Total := Total + D20;
     End;
-    WriteLn('Min=', Min, ', Max=', Max);
+    WriteLn;
+    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Total / 36);
     WriteLn('--------------------------------------------------------------------------------');
     MinR := MaxReal;
     MaxR := 0.0;
+    TotalR := 0;
     For I := 0 To 99 Do
     Begin
-        If I Mod 2 = 0 Then
-            R := Random
-        Else
-            R := Random();
-        Write('R(', I, ')=', R);
+        If I Mod 2 = 0 Then R := Random Else R := Random();
+        Write('R(');
+        If I < 10 Then Write(' ');
+        Write(I, ')=', R);
         If (I+1) Mod 5 = 0 Then WriteLn Else Write(Chr(9));
         if R < MinR Then MinR := R;
         if R > MaxR Then MaxR := R;
+        TotalR := TotalR + R;
     End;
-    WriteLn('Min=', MinR, ', Max=', MaxR);
+    WriteLn('Min=', MinR, ', Max=', MaxR, ' Mean=', TotalR / 100);
     WriteLn('--------------------------------------------------------------------------------');
     // Note: Integer is now cast to Real automatically
     R := Random(6) + 1;

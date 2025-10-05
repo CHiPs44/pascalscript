@@ -40,16 +40,21 @@ Begin
   WriteLn('From ''A'' to ''Z'' with ordinal values:');
   WriteLn('--------------------------------------------------------------------------------');
   I := 0;
-  For C := 'A' To 'Z' Do
+  BOL := False;
+  For C := 'A' sTo 'Z' Do
     Begin
       Write('''', C, '''=#', Ord(C));
-      // Write('''', C, '''');
       I := I + 1;
-      If I Mod 13 = 0 Then
-        WriteLn
+      If I Mod 10 = 0 Then
+      Begin
+        WriteLn;
+        BOL := True;
+      End
       Else
         Write(' ');
     End;
+  if Not BOL Then
+    WriteLn;
   WriteLn('OK!');
   WriteLn('--------------------------------------------------------------------------------');
 End.

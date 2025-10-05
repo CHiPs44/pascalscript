@@ -241,9 +241,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Loaded %s!\n", source_file);
 
     /* List program */
-    ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     if (dump_buffer)
     {
+        ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
         ps_buffer_dump(stderr, lexer->buffer, 0, PS_BUFFER_MAX_LINES);
         if (verbose)
             fprintf(stderr, "Listed!\n");
@@ -251,10 +251,10 @@ int main(int argc, char *argv[])
 
     /* Run program */
     if (verbose)
-        printf("================================================================================\n");
+        printf("===================================== BEGIN ====================================\n");
     bool ok = ps_interpreter_run(interpreter, exec);
     if (verbose)
-        printf("================================================================================\n");
+        printf("====================================== END =====================================\n");
 
     /* List symbols */
     if (dump_symbols)
