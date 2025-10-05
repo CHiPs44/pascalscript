@@ -49,6 +49,7 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 {
     ps_symbol_table *table;
     table = ps_memory_malloc(sizeof(ps_symbol_table));
+    // fprintf(stderr, "ALLOC\tSYMBOL TABLE: %p, size %d\n", table, size);
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
@@ -59,7 +60,6 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
         return NULL; // errno = ENOMEM
     }
     ps_symbol_table_reset(table, false);
-    fprintf(stderr, "ALLOC\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
     return table;
 }
 
@@ -69,7 +69,7 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     {
         if (table->symbols != NULL)
         {
-            fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
+            // fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
             ps_symbol_table_reset(table, true);
             ps_memory_free(table->symbols);
         }

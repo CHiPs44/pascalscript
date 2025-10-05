@@ -11,8 +11,8 @@
 
 ps_string_heap *ps_string_heap_alloc(size_t size)
 {
-    ps_string_heap *heap;
-    heap = (ps_string_heap *)ps_memory_malloc( sizeof(ps_string_heap));
+    ps_string_heap *heap = (ps_string_heap *)ps_memory_malloc(sizeof(ps_string_heap));
+    // fprintf(stderr, "ALLOC\tSTRING HEAP: %p, size %d\n", heap, size);
     if (heap == NULL)
         return NULL; // errno = ENOMEM
     heap->size = size > 0 ? size : PS_STRING_HEAP_SIZE;
@@ -33,6 +33,7 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
     {
         if (heap->data != NULL)
         {
+            // fprintf(stderr, "FREE\tSTRING HEAP: %p, size %d\n", heap, heap->size);
             for (size_t i = 0; i < heap->size; i++)
             {
                 if (heap->data[i] != NULL)
@@ -91,8 +92,7 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
     {
         if (heap->data[index] == NULL)
         {
-            ps_string *s =
-                (ps_string *)ps_memory_malloc( sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
+            ps_string *s = (ps_string *)ps_memory_malloc(sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
             if (s == NULL)
                 return NULL; // errno = ENOMEM
             s->max = len;

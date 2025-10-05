@@ -18,6 +18,7 @@
 ps_interpreter *ps_interpreter_alloc()
 {
     ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
+    // fprintf(stderr, "ALLOC\tINTERPRETER: %p\n", interpreter);
     if (interpreter == NULL)
         return NULL;
     // Set default state
@@ -43,7 +44,6 @@ ps_interpreter *ps_interpreter_alloc()
     // Initialize system environment
     if (!ps_system_init(interpreter->environments[0]))
         return ps_interpreter_free(interpreter);
-    fprintf(stderr, "ALLOC\tINTERPRETER: %p\n", interpreter);
     return interpreter;
 }
 
@@ -51,6 +51,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
 {
     if (interpreter != NULL)
     {
+        // fprintf(stderr, "FREE\tINTERPRETER: %p\n", interpreter);
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
         if (interpreter->parser != NULL)

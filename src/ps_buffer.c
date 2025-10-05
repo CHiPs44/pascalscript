@@ -18,7 +18,7 @@
 
 ps_buffer *ps_buffer_alloc()
 {
-    ps_buffer *buffer = ps_memory_malloc( sizeof(ps_buffer));
+    ps_buffer *buffer = ps_memory_malloc(sizeof(ps_buffer));
     if (buffer == NULL)
         return NULL;
     buffer->file_errno = 0;
@@ -169,6 +169,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             }
             buffer->line_starts[line] = start;
             buffer->line_lengths[line] = line_length;
+            // fprintf(stderr, "%05d %05d %s\n", line, buffer->line_lengths[line], buffer->line_starts[line]);
             line += 1;
             column = 0;
             text += 1;
@@ -287,9 +288,9 @@ int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t
     {
         if (line_number >= buffer->line_count)
             break;
-        // strncpy(line, buffer->line_starts[line_number], buffer->line_lengths[line_number]);
-        // line[buffer->line_lengths[line_number]] = '\0';
-        snprintf(line, sizeof(line) - 1, "%s", buffer->line_starts[line_number]);
+        strncpy(line, buffer->line_starts[line_number], buffer->line_lengths[line_number]);
+        line[buffer->line_lengths[line_number]] = '\0';
+        // snprintf(line, sizeof(line) - 1, "%s", buffer->line_starts[line_number]);
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     return 16;
@@ -329,7 +330,7 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
         buffer->current_line += 1;
         buffer->current_column = 0;
     }
-    if (buffer->current_line > buffer->line_count)
+    if (buffer->current_line >= buffer->line_count)
     {
         buffer->next_char = '\0';
     }

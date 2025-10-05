@@ -14,6 +14,7 @@
 ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
 {
     ps_environment *environment = ps_memory_malloc(sizeof(ps_environment));
+    // fprintf(stderr, "ALLOC\tENVIRONMENT: %p, name %s\n", environment, environment->name);
     if (environment == NULL)
         return NULL; // errno = ENOMEM
     environment->symbols = ps_symbol_table_alloc(size);
@@ -21,8 +22,6 @@ ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name
         return ps_environment_free(environment);
     environment->parent = parent;
     memcpy(environment->name, name, PS_IDENTIFIER_SIZE);
-    fprintf(stderr, "ALLOC\tENVIRONMENT: %p, name %s, symbol table at %p\n", environment, environment->name,
-            environment->symbols);
     return environment;
 }
 
@@ -30,8 +29,8 @@ ps_environment *ps_environment_free(ps_environment *environment)
 {
     if (environment != NULL)
     {
-    fprintf(stderr, "FREE\tENVIRONMENT: %p, name %s, symbol table at %p\n", environment, environment->name,
-            environment->symbols);
+        // fprintf(stderr, "FREE\tENVIRONMENT: %p, name %s, symbol table at %p\n", environment, environment->name,
+        //         environment->symbols);
         if (environment->symbols != NULL)
             environment->symbols = ps_symbol_table_free(environment->symbols);
         environment->parent = NULL;
