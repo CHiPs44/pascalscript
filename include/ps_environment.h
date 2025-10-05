@@ -18,23 +18,24 @@ extern "C"
     /** @brief For now, just a name, a symbol table and a parent for nested scopes */
     typedef struct s_ps_environment
     {
-        struct s_ps_environment *parent; // NULL for system environment
-        ps_symbol_table_error error;
-        ps_identifier name;
-        ps_symbol_table *symbols;
+        struct s_ps_environment *parent; /** @brief NULL for system environment */
+        ps_symbol_table_error error;     /** @brief error code if any */
+        ps_identifier name;              /** @brief SYSTEM for system, program name for program, ... */
+        ps_symbol_table *symbols;        /** @brief symbol table for this environment */
     } ps_environment;
 
 #define PS_ENVIRONMENT_SIZE sizeof(ps_environment)
 
     /** @brief Initialize environment */
-    /** @return NULL if no free memory (errno = ENOMEM) or the environment */
+    /** @return NULL if not enough free memory (errno = ENOMEM) */
     ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
 
     /** @brief Free environment */
+    /** @return NULL */
     ps_environment *ps_environment_free(ps_environment *environment);
 
     /** @brief Add symbol to environment */
-    /** @return true if OK, false otherwise */
+    /** @return true if OK, false otherwise (see error attribute) */
     bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol);
 
     /** @brief Find symbol in environment */

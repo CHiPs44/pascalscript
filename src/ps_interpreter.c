@@ -20,17 +20,6 @@ ps_interpreter *ps_interpreter_alloc()
     ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
-    // Allocate string heap
-    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
-    if (interpreter->string_heap == NULL)
-        return ps_interpreter_free(interpreter);
-    // Allocate parser
-    interpreter->parser = ps_parser_alloc();
-    if (interpreter->parser == NULL)
-        return ps_interpreter_free(interpreter);
-    // Allocate and initialize system environment
-    if (!ps_system_init(interpreter))
-        return ps_interpreter_free(interpreter);
     // Set default state
     for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         interpreter->environments[i] = NULL;
@@ -39,6 +28,22 @@ ps_interpreter *ps_interpreter_alloc()
     interpreter->debug = DEBUG_NONE;
     interpreter->range_check = true;
     interpreter->bool_eval = false;
+    // Allocate string heap
+    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
+    if (interpreter->string_heap == NULL)
+        return ps_interpreter_free(interpreter);
+    // Allocate parser
+    interpreter->parser = ps_parser_alloc();
+    if (interpreter->parser == NULL)
+        return ps_interpreter_free(interpreter);
+    // Allocate system environment
+    interpreter->environments[0] = ps_environment_alloc(NULL, (ps_identifier *)"SYSTEM", PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    if (interpreter->environments[0] == NULL)
+        return ps_interpreter_free(interpreter);
+    // Initialize system environment
+    if (!ps_system_init(interpreter->environments[0]))
+        return ps_interpreter_free(interpreter);
+    fprintf(stderr, "ALLOC\tINTERPRETER: %p\n", interpreter);
     return interpreter;
 }
 
@@ -50,7 +55,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
         if (interpreter->parser != NULL)
             interpreter->parser = ps_parser_free(interpreter->parser);
-        ps_system_done(interpreter);
+        ps_system_done(interpreter->environments[0]);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
             if (interpreter->environments[i] != NULL)
@@ -101,6 +106,7 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
         fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
                 environment->name);
+        ps_symbol_table_dump(NULL, "EXIT ENVIRONMENT", environment->symbols);
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
     }
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)

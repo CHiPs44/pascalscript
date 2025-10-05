@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
         if (verbose)
             fprintf(stderr, "Example path: %s\n", example_path);
         // program_file = "00-hello.pas";
-        program_file = "00-hello1.pas";
-        // program_file = "00-minimal.pas";
+        // program_file = "00-hello1.pas";
+        program_file = "00-minimal.pas";
         // program_file = "01-first.pas";
         // program_file = "02-second.pas";
         // program_file = "03-if-then-else.pas";

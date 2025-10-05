@@ -59,6 +59,7 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
         return NULL; // errno = ENOMEM
     }
     ps_symbol_table_reset(table, false);
+    fprintf(stderr, "ALLOC\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
     return table;
 }
 
@@ -68,6 +69,7 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     {
         if (table->symbols != NULL)
         {
+            fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
             ps_symbol_table_reset(table, true);
             ps_memory_free(table->symbols);
         }
@@ -78,22 +80,18 @@ void *ps_symbol_table_free(ps_symbol_table *table)
 
 ps_symbol_table_size ps_symbol_table_get_used(ps_symbol_table *table)
 {
-    if (table == NULL)
-        return 0;
-    return table->used;
+    return table == NULL ? 0 : table->used;
 }
 
 ps_symbol_table_size ps_symbol_table_get_free(ps_symbol_table *table)
 {
-    if (table == NULL)
-        return 0;
-    return table->size - table->used;
+    return table == NULL ? 0 : table->size - table->used;
 }
 
 ps_symbol_hash_key ps_symbol_get_hash_key(char *name)
 {
     // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
-    // 33 * x => 32 * x + x => x << 5 + x
+    //  NB: 33 * x => 32 * x + x => x << 5 + x
     ps_symbol_hash_key hash = 5381u;
     unsigned int c = (unsigned int)(*name);
     while (c)
@@ -112,8 +110,6 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
     if (table->symbols[index] == NULL)
     {
         ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
-        // if (ps_symbol_table_trace)
-        //     ps_symbol_table_dump(NULL, "NOT FOUND", table);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
     if (strcmp((char *)(table->symbols[index]->name), (char *)name) != 0)
