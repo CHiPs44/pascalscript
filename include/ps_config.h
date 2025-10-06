@@ -105,7 +105,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "8G"
+#define PS_REAL_FMT "11G"
 #endif
 
 #if PS_BITNESS == 32
@@ -113,7 +113,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "8G"
+#define PS_REAL_FMT "11G"
 #endif
 
 #if PS_BITNESS == 64

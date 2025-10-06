@@ -269,6 +269,7 @@ bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
 int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
 {
     char line[80 + 1];
+    int length;
 
     if (output == NULL)
         output = stderr;
@@ -288,9 +289,12 @@ int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t
     {
         if (line_number >= buffer->line_count)
             break;
-        strncpy(line, buffer->line_starts[line_number], buffer->line_lengths[line_number]);
-        line[buffer->line_lengths[line_number]] = '\0';
-        // snprintf(line, sizeof(line) - 1, "%s", buffer->line_starts[line_number]);
+        if (buffer->line_lengths[line_number] > 80)
+            length = 80;
+        else
+            length = buffer->line_lengths[line_number];
+        strncpy(line, buffer->line_starts[line_number], length);
+        line[length] = '\0';
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     return 16;

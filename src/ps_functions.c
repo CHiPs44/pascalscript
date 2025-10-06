@@ -233,7 +233,9 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
+        result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);
+        // fprintf(stderr, "TRUNC(%" PS_REAL_FMT ")=%" PS_INTEGER_FMT_10 "\n", value->data.r, result->data.i);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
