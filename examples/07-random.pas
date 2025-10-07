@@ -4,16 +4,20 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Example07Random;
+Const
+    MaxD20 = 98;
+    MaxRandom = 100;
 Var
     I: Integer;
     D20, Min, Max, Total: Integer;
     R, MinR, MaxR, TotalR: Real;
 Begin
-    // Randomize;
+    Randomize;
     WriteLn('--------------------------------------------------------------------------------');
+    WriteLn(MaxD20, ' random d20 rolls:');
     Min := MaxInt;
     Max := 0;
-    For I := 1 To 98 Do
+    For I := 1 To MaxD20 Do
     Begin
         D20 := Random(10 + 10) + 1;
         Write('d20(');
@@ -27,28 +31,27 @@ Begin
         Total := Total + D20;
     End;
     WriteLn;
-    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Total / 70);
+    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Total / MaxD20);
     WriteLn('--------------------------------------------------------------------------------');
+    WriteLn(MaxRandom, ' random real numbers [0.0..1.0):');
     MinR := MaxReal;
     MaxR := 0.0;
     TotalR := 0;
-    For I := 0 To 999 Do
+    For I := 0 To MaxRandom Do
     Begin
         If I Mod 2 = 0 Then R := Random Else R := Random();
-        // R := 0.0 + Trunc(R * 100000.0) / 100000.0;
-        Write('R(');
         If I < 10 Then Write(' ');
-        If I < 100 Then Write(' ');
-        Write(I, ')=', R);
-        If (I+1) Mod 5 = 0 Then WriteLn Else Write(Chr(9));
+        Write(I, ': ', R);
+        If (I+1) Mod 5 = 0 Then WriteLn Else Write(' ');
         if R < MinR Then MinR := R;
         if R > MaxR Then MaxR := R;
         TotalR := TotalR + R;
     End;
-    WriteLn('Min=', MinR, ', Max=', MaxR, ' Mean=', TotalR / 1000);
+    WriteLn('Min=', MinR, ', Max=', MaxR, ' Mean=', TotalR / MaxRandom);
     WriteLn('--------------------------------------------------------------------------------');
-    // Note: Integer is now cast to Real automatically
-    R := Random(6) + 1;
+    WriteLn('Random real d6:');
+    // Note: Integer should be cast to Real automatically
+    R := Random(6) + 1.0;
     WriteLn('R=', R);
     WriteLn('OK!');
 End.
