@@ -31,7 +31,7 @@ Begin
         Total := Total + D20;
     End;
     WriteLn;
-    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Total / MaxD20);
+    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Trunc((0.0 + Total) / (0.0 + MaxD20)));
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn(MaxRandom, ' random real numbers [0.0..1.0):');
     MinR := MaxReal;
@@ -47,11 +47,12 @@ Begin
         if R > MaxR Then MaxR := R;
         TotalR := TotalR + R;
     End;
-    WriteLn('Min=', MinR, ', Max=', MaxR, ' Mean=', TotalR / MaxRandom);
+    Write('Min=', MinR, ', Max=', MaxR);
+    WriteLn(' Mean=', TotalR / MaxRandom);
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Random real d6:');
     // Note: Integer should be cast to Real automatically
-    R := Random(6) + 1.0;
+    R := 1.0 + Random(6);
     WriteLn('R=', R);
     WriteLn('OK!');
 End.

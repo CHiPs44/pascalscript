@@ -49,6 +49,7 @@ extern "C"
         ps_string_heap *string_heap;                    /** @brief Strings heap to hold string constants */
         uint8_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;             /** @brief Current error PS_ERROR_XXX */
+        char message[128];          /** @brief Additional error message */
         ps_interpreter_debug debug; /** @brief Debug level: NONE, TRACE, VERBOSE */
         bool range_check;           /** @brief Range checking for integer and real values */
         bool bool_eval;             /** @brief *FUTURE* Short circuit boolean evaluation */
@@ -71,6 +72,9 @@ extern "C"
     /** @brief Set error & return NULL */
     void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error);
 
+    /** @brief Set formatted message */
+    bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
+
     /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
     bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);
 
@@ -87,7 +91,7 @@ extern "C"
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
     /**
-     *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa, 
+     *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa,
      *         may set error to PS_ERROR_OUT_OF_RANGE or PS_ERROR_TYPE_MISMATCH
      */
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);

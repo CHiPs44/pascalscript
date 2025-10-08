@@ -79,6 +79,17 @@ void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error)
     return NULL;
 }
 
+bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int ret = vsnprintf(interpreter->message, sizeof(interpreter->message), format, args);
+    va_end(args);
+    if (ret < 0 || ret >= (int)sizeof(interpreter->message))
+        return ps_interpreter_return_false(interpreter, PS_ERROR_OVERFLOW);
+    return true;
+}
+
 bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
 {
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
@@ -215,6 +226,8 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     ps_lexer_reset(lexer);
+
+    memset(interpreter->message, 0, sizeof(interpreter->message));
     if (!ps_buffer_read_next_char(lexer->buffer))
     {
         fprintf(stderr, "ERROR: %s\n", ps_lexer_get_debug_value(lexer));
@@ -222,9 +235,9 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     }
     if (!ps_visit_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
     {
-        // Display up to 5 lines around the error
-        uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
-        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 5);
+        // Display up to 3 lines around the error
+        uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 1 : 0;
+        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 3);
         // Try to align the '^' under the right column
         fprintf(stderr, "%*s\n", margin + lexer->buffer->current_column, "^");
         // Make line and column 1-based
@@ -232,8 +245,11 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
                 lexer->buffer->current_line + 1, lexer->buffer->current_column + 1, interpreter->error,
                 ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),
                 lexer->error, ps_error_get_message(lexer->error));
+        if (interpreter->message[0] != '\0')
+            fprintf(stderr, "DETAIL: %s", interpreter->message);
         ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
         return false;
     }
+
     return true;
 }

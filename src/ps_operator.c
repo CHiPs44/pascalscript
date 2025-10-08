@@ -163,6 +163,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     //             ----------------+-------------------------------------+-----------------------------
     uint16_t key = token_type << 8 | (a->type->value->data.t->base << 4) | b->type->value->data.t->base;
     ps_value_type r = PS_TYPE_NONE;
+    ps_symbol *expected_type = result->type;
     ps_string *s = NULL;
 
     switch (key)
@@ -369,9 +370,10 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     default:
         if (interpreter->debug >= DEBUG_TRACE)
         {
-            fprintf(stderr, "*** ERROR: [1] binary operator %d/%s not applicable for types %s and %s\n", token_type,
-                    ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
-                    ps_value_type_get_name(b->type->value->data.t->base));
+            ps_interpreter_set_message(
+                interpreter, "Binary operator %d/'%s' is not applicable for types '%s' and '%s'\n", token_type,
+                ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
+                ps_value_type_get_name(b->type->value->data.t->base));
         }
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
@@ -398,11 +400,20 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     default:
         if (interpreter->debug >= DEBUG_TRACE)
         {
-            fprintf(stderr, "*** ERROR: [2] Unknown binary operator %d/%s for types %s and %s\n", token_type,
-                    ps_token_get_keyword(token_type), ps_value_type_get_name(a->type->value->data.t->base),
-                    ps_value_type_get_name(b->type->value->data.t->base));
+            ps_interpreter_set_message(interpreter, "Unknown binary operator %d/'%s' for types '%s' and '%s'\n",
+                                       token_type, ps_token_get_keyword(token_type),
+                                       ps_value_type_get_name(a->type->value->data.t->base),
+                                       ps_value_type_get_name(b->type->value->data.t->base));
         }
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+    }
+    if (expected_type != &ps_system_none && result->type != expected_type)
+    {
+        ps_interpreter_set_message(
+            interpreter, "Binary operator %d/'%s' result type '%s' does not match expected type '%s'\n", token_type,
+            ps_token_get_keyword(token_type), ps_value_type_get_name(result->type->value->data.t->base),
+            ps_value_type_get_name(expected_type->value->data.t->base));
+        return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
     }
     return true;
 }
