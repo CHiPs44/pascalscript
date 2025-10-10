@@ -34,7 +34,7 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
     case PS_TOKEN_IDENTIFIER:
         // if (strcmp(lexer->current_token.value.identifier, "D6") == 0)
         //     interpreter->debug = DEBUG_VERBOSE;
-        // fprintf(stderr, "INFO\tIDENTIFIER %s\n", lexer->current_token.value.identifier);
+        // fprintf(stderr, " INFO\tIDENTIFIER %s\n", lexer->current_token.value.identifier);
         if (!ps_visit_assignment_or_procedure_call(interpreter, mode))
         {
             // interpreter->debug = DEBUG_NONE;
@@ -158,7 +158,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
         TRACE_ERROR("VARIABLE2");
     }
-    fprintf(stderr, "\nINFO\tASSIGNMENT: variable '%s' is a '%s', type is '%s'\n", variable->name,
+    fprintf(stderr, "\n INFO\tASSIGNMENT: variable '%s' is a '%s', type is '%s'\n", variable->name,
             variable->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
             : variable->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
                                                       : "VARIABLE",

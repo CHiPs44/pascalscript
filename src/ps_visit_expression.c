@@ -40,7 +40,7 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
         TRACE_ERROR("AND");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, "INFO\tOR_EXPRESSION: expecting result type as '%s'\n",
+        fprintf(stderr, " INFO\tOR_EXPRESSION: expecting result type as '%s'\n",
                 ps_value_type_get_name(left.type->value->data.t->base));
         // result->type = left.type;
     }
@@ -52,7 +52,7 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, "INFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                fprintf(stderr, " INFO\tOR_EXPRESSION: setting result type to '%s'\n",
                         ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
@@ -97,10 +97,10 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
     ps_token_type and_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_relational_expression(interpreter, mode, &left))
-        TRACE_ERROR("RELATIONAL1");
+        TRACE_ERROR("RELATIONAL0");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, "INFO\tAND_EXPRESSION: expecting result type as '%s'\n",
+        fprintf(stderr, " INFO\tAND_EXPRESSION: expecting result type as '%s'\n",
                 ps_value_type_get_name(left.type->value->data.t->base));
     }
     do
@@ -111,7 +111,7 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, "INFO\tAND_EXPRESSION: setting result type to '%s'\n",
+                fprintf(stderr, " INFO\tAND_EXPRESSION: setting result type to '%s'\n",
                         ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
@@ -137,7 +137,7 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, "INFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n");
+        fprintf(stderr, " INFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n");
     }
 
     VISIT_END("AND2");
@@ -166,13 +166,13 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     {
         if (result->type == &ps_system_none)
         {
-            fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
+            fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
                     ps_value_type_get_name(left.type->value->data.t->base));
             // result->type = left.type;
         }
         if (result->type == &ps_system_none)
         {
-            fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
+            fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
                     ps_value_type_get_name(left.type->value->data.t->base));
             result->type = left.type;
         }
@@ -187,7 +187,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     READ_NEXT_TOKEN;
     if (!ps_visit_simple_expression(interpreter, mode, &right))
         TRACE_ERROR("RELATIONAL2");
-    fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n");
+    fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n");
     result->type = &ps_system_boolean;
     if (mode == MODE_EXEC)
     {
@@ -219,7 +219,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         TRACE_ERROR("TERM");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, "INFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n",
+        fprintf(stderr, " INFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n",
                 ps_value_type_get_name(left.type->value->data.t->base));
         result->type = left.type;
     }
@@ -231,7 +231,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, "INFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                fprintf(stderr, " INFO\tOR_EXPRESSION: setting result type to '%s'\n",
                         ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
@@ -278,7 +278,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         TRACE_ERROR("FACTOR");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, "INFO\tTERM: expecting result type as '%s'\n",
+        fprintf(stderr, " INFO\tTERM: expecting result type as '%s'\n",
                 ps_value_type_get_name(left.type->value->data.t->base));
         result->type = left.type;
     }
@@ -290,7 +290,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, "INFO\tTERM: setting result type to '%s'\n",
+                fprintf(stderr, " INFO\tTERM: setting result type to '%s'\n",
                         ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
@@ -356,7 +356,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
-            fprintf(stderr, "INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
+            fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
                     symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
                     : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
                                                               : "VARIABLE",
