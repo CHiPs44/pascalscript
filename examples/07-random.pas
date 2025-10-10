@@ -51,8 +51,12 @@ Begin
     WriteLn(' Mean=', TotalR / MaxRandom);
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Random real d6:');
-    // Note: Integer should be cast to Real automatically
+    // OK
     R := 1.0 + Random(6);
+    // KO
+    // R := Random(6) + 1;
+    // KO
+    // R := Random(6) + 1.0;
     WriteLn('R=', R);
     WriteLn('OK!');
 End.

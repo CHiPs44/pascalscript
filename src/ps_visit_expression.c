@@ -39,17 +39,29 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
     if (!ps_visit_and_expression(interpreter, mode, &left))
         TRACE_ERROR("AND");
     if (result->type == &ps_system_none)
-        result->type = left.type;
+    {
+        fprintf(stderr, "INFO\tOR_EXPRESSION: expecting result type as '%s'\n",
+                ps_value_type_get_name(left.type->value->data.t->base));
+        // result->type = left.type;
+    }
     do
     {
         or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
                                                    or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC)
+            if (result->type == &ps_system_none)
             {
-                result->data = left.data;
+                fprintf(stderr, "INFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                        ps_value_type_get_name(left.type->value->data.t->base));
+                result->type = left.type;
             }
+            if (!ps_interpreter_copy_value(interpreter, &left, result))
+                TRACE_ERROR("COPY");
+            // if (mode == MODE_EXEC)
+            // {
+            //     result->data = left.data;
+            // }
             VISIT_END("LEFT");
         }
         READ_NEXT_TOKEN;
@@ -71,7 +83,8 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
  * Visit and expression:
  *      relational_expression { 'AND' relational_expression }
  * Goal:
- *      make A < 1 AND A > 10 AND A = 5 AND ... work without parenthesis
+ *      make A < 1 AND A > 10 AND B = 5 AND ... work without parenthesis
+ *      ByteValue AND $0F should work too
  */
 bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
 {
@@ -86,17 +99,28 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
     if (!ps_visit_relational_expression(interpreter, mode, &left))
         TRACE_ERROR("RELATIONAL1");
     if (result->type == &ps_system_none)
-        result->type = left.type;
+    {
+        fprintf(stderr, "INFO\tAND_EXPRESSION: expecting result type as '%s'\n",
+                ps_value_type_get_name(left.type->value->data.t->base));
+    }
     do
     {
         and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC)
+            if (result->type == &ps_system_none)
             {
-                result->data = left.data;
+                fprintf(stderr, "INFO\tAND_EXPRESSION: setting result type to '%s'\n",
+                        ps_value_type_get_name(left.type->value->data.t->base));
+                result->type = left.type;
             }
+            if (!ps_interpreter_copy_value(interpreter, &left, result))
+                TRACE_ERROR("COPY");
+            // if (mode == MODE_EXEC)
+            // {
+            //     result->data = left.data;
+            // }
             VISIT_END("AND1");
         }
         READ_NEXT_TOKEN;
@@ -111,12 +135,17 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         }
     } while (true);
 
+    if (result->type == &ps_system_none)
+    {
+        fprintf(stderr, "INFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n");
+    }
+
     VISIT_END("AND2");
 }
 
 /**
  * Visit relational expression:
- *      simple_expression [ '<' | '<=' | '>' | '>=' | '=' | '<>' , simple_expression ]
+ *      simple_expression '<' | '<=' | '>' | '>=' | '=' | '<>' simple_expression
  */
 bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
 {
@@ -136,19 +165,32 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     if (relational_operator == PS_TOKEN_NONE)
     {
         if (result->type == &ps_system_none)
-            result->type = left.type;
-        if (mode == MODE_EXEC)
         {
-            result->data = left.data;
+            fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
+                    ps_value_type_get_name(left.type->value->data.t->base));
+            // result->type = left.type;
         }
+        if (result->type == &ps_system_none)
+        {
+            fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
+                    ps_value_type_get_name(left.type->value->data.t->base));
+            result->type = left.type;
+        }
+        if (!ps_interpreter_copy_value(interpreter, &left, result))
+            TRACE_ERROR("COPY");
+        // if (mode == MODE_EXEC)
+        // {
+        //     result->data = left.data;
+        // }
         VISIT_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN;
     if (!ps_visit_simple_expression(interpreter, mode, &right))
         TRACE_ERROR("RELATIONAL2");
+    fprintf(stderr, "INFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n");
+    result->type = &ps_system_boolean;
     if (mode == MODE_EXEC)
     {
-        result->type = &ps_system_boolean;
         if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
             TRACE_ERROR("BINARY");
     }
@@ -176,17 +218,29 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
     if (!ps_visit_term(interpreter, mode, &left))
         TRACE_ERROR("TERM");
     if (result->type == &ps_system_none)
+    {
+        fprintf(stderr, "INFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n",
+                ps_value_type_get_name(left.type->value->data.t->base));
         result->type = left.type;
+    }
     do
     {
         additive_operator = ps_parser_expect_token_types(
             interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC)
+            if (result->type == &ps_system_none)
             {
-                result->data = left.data;
+                fprintf(stderr, "INFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                        ps_value_type_get_name(left.type->value->data.t->base));
+                result->type = left.type;
             }
+            if (!ps_interpreter_copy_value(interpreter, &left, result))
+                TRACE_ERROR("COPY");
+            // if (mode == MODE_EXEC)
+            // {
+            //     result->data = left.data;
+            // }
             VISIT_END("SIMPLE1");
         }
         READ_NEXT_TOKEN;
@@ -223,17 +277,29 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
     if (!ps_visit_factor(interpreter, mode, &left))
         TRACE_ERROR("FACTOR");
     if (result->type == &ps_system_none)
+    {
+        fprintf(stderr, "INFO\tTERM: expecting result type as '%s'\n",
+                ps_value_type_get_name(left.type->value->data.t->base));
         result->type = left.type;
+    }
     do
     {
         multiplicative_operator = ps_parser_expect_token_types(
             interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC)
+            if (result->type == &ps_system_none)
             {
-                result->data = left.data;
+                fprintf(stderr, "INFO\tTERM: setting result type to '%s'\n",
+                        ps_value_type_get_name(left.type->value->data.t->base));
+                result->type = left.type;
             }
+            if (!ps_interpreter_copy_value(interpreter, &left, result))
+                TRACE_ERROR("COPY");
+            // if (mode == MODE_EXEC)
+            // {
+            //     result->data = left.data;
+            // }
             VISIT_END("1");
         }
         READ_NEXT_TOKEN;
@@ -290,6 +356,11 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
+            fprintf(stderr, "INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
+                    symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
+                    : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
+                                                              : "VARIABLE",
+                    ps_type_definition_get_name(symbol->value->type->value->data.t));
             result->type = symbol->value->type;
             if (mode == MODE_EXEC)
             {

@@ -158,6 +158,11 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
         TRACE_ERROR("VARIABLE2");
     }
+    fprintf(stderr, "\nINFO\tASSIGNMENT: variable '%s' is a '%s', type is '%s'\n", variable->name,
+            variable->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
+            : variable->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
+                                                      : "VARIABLE",
+            ps_type_definition_get_name(variable->value->type->value->data.t));
     result.type = variable->value->type;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("EXPRESSION1");
@@ -437,6 +442,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     while (loop)
     {
         result.type = &ps_system_none;
+        fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPR");
         if (mode == MODE_EXEC)

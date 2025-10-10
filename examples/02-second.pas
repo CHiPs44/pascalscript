@@ -5,21 +5,30 @@
 *)
 Program Second;
 Const 
-    Foo = 100;
+    FOO = 100;
 Var
     a, b, c, d: Integer;
     r: Real;
 Begin
-    a := Foo;
-    WriteLn('a=', a);
+    a := FOO;
+    // WriteLn('a=', a);
     b := 20;
-    WriteLn('b=', b);
-    c := 234;
-    c := a + b + c;
-    WriteLn('c=', c);
-    d := (a * b) Div c;
-    WriteLn('d=', d);
-    r := (a * b * 1.0) / (c * 1.0);
-    WriteLn('r=', r);
-    // Foo := 12;
+    // WriteLn('b=', b);
+    c := a + b;
+    // WriteLn('c=', c);
+    d := (a * b);// Div c;
+    // WriteLn('d=', d);
+    // KO
+    // r := (a * b * 1.0) / (c * 1.0);
+    // r := (1.0 * a * b) / (1.0 * c);
+    r := a * b / 10.0;// + 1.0;
+    WriteLn(
+        'FOO=', FOO, 
+        ',a=FOO=', a, 
+        ', b=20=', b, 
+        ', c=a+b=', c, 
+        ', d=a*b/c=', d, 
+        ', r=a*b+1=', r//:0:2
+    );
+    // FOO := 12;
 End.
