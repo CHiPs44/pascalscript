@@ -431,7 +431,8 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     {
         result.type = &ps_system_none;
         if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
+            fprintf(stderr, "\n%cINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n",
+                    mode == MODE_EXEC ? '*' : ' ');
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
         if (mode == MODE_EXEC)

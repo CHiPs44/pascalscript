@@ -248,8 +248,8 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
     if (!ps_visit_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
     {
         // Display up to 3 lines around the error
-        uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 1 : 0;
-        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 3);
+        uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
+        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 4);
         // Try to align the '^' under the right column
         fprintf(stderr, "%*s\n", margin + lexer->buffer->current_column, "^");
         // Make line and column 1-based
@@ -258,7 +258,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
                 ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),
                 lexer->error, ps_error_get_message(lexer->error));
         if (interpreter->message[0] != '\0')
-            fprintf(stderr, "DETAIL: %s", interpreter->message);
+            fprintf(stderr, "ERROR %s", interpreter->message);
         ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
         return false;
     }
