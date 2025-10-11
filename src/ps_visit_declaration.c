@@ -249,17 +249,17 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
-        if (mode == MODE_EXEC)
-        {
-            value = ps_value_alloc(type, data);
-            if (value == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-            constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
-            if (constant == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-            if (!ps_interpreter_add_symbol(interpreter, constant))
-                RETURN_ERROR(interpreter->error);
-        }
+        // if (mode == MODE_EXEC)
+        // {
+        value = ps_value_alloc(type, data);
+        if (value == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
+        if (constant == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        if (!ps_interpreter_add_symbol(interpreter, constant))
+            RETURN_ERROR(interpreter->error);
+        // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     VISIT_END("OK");

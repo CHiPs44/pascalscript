@@ -40,9 +40,9 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
         TRACE_ERROR("AND");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, " INFO\tOR_EXPRESSION: expecting result type as '%s'\n",
-                ps_value_type_get_name(left.type->value->data.t->base));
-        // result->type = left.type;
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tOR_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    ps_value_type_get_name(left.type->value->data.t->base));
     }
     do
     {
@@ -52,16 +52,13 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, " INFO\tOR_EXPRESSION: setting result type to '%s'\n",
-                        ps_value_type_get_name(left.type->value->data.t->base));
+                if (interpreter->debug >= DEBUG_VERBOSE)
+                    fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
-            // if (mode == MODE_EXEC)
-            // {
-            //     result->data = left.data;
-            // }
             VISIT_END("LEFT");
         }
         READ_NEXT_TOKEN;
@@ -100,8 +97,9 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         TRACE_ERROR("RELATIONAL0");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, " INFO\tAND_EXPRESSION: expecting result type as '%s'\n",
-                ps_value_type_get_name(left.type->value->data.t->base));
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    ps_value_type_get_name(left.type->value->data.t->base));
     }
     do
     {
@@ -111,16 +109,13 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, " INFO\tAND_EXPRESSION: setting result type to '%s'\n",
-                        ps_value_type_get_name(left.type->value->data.t->base));
+                if (interpreter->debug >= DEBUG_VERBOSE)
+                    fprintf(stderr, "%cINFO\tAND_EXPRESSION: setting result type to '%s'\n",
+                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
-            // if (mode == MODE_EXEC)
-            // {
-            //     result->data = left.data;
-            // }
             VISIT_END("AND1");
         }
         READ_NEXT_TOKEN;
@@ -137,7 +132,9 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, " INFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n");
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n",
+                    mode == MODE_EXEC ? '*' : ' ');
     }
 
     VISIT_END("AND2");
@@ -166,28 +163,27 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     {
         if (result->type == &ps_system_none)
         {
-            fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
-                    ps_value_type_get_name(left.type->value->data.t->base));
-            // result->type = left.type;
+            if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
+                        mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
         }
         if (result->type == &ps_system_none)
         {
-            fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
-                    ps_value_type_get_name(left.type->value->data.t->base));
+            if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
+                        mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
             result->type = left.type;
         }
         if (!ps_interpreter_copy_value(interpreter, &left, result))
             TRACE_ERROR("COPY");
-        // if (mode == MODE_EXEC)
-        // {
-        //     result->data = left.data;
-        // }
         VISIT_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN;
     if (!ps_visit_simple_expression(interpreter, mode, &right))
         TRACE_ERROR("RELATIONAL2");
-    fprintf(stderr, " INFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n",
+                mode == MODE_EXEC ? '*' : ' ');
     result->type = &ps_system_boolean;
     if (mode == MODE_EXEC)
     {
@@ -219,9 +215,9 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         TRACE_ERROR("TERM");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, " INFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n",
-                ps_value_type_get_name(left.type->value->data.t->base));
-        result->type = left.type;
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    ps_value_type_get_name(left.type->value->data.t->base));
     }
     do
     {
@@ -231,16 +227,13 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, " INFO\tOR_EXPRESSION: setting result type to '%s'\n",
-                        ps_value_type_get_name(left.type->value->data.t->base));
+                if (interpreter->debug >= DEBUG_VERBOSE)
+                    fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
+                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
-            // if (mode == MODE_EXEC)
-            // {
-            //     result->data = left.data;
-            // }
             VISIT_END("SIMPLE1");
         }
         READ_NEXT_TOKEN;
@@ -264,23 +257,23 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
  */
 bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
 {
+    VISIT_BEGIN("TERM", "");
+
     static ps_token_type multiplicative_operators[] = {
         PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD,
         // PS_TOKEN_AND,  PS_TOKEN_SHL,   PS_TOKEN_SHR
     };
-
-    VISIT_BEGIN("TERM", "");
-
     ps_value left = {.type = result->type, .data.v = NULL};
     ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
+
     if (!ps_visit_factor(interpreter, mode, &left))
         TRACE_ERROR("FACTOR");
     if (result->type == &ps_system_none)
     {
-        fprintf(stderr, " INFO\tTERM: expecting result type as '%s'\n",
-                ps_value_type_get_name(left.type->value->data.t->base));
-        result->type = left.type;
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tTERM: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    ps_value_type_get_name(left.type->value->data.t->base));
     }
     do
     {
@@ -290,17 +283,14 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         {
             if (result->type == &ps_system_none)
             {
-                fprintf(stderr, " INFO\tTERM: setting result type to '%s'\n",
-                        ps_value_type_get_name(left.type->value->data.t->base));
+                if (interpreter->debug >= DEBUG_VERBOSE)
+                    fprintf(stderr, "%cINFO\tTERM: setting result type to '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                            ps_value_type_get_name(left.type->value->data.t->base));
                 result->type = left.type;
             }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
-            // if (mode == MODE_EXEC)
-            // {
-            //     result->data = left.data;
-            // }
-            VISIT_END("1");
+            VISIT_END("TERM1");
         }
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, mode, &right))
@@ -314,7 +304,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         }
     } while (true);
 
-    VISIT_END("2");
+    VISIT_END("TERM2");
 }
 
 /**
@@ -324,13 +314,14 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
  *          | constant_reference
  *          | function_call
  *          | string_value | char_value | integer_value | unsigned_value | real_value | boolean_value
- *          | [ '+' | '-' | 'NOT' ] , factor
+ *          | [ '+' | '-' | 'NOT' ] factor
  *          | nil
  *          ;
  */
 bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
 {
     VISIT_BEGIN("FACTOR", "");
+
     ps_value factor = {.type = &ps_system_none, .data.v = NULL};
     ps_identifier identifier;
     ps_symbol *symbol;
@@ -356,11 +347,12 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
-            fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
-                    symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
-                    : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
-                                                              : "VARIABLE",
-                    ps_type_definition_get_name(symbol->value->type->value->data.t));
+            if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
+                        symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
+                        : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
+                                                                  : "VARIABLE",
+                        ps_type_definition_get_name(symbol->value->type->value->data.t));
             result->type = symbol->value->type;
             if (mode == MODE_EXEC)
             {
@@ -380,45 +372,54 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
 
         break;
     case PS_TOKEN_CHAR_VALUE:
-        result->type = &ps_system_char;
-        if (mode == MODE_EXEC)
-        {
-            result->data.c = lexer->current_token.value.c;
-        }
-        READ_NEXT_TOKEN;
-        break;
     case PS_TOKEN_INTEGER_VALUE:
-        result->type = &ps_system_integer;
-        if (mode == MODE_EXEC)
-        {
-            result->data.i = lexer->current_token.value.i;
-        }
-        READ_NEXT_TOKEN;
-        break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        result->type = &ps_system_unsigned;
-        if (mode == MODE_EXEC)
-        {
-            result->data.u = lexer->current_token.value.u;
-        }
-        READ_NEXT_TOKEN;
-        break;
     case PS_TOKEN_REAL_VALUE:
-        result->type = &ps_system_real;
-        if (mode == MODE_EXEC)
-        {
-            result->data.r = lexer->current_token.value.r;
-        }
-        READ_NEXT_TOKEN;
-        break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        result->type = &ps_system_boolean;
-        if (mode == MODE_EXEC)
-        {
-            result->data.b = lexer->current_token.value.b;
-        }
+        if (!ps_interpreter_copy_value(interpreter, &lexer->current_token.value, result))
+            TRACE_ERROR("COPY");
         READ_NEXT_TOKEN;
         break;
+    // case PS_TOKEN_CHAR_VALUE:
+    //     result->type = &ps_system_char;
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         result->data.c = lexer->current_token.value.c;
+    //     }
+    //     READ_NEXT_TOKEN;
+    //     break;
+    // case PS_TOKEN_INTEGER_VALUE:
+    //     result->type = &ps_system_integer;
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         result->data.i = lexer->current_token.value.i;
+    //     }
+    //     READ_NEXT_TOKEN;
+    //     break;
+    // case PS_TOKEN_UNSIGNED_VALUE:
+    //     result->type = &ps_system_unsigned;
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         result->data.u = lexer->current_token.value.u;
+    //     }
+    //     READ_NEXT_TOKEN;
+    //     break;
+    // case PS_TOKEN_REAL_VALUE:
+    //     result->type = &ps_system_real;
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         result->data.r = lexer->current_token.value.r;
+    //     }
+    //     READ_NEXT_TOKEN;
+    //     break;
+    // case PS_TOKEN_BOOLEAN_VALUE:
+    //     result->type = &ps_system_boolean;
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         result->data.b = lexer->current_token.value.b;
+    //     }
+    //     READ_NEXT_TOKEN;
+    //     break;
     case PS_TOKEN_PLUS:
         READ_NEXT_TOKEN;
         if (!ps_visit_factor(interpreter, mode, result))

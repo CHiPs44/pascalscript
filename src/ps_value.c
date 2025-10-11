@@ -19,7 +19,7 @@
 
 ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 {
-    ps_value *value = ps_memory_malloc( sizeof(ps_value));
+    ps_value *value = ps_memory_malloc(sizeof(ps_value));
     if (value == NULL)
         return NULL;
     value->type = type;
@@ -191,7 +191,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
     {
         if (debug)
         {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL __TYPE__");
+            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
             return buffer;
         }
         return NULL;
@@ -248,12 +248,16 @@ char *ps_value_to_string(ps_value *value, bool debug)
         break;
     case PS_TYPE_STRING:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"", value->data.s->len, value->data.s->max,
-                     PS_IDENTIFIER_LEN - 10, value->data.s->str);
+            if (value->data.s == NULL)
+                snprintf(buffer, sizeof(buffer) - 1, "NULL!");
+            else
+                snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"", value->data.s->len, value->data.s->max,
+                         PS_IDENTIFIER_LEN - 10, value->data.s->str);
         else
         {
             memset(buffer, 0, sizeof(buffer));
-            memcpy(buffer, value->data.s->str, value->data.s->len);
+            if (value->data.s != NULL)
+                memcpy(buffer, value->data.s->str, value->data.s->len);
         }
         break;
     case PS_TYPE_EXECUTABLE:
@@ -299,7 +303,7 @@ char *ps_value_get_debug_string(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "__TYPE__!" : value->type->name;
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_string(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
     return buffer;

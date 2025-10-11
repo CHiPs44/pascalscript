@@ -32,15 +32,10 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
             TRACE_ERROR("COMPOUND");
         break;
     case PS_TOKEN_IDENTIFIER:
-        // if (strcmp(lexer->current_token.value.identifier, "D6") == 0)
-        //     interpreter->debug = DEBUG_VERBOSE;
-        // fprintf(stderr, " INFO\tIDENTIFIER %s\n", lexer->current_token.value.identifier);
         if (!ps_visit_assignment_or_procedure_call(interpreter, mode))
         {
-            // interpreter->debug = DEBUG_NONE;
             TRACE_ERROR("ASSIGNMENT/PROCEDURE");
         }
-        // interpreter->debug = DEBUG_NONE;
         break;
     case PS_TOKEN_IF:
         if (!ps_visit_if_then_else(interpreter, mode))
@@ -158,11 +153,9 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
         TRACE_ERROR("VARIABLE2");
     }
-    fprintf(stderr, "\n INFO\tASSIGNMENT: variable '%s' is a '%s', type is '%s'\n", variable->name,
-            variable->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
-            : variable->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
-                                                      : "VARIABLE",
-            ps_type_definition_get_name(variable->value->type->value->data.t));
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "\n%cINFO\tASSIGNMENT: variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     result.type = variable->value->type;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("EXPRESSION1");
@@ -354,18 +347,13 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         // Execute procedure or function
         if (mode == MODE_EXEC)
         {
-            // fprintf(stderr, "================================================================================\n");
-            // fprintf(stderr, "EXECUTING PROCEDURE '%s' at line %u, column %u\n", (char *)executable->name, line,
-            // column); ps_token_debug(stderr, "CURRENT", &lexer->current_token); Set cursor to the beginning of the
-            // procedure body
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             {
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
             READ_NEXT_TOKEN;
-            // fprintf(stderr, "================================================================================\n");
-            // Parse procedure body
+            // Run procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;
             // Restore cursor position
@@ -388,11 +376,11 @@ cleanup:
         // Empty byref parameters to avoid freeing values still used in the caller environment
         for (uint8_t i = 0; i < executable->value->data.x->signature->parameter_count; i++)
         {
-            ps_formal_parameter *param = &executable->value->data.x->signature->parameters[i];
-            if (param->byref)
+            ps_formal_parameter *parameter = &executable->value->data.x->signature->parameters[i];
+            if (parameter->byref)
             {
                 ps_symbol *symbol =
-                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &param->name, true);
+                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &parameter->name, true);
                 if (symbol != NULL)
                     symbol->value = NULL;
             }
@@ -406,12 +394,12 @@ cleanup:
 
 /**
  * Visit
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
+ *      write_or_writeln =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
  * Next step:
- *      write_or_writeln        =   ( 'WRITE' | 'WRITELN' ) [ '('
- *                                            expression [ ':' width [ ':' precision ] ]
- *                                      [ ',' expression [ ':' width [ ':' precision ] ] ]*
- *                                    ')' ] ;
+ *      write_or_writeln =   ( 'WRITE' | 'WRITELN' ) [ '('
+ *                                  expression [ ':' width [ ':' precision ] ]
+ *                                  [ ',' expression [ ':' width [ ':' precision ] ] ]*
+ *                              ')' ] ;
  */
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
 {
@@ -442,9 +430,10 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     while (loop)
     {
         result.type = &ps_system_none;
-        fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
         if (!ps_visit_expression(interpreter, mode, &result))
-            TRACE_ERROR("EXPR");
+            TRACE_ERROR("EXPRESSION");
         if (mode == MODE_EXEC)
         {
             if (!ps_procedure_write(interpreter, stdout, &result))
@@ -487,8 +476,9 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     {
         if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
         {
-            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
-                    (char *)identifier);
+            if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n",
+                        mode == MODE_EXEC ? '*' : ' ', (char *)identifier);
             // Assign to the "implicit" Result variable
             symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
             if (symbol == NULL)

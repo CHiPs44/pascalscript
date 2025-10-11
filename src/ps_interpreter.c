@@ -167,46 +167,58 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
 {
-    // ps_value_debug(stderr, "FROM\t", from);
-    // ps_value_debug(stderr, "TO\t", to);
+    if (interpreter->debug >= DEBUG_VERBOSE)
+    {
+        fputc('*', stderr);
+        ps_value_debug(stderr, "FROM\t", from);
+    }
+    // If destination type is NONE, set it to source type
     if (to->type == NULL || to->type == &ps_system_none || to->type->value->data.t->base == PS_TYPE_NONE)
         to->type = from->type;
+    // Same type, just copy value
     if (from->type == to->type)
     {
         to->data = from->data;
-        return true;
+        goto OK;
     }
     // Integer => Unsigned?
     if (from->type->value->data.t->base == PS_TYPE_INTEGER && to->type->value->data.t->base == PS_TYPE_UNSIGNED)
     {
         if (interpreter->range_check && from->data.i < 0)
             return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
-        to->data.u = from->data.i;
-        return true;
+        to->data.u = (ps_unsigned)from->data.i;
+        goto OK;
     }
     // Unsigned => Integer?
     if (from->type->value->data.t->base == PS_TYPE_UNSIGNED && to->type->value->data.t->base == PS_TYPE_INTEGER)
     {
         if (interpreter->range_check && from->data.u > PS_INTEGER_MAX)
             return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
-        to->data.i = from->data.u;
-        return true;
+        to->data.i = (ps_integer)from->data.u;
+        goto OK;
     }
     // Integer => Real?
     if (from->type->value->data.t->base == PS_TYPE_INTEGER && to->type->value->data.t->base == PS_TYPE_REAL)
     {
         // NB: no range check needed, as real can hold all integer values
         to->data.r = (ps_real)from->data.i;
-        return true;
+        goto OK;
     }
     // Unsigned => Real?
     if (from->type->value->data.t->base == PS_TYPE_UNSIGNED && to->type->value->data.t->base == PS_TYPE_REAL)
     {
         // NB: no range check needed, as real can hold all unsigned values
         to->data.r = (ps_real)from->data.u;
-        return true;
+        goto OK;
     }
     return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
+OK:
+    if (interpreter->debug >= DEBUG_VERBOSE)
+    {
+        fputc('*', stderr);
+        ps_value_debug(stderr, "TO\t", to);
+    }
+    return true;
 }
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)

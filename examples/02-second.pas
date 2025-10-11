@@ -4,31 +4,33 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Second;
-Const 
-    FOO = 100;
+Const
+    FOO = 10;
+    BAR = 20;
 Var
-    a, b, c, d: Integer;
-    r: Real;
+    A, B, C, D: Integer;
+    R: Real;
 Begin
-    a := FOO;
-    // WriteLn('a=', a);
-    b := 20;
-    // WriteLn('b=', b);
-    c := a + b;
-    // WriteLn('c=', c);
-    d := (a * b);// Div c;
-    // WriteLn('d=', d);
-    // KO
-    // r := (a * b * 1.0) / (c * 1.0);
-    // r := (1.0 * a * b) / (1.0 * c);
-    r := a * b / 10.0;// + 1.0;
+    A := FOO;
+    B := BAR;
+    // R := A * B + 1.23456789;
+    // WriteLn('R=', R);
+    C := A + B;
+    // WriteLn('C=', C);
+    D := (A * B) Div C;
+    // WriteLn('D=', D);
+    // // KO
+    // R := (A * B * 1.0) / (C * 1.0);
+    // // R := (1.0 * A * B) / (1.0 * C);
+    R := A * B * 1.0;
     WriteLn(
         'FOO=', FOO, 
-        ',a=FOO=', a, 
-        ', b=20=', b, 
-        ', c=a+b=', c, 
-        ', d=a*b/c=', d, 
-        ', r=a*b+1=', r//:0:2
+        ', BAR=', BAR, 
+        ', A=FOO=', A, 
+        ', B=BAR=', B, 
+        ', C=A+B=', C, 
+        ', D=A*B/C=', D, 
+        ', R=A*B+1=', R//:0:2
     );
-    // FOO := 12;
+    // // FOO := 12;
 End.
