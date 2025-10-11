@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not initialize interpreter!\n");
         return EXIT_FAILURE;
     }
-    interpreter->debug = debug ? DEBUG_TRACE : trace ? DEBUG_VERBOSE : DEBUG_NONE;
+    interpreter->debug = trace ? DEBUG_VERBOSE : debug ? DEBUG_TRACE : DEBUG_NONE;
     interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
     interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
 

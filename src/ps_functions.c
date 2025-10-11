@@ -271,7 +271,7 @@ ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value 
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
         modf(value->data.r, &r);
-        result->data.r = r;
+        result->data.r = (ps_real)r;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -287,7 +287,7 @@ ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
-        result->data.r = modf(value->data.r, &int_part);
+        result->data.r = (ps_real)modf(value->data.r, &int_part);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -302,7 +302,7 @@ ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value 
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
-        result->data.r = sin(value->data.r);
+        result->data.r = (ps_real)sin(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -317,7 +317,7 @@ ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value 
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
-        result->data.r = cos(value->data.r);
+        result->data.r = (ps_real)cos(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -336,7 +336,7 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
         if (c == 0.0)
             return PS_ERROR_DIVISION_BY_ZERO;
         result->type = &ps_system_real;
-        result->data.r = sin(value->data.r) / c;
+        result->data.r = (ps_real)sin(value->data.r) / c;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -351,7 +351,7 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
-        result->data.r = atan(value->data.r);
+        result->data.r = (ps_real)atan(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -383,7 +383,7 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value
         if (value->data.r < 0.0)
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_real;
-        result->data.r = sqrt(value->data.r);
+        result->data.r = (ps_real)sqrt(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -398,7 +398,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value 
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
-        result->data.r = exp(value->data.r);
+        result->data.r = (ps_real)exp(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -415,7 +415,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *
         if (value->data.r <= 0.0)
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_real;
-        result->data.r = log(value->data.r);
+        result->data.r = (ps_real)log(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -432,7 +432,7 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
         if (value->data.r <= 0.0)
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_real;
-        result->data.r = log10(value->data.r);
+        result->data.r = (ps_real)log10(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -445,8 +445,6 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
 /******************************************************************************/
 
 /** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
-
-/** @brief GETTICKCOUNT: UNSIGNED - Get milliseconds since program start */
 ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     // NB: value parameter is not used
@@ -469,6 +467,7 @@ int rand_range_integer(int n)
 
     return r % n;
 }
+
 unsigned int rand_range_unsigned(unsigned int n)
 {
     // use rand_range_integer() for small values
@@ -480,8 +479,9 @@ unsigned int rand_range_unsigned(unsigned int n)
     return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX);
 }
 
-/** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value */
-/** @brief either real between 0 and 1 (excluded) or between 0 and N - 1 */
+/** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value,
+ *         either real between 0 and 1 (excluded) or between 0 and N - 1
+ */
 ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     if (value == NULL)

@@ -15,9 +15,10 @@
  */
 bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
+    VISIT_BEGIN("PROGRAM", "");
+
     ps_identifier identifier;
     ps_symbol *program;
-    VISIT_BEGIN("PROGRAM", "");
 
     EXPECT_TOKEN(PS_TOKEN_PROGRAM);
     READ_NEXT_TOKEN;

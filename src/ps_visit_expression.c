@@ -50,18 +50,20 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
                                                    or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            if (result->type == &ps_system_none)
-            {
-                if (interpreter->debug >= DEBUG_VERBOSE)
-                    fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
-                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-                result->type = left.type;
-            }
+            // if (result->type == &ps_system_none)
+            // {
+            //     if (interpreter->debug >= DEBUG_VERBOSE)
+            //         fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
+            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
+            //     result->type = left.type;
+            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("LEFT");
         }
         READ_NEXT_TOKEN;
+        right.type = &ps_system_none;
+        right.data.v = NULL;
         if (!ps_visit_and_expression(interpreter, mode, &right))
             TRACE_ERROR("AND2");
         if (mode == MODE_EXEC)
@@ -107,18 +109,20 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            if (result->type == &ps_system_none)
-            {
-                if (interpreter->debug >= DEBUG_VERBOSE)
-                    fprintf(stderr, "%cINFO\tAND_EXPRESSION: setting result type to '%s'\n",
-                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-                result->type = left.type;
-            }
+            // if (result->type == &ps_system_none)
+            // {
+            //     if (interpreter->debug >= DEBUG_VERBOSE)
+            //         fprintf(stderr, "%cINFO\tAND_EXPRESSION: setting result type to '%s'\n",
+            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
+            //     result->type = left.type;
+            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("AND1");
         }
         READ_NEXT_TOKEN;
+        right.type = &ps_system_none;
+        right.data.v = NULL;
         if (!ps_visit_relational_expression(interpreter, mode, &right))
             TRACE_ERROR("RELATIONAL2");
         if (mode == MODE_EXEC)
@@ -167,18 +171,20 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
                 fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
                         mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
         }
-        if (result->type == &ps_system_none)
-        {
-            if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
-                        mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-            result->type = left.type;
-        }
+        // if (result->type == &ps_system_none)
+        // {
+        //     if (interpreter->debug >= DEBUG_VERBOSE)
+        //         fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
+        //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
+        //     result->type = left.type;
+        // }
         if (!ps_interpreter_copy_value(interpreter, &left, result))
             TRACE_ERROR("COPY");
         VISIT_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN;
+    right.type = &ps_system_none;
+    right.data.v = NULL;
     if (!ps_visit_simple_expression(interpreter, mode, &right))
         TRACE_ERROR("RELATIONAL2");
     if (interpreter->debug >= DEBUG_VERBOSE)
@@ -225,18 +231,20 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
             interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            if (result->type == &ps_system_none)
-            {
-                if (interpreter->debug >= DEBUG_VERBOSE)
-                    fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
-                            mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-                result->type = left.type;
-            }
+            // if (result->type == &ps_system_none)
+            // {
+            //     if (interpreter->debug >= DEBUG_VERBOSE)
+            //         fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
+            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
+            //     result->type = left.type;
+            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("SIMPLE1");
         }
         READ_NEXT_TOKEN;
+        right.type = &ps_system_none;
+        right.data.v = NULL;
         if (!ps_visit_term(interpreter, mode, &right))
             TRACE_ERROR("TERM");
         if (mode == MODE_EXEC)
@@ -281,18 +289,20 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
             interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            if (result->type == &ps_system_none)
-            {
-                if (interpreter->debug >= DEBUG_VERBOSE)
-                    fprintf(stderr, "%cINFO\tTERM: setting result type to '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                            ps_value_type_get_name(left.type->value->data.t->base));
-                result->type = left.type;
-            }
+            // if (result->type == &ps_system_none)
+            // {
+            //     if (interpreter->debug >= DEBUG_VERBOSE)
+            //         fprintf(stderr, "%cINFO\tTERM: setting result type to '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+            //                 ps_value_type_get_name(left.type->value->data.t->base));
+            //     result->type = left.type;
+            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("TERM1");
         }
         READ_NEXT_TOKEN;
+        right.type = &ps_system_none;
+        right.data.v = NULL;
         if (!ps_visit_factor(interpreter, mode, &right))
             TRACE_ERROR("FACTOR");
         if (mode == MODE_EXEC)
@@ -329,6 +339,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
 
     switch (lexer->current_token.type)
     {
+    // ***Parenthesized expression ***
     case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN;
         if (!ps_visit_expression(interpreter, mode, result))
@@ -336,8 +347,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN;
         break;
+    // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
-        // variable, constant, function
         COPY_IDENTIFIER(identifier);
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         if (symbol == NULL)
@@ -348,17 +359,15 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
             if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s', type is '%s'\n", symbol->name,
+                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
                         symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
                         : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
                                                                   : "VARIABLE",
                         ps_type_definition_get_name(symbol->value->type->value->data.t));
             result->type = symbol->value->type;
             if (mode == MODE_EXEC)
-            {
                 if (!ps_interpreter_copy_value(interpreter, symbol->value, result))
                     TRACE_ERROR("COPY");
-            }
             READ_NEXT_TOKEN;
             break;
         case PS_SYMBOL_KIND_FUNCTION:
@@ -367,72 +376,38 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             break;
         default:
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-            break;
         }
-
         break;
+    // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
+        result->type = &ps_system_char;
+        if (mode == MODE_EXEC)
+            result->data.c = lexer->current_token.value.c;
+        READ_NEXT_TOKEN;
+        break;
     case PS_TOKEN_INTEGER_VALUE:
+        result->type = &ps_system_integer;
+        if (mode == MODE_EXEC)
+            result->data.i = lexer->current_token.value.i;
+        READ_NEXT_TOKEN;
+        break;
     case PS_TOKEN_UNSIGNED_VALUE:
+        result->type = &ps_system_unsigned;
+        if (mode == MODE_EXEC)
+            result->data.u = lexer->current_token.value.u;
+        READ_NEXT_TOKEN;
+        break;
     case PS_TOKEN_REAL_VALUE:
+        result->type = &ps_system_real;
+        if (mode == MODE_EXEC)
+            result->data.r = lexer->current_token.value.r;
+        READ_NEXT_TOKEN;
+        break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        if (!ps_interpreter_copy_value(interpreter, &lexer->current_token.value, result))
-            TRACE_ERROR("COPY");
+        result->type = &ps_system_boolean;
+        if (mode == MODE_EXEC)
+            result->data.b = lexer->current_token.value.b;
         READ_NEXT_TOKEN;
-        break;
-    // case PS_TOKEN_CHAR_VALUE:
-    //     result->type = &ps_system_char;
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         result->data.c = lexer->current_token.value.c;
-    //     }
-    //     READ_NEXT_TOKEN;
-    //     break;
-    // case PS_TOKEN_INTEGER_VALUE:
-    //     result->type = &ps_system_integer;
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         result->data.i = lexer->current_token.value.i;
-    //     }
-    //     READ_NEXT_TOKEN;
-    //     break;
-    // case PS_TOKEN_UNSIGNED_VALUE:
-    //     result->type = &ps_system_unsigned;
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         result->data.u = lexer->current_token.value.u;
-    //     }
-    //     READ_NEXT_TOKEN;
-    //     break;
-    // case PS_TOKEN_REAL_VALUE:
-    //     result->type = &ps_system_real;
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         result->data.r = lexer->current_token.value.r;
-    //     }
-    //     READ_NEXT_TOKEN;
-    //     break;
-    // case PS_TOKEN_BOOLEAN_VALUE:
-    //     result->type = &ps_system_boolean;
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         result->data.b = lexer->current_token.value.b;
-    //     }
-    //     READ_NEXT_TOKEN;
-    //     break;
-    case PS_TOKEN_PLUS:
-        READ_NEXT_TOKEN;
-        if (!ps_visit_factor(interpreter, mode, result))
-            TRACE_ERROR("UNARY_PLUS");
-        break;
-    case PS_TOKEN_MINUS:
-    case PS_TOKEN_NOT:
-        unary_operator = lexer->current_token.type;
-        READ_NEXT_TOKEN;
-        if (!ps_visit_factor(interpreter, mode, &factor))
-            TRACE_ERROR("UNARY_MINUS_NOT");
-        if (mode == MODE_EXEC && !ps_function_unary_op(interpreter, &factor, result, unary_operator))
-            TRACE_ERROR("UNARY");
         break;
     case PS_TOKEN_STRING_VALUE:
         result->type = &ps_system_string;
@@ -450,6 +425,21 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_NIL:
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         TRACE_ERROR("NIL");
+    // *** Unary operators ***
+    case PS_TOKEN_PLUS:
+        READ_NEXT_TOKEN;
+        if (!ps_visit_factor(interpreter, mode, result))
+            TRACE_ERROR("UNARY_PLUS");
+        break;
+    case PS_TOKEN_MINUS:
+    case PS_TOKEN_NOT:
+        unary_operator = lexer->current_token.type;
+        READ_NEXT_TOKEN;
+        if (!ps_visit_factor(interpreter, mode, &factor))
+            TRACE_ERROR("UNARY_MINUS_NOT");
+        if (mode == MODE_EXEC && !ps_function_unary_op(interpreter, &factor, result, unary_operator))
+            TRACE_ERROR("UNARY");
+        break;
     default:
         interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
         TRACE_ERROR("?");

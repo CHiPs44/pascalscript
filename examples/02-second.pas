@@ -12,17 +12,17 @@ Var
     R: Real;
 Begin
     A := FOO;
-    B := BAR;
-    // R := A * B + 1.23456789;
-    // WriteLn('R=', R);
-    C := A + B;
-    // WriteLn('C=', C);
-    D := (A * B) Div C;
-    // WriteLn('D=', D);
-    // // KO
-    // R := (A * B * 1.0) / (C * 1.0);
-    // // R := (1.0 * A * B) / (1.0 * C);
-    R := A * B * 1.0;
+    // B := BAR;
+    // // R := A * B + 1.23456789;
+    // // WriteLn('R=', R);
+    // C := 0;//A + B;
+    // // WriteLn('C=', C);
+    // D := 0;//(A * B) Div C;
+    // // WriteLn('D=', D);
+    // // // KO
+    // // R := (A * B * 1.0) / (C * 1.0);
+    // // // R := (1.0 * A * B) / (1.0 * C);
+    R := A * 2.0 * 3.0;
     WriteLn(
         'FOO=', FOO, 
         ', BAR=', BAR, 
