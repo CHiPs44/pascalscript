@@ -5,14 +5,15 @@
 *)
 Program Second;
 Const
-    FOO = 10;
-    BAR = 20;
+    FOO = 1;
+    BAR = 2;
+    BAZ = 3.0;
 Var
     A, B, C, D: Integer;
     R: Real;
 Begin
     A := FOO;
-    // B := BAR;
+    B := BAR;
     // // R := A * B + 1.23456789;
     // // WriteLn('R=', R);
     // C := 0;//A + B;
@@ -22,7 +23,7 @@ Begin
     // // // KO
     // // R := (A * B * 1.0) / (C * 1.0);
     // // // R := (1.0 * A * B) / (1.0 * C);
-    R := A * B * 2.0 * 3.0;
+    R := A * B * 2.0 / BAZ;
     WriteLn(
         'FOO=', FOO, 
         ', BAR=', BAR, 

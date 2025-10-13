@@ -91,7 +91,6 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
         case PS_TOKEN_PROCEDURE:
             if (!ps_visit_procedure_or_function(interpreter, MODE_SKIP, PS_SYMBOL_KIND_PROCEDURE))
                 TRACE_ERROR("PROCEDURE");
-            // ps_symbol_table_dump(NULL, "PROCEDURE1?", ps_interpreter_get_environment(interpreter)->symbols);
             break;
         case PS_TOKEN_FUNCTION:
             if (!ps_visit_procedure_or_function(interpreter, MODE_SKIP, PS_SYMBOL_KIND_FUNCTION))
@@ -129,6 +128,7 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *          AllRights    = &777;
  *          DashPattern0 = %10101010;
  *          DashPattern1 = %01010101;
+ *          Lines        = 'First line' #10 'Second line' + #10#13 + 'Third line';
  * Next step:
  *      IDENTIFIER '=' IDENTIFIER | CONSTANT_EXPRESSION ';'
  * Examples:
