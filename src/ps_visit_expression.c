@@ -190,10 +190,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
 {
     VISIT_BEGIN("SIMPLE_EXPRESSION", "");
 
-    static ps_token_type additive_operators[] = {
-        PS_TOKEN_PLUS, PS_TOKEN_MINUS,
-        // PS_TOKEN_OR, PS_TOKEN_XOR
-    };
+    static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS};
     ps_value left = {.type = result->type, .data.v = NULL};
     ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type additive_operator = PS_TOKEN_NONE;
@@ -221,6 +218,11 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         right.data.v = NULL;
         if (!ps_visit_term(interpreter, mode, &right))
             TRACE_ERROR("TERM");
+        // Promote to real if one operand is real
+        if (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL)
+        {
+            result->type = &ps_system_real;
+        }
         if (mode == MODE_EXEC)
         {
             if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
@@ -272,6 +274,12 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         right.data.v = NULL;
         if (!ps_visit_factor(interpreter, mode, &right))
             TRACE_ERROR("FACTOR");
+        // For multiplication/division, promote to real if one operand is real
+        if ((multiplicative_operator == PS_TOKEN_STAR || multiplicative_operator == PS_TOKEN_SLASH) &&
+            (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL))
+        {
+            result->type = &ps_system_real;
+        }
         if (mode == MODE_EXEC)
         {
             if (!ps_function_binary_op(interpreter, &left, &right, result, multiplicative_operator))

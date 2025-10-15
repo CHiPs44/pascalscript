@@ -261,7 +261,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
                 ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),
                 lexer->error, ps_error_get_message(lexer->error));
         if (interpreter->message[0] != '\0')
-            fprintf(stderr, "ERROR %s", interpreter->message);
+            fprintf(stderr, "ERROR %s\n", interpreter->message);
         ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
         return false;
     }

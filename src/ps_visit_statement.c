@@ -499,6 +499,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             TRACE_ERROR("ASSIGNMENT");
         break;
     case PS_SYMBOL_KIND_CONSTANT:
+        ps_interpreter_set_message(interpreter, "Constant '%s' cannot be assigned", symbol->name);
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_visit_procedure_or_function_call(interpreter, mode, symbol, NULL))
