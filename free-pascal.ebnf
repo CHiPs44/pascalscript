@@ -24,7 +24,7 @@ oct_digit   =   bin_digit | '2' | '3' | '4' |'5' | '6' | '7' ;
 dec_digit   =   oct_digit | '8' | '9' ;
 hex_digit   =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
 
-bin_digit_sequence  =   hex_digit , { hex_digit } ;
+bin_digit_sequence  =   bin_digit , { bin_digit } ;
 oct_digit_sequence  =   oct_digit , { oct_digit } ;
 dec_digit_sequence  =   dec_digit , { dec_digit } ;
 hex_digit_sequence  =   hex_digit , { hex_digit } ;
