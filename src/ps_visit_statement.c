@@ -146,11 +146,13 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
         interpreter->error = PS_ERROR_ASSIGN_TO_CONST;
+        ps_interpreter_set_message(interpreter, "Constant '%s' cannot be assigned", variable->name);
         TRACE_ERROR("CONST");
     }
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
+        ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
         TRACE_ERROR("VARIABLE2");
     }
     if (interpreter->debug >= DEBUG_VERBOSE)
@@ -480,7 +482,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             if (interpreter->debug >= DEBUG_VERBOSE)
                 fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n",
                         mode == MODE_EXEC ? '*' : ' ', (char *)identifier);
-            // Assign to the "implicit" Result variable
+            // Assign to the not so implicit "Result" variable
             symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);

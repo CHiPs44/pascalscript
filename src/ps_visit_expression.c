@@ -50,13 +50,6 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
                                                    or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            // if (result->type == &ps_system_none)
-            // {
-            //     if (interpreter->debug >= DEBUG_VERBOSE)
-            //         fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
-            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-            //     result->type = left.type;
-            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("LEFT");
@@ -109,13 +102,6 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
                                                     and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            // if (result->type == &ps_system_none)
-            // {
-            //     if (interpreter->debug >= DEBUG_VERBOSE)
-            //         fprintf(stderr, "%cINFO\tAND_EXPRESSION: setting result type to '%s'\n",
-            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-            //     result->type = left.type;
-            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("AND1");
@@ -153,6 +139,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
+        // <            <=            >           >=           =               <>
         PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQUAL, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
@@ -161,6 +148,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
 
     if (!ps_visit_simple_expression(interpreter, mode, &left))
         TRACE_ERROR("RELATIONAL1");
+    // No loop, only one relational operator allowed, no a <= b <= c
     relational_operator = ps_parser_expect_token_types(
         interpreter->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
@@ -171,13 +159,6 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
                 fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
                         mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
         }
-        // if (result->type == &ps_system_none)
-        // {
-        //     if (interpreter->debug >= DEBUG_VERBOSE)
-        //         fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to '%s'\n",
-        //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-        //     result->type = left.type;
-        // }
         if (!ps_interpreter_copy_value(interpreter, &left, result))
             TRACE_ERROR("COPY");
         VISIT_END("RELATIONAL1");
@@ -231,13 +212,6 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
             interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            // if (result->type == &ps_system_none)
-            // {
-            //     if (interpreter->debug >= DEBUG_VERBOSE)
-            //         fprintf(stderr, "%cINFO\tOR_EXPRESSION: setting result type to '%s'\n",
-            //                 mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-            //     result->type = left.type;
-            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("SIMPLE1");
@@ -289,13 +263,6 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
             interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            // if (result->type == &ps_system_none)
-            // {
-            //     if (interpreter->debug >= DEBUG_VERBOSE)
-            //         fprintf(stderr, "%cINFO\tTERM: setting result type to '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-            //                 ps_value_type_get_name(left.type->value->data.t->base));
-            //     result->type = left.type;
-            // }
             if (!ps_interpreter_copy_value(interpreter, &left, result))
                 TRACE_ERROR("COPY");
             VISIT_END("TERM1");

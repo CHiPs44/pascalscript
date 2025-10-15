@@ -211,6 +211,9 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
         to->data.r = (ps_real)from->data.u;
         goto OK;
     }
+    ps_interpreter_set_message(interpreter, "Cannot convert value from type '%s' to type '%s'",
+                               ps_value_type_get_name(from->type->value->data.t->base),
+                               ps_value_type_get_name(to->type->value->data.t->base));
     return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
 OK:
     if (interpreter->debug >= DEBUG_VERBOSE)

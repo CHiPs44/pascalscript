@@ -12,8 +12,8 @@ Var
     A, B, C, D: Integer;
     R: Real;
 Begin
-    A := FOO;
-    B := BAR;
+    // A := FOO;
+    // B := BAR;
     // // R := A * B + 1.23456789;
     // // WriteLn('R=', R);
     // C := 0;//A + B;
@@ -23,15 +23,17 @@ Begin
     // // // KO
     // // R := (A * B * 1.0) / (C * 1.0);
     // // // R := (1.0 * A * B) / (1.0 * C);
-    R := A * B * 2.0 / BAZ;
+    // R := A * B / 2.0;// / BAZ;
+    R := FOO * BAR * BAZ;
     WriteLn(
         'FOO=', FOO, 
         ', BAR=', BAR, 
-        ', A=FOO=', A, 
-        ', B=BAR=', B, 
-        ', C=A+B=', C, 
-        ', D=A*B/C=', D, 
-        ', R=A*B+1=', R//:0:2
+        ', BAZ=', BAZ, 
+        ', A=', A, 
+        ', B=', B, 
+        ', C=', C, 
+        ', D=', D, 
+        ', R=', R//:0:2
     );
-    // // FOO := 12;
+    // FOO := 12;
 End.
