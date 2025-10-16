@@ -6,7 +6,7 @@ REPORT_FILE="./report.txt"
 SUCCESS=0
 FAILURE=0
 TOTAL=0
-# Trouver les fichiers exemple* (exemple1, exemple2, ...)
+printf "%-31s %15s %-10s\n" "Example" "ms" "Result" >> "$REPORT_FILE"
 for example in *.pas; do
     OUT_FILE="${example}.out"
     ERR_FILE="${example}.err"
@@ -17,13 +17,13 @@ for example in *.pas; do
         ../pascalscript "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
         RESULT=$?
         END=$(date +%s%N)
-        DURATION=$(( (END - START) / 1000 )) # Duration in microseconds
+        DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
         if [[ ${RESULT} -eq 0 ]]; then
             printf "%-31s %15s %s\n" "${example}" "${DURATION}" "OK"  >> "$REPORT_FILE"
             SUCCESS=$((SUCCESS + 1))
             echo "OK"
         else
-            printf "%-31s %15s %s\n" "${example}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
+            printf "%-31s %15s %-10s\n" "${example}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
             FAILURE=$((FAILURE + 1))
             echo "KO"
         fi
@@ -31,5 +31,5 @@ for example in *.pas; do
     fi
 done
 
-echo "Total: $TOTAL, Success: $SUCCESS, Failure: $FAILURE" | tee -a "$REPORT_FILE"
-echo "Report written to $REPORT_FILE"
+echo "Total: $TOTAL, Success: $SUCCESS, Failure: $FAILURE" >> "$REPORT_FILE"
+cat ${REPORT_FILE}

@@ -5,7 +5,7 @@
 # x86 32 bits:
 # (requires sudo apt install gcc-multilib g++-multilib)
 CC		= LANG=C gcc
-#CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
+# CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
 CFLAGS	= -std=c17 -Wall -Iinclude -ggdb -m32
 
 # ARM 32 bits:

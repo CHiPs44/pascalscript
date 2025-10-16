@@ -155,12 +155,14 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
         TRACE_ERROR("VARIABLE2");
     }
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "\n%cINFO\tASSIGNMENT: variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
+    // if (interpreter->debug >= DEBUG_VERBOSE)
+    fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+            variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     result.type = variable->value->type;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("EXPRESSION1");
+    fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+            variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     if (mode == MODE_EXEC)
     {
         if (!ps_interpreter_copy_value(interpreter, &result, variable->value))
