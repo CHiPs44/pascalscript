@@ -10,11 +10,14 @@ Var
     R : Real;
     Z : Real;
 Begin
+    WriteLn('Example 04: Repeat-Until Loop with Real numbers');
+    WriteLn('--------------------------------------------------------------------------------');
     R := -Limit;
     Repeat
         Z := R * 10.0;
-        Write(Z, ' ');
+        WriteLn(Z);
         R := R + 0.1;
     Until R - 0.01 > Limit;
     WriteLn('O', 'K', '!');
+    WriteLn('--------------------------------------------------------------------------------');
 End.

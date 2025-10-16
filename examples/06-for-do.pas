@@ -6,7 +6,7 @@
 Program Example06ForDo;
 Const 
   Limit = 99;
-  PerLine = 27;
+  PerLine = 25;
 Var 
   I: Integer;
   C: Char;
@@ -41,7 +41,7 @@ Begin
   WriteLn('--------------------------------------------------------------------------------');
   I := 0;
   BOL := False;
-  For C := 'A' sTo 'Z' Do
+  For C := 'A' To 'Z' Do
     Begin
       Write('''', C, '''=#', Ord(C));
       I := I + 1;
@@ -51,7 +51,10 @@ Begin
         BOL := True;
       End
       Else
+      Begin
         Write(' ');
+        BOL := False;
+      End;
     End;
   if Not BOL Then
     WriteLn;

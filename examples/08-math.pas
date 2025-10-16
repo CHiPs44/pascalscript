@@ -4,7 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Example08Math;
-Uses FreePascalCompatibility32;
+//Uses FreePascalCompatibility32;
 { With UTF-8 chars for fun! }
 Begin
   WriteLn('PascalScript version ', PS_VERSION, ' (', PS_BITNESS, ' bits)');

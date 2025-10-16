@@ -4,7 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 (* Won't work with first versions as they lack strings *)
-Program Example01HelloWorld;
+Program Example003Hello;
 Const 
     HelloWorld = '''Hello, ''world''!''';
     H = 'H';
