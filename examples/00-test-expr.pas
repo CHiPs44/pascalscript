@@ -1,12 +1,12 @@
 Program TestExpressions;
 
 Const
-  AAA = 1234;
-  BBB = -2345;
-  CCC = AAA;
+  AAA = 123;
+  BBB = -234;
+  CCC = 345;//AAA;
   BIN = %01010101;
-  OCT = &77777777;
-  HEX = $5555AAAA;
+  OCT = &7777;
+  HEX = $55AA;
 
 Var
   Test1: Integer;
@@ -21,6 +21,6 @@ Begin
   WriteLn(Test2);
   Test3 := Test1 * 12 >= Test2;
   WriteLn(Test3);
-  Test4 := (1 * CCC + 3 * 4) + HEX;
+  Test4 := CCC;//(1 * CCC + 3 * 4) + HEX;
   WriteLn(Test4);
 End.

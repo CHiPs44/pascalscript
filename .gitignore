@@ -66,3 +66,6 @@ test/test_value
 tmp*
 .antlr*
 *.ppu
+examples/*.out
+examples/*.err
+examples/report.txt

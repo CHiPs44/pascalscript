@@ -35,7 +35,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
 
 ps_lexer *ps_lexer_alloc()
 {
-    ps_lexer *lexer = ps_memory_malloc( sizeof(ps_lexer));
+    ps_lexer *lexer = ps_memory_malloc(sizeof(ps_lexer));
     if (lexer == NULL)
         return NULL;
     lexer->buffer = ps_buffer_alloc();
@@ -367,9 +367,8 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         }
         else
         {
-            if (pos >= PS_STRING_MAX_LEN)
+            if (pos > PS_STRING_MAX_LEN)
                 return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
-
             buffer[pos++] = c;
             ADVANCE;
         }
