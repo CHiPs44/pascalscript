@@ -333,12 +333,12 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
-            // if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
-                    symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
-                    : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
-                                                              : "VARIABLE",
-                    ps_type_definition_get_name(symbol->value->type->value->data.t));
+            if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
+                        symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
+                        : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
+                                                                  : "VARIABLE",
+                        ps_type_definition_get_name(symbol->value->type->value->data.t));
             result->type = symbol->value->type;
             if (mode == MODE_EXEC)
                 if (!ps_interpreter_copy_value(interpreter, symbol->value, result))

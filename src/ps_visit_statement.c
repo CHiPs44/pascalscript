@@ -33,9 +33,7 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
         break;
     case PS_TOKEN_IDENTIFIER:
         if (!ps_visit_assignment_or_procedure_call(interpreter, mode))
-        {
             TRACE_ERROR("ASSIGNMENT/PROCEDURE");
-        }
         break;
     case PS_TOKEN_IF:
         if (!ps_visit_if_then_else(interpreter, mode))
@@ -155,14 +153,15 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
         TRACE_ERROR("VARIABLE2");
     }
-    // if (interpreter->debug >= DEBUG_VERBOSE)
-    fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-            variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     result.type = variable->value->type;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("EXPRESSION1");
-    fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-            variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     if (mode == MODE_EXEC)
     {
         if (!ps_interpreter_copy_value(interpreter, &result, variable->value))
@@ -309,7 +308,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     else
     {
         // User defined procedure call
-        // Enter environment for procedure call
+        // Enter environment for procedure
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
             RETURN_ERROR(interpreter->error);
         has_environment = true;
@@ -365,6 +364,18 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             {
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
+            }
+        }
+        // Empty byref parameters to avoid freeing values still used in the caller environment
+        for (uint8_t i = 0; i < executable->value->data.x->signature->parameter_count; i++)
+        {
+            ps_formal_parameter *parameter = &executable->value->data.x->signature->parameters[i];
+            if (parameter->byref)
+            {
+                ps_symbol *symbol =
+                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &parameter->name, true);
+                if (symbol != NULL)
+                    symbol->value = NULL;
             }
         }
         // Exit environment
