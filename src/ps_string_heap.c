@@ -33,7 +33,7 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
     {
         if (heap->data != NULL)
         {
-            // fprintf(stderr, "FREE\tSTRING HEAP: %p, size %d\n", heap, heap->size);
+            fprintf(stderr, "FREE\tSTRING HEAP: %p, size %d\n", heap, heap->size);
             for (size_t i = 0; i < heap->size; i++)
             {
                 if (heap->data[i] != NULL)

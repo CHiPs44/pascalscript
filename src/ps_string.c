@@ -29,6 +29,7 @@ ps_string *ps_string_alloc(ps_string_len max)
 
 void ps_string_free(ps_string *s)
 {
+    fprintf(stderr, "FREE\tSTRING: %p, '%s'\n", s, s->str);
     ps_memory_free(s);
 }
 

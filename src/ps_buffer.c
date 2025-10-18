@@ -21,12 +21,14 @@ ps_buffer *ps_buffer_alloc()
     ps_buffer *buffer = ps_memory_malloc(sizeof(ps_buffer));
     if (buffer == NULL)
         return NULL;
+    buffer->error = PS_ERROR_NONE;
     buffer->file_errno = 0;
-    buffer->text = NULL;
+    buffer->from_file = false;
     buffer->length = 0;
     buffer->line_count = 0;
-    buffer->line_starts = NULL;
     buffer->line_lengths = NULL;
+    buffer->line_starts = NULL;
+    buffer->text = NULL;
     ps_buffer_reset(buffer);
     return buffer;
 }

@@ -4,7 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-// #include <malloc.h>
+#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,8 +27,8 @@ void *ps_memory_malloc(size_t size)
     // FILE *f = fopen("/tmp/malloc_info.log", "a");
     // malloc_info(0, f);
     // fclose(f);
-    // size_t size2 = malloc_usable_size(ptr);
-    // fprintf(stderr, "%04u MALLOC %8u bytes at %p, size %8u\n", mallocations, (unsigned)size, ptr, size2);
+    size_t size2 = malloc_usable_size(ptr);
+    fprintf(stderr, "%04u MALLOC %8u bytes at %p, size %8u\n", mallocations, (unsigned)size, ptr, size2);
     return ptr;
 }
 
@@ -40,8 +40,8 @@ void *ps_memory_calloc(size_t count, size_t size)
     callocations += 1;
     callocated += count * size;
     void *ptr = calloc(count, size);
-    // size_t size2 = malloc_usable_size(ptr);
-    // fprintf(stderr, "%04u CALLOC %8u bytes at %p, size %8u\n", callocations, (unsigned)(count * size), ptr, size2);
+    size_t size2 = malloc_usable_size(ptr);
+    fprintf(stderr, "%04u CALLOC %8u bytes at %p, size %8u\n", callocations, (unsigned)(count * size), ptr, size2);
     return ptr;
 }
 
@@ -49,7 +49,14 @@ void *ps_memory_realloc(void *ptr, size_t size)
 {
     reallocations += 1;
     reallocated += size;
-    return realloc(ptr, size);
+    char old[16] = {0};
+    size_t size1 = malloc_usable_size(old);
+    snprintf(old, sizeof(old) - 1, "%p", ptr);
+    void *new = realloc(ptr, size);
+    size_t size2 = malloc_usable_size(new);
+    fprintf(stderr, "%04u REALLOC %8u bytes at %s => %p, size %8u => %8u\n", reallocations, (unsigned)(size), old, new,
+            size1, size2);
+    return new;
 }
 
 void ps_memory_free(void *ptr)
