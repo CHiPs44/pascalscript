@@ -52,6 +52,8 @@ extern "C"
   ps_error ps_function_tan            (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_trunc          (ps_interpreter *interpreter, ps_value *value, ps_value *result);
 
+  ps_error ps_function_length         (ps_interpreter *interpreter, ps_value *value, ps_value *result);
+
   ps_error ps_function_get_tick_count (ps_interpreter *interpreter, ps_value *value, ps_value *result);
   ps_error ps_function_random         (ps_interpreter *interpreter, ps_value *value, ps_value *result);
 

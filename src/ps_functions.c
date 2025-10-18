@@ -441,6 +441,20 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
 }
 
 /******************************************************************************/
+/* STRINGS                                                                    */
+/******************************************************************************/
+
+/** @brief LENGTH(): UNSIGNED - Get string length */
+ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    if (value->type->value->data.t->base != PS_TYPE_STRING)
+        return PS_ERROR_EXPECTED_STRING;
+    result->type = &ps_system_unsigned;
+    result->data.u = value->data.s->len;
+    return PS_ERROR_NONE;
+}
+
+/******************************************************************************/
 /* OTHER                                                                      */
 /******************************************************************************/
 

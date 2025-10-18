@@ -126,6 +126,7 @@ PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , even          , "EVEN"  
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , exp           , "EXP"         , &ps_function_exp              );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , frac          , "FRAC"        , &ps_function_frac             );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , int           , "INT"         , &ps_function_int              );
+PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , length        , "LENGTH"      , &ps_function_length           );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , ln            , "LN"          , &ps_function_ln               );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , log           , "LOG"         , &ps_function_log              );
 PS_SYSTEM_CALLABLE(function , PS_SYMBOL_KIND_FUNCTION , odd           , "ODD"         , &ps_function_odd              );
@@ -239,6 +240,7 @@ bool ps_system_init(ps_environment *system)
     error = error || !ps_environment_add_symbol(system, &ps_system_function_exp);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_frac);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_int);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_length);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_ln);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_log);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_odd);

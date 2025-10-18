@@ -61,12 +61,12 @@ extern "C"
     /// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_copy(ps_string *a, ps_string_len start, ps_string_len length);
 
-    /// @brief Concatenate two strings into another one if lengths are OK
+    /// @brief Compare two strings
     /// @return -1 if a<b, 0 if a=b, 1 if a>b (same as strcmp)
     int ps_string_compare(ps_string *a, ps_string *b);
 
     /// @brief Search for substring in a string, cf. https://www.freepascal.org/docs-html/rtl/system/pos.html
-    /// @example position('ABCDEFGHI', 'CDEFG') => 3
+    /// @example position('CDEFG', 'ABCDEFGHI') => 3
     /// @return position of substring in string or 0 if not found
     ps_string_len ps_string_position(ps_string *substr, ps_string *s);
 
