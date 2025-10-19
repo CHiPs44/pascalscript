@@ -192,8 +192,8 @@ int main(int argc, char *argv[])
         // program_file = "04-repeat-until-real.pas";
         // program_file = "05-while-do.pas";
         // program_file = "06-for-do.pas";
-        // program_file = "07-random.pas";
-        program_file = "080-math.pas";
+        program_file = "070-random.pas";
+        // program_file = "080-math.pas";
         // program_file = "09-boolean.pas";
         // program_file = "10-strings.pas";
         // program_file = "12-toayue-powersoftwo.pas";

@@ -6,8 +6,9 @@
 # (requires sudo apt install gcc-multilib g++-multilib)
 CC		= LANG=C gcc
 # CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
-CFLAGS	= -m32 -O3 -std=c17 -Wall -Iinclude -ggdb
-# CFLAGS	= -m32 -O3 -std=c17 -Wall -Iinclude -ggdb -fsanitize=address -fsanitize=leak -static-libasan 
+# CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb
+CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3
+# CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3 -fsanitize=address -fsanitize=leak -static-libasan 
 
 # ARM 32 bits:
 # (requires apt install qemu-user gcc-arm-linux-gnueabi)
@@ -22,12 +23,35 @@ PROJECT  = pascalscript
 SOURCES  = $(wildcard src/*.c)
 INCLUDES = $(wildcard include/*.h)
 
-all: $(PROJECT)
+DEPDIR := .deps
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+DEPFILES := $(SOURCES:src/%.c=$(DEPDIR)/%.d)
+#$(shell echo DEPFILES is ${DEPFILES})
 
-$(PROJECT): $(SOURCES) $(INCLUDES)
-	$(CC) $(CFLAGS) -o $(PROJECT) $(SOURCES) $(CLIBS)
+$(DEPFILES):
+	include $(wildcard $(DEPFILES))
+
+$(PROJECT): obj/%.o
+	echo $(CC) $(CFLAGS) -o $@ -c $< $(CLIBS)
+
+%.o : %.c
+%.o : %.c $(DEPDIR)/%.d | $(DEPDIR)
+# 	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# src/%.d: src/%.c $(INCLUDES)
+# 	$(CC) -MM $(CFLAGS) $(SOURCES) > $@
+
+$(DEPDIR): ; @mkdir -p $@
+
+all: $(PROJECT)
 
 clean:
 	rm -f $(PROJECT)
+	rm -f obj/*.o
+	rm -f ${DEPDIR}/*.d
+
+obj/%.o: src/%.c ${DEPDIR}/%.d
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # EOF

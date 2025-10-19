@@ -448,10 +448,6 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         // System functions
         if (function == &ps_system_function_random)
         {
-            // interpreter->debug = DEBUG_VERBOSE;
-            fprintf(stderr, "********************************************************************************\n");
-            fprintf(stderr, "%cINFO\tFUNCTION_CALL: RANDOM function\n", mode == MODE_EXEC ? '*' : ' ');
-            fprintf(stderr, "********************************************************************************\n");
             // Random function can be called with 2 signatures:
             //  1. Random or Random() => Real from 0.0 to 1.0 excluded
             //  2. Random(Integer|Unsigned) => Integer|Unsigned
@@ -469,7 +465,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
                 {
                     if (!ps_visit_expression(interpreter, mode, &arg))
                         TRACE_ERROR("PARAMETER");
-                    if (arg.type != &ps_system_integer && arg.type != &ps_system_unsigned)
+                    if (mode == MODE_EXEC && arg.type != &ps_system_integer && arg.type != &ps_system_unsigned)
                         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
                     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
                     result->type = arg.type;
@@ -510,11 +506,6 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             interpreter->error = ps_function_exec(interpreter, function, null_arg ? NULL : &arg, result);
             if (interpreter->error != PS_ERROR_NONE)
                 TRACE_ERROR("FUNCTION");
-            fprintf(stderr, "********************************************************************************\n");
-            fprintf(stderr, "%cINFO\tFUNCTION_CALL: Result='%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    ps_value_get_debug_string(result));
-            fprintf(stderr, "********************************************************************************\n");
-            // interpreter->debug = DEBUG_NONE;
         }
     }
     else
