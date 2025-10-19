@@ -37,19 +37,22 @@ Next steps should be implementing:
 
 ## Performance
 
-As of 2025-09-19, it is not too bad but far less than Lua or Python.
+As of 2025-09-19, using GCC without optimizations, it is not too bad but far less than Lua or Python.
 
-For 100,000 iterations, see `examples/13-big-loops.*`¹:
+On 2025-10-19, using GCC optimization `-O3`, execution times reduced considerably.
 
-| Interpreter   |     For |    While |  Repeat² |
-| ------------- | ------: | -------: | -------: |
-| PascalScript  |  121 ms |   407 ms |   344 ms |
-| Lua 5.4.6     | 0.37 ms |  0.85 ms |  0.92 ms |
-| Python 3.12.3 | 4.87 ms | 15.27 ms | 12.27 ms |
+For 100,000 iterations, see `examples/13-big-loops.[pas|lua|py]`¹:
 
-There are big differences between `For` and `Repeat` / `While` loops for each language, and Lua runs faster.
+| Interpreter               |     For |    While |  Repeat² |
+| ------------------------- | ------: | -------: | -------: |
+| PascalScript (2025-09-19) |  121 ms |   407 ms |   344 ms |
+| PascalScript (2025-10-19) |   66 ms |   266 ms |   232 ms |
+| Lua 5.4.6                 | 0.37 ms |  0.85 ms |  0.92 ms |
+| Python 3.12.3             | 4.87 ms | 15.27 ms | 12.27 ms |
 
-¹ on my Lenovo Thinkpad P70 / Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
+There are big differences between `For` and `Repeat` / `While` loops for each language, and Lua runs much faster.
+
+¹ on my Lenovo Thinkpad P70 / Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with Ubuntu 24.04 LTS and GCC 13.3.0
 
 ² simulated with `while` for Python
 

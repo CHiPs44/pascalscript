@@ -162,11 +162,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (interpreter->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
-    if (mode == MODE_EXEC)
-    {
-        if (!ps_interpreter_copy_value(interpreter, &result, variable->value))
-            TRACE_ERROR("COPY");
-    }
+    if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
+        TRACE_ERROR("COPY");
 
     VISIT_END("OK");
 }
@@ -633,12 +630,13 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("FOR_DO", "");
+
     ps_value start = {.type = &ps_system_none, .data.v = NULL};
     ps_value finish = {.type = &ps_system_none, .data.v = NULL};
     ps_value step = {.type = &ps_system_none, .data.v = NULL};
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
-    ps_identifier identifier;
-    ps_symbol *variable;
+    ps_identifier identifier = {0};
+    ps_symbol *variable = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
 

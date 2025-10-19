@@ -38,7 +38,8 @@ ps_interpreter *ps_interpreter_alloc()
     if (interpreter->parser == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate system environment
-    interpreter->environments[0] = ps_environment_alloc(NULL, (ps_identifier *)"SYSTEM", PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    ps_identifier system = "SYSTEM";
+    interpreter->environments[0] = ps_environment_alloc(NULL, &system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
     if (interpreter->environments[0] == NULL)
         return ps_interpreter_free(interpreter);
     // Initialize system environment

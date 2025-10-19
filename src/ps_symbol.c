@@ -17,7 +17,7 @@ static uint32_t ps_symbol_auto_index = 0;
 
 ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value)
 {
-    ps_symbol *symbol = (ps_symbol *)ps_memory_malloc( sizeof(ps_symbol));
+    ps_symbol *symbol = (ps_symbol *)ps_memory_malloc(sizeof(ps_symbol));
     if (symbol == NULL)
         return NULL;
     symbol->kind = kind;
@@ -93,7 +93,9 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 
 char *ps_symbol_dump_value(ps_symbol *symbol)
 {
-    static char buffer[128];
+    static char buffer[192];
+    static char value[48];
+    snprintf(value, sizeof(value) - 1, "%s", ps_value_get_debug_string(symbol == NULL ? NULL : symbol->value));
     // clang-format off
     snprintf(buffer, sizeof(buffer) - 1, 
         "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s", 
@@ -101,7 +103,7 @@ char *ps_symbol_dump_value(ps_symbol *symbol)
         symbol == NULL ? "NULL!" : symbol->name, 
         symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
         symbol == NULL ? "NULL!" : symbol->value->type->name,
-        symbol == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value)
+        symbol == NULL ? "NULL!" : value
     );
     // clang-format on
     return buffer;

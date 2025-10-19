@@ -33,7 +33,7 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
     {
         if (heap->data != NULL)
         {
-            fprintf(stderr, "FREE\tSTRING HEAP: %p, size %d\n", heap, heap->size);
+            // fprintf(stderr, "FREE\tSTRING HEAP: %p, size %zu\n", heap, heap->size);
             for (size_t i = 0; i < heap->size; i++)
             {
                 if (heap->data[i] != NULL)
@@ -97,7 +97,8 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
                 return NULL; // errno = ENOMEM
             s->max = len;
             s->len = len;
-            strncpy((char *)s->str, z, len);
+            // strncpy((char *)s->str, z, len);
+            memcpy((char *)s->str, z, len);
             s->str[len] = '\0'; // Ensure null-termination
             heap->data[index] = s;
             heap->used++;
@@ -143,8 +144,7 @@ void ps_string_heap_dump(ps_string_heap *heap, FILE *f)
         if (heap->data[i] != NULL)
         {
             used += 1;
-            fprintf(f, "  [%zu] %s (max=%zu, len=%zu)\n", i, heap->data[i]->str, heap->data[i]->max,
-                    heap->data[i]->len);
+            fprintf(f, "  [%zu] %s (max=%u, len=%u)\n", i, heap->data[i]->str, heap->data[i]->max, heap->data[i]->len);
         }
         else
         {

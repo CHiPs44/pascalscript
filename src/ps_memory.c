@@ -5,6 +5,8 @@
 */
 
 #include <malloc.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,44 +20,70 @@ size_t callocated = 0;
 size_t reallocated = 0;
 size_t frees = 0;
 
+bool ps_memory_debug_enabled = false;
+
 void *ps_memory_malloc(size_t size)
 {
     mallocations += 1;
-    // fprintf(stderr, "%04d MALLOC %8u bytes at ?\n", mallocations, (unsigned)size);
-    mallocated += size;
+    if (ps_memory_debug_enabled)
+        fprintf(stderr, "%04zu MALLOC %8zu bytes at ?\n", mallocations, size);
     void *ptr = malloc(size);
-    // FILE *f = fopen("/tmp/malloc_info.log", "a");
-    // malloc_info(0, f);
-    // fclose(f);
-    size_t size2 = malloc_usable_size(ptr);
-    fprintf(stderr, "%04u MALLOC %8u bytes at %p, size %8u\n", mallocations, (unsigned)size, ptr, size2);
+    if (ptr != NULL)
+        mallocated += size;
+    if (ps_memory_debug_enabled)
+    {
+        // FILE *f = fopen("/tmp/malloc_info.log", "w");
+        // malloc_info(0, f);
+        // fclose(f);
+        size_t size2 = ptr == NULL ? 0 : malloc_usable_size(ptr);
+        fprintf(stderr, "%04zu MALLOC %8zu bytes at %p, size %8zu\n", mallocations, size, ptr, size2);
+    }
     return ptr;
 }
 
 void *ps_memory_calloc(size_t count, size_t size)
 {
-    if (size == 0 || count == 0)
-        return NULL;
-    // fprintf(stderr, "WARNING: CALLOC with count=%u size=%u\n", (unsigned)count, (unsigned)size);
     callocations += 1;
+    if (size == 0 || count == 0)
+    {
+        if (ps_memory_debug_enabled)
+            fprintf(stderr, "WARNING: CALLOC with count=%zu size=%zu\n", count, size);
+        return NULL;
+    }
     callocated += count * size;
     void *ptr = calloc(count, size);
-    size_t size2 = malloc_usable_size(ptr);
-    fprintf(stderr, "%04u CALLOC %8u bytes at %p, size %8u\n", callocations, (unsigned)(count * size), ptr, size2);
+    if (ps_memory_debug_enabled)
+    {
+        size_t size2 = ptr == NULL ? 0 : malloc_usable_size(ptr);
+        fprintf(stderr, "%04zu CALLOC %8zu bytes at %p, size %8zu\n", callocations, count * size, ptr, size2);
+    }
     return ptr;
 }
 
 void *ps_memory_realloc(void *ptr, size_t size)
 {
+    char old[16] = {0};
+    size_t size1 = 0;
+    size_t size2 = 0;
+    void *new = NULL;
+
     reallocations += 1;
     reallocated += size;
-    char old[16] = {0};
-    size_t size1 = malloc_usable_size(old);
-    snprintf(old, sizeof(old) - 1, "%p", ptr);
-    void *new = realloc(ptr, size);
-    size_t size2 = malloc_usable_size(new);
-    fprintf(stderr, "%04u REALLOC %8u bytes at %s => %p, size %8u => %8u\n", reallocations, (unsigned)(size), old, new,
-            size1, size2);
+    if (ps_memory_debug_enabled)
+    {
+        // avoid use after free in debug output
+        size1 = malloc_usable_size(old);
+        snprintf(old, sizeof(old) - 1, "%p", ptr);
+        new = realloc(ptr, size);
+        size2 = malloc_usable_size(new);
+        fprintf(stderr, "%04zu REALLOC %8zu bytes at %s => %p, size %8zu => %8zu\n", reallocations, size, old, new,
+                size1, size2);
+    }
+    else
+    {
+        new = realloc(ptr, size);
+    }
+
     return new;
 }
 
@@ -73,11 +101,11 @@ void ps_memory_debug(FILE *output)
         output = stderr;
     fprintf(output, "        | calls    | bytes    |\n");
     fprintf(output, "        |----------|----------|\n");
-    fprintf(output, "malloc  | %8u | %8u |\n", mallocations, mallocated);
-    fprintf(output, "calloc  | %8u | %8u |\n", callocations, callocated);
-    fprintf(output, "realloc | %8u | %8u |\n", reallocations, reallocated);
+    fprintf(output, "malloc  | %8zu | %8zu |\n", mallocations, mallocated);
+    fprintf(output, "calloc  | %8zu | %8zu |\n", callocations, callocated);
+    fprintf(output, "realloc | %8zu | %8zu |\n", reallocations, reallocated);
     fprintf(output, "        |----------|----------|\n");
-    fprintf(output, "totals  | %8u | %8u |\n", total_allocations, total_allocated);
+    fprintf(output, "totals  | %8zu | %8zu |\n", total_allocations, total_allocated);
     fprintf(output, "        |----------|----------|\n");
-    fprintf(output, "free    | %8u |        - |\n", frees);
+    fprintf(output, "free    | %8zu |        - |\n", frees);
 }

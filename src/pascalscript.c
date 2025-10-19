@@ -150,6 +150,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    /* Display banner */
+    if (verbose)
+    {
+        fprintf(stdout, "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION_MAJOR,
+                PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+    }
+
     current_path = getcwd(NULL, 0);
     size_t len = strlen(current_path);
     if (verbose)
@@ -186,7 +193,7 @@ int main(int argc, char *argv[])
         // program_file = "05-while-do.pas";
         // program_file = "06-for-do.pas";
         // program_file = "07-random.pas";
-        // program_file = "08-math.pas";
+        program_file = "080-math.pas";
         // program_file = "09-boolean.pas";
         // program_file = "10-strings.pas";
         // program_file = "12-toayue-powersoftwo.pas";
@@ -195,16 +202,21 @@ int main(int argc, char *argv[])
         // program_file = "22-procedure2.pas";
         // program_file = "30-function0.pas";
         // program_file = "41-circle.pas";
-        snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
+        if (program_file != NULL)
+            snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
+        else
+            source_file[0] = '\0';
     }
     ps_memory_free(current_path);
     current_path = NULL;
-
-    /* Display banner */
+    if (strlen(source_file) == 0)
+    {
+        fprintf(stderr, "No file to run!\n");
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
     if (verbose)
     {
-        fprintf(stdout, "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION_MAJOR,
-                PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
         fprintf(stderr, "Source file: %s\n", source_file);
     }
 

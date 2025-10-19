@@ -6,7 +6,8 @@
 # (requires sudo apt install gcc-multilib g++-multilib)
 CC		= LANG=C gcc
 # CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
-CFLAGS	= -std=c17 -Wall -Iinclude -ggdb -m32
+CFLAGS	= -m32 -O3 -std=c17 -Wall -Iinclude -ggdb
+# CFLAGS	= -m32 -O3 -std=c17 -Wall -Iinclude -ggdb -fsanitize=address -fsanitize=leak -static-libasan 
 
 # ARM 32 bits:
 # (requires apt install qemu-user gcc-arm-linux-gnueabi)

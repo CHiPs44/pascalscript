@@ -53,7 +53,9 @@ char *ps_token_dump_value(ps_token *token)
         break;
     case PS_TOKEN_STRING_VALUE:
         type = "STRING";
-        strncpy(string, (char *)token->value.s, sizeof(string) - 1);
+        // strncpy(string, (char *)token->value.s, sizeof(string) - 1);
+        memset(string, 0, sizeof(string));
+        memcpy(string, (char *)token->value.s, sizeof(string) - 1);
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, string);
         break;
     case PS_TOKEN_IDENTIFIER:

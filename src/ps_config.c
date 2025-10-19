@@ -14,13 +14,9 @@
 #include "ps_value_data.h"
 #include "ps_version.h"
 
-#if __WORDSIZE == 64
-#define FMT_SIZE "lu"
-#else
-#define FMT_SIZE "u"
-#endif
+#define FMT_SIZE "zu"
 
-#define STRING(Z) #Z
+#define STRING(__STRING__) #__STRING__
 
 #define REPORT_FORMAT(__MACRO__, __FORMAT__) fprintf(output, "┃ %-36s ┃ %-37" __FORMAT__ " ┃\n", #__MACRO__, __MACRO__)
 

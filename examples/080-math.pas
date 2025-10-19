@@ -10,7 +10,7 @@ Begin
   WriteLn('PascalScript version ', PS_VERSION, ' (', PS_BITNESS, ' bits)'                   );
   WriteLn('--------------------------------------------------------------------------------');
   WriteLn('Math constants and functions'                                                    );
-  For I := 1 To 10 Do
+  For I := 1 To 2 Do
   Begin
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('ε        = ', EpsReal                                                            );
@@ -18,8 +18,8 @@ Begin
     WriteLn('Max      = ', MaxReal                                                            );
     WriteLn('1.2E+34  = ', 1.23456789E+34                                                     );
     WriteLn('1.2E-34  = ', 1.23456789e-34                                                     );
-    WriteLn('1/3      = ', Abs(-1/3)                                                          );
-    WriteLn('1.0/3.0  = ', Abs(1.0/3.0)                                                       );
+    WriteLn('|-1/3|   = ', Abs(-1/3)                                                          );
+    WriteLn('1.0/3.0  = ', 1.0/3.0                                                            );
     WriteLn('π        = ', Pi                                                                 );
     WriteLn('trunc(π) = ', Trunc(Pi)                                                          );
     WriteLn('frac(π)  = ', Frac(Pi)                                                           );
@@ -29,6 +29,7 @@ Begin
     WriteLn('tan(π/4) = ', Tan(Pi / 4.0)                                                      );
     WriteLn('atn(1)   = ', ArcTan(1.0)                                                        );
     WriteLn('999²     = ', Sqr(999.0)                                                         );
+    WriteLn('√2       = ', Sqrt(2.0)                                                          );
     WriteLn('√2/2     = ', Sqrt(2.0) / 2.0                                                    );
     WriteLn('e        = ', Exp(1.0)                                                           );
     WriteLn('round(e) = ', Round(Exp(1.0))                                                    );

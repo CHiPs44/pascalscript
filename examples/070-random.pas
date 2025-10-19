@@ -5,58 +5,59 @@
 *)
 Program Example07Random;
 Const
-    MaxD20 = 98;
-    MaxRandom = 100;
+    MaxD20 = 2;//98;
+    // MaxRandom = 100;
 Var
     I: Integer;
-    D20, Min, Max, Total: Integer;
-    R, MinR, MaxR, TotalR: Real;
+    D20: Integer; //, Min, Max, Total: Integer;
+    // R, MinR, MaxR, TotalR: Real;
 Begin
-    Randomize;
-    WriteLn('--------------------------------------------------------------------------------');
-    WriteLn(MaxD20, ' random d20 rolls:');
-    Min := MaxInt;
-    Max := 0;
+    // Randomize;
+    // WriteLn('--------------------------------------------------------------------------------');
+    // WriteLn(MaxD20, ' random d20 rolls:');
+    // Min := MaxInt;
+    // Max := 0;
     For I := 1 To MaxD20 Do
     Begin
-        D20 := Random(10 + 10) + 1;
-        Write('d20(');
-        If I < 10 Then Write(' ');
-        Write(I, ')=');
-        If D20 < 10 Then Write(' ');
-        Write(D20);
-        If I Mod 7 = 0 Then WriteLn Else Write(' ');
-        if D20 < Min Then Min := D20;
-        if D20 > Max Then Max := D20;
-        Total := Total + D20;
+        WriteLn('I=', I);
+        D20 := Random(10 + 10);// + 1;
+        // Write('d20(');
+        // If I < 10 Then Write(' ');
+        // Write(I, ')=');
+        // If D20 < 10 Then Write(' ');
+        // Write(D20);
+        // If I Mod 7 = 0 Then WriteLn Else Write(' ');
+        // if D20 < Min Then Min := D20;
+        // if D20 > Max Then Max := D20;
+        // Total := Total + D20;
     End;
-    WriteLn;
-    WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Trunc((0.0 + Total) / (0.0 + MaxD20)));
-    WriteLn('--------------------------------------------------------------------------------');
-    WriteLn(MaxRandom, ' random real numbers [0.0..1.0):');
-    MinR := MaxReal;
-    MaxR := 0.0;
-    TotalR := 0;
-    For I := 0 To MaxRandom Do
-    Begin
-        If I Mod 2 = 0 Then R := Random Else R := Random();
-        If I < 10 Then Write(' ');
-        Write(I, ': ', R);
-        If (I+1) Mod 5 = 0 Then WriteLn Else Write(' ');
-        if R < MinR Then MinR := R;
-        if R > MaxR Then MaxR := R;
-        TotalR := TotalR + R;
-    End;
-    Write('Min=', MinR, ', Max=', MaxR);
-    WriteLn(' Mean=', TotalR / MaxRandom);
-    WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('Random real d6:');
-    // OK
-    R := 1.0 + Random(6);
-    // KO
-    // R := Random(6) + 1;
-    // KO
-    // R := Random(6) + 1.0;
-    WriteLn('R=', R);
-    WriteLn('OK!');
+    // WriteLn;
+    // WriteLn('Min=', Min, ', Max=', Max, ' Mean=', Trunc((0.0 + Total) / (0.0 + MaxD20)));
+    // WriteLn('--------------------------------------------------------------------------------');
+    // WriteLn(MaxRandom, ' random real numbers [0.0..1.0):');
+    // MinR := MaxReal;
+    // MaxR := 0.0;
+    // TotalR := 0;
+    // For I := 0 To MaxRandom Do
+    // Begin
+    //     If I Mod 2 = 0 Then R := Random Else R := Random();
+    //     If I < 10 Then Write(' ');
+    //     Write(I, ': ', R);
+    //     If (I+1) Mod 5 = 0 Then WriteLn Else Write(' ');
+    //     if R < MinR Then MinR := R;
+    //     if R > MaxR Then MaxR := R;
+    //     TotalR := TotalR + R;
+    // End;
+    // Write('Min=', MinR, ', Max=', MaxR);
+    // WriteLn(' Mean=', TotalR / MaxRandom);
+    // WriteLn('--------------------------------------------------------------------------------');
+    // WriteLn('Random real d6:');
+    // // OK
+    // R := 1.0 + Random(6);
+    // // KO
+    // // R := Random(6) + 1;
+    // // KO
+    // // R := Random(6) + 1.0;
+    // WriteLn('R=', R);
+    // WriteLn('OK!');
 End.
