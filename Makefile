@@ -10,48 +10,53 @@ CC		= LANG=C gcc
 CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3
 # CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3 -fsanitize=address -fsanitize=leak -static-libasan 
 
-# ARM 32 bits:
-# (requires apt install qemu-user gcc-arm-linux-gnueabi)
-# (and export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi or -static)
-# (incompatible with gcc-multilib / g++-multilib)
-#CC		= arm-linux-gnueabi-gcc
-#CC		= arm-none-eabi-gcc
-#CFLAGS	= -static -std=c17 -Wall -Iinclude -ggdb
-
 CLIBS    = -lm
+
 PROJECT  = pascalscript
-SOURCES  = $(wildcard src/*.c)
-INCLUDES = $(wildcard include/*.h)
+SRCDIR   = src
+INCDIR   = include
+OBJDIR   = .obj
+DEPDIR   = .deps
 
-DEPDIR := .deps
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
-DEPFILES := $(SOURCES:src/%.c=$(DEPDIR)/%.d)
-#$(shell echo DEPFILES is ${DEPFILES})
+SOURCES  = $(wildcard $(SRCDIR)/*.c)
+OBJECTS  = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+DEPFILES = $(SOURCES:$(SRCDIR)/%.c=$(DEPDIR)/%.d)
 
-$(DEPFILES):
-	include $(wildcard $(DEPFILES))
+# dependency flags: generate .d files in $(DEPDIR) and set proper target
+DEPFLAGS = -MMD -MP -MF $(DEPDIR)/$*.d -MT $@
 
-$(PROJECT): obj/%.o
-	echo $(CC) $(CFLAGS) -o $@ -c $< $(CLIBS)
+# include dependency files (skip when running clean)
+ifneq ($(MAKECMDGOALS),clean)
+-include $(wildcard $(DEPFILES))
+endif
 
-%.o : %.c
-%.o : %.c $(DEPDIR)/%.d | $(DEPDIR)
-# 	$(COMPILE.c) $(OUTPUT_OPTION) $<
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# src/%.d: src/%.c $(INCLUDES)
-# 	$(CC) -MM $(CFLAGS) $(SOURCES) > $@
-
-$(DEPDIR): ; @mkdir -p $@
+.PHONY: all clean test dirs
 
 all: $(PROJECT)
 
-clean:
-	rm -f $(PROJECT)
-	rm -f obj/*.o
-	rm -f ${DEPDIR}/*.d
+# link
+$(PROJECT): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(CLIBS)
 
-obj/%.o: src/%.c ${DEPDIR}/%.d
+# compile: create object and dependency file
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | dirs
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
+
+# fallback generic rule
+%.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+dirs:
+	@mkdir -p $(OBJDIR) $(DEPDIR)
+
+test:
+	@echo "SOURCES: $(SOURCES)"
+	@echo "OBJECTS: $(OBJECTS)"
+	@echo "DEPFILES: $(DEPFILES)"
+
+clean:
+	-rm -f $(PROJECT)
+	-rm -f $(OBJDIR)/*.o
+	-rm -f $(DEPDIR)/*.d
 
 # EOF

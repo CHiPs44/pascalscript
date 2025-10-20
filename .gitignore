@@ -69,5 +69,5 @@ tmp*
 examples/*.out
 examples/*.err
 examples/report.txt
-obj/
+.obj/
 .deps/
