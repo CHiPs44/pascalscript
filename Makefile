@@ -30,9 +30,17 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(wildcard $(DEPFILES))
 endif
 
-.PHONY: all clean test dirs
+.PHONY: all clean dirs
 
 all: $(PROJECT)
+
+clean:
+	-rm -f $(PROJECT)
+	-rm -f $(OBJDIR)/*.o
+	-rm -f $(DEPDIR)/*.d
+
+dirs:
+	@mkdir -p $(OBJDIR) $(DEPDIR)
 
 # link
 $(PROJECT): $(OBJECTS)
@@ -41,22 +49,5 @@ $(PROJECT): $(OBJECTS)
 # compile: create object and dependency file
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | dirs
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
-
-# fallback generic rule
-%.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-dirs:
-	@mkdir -p $(OBJDIR) $(DEPDIR)
-
-test:
-	@echo "SOURCES: $(SOURCES)"
-	@echo "OBJECTS: $(OBJECTS)"
-	@echo "DEPFILES: $(DEPFILES)"
-
-clean:
-	-rm -f $(PROJECT)
-	-rm -f $(OBJDIR)/*.o
-	-rm -f $(DEPDIR)/*.d
 
 # EOF

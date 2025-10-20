@@ -104,7 +104,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
+        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
                 (char *)name);
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
     }
@@ -117,7 +117,7 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d %s\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
+        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
                 environment->name);
         ps_symbol_table_dump(NULL, "EXIT ENVIRONMENT", environment->symbols);
         fprintf(stderr, "--------------------------------------------------------------------------------\n");

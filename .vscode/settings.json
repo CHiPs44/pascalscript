@@ -12,7 +12,7 @@
     "makefile.configureOnOpen": false,
     "workbench.iconTheme": "fira-code-material-minimal",
     "editor.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
-    "editor.fontSize": 12,
+    "editor.fontSize": 14,
     "editor.fontLigatures": true,
-    "terminal.integrated.fontSize": 12
+    "terminal.integrated.fontSize": 14
 }
