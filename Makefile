@@ -5,9 +5,13 @@
 # x86 32 bits:
 # (requires sudo apt install gcc-multilib g++-multilib)
 CC		= LANG=C gcc
+# Native build + debug info:
 # CFLAGS	= -std=c17 -Wall -Iinclude -ggdb
-# CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb
-CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3
+# 32 bits + debug info:
+CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb
+# no optimization because of "optimized out" variables during debugging
+# CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3
+# AddressSanitizer + LeakSanitizer are not GDB's friends...
 # CFLAGS	= -m32 -std=c17 -Wall -Iinclude -ggdb -O3 -fsanitize=address -fsanitize=leak -static-libasan 
 
 CLIBS    = -lm

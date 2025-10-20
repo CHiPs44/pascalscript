@@ -18,8 +18,8 @@ Var
 
 Begin
     I := 21;
-    WriteLn('Calling FooBar with ', I, '...');
-    J := FooBar(I);
-    WriteLn(' FooBar returned ', J);
+    // WriteLn('Calling FooBar with ', I, '...');
+    // J := FooBar(I);
+    // WriteLn(' FooBar returned ', J);
     WriteLn(' FooBar returned ', FooBar(I));
 End.
