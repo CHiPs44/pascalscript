@@ -3,8 +3,8 @@
 REPORT_FILE="./examples/report.txt"
 > "$REPORT_FILE"
 
-SUCCESS=0
-FAILURE=0
+OK=0
+KO=0
 TOTAL=0
 printf "%-47s %15s %-10s\n" "Example" "ms" "Result" >> "$REPORT_FILE"
 for example in ./examples/*.pas; do
@@ -20,16 +20,16 @@ for example in ./examples/*.pas; do
         DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
         if [[ ${RESULT} -eq 0 ]]; then
             printf "%-47s %15s %s\n" "${example}" "${DURATION}" "OK"  >> "$REPORT_FILE"
-            SUCCESS=$((SUCCESS + 1))
+            OK=$((OK + 1))
             echo "OK"
         else
             printf "%-47s %15s %-10s\n" "${example}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
-            FAILURE=$((FAILURE + 1))
+            KO=$((KO + 1))
             echo "KO"
         fi
         TOTAL=$((TOTAL + 1))
     fi
 done
 
-echo "Total: $TOTAL, Success: $SUCCESS, Failure: $FAILURE" >> "$REPORT_FILE"
+echo "Total: $TOTAL, OK $OK, KO $KO" >> "$REPORT_FILE"
 cat ${REPORT_FILE}

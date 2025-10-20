@@ -4,61 +4,22 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 
-Program Example30Function0;
+Program Example300Function0;
 
-Function FooBarBaz(pCount, Sides: Integer): Integer;
-Var
-    Total: Integer;
+Function FooBar(Baz: Integer): Integer;
 Begin
-    // Write(' FooBarBaz: Count=', Count);
-    Total := 0;
-    While pCount > 0 Do
-    Begin
-        Total := Total + Random(Sides) + 1;
-        pCount := pCount - 1;
-    End;
-    FooBarBaz := Total;
-    // Result := Total;
+    WriteLn(' FooBar: Baz=', Baz);
+    // FooBar := Baz * 2;
+    Result := Baz * 2;
 End;
 
-Function D6(Count: Integer): Integer;
 Var
-    Temp: Integer;
-Begin
-    // Write(' D6: Count=', Count);
-    // D6 := FooBarBaz(Count, 6);
-    // Result := FooBarBaz(Count, 6);
-    Temp := FooBarBaz(Count, 6);
-    D6 := Temp;
-End;
-
-Const
-    Count = 16;
-
-Var
-    I: Integer;
-    Characteristic, Min, Max: Integer;
-    Total: Real;
+    I, J: Integer;
 
 Begin
-    WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('Launching 3d6 for ', Count, 'tries...');
-    Randomize;
-    Min := MaxInt;
-    Max := 0;
-    Total := 0;
-    For I := 1 To Count Do
-    Begin
-        // Characteristic := D6(3);
-        Characteristic := FooBarBaz(3, 6);
-        Total := Total + Characteristic;
-        If Characteristic < Min Then Min := Characteristic;
-        If Characteristic > Max Then Max := Characteristic;
-        if Characteristic < 10 Then Write(' ');
-        Write(Characteristic, ' ');
-        If I Mod 16 = 0 Then WriteLn(' Mean = ', Total / I);
-    End;
-    WriteLn;
-    WriteLn('Min = ', Min, ', Max = ', Max, ', Mean = ', Total / Count);
-    WriteLn('--------------------------------------------------------------------------------');
+    I := 21;
+    WriteLn('Calling FooBar with ', I, '...');
+    J := FooBar(I);
+    WriteLn(' FooBar returned ', J);
+    WriteLn(' FooBar returned ', FooBar(I));
 End.
