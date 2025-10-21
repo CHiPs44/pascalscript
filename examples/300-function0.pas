@@ -21,5 +21,5 @@ Begin
     // WriteLn('Calling FooBar with ', I, '...');
     // J := FooBar(I);
     // WriteLn(' FooBar returned ', J);
-    WriteLn(' FooBar returned ', FooBar(I));
+    WriteLn(' FooBar returned ', FooBar(I), ' for input ', I);
 End.

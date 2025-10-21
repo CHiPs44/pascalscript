@@ -104,8 +104,8 @@ int main(int argc, char *argv[])
     char *program_file = NULL;
     char source_file[256] = {0};
 
-    // trace = true;
-    // debug = true;
+    trace = true;
+    debug = true;
 
     int opt;
     int arg = 0;
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         else
             source_file[0] = '\0';
     }
-    ps_memory_free(current_path);
+    free(current_path);
     current_path = NULL;
     if (strlen(source_file) == 0)
     {

@@ -291,9 +291,17 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
 
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
     {
-        // Write or Writeln
+        // Write or WriteLn
         if (!ps_visit_write_or_writeln(interpreter, mode, executable == &ps_system_procedure_writeln))
             TRACE_ERROR("WRITE[LN]");
+    }
+    else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
+    {
+        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+        TRACE_ERROR("READ[LN] NOT IMPLEMENTED");
+        // Read or ReadLn
+        // if (!ps_visit_read_or_readln(interpreter, mode, executable == &ps_system_procedure_readln))
+        //     TRACE_ERROR("READ[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)
     {
