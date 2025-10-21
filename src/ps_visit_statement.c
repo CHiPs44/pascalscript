@@ -171,6 +171,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
 bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *procedure,
                                ps_actual_signature *actual)
 {
+    (void)actual;
     VISIT_BEGIN("ACTUAL_SIGNATURE", "");
 
     ps_formal_signature *formal_signature = procedure->value->data.x->signature;
@@ -307,7 +308,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     {
         // Randomize
         if (mode == MODE_EXEC)
-            if (!ps_procedure_randomize(interpreter, NULL))
+            if (!ps_procedure_randomize(interpreter, NULL, NULL))
                 TRACE_ERROR("RANDOMIZE");
     }
     else

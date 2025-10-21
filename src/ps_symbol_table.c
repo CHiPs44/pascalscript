@@ -197,7 +197,7 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
     fprintf(output, "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(output, "┃      #┃Hash / index  ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
     fprintf(output, "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    for (int i = 0; i < table->size; i++)
+    for (unsigned int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
             free += 1;

@@ -16,7 +16,7 @@ ps_executable *ps_executable_alloc(ps_formal_signature *signature, uint16_t line
     ps_executable *executable = ps_memory_malloc(sizeof(ps_executable));
     if (executable == NULL)
         return NULL;
-    executable->system = NULL;
+    executable->func_1arg = NULL;
     executable->signature = signature;
     executable->line = line;
     executable->column = column;

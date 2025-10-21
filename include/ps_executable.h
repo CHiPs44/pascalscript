@@ -21,11 +21,20 @@ extern "C"
     // Forward references
     typedef struct s_ps_formal_signature ps_formal_signature;
     typedef struct s_ps_type_definition ps_type_definition;
+    typedef struct s_ps_interpreter ps_interpreter;
+    typedef struct s_ps_value ps_value;
 
+    typedef ps_error (*ps_function_1arg)(ps_interpreter *interpreter, ps_value *value, ps_value *result);
+    typedef bool (*ps_procedure_file)(ps_interpreter *interpreter, FILE *f, ps_value *value);
+
+    /** @brief Executable is a function or procedure */
     typedef struct s_ps_executable
     {
-        void *system;                   /** @brief Pointer to system function (NULL for user defined functions) */
-        ps_formal_signature *signature; /** @brief Parameters and return type (NULL for procedures) of the executable */
+        union {
+            ps_function_1arg func_1arg;  /** @brief Pointer to system function (NULL for user defined functions) */
+            ps_procedure_file proc_file; /** @brief Pointer to system procedure (NULL for user defined procedures) */
+        };
+        ps_formal_signature *signature; /** @brief Parameters and return type of the executable */
         uint16_t line;                  /** @brief Line number in the source code */
         uint16_t column;                /** @brief Column number in the source code */
     } __attribute__((__packed__)) ps_executable;

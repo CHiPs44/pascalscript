@@ -109,7 +109,7 @@ extern "C"
         PS_TOKEN_COLON = ':',             // :  various uses: type definition, field access, etc.
         PS_TOKEN_COMMA = ',',             // ,  various uses: separating identifiers, parameters, etc.
         PS_TOKEN_DOT = '.',               // .  various uses: final dot of program / unit, field access, etc.
-        PS_TOKEN_EQUAL = '=',             // =  equals to
+        PS_TOKEN_EQ = '=',             // =  equals to
         PS_TOKEN_GT = '>',                // >  greater than
         PS_TOKEN_LEFT_BRACKET = '[',      // [  *FUTURE* array access: opening
         PS_TOKEN_LEFT_PARENTHESIS = '(',  // (  various uses: opening in expressions, function calls, etc.

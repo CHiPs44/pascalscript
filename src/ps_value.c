@@ -264,9 +264,9 @@ char *ps_value_to_string(ps_value *value, bool debug)
         executable = value->data.x;
         if (executable == NULL)
             snprintf(buffer, sizeof(buffer) - 1, "NULL!");
-        else if (executable->system != NULL)
+        else if (executable->func_1arg != NULL)
         {
-            snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", executable->system);
+            snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", (void *)executable->func_1arg);
         }
         else
         {

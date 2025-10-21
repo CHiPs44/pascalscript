@@ -135,6 +135,9 @@ bool ps_actual_signature_add_byref_parameter(ps_actual_signature *signature, ps_
 
 bool ps_signature_compare(ps_interpreter *interpreter, ps_formal_signature *formal, ps_actual_signature *actual)
 {
+    (void)interpreter;
+    (void)formal;
+    (void)actual;
     return PS_ERROR_NOT_IMPLEMENTED;
     /*
     ps_type_definition *formal_type, *actual_type;
@@ -163,6 +166,9 @@ bool ps_signature_compare(ps_interpreter *interpreter, ps_formal_signature *form
 
 bool ps_signature_assign(ps_interpreter *interpreter, ps_formal_signature *formal, ps_actual_signature *actual)
 {
+    (void)interpreter;
+    (void)formal;
+    (void)actual;
     return false;
     /*
     ps_symbol *variable;

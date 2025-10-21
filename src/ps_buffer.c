@@ -112,7 +112,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             current_char = *text++;
         }
     }
-    if (buffer->line_count > PS_BUFFER_MAX_LINES)
+    if (buffer->line_count >= PS_BUFFER_MAX_LINES)
     {
         buffer->error = PS_ERROR_OVERFLOW;
         return false;

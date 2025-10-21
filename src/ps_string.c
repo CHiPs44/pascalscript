@@ -190,16 +190,24 @@ int ps_string_compare(ps_string *a, ps_string *b)
 
 ps_string_len ps_string_position(ps_string *substr, ps_string *s)
 {
+    (void)substr;
+    (void)s;
     return 0; // TODO
 }
 
 ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len count)
 {
+    (void)s;
+    (void)index;
+    (void)count;
     return NULL; // TODO
 }
 
 ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)
 {
+    (void)source;
+    (void)s;
+    (void)index;
     return NULL; // TODO
 }
 

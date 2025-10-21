@@ -79,7 +79,7 @@ const struct s_ps_symbol_kind_name
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)
 {
     static char kind_name[PS_IDENTIFIER_SIZE];
-    for (int i = 0; i < sizeof(ps_symbol_kind_names) / sizeof(struct s_ps_symbol_kind_name); i += 1)
+    for (unsigned int i = 0; i < sizeof(ps_symbol_kind_names) / sizeof(struct s_ps_symbol_kind_name); i += 1)
     {
         if (ps_symbol_kind_names[i].kind == kind)
         {

@@ -21,7 +21,7 @@ extern "C"
 #endif
 
 #ifndef PS_INTERPRETER_ENVIRONMENTS
-#define PS_INTERPRETER_ENVIRONMENTS 256u
+#define PS_INTERPRETER_ENVIRONMENTS 1024u
 #endif
 
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0u
@@ -43,16 +43,16 @@ extern "C"
 
     typedef struct s_ps_interpreter
     {
+        ps_parser *parser;           /** @brief Parser with lexer with source code buffer */
+        ps_string_heap *string_heap; /** @brief Strings heap to hold string constants */
+        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
+        ps_error error;              /** @brief Current error PS_ERROR_XXX */
+        char message[128];           /** @brief Additional error message */
+        ps_interpreter_debug debug;  /** @brief Debug level: NONE, TRACE, VERBOSE */
+        bool range_check;            /** @brief Range checking for integer and real values */
+        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation */
         ps_environment
             *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
-        ps_parser *parser;                              /** @brief Parser with lexer with source code buffer */
-        ps_string_heap *string_heap;                    /** @brief Strings heap to hold string constants */
-        uint8_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
-        ps_error error;             /** @brief Current error PS_ERROR_XXX */
-        char message[128];          /** @brief Additional error message */
-        ps_interpreter_debug debug; /** @brief Debug level: NONE, TRACE, VERBOSE */
-        bool range_check;           /** @brief Range checking for integer and real values */
-        bool bool_eval;             /** @brief *FUTURE* Short circuit boolean evaluation */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)

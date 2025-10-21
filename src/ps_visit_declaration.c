@@ -157,7 +157,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
         COPY_IDENTIFIER(identifier);
         READ_NEXT_TOKEN;
-        EXPECT_TOKEN(PS_TOKEN_EQUAL);
+        EXPECT_TOKEN(PS_TOKEN_EQ);
         READ_NEXT_TOKEN;
         // TODO allow constant expression
         // For now keep track of '-' so "Const Foo = -4;" works as expected

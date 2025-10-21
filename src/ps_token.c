@@ -69,7 +69,7 @@ char *ps_token_dump_value(ps_token *token)
     case PS_TOKEN_COLON:             // :
     case PS_TOKEN_COMMA:             // ,
     case PS_TOKEN_DOT:               // .
-    case PS_TOKEN_EQUAL:             // =
+    case PS_TOKEN_EQ:             // =
     case PS_TOKEN_GT:                // >
     case PS_TOKEN_LEFT_BRACKET:      // [
     case PS_TOKEN_LEFT_PARENTHESIS:  // (
@@ -139,7 +139,7 @@ struct s_ps_keyword
     { .keyword = "<"                , .token_type = PS_TOKEN_LT               , .is_symbol = true  },
     { .keyword = "<="               , .token_type = PS_TOKEN_LE               , .is_symbol = true  },
     { .keyword = "<>"               , .token_type = PS_TOKEN_NE               , .is_symbol = true  },
-    { .keyword = "="                , .token_type = PS_TOKEN_EQUAL            , .is_symbol = true  },
+    { .keyword = "="                , .token_type = PS_TOKEN_EQ            , .is_symbol = true  },
     { .keyword = ">"                , .token_type = PS_TOKEN_GT               , .is_symbol = true  },
     { .keyword = ">="               , .token_type = PS_TOKEN_GE               , .is_symbol = true  },
     { .keyword = "AND"              , .token_type = PS_TOKEN_AND              , .is_symbol = false },

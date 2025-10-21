@@ -17,7 +17,7 @@
 
 ps_type_definition *ps_type_definition_create(ps_value_type type)
 {
-    ps_type_definition *type_def = ps_memory_malloc( sizeof(ps_type_definition));
+    ps_type_definition *type_def = ps_memory_malloc(sizeof(ps_type_definition));
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
     type_def->type = type_def->base = type;
@@ -116,10 +116,6 @@ void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *t
     if (output == NULL)
         output = stderr;
     if (message == NULL)
-        if (type_def == NULL)
-        {
-            fprintf(output, "%s: NULL\n", message);
-            return;
-        }
+        message = "TYPE DEFINITION";
     fprintf(output, "%s: %s\n", message, ps_type_definition_get_name(type_def));
 }

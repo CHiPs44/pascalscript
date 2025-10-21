@@ -334,7 +334,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     char c;
     char buffer[PS_STRING_MAX_LEN + 1];
-    int pos = 0;
+    unsigned int pos = 0;
 
     c = ps_buffer_peek_char(lexer->buffer);
     if (c != '\'')
@@ -499,7 +499,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
             ADVANCE;
             break;
         case '=':
-            lexer->current_token.type = PS_TOKEN_EQUAL;
+            lexer->current_token.type = PS_TOKEN_EQ;
             ADVANCE;
             break;
         case '<':
@@ -571,7 +571,7 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
     static char value[128] = {0};
     static char string[96] = {0};
-    int len = 0;
+    unsigned int len = 0;
 
     switch (lexer->current_token.type)
     {

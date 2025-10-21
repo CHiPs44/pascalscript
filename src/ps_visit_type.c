@@ -143,6 +143,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (symbol->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
             RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
         *type_symbol = symbol;
+        break;
         /* ********** Other types ********** */
     case PS_TOKEN_ARRAY:
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
@@ -192,7 +193,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     COPY_IDENTIFIER(type_name);
     READ_NEXT_TOKEN;
     // '='
-    EXPECT_TOKEN(PS_TOKEN_EQUAL);
+    EXPECT_TOKEN(PS_TOKEN_EQ);
     READ_NEXT_TOKEN;
     // TYPE_REFERENCE
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))

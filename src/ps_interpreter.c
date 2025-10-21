@@ -7,12 +7,11 @@
 #include <string.h>
 
 #include "ps_error.h"
+#include "ps_interpreter.h"
+#include "ps_memory.h"
 #include "ps_parser.h"
 #include "ps_system.h"
 #include "ps_value.h"
-
-#include "ps_interpreter.h"
-#include "ps_memory.h"
 #include "ps_visit.h"
 
 ps_interpreter *ps_interpreter_alloc()
@@ -154,7 +153,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
         if (local)
             break;
         level -= 1;
-    } while (level >= PS_INTERPRETER_ENVIRONMENT_SYSTEM);
+    } while (level != PS_INTERPRETER_ENVIRONMENT_SYSTEM);
     return NULL; // Symbol not found in any environment
 }
 

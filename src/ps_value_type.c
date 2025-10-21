@@ -31,7 +31,5 @@ char *ps_type_names[] = {
 
 char *ps_value_type_get_name(ps_value_type type)
 {
-    if (type >= PS_TYPE_NONE && type <= PS_TYPE_FILE)
-        return ps_type_names[type];
-    return NULL;
+    return ps_type_names[type];
 }
