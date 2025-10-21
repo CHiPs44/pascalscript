@@ -282,6 +282,7 @@ bool ps_system_init(ps_environment *system)
 
 void ps_system_done(ps_environment *system)
 {
+    (void)system;
     if (ps_system_constant_string_ps_version.value->data.s != NULL)
     {
         ps_string_free(ps_system_constant_string_ps_version.value->data.s);

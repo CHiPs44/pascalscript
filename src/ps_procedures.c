@@ -61,7 +61,7 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return true;
 }
 
-bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     (void)result;
     unsigned int seed = 0;

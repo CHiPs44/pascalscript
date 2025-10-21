@@ -31,6 +31,7 @@ extern "C"
     typedef struct s_ps_executable
     {
         union {
+            void *address;               /** @brief Generic pointer to function/procedure */
             ps_function_1arg func_1arg;  /** @brief Pointer to system function (NULL for user defined functions) */
             ps_procedure_file proc_file; /** @brief Pointer to system procedure (NULL for user defined procedures) */
         };
