@@ -7,7 +7,8 @@
         "ps_symbol_table.h": "c",
         "ps_environment.h": "c",
         "ps_interpreter.h": "c",
-        "ps_parser.h": "c"
+        "ps_parser.h": "c",
+        "ps_value.h": "c"
     },
     "makefile.configureOnOpen": false,
     "workbench.iconTheme": "fira-code-material-minimal",

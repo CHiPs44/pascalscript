@@ -1,19 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10.0)
+project(pascalscript VERSION 0.1.0 LANGUAGES C)
 
-project(pascalscript C)
-
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -O3 -m32")
 
-file(GLOB SOURCES "src/*.c" "*.c")
-
-if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/include)
-    # target_include_directories(pascalscript PUBLIC include)
-endif()
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 
 add_executable(pascalscript ${SOURCES})
-
-message(STATUS "Project configured. To build with Ninja, run 'ninja' in the build directory.")
+target_link_libraries(pascalscript m)

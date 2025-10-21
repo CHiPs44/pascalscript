@@ -18,7 +18,7 @@
 
 ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
-    ps_function_1arg function = symbol->value->data.x->system;
+    ps_function_1arg function = (ps_function_1arg)(symbol->value->data.x->system);
     if (function == NULL)
         return PS_ERROR_NOT_IMPLEMENTED;
     return function(interpreter, value, result);
@@ -31,6 +31,7 @@ ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_val
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
 ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     result->type = &ps_system_boolean;
     switch (value->type->value->data.t->base)
     {
@@ -49,6 +50,7 @@ ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
 ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     result->type = &ps_system_boolean;
     switch (value->type->value->data.t->base)
     {
@@ -67,6 +69,7 @@ ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief ORD - Get ordinal value of boolean / char */
 ps_error ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
@@ -206,6 +209,7 @@ ps_error ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer, unsigned or real */
 ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->type)
     {
     case PS_TYPE_UNSIGNED:
@@ -265,6 +269,7 @@ ps_error ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_valu
 /** @brief INT(REAL): REAL - Get integer part of floating point value */
 ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     double r;
     switch (value->type->value->data.t->base)
     {
@@ -282,6 +287,7 @@ ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief FRAC(REAL): REAL - Get fractional part of floating point value */
 ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     double int_part;
     switch (value->type->value->data.t->base)
     {
@@ -298,6 +304,7 @@ ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief SIN(REAL): REAL - Get sinus of floating point value */
 ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -313,6 +320,7 @@ ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief COS(REAL): REAL - Get cosinus of floating point value */
 ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -328,6 +336,7 @@ ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief TAN(REAL): REAL - Get tangent of floating point value */
 ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     double c;
     switch (value->type->value->data.t->base)
     {
@@ -347,6 +356,7 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
 ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -362,9 +372,11 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
 /** @brief SQR(REAL): REAL - Get square of floating point value */
 ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
+        // TODO range check for overflow?
         result->type = &ps_system_real;
         result->data.r = value->data.r * value->data.r;
         break;
@@ -377,6 +389,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief SQRT(REAL): REAL - Get square root of floating point value */
 ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -394,10 +407,12 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value
 /** @brief EXP(REAL): REAL - Get exponential of floating point value */
 ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         result->type = &ps_system_real;
+        // TODO range check for overflow?
         result->data.r = (ps_real)exp(value->data.r);
         break;
     default:
@@ -409,6 +424,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief LN(REAL): REAL - Get logarithm of floating point value */
 ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -426,6 +442,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *
 /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
 ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
@@ -447,6 +464,7 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
 /** @brief LENGTH(): UNSIGNED - Get string length */
 ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
         return PS_ERROR_EXPECTED_STRING;
     result->type = &ps_system_unsigned;
@@ -461,7 +479,9 @@ ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_val
 /** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
 ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     // NB: value parameter is not used
+    ((void)value);
     result->type = &ps_system_unsigned;
     clock_t c = clock();
     result->data.u = (ps_unsigned)((c * 1000) / CLOCKS_PER_SEC);
@@ -498,6 +518,7 @@ unsigned int rand_range_unsigned(unsigned int n)
  */
 ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
+    ((void)interpreter);
     if (value == NULL)
     {
         // no argument, return random real between 0.0 and 1.0 excluded
