@@ -219,7 +219,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         else
         {
-            result.type = &ps_system_none;
+            result.type = parameter->type; //&ps_system_none;
             result.data.v = NULL;
             if (!ps_visit_expression(interpreter, mode, &result))
                 TRACE_ERROR("EXPRESSION");
@@ -260,11 +260,13 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
+            fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ',' encountered\n");
             READ_NEXT_TOKEN;
             continue;
         }
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
+            fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ')' encountered\n");
             READ_NEXT_TOKEN;
             break;
         }
@@ -463,6 +465,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
+            fprintf(stderr, " INFO\tWRITE_OR_WRITELN: ',' encountered, loop to next argument\n");
             READ_NEXT_TOKEN;
             continue;
         }
