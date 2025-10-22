@@ -136,10 +136,12 @@ PS_SYSTEM_FUNCTION (function , cos           , "COS"         , &ps_function_cos 
 PS_SYSTEM_FUNCTION (function , even          , "EVEN"        , &ps_function_even             );
 PS_SYSTEM_FUNCTION (function , exp           , "EXP"         , &ps_function_exp              );
 PS_SYSTEM_FUNCTION (function , frac          , "FRAC"        , &ps_function_frac             );
+PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", &ps_function_get_tick_count   );
 PS_SYSTEM_FUNCTION (function , int           , "INT"         , &ps_function_int              );
 PS_SYSTEM_FUNCTION (function , length        , "LENGTH"      , &ps_function_length           );
 PS_SYSTEM_FUNCTION (function , ln            , "LN"          , &ps_function_ln               );
 PS_SYSTEM_FUNCTION (function , log           , "LOG"         , &ps_function_log              );
+PS_SYSTEM_FUNCTION (function , lowercase     , "LOWERCASE"   , &ps_function_lowercase        );
 PS_SYSTEM_FUNCTION (function , odd           , "ODD"         , &ps_function_odd              );
 PS_SYSTEM_FUNCTION (function , ord           , "ORD"         , &ps_function_ord              );
 PS_SYSTEM_FUNCTION (function , pred          , "PRED"        , &ps_function_pred             );
@@ -150,8 +152,8 @@ PS_SYSTEM_FUNCTION (function , sqr           , "SQR"         , &ps_function_sqr 
 PS_SYSTEM_FUNCTION (function , sqrt          , "SQRT"        , &ps_function_sqrt             );
 PS_SYSTEM_FUNCTION (function , succ          , "SUCC"        , &ps_function_succ             );
 PS_SYSTEM_FUNCTION (function , tan           , "TAN"         , &ps_function_tan              );
-PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", &ps_function_get_tick_count   );
 PS_SYSTEM_FUNCTION (function , trunc         , "TRUNC"       , &ps_function_trunc            );
+PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , &ps_function_uppercase        );
 PS_SYSTEM_FUNCTION (procedure, randomize     , "RANDOMIZE"   , &ps_procedure_randomize       );
 PS_SYSTEM_PROCEDURE(procedure, read          , "READ"        , &ps_procedure_read            );
 PS_SYSTEM_PROCEDURE(procedure, readln        , "READLN"      , &ps_procedure_readln          );
@@ -240,34 +242,36 @@ bool ps_system_init(ps_environment *system)
     /* STANDARD PROCEDURES & FUNCTIONS                                        */
     /**************************************************************************/
 
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_read);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_readln);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_write);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_writeln);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_abs);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_arctan);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_chr);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_cos);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_even);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_exp);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_frac);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_get_tick_count);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_int);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_length);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_ln);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_log);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_lowercase);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_odd);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_ord);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_pred);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_random);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_round);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_sin);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_sqr);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_sqrt);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_tan);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_get_tick_count);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_trunc);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_randomize);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_chr);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_ord);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_pred);
     error = error || !ps_environment_add_symbol(system, &ps_system_function_succ);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_tan);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_trunc);
+    error = error || !ps_environment_add_symbol(system, &ps_system_function_uppercase);
+    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_randomize);
+    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_read);
+    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_readln);
+    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_write);
+    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_writeln);
 
     // ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
 

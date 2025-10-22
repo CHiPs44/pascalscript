@@ -4,7 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 (* Won't work with first versions *)
-Program Example002Hello;
+Program Strings;
 Const
   QUOTE_CHAR      = '''';
   Z_CHAR          = 'Z';

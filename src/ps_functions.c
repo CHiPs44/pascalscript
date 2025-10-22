@@ -472,6 +472,30 @@ ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_val
     return PS_ERROR_NONE;
 }
 
+ps_error ps_function_lowercase(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    ((void)interpreter);
+    if (value->type->value->data.t->base != PS_TYPE_STRING)
+        return PS_ERROR_EXPECTED_STRING;
+    result->type = &ps_system_string;
+    result->data.s = ps_string_lowercase(value->data.s);
+    if (result->data.s == NULL)
+        return PS_ERROR_OUT_OF_MEMORY;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_function_uppercase(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+{
+    ((void)interpreter);
+    if (value->type->value->data.t->base != PS_TYPE_STRING)
+        return PS_ERROR_EXPECTED_STRING;
+    result->type = &ps_system_string;
+    result->data.s = ps_string_uppercase(value->data.s);
+    if (result->data.s == NULL)
+        return PS_ERROR_OUT_OF_MEMORY;
+    return PS_ERROR_NONE;
+}
+
 /******************************************************************************/
 /* OTHER                                                                      */
 /******************************************************************************/

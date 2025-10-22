@@ -10,8 +10,7 @@ Var
   s1, s2, s3, s4: String;
   I: Integer;
 Begin
-  WriteLn('PascalScript version ', PS_VERSION, ' ', PS_BITNESS, ' bits');
-  WriteLn;
+  WriteLn('*** PascalScript version ', PS_VERSION, ' ', PS_BITNESS, ' bits ***');
   WriteLn('------------------------------');
   WriteLn('String constants and functions');
   WriteLn('------------------------------');
@@ -26,11 +25,11 @@ Begin
   For I := 1 to 10 do
     s4 := s4 + '-_';
   WriteLn('s4 = ', s4);
+  WriteLn('Length(''', s1, ''') = ', Length(s1));
+  WriteLn('Length(''', s2, ''') = ', Length(s2));
+  WriteLn('UpperCase(''', s1, ''') = ', UpperCase(s1));
+  WriteLn('LowerCase(''', s2, ''') = ', LowerCase(s2));
   // *FUTURE*
-  // WriteLn('Length(s1) = ', Length(s1));
-  // WriteLn('Length(s2) = ', Length(s2));
-  // WriteLn('UpperCase(s1) = ', UpperCase(s1));
-  // WriteLn('LowerCase(s2) = ', LowerCase(s2));
   // WriteLn('Pos(''lo'', s1) = ', Pos('lo', s1));
   // WriteLn('Pos(''lo'', s2) = ', Pos('lo', s2));
 End.

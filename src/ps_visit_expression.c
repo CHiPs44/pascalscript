@@ -353,8 +353,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             READ_NEXT_TOKEN;
             break;
         case PS_SYMBOL_KIND_FUNCTION:
-            interpreter->debug = DEBUG_VERBOSE;
-            fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
+            // interpreter->debug = DEBUG_VERBOSE;
+            // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
             if (!ps_visit_function_call(interpreter, mode, symbol, result))
                 TRACE_ERROR("FUNCTION");
             // READ_NEXT_TOKEN;

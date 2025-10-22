@@ -1,4 +1,4 @@
-Program Example05WhileDo;
+Program WhileDo;
 Const
     Loops = 10;
 Var

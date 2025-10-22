@@ -465,7 +465,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            fprintf(stderr, " INFO\tWRITE_OR_WRITELN: ',' encountered, loop to next argument\n");
+            // fprintf(stderr, " INFO\tWRITE_OR_WRITELN: ',' encountered, loop to next argument\n");
             READ_NEXT_TOKEN;
             continue;
         }

@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
-Program Example06ForDo;
+Program ForDo;
 Const 
   Limit = 99;
   PerLine = 25;
