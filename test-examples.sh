@@ -14,7 +14,7 @@ for example in ./examples/*.pas; do
         echo -n "Executing ${example}... "
         START=$(date +%s%N)
         # ../pascalscript -v -t "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
-        ./pascalscript "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
+        ./build/pascalscript "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
         RESULT=$?
         END=$(date +%s%N)
         DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds

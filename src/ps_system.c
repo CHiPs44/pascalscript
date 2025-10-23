@@ -154,7 +154,7 @@ PS_SYSTEM_FUNCTION (function , succ          , "SUCC"        , &ps_function_succ
 PS_SYSTEM_FUNCTION (function , tan           , "TAN"         , &ps_function_tan              );
 PS_SYSTEM_FUNCTION (function , trunc         , "TRUNC"       , &ps_function_trunc            );
 PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , &ps_function_uppercase        );
-PS_SYSTEM_FUNCTION (procedure, randomize     , "RANDOMIZE"   , &ps_procedure_randomize       );
+PS_SYSTEM_PROCEDURE(procedure, randomize     , "RANDOMIZE"   , &ps_procedure_randomize       );
 PS_SYSTEM_PROCEDURE(procedure, read          , "READ"        , &ps_procedure_read            );
 PS_SYSTEM_PROCEDURE(procedure, readln        , "READLN"      , &ps_procedure_readln          );
 PS_SYSTEM_PROCEDURE(procedure, write         , "WRITE"       , &ps_procedure_write           );

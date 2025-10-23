@@ -61,9 +61,9 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return true;
 }
 
-ps_error ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+bool ps_procedure_randomize(ps_interpreter *interpreter, FILE *f, ps_value *value)
 {
-    (void)result;
+    (void)f;
     unsigned int seed = 0;
     // No argument: use current time as seed
     if (value == NULL || value->type == NULL || value->type->value == NULL)
@@ -87,7 +87,7 @@ ps_error ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value, ps
         return false;
     }
     srand(seed);
-    if (interpreter->debug)
+    if (interpreter->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "RANDOMIZE(%u)\n", seed);
     return true;
 }
