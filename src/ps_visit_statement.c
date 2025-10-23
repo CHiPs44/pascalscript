@@ -329,20 +329,22 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             READ_NEXT_TOKEN;
         }
         SAVE_CURSOR(line, column);
-        ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
-        if (token_type == PS_TOKEN_NONE)
+        if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
         {
-            interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-            goto cleanup;
+            ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
+            if (token_type == PS_TOKEN_NONE)
+            {
+                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+                goto cleanup;
+            }
         }
-        // Function have a return value
-        if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
+        else if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
         {
+            // Function have a return value
             result_value->type = executable->value->data.x->signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE,
-                                            &(ps_identifier){'R', 'E', 'S', 'U', 'L', 'T', '\0'}, result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -388,7 +390,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         }
         // Exit environment
         if (!ps_interpreter_exit_environment(interpreter))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR(interpreter->error);
     }
 
     VISIT_END("OK");
@@ -452,6 +454,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     while (loop)
     {
+        interpreter->debug = DEBUG_VERBOSE;
         result.type = &ps_system_none;
         if (interpreter->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "\n%cINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n",

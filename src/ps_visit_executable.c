@@ -295,8 +295,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
 cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    if (result_symbol != NULL)
-        result_symbol = ps_symbol_free(result_symbol);
+    // if (result_symbol != NULL)
+    //     result_symbol = ps_symbol_free(result_symbol);
     if (symbol != NULL)
     {
         symbol = ps_symbol_free(symbol);
@@ -308,8 +308,6 @@ cleanup:
     }
     if (executable != NULL)
         executable = ps_executable_free(executable);
-    if (has_environment)
-        ps_interpreter_exit_environment(interpreter);
     if (interpreter->error == PS_ERROR_NONE)
         interpreter->error = PS_ERROR_GENERIC;
     TRACE_ERROR("CLEANUP");
