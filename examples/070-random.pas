@@ -12,6 +12,10 @@ Var
     D20, Min, Max, Total: Integer;
     R, MinR, MaxR, TotalR: Real;
 Begin
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('PascalScript Random Number Generation Example');
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('Seeding random number generator...');
     Randomize;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn(MaxD20, ' random d20 rolls:');
@@ -19,7 +23,7 @@ Begin
     Max := 0;
     For I := 1 To MaxD20 Do
     Begin
-        D20 := Random(10 + 10);// + 1;
+        D20 := Random(10 + 10) + 1;
         Write('d20(');
         If I < 10 Then Write(' ');
         Write(I, ')=');
@@ -49,11 +53,12 @@ Begin
     WriteLn('Min=', MinR, ', Max=', MaxR, ', Mean=', TotalR / (MaxRandom + 1));
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Random real d6:');
-    R := 1.0 + Random(6);
+    R := Random(6) + 1.0;
     WriteLn('R=', R);
     R := Random(6) + 1;
     WriteLn('R=', R);
     R := Random(6) + 1.0;
     WriteLn('R=', R);
+    WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK!');
 End.
