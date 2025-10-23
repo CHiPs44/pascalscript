@@ -15,7 +15,7 @@ Begin
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('PascalScript Random Number Generation Example');
     WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('Seeding random number generator...');
+    WriteLn('Seeding RNG...');
     Randomize;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn(MaxD20, ' random d20 rolls:');
