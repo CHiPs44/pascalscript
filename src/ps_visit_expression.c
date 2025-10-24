@@ -357,7 +357,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
             if (!ps_visit_function_call(interpreter, mode, symbol, result))
                 TRACE_ERROR("FUNCTION");
-            // READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN;
             break;
         default:
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);

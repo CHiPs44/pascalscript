@@ -221,6 +221,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         {
             result.type = parameter->type; //&ps_system_none;
             result.data.v = NULL;
+            interpreter->debug = DEBUG_VERBOSE;
             if (!ps_visit_expression(interpreter, mode, &result))
                 TRACE_ERROR("EXPRESSION");
             if (mode == MODE_EXEC)
@@ -316,7 +317,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     else
     {
         // User defined procedure call
-        // Enter environment for procedure
+        // Enter environment for procedure or function
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
             RETURN_ERROR(interpreter->error);
         has_environment = true;
@@ -326,7 +327,6 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             if (!ps_visit_actual_signature(interpreter, mode, executable, actual_signature))
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN;
         }
         SAVE_CURSOR(line, column);
         if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
@@ -375,6 +375,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
                 interpreter->error = PS_ERROR_GENERIC; // TODO better error code
                 goto cleanup;
             }
+            // READ_NEXT_TOKEN;
         }
         // Empty byref parameters to avoid freeing values still used in the caller environment
         for (uint8_t i = 0; i < executable->value->data.x->signature->parameter_count; i++)
@@ -390,7 +391,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         }
         // Exit environment
         if (!ps_interpreter_exit_environment(interpreter))
-            TRACE_ERROR(interpreter->error);
+            TRACE_ERROR("EXIT_ENVIRONMENT");
     }
 
     VISIT_END("OK");
@@ -454,7 +455,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     while (loop)
     {
-        interpreter->debug = DEBUG_VERBOSE;
+        // interpreter->debug = DEBUG_VERBOSE;
         result.type = &ps_system_none;
         if (interpreter->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "\n%cINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n",

@@ -13,6 +13,10 @@ Program Example300Function0;
 //     WriteLn('   FooBar: Result=', Result);
 // End;
 
+Procedure Toto;
+Begin
+End;
+
 Function FooBar(Baz: Integer): Integer;
 Begin
     FooBar := Baz * 2;
@@ -21,12 +25,18 @@ End;
 Var
     I, J: Integer;
 
+    // I := 21;
     // WriteLn('Calling FooBar with ', I, '...');
     // J := FooBar(I);
     // WriteLn(' FooBar returned ', J);
     // WriteLn(' FooBar returned ', FooBar(I), ' for input ', I);
+    // I := 21;
 
 Begin
+    Toto;
+    // WriteLn('Calling FooBar with 21...');
     I := 21;
-    WriteLn(FooBar(I), '*END*');
+    J := FooBar(I);
+    // WriteLn(' FooBar returned ', J);
+    // WriteLn(FooBar(21), '*STOP*');
 End.
