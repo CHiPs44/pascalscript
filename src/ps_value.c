@@ -271,7 +271,7 @@ char *ps_value_to_string(ps_value *value, bool debug)
         else
         {
             snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",
-                     executable->signature->result_type == NULL || executable->signature->result_type == &ps_system_none
+                     executable->formal_signature->result_type == NULL || executable->formal_signature->result_type == &ps_system_none
                          ? "PROCEDURE"
                          : "FUNCTION",
                      executable->line + 1, executable->column + 1);

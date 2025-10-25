@@ -17,7 +17,7 @@ ps_executable *ps_executable_alloc(ps_formal_signature *signature, uint16_t line
     if (executable == NULL)
         return NULL;
     executable->address = NULL;
-    executable->signature = signature;
+    executable->formal_signature = signature;
     executable->line = line;
     executable->column = column;
     return executable;
@@ -27,8 +27,8 @@ ps_executable *ps_executable_free(ps_executable *executable)
 {
     if (executable == NULL)
         return NULL;
-    if (executable->signature != NULL)
-        executable->signature = ps_formal_signature_free(executable->signature);
+    if (executable->formal_signature != NULL)
+        executable->formal_signature = ps_formal_signature_free(executable->formal_signature);
     ps_memory_free(executable);
     return NULL;
 }
@@ -40,8 +40,8 @@ void ps_executable_debug(FILE *output, char *message, ps_executable *executable)
     fprintf(output, "%s: Executable at %p:\n", message, (void *)executable);
     if (executable == NULL)
         return;
-    fprintf(output, "\tSignature: %p\n", (void *)executable->signature);
-    // if (executable->signature != NULL)
-    //     ps_signature_debug(output, "  Signature", executable->signature);
+    fprintf(output, "\tSignature: %p\n", (void *)executable->formal_signature);
+    // if (executable->formal_signature != NULL)
+    //     ps_signature_debug(output, "  Signature", executable->formal_signature);
     fprintf(output, "\tLine: %u, Column: %u\n", executable->line, executable->column);
 }

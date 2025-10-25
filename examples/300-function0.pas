@@ -13,8 +13,9 @@ Program Example300Function0;
 //     WriteLn('   FooBar: Result=', Result);
 // End;
 
-Procedure Toto;
+Procedure Toto(Titi: Integer);
 Begin
+    WriteLn('Toto called with', Titi);
 End;
 
 Function FooBar(Baz: Integer): Integer;
@@ -33,10 +34,11 @@ Var
     // I := 21;
 
 Begin
-    Toto;
-    // WriteLn('Calling FooBar with 21...');
+    Toto(1);
+    WriteLn('Calling FooBar with 21...');
     I := 21;
     J := FooBar(I);
+    WriteLn(J);
     // WriteLn(' FooBar returned ', J);
     // WriteLn(FooBar(21), '*STOP*');
 End.

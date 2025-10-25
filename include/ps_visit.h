@@ -29,6 +29,9 @@ extern "C"
 
     /* src/ps_visit_executable.c */
     bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind);
+    bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                             ps_symbol *executable, ps_value *result);
+    bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **variable);
 
     /* src/ps_visit_expression.c */
     bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
@@ -47,8 +50,6 @@ extern "C"
     bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
-    bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode,
-                                             ps_symbol *executable, ps_value *result);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);

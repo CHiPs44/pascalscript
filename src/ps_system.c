@@ -112,7 +112,8 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
 
 /* clang-format on */
 #define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, CALLABLE)                                                                \
-    ps_executable ps_executable_##TYPE##_##VALUE = {.func_1arg = CALLABLE, .signature = NULL, .line = 0, .column = 0}; \
+    ps_executable ps_executable_##TYPE##_##VALUE = {                                                                   \
+        .func_1arg = CALLABLE, .formal_signature = NULL, .line = 0, .column = 0};                                      \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
     ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
                                             .name = NAME,                                                              \
@@ -120,7 +121,8 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL      
                                             .system = true,                                                            \
                                             .allocated = false}
 #define PS_SYSTEM_PROCEDURE(TYPE, VALUE, NAME, CALLABLE)                                                               \
-    ps_executable ps_executable_##TYPE##_##VALUE = {.proc_file = CALLABLE, .signature = NULL, .line = 0, .column = 0}; \
+    ps_executable ps_executable_##TYPE##_##VALUE = {                                                                   \
+        .proc_file = CALLABLE, .formal_signature = NULL, .line = 0, .column = 0};                                      \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
     ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                          \
                                             .name = NAME,                                                              \

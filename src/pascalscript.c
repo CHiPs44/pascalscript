@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     }
 
     current_path = getcwd(NULL, 0);
-    size_t len = strlen(current_path);
+    // size_t len = strlen(current_path);
     if (verbose)
         fprintf(stderr, "Current working directory: %s\n", current_path);
     example_path = "";
