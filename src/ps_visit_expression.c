@@ -434,13 +434,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
 }
 
 /**
- * Visit function call:
- *      identifier [ '(' , expression [ ',' , expression ]* ')' ]
- *  only 1 parameter for now and only "system" functions
- * Next steps:
- *  - get all parameters
- *  - check function signature
- *  - check function return type
+ * Visit system or user function call:
+ *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
 bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *function,
                             ps_value *result)
@@ -501,7 +496,8 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         }
         else
         {
-            // all other functions have one argument for now
+            // all other functions have one "by value" argument for now
+            // examples: Ord, Chr, Pred, Succ, ...
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, mode, &arg))
@@ -513,7 +509,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         {
             interpreter->error = ps_function_exec(interpreter, function, null_arg ? NULL : &arg, result);
             if (interpreter->error != PS_ERROR_NONE)
-                TRACE_ERROR("FUNCTION");
+                TRACE_ERROR("SYSTEM_FUNCTION");
         }
     }
     else

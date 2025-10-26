@@ -17,59 +17,97 @@ void ps_token_debug(FILE *output, char *message, ps_token *token)
             ps_token_dump_value(token));
 }
 
+char *ps_token_type_dump_value(ps_token_type token_type, char *default_value)
+{
+    char *type_name;
+    // clang-format off
+    switch (token_type)
+    {
+    case PS_TOKEN_NONE:              return "NONE";
+    case PS_TOKEN_INTEGER_VALUE:     return "INTEGER";
+    case PS_TOKEN_UNSIGNED_VALUE:    return "UNSIGNED";
+    case PS_TOKEN_REAL_VALUE:        return "REAL";
+    case PS_TOKEN_BOOLEAN_VALUE:     return "BOOLEAN";
+    case PS_TOKEN_CHAR_VALUE:        return "CHAR";
+    case PS_TOKEN_STRING_VALUE:      return "STRING";
+    case PS_TOKEN_IDENTIFIER:        return "IDENTIFIER";
+    case PS_TOKEN_AT_SIGN:           return "AT_SIGN";
+    case PS_TOKEN_CARET:             return "CARET";
+    case PS_TOKEN_COLON:             return "COLON";
+    case PS_TOKEN_COMMA:             return "COMMA";
+    case PS_TOKEN_DOT:               return "DOT";
+    case PS_TOKEN_EQ:                return "EQ";
+    case PS_TOKEN_GT:                return "GT";
+    case PS_TOKEN_LEFT_BRACKET:      return "LEFT_BRACKET";
+    case PS_TOKEN_LEFT_PARENTHESIS:  return "LEFT_PARENTHESIS";
+    case PS_TOKEN_LT:                return "LT";
+    case PS_TOKEN_MINUS:             return "MINUS";
+    case PS_TOKEN_PLUS:              return "PLUS";
+    case PS_TOKEN_RIGHT_BRACKET:     return "RIGHT_BRACKET";
+    case PS_TOKEN_RIGHT_PARENTHESIS: return "RIGHT_PARENTHESIS";
+    case PS_TOKEN_SEMI_COLON:        return "SEMI_COLON";
+    case PS_TOKEN_SLASH:             return "SLASH";
+    case PS_TOKEN_STAR:              return "STAR";
+    case PS_TOKEN_ASSIGN:            return "ASSIGN";
+    case PS_TOKEN_GE:                return "GE";
+    case PS_TOKEN_LE:                return "LE";
+    case PS_TOKEN_NE:                return "NE";
+    case PS_TOKEN_POWER:             return "POWER";
+    case PS_TOKEN_RANGE:             return "RANGE";
+    default:
+        type_name = ps_token_get_keyword(token_type);
+        if (type_name == NULL)
+            return default_value;
+        return type_name;
+    }
+    // clang-format on
+}
+
 char *ps_token_dump_value(ps_token *token)
 {
     ps_token_type token_type;
-    char *type;
+    char *type_name;
     static char buffer[128];
     static char value[80];
     static char string[64];
 
+    type_name = ps_token_type_dump_value(token->type, "UNKNOWN");
+    memset(value, 0, sizeof(value));
     switch (token->type)
     {
     case PS_TOKEN_NONE:
-        type = "NONE";
-        snprintf(value, sizeof(value) - 1, "%04d: NONE", token->type);
+        snprintf(value, sizeof(value) - 1, "%04d: %s", token->type, type_name);
         break;
     case PS_TOKEN_INTEGER_VALUE:
-        type = "INTEGER";
         snprintf(value, sizeof(value) - 1, "%04d: %" PS_INTEGER_FMT_10, token->type, token->value.i);
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        type = "UNSIGNED";
         snprintf(value, sizeof(value) - 1, "%04d: %" PS_UNSIGNED_FMT_10, token->type, token->value.u);
         break;
     case PS_TOKEN_REAL_VALUE:
-        type = "REAL";
         snprintf(value, sizeof(value) - 1, "%04d: %" PS_REAL_FMT, token->type, token->value.r);
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        type = "BOOLEAN";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.b ? "TRUE" : "FALSE");
         break;
     case PS_TOKEN_CHAR_VALUE:
-        type = "CHAR";
         snprintf(value, sizeof(value) - 1, "%04d: '%c'", token->type, token->value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
-        type = "STRING";
-        // strncpy(string, (char *)token->value.s, sizeof(string) - 1);
         memset(string, 0, sizeof(string));
         memcpy(string, (char *)token->value.s, sizeof(string) - 1);
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, string);
         break;
     case PS_TOKEN_IDENTIFIER:
-        type = "IDENTIFIER";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     /* These are now handled as keywords, see below */
-    // 1 character symbols
     case PS_TOKEN_AT_SIGN:           // @
     case PS_TOKEN_CARET:             // ^
     case PS_TOKEN_COLON:             // :
     case PS_TOKEN_COMMA:             // ,
     case PS_TOKEN_DOT:               // .
-    case PS_TOKEN_EQ:             // =
+    case PS_TOKEN_EQ:                // =
     case PS_TOKEN_GT:                // >
     case PS_TOKEN_LEFT_BRACKET:      // [
     case PS_TOKEN_LEFT_PARENTHESIS:  // (
@@ -81,32 +119,32 @@ char *ps_token_dump_value(ps_token *token)
     case PS_TOKEN_SEMI_COLON:        // ;
     case PS_TOKEN_SLASH:             // /
     case PS_TOKEN_STAR:              // *
-    // 2 characters symbols
-    case PS_TOKEN_ASSIGN: // :=
-    case PS_TOKEN_GE:     // >=
-    case PS_TOKEN_LE:     // <=
-    case PS_TOKEN_NE:     // <>
-    case PS_TOKEN_POWER:  // **
-    case PS_TOKEN_RANGE:  // ..
-        type = "KEYWORD";
+    case PS_TOKEN_ASSIGN:            // :=
+    case PS_TOKEN_GE:                // >=
+    case PS_TOKEN_LE:                // <=
+    case PS_TOKEN_NE:                // <>
+    case PS_TOKEN_POWER:             // **
+    case PS_TOKEN_RANGE:             // ..
+        type_name = "KEYWORD";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     /**/
     default:
-        token_type = ps_token_is_keyword(token->value.identifier);
+        if (type_name)
+            token_type = ps_token_is_keyword(token->value.identifier);
         if (token_type == PS_TOKEN_IDENTIFIER)
         {
-            type = "UNKNOWN";
+            type_name = "UNKNOWN";
             snprintf(value, sizeof(value) - 1, "'%s'", "?");
         }
         else
         {
-            type = "KEYWORD";
+            type_name = "KEYWORD";
             snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         }
         break;
     }
-    snprintf(buffer, sizeof(buffer) - 1, "type=%-16s, value=%s", type, value);
+    snprintf(buffer, sizeof(buffer) - 1, "type=%-16s, value=%s", type_name, value);
     return buffer;
 }
 
@@ -139,7 +177,7 @@ struct s_ps_keyword
     { .keyword = "<"                , .token_type = PS_TOKEN_LT               , .is_symbol = true  },
     { .keyword = "<="               , .token_type = PS_TOKEN_LE               , .is_symbol = true  },
     { .keyword = "<>"               , .token_type = PS_TOKEN_NE               , .is_symbol = true  },
-    { .keyword = "="                , .token_type = PS_TOKEN_EQ            , .is_symbol = true  },
+    { .keyword = "="                , .token_type = PS_TOKEN_EQ               , .is_symbol = true  },
     { .keyword = ">"                , .token_type = PS_TOKEN_GT               , .is_symbol = true  },
     { .keyword = ">="               , .token_type = PS_TOKEN_GE               , .is_symbol = true  },
     { .keyword = "AND"              , .token_type = PS_TOKEN_AND              , .is_symbol = false },

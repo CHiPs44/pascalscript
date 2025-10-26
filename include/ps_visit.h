@@ -73,13 +73,15 @@ extern "C"
     }
 
 #define VISIT_END(__PLUS__)                                                                                            \
-    if (interpreter->debug >= DEBUG_TRACE)                                                                             \
     {                                                                                                                  \
-        fprintf(stderr, "%*cEND\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',       \
-                visit, __PLUS__);                                                                                      \
-        ps_token_debug(stderr, "END", &lexer->current_token);                                                          \
-    }                                                                                                                  \
-    return true;
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cEND\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',   \
+                    visit, __PLUS__);                                                                                  \
+            ps_token_debug(stderr, "END", &lexer->current_token);                                                      \
+        }                                                                                                              \
+        return true;                                                                                                   \
+    }
 
 #define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
@@ -96,6 +98,12 @@ extern "C"
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__)                                                                                \
     if (!ps_parser_expect_token_type(interpreter->parser, __PS_TOKEN_TYPE__))                                          \
     {                                                                                                                  \
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, MODE_EXEC ? '*' : ' ',         \
+                    "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
+            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
+        }                                                                                                              \
         interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                \
         return false;                                                                                                  \
     }
@@ -117,8 +125,8 @@ extern "C"
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
-                    "", "");                                                                                           \
+            fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1, MODE_EXEC ? '*' : ' ',         \
+                    "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
         goto cleanup;                                                                                                  \

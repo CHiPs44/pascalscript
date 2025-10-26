@@ -109,7 +109,7 @@ extern "C"
         PS_TOKEN_COLON = ':',             // :  various uses: type definition, field access, etc.
         PS_TOKEN_COMMA = ',',             // ,  various uses: separating identifiers, parameters, etc.
         PS_TOKEN_DOT = '.',               // .  various uses: final dot of program / unit, field access, etc.
-        PS_TOKEN_EQ = '=',             // =  equals to
+        PS_TOKEN_EQ = '=',                // =  equals to
         PS_TOKEN_GT = '>',                // >  greater than
         PS_TOKEN_LEFT_BRACKET = '[',      // [  *FUTURE* array access: opening
         PS_TOKEN_LEFT_PARENTHESIS = '(',  // (  various uses: opening in expressions, function calls, etc.
@@ -203,7 +203,7 @@ extern "C"
 #define PS_TOKEN_VALUE_SIZE sizeof(ps_token_value)
 #define PS_TOKEN_SIZE sizeof(ps_token)
 
-    // char *ps_token_get_reserved_symbol(ps_token_type token_type);
+    char *ps_token_type_dump_value(ps_token_type token_type, char *default_value);
     void ps_token_debug(FILE *output, char *message, ps_token *token);
     char *ps_token_dump_value(ps_token *token);
     char *ps_token_get_keyword(ps_token_type token_type);
