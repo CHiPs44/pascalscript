@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <string.h>
 
 #include "ps_environment.h"
@@ -13,6 +14,8 @@
 
 ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
 {
+    assert(name != NULL);
+    assert(size > 0);
     ps_environment *environment = ps_memory_malloc(sizeof(ps_environment));
     // fprintf(stderr, "ALLOC\tENVIRONMENT: %p, name %s\n", environment, environment->name);
     if (environment == NULL)
@@ -41,12 +44,16 @@ ps_environment *ps_environment_free(ps_environment *environment)
 
 bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol)
 {
+    assert(environment != NULL);
+    assert(symbol != NULL);
     environment->error = ps_symbol_table_add(environment->symbols, symbol);
     return environment->error == PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
 ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name, bool local)
 {
+    assert(environment != NULL);
+    assert(name != NULL);
     ps_symbol *symbol;
     while (environment != NULL)
     {

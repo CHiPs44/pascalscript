@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -41,7 +42,5 @@ void ps_executable_debug(FILE *output, char *message, ps_executable *executable)
     if (executable == NULL)
         return;
     fprintf(output, "\tSignature: %p\n", (void *)executable->formal_signature);
-    // if (executable->formal_signature != NULL)
-    //     ps_signature_debug(output, "  Signature", executable->formal_signature);
     fprintf(output, "\tLine: %u, Column: %u\n", executable->line, executable->column);
 }

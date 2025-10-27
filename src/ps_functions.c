@@ -4,6 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
+#include <errno.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -18,6 +20,12 @@
 
 ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
+    assert(interpreter != NULL);
+    assert(symbol != NULL);
+    assert(symbol->value != NULL);
+    assert(symbol->value->data.x != NULL);
+    assert(value != NULL);
+    assert(result != NULL);
     ps_function_1arg function = (ps_function_1arg)(symbol->value->data.x->func_1arg);
     if (function == NULL)
         return PS_ERROR_NOT_IMPLEMENTED;
@@ -324,12 +332,12 @@ ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value 
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = &ps_system_real;
         result->data.r = (ps_real)cos(value->data.r);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
+    result->type = &ps_system_real;
     return PS_ERROR_NONE;
 }
 
@@ -344,12 +352,12 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
         c = cos(value->data.r);
         if (c == 0.0)
             return PS_ERROR_DIVISION_BY_ZERO;
-        result->type = &ps_system_real;
         result->data.r = (ps_real)sin(value->data.r) / c;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
+    result->type = &ps_system_real;
     return PS_ERROR_NONE;
 }
 
@@ -357,15 +365,19 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
 ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
+    ps_real r;
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)atan(value->data.r);
+        r = (ps_real)atan(value->data.r);
+        // if (errno != 0 || isnan(r) || isinf(r))
+        //     return PS_ERROR_MATH;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
+    result->type = &ps_system_real;
+    result->data.r = r;
     return PS_ERROR_NONE;
 }
 
@@ -373,16 +385,18 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
 ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
+    ps_real r;
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         // TODO range check for overflow?
-        result->type = &ps_system_real;
-        result->data.r = value->data.r * value->data.r;
+        r = value->data.r * value->data.r;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
+    result->type = &ps_system_real;
+    result->data.r = r;
     return PS_ERROR_NONE;
 }
 

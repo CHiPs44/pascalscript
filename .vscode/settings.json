@@ -10,7 +10,8 @@
         "ps_parser.h": "c",
         "ps_value.h": "c",
         "ps_string.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "math.h": "c"
     },
     "makefile.configureOnOpen": false,
     "workbench.iconTheme": "fira-code-material-minimal",
