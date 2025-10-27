@@ -181,7 +181,6 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            // fprintf(stderr, " INFO\tWRITE_OR_WRITELN: ',' encountered, loop to next argument\n");
             READ_NEXT_TOKEN;
             continue;
         }
@@ -213,6 +212,8 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     // Check if identifier is the current function as defined in its parent environment
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
+    if (environment == NULL)
+        RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
     if (symbol != NULL)
     {
         if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
@@ -281,7 +282,7 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
 
 /**
  * Visit
- *      repeat_statement = 'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
+ *      'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
  */
 bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
@@ -352,7 +353,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
 /**
  * Visit
- *      for_statement = 'FOR' control_variable ':=' expression ( 'TO' |
+ *      'FOR' control_variable ':=' expression ( 'TO' |
  * 'DOWNTO' ) expression 'DO' statement ;
  */
 bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)

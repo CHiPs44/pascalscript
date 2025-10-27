@@ -66,28 +66,28 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, FILE *f, ps_value *valu
     (void)f;
     unsigned int seed = 0;
     // No argument: use current time as seed
-    if (value == NULL || value->type == NULL || value->type->value == NULL)
+    if (value != NULL && value->type != NULL && value->type->value != NULL)
     {
-        srand((unsigned int)time(NULL));
-        if (interpreter->debug)
-            fprintf(stderr, "RANDOMIZE\n");
+        // Argument: use its value as seed
+        switch (value->type->value->data.t->base)
+        {
+        case PS_TYPE_INTEGER:
+            seed = (unsigned int)(value->data.i);
+            break;
+        case PS_TYPE_UNSIGNED:
+            seed = (unsigned int)(value->data.u);
+            break;
+        default:
+            interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
+            return false;
+        }
+        srand(seed);
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "RANDOMIZE(%u)\n", seed);
         return true;
     }
-    // Argument: use its value as seed
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_INTEGER:
-        seed = (unsigned int)(value->data.i);
-        break;
-    case PS_TYPE_UNSIGNED:
-        seed = (unsigned int)(value->data.u);
-        break;
-    default:
-        interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
-        return false;
-    }
-    srand(seed);
+    srand((unsigned int)time(NULL));
     if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "RANDOMIZE(%u)\n", seed);
+        fprintf(stderr, "RANDOMIZE\n");
     return true;
 }

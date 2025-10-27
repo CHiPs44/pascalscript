@@ -12,6 +12,7 @@
 /**
  * Visit program declaration:
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
+ *  identifiers are ignored
  */
 bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
@@ -136,7 +137,8 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *          ImageWidth  = 320;
  *          ImageHeight = 200;
  *          ImageDepth  = 8;
- *          ImageSize    = (ImageWidth * ImageHeight * ImageDepth) div 8;
+ *          ImagePixels = ImageWidth * ImageHeight;
+ *          ImageSize   = (ImagePixels * ImageDepth) div 8;
  */
 bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {

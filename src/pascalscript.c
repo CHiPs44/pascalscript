@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "ctdsbvnm")) != -1)
+    while ((opt = getopt(argc, argv, "ctdsbvnmh")) != -1)
     {
         switch (opt)
         {

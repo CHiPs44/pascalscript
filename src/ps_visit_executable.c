@@ -151,10 +151,8 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
  *      where actual_parameter is:
  *          expression or variable_reference
  */
-bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *procedure,
-                               ps_actual_signature *actual)
+bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *procedure)
 {
-    (void)actual;
     VISIT_BEGIN("ACTUAL_SIGNATURE", "");
 
     ps_formal_signature *formal_signature = procedure->value->data.x->formal_signature;
@@ -204,7 +202,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         {
             result.type = parameter->type; //&ps_system_none;
             result.data.v = NULL;
-            interpreter->debug = DEBUG_VERBOSE;
+            // interpreter->debug = DEBUG_VERBOSE;
             if (!ps_visit_expression(interpreter, mode, &result))
                 TRACE_ERROR("EXPRESSION");
             if (mode == MODE_EXEC)
@@ -292,7 +290,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     // ps_value result = {0};
     bool has_environment = false;
     ps_symbol *result_symbol = NULL;
-    ps_value result_value = {0};
+    ps_value *result_value = NULL;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -412,10 +410,16 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     // Function have a return value
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
-        result_value.type = signature->result_type;
-        result_value.data.v = NULL;
-        result_value.allocated = false;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", &result_value);
+        result_value = ps_value_alloc(signature->result_type, (ps_value_data){.v = NULL});
+        if (result_value == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
+        }
+        result_value->type = signature->result_type;
+        result_value->data.v = NULL;
+        result_value->allocated = true;
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -433,11 +437,6 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     READ_NEXT_TOKEN;
     if (!ps_visit_block(interpreter, MODE_SKIP))
     {
-        goto cleanup;
-    }
-    if (!ps_interpreter_exit_environment(interpreter))
-    {
-        has_environment = false;
         goto cleanup;
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
@@ -477,7 +476,6 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
 {
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "");
 
-    ps_actual_signature *actual_signature = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
     bool has_environment = false;
@@ -514,11 +512,20 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         // Parse actual parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
-            if (!ps_visit_actual_signature(interpreter, mode, executable, actual_signature))
+            if (!ps_visit_actual_signature(interpreter, mode, executable))
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+            SAVE_CURSOR(line, column);
+            READ_NEXT_TOKEN;
         }
-        SAVE_CURSOR(line, column);
+        else
+        {
+            // No parameters
+            ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
+            if (formal_signature->parameter_count != 0)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            SAVE_CURSOR(line, column);
+        }
         if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
         {
             ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
@@ -578,8 +585,6 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             TRACE_ERROR("EXIT_ENVIRONMENT");
     }
 
-    VISIT_END("OK");
-
 cleanup:
     if (has_environment)
     {
@@ -597,7 +602,7 @@ cleanup:
         }
         ps_interpreter_exit_environment(interpreter);
     }
-    if (interpreter->error == PS_ERROR_NONE)
-        interpreter->error = PS_ERROR_GENERIC;
-    TRACE_ERROR("CLEANUP");
+    if (interpreter->error != PS_ERROR_NONE)
+        TRACE_ERROR("CLEANUP");
+    VISIT_END("OK");
 }
