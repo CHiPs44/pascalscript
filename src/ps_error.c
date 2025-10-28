@@ -116,6 +116,8 @@ char *ps_error_get_message(ps_error error)
         return "Too many variables in declaration";
     case PS_ERROR_PARAMETER_COUNT_MISMATCH:
         return "Parameter count mismatch";
+    case PS_ERROR_MATH_NAN_INF:
+        return "Math result is NaN or Infinity";
     case PS_ERROR_MAX:
         return "MAX error?";
     }

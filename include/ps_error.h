@@ -71,6 +71,7 @@ extern "C"
         PS_ERROR_INVALID_PARAMETERS,
         PS_ERROR_TOO_MANY_VARIABLES,
         PS_ERROR_PARAMETER_COUNT_MISMATCH,
+        PS_ERROR_MATH_NAN_INF,
         // ...
         PS_ERROR_MAX = UINT8_MAX
     } __attribute__((__packed__)) ps_error;

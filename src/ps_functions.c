@@ -345,14 +345,15 @@ ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value 
 ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    double c;
+    double c, s;
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
         c = cos(value->data.r);
         if (c == 0.0)
             return PS_ERROR_DIVISION_BY_ZERO;
-        result->data.r = (ps_real)sin(value->data.r) / c;
+        s = sin(value->data.r);
+        result->data.r = (ps_real)(s / c);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -365,19 +366,21 @@ ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value 
 ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    ps_real r;
+    double r;
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_REAL:
-        r = (ps_real)atan(value->data.r);
-        // if (errno != 0 || isnan(r) || isinf(r))
-        //     return PS_ERROR_MATH;
+        r = atan(value->data.r);
+        if (errno != 0 || isnan(r) || isinf(r))
+            return PS_ERROR_MATH_NAN_INF;
+        if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
+            return PS_ERROR_OUT_OF_RANGE;
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
     result->type = &ps_system_real;
-    result->data.r = r;
+    result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
