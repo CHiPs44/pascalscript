@@ -17,7 +17,7 @@ Var
     I, J: Integer;
 
 Begin
-    WriteLn('Calling FooBar with 21...');
+    // WriteLn('Calling FooBar with 21...');
     I := 21;
     J := FooBar(I);
     WriteLn(' FooBar returned ', J);

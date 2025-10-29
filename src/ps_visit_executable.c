@@ -442,13 +442,9 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
 
-    VISIT_END("OK");
-
 cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    // if (result_symbol != NULL)
-    //     result_symbol = ps_symbol_free(result_symbol);
     if (symbol != NULL)
     {
         symbol = ps_symbol_free(symbol);
@@ -460,9 +456,9 @@ cleanup:
     }
     if (executable != NULL)
         executable = ps_executable_free(executable);
-    if (interpreter->error == PS_ERROR_NONE)
-        interpreter->error = PS_ERROR_GENERIC;
-    TRACE_ERROR("CLEANUP");
+    if (interpreter->error != PS_ERROR_NONE)
+        TRACE_ERROR("CLEANUP");
+    VISIT_END("OK");
 }
 
 /**
