@@ -197,7 +197,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     READ_NEXT_TOKEN;
     // TYPE_REFERENCE
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
-        RETURN_ERROR(interpreter->error);
+        TRACE_ERROR("TYPE REFERENCE");
 
     if (mode == MODE_EXEC)
     {
@@ -210,7 +210,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
         if (type_symbol == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         if (!ps_interpreter_add_symbol(interpreter, type_symbol))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("ADD SYMBOL");
     }
 
     VISIT_END("OK");

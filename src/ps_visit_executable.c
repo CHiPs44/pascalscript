@@ -122,7 +122,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
 
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_reference))
-        RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("TYPE REFERENCE");
 
     // Add the parameters to the signature and to the current environment if executing
     for (int i = 0; i <= index; i++)
@@ -138,7 +138,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         if (parameter == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         if (!ps_interpreter_add_symbol(interpreter, parameter))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("ADD SYMBOL");
         // }
     }
 
@@ -503,7 +503,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         // User defined procedure call
         // Enter environment for procedure or function
         if (!ps_interpreter_enter_environment(interpreter, &executable->name))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("ENTER_ENVIRONMENT");
         has_environment = true;
         // Parse actual parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)

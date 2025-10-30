@@ -35,6 +35,10 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 break;
             EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+            if (interpreter->debug >= DEBUG_TRACE)
+            {
+                ps_token_debug(stderr, "PROGRAM PARAMETER SKIPPED", &lexer->current_token);
+            }
             if (lexer->current_token.type == PS_TOKEN_COMMA)
                 continue;
         } while (true);
@@ -42,13 +46,14 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
     READ_NEXT_TOKEN;
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
-        RETURN_ERROR(interpreter->error);
+        TRACE_ERROR("ENTER ENVIRONMENT");
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
-        RETURN_ERROR(interpreter->error);
+        TRACE_ERROR("ADD SYMBOL");
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
-    ps_interpreter_exit_environment(interpreter);
+    if (!ps_interpreter_exit_environment(interpreter))
+        TRACE_ERROR("EXIT ENVIRONMENT");
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: text after '.' is not analyzed and has not to be
 
@@ -261,7 +266,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         if (constant == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         if (!ps_interpreter_add_symbol(interpreter, constant))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("ADD SYMBOL");
         // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
@@ -314,7 +319,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
         } while (true);
         READ_NEXT_TOKEN;
         if (!ps_visit_type_reference(interpreter, mode, &type))
-            RETURN_ERROR(interpreter->error);
+            TRACE_ERROR("TYPE REFERENCE");
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN;
         // if (mode==MODE_EXEC)
@@ -326,7 +331,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (variable == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
             if (!ps_interpreter_add_symbol(interpreter, variable))
-                RETURN_ERROR(interpreter->error);
+                TRACE_ERROR("ADD SYMBOL");
         }
         // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);

@@ -135,6 +135,17 @@ extern "C"
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
     memcpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE)
 
+#define VISIT_ERROR(__PLUS__)                                                                                          \
+    {                                                                                                                  \
+        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "%*cRETURN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1,                               \
+                    mode == MODE_EXEC ? '*' : ' ', visit, __PLUS__);                                                   \
+            ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
+        }                                                                                                              \
+        return false;                                                 \
+    }
+
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
