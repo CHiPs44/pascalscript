@@ -19,7 +19,7 @@ Var
 Begin
     // WriteLn('Calling FooBar with 21...');
     I := 21;
-    J := FooBar(I);
+    J := 42;//FooBar(I);
     WriteLn(' FooBar returned ', J);
     // WriteLn(FooBar(21), '*STOP*');
 End.

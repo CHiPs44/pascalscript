@@ -564,21 +564,6 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
                 RETURN_ERROR_OR_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
             // READ_NEXT_TOKEN;
         }
-        // Empty byref parameters to avoid freeing values still used in the caller environment
-        for (uint8_t i = 0; i < executable->value->data.x->formal_signature->parameter_count; i++)
-        {
-            ps_formal_parameter *parameter = &executable->value->data.x->formal_signature->parameters[i];
-            if (parameter->byref)
-            {
-                ps_symbol *symbol =
-                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &parameter->name, true);
-                if (symbol != NULL)
-                    symbol->value = NULL;
-            }
-        }
-        // Exit environment
-        if (!ps_interpreter_exit_environment(interpreter))
-            TRACE_ERROR("EXIT_ENVIRONMENT");
     }
 
 cleanup:
