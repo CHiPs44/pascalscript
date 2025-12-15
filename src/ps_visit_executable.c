@@ -193,7 +193,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
             }
             if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
             {
-                ps_symbol_free(argument);
+                argument = ps_symbol_free(argument);
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("ADD_BYREF");
             }
@@ -227,7 +227,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 }
                 if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
                 {
-                    ps_symbol_free(argument);
+                    argument = ps_symbol_free(argument);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("ADD_BYVAL");
                 }

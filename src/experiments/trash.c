@@ -6,9 +6,9 @@
  */
 ps_error lexer_copy_identifier(char *text, ps_token *token)
 {
-    char identifier[PS_IDENTIFIER_MAX + 1];
+    char identifier[PS_IDENTIFIER_LEN + 1];
     size_t length = strlen(text);
-    if (length > PS_IDENTIFIER_MAX)
+    if (length > PS_IDENTIFIER_LEN)
     {
         return PS_ERROR_IDENTIFIER_TOO_LONG;
     }

@@ -205,14 +205,14 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
  */
 bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
-    char buffer[PS_IDENTIFIER_MAX + 1];
+    char buffer[PS_IDENTIFIER_LEN + 1];
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     if (isalpha(c))
     {
         do
         {
-            if (pos > PS_IDENTIFIER_MAX)
+            if (pos > PS_IDENTIFIER_LEN)
             {
                 return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG,
                                              "ps_lexer_read_identifier_or_keyword");

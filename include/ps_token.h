@@ -15,10 +15,6 @@ extern "C"
 {
 #endif
 
-#ifndef PS_IDENTIFIER_MAX
-#define PS_IDENTIFIER_MAX 31
-#endif
-
     /*
         1. Mimimalistic
             PROGRAM         BEGIN           END
@@ -184,7 +180,7 @@ extern "C"
     } ps_token_type;
 
     typedef union u_ps_token_value {
-        char identifier[PS_IDENTIFIER_MAX + 1];
+        char identifier[PS_IDENTIFIER_LEN + 1];
         ps_integer i;
         ps_unsigned u;
         ps_real r;

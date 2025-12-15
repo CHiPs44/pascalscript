@@ -15,6 +15,12 @@
 - **TP4** Turbo Pascal 4.0, cf. <http://www.bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_4.0_Owners_Manual_1987.pdf> page 194
 - **PS** PascalScript itself ;-)
 
+    STD ISO 7185 Standard Pascal, cf. https://wiki.lazarus.freepascal.org/Standard_Pascal
+    EXT ISO 10206 Extended Pascal, cf. http://pascal.hansotten.com/uploads/standardpascal/iso10206_a4.pdf
+    TP3 Turbo Pascal 3.0, cf. http://www.bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1986.pdf page 37
+    TP4 Turbo Pascal 4.0, cf. http://www.bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_4.0_Owners_Manual_1987.pdf page 194
+    PS PascalScript itself ;-)
+
 Should we add UCSD Pascal betwween **EXT** and **TP3**?
 
 | Keyword          |  STD  |  EXT  |  TP3  |  TP4  |  PS   | Notes                                 |

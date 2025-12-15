@@ -36,7 +36,7 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
         {
             if (free_symbols && table->symbols[i]->allocated)
             {
-                ps_symbol_free(table->symbols[i]);
+                table->symbols[i] = ps_symbol_free(table->symbols[i]);
             }
             table->symbols[i] = NULL;
         }
@@ -160,7 +160,7 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;
     ps_symbol_table_size start_index = index;
-    fprintf(stderr, "ADD\tps_symbol_table_add: '%s' at index %d (hash %08x)\n", symbol->name, index, hash);
+    // fprintf(stderr, "ADD\tps_symbol_table_add: '%*s' at index %05d (hash %08x)\n", -(int)PS_IDENTIFIER_LEN, symbol->name, index, hash);
     // Find an empty slot in the table
     while (table->symbols[index] != NULL)
     {
