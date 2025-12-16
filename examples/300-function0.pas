@@ -18,13 +18,13 @@ Begin
     // Do nothing
 End;
 
-Var
-    I, J: Integer;
+// Var
+//     I, J: Integer;
 
 Begin
     // WriteLn('Calling FooBar with 21...');
-    I := 21;
-    J := 42;//FooBar(I);
-    WriteLn('FooBar returned ', J);
+    // I := 21;
+    // J := 42;//FooBar(I);
+    // WriteLn('FooBar returned ', J);
     // WriteLn(FooBar(21), '*STOP*');
 End.

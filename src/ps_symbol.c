@@ -41,6 +41,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
         // free only allocated symbols
         if (symbol->allocated)
         {
+            fprintf(stderr, "FREE\tSYMBOL: %p, name %s, value %p\n", (void *)symbol, symbol->name, (void *)symbol->value);
             symbol->value = ps_value_free(symbol->value);
             ps_memory_free(symbol);
         }

@@ -122,7 +122,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
 
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_reference))
-            TRACE_ERROR("TYPE REFERENCE");
+        TRACE_ERROR("TYPE REFERENCE");
 
     // Add the parameters to the signature and to the current environment if executing
     for (int i = 0; i <= index; i++)
@@ -281,7 +281,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
 
     ps_identifier identifier;
-    ps_symbol *symbol = NULL;
+    ps_symbol *executable_symbol = NULL;
     ps_value *value = NULL;
     ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
@@ -291,6 +291,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     bool has_environment = false;
     ps_symbol *result_symbol = NULL;
     ps_value *result_value = NULL;
+    bool result_symbol_added = false;
+    bool executable_symbol_added = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -300,8 +302,8 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     // Does it already exist in the current environment?
     COPY_IDENTIFIER(identifier);
-    symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
-    if (symbol != NULL)
+    executable_symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
+    if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
     // Create new environment for the procedure/function
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
@@ -386,27 +388,27 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         fprintf(stderr, "================================================================================\n");
     }
 
-    symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
-    if (symbol == NULL)
+    executable_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
+    if (executable_symbol == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    symbol->kind = kind;
+    executable_symbol->kind = kind;
     value = ps_value_alloc(&ps_system_procedure, (ps_value_data){.x = executable});
     if (value == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    symbol->value = value;
+    executable_symbol->value = value;
     // Add the procedure/function to the parent environment
     ps_environment *parent_environment = ps_interpreter_get_environment(interpreter)->parent;
-    // if (!ps_interpreter_add_symbol(interpreter, callable))
-    if (parent_environment == NULL || !ps_environment_add_symbol(parent_environment, symbol))
+    if (parent_environment == NULL || !ps_environment_add_symbol(parent_environment, executable_symbol))
     {
         goto cleanup;
     }
+    executable_symbol_added = true;
     // Function have a return value
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
@@ -427,6 +429,7 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
         }
         if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
         {
+            result_symbol_added = true;
             result_symbol = ps_symbol_free(result_symbol);
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
@@ -445,10 +448,15 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
 cleanup:
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    if (symbol != NULL)
+    if (executable_symbol != NULL && !executable_symbol_added)
     {
-        symbol = ps_symbol_free(symbol);
+        executable_symbol = ps_symbol_free(executable_symbol);
         value = NULL;
+    }
+    if (result_symbol != NULL && !result_symbol_added)
+    {
+        result_symbol = ps_symbol_free(result_symbol);
+        result_value = NULL;
     }
     if (value != NULL)
     {
