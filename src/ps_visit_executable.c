@@ -22,12 +22,14 @@
  * Visit variable reference:
  *      IDENTIFIER
  * Next steps:
+ *  "Namespace" access (System.MaxInt, System.Sin, <Program>.<Variable>, <Procedure>.<Variable>, ...):
+ *      IDENTIFIER '.' IDENTIFIER
  *  Array access:
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']'
- *  "Namespace" access (System.MaxInt, System.Sin, <Program>.Variable, ...):
- *      IDENTIFIER '.' IDENTIFIER
  *  Pointer dereference:
  *      VARIABLE_REFERENCE '^'
+ * "Nested" access (Record.Field.SubField, Array[0].Field, Pointer^.Field, ...):
+ *      IDENTIFIER [ '.' IDENTIFIER ]* '.' IDENTIFIER
  */
 bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **variable)
 {
@@ -258,8 +260,9 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
 }
 
 /**
- * Visit procedure declaration:
+ * Visit procedure or functions (with return type) declaration:
  *      PROCEDURE IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] ;
+ *      FUNCTION IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] : TYPE_REFERENCE ;
  *      [ CONST ... TYPE ... VAR ... ]*
  *      BEGIN
  *          COMPOUND_STATEMENT [ ; ]
@@ -268,15 +271,10 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  * Done:
  *  - allow procedure parameters
  *  - allow by reference parameters
- * Next steps:
- *  - functions with return type
- *      FUNCTION IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] : TYPE_REFERENCE ;
- *      [ CONST ... TYPE ... VAR ... ]*
- *      BEGIN
- *          COMPOUND_STATEMENT [ ; ]
- *      END ;
+ * TODO:
+ *  - debug core dump...
  */
-bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
+bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
 {
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
 
@@ -446,15 +444,21 @@ bool ps_visit_procedure_or_function(ps_interpreter *interpreter, ps_interpreter_
     READ_NEXT_TOKEN;
 
 cleanup:
+    interpreter->debug = DEBUG_VERBOSE;
+    fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
+    fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol, executable_symbol_added ? " (added)" : " (not added)");
     if (executable_symbol != NULL && !executable_symbol_added)
     {
+        fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         executable_symbol = ps_symbol_free(executable_symbol);
         value = NULL;
     }
+    fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol, result_symbol_added ? " (added)" : " (not added)");
     if (result_symbol != NULL && !result_symbol_added)
     {
+        fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
         result_symbol = ps_symbol_free(result_symbol);
         result_value = NULL;
     }
