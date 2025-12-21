@@ -212,7 +212,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
     {
         do
         {
-            if (pos > PS_IDENTIFIER_LEN)
+            if (pos > (int)PS_IDENTIFIER_LEN)
             {
                 return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG,
                                              "ps_lexer_read_identifier_or_keyword");

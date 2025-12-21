@@ -69,13 +69,32 @@ extern "C"
         ps_string_len max;
     } __attribute__((__packed__)) ps_type_definition_string;
 
-    // /** @brief *FUTURE* => index goes from range->value->g.min to range->value->g.max */
-    // typedef struct s_ps_type_definition_array
-    // {
-    //     ps_symbol *range;    /** @brief index range as subrange */
-    //     ps_unsigned count;   /** @brief number of elements (max - min) + 1 */
-    //     ps_symbol *type_def; /** @brief type of elements, may be another array definition */
-    // } __attribute__((__packed__)) ps_type_definition_array;
+    /** @brief *FUTURE* => index goes from range->value->g.min to range->value->g.max */
+    typedef struct s_ps_type_definition_array
+    {
+        ps_symbol *range;    /** @brief index range as subrange */
+        ps_unsigned count;   /** @brief number of elements (max - min) + 1 */
+        ps_symbol *type_def; /** @brief type of elements, may be another array definition */
+    } __attribute__((__packed__)) ps_type_definition_array;
+
+    typedef struct s_ps_type_definition_record_field
+    {
+        ps_symbol *name;               /** @brief field name */
+        ps_symbol *type_def;          /** @brief field type definition */
+        struct s_ps_type_definition_record_field *next; /** @brief next field in the record, NULL if last */
+    } __attribute__((__packed__)) ps_type_definition_record_field;
+
+    /** @brief *FUTURE* => linked list of fields */
+    typedef struct s_ps_type_definition_record
+    {
+        ps_type_definition_record_field *fields; /** @brief linked list of fields */
+    } __attribute__((__packed__)) ps_type_definition_record;
+
+    /** @brief *FUTURE* => file type definition */
+    typedef struct s_ps_type_definition_file
+    {
+        ps_symbol *type_def; /** @brief type definition of the file content */
+    } __attribute__((__packed__)) ps_type_definition_file;
 
     /** @brief Type definition: type + base + parameters if needed (simple types have type == base) */
     typedef struct s_ps_type_definition
@@ -89,9 +108,9 @@ extern "C"
             ps_type_definition_set def_set;
             ps_type_definition_pointer def_pointer;
             ps_type_definition_string def_string;
-            // ps_type_definition_array def_array;
-            // ps_type_definition_record def_record;
-            // ps_type_definition_file def_file;
+            ps_type_definition_array def_array;
+            ps_type_definition_record def_record;
+            ps_type_definition_file def_file;
         } def; /** @brief  */
     } /*__attribute__((__packed__))*/ ps_type_definition;
 

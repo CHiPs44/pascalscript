@@ -112,6 +112,14 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             current_char = *text++;
         }
     }
+    /*
+     * If the file does not end with a newline (CR or LF), there is still one
+     * final line that must be counted. The loop above only counts newline
+     * separators, so add one more line when the last character wasn't a
+     * newline (and text is non-empty).
+     */
+    if (previous_char != '\0' && previous_char != '\n' && previous_char != '\r')
+        buffer->line_count += 1;
     if (buffer->line_count >= PS_BUFFER_MAX_LINES)
     {
         buffer->error = PS_ERROR_OVERFLOW;
@@ -181,6 +189,26 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             start = text;
             break;
         case '\0':
+            /*
+             * End of text: if there is a remaining partial line (no trailing
+             * newline), record it here.
+             */
+            if (start < text)
+            {
+                line_length = text - start;
+                if (line_length > PS_BUFFER_MAX_COLUMNS)
+                {
+                    ps_memory_free(buffer->line_starts);
+                    buffer->line_starts = NULL;
+                    ps_memory_free(buffer->line_lengths);
+                    buffer->line_lengths = NULL;
+                    buffer->error = PS_ERROR_OVERFLOW;
+                    return false;
+                }
+                buffer->line_starts[line] = start;
+                buffer->line_lengths[line] = line_length;
+                line += 1;
+            }
             stop = true;
             break;
         default:

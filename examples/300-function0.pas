@@ -5,26 +5,26 @@
 *)
 Program Example300Function0;
 
-// Function FooBar(Baz: Integer): Integer;
-// Begin
-//     // WriteLn('   FooBar: Baz=', Baz);
-//     // FooBar := Baz * 2;
-//     // Result := Baz * 2;
-//     // WriteLn('   FooBar: Result=', Result);
-// End;
-
-Procedure Dummy;
+Function FooBar(Baz: Unsigned): Unsigned;
 Begin
-    // Do nothing
+    // WriteLn('   FooBar: Baz=', Baz);
+    FooBar := Baz * 2;
+    // Result := Baz * 2;
+    // WriteLn('   FooBar: Result=', Result);
 End;
 
+// Procedure Dummy;
+// Begin
+//     // Do nothing
+// End;
+
 // Var
-//     I, J: Integer;
+//     I, J: Unsigned;
 
 Begin
     // WriteLn('Calling FooBar with 21...');
     // I := 21;
-    // J := 42;//FooBar(I);
+    // J := FooBar(I);
     // WriteLn('FooBar returned ', J);
     // WriteLn(FooBar(21), '*STOP*');
 End.

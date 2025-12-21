@@ -4,6 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <math.h>
+
 #include "ps_system.h"
 #include "ps_environment.h"
 #include "ps_functions.h"
@@ -47,10 +49,10 @@ PS_SYSTEM_TYPE(boolean  , "BOOLEAN"   , PS_TYPE_BOOLEAN                         
 PS_SYSTEM_TYPE(char     , "CHAR"      , PS_TYPE_CHAR                                                                  );
 PS_SYSTEM_TYPE(real     , "REAL"      , PS_TYPE_REAL                                                                  );
 PS_SYSTEM_TYPE(string   , "STRING"    , PS_TYPE_STRING                                                                );
-// PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY                                                                 );
-// PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE                                                              );
-// PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM                                                                  );
-// PS_SYSTEM_TYPE(record   , "#RECORD"   , PS_TYPE_RECORD                                                                );
+PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY                                                                 );
+PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE                                                              );
+PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM                                                                  );
+PS_SYSTEM_TYPE(record   , "#RECORD"   , PS_TYPE_RECORD                                                                );
 PS_SYSTEM_TYPE(procedure, "#PROCEDURE", PS_TYPE_EXECUTABLE                                                            );
 PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE                                                            );
 
@@ -76,7 +78,7 @@ PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, (ps_unsigned)PS_UNSIGNED_MAX
 PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX                                              );
 PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                                              );
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                          );
-PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.141592653589793115997963468544185161590576171875       );
+PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
 
 /**********************************************************************************************************************/
 /* VARIABLES                                                                                                          */
@@ -196,10 +198,10 @@ bool ps_system_init(ps_environment *system)
     error = error || !ps_environment_add_symbol(system, &ps_system_string);
     error = error || !ps_environment_add_symbol(system, &ps_system_procedure);
     error = error || !ps_environment_add_symbol(system, &ps_system_function);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_subrange);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_enum);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_array);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_record);
+    error = error || !ps_environment_add_symbol(system, &ps_system_subrange);
+    error = error || !ps_environment_add_symbol(system, &ps_system_enum);
+    error = error || !ps_environment_add_symbol(system, &ps_system_array);
+    error = error || !ps_environment_add_symbol(system, &ps_system_record);
 
     /**************************************************************************/
     /* VARIABLES                                                              */

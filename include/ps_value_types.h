@@ -15,22 +15,22 @@ extern "C"
     /** @brief Base types: */
     typedef enum e_ps_value_type
     {
-        PS_TYPE_NONE,       /** @brief [N]o type yet or unknown                    */
-        PS_TYPE_REAL,       /** @brief [R]eal                      *BASE*          */
-        PS_TYPE_INTEGER,    /** @brief [I]nteger (Signed)          *BASE*          */
-        PS_TYPE_UNSIGNED,   /** @brief [U]nsigned integer          *BASE*          */
-        PS_TYPE_BOOLEAN,    /** @brief [B]oolean                   *BASE*          */
-        PS_TYPE_CHAR,       /** @brief [C]har                      *BASE*          */
-        PS_TYPE_STRING,     /** @brief [S]tring                    *BASE*          */
-        PS_TYPE_SET,        /** @brief [Z] Set                            *FUTURE* */
-        PS_TYPE_DEFINITION, /** @brief [T]ype definition                           */
-        PS_TYPE_EXECUTABLE, /** @brief [X] executable: procedure or function       */
-        PS_TYPE_SUBRANGE,   /** @brief [G] subrange                       *FUTURE* */
-        PS_TYPE_ENUM,       /** @brief [E]num                             *FUTURE* */
-        PS_TYPE_POINTER,    /** @brief [P]ointer                          *FUTURE* */
-        PS_TYPE_ARRAY,      /** @brief [A]rray                            *FUTURE* */
-        PS_TYPE_RECORD,     /** @brief [R]ecord                           *FUTURE* */
-        PS_TYPE_FILE,       /** @brief [F]ile                             *FUTURE* */
+        PS_TYPE_NONE,       /** @brief [N]o type yet or unknown              */
+        PS_TYPE_REAL,       /** @brief [R]eal                      *BASE*    */
+        PS_TYPE_INTEGER,    /** @brief [I]nteger (Signed)          *BASE*    */
+        PS_TYPE_UNSIGNED,   /** @brief [U]nsigned integer          *BASE*    */
+        PS_TYPE_BOOLEAN,    /** @brief [B]oolean                   *BASE*    */
+        PS_TYPE_CHAR,       /** @brief [C]har                      *BASE*    */
+        PS_TYPE_STRING,     /** @brief [S]tring                    *BASE*    */
+        PS_TYPE_SET,        /** @brief [Z] Set                     *FUTURE*  */
+        PS_TYPE_DEFINITION, /** @brief [T]ype definition                     */
+        PS_TYPE_EXECUTABLE, /** @brief [X] executable: procedure or function */
+        PS_TYPE_SUBRANGE,   /** @brief [G] subrange                *FUTURE*  */
+        PS_TYPE_ENUM,       /** @brief [E]num                      *FUTURE*  */
+        PS_TYPE_POINTER,    /** @brief [P]ointer                   *FUTURE*  */
+        PS_TYPE_ARRAY,      /** @brief [A]rray                     *FUTURE*  */
+        PS_TYPE_RECORD,     /** @brief [R]ecord                    *FUTURE*  */
+        PS_TYPE_FILE,       /** @brief [F]ile                      *FUTURE*  */
     } __attribute__((__packed__)) ps_value_type;
 
 #define PS_VALUE_TYPE_SIZE sizeof(ps_value_type)

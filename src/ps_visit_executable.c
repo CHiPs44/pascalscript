@@ -193,6 +193,13 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("ARGUMENT_BYREF");
             }
+            /*
+             * For by-reference parameters the argument symbol must not take
+             * ownership of the variable's value; it is only an alias. Mark
+             * the symbol as not allocated so we don't free the value twice.
+             */
+            if (argument != NULL)
+                argument->allocated = false;
             if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
             {
                 argument = ps_symbol_free(argument);
@@ -274,7 +281,8 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  * TODO:
  *  - debug core dump...
  */
-bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol_kind kind)
+bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                                ps_symbol_kind kind)
 {
     VISIT_BEGIN("PROCEDURE_OR_FUNCTION", "");
 
@@ -386,14 +394,14 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         fprintf(stderr, "================================================================================\n");
     }
 
-    executable_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROCEDURE, &identifier, NULL);
+    executable_symbol = ps_symbol_alloc(kind, &identifier, NULL);
     if (executable_symbol == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
         goto cleanup;
     }
-    executable_symbol->kind = kind;
-    value = ps_value_alloc(&ps_system_procedure, (ps_value_data){.x = executable});
+    value = ps_value_alloc(kind == PS_SYMBOL_KIND_PROCEDURE ? &ps_system_procedure : &ps_system_function,
+                           (ps_value_data){.x = executable});
     if (value == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -406,6 +414,8 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     {
         goto cleanup;
     }
+    /* Ownership of 'value' is transferred to the environment via the symbol */
+    value = NULL;
     executable_symbol_added = true;
     // Function have a return value
     if (kind == PS_SYMBOL_KIND_FUNCTION)
@@ -427,11 +437,12 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         }
         if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
         {
-            result_symbol_added = true;
             result_symbol = ps_symbol_free(result_symbol);
+            result_value = NULL;
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
+        result_symbol_added = true;
     }
 
     // Skip block
@@ -444,18 +455,20 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     READ_NEXT_TOKEN;
 
 cleanup:
-    interpreter->debug = DEBUG_VERBOSE;
+    // interpreter->debug = DEBUG_VERBOSE;
     fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol, executable_symbol_added ? " (added)" : " (not added)");
+    fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
+            executable_symbol_added ? " (added)" : " (not added)");
     if (executable_symbol != NULL && !executable_symbol_added)
     {
         fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         executable_symbol = ps_symbol_free(executable_symbol);
         value = NULL;
     }
-    fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol, result_symbol_added ? " (added)" : " (not added)");
+    fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
+            result_symbol_added ? " (added)" : " (not added)");
     if (result_symbol != NULL && !result_symbol_added)
     {
         fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
@@ -466,10 +479,12 @@ cleanup:
     {
         value = ps_value_free(value);
     }
-    if (executable != NULL)
-        executable = ps_executable_free(executable);
     if (interpreter->error != PS_ERROR_NONE)
+    {
+        if (executable != NULL)
+            executable = ps_executable_free(executable);
         TRACE_ERROR("CLEANUP");
+    }
     VISIT_END("OK");
 }
 
