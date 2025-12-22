@@ -10,15 +10,10 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 
-(******************************************************************************)
-(* LEXER RULES                                                                *)
-(******************************************************************************)
+uppercase_letter = ? 'A'..'Z' ? ;
+lowercase_letter = ? 'a'..'z' ? ;
+letter           = uppercase_letter | lowercase_letter ;
 
-letter      =   'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' 
-            |   'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
-            |   'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' 
-            |   'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
-            ;
 bin_digit   =   '0' | '1' ;
 oct_digit   =   bin_digit | '2' | '3' | '4' |'5' | '6' | '7' ;
 dec_digit   =   oct_digit | '8' | '9' ;
@@ -34,21 +29,19 @@ unsigned_integer    =   dec_digit_sequence
                     |   '$' , hex_digit_sequence 
                     ;
 unsigned_real       =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
-scale_factor        =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
 sign                =   '+' | '-' ;
+scale_factor        =   'E' | 'e' , [ sign ] , dec_digit_sequence ;
 unsigned_number     =   unsigned_real | unsigned_integer ;
 signed_number       =   sign , unsigned_number ;
 
 character_string    =   quoted_string | control_string ;
 quoted_string       =   "'" , { string_character } , "'" ;
 string_character    =   "''" | ? Any character except ', CR and LF ? ;
-control_string      =   '#' , unsigned_integer ;
+control_string_sharp =   '#' , unsigned_integer ;
+control_string_caret =   '^' , uppercase_letter | lowercase_letter ;
+control_string      =  control_string_sharp | control_string_caret ;
 
 identifier          =   letter | '_' , { letter | dec_digit | '_' } ;
-
-(******************************************************************************)
-(* PARSER RULES                                                               *)
-(******************************************************************************)
 
 label                   =   'LABEL' , dec_digit_sequence | identifier
                         ;
@@ -76,13 +69,10 @@ type                    =   simple_type
                         ;
 simple_type             =   ordinal_type | real_type | boolean_type ;
 real_type               =   real_type_identifier ;
-real_type_identifier    =   'REAL'
-                        ;   (* | 'SINGLE' | 'DOUBLE' | 'EXTENDED' | 'COMP' | 'CURRENCY' ; *)
-ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR'
-                        ;   (* | 'SHORTINT' | 'SMALLINT' | 'LONGINT' | 'LONGWORD' | 'INT64' | 'BYTE' | 'WORD' | 'QWORD' 
-                               | 'BYTEBOOL' | 'WORDBOOL' | 'LONGBOOL' | 'QWORDBOOL' ; *)
-boolean_type            =   'BOOLEAN' | 'BOOLEAN16' | 'BOOLEAN32' | 'BOOLEAN64' ;
-string_type             =   'STRING' , [ '[' , unsigned_integer | constant_identifier , ']' ] ;
+real_type_identifier    =   'REAL' ;   
+ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR' ;
+boolean_type            =   'BOOLEAN' ;
+string_type             =   'STRING' , [ '[' , unsigned_integer | constant_expression , ']' ] ;
 enumerated_type         =   '(' , identifier_list , ')'
                         ;
 structured_type         =   array_type | record_type | set_type | file_type | pointer_type
@@ -106,7 +96,7 @@ identifier_list         =   identifier , { ',' , identifier }
 (* omitted: assigned_enum_list, hint_directives, ansi strings, ... *)
 
 additive_operator       =   '+' | '-' ;
-multiplicative_operator =   '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' ;
+multiplicative_operator =   '*' | '/'| 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' ;
 relational_operator     =   '=' | '<>' | '<' | '>' | '<=' | '>=' | 'IN' | 'IS' ;
 
 expression              =   or_expression ;
