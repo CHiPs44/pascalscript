@@ -20,7 +20,7 @@ ps_vm *vm = &_vm;
 
 int main(void)
 {
-    struct rlimit rl = {256 * 1024 * 12, 256 * 1024 * 12};
+    struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
     int result;

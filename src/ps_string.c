@@ -159,48 +159,36 @@ ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
 int ps_string_compare(ps_string *a, ps_string *b)
 {
     return strcmp((char *)a->str, (char *)b->str);
-    // int diff = 0;
-    // ps_string_len len = a->len > b->len ? a->len : b->len;
-    // for (ps_string_len i = 0; i < len; i++)
-    // {
-    //     if (i < a->len)
-    //     {
-    //         if (i < b->len)
-    //         {
-    //             diff = (int)a->str[i] - (int)b->str[i];
-    //             if (diff == 0)
-    //             {
-    //                 continue;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             diff = (int)a->str[i];
-    //             break;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         diff = -(int)b->str[i];
-    //         break;
-    //     }
-    // }
-    // return diff;
 }
 
 ps_string_len ps_string_position(ps_string *substr, ps_string *s)
 {
-    (void)substr;
-    (void)s;
-    return 0; // TODO
+    char *pos = strstr((char *)s->str, (char *)substr->str);
+    if (pos == NULL)
+        return 0;
+    return (ps_string_len)(pos - (char *)s->str + 1);
 }
 
 ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len count)
 {
-    (void)s;
-    (void)index;
-    (void)count;
-    return NULL; // TODO
+    // (void)s;
+    // (void)index;
+    // (void)count;
+    // return NULL; // TODO
+    if (index < 1 || index > s->len)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    if (count == 0)
+        return s; // nothing to delete
+    if (index + count - 1 > s->len)
+    {
+        count = s->len - index + 1; // adjust count
+    }
+    memmove(&s->str[index - 1], &s->str[index - 1 + count], s->len - (index - 1 + count));
+    s->len -= count;
+    return s;
 }
 
 ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)

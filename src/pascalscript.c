@@ -169,18 +169,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // // gdb runs from src directory
-        // // fprintf(stderr, "cwd=%s", current_path);
-        // if (len > 3 && current_path[len - 4] == '/' && current_path[len - 3] == 's' && current_path[len - 2] == 'r'
-        // &&
-        //     current_path[len - 1] == 'c')
-        // {
         example_path = "../examples";
-        // }
-        // else
-        // {
-        //     example_path = "examples";
-        // }
         if (verbose)
             fprintf(stderr, "Example path: %s\n", example_path);
         // program_file = "00-hello.pas";

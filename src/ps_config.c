@@ -43,7 +43,7 @@ void ps_config_report(FILE *output)
     // fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     // REPORT_SECTION("*** CONFIGURATION ***");
     fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "┃ *** CONFIGURATION ***                                                        ┃\n");
+    fprintf(output, "┃ *** PASCALSCRIPT CONFIGURATION ***                                           ┃\n");
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     REPORT_FORMAT(PS_VERSION, "s");
     // REPORT_FORMAT(PS_VERSION_MAJOR, "d");
@@ -55,7 +55,9 @@ void ps_config_report(FILE *output)
     REPORT_STRING(PS_INTEGER);
     REPORT_FORMAT(PS_INTEGER_SIZE, FMT_SIZE);
     REPORT_FORMAT(PS_INTEGER_MIN, PS_INTEGER_FMT_10);
+    REPORT_FORMAT(PS_INTEGER_MIN, PS_INTEGER_FMT_16);
     REPORT_FORMAT(PS_INTEGER_MAX, PS_INTEGER_FMT_10);
+    REPORT_FORMAT(PS_INTEGER_MAX, PS_INTEGER_FMT_16);
     REPORT_FORMAT(PS_INTEGER_FMT_10, "s");
     REPORT_FORMAT(PS_INTEGER_FMT_16, "s");
     REPORT_SECTION("*** UNSIGNED TYPE ***");
