@@ -357,7 +357,6 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
             if (!ps_visit_function_call(interpreter, mode, symbol, result))
                 TRACE_ERROR("FUNCTION");
-            READ_NEXT_TOKEN;
             break;
         default:
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -487,8 +486,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
             {
                 READ_NEXT_TOKEN;
-                if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
-                    RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
                 READ_NEXT_TOKEN;
             }
             null_arg = true;
@@ -497,7 +495,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         else
         {
             // all other functions have one "by value" argument for now
-            // examples: Ord, Chr, Pred, Succ, ...
+            // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, mode, &arg))

@@ -6,13 +6,13 @@
 
 Program Example300Function0;
 
-Function FooBar(Baz: Unsigned): Unsigned;
-Begin
-  // WriteLn('   FooBar: Baz=', Baz);
-  FooBar := Baz * 2;
-  // Result := Baz * 2;
-  // WriteLn('   FooBar: Result=', Result);
-End;
+// Function FooBar(Baz: Unsigned): Unsigned;
+// Begin
+//   // WriteLn('   FooBar: Baz=', Baz);
+//   FooBar := Baz * 2;
+//   // Result := Baz * 2;
+//   // WriteLn('   FooBar: Result=', Result);
+// End;
 
 // Procedure Dummy;
 // Begin
@@ -20,12 +20,16 @@ End;
 // End;
 
 Var 
-  I, J: Unsigned;
+  // I, J: Unsigned;
+  R: Real;
 
 Begin
   // WriteLn('Calling FooBar with 21...');
   // I := 21;
-  J := FooBar(I);
-  WriteLn('FooBar returned ', J);
+  // J := FooBar(I);
+  // WriteLn('FooBar returned ', J);
   // WriteLn(FooBar(21), '*STOP*');
+  // WriteLn('Calling 1.0+Sin(1.0)...');
+  R := 1+2;//1.0 + Sin(1.0);
+  // WriteLn('1.0+Sin(1.0) = ', R);
 End.
