@@ -455,23 +455,27 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     READ_NEXT_TOKEN;
 
 cleanup:
-    // interpreter->debug = DEBUG_VERBOSE;
-    fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
     if (has_environment)
         ps_interpreter_exit_environment(interpreter);
-    fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
-            executable_symbol_added ? " (added)" : " (not added)");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
+                executable_symbol_added ? " (added)" : " (not added)");
     if (executable_symbol != NULL && !executable_symbol_added)
     {
-        fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         executable_symbol = ps_symbol_free(executable_symbol);
         value = NULL;
     }
-    fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
-            result_symbol_added ? " (added)" : " (not added)");
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
+                result_symbol_added ? " (added)" : " (not added)");
     if (result_symbol != NULL && !result_symbol_added)
     {
-        fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
         result_symbol = ps_symbol_free(result_symbol);
         result_value = NULL;
     }
