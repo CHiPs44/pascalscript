@@ -156,7 +156,7 @@ extern "C"
         return ps_interpreter_return_false(interpreter, __PS_ERROR__);                                                 \
     }
 
-#define RETURN_ERROR_OR_CLEANUP(__PS_ERROR__)                                                                          \
+#define GOTO_CLEANUP(__PS_ERROR__)                                                                          \
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
         {                                                                                                              \

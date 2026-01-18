@@ -6,10 +6,12 @@
 
 Program Example300Function1;
 
-Function FooBarBaz(pCount, Sides: Integer): Integer;
+Function FooBarBaz(pCount, Sides: Unsigned): Unsigned;
 Var
-    Total: Integer;
+    Test: Unsigned;
+    Total: Unsigned;
 Begin
+    Test := 234567;
     // Write(' FooBarBaz: Count=', Count);
     Total := 0;
     While pCount > 0 Do
@@ -21,44 +23,42 @@ Begin
     // Result := Total;
 End;
 
-Function D6(Count: Integer): Integer;
-Var
-    Temp: Integer;
+Function D6(Count: Unsigned): Unsigned;
 Begin
-    // Write(' D6: Count=', Count);
-    // D6 := FooBarBaz(Count, 6);
-    // Result := FooBarBaz(Count, 6);
-    Temp := FooBarBaz(Count, 6);
-    D6 := Temp;
+    D6 := FooBarBaz(Count, 6);
+    // D6 := 3 + Random(6) + Random(6) + Random(6);
 End;
 
 Const
-    Count = 16;
+    Count = 256;
 
 Var
-    I: Integer;
-    Characteristic, Min, Max: Integer;
-    Total: Real;
+    Test: integer;
+    I: Unsigned;
+    Characteristic, Minimum, Maximum: Unsigned;
+    Total2: Real;
 
 Begin
+    Test := 123456;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Launching 3d6 for ', Count, ' tries...');
     Randomize;
-    Min := MaxInt;
-    Max := 0;
-    Total := 0;
+    Minimum := MaxInt;
+    Maximum := 0;
+    Total2 := 0;
     For I := 1 To Count Do
     Begin
         // Characteristic := D6(3);
         Characteristic := FooBarBaz(3, 6);
-        Total := Total + Characteristic;
-        If Characteristic < Min Then Min := Characteristic;
-        If Characteristic > Max Then Max := Characteristic;
+        Total2 := Total2 + Characteristic;
+        If Characteristic < Minimum Then Minimum := Characteristic;
+        If Characteristic > Maximum Then Maximum := Characteristic;
         if Characteristic < 10 Then Write(' ');
         Write(Characteristic, ' ');
-        If I Mod 16 = 0 Then WriteLn(' Mean = ', Total / I);
+        If I Mod 16 = 0 Then WriteLn(' Mean = ', Total2 / I, ' Total2 = ', Total2);
     End;
     WriteLn;
-    WriteLn('Min = ', Min, ', Max = ', Max, ', Mean = ', Total / Count);
+    WriteLn('Minimum = ', Minimum, ', Maximum = ', Maximum, ', Mean = ', Total2 / Count);
     WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('Test=', Test);
 End.

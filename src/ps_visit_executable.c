@@ -251,13 +251,13 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ',' encountered\n");
+            // fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ',' encountered\n");
             READ_NEXT_TOKEN;
             continue;
         }
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ')' encountered\n");
+            // fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ')' encountered\n");
             READ_NEXT_TOKEN;
             break;
         }
@@ -356,7 +356,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
                     READ_NEXT_TOKEN_OR_CLEANUP;
                     break;
                 }
-                RETURN_ERROR_OR_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN);
+                GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN);
             } while (true);
         }
     }
@@ -585,14 +585,14 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         if (mode == MODE_EXEC)
         {
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
-                RETURN_ERROR_OR_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
+                GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
             READ_NEXT_TOKEN;
             // Run procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;
             // Restore cursor position
             if (!ps_lexer_set_cursor(lexer, line, column))
-                RETURN_ERROR_OR_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
+                GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
             // READ_NEXT_TOKEN;
         }
     }
