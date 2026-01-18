@@ -236,16 +236,16 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
  */
 bool ps_lexer_read_number(ps_lexer *lexer)
 {
-    char buffer[PS_BUFFER_MAX_COLUMNS + 1];
+    char buffer[33];
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     int base = 10;
     bool is_real = false;
     bool has_exp = false;
     char *end;
-
-    char *digits = "0123456789"; // Decimal
-    if (c == '%')                // Binary?
+    // Decimal (default)
+    char *digits = "0123456789";
+    if (c == '%') // Binary?
     {
         base = 2;
         digits = "01";
@@ -267,41 +267,55 @@ bool ps_lexer_read_number(ps_lexer *lexer)
     {
         do
         {
-            if (pos > PS_BUFFER_MAX_COLUMNS)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_number");
+            if (pos > 32)
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
             buffer[pos++] = c;
             GET_NEXT_CHAR(c);
             if (base == 10)
             {
-                if (c == '.' && !is_real)
+                // floating point or exponent part?
+                if (c == '.')
                 {
+                    if (is_real)
+                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "only 1 dot allowed");
+                    if (has_exp)
+                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                                     "no dot in exponent allowed");
                     is_real = true;
+                    if (pos > 32)
+                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
                     buffer[pos++] = c;
                     GET_NEXT_CHAR(c);
                 }
+                // exponent part?
                 else if ((c == 'e' || c == 'E'))
                 {
                     if (has_exp)
                         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
-                    has_exp = true;
+                    // 1E12 is valid
                     is_real = true;
+                    has_exp = true;
+                    if (pos > 32)
+                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
                     buffer[pos++] = c;
                     GET_NEXT_CHAR(c);
                     if (c == '+' || c == '-')
                     {
+                        if (pos > 32)
+                            return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
                         buffer[pos++] = c;
                         GET_NEXT_CHAR(c);
                     }
                 }
             }
-        } while (strchr(digits, c) != NULL || strchr(".eE+-", c) != NULL);
+        } while (strchr(digits, c) != NULL);
         buffer[pos] = '\0';
         // TODO? use even better conversion from string to real or unsigned integer
         if (is_real)
         {
             double d = strtod(buffer, &end);
             if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_number");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "invalid real number");
             lexer->current_token.type = PS_TOKEN_REAL_VALUE;
             lexer->current_token.value.r = (ps_real)d;
         }
@@ -309,7 +323,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         {
             unsigned long u = strtoul(buffer, &end, base);
             if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_number");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "invalid number");
             if (u > PS_INTEGER_MAX)
             {
                 lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
