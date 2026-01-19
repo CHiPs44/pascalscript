@@ -96,6 +96,8 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
+    // if (mode == MODE_EXEC)
+    //     interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("ASSIGNMENT", "");
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
@@ -127,6 +129,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
         TRACE_ERROR("COPY");
 
+    // if (mode == MODE_EXEC)
+    //     interpreter->debug = DEBUG_NONE;
     VISIT_END("OK");
 }
 
@@ -211,9 +215,9 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     READ_NEXT_TOKEN;
     // Check if identifier is the current function as defined in its parent environment
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
-    symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
     if (environment == NULL)
         RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
+    symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
     if (symbol != NULL)
     {
         if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
@@ -225,6 +229,8 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        } else{
+            symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         }
     }
     else

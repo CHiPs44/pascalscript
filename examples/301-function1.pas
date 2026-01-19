@@ -4,36 +4,38 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 
-Program Example300Function1;
+Program Example301Function1;
 
-Function FooBarBaz(pCount, Sides: Unsigned): Unsigned;
+Var
+    Test: integer;
+
+Function RollDices(pCount, Sides: Unsigned): Unsigned;
 Var
     Test: Unsigned;
     Total: Unsigned;
 Begin
     Test := 234567;
-    // Write(' FooBarBaz: Count=', Count);
+    // Write(' RollDices: Count=', Count);
     Total := 0;
     While pCount > 0 Do
     Begin
         Total := Total + Random(Sides) + 1;
         pCount := pCount - 1;
     End;
-    FooBarBaz := Total;
+    RollDices := Total;
     // Result := Total;
 End;
 
 Function D6(Count: Unsigned): Unsigned;
 Begin
-    D6 := FooBarBaz(Count, 6);
+    D6 := RollDices(Count, 6);
     // D6 := 3 + Random(6) + Random(6) + Random(6);
 End;
 
 Const
-    Count = 256;
+    Count = 1;
 
 Var
-    Test: integer;
     I: Unsigned;
     Characteristic, Minimum, Maximum: Unsigned;
     Total2: Real;
@@ -42,6 +44,7 @@ Begin
     Test := 123456;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Launching 3d6 for ', Count, ' tries...');
+    WriteLn('Theorical mean = ', 10.5);
     Randomize;
     Minimum := MaxInt;
     Maximum := 0;
@@ -49,7 +52,7 @@ Begin
     For I := 1 To Count Do
     Begin
         // Characteristic := D6(3);
-        Characteristic := FooBarBaz(3, 6);
+        Characteristic := RollDices(3, 6);
         Total2 := Total2 + Characteristic;
         If Characteristic < Minimum Then Minimum := Characteristic;
         If Characteristic > Maximum Then Maximum := Characteristic;
