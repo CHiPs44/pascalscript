@@ -229,12 +229,18 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-        } else{
+        }
+        else
+        {
+            // Not the current function, normal lookup
             symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         }
     }
     else
+    {
+        // Normal lookup
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+    }
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
