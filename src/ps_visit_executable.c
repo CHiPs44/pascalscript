@@ -526,7 +526,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     {
         // Randomize
         if (mode == MODE_EXEC)
-            if (!ps_procedure_randomize(interpreter, NULL, NULL))
+            if (!ps_procedure_randomize(interpreter, NULL))
                 TRACE_ERROR("RANDOMIZE");
     }
     else

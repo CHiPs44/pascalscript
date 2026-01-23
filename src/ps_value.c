@@ -174,7 +174,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     PS_VALUE_SET(type_def, p);
 // }
 
-char *ps_value_to_string(ps_value *value, bool debug)
+char *ps_value_to_string(ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
     ps_executable *executable;
@@ -220,12 +220,20 @@ char *ps_value_to_string(ps_value *value, bool debug)
             return NULL;
         break;
     case PS_TYPE_REAL:
-        snprintf(buffer, sizeof(buffer) - 1, "%" PS_REAL_FMT, value->data.r);
+        if (width > 0)
+            if (precision == 0)
+                snprintf(buffer, sizeof(buffer) - 1, "%*" PS_REAL_FMT_WP, width, value->data.r);
+            else
+                snprintf(buffer, sizeof(buffer) - 1, "%*.*" PS_REAL_FMT_WP, width, precision, value->data.r);
+        else
+            snprintf(buffer, sizeof(buffer) - 1, "%" PS_REAL_FMT, value->data.r);
         break;
     case PS_TYPE_INTEGER:
         if (debug)
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i,
                      value->data.i);
+        else if (width > 0)
+            snprintf(buffer, sizeof(buffer) - 1, "%*" PS_INTEGER_FMT_10, width, value->data.i);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10, value->data.i);
         break;
@@ -233,6 +241,8 @@ char *ps_value_to_string(ps_value *value, bool debug)
         if (debug)
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u,
                      value->data.u);
+        else if (width > 0)
+            snprintf(buffer, sizeof(buffer) - 1, "%*" PS_UNSIGNED_FMT_10, width, value->data.i);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10, value->data.u);
         break;
@@ -271,7 +281,8 @@ char *ps_value_to_string(ps_value *value, bool debug)
         else
         {
             snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",
-                     executable->formal_signature->result_type == NULL || executable->formal_signature->result_type == &ps_system_none
+                     executable->formal_signature->result_type == NULL ||
+                             executable->formal_signature->result_type == &ps_system_none
                          ? "PROCEDURE"
                          : "FUNCTION",
                      executable->line + 1, executable->column + 1);
@@ -290,14 +301,14 @@ char *ps_value_to_string(ps_value *value, bool debug)
     return buffer;
 }
 
-char *ps_value_get_display_string(ps_value *value)
+char *ps_value_get_display_string(ps_value *value, int16_t width, int16_t precision)
 {
-    return ps_value_to_string(value, false);
+    return ps_value_to_string(value, false, width, precision);
 }
 
 char *ps_value_get_debug_string(ps_value *value)
 {
-    return ps_value_to_string(value, true);
+    return ps_value_to_string(value, true, 0, 0);
 }
 
 char *ps_value_dump(ps_value *value)

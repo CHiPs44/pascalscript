@@ -31,9 +31,9 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return false;
 }
 
-bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision)
 {
-    char *display_value = ps_value_get_display_string(value);
+    char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
     {
         interpreter->error = PS_ERROR_EXPECTED_STRING;
@@ -46,9 +46,9 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return true;
 }
 
-bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision)
 {
-    char *display_value = ps_value_get_display_string(value);
+    char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
     {
         interpreter->error = PS_ERROR_EXPECTED_STRING;
@@ -61,9 +61,8 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return true;
 }
 
-bool ps_procedure_randomize(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
 {
-    (void)f;
     unsigned int seed = 0;
     // No argument: use current time as seed
     if (value != NULL && value->type != NULL && value->type->value != NULL)

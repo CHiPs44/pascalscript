@@ -136,12 +136,16 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
 
 /**
  * Visit
- *      write_or_writeln =   ( 'WRITE' | 'WRITELN' ) [ '(' expression [ ',' expression ]* ')' ] ;
- * Next step:
- *      write_or_writeln =   ( 'WRITE' | 'WRITELN' ) [ '('
- *                                  expression [ ':' width [ ':' precision ] ]
- *                                  [ ',' expression [ ':' width [ ':' precision ] ] ]*
- *                              ')' ] ;
+ *      'WRITE' | 'WRITELN' ) [ '('
+ *          expression [ ':' width [ ':' precision ] ]
+ *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
+ *      ')' ] ;
+ * Next steps:
+ *      'WRITE' | 'WRITELN' ) [ '('
+ *          [ file_variable ',' ]
+ *          expression [ ':' width [ ':' precision ] ]
+ *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
+ *      ')' ] ;
  */
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
 {
@@ -149,6 +153,8 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
     bool loop = true;
+    int16_t width = 0;
+    int16_t precision = 0;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is legal but is a no-op)
@@ -178,9 +184,25 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
                     mode == MODE_EXEC ? '*' : ' ');
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
+        width = 0;
+        precision = 0;
+        if (lexer->current_token.type == PS_TOKEN_COLON)
+        {
+            READ_NEXT_TOKEN;
+            EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
+            width = (int16_t)(lexer->current_token.value.i);
+            READ_NEXT_TOKEN;
+            if (lexer->current_token.type == PS_TOKEN_COLON)
+            {
+                READ_NEXT_TOKEN;
+                EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
+                precision = (int16_t)(lexer->current_token.value.i);
+                READ_NEXT_TOKEN;
+            }
+        }
         if (mode == MODE_EXEC)
         {
-            if (!ps_procedure_write(interpreter, stdout, &result))
+            if (!ps_procedure_write(interpreter, stdout, &result, width, precision))
                 TRACE_ERROR("WRITE");
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -275,7 +297,7 @@ bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode
 
     READ_NEXT_TOKEN;
     if (!ps_visit_expression(interpreter, mode, &result))
-        TRACE_ERROR("TEST");
+        TRACE_ERROR("CONDITION");
     if (result.type != &ps_system_boolean)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
     EXPECT_TOKEN(PS_TOKEN_THEN);

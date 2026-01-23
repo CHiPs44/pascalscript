@@ -106,6 +106,7 @@ extern "C"
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
 #define PS_REAL_FMT "11G"
+#define PS_REAL_FMT_WP "f"
 #endif
 
 #if PS_BITNESS == 32
@@ -114,6 +115,7 @@ extern "C"
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
 #define PS_REAL_FMT "11G"
+#define PS_REAL_FMT_WP "f"
 #endif
 
 #if PS_BITNESS == 64
@@ -122,6 +124,7 @@ extern "C"
 #define PS_REAL_MAX DBL_MAX
 #define PS_REAL_EPSILON DBL_EPSILON
 #define PS_REAL_FMT "15lG"
+#define PS_REAL_FMT_WP "d"
 #endif
 
 #endif
