@@ -7,21 +7,25 @@ Program RepeatUntilReal;
 Const
     Limit = 1.0;
 Var
+    C : Integer;
     R : Real;
-    Z : Real;
 Begin
     WriteLn('Example 045: Repeat-Until Loop with Real numbers');
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('         1         2         3         4         5         6         7         8');
     WriteLn('12345678901234567890123456789012345678901234567890123456789012345678901234567890');
     R := -Limit;
+    C := 1;
     Repeat
-        Z := R * 10.0;
-        Write(Z:10:1);
-        If (Z>=-3.0 And Z<-2.0) Or (Z>=5.0 And Z<6.0) Then
+        Write(R:10:6);
+        C := C + 10;
+        If C > 80 Then
+        Begin
+            C := 1;
             WriteLn;
-        R := R + 0.1;
-    Until R - 0.01 > Limit;
+        End;
+        R := R + Limit / 10.0;
+    Until R - EpsReal > Limit;
     WriteLn;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK!');
