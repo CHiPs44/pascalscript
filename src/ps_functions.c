@@ -18,18 +18,39 @@
 #include "ps_token.h"
 #include "ps_value.h"
 
-ps_error ps_function_exec(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
+ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {
     assert(interpreter != NULL);
     assert(symbol != NULL);
     assert(symbol->value != NULL);
     assert(symbol->value->data.x != NULL);
-    assert(value != NULL);
     assert(result != NULL);
     ps_function_1arg function = (ps_function_1arg)(symbol->value->data.x->func_1arg);
     if (function == NULL)
+    {
+        ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
         return PS_ERROR_NOT_IMPLEMENTED;
+    }
     return function(interpreter, value, result);
+}
+
+ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *a, ps_value *b,
+                                ps_value *result)
+{
+    assert(interpreter != NULL);
+    assert(symbol != NULL);
+    assert(symbol->value != NULL);
+    assert(symbol->value->data.x != NULL);
+    assert(a != NULL);
+    assert(b != NULL);
+    assert(result != NULL);
+    ps_function_2args function = (ps_function_2args)(symbol->value->data.x->func_2args);
+    if (function == NULL)
+    {
+        ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
+        return PS_ERROR_NOT_IMPLEMENTED;
+    }
+    return function(interpreter, a, b, result);
 }
 
 /******************************************************************************/
@@ -247,7 +268,6 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);
-        // fprintf(stderr, "TRUNC(%" PS_REAL_FMT ")=%" PS_INTEGER_FMT_10 "\n", value->data.r, result->data.i);
         break;
     default:
         return PS_ERROR_EXPECTED_REAL;
@@ -471,6 +491,17 @@ ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value 
     default:
         return PS_ERROR_EXPECTED_REAL;
     }
+    return PS_ERROR_NONE;
+}
+
+/** @brief POWER(REAL, REAL): REAL - Get power of floating point value */
+ps_error ps_function_power(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+{
+    ((void)interpreter);
+    if (a->type->value->data.t->base != PS_TYPE_REAL || b->type->value->data.t->base != PS_TYPE_REAL)
+        return PS_ERROR_EXPECTED_REAL;
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)pow(a->data.r, b->data.r);
     return PS_ERROR_NONE;
 }
 

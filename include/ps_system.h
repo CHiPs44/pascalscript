@@ -48,10 +48,13 @@ extern "C"
     extern ps_symbol ps_system_function_frac;
     extern ps_symbol ps_system_function_get_tick_count;
     extern ps_symbol ps_system_function_int;
+    extern ps_symbol ps_system_function_length;
     extern ps_symbol ps_system_function_ln;
     extern ps_symbol ps_system_function_log;
+    extern ps_symbol ps_system_function_lowercase;
     extern ps_symbol ps_system_function_odd;
     extern ps_symbol ps_system_function_ord;
+    extern ps_symbol ps_system_function_power;
     extern ps_symbol ps_system_function_pred;
     extern ps_symbol ps_system_function_random;
     extern ps_symbol ps_system_function_round;
@@ -61,6 +64,7 @@ extern "C"
     extern ps_symbol ps_system_function_succ;
     extern ps_symbol ps_system_function_tan;
     extern ps_symbol ps_system_function_trunc;
+    extern ps_symbol ps_system_function_uppercase;
     extern ps_symbol ps_system_procedure_randomize;
     extern ps_symbol ps_system_procedure_read;
     extern ps_symbol ps_system_procedure_readln;

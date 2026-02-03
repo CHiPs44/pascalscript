@@ -382,8 +382,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         NUMBER_CASE(PS_TOKEN_SHR << 8 | UI, u, i, >>, u, PS_TYPE_UNSIGNED)
         NUMBER_CASE(PS_TOKEN_SHR << 8 | UU, u, u, >>, u, PS_TYPE_UNSIGNED)
     default:
-        ps_interpreter_set_message(interpreter, "Binary operator %d/'%s' is not applicable for types '%s' and '%s'\n",
-                                   token_type, ps_token_get_keyword(token_type),
+        ps_interpreter_set_message(interpreter, "Binary operator %s (%d) is not applicable for types %s and %s\n",
+                                   ps_token_get_keyword(token_type), token_type,
                                    ps_value_type_get_name(a->type->value->data.t->base),
                                    ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
@@ -409,8 +409,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         result->type = &ps_system_string;
         break;
     default:
-        ps_interpreter_set_message(interpreter, "Unknown binary operator %d/'%s' for types '%s' and '%s'\n", token_type,
-                                   ps_token_get_keyword(token_type),
+        ps_interpreter_set_message(interpreter, "Unknown binary operator %s (%d) for types %s and %s\n",
+                                   ps_token_get_keyword(token_type), token_type,
                                    ps_value_type_get_name(a->type->value->data.t->base),
                                    ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
@@ -418,7 +418,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
     if (expected_type != &ps_system_none && result->type != expected_type)
     {
         ps_interpreter_set_message(
-            interpreter, "Binary operator '%s' (%d) result type '%s' does not match expected type '%s'\n",
+            interpreter, "Binary operator %s (%d) result type %s does not match expected type %s\n",
             ps_token_get_keyword(token_type), token_type, ps_value_type_get_name(result->type->value->data.t->base),
             ps_value_type_get_name(expected_type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);

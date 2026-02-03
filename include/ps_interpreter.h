@@ -59,7 +59,7 @@ extern "C"
 
     /**
      * @brief Initialize interpreter
-     * @return NULL if no free memory (errno = ENOMEM) or the interpreter
+     * @return NULL if no free memory (errno = ENOMEM)
      */
     ps_interpreter *ps_interpreter_alloc();
 

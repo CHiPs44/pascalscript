@@ -37,7 +37,7 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
     ps_token_type or_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_and_expression(interpreter, mode, &left))
-        TRACE_ERROR("AND");
+        TRACE_ERROR("AND1");
     if (mode == MODE_EXEC && result->type == &ps_system_none)
     {
         if (interpreter->debug >= DEBUG_VERBOSE)
@@ -140,12 +140,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
 
     static ps_token_type relational_operators[] = {
         // <            <=            >           >=           =               <>
-        PS_TOKEN_LT,
-        PS_TOKEN_LE,
-        PS_TOKEN_GT,
-        PS_TOKEN_GE,
-        PS_TOKEN_EQ,
-        PS_TOKEN_NE,
+        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -441,8 +436,10 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
 {
     VISIT_BEGIN("FUNCTION_CALL", "");
 
-    ps_value arg = {.type = &ps_system_none, .data.v = NULL};
+    ps_value arg1 = {.type = &ps_system_none, .data.v = NULL};
+    ps_value arg2 = {.type = &ps_system_none, .data.v = NULL};
     bool null_arg = false;
+    int arg_count = 1;
 
     READ_NEXT_TOKEN;
     if (function->system)
@@ -450,9 +447,10 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         // System functions
         if (function == &ps_system_function_random)
         {
-            // Random function can be called with 2 signatures:
+            // Random function can be called with 3 signatures:
             //  1. Random or Random() => Real from 0.0 to 1.0 excluded
-            //  2. Random(Integer|Unsigned) => Integer|Unsigned
+            //  2. Random(Integer) => Integer
+            //  3. Random(Unsigned) => Unsigned
             if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
             {
                 // Skip '(' and ')' or get parameter enclosed in parentheses
@@ -465,17 +463,18 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
                 }
                 else
                 {
-                    if (!ps_visit_expression(interpreter, mode, &arg))
+                    if (!ps_visit_expression(interpreter, mode, &arg1))
                         TRACE_ERROR("PARAMETER");
-                    if (mode == MODE_EXEC && arg.type != &ps_system_integer && arg.type != &ps_system_unsigned)
+                    if (mode == MODE_EXEC && arg1.type != &ps_system_integer && arg1.type != &ps_system_unsigned)
                         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
                     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-                    result->type = arg.type;
+                    result->type = arg1.type;
                     READ_NEXT_TOKEN;
                 }
             }
             else
             {
+                arg_count = 0;
                 null_arg = true;
                 result->type = &ps_system_real;
             }
@@ -492,20 +491,44 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             null_arg = true;
             result->type = &ps_system_unsigned;
         }
+        else if (function == &ps_system_function_power)
+        {
+            arg_count = 2;
+            // Power function has two "by value" arguments
+            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+            READ_NEXT_TOKEN;
+            if (!ps_visit_expression(interpreter, mode, &arg1))
+                TRACE_ERROR("FIRST_PARAMETER");
+            EXPECT_TOKEN(PS_TOKEN_COMMA);
+            READ_NEXT_TOKEN;
+            if (!ps_visit_expression(interpreter, mode, &arg2))
+                TRACE_ERROR("SECOND_PARAMETER");
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+            READ_NEXT_TOKEN;
+            if (mode == MODE_EXEC)
+            {
+                interpreter->error = ps_function_exec_2args(interpreter, function, &arg1, &arg2, result);
+                if (interpreter->error != PS_ERROR_NONE)
+                    TRACE_ERROR("SYSTEM_FUNCTION");
+            }
+        }
         else
         {
             // all other functions have one "by value" argument for now
             // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
-            if (!ps_visit_expression(interpreter, mode, &arg))
+            if (!ps_visit_expression(interpreter, mode, &arg1))
                 TRACE_ERROR("PARAMETER");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
         }
         if (mode == MODE_EXEC)
         {
-            interpreter->error = ps_function_exec(interpreter, function, null_arg ? NULL : &arg, result);
+            if (arg_count <= 1)
+                interpreter->error = ps_function_exec_1arg(interpreter, function, null_arg ? NULL : &arg1, result);
+            else if (arg_count == 2)
+                interpreter->error = ps_function_exec_2args(interpreter, function, &arg1, &arg2, result);
             if (interpreter->error != PS_ERROR_NONE)
                 TRACE_ERROR("SYSTEM_FUNCTION");
         }

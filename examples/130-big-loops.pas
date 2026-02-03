@@ -8,13 +8,13 @@ Const
   MaxLoops = 100000;
 Var
   I: Integer;
-  // Start, Finish: Unsigned;
+  Start, Finish: Unsigned;
   T1For, T2For: Unsigned;
   T1While, T2While: Unsigned;
   T1Repeat, T2Repeat: Unsigned;
 Begin
-  // Start := GetTickCount();
-  // WriteLn('Starting big loops...');
+  Start := GetTickCount();
+  WriteLn('Starting big loops...');
 
   T1For := GetTickCount();
   For I := 1 To MaxLoops Do
@@ -42,8 +42,8 @@ Begin
   WriteLn(' - while       : ', T2While - T1While, ' ms');
   WriteLn(' - repeat until: ', T2Repeat - T1Repeat, ' ms');
 
-  // WriteLn('Finished big loops.');
-  // Finish := GetTickCount();
-  // WriteLn('Overall time: ', Finish - Start, ' ms');
-  // WriteLn('OK!');
+  WriteLn('Finished big loops.');
+  Finish := GetTickCount();
+  WriteLn('Overall time: ', Finish - Start, ' ms');
+  WriteLn('OK!');
 End.

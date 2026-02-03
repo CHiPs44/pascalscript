@@ -102,11 +102,8 @@ PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", i, (ps_integer)0              
 /**********************************************************************************************************************/
 
 PS_SYSTEM_CONSTANT(unsigned, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS                                      );
-// PS_SYSTEM_CONSTANT(unsigned, ps_version_major, "PS_VERSION_MAJOR", u, PS_VERSION_MAJOR                                );
-// PS_SYSTEM_CONSTANT(unsigned, ps_version_minor, "PS_VERSION_MINOR", u, PS_VERSION_MINOR                                );
-// PS_SYSTEM_CONSTANT(unsigned, ps_version_patch, "PS_VERSION_PATCH", u, PS_VERSION_PATCH                                );
-// PS_SYSTEM_CONSTANT(unsigned, ps_version_index, "PS_VERSION_INDEX", u, PS_VERSION_INDEX                                );
-PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, NULL                                            );
+ps_string ps_version_string = {.max = 0, .len = 0, .str = "PS_VERSION"};
+PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_version_string                              );
 
 /**********************************************************************************************************************/
 /* STANDARD + MATH LIBRARY                                                    */
@@ -148,6 +145,7 @@ PS_SYSTEM_FUNCTION (function , log           , "LOG"         , .func_1arg      ,
 PS_SYSTEM_FUNCTION (function , lowercase     , "LOWERCASE"   , .func_1arg      , &ps_function_lowercase         );
 PS_SYSTEM_FUNCTION (function , odd           , "ODD"         , .func_1arg      , &ps_function_odd               );
 PS_SYSTEM_FUNCTION (function , ord           , "ORD"         , .func_1arg      , &ps_function_ord               );
+PS_SYSTEM_FUNCTION (function , power         , "POWER"       , .func_2args     , &ps_function_power             );
 PS_SYSTEM_FUNCTION (function , pred          , "PRED"        , .func_1arg      , &ps_function_pred              );
 PS_SYSTEM_FUNCTION (function , random        , "RANDOM"      , .func_1arg      , &ps_function_random            );
 PS_SYSTEM_FUNCTION (function , round         , "ROUND"       , .func_1arg      , &ps_function_round             );
@@ -166,10 +164,12 @@ PS_SYSTEM_PROCEDURE(procedure, writeln       , "WRITELN"     , .proc_file_write,
 
 /* clang-format on */
 
+#define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
+    if (!ps_environment_add_symbol(system, &__SYMBOL__))                                                               \
+        goto error;
+
 bool ps_system_init(ps_environment *system)
 {
-    bool error = false;
-
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/
@@ -188,112 +188,100 @@ bool ps_system_init(ps_environment *system)
     // ps_system_enum.value->type->def.def_enum.count = 0;
     // ps_system_enum.value->type->def.def_enum.values = NULL;
     // Register the system types
-    error = error || !ps_environment_add_symbol(system, &ps_system_none);
-    error = error || !ps_environment_add_symbol(system, &ps_system_type_def);
-    error = error || !ps_environment_add_symbol(system, &ps_system_boolean);
-    error = error || !ps_environment_add_symbol(system, &ps_system_char);
-    error = error || !ps_environment_add_symbol(system, &ps_system_integer);
-    error = error || !ps_environment_add_symbol(system, &ps_system_unsigned);
-    error = error || !ps_environment_add_symbol(system, &ps_system_real);
-    error = error || !ps_environment_add_symbol(system, &ps_system_string);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function);
-    error = error || !ps_environment_add_symbol(system, &ps_system_subrange);
-    error = error || !ps_environment_add_symbol(system, &ps_system_enum);
-    error = error || !ps_environment_add_symbol(system, &ps_system_array);
-    error = error || !ps_environment_add_symbol(system, &ps_system_record);
+    ADD_SYSTEM_SYMBOL(ps_system_none);
+    ADD_SYSTEM_SYMBOL(ps_system_type_def);
+    ADD_SYSTEM_SYMBOL(ps_system_boolean);
+    ADD_SYSTEM_SYMBOL(ps_system_char);
+    ADD_SYSTEM_SYMBOL(ps_system_integer);
+    ADD_SYSTEM_SYMBOL(ps_system_unsigned);
+    ADD_SYSTEM_SYMBOL(ps_system_real);
+    ADD_SYSTEM_SYMBOL(ps_system_string);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure);
+    ADD_SYSTEM_SYMBOL(ps_system_function);
+    ADD_SYSTEM_SYMBOL(ps_system_subrange);
+    ADD_SYSTEM_SYMBOL(ps_system_enum);
+    ADD_SYSTEM_SYMBOL(ps_system_array);
+    ADD_SYSTEM_SYMBOL(ps_system_record);
 
     /**************************************************************************/
     /* VARIABLES                                                              */
     /**************************************************************************/
 
-    error = error || !ps_environment_add_symbol(system, &ps_system_variable_integer_exitcode);
-    error = error || !ps_environment_add_symbol(system, &ps_system_variable_integer_ioresult);
+    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_exitcode);
+    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_ioresult);
 
     /**************************************************************************/
     /* CONSTANTS                                                              */
     /**************************************************************************/
 
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_boolean_false);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_boolean_true);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_integer_maxint);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_integer_minint);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_maxuint);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_real_maxreal);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_real_minreal);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_real_epsreal);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_real_pi);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_false);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_true);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_maxint);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_minint);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_maxuint);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_maxreal);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_minreal);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_epsreal);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_pi);
 
     /**************************************************************************/
     /* BITNESS & VERSION                                                      */
     /**************************************************************************/
 
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_ps_bitness);
-    if (!error)
-    {
-        ps_string *ps_version_string = ps_string_create(PS_VERSION, strlen(PS_VERSION));
-        if (ps_version_string == NULL)
-            error = true;
-        ps_system_constant_string_ps_version.value->data.s = ps_version_string;
-    }
-    // error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_ps_version_major);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_ps_version_minor);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_ps_version_patch);
-    // error = error || !ps_environment_add_symbol(system, &ps_system_constant_unsigned_ps_version_index);
-    error = error || !ps_environment_add_symbol(system, &ps_system_constant_string_ps_version);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_bitness);
+    ps_system_constant_string_ps_version.value->data.s->len = strlen(PS_VERSION);
+    ps_system_constant_string_ps_version.value->data.s->max = strlen(PS_VERSION);
+    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_major);
+    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_minor);
+    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_patch);
+    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_index);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version);
 
     /**************************************************************************/
     /* STANDARD PROCEDURES & FUNCTIONS                                        */
     /**************************************************************************/
 
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_abs);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_arctan);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_chr);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_cos);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_even);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_exp);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_frac);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_get_tick_count);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_int);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_length);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_ln);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_log);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_lowercase);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_odd);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_ord);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_pred);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_random);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_round);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_sin);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_sqr);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_sqrt);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_succ);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_tan);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_trunc);
-    error = error || !ps_environment_add_symbol(system, &ps_system_function_uppercase);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_randomize);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_read);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_readln);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_write);
-    error = error || !ps_environment_add_symbol(system, &ps_system_procedure_writeln);
+    ADD_SYSTEM_SYMBOL(ps_system_function_abs);
+    ADD_SYSTEM_SYMBOL(ps_system_function_arctan);
+    ADD_SYSTEM_SYMBOL(ps_system_function_chr);
+    ADD_SYSTEM_SYMBOL(ps_system_function_cos);
+    ADD_SYSTEM_SYMBOL(ps_system_function_even);
+    ADD_SYSTEM_SYMBOL(ps_system_function_exp);
+    ADD_SYSTEM_SYMBOL(ps_system_function_frac);
+    ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count);
+    ADD_SYSTEM_SYMBOL(ps_system_function_int);
+    ADD_SYSTEM_SYMBOL(ps_system_function_length);
+    ADD_SYSTEM_SYMBOL(ps_system_function_ln);
+    ADD_SYSTEM_SYMBOL(ps_system_function_log);
+    ADD_SYSTEM_SYMBOL(ps_system_function_lowercase);
+    ADD_SYSTEM_SYMBOL(ps_system_function_odd);
+    ADD_SYSTEM_SYMBOL(ps_system_function_ord);
+    ADD_SYSTEM_SYMBOL(ps_system_function_power);
+    ADD_SYSTEM_SYMBOL(ps_system_function_pred);
+    ADD_SYSTEM_SYMBOL(ps_system_function_random);
+    ADD_SYSTEM_SYMBOL(ps_system_function_round);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sin);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqr);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqrt);
+    ADD_SYSTEM_SYMBOL(ps_system_function_succ);
+    ADD_SYSTEM_SYMBOL(ps_system_function_tan);
+    ADD_SYSTEM_SYMBOL(ps_system_function_trunc);
+    ADD_SYSTEM_SYMBOL(ps_system_function_uppercase);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_read);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_readln);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_write);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln);
 
     // ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
 
-    if (error)
-    {
-        ps_system_done(system);
-        return false;
-    }
-
     return true;
+
+error:
+    return false;
 }
 
 void ps_system_done(ps_environment *system)
 {
     (void)system;
-    if (ps_system_constant_string_ps_version.value->data.s != NULL)
-    {
-        ps_string_free(ps_system_constant_string_ps_version.value->data.s);
-        ps_system_constant_string_ps_version.value->data.s = NULL;
-    }
 }

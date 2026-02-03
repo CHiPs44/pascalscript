@@ -83,10 +83,8 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
 {
     va_list args;
     va_start(args, format);
-    int ret = vsnprintf(interpreter->message, sizeof(interpreter->message), format, args);
+    vsnprintf(interpreter->message, sizeof(interpreter->message), format, args);
     va_end(args);
-    if (ret < 0 || ret >= (int)sizeof(interpreter->message))
-        return ps_interpreter_return_false(interpreter, PS_ERROR_OVERFLOW);
     return true;
 }
 

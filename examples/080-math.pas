@@ -13,6 +13,7 @@ Begin
   For I := 1 To 2 Do
   Begin
     WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('12345678 | 1234567890123456789012345678901234567890'                             );
     WriteLn('ε        = ', EpsReal                                                            );
     WriteLn('Min      = ', MinReal                                                            );
     WriteLn('Max      = ', MaxReal                                                            );
@@ -33,6 +34,7 @@ Begin
     WriteLn('√2/2     = ', Sqrt(2.0) / 2.0                                                    );
     WriteLn('e        = ', Exp(1.0)                                                           );
     WriteLn('round(e) = ', Round(Exp(1.0))                                                    );
+    WriteLn('1.2^3.4  = ', Power(1.2, 3.4)                                                    );
   End;
   WriteLn('--------------------------------------------------------------------------------');
   WriteLn('OK!'                                                                             );

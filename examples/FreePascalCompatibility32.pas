@@ -9,7 +9,7 @@ Unit FreePascalCompatibility32;
   This unit provides compatibility definitions to ensure that code written
   for 32 bits PascalScript can be compiled with Free Pascal
   To compile from examples directory, use
-    fpc -FaFreePascalCompatibility32 <yourfile>.pas
+    fpc -FaFreePascalCompatibility32 <demofile>.pas
 }
 
 Interface

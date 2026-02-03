@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// #include "ps_interpreter.h"
 #include "ps_symbol.h"
 #include "ps_value.h"
 

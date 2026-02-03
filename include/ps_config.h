@@ -105,7 +105,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "11G"
+#define PS_REAL_FMT "G"
 #define PS_REAL_FMT_WP "f"
 #endif
 
@@ -114,7 +114,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
-#define PS_REAL_FMT "11G"
+#define PS_REAL_FMT "G"
 #define PS_REAL_FMT_WP "f"
 #endif
 
@@ -123,7 +123,7 @@ extern "C"
 #define PS_REAL_MIN DBL_MIN
 #define PS_REAL_MAX DBL_MAX
 #define PS_REAL_EPSILON DBL_EPSILON
-#define PS_REAL_FMT "15lG"
+#define PS_REAL_FMT "lG"
 #define PS_REAL_FMT_WP "d"
 #endif
 
@@ -151,7 +151,7 @@ extern "C"
 #ifndef PS_STRING_MAX_LEN
 // "Short" strings
 #define PS_STRING_LEN_TYPE uint8_t
-#define PS_STRING_MAX_LEN 255u
+#define PS_STRING_MAX_LEN UINT8_MAX
 // "Wide" strings
 // #define PS_STRING_LEN_TYPE uint16_t
 // #define PS_STRING_MAX_LEN UINT16_MAX
@@ -172,7 +172,7 @@ extern "C"
 #define PS_IDENTIFIER_LEN 31u
 #endif
 
-#define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1))
+#define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1u))
 
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 

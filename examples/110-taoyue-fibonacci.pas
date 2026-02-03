@@ -19,7 +19,7 @@ Begin (* Main *)
   Fibonacci1 := 0;
   Fibonacci2 := 1;
   Repeat
-    Write(Fibonacci2(*:7*), ' ');
+    Write(Fibonacci2:7, ' ');
     Temp := Fibonacci2;
     Fibonacci2 := Fibonacci1 + Fibonacci2;
     Fibonacci1 := Temp;
