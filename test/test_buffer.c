@@ -10,18 +10,20 @@
 
 #include "../include/ps_buffer.h"
 #include "../include/ps_error.h"
+#include "../include/ps_memory.h"
 #include "../include/ps_readall.h"
 
 #include "../src/ps_buffer.c"
 #include "../src/ps_error.c"
+#include "../src/ps_memory.c"
 #include "../src/ps_readall.c"
 
 ps_buffer *buffer;
 
 char *minimal_source = "PROGRAM MINIMAL;\n"
-                       "\t(* This program does nothing. *)\n"
+                       "    (* This program does nothing. *)\n"
                        "BEGIN\n"
-                       "\t{ NOP! }\n"
+                       "    { NOP! }\n"
                        "END.\n";
 
 char *hello_utf8 =
@@ -61,7 +63,7 @@ int main(void)
     {
         count += 1;
     }
-    printf(" => count=%d, strlen=%d\n", count, strlen(minimal_source));
+    printf(" => count=%d, length=%d\n", count, strlen(minimal_source));
 
     printf("TEST BUFFER: SET TEXT HELLO\n");
     ps_buffer_load_string(buffer, hello_utf8, strlen(hello_utf8));

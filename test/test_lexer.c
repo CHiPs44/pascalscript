@@ -11,12 +11,14 @@
 #include "../include/ps_config.h"
 #include "../include/ps_error.h"
 #include "../include/ps_lexer.h"
+#include "../include/ps_memory.h"
 #include "../include/ps_readall.h"
 #include "../include/ps_token.h"
 
 #include "../src/ps_buffer.c"
 #include "../src/ps_error.c"
 #include "../src/ps_lexer.c"
+#include "../src/ps_memory.c"
 #include "../src/ps_readall.c"
 #include "../src/ps_token.c"
 

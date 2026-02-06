@@ -33,13 +33,14 @@ ps_buffer *ps_buffer_alloc()
     return buffer;
 }
 
-void ps_buffer_free(ps_buffer *buffer)
+ps_buffer *ps_buffer_free(ps_buffer *buffer)
 {
     if (buffer->from_file)
         ps_memory_free(buffer->text);
     ps_memory_free(buffer->line_starts);
     ps_memory_free(buffer->line_lengths);
     ps_memory_free(buffer);
+    return NULL;
 }
 
 void ps_buffer_reset(ps_buffer *buffer)

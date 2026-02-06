@@ -53,7 +53,7 @@ extern "C"
     ps_buffer *ps_buffer_alloc();
 
     /** @brief Release buffer */
-    void ps_buffer_free(ps_buffer *buffer);
+    ps_buffer *ps_buffer_free(ps_buffer *buffer);
 
     /** @brief Reset buffer */
     void ps_buffer_reset(ps_buffer *buffer);

@@ -8,6 +8,7 @@
 #include <sys/resource.h>
 
 #define PS_SYMBOL_TABLE_SIZE 3
+#include "../include/ps_memory.h"
 #include "../include/ps_symbol.h"
 #include "../include/ps_symbol_table.h"
 #include "../include/ps_value.h"
@@ -19,6 +20,7 @@ ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO};
 ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_KIND_CONSTANT};
 
 // Poor man's Makefile ;-)
+#include "../src/ps_memory.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
 #include "../src/ps_value.c"

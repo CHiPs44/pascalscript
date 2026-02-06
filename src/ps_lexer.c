@@ -51,7 +51,7 @@ ps_lexer *ps_lexer_alloc()
 ps_lexer *ps_lexer_free(ps_lexer *lexer)
 {
     if (lexer->buffer != NULL)
-        ps_buffer_free(lexer->buffer);
+        lexer->buffer = ps_buffer_free(lexer->buffer);
     ps_memory_free(lexer);
     return NULL;
 }
@@ -68,18 +68,19 @@ char *ps_lexer_get_error_message(ps_lexer *lexer)
 {
     static char message[128];
     snprintf(message, sizeof(message) - 1, "LEXER: Error %d %s, Line %d, Column %d", lexer->error,
-             ps_error_get_message(lexer->error), lexer->buffer->current_line, lexer->buffer->current_column);
+             ps_error_get_message(lexer->error), lexer->buffer->current_line + 1, lexer->buffer->current_column + 1);
     return message;
 }
 
 bool ps_lexer_return_error(ps_lexer *lexer, ps_error error, char *message)
 {
-    if (message != NULL)
-        fprintf(stderr, "%s: %d %s, Line %d, column %d %c\n", message, error, ps_error_get_message(error),
-                lexer->buffer->current_line, lexer->buffer->current_column,
-                lexer->buffer->current_char >= ' ' ? lexer->buffer->current_char : '_');
-    lexer->current_token.type = PS_TOKEN_NONE;
     lexer->error = error;
+    if (message != NULL)
+        fprintf(stderr, "%s: Char '%c', %s\n", ps_lexer_get_error_message(lexer),
+                lexer->buffer->current_char >= ' ' && lexer->buffer->current_char < 0x7f ? lexer->buffer->current_char
+                                                                                         : '_',
+                message);
+    lexer->current_token.type = PS_TOKEN_NONE;
     return false;
 }
 
@@ -87,7 +88,7 @@ bool ps_lexer_read_next_char(ps_lexer *lexer)
 {
     if (ps_buffer_read_next_char(lexer->buffer))
         return true;
-    return ps_lexer_return_error(lexer, lexer->buffer->error, "ps_lexer_read_next_char");
+    return ps_lexer_return_error(lexer, lexer->buffer->error, "Cannot read next character");
 }
 
 bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
@@ -116,7 +117,7 @@ bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
         {
             GET_NEXT_CHAR(c);
             if (c == '\0')
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment1");
+                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE;
     }
@@ -140,7 +141,7 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
             if (c1 == '\0' || c2 == '\0')
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment2");
+                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
             if (c1 == '*' && c2 == ')')
             {
                 break;
@@ -170,7 +171,7 @@ bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
             ADVANCE;
             c1 = ps_buffer_peek_char(lexer->buffer);
             if (c1 == '\0')
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_skip_comment3");
+                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE;
     }
@@ -214,8 +215,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
         {
             if (pos > (int)PS_IDENTIFIER_LEN)
             {
-                return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG,
-                                             "ps_lexer_read_identifier_or_keyword");
+                return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG, "Identifier or keyword too long");
             }
             buffer[pos] = toupper(c);
             GET_NEXT_CHAR(c);
@@ -227,7 +227,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
         return true;
     }
     lexer->current_token.type = PS_TOKEN_NONE;
-    return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_identifier_or_keyword");
+    return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid start of identifier or keyword");
 }
 
 /**
@@ -268,7 +268,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         do
         {
             if (pos > 32)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
             buffer[pos++] = c;
             GET_NEXT_CHAR(c);
             if (base == 10)
@@ -277,13 +277,14 @@ bool ps_lexer_read_number(ps_lexer *lexer)
                 if (c == '.')
                 {
                     if (is_real)
-                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "only 1 dot allowed");
+                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                                     "Only one dot allowed in real constants");
                     if (has_exp)
                         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                                      "no dot in exponent allowed");
                     is_real = true;
                     if (pos > 32)
-                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
+                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in real value");
                     buffer[pos++] = c;
                     GET_NEXT_CHAR(c);
                 }
@@ -291,18 +292,19 @@ bool ps_lexer_read_number(ps_lexer *lexer)
                 else if ((c == 'e' || c == 'E'))
                 {
                     if (has_exp)
-                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
+                        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                                     "Only one exponent allowed in real constants");
                     // 1E12 is valid
                     is_real = true;
                     has_exp = true;
                     if (pos > 32)
-                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
+                        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in real value");
                     buffer[pos++] = c;
                     GET_NEXT_CHAR(c);
                     if (c == '+' || c == '-')
                     {
                         if (pos > 32)
-                            return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "too many characters in number");
+                            return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in real value");
                         buffer[pos++] = c;
                         GET_NEXT_CHAR(c);
                     }
@@ -315,7 +317,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         {
             double d = strtod(buffer, &end);
             if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "invalid real number");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid real number value");
             lexer->current_token.type = PS_TOKEN_REAL_VALUE;
             lexer->current_token.value.r = (ps_real)d;
         }
@@ -323,7 +325,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         {
             unsigned long u = strtoul(buffer, &end, base);
             if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "invalid number");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
             if (u > PS_INTEGER_MAX)
             {
                 lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
@@ -338,7 +340,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         lexer->error = PS_ERROR_NONE;
         return true;
     }
-    return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_number");
+    return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid start of number");
 }
 
 /**
@@ -352,14 +354,16 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 
     c = ps_buffer_peek_char(lexer->buffer);
     if (c != '\'')
-        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "ps_lexer_read_char_or_string_value");
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                     "Char or string value must start with a single quote");
     // Consume the opening quote
     ADVANCE;
     while (true)
     {
         c = ps_buffer_peek_char(lexer->buffer);
         if (c == '\0')
-            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "ps_lexer_read_char_or_string_value");
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
+                                         "Unexpected end of file in char or string value");
         if (c == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
@@ -367,7 +371,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             if (next_char == '\'')
             {
                 if (pos >= PS_STRING_MAX_LEN)
-                    return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
+                    return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many characters in string value");
                 buffer[pos++] = '\'';
                 ADVANCE; // Consume the first quote
                 ADVANCE; // Consume the second quote
@@ -382,7 +386,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         else
         {
             if (pos > PS_STRING_MAX_LEN)
-                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "ps_lexer_read_char_or_string_value");
+                return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many characters in string value");
             buffer[pos++] = c;
             ADVANCE;
         }
@@ -412,8 +416,6 @@ bool ps_lexer_read_token(ps_lexer *lexer)
         return false;
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
-    // fprintf(stderr, "char=%d next=%d length=%d error=%d\n", current_char, next_char, lexer->buffer->length,
-    // lexer->buffer->error);
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))
@@ -545,10 +547,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
             ADVANCE;
             break;
         default:
-            printf("DEFAULT! %c %d at line %d column %d\n", current_char, current_char, lexer->buffer->current_line,
-                   lexer->buffer->current_column);
-            lexer->error = PS_ERROR_UNEXPECTED_CHARACTER;
-            return false;
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid character");
         }
     }
     return true;
