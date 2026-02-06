@@ -208,6 +208,7 @@ struct s_ps_keyword
     { .keyword = "OF"               , .token_type = PS_TOKEN_OF               , .is_symbol = false },
     { .keyword = "OR"               , .token_type = PS_TOKEN_OR               , .is_symbol = false },
     { .keyword = "OTHERWISE"        , .token_type = PS_TOKEN_OTHERWISE        , .is_symbol = false },
+    { .keyword = "OUT"              , .token_type = PS_TOKEN_OUT              , .is_symbol = false },
     { .keyword = "PROCEDURE"        , .token_type = PS_TOKEN_PROCEDURE        , .is_symbol = false },
     { .keyword = "PROGRAM"          , .token_type = PS_TOKEN_PROGRAM          , .is_symbol = false },
     { .keyword = "REAL"             , .token_type = PS_TOKEN_REAL             , .is_symbol = false },

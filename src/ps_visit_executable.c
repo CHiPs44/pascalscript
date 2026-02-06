@@ -79,7 +79,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
 
     // Default is "by value"
     byref = false;
-    if (lexer->current_token.type == PS_TOKEN_VAR)
+    if (lexer->current_token.type == PS_TOKEN_VAR || lexer->current_token.type == PS_TOKEN_OUT)
     {
         byref = true;
         READ_NEXT_TOKEN;

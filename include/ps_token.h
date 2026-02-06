@@ -139,6 +139,7 @@ extern "C"
         PS_TOKEN_CONST,
         PS_TOKEN_TYPE,
         PS_TOKEN_VAR,
+        PS_TOKEN_OUT,
         PS_TOKEN_FUNCTION,
         PS_TOKEN_PROCEDURE,
         PS_TOKEN_BEGIN,
