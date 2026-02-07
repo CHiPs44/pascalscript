@@ -8,17 +8,74 @@
 #include <string.h>
 #include <time.h>
 
+#include "ps_environment.h"
 #include "ps_error.h"
-#include "ps_functions.h"
 #include "ps_interpreter.h"
+#include "ps_procedures.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_value.h"
+
+/******************************************************************************/
+/* STANDARD PROCEDURES                                                        */
+/******************************************************************************/
+
+/* clang-format off */
+PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", .proc_1arg      , &ps_procedure_randomize);
+PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , .proc_file_read , &ps_procedure_read     );
+PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , .proc_file_read , &ps_procedure_readln   );
+PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , .proc_file_write, &ps_procedure_write    );
+PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , .proc_file_write, &ps_procedure_writeln  );
+/* clang-format on */
+
+bool ps_procedures_init(ps_environment *system)
+{
+    (void)system;
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_read);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_readln);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_write);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln);
+    return true;
+error:
+    return false;
+}
+
+bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
+{
+    unsigned int seed = 0;
+    // No argument: use current time as seed
+    if (value != NULL && value->type != NULL && value->type->value != NULL)
+    {
+        // Argument: use its value as seed
+        switch (value->type->value->data.t->base)
+        {
+        case PS_TYPE_INTEGER:
+            seed = (unsigned int)(value->data.i);
+            break;
+        case PS_TYPE_UNSIGNED:
+            seed = (unsigned int)(value->data.u);
+            break;
+        default:
+            interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
+            return false;
+        }
+        srand(seed);
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "RANDOMIZE(%u)\n", seed);
+        return true;
+    }
+    srand((unsigned int)time(NULL));
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "RANDOMIZE\n");
+    return true;
+}
 
 bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value)
 {
     ((void)f);
     ((void)value);
+    ps_interpreter_set_message(interpreter, "READ not implemented");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
@@ -27,6 +84,7 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value)
 {
     ((void)f);
     ((void)value);
+    ps_interpreter_set_message(interpreter, "READLN not implemented");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
@@ -58,35 +116,5 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value,
         fprintf(f, "WRITELN('%s')\n", display_value);
     else
         fprintf(f, "%s", display_value);
-    return true;
-}
-
-bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
-{
-    unsigned int seed = 0;
-    // No argument: use current time as seed
-    if (value != NULL && value->type != NULL && value->type->value != NULL)
-    {
-        // Argument: use its value as seed
-        switch (value->type->value->data.t->base)
-        {
-        case PS_TYPE_INTEGER:
-            seed = (unsigned int)(value->data.i);
-            break;
-        case PS_TYPE_UNSIGNED:
-            seed = (unsigned int)(value->data.u);
-            break;
-        default:
-            interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
-            return false;
-        }
-        srand(seed);
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "RANDOMIZE(%u)\n", seed);
-        return true;
-    }
-    srand((unsigned int)time(NULL));
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "RANDOMIZE\n");
     return true;
 }

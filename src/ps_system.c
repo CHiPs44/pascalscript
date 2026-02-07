@@ -78,7 +78,8 @@ PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, (ps_unsigned)PS_UNSIGNED_MAX
 PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX                                              );
 PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                                              );
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                          );
-PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
+// PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
+PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323846                                   );
 
 /**********************************************************************************************************************/
 /* VARIABLES                                                                                                          */
@@ -110,64 +111,6 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, CALLABLE_FIELD, CALLABLE)                                                \
-    ps_executable ps_executable_##TYPE##_##VALUE = {CALLABLE_FIELD = CALLABLE, .formal_signature = NULL, .line = 0,    \
-                                                    .column = 0};                                                      \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
-    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
-                                            .name = NAME,                                                              \
-                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
-                                            .system = true,                                                            \
-                                            .allocated = false}
-#define PS_SYSTEM_PROCEDURE(TYPE, VALUE, NAME, CALLABLE_FIELD, CALLABLE)                                               \
-    ps_executable ps_executable_##TYPE##_##VALUE = {CALLABLE_FIELD = CALLABLE, .formal_signature = NULL, .line = 0,    \
-                                                    .column = 0};                                                      \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
-    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                          \
-                                            .name = NAME,                                                              \
-                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
-                                            .system = true,                                                            \
-                                            .allocated = false}
-/* clang-format off */
-
-PS_SYSTEM_FUNCTION (function , abs           , "ABS"         , .func_1arg      , &ps_function_abs               );
-PS_SYSTEM_FUNCTION (function , arctan        , "ARCTAN"      , .func_1arg      , &ps_function_arctan            );
-PS_SYSTEM_FUNCTION (function , chr           , "CHR"         , .func_1arg      , &ps_function_chr               );
-PS_SYSTEM_FUNCTION (function , cos           , "COS"         , .func_1arg      , &ps_function_cos               );
-PS_SYSTEM_FUNCTION (function , even          , "EVEN"        , .func_1arg      , &ps_function_even              );
-PS_SYSTEM_FUNCTION (function , exp           , "EXP"         , .func_1arg      , &ps_function_exp               );
-PS_SYSTEM_FUNCTION (function , frac          , "FRAC"        , .func_1arg      , &ps_function_frac              );
-PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", .func_1arg      , &ps_function_get_tick_count    );
-PS_SYSTEM_FUNCTION (function , int           , "INT"         , .func_1arg      , &ps_function_int               );
-PS_SYSTEM_FUNCTION (function , length        , "LENGTH"      , .func_1arg      , &ps_function_length            );
-PS_SYSTEM_FUNCTION (function , ln            , "LN"          , .func_1arg      , &ps_function_ln                );
-PS_SYSTEM_FUNCTION (function , log           , "LOG"         , .func_1arg      , &ps_function_log               );
-PS_SYSTEM_FUNCTION (function , lowercase     , "LOWERCASE"   , .func_1arg      , &ps_function_lowercase         );
-PS_SYSTEM_FUNCTION (function , odd           , "ODD"         , .func_1arg      , &ps_function_odd               );
-PS_SYSTEM_FUNCTION (function , ord           , "ORD"         , .func_1arg      , &ps_function_ord               );
-PS_SYSTEM_FUNCTION (function , power         , "POWER"       , .func_2args     , &ps_function_power             );
-PS_SYSTEM_FUNCTION (function , pred          , "PRED"        , .func_1arg      , &ps_function_pred              );
-PS_SYSTEM_FUNCTION (function , random        , "RANDOM"      , .func_1arg      , &ps_function_random            );
-PS_SYSTEM_FUNCTION (function , round         , "ROUND"       , .func_1arg      , &ps_function_round             );
-PS_SYSTEM_FUNCTION (function , sin           , "SIN"         , .func_1arg      , &ps_function_sin               );
-PS_SYSTEM_FUNCTION (function , sqr           , "SQR"         , .func_1arg      , &ps_function_sqr               );   
-PS_SYSTEM_FUNCTION (function , sqrt          , "SQRT"        , .func_1arg      , &ps_function_sqrt              );
-PS_SYSTEM_FUNCTION (function , succ          , "SUCC"        , .func_1arg      , &ps_function_succ              );
-PS_SYSTEM_FUNCTION (function , tan           , "TAN"         , .func_1arg      , &ps_function_tan               );
-PS_SYSTEM_FUNCTION (function , trunc         , "TRUNC"       , .func_1arg      , &ps_function_trunc             );
-PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , .func_1arg      , &ps_function_uppercase         );
-PS_SYSTEM_PROCEDURE(procedure, randomize     , "RANDOMIZE"   , .proc_1arg      , &ps_procedure_randomize        );
-PS_SYSTEM_PROCEDURE(procedure, read          , "READ"        , .proc_file_read , &ps_procedure_read             );
-PS_SYSTEM_PROCEDURE(procedure, readln        , "READLN"      , .proc_file_read , &ps_procedure_readln           );
-PS_SYSTEM_PROCEDURE(procedure, write         , "WRITE"       , .proc_file_write, &ps_procedure_write            );
-PS_SYSTEM_PROCEDURE(procedure, writeln       , "WRITELN"     , .proc_file_write, &ps_procedure_writeln          );
-
-/* clang-format on */
-
-#define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
-    if (!ps_environment_add_symbol(system, &__SYMBOL__))                                                               \
-        goto error;
-
 bool ps_system_init(ps_environment *system)
 {
     /**************************************************************************/
@@ -236,42 +179,6 @@ bool ps_system_init(ps_environment *system)
     // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_patch);
     // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_index);
     ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version);
-
-    /**************************************************************************/
-    /* STANDARD PROCEDURES & FUNCTIONS                                        */
-    /**************************************************************************/
-
-    ADD_SYSTEM_SYMBOL(ps_system_function_abs);
-    ADD_SYSTEM_SYMBOL(ps_system_function_arctan);
-    ADD_SYSTEM_SYMBOL(ps_system_function_chr);
-    ADD_SYSTEM_SYMBOL(ps_system_function_cos);
-    ADD_SYSTEM_SYMBOL(ps_system_function_even);
-    ADD_SYSTEM_SYMBOL(ps_system_function_exp);
-    ADD_SYSTEM_SYMBOL(ps_system_function_frac);
-    ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count);
-    ADD_SYSTEM_SYMBOL(ps_system_function_int);
-    ADD_SYSTEM_SYMBOL(ps_system_function_length);
-    ADD_SYSTEM_SYMBOL(ps_system_function_ln);
-    ADD_SYSTEM_SYMBOL(ps_system_function_log);
-    ADD_SYSTEM_SYMBOL(ps_system_function_lowercase);
-    ADD_SYSTEM_SYMBOL(ps_system_function_odd);
-    ADD_SYSTEM_SYMBOL(ps_system_function_ord);
-    ADD_SYSTEM_SYMBOL(ps_system_function_power);
-    ADD_SYSTEM_SYMBOL(ps_system_function_pred);
-    ADD_SYSTEM_SYMBOL(ps_system_function_random);
-    ADD_SYSTEM_SYMBOL(ps_system_function_round);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sin);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sqr);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sqrt);
-    ADD_SYSTEM_SYMBOL(ps_system_function_succ);
-    ADD_SYSTEM_SYMBOL(ps_system_function_tan);
-    ADD_SYSTEM_SYMBOL(ps_system_function_trunc);
-    ADD_SYSTEM_SYMBOL(ps_system_function_uppercase);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_read);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_readln);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_write);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln);
 
     // ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
 

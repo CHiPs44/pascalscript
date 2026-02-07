@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
@@ -17,6 +18,72 @@
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_value.h"
+
+/******************************************************************************/
+/* STANDARD FUNCTIONS                                                         */
+/******************************************************************************/
+
+/* clang-format off */
+PS_SYSTEM_FUNCTION (function , abs           , "ABS"         , .func_1arg      , &ps_function_abs               );
+PS_SYSTEM_FUNCTION (function , arctan        , "ARCTAN"      , .func_1arg      , &ps_function_arctan            );
+PS_SYSTEM_FUNCTION (function , chr           , "CHR"         , .func_1arg      , &ps_function_chr               );
+PS_SYSTEM_FUNCTION (function , cos           , "COS"         , .func_1arg      , &ps_function_cos               );
+PS_SYSTEM_FUNCTION (function , even          , "EVEN"        , .func_1arg      , &ps_function_even              );
+PS_SYSTEM_FUNCTION (function , exp           , "EXP"         , .func_1arg      , &ps_function_exp               );
+PS_SYSTEM_FUNCTION (function , frac          , "FRAC"        , .func_1arg      , &ps_function_frac              );
+PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", .func_1arg      , &ps_function_get_tick_count    );
+PS_SYSTEM_FUNCTION (function , int           , "INT"         , .func_1arg      , &ps_function_int               );
+PS_SYSTEM_FUNCTION (function , length        , "LENGTH"      , .func_1arg      , &ps_function_length            );
+PS_SYSTEM_FUNCTION (function , ln            , "LN"          , .func_1arg      , &ps_function_ln                );
+PS_SYSTEM_FUNCTION (function , log           , "LOG"         , .func_1arg      , &ps_function_log               );
+PS_SYSTEM_FUNCTION (function , lowercase     , "LOWERCASE"   , .func_1arg      , &ps_function_lowercase         );
+PS_SYSTEM_FUNCTION (function , odd           , "ODD"         , .func_1arg      , &ps_function_odd               );
+PS_SYSTEM_FUNCTION (function , ord           , "ORD"         , .func_1arg      , &ps_function_ord               );
+PS_SYSTEM_FUNCTION (function , power         , "POWER"       , .func_2args     , &ps_function_power             );
+PS_SYSTEM_FUNCTION (function , pred          , "PRED"        , .func_1arg      , &ps_function_pred              );
+PS_SYSTEM_FUNCTION (function , random        , "RANDOM"      , .func_1arg      , &ps_function_random            );
+PS_SYSTEM_FUNCTION (function , round         , "ROUND"       , .func_1arg      , &ps_function_round             );
+PS_SYSTEM_FUNCTION (function , sin           , "SIN"         , .func_1arg      , &ps_function_sin               );
+PS_SYSTEM_FUNCTION (function , sqr           , "SQR"         , .func_1arg      , &ps_function_sqr               );   
+PS_SYSTEM_FUNCTION (function , sqrt          , "SQRT"        , .func_1arg      , &ps_function_sqrt              );
+PS_SYSTEM_FUNCTION (function , succ          , "SUCC"        , .func_1arg      , &ps_function_succ              );
+PS_SYSTEM_FUNCTION (function , tan           , "TAN"         , .func_1arg      , &ps_function_tan               );
+PS_SYSTEM_FUNCTION (function , trunc         , "TRUNC"       , .func_1arg      , &ps_function_trunc             );
+PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , .func_1arg      , &ps_function_uppercase         );
+/* clang-format on */
+
+bool ps_functions_init(ps_environment *system)
+{
+    ADD_SYSTEM_SYMBOL(ps_system_function_abs);
+    ADD_SYSTEM_SYMBOL(ps_system_function_arctan);
+    ADD_SYSTEM_SYMBOL(ps_system_function_chr);
+    ADD_SYSTEM_SYMBOL(ps_system_function_cos);
+    ADD_SYSTEM_SYMBOL(ps_system_function_even);
+    ADD_SYSTEM_SYMBOL(ps_system_function_exp);
+    ADD_SYSTEM_SYMBOL(ps_system_function_frac);
+    ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count);
+    ADD_SYSTEM_SYMBOL(ps_system_function_int);
+    ADD_SYSTEM_SYMBOL(ps_system_function_length);
+    ADD_SYSTEM_SYMBOL(ps_system_function_ln);
+    ADD_SYSTEM_SYMBOL(ps_system_function_log);
+    ADD_SYSTEM_SYMBOL(ps_system_function_lowercase);
+    ADD_SYSTEM_SYMBOL(ps_system_function_odd);
+    ADD_SYSTEM_SYMBOL(ps_system_function_ord);
+    ADD_SYSTEM_SYMBOL(ps_system_function_power);
+    ADD_SYSTEM_SYMBOL(ps_system_function_pred);
+    ADD_SYSTEM_SYMBOL(ps_system_function_random);
+    ADD_SYSTEM_SYMBOL(ps_system_function_round);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sin);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqr);
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqrt);
+    ADD_SYSTEM_SYMBOL(ps_system_function_succ);
+    ADD_SYSTEM_SYMBOL(ps_system_function_tan);
+    ADD_SYSTEM_SYMBOL(ps_system_function_trunc);
+    ADD_SYSTEM_SYMBOL(ps_system_function_uppercase);
+    return true;
+error:
+    return false;
+}
 
 ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
 {

@@ -38,7 +38,7 @@ extern "C"
     /** @return true if OK, false otherwise (see error attribute) */
     bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol);
 
-    /** @brief Find symbol in environment */
+    /** @brief Find symbol in environment, or in parent environments if local is false */
     /** @return NULL if not found */
     ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name, bool local);
 

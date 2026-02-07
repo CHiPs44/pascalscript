@@ -19,6 +19,29 @@ extern "C"
 #define PS_SYSTEM_SYMBOL_TABLE_SIZE 64
 #endif
 
+#define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, CALLABLE_FIELD, CALLABLE)                                                \
+    ps_executable ps_executable_##TYPE##_##VALUE = {CALLABLE_FIELD = CALLABLE, .formal_signature = NULL, .line = 0,    \
+                                                    .column = 0};                                                      \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
+    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
+                                            .name = NAME,                                                              \
+                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
+                                            .system = true,                                                            \
+                                            .allocated = false}
+#define PS_SYSTEM_PROCEDURE(TYPE, VALUE, NAME, CALLABLE_FIELD, CALLABLE)                                               \
+    ps_executable ps_executable_##TYPE##_##VALUE = {CALLABLE_FIELD = CALLABLE, .formal_signature = NULL, .line = 0,    \
+                                                    .column = 0};                                                      \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
+    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                          \
+                                            .name = NAME,                                                              \
+                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
+                                            .system = true,                                                            \
+                                            .allocated = false}
+
+#define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
+    if (!ps_environment_add_symbol(system, &__SYMBOL__))                                                               \
+        goto error;
+
     /** @brief Type definition type defintion (!) */
     extern ps_symbol ps_system_type_def;
 
@@ -36,40 +59,6 @@ extern "C"
     /* Derived types */
     extern ps_symbol ps_system_subrange;
     extern ps_symbol ps_system_enum;
-
-    /* System procedures & functions */
-    extern ps_symbol ps_system_function_abs;
-    extern ps_symbol ps_system_function_abs;
-    extern ps_symbol ps_system_function_arctan;
-    extern ps_symbol ps_system_function_chr;
-    extern ps_symbol ps_system_function_cos;
-    extern ps_symbol ps_system_function_even;
-    extern ps_symbol ps_system_function_exp;
-    extern ps_symbol ps_system_function_frac;
-    extern ps_symbol ps_system_function_get_tick_count;
-    extern ps_symbol ps_system_function_int;
-    extern ps_symbol ps_system_function_length;
-    extern ps_symbol ps_system_function_ln;
-    extern ps_symbol ps_system_function_log;
-    extern ps_symbol ps_system_function_lowercase;
-    extern ps_symbol ps_system_function_odd;
-    extern ps_symbol ps_system_function_ord;
-    extern ps_symbol ps_system_function_power;
-    extern ps_symbol ps_system_function_pred;
-    extern ps_symbol ps_system_function_random;
-    extern ps_symbol ps_system_function_round;
-    extern ps_symbol ps_system_function_sin;
-    extern ps_symbol ps_system_function_sqr;
-    extern ps_symbol ps_system_function_sqrt;
-    extern ps_symbol ps_system_function_succ;
-    extern ps_symbol ps_system_function_tan;
-    extern ps_symbol ps_system_function_trunc;
-    extern ps_symbol ps_system_function_uppercase;
-    extern ps_symbol ps_system_procedure_randomize;
-    extern ps_symbol ps_system_procedure_read;
-    extern ps_symbol ps_system_procedure_readln;
-    extern ps_symbol ps_system_procedure_write;
-    extern ps_symbol ps_system_procedure_writeln;
 
     /* System constants */
     extern ps_symbol ps_system_constant_boolean_false;

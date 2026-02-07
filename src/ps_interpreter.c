@@ -7,9 +7,11 @@
 #include <string.h>
 
 #include "ps_error.h"
+#include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
 #include "ps_parser.h"
+#include "ps_procedures.h"
 #include "ps_system.h"
 #include "ps_value.h"
 #include "ps_visit.h"
@@ -28,6 +30,7 @@ ps_interpreter *ps_interpreter_alloc()
     interpreter->debug = DEBUG_NONE;
     interpreter->range_check = true;
     interpreter->bool_eval = false;
+    interpreter->io_check = false;
     // Allocate string heap
     interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
     if (interpreter->string_heap == NULL)
@@ -43,6 +46,10 @@ ps_interpreter *ps_interpreter_alloc()
         return ps_interpreter_free(interpreter);
     // Initialize system environment
     if (!ps_system_init(interpreter->environments[0]))
+        return ps_interpreter_free(interpreter);
+    if (!ps_procedures_init(interpreter->environments[0]))
+        return ps_interpreter_free(interpreter);
+    if (!ps_functions_init(interpreter->environments[0]))
         return ps_interpreter_free(interpreter);
     return interpreter;
 }

@@ -75,6 +75,19 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
     PS_VALUE_SET(ps_system_char, c);
 }
 
+// ps_value *ps_value_set_string(ps_value *value, ps_string *s)
+// {
+//     if (NULL == value)
+//     {
+//         return ps_string_create(s, 0);
+//     }
+//     if (ps_string_set(value->data.s, s) == NULL)
+//     {
+//         return NULL; // errno = ENOMEM or EINVAL
+//     }
+//     return value;
+// }
+
 // ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)
 // {
 //     if (PS_TYPE_ENUM != type_def->base)
@@ -93,15 +106,6 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //         return NULL;
 //     }
 //     PS_VALUE_SET(type_def, g);
-// }
-
-// ps_value *ps_value_set_string(ps_value *value, ps_string *s)
-// {
-//     if (NULL == value)
-//     {
-//         return ps_value_new_string();
-//     }
-//     return s;
 // }
 
 // ps_string *ps_value_new_string(char *s, ps_string_len max, ps_string_len len)

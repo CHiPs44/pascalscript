@@ -19,23 +19,26 @@ extern "C"
         1. Mimimalistic
             PROGRAM         BEGIN           END
             CONST           VAR
+            BOOLEAN         TRUE*           FALSE*
             INTEGER         UNSIGNED        REAL
             CHAR            STRING
+            * these are not reserved words, but they are reserved identifiers
         2. Expressions
             DIV             MOD
+            AND             OR              NOT
         3. Decision making
             BOOLEAN         TRUE            FALSE
             IF              THEN            ELSE
-            AND             OR              XOR
-            NOT             CASE            OTHERWISE
+            AND             OR              NOT
+            CASE            OTHERWISE
         4. Loops
             REPEAT          UNTIL
             WHILE           DO
             FOR             DOWNTO          TO
         5. Types
-            type            array           of
-            file            nil
-            record          with
+            TYPE            ARRAY           OF
+            FILE            NIL
+            RECORD          WITH
         6. More types
             set             in
         7. Mother of all evil?
@@ -43,11 +46,12 @@ extern "C"
         8. "Modularity"
             function        procedure
         9. More operators
-            shl             shr             xor
+            SHL             SHR             XOR
         10. More reserved words
+            OUT             IN              ON
         11. Units
-            unit            uses        interface
-            implementation
+            UNIT            USES        INTERFACE
+            IMPLEMENTATION
         12. Objects
             ABSTRACT        AS              CLASS
             CONSTRUCTOR     DESTRUCTOR      DYNAMIC
@@ -64,7 +68,6 @@ extern "C"
             INLINE
             OPERATOR
             PACKED
-
 
         -file           -packed         -record             -nil        -with
         -absolute       -asm            -inline             -operator   -reintroduce

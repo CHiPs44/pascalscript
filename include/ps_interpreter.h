@@ -30,27 +30,28 @@ extern "C"
     typedef enum e_ps_interpreter_mode
     {
         MODE_EXEC, /** @brief Execute instructions */
-        MODE_SKIP, /** @brief Skip execution but keep declarations */
-        MODE_OUT,  /** @brief *FUTURE* Output AST / intermediate language / whatever */
+        MODE_SKIP, /** @brief Skip execution but parse declarations */
+        MODE_CODE, /** @brief *FUTURE* Output AST / intermediate language / whatever */
     } ps_interpreter_mode;
 
     typedef enum e_ps_interpreter_debug
     {
         DEBUG_NONE,    /** @brief No debug */
-        DEBUG_TRACE,   /** @brief Output to stderr */
+        DEBUG_TRACE,   /** @brief Output messages to stderr */
         DEBUG_VERBOSE, /** @brief More traces */
     } ps_interpreter_debug;
 
     typedef struct s_ps_interpreter
     {
-        ps_parser *parser;           /** @brief Parser with lexer with source code buffer */
-        ps_string_heap *string_heap; /** @brief Strings heap to hold string constants */
+        ps_parser *parser;           /** @brief Parser with lexer with source code buffer                    */
+        ps_string_heap *string_heap; /** @brief Strings heap to hold string constants                        */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
-        ps_error error;              /** @brief Current error PS_ERROR_XXX */
-        char message[128];           /** @brief Additional error message */
-        ps_interpreter_debug debug;  /** @brief Debug level: NONE, TRACE, VERBOSE */
-        bool range_check;            /** @brief Range checking for integer and real values */
-        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation */
+        ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
+        char message[128];           /** @brief Additional error message                                     */
+        ps_interpreter_debug debug;  /** @brief Debug level: NONE, TRACE, VERBOSE                            */
+        bool range_check;            /** @brief Range checking for integer and real values                   */
+        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                    */
+        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
         ps_environment
             *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
     } /*__attribute__((__packed__))*/ ps_interpreter;

@@ -17,6 +17,37 @@ extern "C"
 {
 #endif
 
+    bool ps_functions_init(ps_environment *system);
+
+    extern ps_symbol ps_system_function_abs;
+    extern ps_symbol ps_system_function_abs;
+    extern ps_symbol ps_system_function_arctan;
+    extern ps_symbol ps_system_function_chr;
+    extern ps_symbol ps_system_function_cos;
+    extern ps_symbol ps_system_function_even;
+    extern ps_symbol ps_system_function_exp;
+    extern ps_symbol ps_system_function_frac;
+    extern ps_symbol ps_system_function_get_tick_count;
+    extern ps_symbol ps_system_function_int;
+    extern ps_symbol ps_system_function_length;
+    extern ps_symbol ps_system_function_ln;
+    extern ps_symbol ps_system_function_log;
+    extern ps_symbol ps_system_function_lowercase;
+    extern ps_symbol ps_system_function_odd;
+    extern ps_symbol ps_system_function_ord;
+    extern ps_symbol ps_system_function_power;
+    extern ps_symbol ps_system_function_pred;
+    extern ps_symbol ps_system_function_random;
+    extern ps_symbol ps_system_function_round;
+    extern ps_symbol ps_system_function_sin;
+    extern ps_symbol ps_system_function_sqr;
+    extern ps_symbol ps_system_function_sqrt;
+    extern ps_symbol ps_system_function_succ;
+    extern ps_symbol ps_system_function_tan;
+    extern ps_symbol ps_system_function_trunc;
+    extern ps_symbol ps_system_function_uppercase;
+    extern ps_symbol ps_system_procedure_randomize;
+
     bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value *result, ps_token_type token_type);
 
     bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result,

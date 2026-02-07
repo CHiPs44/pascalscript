@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "ps_executable.h"
+#include "ps_functions.h"
 #include "ps_lexer.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"

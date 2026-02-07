@@ -16,10 +16,14 @@
 
 ps_string *ps_string_alloc(ps_string_len max)
 {
-    // allocate sizeof(max) + sizeof(len) + (max + 1) chars
-    // maximum: 1           + 1           +  255 + 1  bytes for "short" strings
+    // When sizeof(ps_char) == 1:
+    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
+    //  maximum: 1           + 1           +  255 + 1  bytes for "short" strings
     //       => 258
-    ps_string *s = (ps_string *)ps_memory_malloc(2 * sizeof(ps_string_len) + (max + 1) * sizeof(ps_char));
+    if (max == 0)
+        max = PS_STRING_MAX_LEN;
+    size_t size = sizeof(ps_string_len) + sizeof(ps_string_len) + (max + 1) * sizeof(ps_char);
+    ps_string *s = (ps_string *)ps_memory_malloc(size);
     if (s == NULL)
         return NULL; // errno = ENOMEM;
     s->max = max;
@@ -42,7 +46,6 @@ ps_string *ps_string_set(ps_string *s, char *z)
         return NULL;
     }
     s->len = (ps_string_len)len;
-    // TODO
     memcpy(s->str, z, len);
     s->str[len] = '\0'; // null terminate
     return s;

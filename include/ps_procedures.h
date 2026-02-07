@@ -17,6 +17,14 @@ extern "C"
 {
 #endif
 
+    bool ps_procedures_init(ps_environment *system);
+
+    extern ps_symbol ps_system_procedure_read;
+    extern ps_symbol ps_system_procedure_readln;
+    extern ps_symbol ps_system_procedure_write;
+    extern ps_symbol ps_system_procedure_writeln;
+    extern ps_symbol ps_system_procedure_randomize;
+
     /* clang-format off */
     bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value);
     bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value);

@@ -13,11 +13,12 @@ for TEST in ./test/test_*.c; do
     OUT_FILE="./test/${TESTNAME}.out"
     ERR_FILE="./test/${TESTNAME}.err"
     echo -n "Executing ${TESTNAME}... "
-    gcc -m32 -std=c17 -Wall -I./include -ggdb -o ./test/test ${TEST} -lm  > "$OUT_FILE" 2> "$ERR_FILE"
+    gcc -m32 -std=c17 -Wall -I./include -Wall -Wextra -Wpedantic -ggdb -O3 -o ./test/test ${TEST} -lm  > "$OUT_FILE" 2> "$ERR_FILE"
     if [[ $? -ne 0 ]]; then
         printf "%-47s %15s %-10s\n" "${TESTNAME}" "N/A" "KO (compile error)"  >> "$REPORT_FILE"
         KO=$((KO + 1))
         echo "KO (compile error)"
+        TOTAL=$((TOTAL + 1))
         continue
     fi
     START=$(date +%s%N)
