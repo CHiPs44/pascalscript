@@ -239,32 +239,28 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (environment == NULL)
         RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
+    
+    // First, check if this is an assignment to the current function name
     symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
-    if (symbol != NULL)
+    if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
     {
-        if (symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
-        {
-            if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n",
-                        mode == MODE_EXEC ? '*' : ' ', (char *)identifier);
-            // Assign to the not so implicit "Result" variable
-            symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
-            if (symbol == NULL)
-                RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-        }
-        else
-        {
-            // Not the current function, normal lookup
-            symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
-        }
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n",
+                    mode == MODE_EXEC ? '*' : ' ', (char *)identifier);
+        // Assign to the not so implicit "Result" variable
+        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     }
     else
     {
-        // Normal lookup
+        // Normal lookup - can be variable, constant, procedure, or function
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
     }
+    
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+    
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_VARIABLE:
@@ -277,6 +273,14 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_visit_procedure_or_function_call(interpreter, mode, symbol, NULL))
             TRACE_ERROR("PROCEDURE_CALL");
+        break;
+    case PS_SYMBOL_KIND_FUNCTION:
+        // Assignment to function name = assignment to Result
+        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        if (!ps_visit_assignment(interpreter, mode, symbol))
+            TRACE_ERROR("ASSIGNMENT");
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
