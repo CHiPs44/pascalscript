@@ -14,15 +14,11 @@
 #include "../include/ps_system.h"
 #include "../include/ps_value.h"
 
-// #include "../src/ps_string.c"
-#include "../src/ps_environment.c"
-#include "../src/ps_functions.c"
-#include "../src/ps_interpreter.c"
 #include "../src/ps_memory.c"
-#include "../src/ps_procedures.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
+#include "../src/ps_environment.c"
 #include "../src/ps_system.c"
 #include "../src/ps_type_definition.c"
 #include "../src/ps_value.c"
@@ -33,8 +29,9 @@ int main(void)
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
-    ps_environment environment = {0};
-    ps_system_init(&environment);
+    ps_identifier system = "SYSTEM";
+    ps_environment *environment = ps_environment_alloc(NULL, &system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    ps_system_init(environment);
 
     printf("TEST VALUE: BEGIN\n");
     ps_value *dummy = ps_value_alloc(ps_system_integer.value->type, (ps_value_data){.i = 0});
@@ -69,20 +66,8 @@ int main(void)
     ps_value_debug(stdout, "R=", real_value);
     real_value = ps_value_free(real_value);
 
-    // printf("TEST VALUE: STRING\n");
-    // ps_value *string_value = ps_value_alloc(&ps_system_string.value->type, (ps_value_data){.s = NULL});
-    // string_value->data.s = ps_string_alloc(PS_STRING_MAX_LEN);
-    // ps_value_set_string(string_value, "This is a test.");
-    // ps_value_debug(stdout, "S=", string_value);
-    // ps_value_set_string(string_value, "The Quick Brown Fox Jumps Over The Lazy Dog.");
-    // ps_value_debug(stdout, "S=", string_value);
-    // ps_value_set_string(string_value, "01234567890123456789012345678901234567890123456789");
-    // ps_value_debug(stdout, "S=", string_value);
-
-    // printf("TEST VALUE: POINTER\n");
-    // ps_value_set_pointer(value, (void *)0x55AA55AA);
-    // ps_value_debug(stdout, "P=", value);
-
     printf("TEST VALUE: END\n");
+
+    environment = ps_environment_free(environment);
     return 0;
 }
