@@ -22,6 +22,10 @@ size_t frees = 0;
 
 bool ps_memory_debug_enabled = false;
 
+/**
+ * @brief Allocate and count size allocated
+ * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
+ */
 void *ps_memory_malloc(size_t size)
 {
     mallocations += 1;
@@ -41,6 +45,10 @@ void *ps_memory_malloc(size_t size)
     return ptr;
 }
 
+/**
+ * @brief Allocate count elements of size bytes each, all initialized to 0.
+ * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
+ */
 void *ps_memory_calloc(size_t count, size_t size)
 {
     callocations += 1;
@@ -60,6 +68,10 @@ void *ps_memory_calloc(size_t count, size_t size)
     return ptr;
 }
 
+/**
+ * @brief Change the size of the memory block pointed to by ptr to size bytes.
+ * @return pointer to reallocated memory or NULL on failure (errno=ENOMEM)
+ */
 void *ps_memory_realloc(void *ptr, size_t size)
 {
     char old[16] = {0};
@@ -87,12 +99,19 @@ void *ps_memory_realloc(void *ptr, size_t size)
     return new;
 }
 
+/**
+ * @brief Deallocate memory previously allocated by malloc, calloc or realloc.
+ */
 void ps_memory_free(void *ptr)
 {
     frees += 1;
     free(ptr);
 }
 
+/**
+ * @brief Print memory allocation statistics to the specified output stream.
+ * If output is NULL, it defaults to stderr.
+ */
 void ps_memory_debug(FILE *output)
 {
     size_t total_allocations = mallocations + callocations + reallocations;
