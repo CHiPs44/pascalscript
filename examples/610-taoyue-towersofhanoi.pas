@@ -52,6 +52,6 @@ begin    (* Main *)
    // readln (numdiscs);
    // numdiscs := 2;
    // writeln;
-   DoTowers (3, 1, 3, 2)
+   DoTowers (5, 1, 3, 2)
 end.     (* Main *)
 

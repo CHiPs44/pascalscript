@@ -44,7 +44,7 @@ Begin
 End;
 
 Var
-  N, Recursive, iterative: Unsigned;
+  N, Recursive, Iterative: Unsigned;
 Begin
   // Repeat
   //   Write('N=');
@@ -52,12 +52,16 @@ Begin
   // Until N > 0;
   // N := 31;
   WriteLn('Factorial - Recursive and Iterative:');
-  For N := 0 To 12 Do
+  WriteLn('--------------------------------------------------------------------------------');
+  WriteLn;
+  WriteLn(' N  Recursive   Iterative');
+  WriteLn('--- ---------- ----------');
+  For N := 0 To 13 Do
   Begin
     Recursive := RecursiveFactorial(N);
-    // WriteLn(' - Recursive: ', N, '! = ', Recursive);
-    iterative := IterativeFactorial(N);
-    // WriteLn(' - Iterative: ', N, '! = ', iterative);
-    WriteLn(N, '! = ', Recursive, ' = ', iterative);
+    Iterative := IterativeFactorial(N);
+    WriteLn(N:2, '! ', Recursive:10, ' ', Iterative:10);
   End;
+  WriteLn('--------------------------------------------------------------------------------');
+  WriteLn('OK!');
 End.

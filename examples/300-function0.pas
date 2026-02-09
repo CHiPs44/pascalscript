@@ -8,24 +8,22 @@ Program Example300Function0;
 
 Function FooBar(Baz: Unsigned): Unsigned;
 Begin
-  // WriteLn('   FooBar: Baz=', Baz);
-  FooBar := Baz * 2;
-  // Result := Baz * 2;
-  // WriteLn('   FooBar: Result=', Result);
+  // FooBar := Baz * 2;
+  Result := Baz * 2;
 End;
 
-// Procedure Dummy;
-// Begin
-//     // Do nothing
-// End;
+Procedure Dummy;
+Begin
+    // Do nothing
+End;
 
 Var 
   I, J: Unsigned;
 
 Begin
   I := 21;
-  // WriteLn('Calling FooBar with ', I, '...');
+  WriteLn('Calling FooBar with ', I, '...');
   J := FooBar(I);
-  // WriteLn('FooBar returned ', J);
-  // WriteLn(FooBar(11223344), '*STOP*');
+  WriteLn('FooBar returned ', J);
+  WriteLn(FooBar(11223344), '*STOP*');
 End.
