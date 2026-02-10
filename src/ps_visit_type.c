@@ -19,6 +19,7 @@
  *      'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
  *      ENUMERATION =   '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
  *        Examples:
+ *          TGender = (Male, Female, Other)
  *          TAbilities = (Strength, Intelligence, Wisdom, Dexterity, Constitution, Charisma)
  *          TCharacterClass = (Fighter, Wizard, Cleric, Rogue)
  *          TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, HalfOrc)
@@ -29,7 +30,7 @@
  *          Score = 1..20
  *          WorkDays = Monday..Friday
  *          WeekEnd = Saturday..Sunday
- *          UppercaseLetters = Set Of 'A'..'Z'
+ *          UppercaseLetters = 'A'..'Z'
  *      LOW_OR_HIGH =   UNSIGNED | INTEGER | ORDINAL_CONSTANT_IDENTIFIER
  *      ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  *        Examples:
@@ -53,7 +54,7 @@
  *          TCharacter = Record
  *            Name: String;
  *            Age: Unsigned;
- *            Genre: Char;
+ *            Gender: TGender;
  *            Class: TCharacterClass;
  *            Race: TCharacterRace;
  *            HitDie: TDie;
@@ -126,7 +127,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
             // if (len < 1 || len > PS_STRING_MAX_LEN)
             //     RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
-            // // data.t.def.def_string.length = len;
+            // // data.t.def.s.length = len;
             // // type_def
             // // value = ps_value_alloc(&ps_system_type_def, data);
         }
@@ -136,10 +137,15 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         }
         break;
     case PS_TOKEN_IDENTIFIER:
-        // TODO could be a subrange definition, too
+        // TODO could be a subrange definition from an enumeration
         symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
+        if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
+        {
+            // Subrange from enumeration
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        }
         if (symbol->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
             RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
         *type_symbol = symbol;
@@ -152,11 +158,13 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         // type = ps_system_array.value->data.t; // TODO: parse array definition
         // data.s = NULL; // TODO: allocate array
         // break;
-    case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
-    case PS_TOKEN_INTEGER_VALUE:    // subrange
-    case PS_TOKEN_UNSIGNED_VALUE:   // subrange
-    case PS_TOKEN_CHAR_VALUE:       // subrange
+    case PS_TOKEN_CHAR_VALUE:     // subrange
+    case PS_TOKEN_INTEGER_VALUE:  // subrange
+    case PS_TOKEN_UNSIGNED_VALUE: // subrange
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        break;
     case PS_TOKEN_BOOLEAN_VALUE:    // subrange
+    case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
     case PS_TOKEN_SET:              // set
     case PS_TOKEN_FILE:             // file
     case PS_TOKEN_TEXT:             // text

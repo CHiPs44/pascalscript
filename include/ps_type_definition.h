@@ -27,9 +27,26 @@ extern "C"
 
     typedef struct s_ps_type_definition_subrange
     {
-        ps_value_type def; /** @brief type of subrange: integer, unsigned, char, enum */
-        ps_value_data min; /** @brief Minimum value of the subrange */
-        ps_value_data max; /** @brief Maximum value of the subrange */
+        ps_value_type base; /** @brief type of subrange: integer, unsigned, char, enum */
+        union {
+            struct
+            {
+                ps_char min, max;
+            } c;
+            struct
+            {
+                ps_integer min, max;
+            } i;
+            struct
+            {
+                ps_unsigned min, max;
+            } u;
+            struct
+            {
+                ps_symbol *symbol_enum;
+                uint8_t min, max;
+            } e;
+        };
     } __attribute__((__packed__)) ps_type_definition_subrange;
 
     /** @brief Enumerations are stored as unsigned bytes (first=0, second=1, ...) */
@@ -79,8 +96,8 @@ extern "C"
 
     typedef struct s_ps_type_definition_record_field
     {
-        ps_symbol *name;               /** @brief field name */
-        ps_symbol *type_def;          /** @brief field type definition */
+        ps_symbol *name;                                /** @brief field name */
+        ps_symbol *type_def;                            /** @brief field type definition */
         struct s_ps_type_definition_record_field *next; /** @brief next field in the record, NULL if last */
     } __attribute__((__packed__)) ps_type_definition_record_field;
 
@@ -103,14 +120,14 @@ extern "C"
         ps_value_type base; /** @brief same as type for internal types like integer or char,
                                        values for sub-type for subranges and enums, ... */
         union {
-            ps_type_definition_enum def_enum;
-            ps_type_definition_subrange def_subrange;
-            ps_type_definition_set def_set;
-            ps_type_definition_pointer def_pointer;
-            ps_type_definition_string def_string;
-            ps_type_definition_array def_array;
-            ps_type_definition_record def_record;
-            ps_type_definition_file def_file;
+            ps_type_definition_enum e;
+            ps_type_definition_subrange g;
+            ps_type_definition_set t;
+            ps_type_definition_pointer p;
+            ps_type_definition_string s;
+            ps_type_definition_array a;
+            ps_type_definition_record r;
+            ps_type_definition_file f;
         } def; /** @brief  */
     } /*__attribute__((__packed__))*/ ps_type_definition;
 

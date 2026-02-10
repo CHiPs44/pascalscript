@@ -118,18 +118,18 @@ bool ps_system_init(ps_environment *system)
     /**************************************************************************/
 
     // // Array: empty
-    // ps_system_array.value->type->def.def_array.count = 0;
-    // ps_system_array.value->type->def.def_array.range = NULL;
-    // ps_system_array.value->type->def.def_array.type_def = NULL;
+    // ps_system_array.value->type->def.a.count = 0;
+    // ps_system_array.value->type->def.a.range = NULL;
+    // ps_system_array.value->type->def.a.type_def = NULL;
     // // String: max length
-    // ps_system_string.value->type->def.def_string.max = PS_STRING_MAX_LEN;
+    // ps_system_string.value->type->def.s.max = PS_STRING_MAX_LEN;
     // // Subrange: 0..0 as integers
-    // ps_system_subrange.value->type->def.def_subrange.def = &ps_type_def_integer;
-    // ps_system_subrange.value->type->def.def_subrange.max.i = 0;
-    // ps_system_subrange.value->type->def.def_subrange.min.i = 0;
+    // ps_system_subrange.value->type->def.g.def = &ps_type_def_integer;
+    // ps_system_subrange.value->type->def.g.max.i = 0;
+    // ps_system_subrange.value->type->def.g.min.i = 0;
     // // Enum: empty
-    // ps_system_enum.value->type->def.def_enum.count = 0;
-    // ps_system_enum.value->type->def.def_enum.values = NULL;
+    // ps_system_enum.value->type->def.e.count = 0;
+    // ps_system_enum.value->type->def.e.values = NULL;
     // Register the system types
     ADD_SYSTEM_SYMBOL(ps_system_none);
     ADD_SYSTEM_SYMBOL(ps_system_type_def);
