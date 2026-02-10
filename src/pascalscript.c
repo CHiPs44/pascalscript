@@ -172,27 +172,7 @@ int main(int argc, char *argv[])
         example_path = "../examples";
         if (verbose)
             fprintf(stderr, "Example path: %s\n", example_path);
-        // program_file = "00-hello.pas";
-        // program_file = "00-hello1.pas";
-        // program_file = "00-minimal.pas";
-        // program_file = "01-first.pas";
-        // program_file = "02-second.pas";
-        // program_file = "03-if-then-else.pas";
-        // program_file = "04-repeat-until.pas";
-        // program_file = "04-repeat-until-real.pas";
-        // program_file = "05-while-do.pas";
-        // program_file = "06-for-do.pas";
-        // program_file = "070-random.pas";
-        // program_file = "080-math.pas";
-        // program_file = "09-boolean.pas";
-        // program_file = "10-strings.pas";
-        // program_file = "12-toayue-powersoftwo.pas";
-        program_file = "130-big-loops.pas";
-        // program_file = "20-procedure0.pas";
-        // program_file = "21-procedure1.pas";
-        // program_file = "22-procedure2.pas";
-        // program_file = "300-function0.pas";
-        // program_file = "41-circle.pas";
+        program_file = "300-function0.pas";
         if (program_file != NULL)
             snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
         else
