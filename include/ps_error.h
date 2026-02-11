@@ -40,6 +40,7 @@ extern "C"
         PS_ERROR_UNEXPECTED_TOKEN,
         PS_ERROR_UNKOWN_IDENTIFIER,
         PS_ERROR_CONSTANT_VALUE,
+        PS_ERROR_INVALID_SUBRANGE,
         /* -------------------- RUNTIME -------------------- */
         PS_ERROR_ENVIRONMENT_UNDERFLOW,
         PS_ERROR_ENVIRONMENT_OVERFLOW,

@@ -25,27 +25,35 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
+    typedef struct s_ps_type_definition_subrange_char
+    {
+        ps_char min, max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_char;
+
+    typedef struct s_ps_type_definition_subrange_integer
+    {
+        ps_integer min, max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_integer;
+
+    typedef struct s_ps_type_definition_subrange_unsigned
+    {
+        ps_unsigned min, max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
+
+    typedef struct s_ps_type_definition_subrange_enum
+    {
+        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
+        uint8_t min, max;      /** @brief min and max values in the enumeration for the subrange */
+    } __attribute__((__packed__)) ps_type_definition_subrange_enum;
+
     typedef struct s_ps_type_definition_subrange
     {
         ps_value_type base; /** @brief type of subrange: integer, unsigned, char, enum */
         union {
-            struct
-            {
-                ps_char min, max;
-            } c;
-            struct
-            {
-                ps_integer min, max;
-            } i;
-            struct
-            {
-                ps_unsigned min, max;
-            } u;
-            struct
-            {
-                ps_symbol *symbol_enum;
-                uint8_t min, max;
-            } e;
+            ps_type_definition_subrange_char c;
+            ps_type_definition_subrange_integer i;
+            ps_type_definition_subrange_unsigned u;
+            ps_type_definition_subrange_enum e;
         };
     } __attribute__((__packed__)) ps_type_definition_subrange;
 
@@ -136,6 +144,13 @@ extern "C"
     char *ps_type_definition_get_name(ps_type_definition *type_def);
 
     void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
+
+    ps_type_definition *ps_type_definition_create(ps_value_type type);
+    ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol *values);
+    ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max);
+    ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);
+    ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max);
+    ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, uint8_t min, uint8_t max);
 
 #ifdef __cplusplus
 }

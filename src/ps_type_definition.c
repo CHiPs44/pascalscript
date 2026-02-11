@@ -15,12 +15,12 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-ps_type_definition *ps_type_definition_create(ps_value_type type)
+ps_type_definition *ps_type_definition_create(ps_value_type base_type)
 {
     ps_type_definition *type_def = ps_memory_malloc(sizeof(ps_type_definition));
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
-    type_def->type = type_def->base = type;
+    type_def->type = type_def->base = base_type;
     return type_def;
 }
 
@@ -32,6 +32,8 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
     {
     case PS_TYPE_ENUM:
         ps_memory_free(type_def->def.e.values);
+        type_def->def.e.values = NULL;
+        type_def->def.e.count = 0;
         break;
     case PS_TYPE_SUBRANGE:
         // nothing to free

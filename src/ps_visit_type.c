@@ -7,6 +7,7 @@
 #include "ps_executable.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
 #include "ps_visit.h"
 
 /**
@@ -82,8 +83,8 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
  *      | 'STRING'
  *      | IDENTIFIER
  *  Next steps:
- *      'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
- *      ENUMERATION =   '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
+ *      | 'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
+ *      | ENUMERATION =   '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
  *        Examples:
  *          TGender = (Male, Female, Other)
  *          TAbilities = (Strength, Intelligence, Wisdom, Dexterity, Constitution, Charisma)
@@ -91,24 +92,24 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
  *          TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, HalfOrc)
  *          TDie = (D4, D6, D8, D10, D12, D20, D100)
  *          Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
- *      SUBRANGE    =   LOW_OR_HIGH '..' LOW_OR_HIGH
+ *      | SUBRANGE    =   LOW_OR_HIGH '..' LOW_OR_HIGH
  *        Examples:
  *          Score = 1..20
  *          WorkDays = Monday..Friday
  *          WeekEnd = Saturday..Sunday
  *          UppercaseLetters = 'A'..'Z'
- *      LOW_OR_HIGH =   UNSIGNED | INTEGER | ORDINAL_CONSTANT_IDENTIFIER
- *      ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
+ *        LOW_OR_HIGH =   UNSIGNED | INTEGER | ORDINAL_CONSTANT_IDENTIFIER
+ *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  *        Examples:
  *          CheckerBoard = Array [1..8, 1..8] Of Boolean
- *      SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
+ *      | SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
  *        Examples:
  *          Options = Set Of UppercaseLetters
- *      FILE        =   'TEXT' | 'FILE' [ 'OF' TYPE_REFERENCE ]
+ *      | FILE        =   'TEXT' | 'FILE' [ 'OF' TYPE_REFERENCE ]
  *        Examples:
  *          InputFile = Text
  *          ResultFile = File Of Integer
- *      RECORD      =   'RECORD'
+ *      | RECORD      =   'RECORD'
  *                          FIELD [ ';' FIELD ]*
  *                          [ ';' ]
  *                      'END'
@@ -130,10 +131,10 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
  *            Abilities: Array[TAbilities] Of Unsigned;
  *            Modifiers: Array[TAbilities] Of Integer;
  *          End;
- *      FIELD       = IDENTIFIER ':' TYPE_REFERENCE
+ *        FIELD       = IDENTIFIER ':' TYPE_REFERENCE
  * ???:
- *      TPOINTER    = '^' TYPE_REFERENCE
- *      POINTER     = 'POINTER'
+ *      | TPOINTER    = '^' TYPE_REFERENCE
+ *      | POINTER     = 'POINTER'
  */
 bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
 {
@@ -225,7 +226,9 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         // type = ps_system_array.value->data.t; // TODO: parse array definition
         // data.s = NULL; // TODO: allocate array
         // break;
-    case PS_TOKEN_CHAR_VALUE:     // subrange
+    case PS_TOKEN_CHAR_VALUE: // subrange
+        if (!ps_visit_type_reference_subrange_char(interpreter, mode, type_symbol))
+            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
     case PS_TOKEN_INTEGER_VALUE:  // subrange
     case PS_TOKEN_UNSIGNED_VALUE: // subrange
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
@@ -243,6 +246,39 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (advance)
         READ_NEXT_TOKEN;
+
+    VISIT_END("OK");
+}
+
+bool ps_visit_type_reference_subrange_char(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "CHAR");
+
+    ps_char lo, hi;
+    
+    lo = lexer->current_token.value.c;
+    READ_NEXT_TOKEN;
+    EXPECT_TOKEN(PS_TOKEN_RANGE);
+    READ_NEXT_TOKEN;
+    if (lexer->current_token.type != PS_TOKEN_CHAR_VALUE)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    READ_NEXT_TOKEN;
+    hi = lexer->current_token.value.c;
+    if (lo >= hi)
+        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create_subrange_char(lo, hi);
+    if (type_def == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    ps_value value = {.type = &ps_system_type_def, .data.t = type_def};
+    ps_identifier name = {0};
+    snprintf(name, sizeof(name) - 1, "#SUBRANGE_CHAR_%d_%d", lo, hi);
+    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def}));
+    if (symbol == NULL)
+    {
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    }
+    *type_symbol = symbol;
 
     VISIT_END("OK");
 }
