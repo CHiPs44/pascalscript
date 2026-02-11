@@ -10,6 +10,72 @@
 #include "ps_visit.h"
 
 /**
+ * Visit
+ *      'TYPE' TYPE_DEFINITION ';' [ TYPE_DEFINITION ';' ]*
+ */
+bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("TYPE", "");
+
+    EXPECT_TOKEN(PS_TOKEN_TYPE);
+    READ_NEXT_TOKEN;
+    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    do
+    {
+        if (!ps_visit_type_definition(interpreter, mode))
+            TRACE_ERROR("TYPE_DEFINITION");
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN;
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+
+    VISIT_END("OK");
+}
+
+/**
+ * Visit type definition:
+ *    IDENTIFIER '=' TYPE_REFERENCE
+ */
+bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("TYPE_DEFINITION", "");
+
+    ps_symbol *type = NULL;
+    ps_value *value = NULL;
+    ps_symbol *type_symbol = NULL;
+    ps_identifier type_name = {0};
+    ps_value_data data = {0};
+
+    // IDENTIFIER
+    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    COPY_IDENTIFIER(type_name);
+    READ_NEXT_TOKEN;
+    // '='
+    EXPECT_TOKEN(PS_TOKEN_EQ);
+    READ_NEXT_TOKEN;
+    // TYPE_REFERENCE
+    if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
+        TRACE_ERROR("TYPE REFERENCE");
+
+    if (mode == MODE_EXEC)
+    {
+        // Register new type definition in symbol table
+        data.t = type_symbol->value->data.t;
+        value = ps_value_alloc(type, data);
+        if (value == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
+        if (type_symbol == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        if (!ps_interpreter_add_symbol(interpreter, type_symbol))
+            TRACE_ERROR("ADD SYMBOL");
+    }
+
+    VISIT_END("OK");
+}
+
+/**
  * @details
  *  Visit type reference, for now, only base types:
  *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
@@ -66,7 +132,8 @@
  *          End;
  *      FIELD       = IDENTIFIER ':' TYPE_REFERENCE
  * ???:
- *      POINTER     =   'POINTER'
+ *      TPOINTER    = '^' TYPE_REFERENCE
+ *      POINTER     = 'POINTER'
  */
 bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
 {
@@ -162,7 +229,6 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     case PS_TOKEN_INTEGER_VALUE:  // subrange
     case PS_TOKEN_UNSIGNED_VALUE: // subrange
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-        break;
     case PS_TOKEN_BOOLEAN_VALUE:    // subrange
     case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
     case PS_TOKEN_SET:              // set
@@ -177,72 +243,6 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (advance)
         READ_NEXT_TOKEN;
-
-    VISIT_END("OK");
-}
-
-/**
- * Visit type definition:
- *    IDENTIFIER '=' TYPE_REFERENCE
- */
-bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode)
-{
-    VISIT_BEGIN("TYPE_DEFINITION", "");
-
-    ps_symbol *type = NULL;
-    ps_value *value = NULL;
-    ps_symbol *type_symbol = NULL;
-    ps_identifier type_name = {0};
-    ps_value_data data = {0};
-
-    // IDENTIFIER
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    COPY_IDENTIFIER(type_name);
-    READ_NEXT_TOKEN;
-    // '='
-    EXPECT_TOKEN(PS_TOKEN_EQ);
-    READ_NEXT_TOKEN;
-    // TYPE_REFERENCE
-    if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
-        TRACE_ERROR("TYPE REFERENCE");
-
-    if (mode == MODE_EXEC)
-    {
-        // Register new type definition in symbol table
-        data.t = type_symbol->value->data.t;
-        value = ps_value_alloc(type, data);
-        if (value == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
-        if (type_symbol == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        if (!ps_interpreter_add_symbol(interpreter, type_symbol))
-            TRACE_ERROR("ADD SYMBOL");
-    }
-
-    VISIT_END("OK");
-}
-
-/**
- * Visit
- *      'TYPE' TYPE_DEFINITION ';' [ TYPE_DEFINITION ';' ]*
- */
-bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
-{
-    VISIT_BEGIN("TYPE", "");
-
-    EXPECT_TOKEN(PS_TOKEN_TYPE);
-    READ_NEXT_TOKEN;
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    do
-    {
-        if (!ps_visit_type_definition(interpreter, mode))
-            TRACE_ERROR("TYPE_DEFINITION");
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
-    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     VISIT_END("OK");
 }

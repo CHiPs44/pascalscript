@@ -175,8 +175,13 @@ char *ps_type_definition_get_name(ps_type_definition *type_def)
                      type_def->def.g.u.max);
             break;
         case PS_TYPE_ENUM:
-            snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %s..%s)", type_name, base_name, type_def->def.g.e.min,
-                     type_def->def.g.e.max);
+            // TODO: get symbol names for min and max values
+            // snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %s..%s)", type_name, base_name, type_def->def.g.e.min,
+            //          type_def->def.g.e.max);
+            snprintf(buffer, sizeof(buffer) - 1, "%s(%s)", type_name, base_name);
+            break;
+        default:
+            snprintf(buffer, sizeof(buffer) - 1, "%s(%s, ?..?)", type_name, base_name);
             break;
         }
         break;
