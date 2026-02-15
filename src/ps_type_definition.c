@@ -14,6 +14,7 @@
 #include "ps_symbol_table.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
+#include "ps_system.h"
 
 ps_type_definition *ps_type_definition_create(ps_value_type base_type)
 {
@@ -88,7 +89,7 @@ ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_i
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
         return NULL;
-    type_def->def.g.base = PS_TYPE_CHAR;
+    type_def->base = PS_TYPE_CHAR;
     type_def->def.g.c.min = min;
     type_def->def.g.c.max = max;
     return type_def;
@@ -99,7 +100,7 @@ ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, p
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
         return NULL;
-    type_def->def.g.base = PS_TYPE_INTEGER;
+    type_def->base = PS_TYPE_INTEGER;
     type_def->def.g.i.min = min;
     type_def->def.g.i.max = max;
     return type_def;
@@ -110,7 +111,7 @@ ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min,
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
         return NULL;
-    type_def->def.g.base = PS_TYPE_UNSIGNED;
+    type_def->base = PS_TYPE_UNSIGNED;
     type_def->def.g.u.min = min;
     type_def->def.g.u.max = max;
     return type_def;
@@ -121,7 +122,7 @@ ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_en
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
     if (type_def == NULL)
         return NULL;
-    type_def->def.g.base = PS_TYPE_ENUM;
+    type_def->base = PS_TYPE_ENUM;
     type_def->def.g.e.symbol_enum = symbol_enum;
     type_def->def.g.e.min = min;
     type_def->def.g.e.max = max;
@@ -162,7 +163,7 @@ char *ps_type_definition_get_name(ps_type_definition *type_def)
         break;
     case PS_TYPE_SUBRANGE:
         // -5..24 => "SUBRANGE(INTEGER, -5..24)"
-        switch (type_def->def.g.base)
+        switch (type_def->base)
         {
         case PS_TYPE_CHAR:
             snprintf(buffer, sizeof(buffer) - 1, "%s(%s, '%c'..'%c')", type_name, base_name, type_def->def.g.c.min,

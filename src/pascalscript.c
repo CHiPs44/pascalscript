@@ -19,10 +19,18 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
+#define DEBUGGER_SOURCE "examples/400-subrange.pas"
+
 ps_interpreter *interpreter = NULL;
+
+void banner(FILE *out)
+{
+    fprintf(out, "PascalScript v%s (%d bits) - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION, PS_BITNESS);
+}
 
 void usage(char *program_name)
 {
+    banner(stderr);
     fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
     fprintf(stderr, "Runtime options:\n");
     fprintf(stderr, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
@@ -32,14 +40,13 @@ void usage(char *program_name)
     fprintf(stderr, "  -c : display configuration and exit\n");
     fprintf(stderr, "  -d : debug (more verbose trace)\n");
     fprintf(stderr, "  -h : display this help message and exit\n");
-    fprintf(stderr, "  -h : display this help message and exit\n");
     fprintf(stderr, "  -m : display memory usage at the end\n");
     fprintf(stderr, "  -n : do not execute program, just parse source code\n");
     fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
     fprintf(stderr, "  -t : trace execution\n");
     fprintf(stderr, "  -u : dump source buffer after loading\n");
     fprintf(stderr, "  -v : verbose (display banner and other infos)\n");
-    fprintf(stderr, "  program_file : path to the Pascal source file to run (default: examples/300-function0.pas)\n");
+    fprintf(stderr, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUGGER_SOURCE);
 }
 
 int main(int argc, char *argv[])
@@ -68,7 +75,7 @@ int main(int argc, char *argv[])
 
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "ctdsbvnmh")) != -1)
+    while ((opt = getopt(argc, argv, "bircdhmnstuv")) != -1)
     {
         switch (opt)
         {
@@ -124,15 +131,17 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* Display banner */
+    /* Display banner and intepreter runtime options */
     if (verbose)
     {
-        fprintf(stdout, "PascalScript v%d.%d.%d.%d - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION_MAJOR,
-                PS_VERSION_MINOR, PS_VERSION_PATCH, PS_VERSION_INDEX);
+        banner(stdout);
+        fprintf(stdout, "Runtime options:\n");
+        fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+        fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
+        fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
     }
 
     current_path = getcwd(NULL, 0);
-    // size_t len = strlen(current_path);
     if (verbose)
         fprintf(stderr, "Current working directory: %s\n", current_path);
     example_path = "";
@@ -146,7 +155,7 @@ int main(int argc, char *argv[])
         example_path = "../examples";
         if (verbose)
             fprintf(stderr, "Example path: %s\n", example_path);
-        program_file = "400-subrange.pas";
+        program_file = DEBUGGER_SOURCE;
         if (program_file != NULL)
             snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
         else
@@ -181,13 +190,6 @@ int main(int argc, char *argv[])
         ps_symbol_table_dump(NULL, "Initialization",
                              interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
-    /* Load program source from string or file */
-    // if (!ps_interpreter_load_string(interpreter, minimal_source, strlen(minimal_source)))
-    // // if (!ps_interpreter_load_string(interpreter, hello_source, strlen(hello_source)))
-    // {
-    //     fprintf(stderr, "Source not loaded!\n");
-    //     return EXIT_FAILURE;
-    // }
     if (!ps_interpreter_load_file(interpreter, source_file))
     {
         fprintf(stderr, "File %s not loaded!\n", source_file);

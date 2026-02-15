@@ -48,7 +48,7 @@ extern "C"
 
     typedef struct s_ps_type_definition_subrange
     {
-        ps_value_type base; /** @brief type of subrange: integer, unsigned, char, enum */
+        // ps_value_type base; /** @brief type of subrange: integer, unsigned, char, enum */
         union {
             ps_type_definition_subrange_char c;
             ps_type_definition_subrange_integer i;

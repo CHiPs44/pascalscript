@@ -2,17 +2,25 @@ Program SubRange;
 // Uses
 //   FreePascalCompatibility32;
 // not usable by PascalScript yet: {$R+} {$RANGECHECKS ON}
+Type
+  UpperCaseLetter = 'A'..'Z';
 Var
   I: Integer;
   J: 1 .. 10;
   K: Unsigned;
+  L: UpperCaseLetter;
 Begin
-  I := 5;
-  { this won't cause a runtime error because 5 is in the range of J }
-  J := I;
+  L := 'L';
+  WriteLn('L = ', L);
+  { this should/will cause a runtime error because 'a'' is out of range for 'A'..'Z' }
+  // L := 'a';
+  // WriteLn('L = ', L);
+  // I := 5;
+  // { this won't cause a runtime error because 5 is in 1..10 }
+  // J := I;
+  // WriteLn('I = ', I, ' J = ', J);
   K := 15;
-  WriteLn('I = ', I, ' J = ', J, ' K = ', K);
-  { this should/will cause a runtime error because 15 is out of the range of J }
+  { this should/will cause a runtime error because 15 is out of range for 1..10 }
   J := K;
   WriteLn('I = ', I, ' J = ', J, ' K = ', K);
 End.

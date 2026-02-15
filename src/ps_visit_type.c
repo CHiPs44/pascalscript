@@ -227,15 +227,18 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         // data.s = NULL; // TODO: allocate array
         // break;
     case PS_TOKEN_CHAR_VALUE: // subrange
+        advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_CHAR))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
         break;
     case PS_TOKEN_INTEGER_VALUE: // subrange
     case PS_TOKEN_MINUS:         // subrange with negative integer
+        advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_INTEGER))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
         break;
     case PS_TOKEN_UNSIGNED_VALUE: // subrange
+        advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_UNSIGNED))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
         break;

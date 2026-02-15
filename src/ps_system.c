@@ -31,8 +31,8 @@ ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def          
 ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .system = true, .allocated = false};
 
 /* clang-format on */
-#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__)                                                             \
-    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_TYPE__};                      \
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                                             \
+    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__};                      \
     ps_value ps_value_##__name__ = {                                                                                   \
         .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
     ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
@@ -42,19 +42,22 @@ ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITIO
                                       .allocated = false}
 /* clang-format off */
 
-PS_SYSTEM_TYPE(none     , "#NONE"     , PS_TYPE_NONE                                                                  );
-PS_SYSTEM_TYPE(integer  , "INTEGER"   , PS_TYPE_INTEGER                                                               );
-PS_SYSTEM_TYPE(unsigned , "UNSIGNED"  , PS_TYPE_UNSIGNED                                                              );
-PS_SYSTEM_TYPE(boolean  , "BOOLEAN"   , PS_TYPE_BOOLEAN                                                               );
-PS_SYSTEM_TYPE(char     , "CHAR"      , PS_TYPE_CHAR                                                                  );
-PS_SYSTEM_TYPE(real     , "REAL"      , PS_TYPE_REAL                                                                  );
-PS_SYSTEM_TYPE(string   , "STRING"    , PS_TYPE_STRING                                                                );
-PS_SYSTEM_TYPE(array    , "#ARRAY"    , PS_TYPE_ARRAY                                                                 );
-PS_SYSTEM_TYPE(subrange , "#SUBRANGE" , PS_TYPE_SUBRANGE                                                              );
-PS_SYSTEM_TYPE(enum     , "#ENUM"     , PS_TYPE_ENUM                                                                  );
-PS_SYSTEM_TYPE(record   , "#RECORD"   , PS_TYPE_RECORD                                                                );
-PS_SYSTEM_TYPE(procedure, "#PROCEDURE", PS_TYPE_EXECUTABLE                                                            );
-PS_SYSTEM_TYPE(function , "#FUNCTION" , PS_TYPE_EXECUTABLE                                                            );
+PS_SYSTEM_TYPE(none             , "#NONE"             , PS_TYPE_NONE      , PS_TYPE_NONE                              );
+PS_SYSTEM_TYPE(integer          , "INTEGER"           , PS_TYPE_INTEGER   , PS_TYPE_INTEGER                           );
+PS_SYSTEM_TYPE(unsigned         , "UNSIGNED"          , PS_TYPE_UNSIGNED  , PS_TYPE_UNSIGNED                          );
+PS_SYSTEM_TYPE(boolean          , "BOOLEAN"           , PS_TYPE_BOOLEAN   , PS_TYPE_BOOLEAN                           );
+PS_SYSTEM_TYPE(char             , "CHAR"              , PS_TYPE_CHAR      , PS_TYPE_CHAR                              );
+PS_SYSTEM_TYPE(real             , "REAL"              , PS_TYPE_REAL      , PS_TYPE_REAL                              );
+PS_SYSTEM_TYPE(string           , "STRING"            , PS_TYPE_STRING    , PS_TYPE_STRING                            );
+PS_SYSTEM_TYPE(array            , "#ARRAY"            , PS_TYPE_ARRAY     , PS_TYPE_ARRAY                             );
+PS_SYSTEM_TYPE(subrange_char    , "#SUBRANGE_CHAR"    , PS_TYPE_SUBRANGE  , PS_TYPE_CHAR                              );
+PS_SYSTEM_TYPE(subrange_integer , "#SUBRANGE_INTEGER" , PS_TYPE_SUBRANGE  , PS_TYPE_INTEGER                           );
+PS_SYSTEM_TYPE(subrange_unsigned, "#SUBRANGE_UNSIGNED", PS_TYPE_SUBRANGE  , PS_TYPE_UNSIGNED                          );
+PS_SYSTEM_TYPE(subrange_enum    , "#SUBRANGE_ENUM"    , PS_TYPE_SUBRANGE  , PS_TYPE_ENUM                              );
+PS_SYSTEM_TYPE(enum             , "#ENUM"             , PS_TYPE_ENUM      , PS_TYPE_UNSIGNED                          );
+PS_SYSTEM_TYPE(record           , "#RECORD"           , PS_TYPE_RECORD    , PS_TYPE_RECORD                            );
+PS_SYSTEM_TYPE(procedure        , "#PROCEDURE"        , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
+PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
 
 /**********************************************************************************************************************/
 /* CONSTANTS                                                                                                          */
@@ -123,10 +126,6 @@ bool ps_system_init(ps_environment *system)
     // ps_system_array.value->type->def.a.type_def = NULL;
     // // String: max length
     // ps_system_string.value->type->def.s.max = PS_STRING_MAX_LEN;
-    // // Subrange: 0..0 as integers
-    // ps_system_subrange.value->type->def.g.def = &ps_type_def_integer;
-    // ps_system_subrange.value->type->def.g.max.i = 0;
-    // ps_system_subrange.value->type->def.g.min.i = 0;
     // // Enum: empty
     // ps_system_enum.value->type->def.e.count = 0;
     // ps_system_enum.value->type->def.e.values = NULL;
@@ -141,7 +140,10 @@ bool ps_system_init(ps_environment *system)
     ADD_SYSTEM_SYMBOL(ps_system_string);
     ADD_SYSTEM_SYMBOL(ps_system_procedure);
     ADD_SYSTEM_SYMBOL(ps_system_function);
-    ADD_SYSTEM_SYMBOL(ps_system_subrange);
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_char);
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_integer);
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned);
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_enum);
     ADD_SYSTEM_SYMBOL(ps_system_enum);
     ADD_SYSTEM_SYMBOL(ps_system_array);
     ADD_SYSTEM_SYMBOL(ps_system_record);

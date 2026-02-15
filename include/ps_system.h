@@ -57,7 +57,10 @@ extern "C"
     extern ps_symbol ps_system_function;
 
     /* Derived types */
-    extern ps_symbol ps_system_subrange;
+    extern ps_symbol ps_system_subrange_char;
+    extern ps_symbol ps_system_subrange_integer;
+    extern ps_symbol ps_system_subrange_unsigned;
+    extern ps_symbol ps_system_subrange_enum;
     extern ps_symbol ps_system_enum;
 
     /* System constants */

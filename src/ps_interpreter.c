@@ -181,7 +181,7 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
 {
-    if (interpreter->debug >= DEBUG_VERBOSE)
+    // if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fputc('*', stderr);
         ps_value_debug(stderr, "FROM\t", from);
@@ -193,6 +193,40 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     if (from->type == to->type)
     {
         to->data = from->data;
+        goto OK;
+    }
+    // Char => Char? (subrange)
+    if (from->type->value->data.t->base == PS_TYPE_CHAR && to->type->value->data.t->base == PS_TYPE_CHAR)
+    {
+        if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
+            (from->data.c < to->type->value->data.t->def.g.c.min ||
+             from->data.c > to->type->value->data.t->def.g.c.max))
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+        to->data.c = from->data.c;
+        goto OK;
+    }
+    // Integer => Integer? (subrange)
+    if (from->type->value->data.t->base == PS_TYPE_INTEGER && to->type->value->data.t->base == PS_TYPE_INTEGER)
+    {
+        ps_value_debug(stderr, "I/FROM\t", from);
+        ps_value_debug(stderr, "I/TO\t", to);
+        if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
+            (from->data.i < to->type->value->data.t->def.g.i.min ||
+             from->data.i > to->type->value->data.t->def.g.i.max))
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+        to->data.i = from->data.i;
+        goto OK;
+    }
+    // Unsigned => Unsigned? (subrange)
+    if (from->type->value->data.t->base == PS_TYPE_UNSIGNED && to->type->value->data.t->base == PS_TYPE_UNSIGNED)
+    {
+        ps_value_debug(stderr, "U/FROM\t", from);
+        ps_value_debug(stderr, "U/TO\t", to);
+        if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
+            (from->data.u < to->type->value->data.t->def.g.u.min ||
+             from->data.u > to->type->value->data.t->def.g.u.max))
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+        to->data.u = from->data.u;
         goto OK;
     }
     // Integer => Unsigned?
@@ -225,9 +259,11 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
         to->data.r = (ps_real)from->data.u;
         goto OK;
     }
-    ps_interpreter_set_message(interpreter, "Cannot convert value from type '%s' to type '%s'",
-                               ps_value_type_get_name(from->type->value->data.t->base),
-                               ps_value_type_get_name(to->type->value->data.t->base));
+    ps_interpreter_set_message(
+        interpreter, "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
+        ps_value_type_get_name(from->type->value->data.t->type),
+        ps_value_type_get_name(from->type->value->data.t->base), ps_value_type_get_name(to->type->value->data.t->type),
+        ps_value_type_get_name(to->type->value->data.t->base));
     return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
 OK:
     if (interpreter->debug >= DEBUG_VERBOSE)
