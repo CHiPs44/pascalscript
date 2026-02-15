@@ -30,7 +30,9 @@ extern "C"
 
 #define PS_VALUE_SIZE sizeof(ps_value)
 
+    /** @brief Allocate a new value */
     ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data);
+    /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
 
     /* clang-format off */

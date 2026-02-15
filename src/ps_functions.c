@@ -471,7 +471,7 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_val
     return PS_ERROR_NONE;
 }
 
-/** @brief SQR(REAL): REAL - Get square of floating point value */
+/** @brief SQR(REAL): REAL - Get square (x²) of floating point value */
 ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
@@ -490,7 +490,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value 
     return PS_ERROR_NONE;
 }
 
-/** @brief SQRT(REAL): REAL - Get square root of floating point value */
+/** @brief SQRT(REAL): REAL - Get square root (√x) of floating point value */
 ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
@@ -660,7 +660,7 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
     ((void)interpreter);
     if (value == NULL)
     {
-        // no argument, return random real between 0.0 and 1.0 excluded
+        // no argument, return random real between 0.0 included and 1.0 excluded
         result->type = &ps_system_real;
         do
         {

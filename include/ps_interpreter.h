@@ -60,9 +60,12 @@ extern "C"
 
     /**
      * @brief Initialize interpreter
+     * @param range_check enable range checking for integer and real values
+     * @param bool_eval enable short circuit boolean evaluation
+     * @param io_check enable I/O error checking
      * @return NULL if no free memory (errno = ENOMEM)
      */
-    ps_interpreter *ps_interpreter_alloc();
+    ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check);
 
     /** @brief Release interpreter */
     ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter);

@@ -146,6 +146,7 @@ extern "C"
     void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
 
     ps_type_definition *ps_type_definition_create(ps_value_type type);
+    ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
     ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol *values);
     ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max);
     ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);

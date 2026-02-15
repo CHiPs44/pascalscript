@@ -16,10 +16,14 @@
 
 ps_string *ps_string_alloc(ps_string_len max)
 {
-    // When sizeof(ps_char) == 1:
+    // When sizeof(ps_char) == 1 and sizeof(ps_string_len) == 1:
     //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
     //  maximum: 1           + 1           +  255 + 1  bytes for "short" strings
-    //       => 258
+    //      => 258
+    // When sizeof(ps_char) == 2 and sizeof(ps_string_len) == 2:
+    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
+    //  maximum: 2           + 2           +  65536 + 2 "wide" chars
+    //      => 65542
     if (max == 0)
         max = PS_STRING_MAX_LEN;
     size_t size = sizeof(ps_string_len) + sizeof(ps_string_len) + (max + 1) * sizeof(ps_char);

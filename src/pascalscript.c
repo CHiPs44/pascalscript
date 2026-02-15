@@ -21,89 +21,48 @@
 
 ps_interpreter *interpreter = NULL;
 
-/* char *minimal_source = "Program Minimal;\n"
-                       "Const Int1 = 1073741824;\n"
-                       "Const Num1 = 123.45;\n"
-                       "      MinReal2 = 1.17549435082228750796873653722224568e-38;\n"
-                       "      MaxReal2 = 3.40282346638528859811704183484516925e38;\n"
-                       "      EpsReal2 = 1.19209289550781250000000000000000000e-7;\n"
-                       "      Hex1 = $AABBCCDD;\n"
-                       "      Oct1 = &1000;\n"
-                       "      Bin1 = %11110000101010100000111101010101;\n"
-                       "Var   R : Real;\n"
-                       "Const Int2 = 10;\n"
-                       "      Real1 = 12.34;\n"
-                       "Var   I : Integer;\n"
-                       "      U1 : Unsigned;\n"
-                       "      U2 : Unsigned;\n"
-                       "      U : Unsigned;\n"
-                       "      C : Char;\n"
-                       "      B: Boolean;\n"
-                       "Begin\n"
-                       "   WriteLn;\n"
-                       "   WriteLn();\n"
-                       "   { No strings yet! }\n"
-                       "   WriteLn('M', 'i', 'n', 'R', 'e', 'a', 'l', '=', MinReal);\n"
-                       "   WriteLn('M', 'a', 'x', 'R', 'e', 'a', 'l', '=', MaxReal);\n"
-                       "   B := MinReal > MaxReal;\n"
-                       "   WriteLn(B);\n"
-                       "   U1 := Int1;\n"
-                       "   U2 := Int2;\n"
-                       "   WriteLn('U', '1', '=', U1);\n"
-                       "   WriteLn('U', '2', '=', U2);\n"
-                       "   U := (U1 + U2) * 2;\n"
-                       "   WriteLn('U', '=', U);\n"
-                       "   U := U + 1;\n"
-                       "   WriteLn('U', '=', U);\n"
-                       "   I := U div 2;\n"
-                       "   WriteLn('I', '=', I);\n"
-                       "   C := Chr(65);\n"
-                       "   WriteLn('C', '=', C);\n"
-                       "End.\n";
-*/
-
-/* char *hello_source =
-    "program hello;\n"
-    "{ comment with curly brackets }\n"
-    "const\n"
-    "  chips = 44;\n"
-    "var\n"
-    "  test: integer;\n"
-    "begin\n"
-    "(*\n"
-    " multi-line comment enclosed in\n"
-    " parenthesis plus stars\n"
-    "*)\n"
-    "  test := 1 + chips;\n"
-    "  writeln('test=', test);\n"
-    "end.\n";
-*/
-
 void usage(char *program_name)
 {
     fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
-    fprintf(stderr, "  -b : dump source buffer after loading\n");
+    fprintf(stderr, "Runtime options:\n");
+    fprintf(stderr, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
+    fprintf(stderr, "  -i : flips I/O error checking (default: true, ${I})\n");
+    fprintf(stderr, "  -r : flips range checking (default: true, {$R})\n");
+    fprintf(stderr, "Other options:\n");
+    fprintf(stderr, "  -c : display configuration and exit\n");
     fprintf(stderr, "  -d : debug (more verbose trace)\n");
+    fprintf(stderr, "  -h : display this help message and exit\n");
+    fprintf(stderr, "  -h : display this help message and exit\n");
+    fprintf(stderr, "  -m : display memory usage at the end\n");
     fprintf(stderr, "  -n : do not execute program, just parse source code\n");
     fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
     fprintf(stderr, "  -t : trace execution\n");
+    fprintf(stderr, "  -u : dump source buffer after loading\n");
     fprintf(stderr, "  -v : verbose (display banner and other infos)\n");
+    fprintf(stderr, "  program_file : path to the Pascal source file to run (default: examples/300-function0.pas)\n");
 }
 
 int main(int argc, char *argv[])
 {
-    bool trace = false;
-    bool debug = trace;
-    bool verbose = false;
-    bool dump_symbols = false;
+    // Runtime options
+    bool bool_eval = false;
+    bool io_check = true;
+    bool range_check = true;
+    // Others options
+    bool debug = false;
     bool dump_buffer = false;
+    bool dump_symbols = false;
     bool exec = true;
     bool memory = false;
+    bool trace = false;
+    bool verbose = false;
+    // Paths & file names
     char *current_path = NULL;
     char *example_path = NULL;
     char *program_file = NULL;
     char source_file[256] = {0};
 
+    // Force when debugging as I didn't find how to pass command line options
     // trace = true;
     // debug = true;
 
@@ -113,35 +72,50 @@ int main(int argc, char *argv[])
     {
         switch (opt)
         {
-        case 'c':
-            ps_config_report(stdout);
-            exit(0);
-        case 't':
-            trace = true;
+        case 'b':
+            bool_eval = !bool_eval;
             arg++;
             break;
+        case 'i':
+            io_check = !io_check;
+            arg++;
+            break;
+        case 'r':
+            range_check = !range_check;
+            arg++;
+            break;
+        case 'c':
+            ps_config_report(stdout);
+            exit(EXIT_SUCCESS);
         case 'd':
             debug = true;
             arg++;
             break;
-        case 's':
-            dump_symbols = true;
-            arg++;
-            break;
-        case 'b':
-            dump_buffer = true;
-            arg++;
-            break;
-        case 'v':
-            verbose = true;
+        case 'h':
+            usage(argv[0]);
+            exit(EXIT_SUCCESS);
+        case 'm':
+            memory = true;
             arg++;
             break;
         case 'n':
             exec = false;
             arg++;
             break;
-        case 'm':
-            memory = true;
+        case 's':
+            dump_symbols = true;
+            arg++;
+            break;
+        case 't':
+            trace = true;
+            arg++;
+            break;
+        case 'u':
+            dump_buffer = true;
+            arg++;
+            break;
+        case 'v':
+            verbose = true;
             arg++;
             break;
         default:
@@ -172,7 +146,7 @@ int main(int argc, char *argv[])
         example_path = "../examples";
         if (verbose)
             fprintf(stderr, "Example path: %s\n", example_path);
-        program_file = "300-function0.pas";
+        program_file = "400-subrange.pas";
         if (program_file != NULL)
             snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
         else
@@ -192,7 +166,7 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize interpreter */
-    interpreter = ps_interpreter_alloc();
+    interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
     if (interpreter == NULL)
     {
         fprintf(stderr, "Could not initialize interpreter!\n");

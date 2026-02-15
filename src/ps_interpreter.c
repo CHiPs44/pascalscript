@@ -16,7 +16,7 @@
 #include "ps_value.h"
 #include "ps_visit.h"
 
-ps_interpreter *ps_interpreter_alloc()
+ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check)
 {
     ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
     // fprintf(stderr, "ALLOC\tINTERPRETER: %p\n", interpreter);
@@ -28,9 +28,9 @@ ps_interpreter *ps_interpreter_alloc()
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_ERROR_NONE;
     interpreter->debug = DEBUG_NONE;
-    interpreter->range_check = true;
-    interpreter->bool_eval = false;
-    interpreter->io_check = false;
+    interpreter->range_check = range_check;
+    interpreter->bool_eval = bool_eval;
+    interpreter->io_check = io_check;
     // Allocate string heap
     interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
     if (interpreter->string_heap == NULL)
