@@ -12,16 +12,17 @@
 #include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_system.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
-#include "ps_system.h"
 
-ps_type_definition *ps_type_definition_create(ps_value_type base_type)
+ps_type_definition *ps_type_definition_create(ps_value_type type, ps_value_type base)
 {
     ps_type_definition *type_def = ps_memory_malloc(sizeof(ps_type_definition));
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
-    type_def->type = type_def->base = base_type;
+    type_def->type = type;
+    type_def->base = base;
     return type_def;
 }
 
@@ -65,9 +66,9 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
     return NULL;
 }
 
-ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol *values)
+ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **values)
 {
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_ENUM, PS_TYPE_UNSIGNED);
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
     type_def->def.e.count = count;
@@ -86,10 +87,9 @@ ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol *val
 
 ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max)
 {
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_CHAR);
     if (type_def == NULL)
         return NULL;
-    type_def->base = PS_TYPE_CHAR;
     type_def->def.g.c.min = min;
     type_def->def.g.c.max = max;
     return type_def;
@@ -97,10 +97,9 @@ ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_i
 
 ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max)
 {
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_INTEGER);
     if (type_def == NULL)
         return NULL;
-    type_def->base = PS_TYPE_INTEGER;
     type_def->def.g.i.min = min;
     type_def->def.g.i.max = max;
     return type_def;
@@ -108,10 +107,9 @@ ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, p
 
 ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max)
 {
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_UNSIGNED);
     if (type_def == NULL)
         return NULL;
-    type_def->base = PS_TYPE_UNSIGNED;
     type_def->def.g.u.min = min;
     type_def->def.g.u.max = max;
     return type_def;
@@ -119,10 +117,9 @@ ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min,
 
 ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, uint8_t min, uint8_t max)
 {
-    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE);
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_ENUM);
     if (type_def == NULL)
         return NULL;
-    type_def->base = PS_TYPE_ENUM;
     type_def->def.g.e.symbol_enum = symbol_enum;
     type_def->def.g.e.min = min;
     type_def->def.g.e.max = max;
@@ -159,7 +156,7 @@ char *ps_type_definition_get_name(ps_type_definition *type_def)
     case PS_TYPE_ENUM:
         // (One, Two, Three) => "ENUM(UNSIGNED, 3, 'One', ...)"
         snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %d, '%s', ...)", type_name, base_name, type_def->def.e.count,
-                 type_def->def.e.count == 0 ? "???" : (type_def->def.e.values[0]).name);
+                 type_def->def.e.count == 0 ? "???" : type_def->def.e.values[0]->name);
         break;
     case PS_TYPE_SUBRANGE:
         // -5..24 => "SUBRANGE(INTEGER, -5..24)"

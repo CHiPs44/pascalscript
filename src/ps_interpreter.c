@@ -220,8 +220,6 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     // Unsigned => Unsigned? (subrange)
     if (from->type->value->data.t->base == PS_TYPE_UNSIGNED && to->type->value->data.t->base == PS_TYPE_UNSIGNED)
     {
-        ps_value_debug(stderr, "U/FROM\t", from);
-        ps_value_debug(stderr, "U/TO\t", to);
         if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
             (from->data.u < to->type->value->data.t->def.g.u.min ||
              from->data.u > to->type->value->data.t->def.g.u.max))

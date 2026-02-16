@@ -62,7 +62,7 @@ extern "C"
     typedef struct s_ps_type_definition_enum
     {
         /** @brief Array of symbols for each item in the enumeration */
-        ps_symbol *values;
+        ps_symbol **values;
         /** @brief Number of items in the enumeration */
         uint8_t count;
     } __attribute__((__packed__)) ps_type_definition_enum;
@@ -145,9 +145,9 @@ extern "C"
 
     void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
 
-    ps_type_definition *ps_type_definition_create(ps_value_type type);
+    ps_type_definition *ps_type_definition_create(ps_value_type type, ps_value_type base);
     ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
-    ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol *values);
+    ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **values);
     ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max);
     ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);
     ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max);

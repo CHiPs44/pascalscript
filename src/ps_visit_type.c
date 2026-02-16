@@ -5,9 +5,11 @@
 */
 
 #include "ps_executable.h"
+#include "ps_symbol.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_type_definition.h"
+#include "ps_value.h"
 #include "ps_visit.h"
 
 /**
@@ -244,11 +246,15 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         break;
     // case PS_TOKEN_BOOLEAN_VALUE:    // subrange => not really useful but possible
     case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
-    case PS_TOKEN_SET:              // set
-    case PS_TOKEN_FILE:             // file
-    case PS_TOKEN_TEXT:             // text
-    case PS_TOKEN_RECORD:           // record
-    case PS_TOKEN_CARET:            // pointer
+        advance = false;
+        if (!ps_visit_type_reference_enum(interpreter, mode, type_symbol))
+            TRACE_ERROR("TYPE_REFERENCE_ENUM");
+        break;
+    case PS_TOKEN_SET:    // set
+    case PS_TOKEN_FILE:   // file
+    case PS_TOKEN_TEXT:   // text
+    case PS_TOKEN_RECORD: // record
+    case PS_TOKEN_CARET:  // pointer
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
@@ -256,6 +262,88 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (advance)
         READ_NEXT_TOKEN;
+
+    VISIT_END("OK");
+}
+
+bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_ENUM", "");
+
+    // Up to 256 values in an enumeration
+    ps_symbol *values[256] = {0};
+    int count = 0;
+
+    // re-check that current token is '('
+    if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    READ_NEXT_TOKEN;
+    // empty enumeration not allowed
+    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    // Parse enumeration values
+    // fprintf(stderr, "ENUM VALUES:\n");
+    do
+    {
+        if (count == 256)
+            RETURN_ERROR(PS_ERROR_OVERFLOW);
+        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        // fprintf(stderr, " ENUM VALUE #%d '%*s'\n", count+1, -(int)PS_IDENTIFIER_LEN, lexer->current_token.value.identifier);
+        // Check that enumeration value does not already exist as symbol
+        if (ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true) != NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+        // Create a new symbol for the enumeration value
+        ps_value *value = ps_value_alloc(&ps_system_unsigned, (ps_value_data){.u = count});
+        ps_symbol *value_symbol =
+            ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &lexer->current_token.value.identifier, value);
+        if (value_symbol == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        if (!ps_interpreter_add_symbol(interpreter, value_symbol))
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_ADDED);
+        values[count] = value_symbol;
+        count += 1;
+        READ_NEXT_TOKEN;
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            READ_NEXT_TOKEN;
+            continue;
+        }
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+            break;
+    } while (true);
+    READ_NEXT_TOKEN;
+
+    // Register new type definition in symbol table
+    ps_symbol_hash_key hash_key_0 = ps_symbol_get_hash_key((char *)values[0]->name);
+    ps_symbol_hash_key hash_key_1 = ps_symbol_get_hash_key((char *)values[count - 1]->name);
+    ps_identifier name = {0};
+    snprintf(name, sizeof(name) - 1, "#ENUM_%d_%08x_%08x", count, hash_key_0, hash_key_1);
+    // fprintf(stderr, "ENUM TYPE NAME: '%*s'\n", -(int)PS_IDENTIFIER_LEN, name);
+    ps_type_definition *type_def = ps_type_definition_create_enum(count, values);
+    if (type_def == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+    if (value == NULL)
+    {
+        type_def = ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    }
+    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &name, value);
+    if (symbol == NULL)
+    {
+        value = ps_value_free(value);
+        type_def = ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    }
+    if (!ps_interpreter_add_symbol(interpreter, symbol))
+    {
+        symbol = ps_symbol_free(symbol);
+        value = ps_value_free(value);
+        type_def = ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_GENERIC); // TODO: specific error
+    }
+    *type_symbol = symbol;
 
     VISIT_END("OK");
 }
@@ -342,8 +430,8 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    // Create type definition for subrange
     READ_NEXT_TOKEN;
+    // Create type definition for subrange
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
     switch (base)
