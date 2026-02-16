@@ -55,6 +55,8 @@ char *ps_error_get_message(ps_error error)
         return "Unknown identifier";
     case PS_ERROR_CONSTANT_VALUE:
         return "Constant value";
+    case PS_ERROR_INVALID_SUBRANGE:
+        return "Invalid subrange";
     /* ==================== RUNTIME  ==================== */
     case PS_ERROR_ENVIRONMENT_UNDERFLOW:
         return "Environment underflow";

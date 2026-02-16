@@ -36,18 +36,18 @@ ps_value *ps_value_free(ps_value *value)
     return NULL;
 }
 
-#define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
-    if (value == NULL)                                                                                                 \
-    {                                                                                                                  \
-        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__});                                            \
-        if (value == NULL)                                                                                             \
-            return NULL;                                                                                               \
-    }                                                                                                                  \
-    else                                                                                                               \
-    {                                                                                                                  \
-        value->type = &__TYPE__;                                                                                       \
-        value->data.__X__ = __X__;                                                                                     \
-    }                                                                                                                  \
+#define PS_VALUE_SET(__TYPE__, __X__)                                       \
+    if (value == NULL)                                                      \
+    {                                                                       \
+        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__}); \
+        if (value == NULL)                                                  \
+            return NULL;                                                    \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+        value->type = &__TYPE__;                                            \
+        value->data.__X__ = __X__;                                          \
+    }                                                                       \
     return value;
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
@@ -318,9 +318,13 @@ char *ps_value_get_debug_string(ps_value *value)
 char *ps_value_dump(ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!"
+                                                               : value->type->name;
+    char *base = value == NULL ? "NULL!" : value->type == NULL      ? "TYPE!"
+                                       : value->type->value == NULL ? "BASE!"
+                                                                    : ps_value_type_get_name(value->type->value->data.t->base);
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_string(value);
-    snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s, value=%s", type, data);
+    snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s (base=%s), value=%s", type, base, data);
     return buffer;
 }
 

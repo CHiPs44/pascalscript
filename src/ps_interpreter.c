@@ -181,10 +181,12 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
 {
-    // if (interpreter->debug >= DEBUG_VERBOSE)
+    if (interpreter->debug >= DEBUG_VERBOSE)
     {
-        fputc('*', stderr);
+        fputc('>', stderr);
         ps_value_debug(stderr, "FROM\t", from);
+        fputc('>', stderr);
+        ps_value_debug(stderr, "TO\t", to);
     }
     // If destination type is NONE, set it to source type
     if (to->type == NULL || to->type == &ps_system_none || to->type->value->data.t->base == PS_TYPE_NONE)
@@ -208,8 +210,6 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     // Integer => Integer? (subrange)
     if (from->type->value->data.t->base == PS_TYPE_INTEGER && to->type->value->data.t->base == PS_TYPE_INTEGER)
     {
-        ps_value_debug(stderr, "I/FROM\t", from);
-        ps_value_debug(stderr, "I/TO\t", to);
         if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
             (from->data.i < to->type->value->data.t->def.g.i.min ||
              from->data.i > to->type->value->data.t->def.g.i.max))
@@ -234,6 +234,10 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     {
         if (interpreter->range_check && from->data.i < 0)
             return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+        if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
+            ((ps_unsigned)from->data.i < to->type->value->data.t->def.g.u.min ||
+             (ps_unsigned)from->data.i > to->type->value->data.t->def.g.u.max))
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
         to->data.u = (ps_unsigned)from->data.i;
         goto OK;
     }
@@ -241,6 +245,10 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
     if (from->type->value->data.t->base == PS_TYPE_UNSIGNED && to->type->value->data.t->base == PS_TYPE_INTEGER)
     {
         if (interpreter->range_check && from->data.u > PS_INTEGER_MAX)
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+        if (interpreter->range_check && to->type->value->data.t->type == PS_TYPE_SUBRANGE &&
+            ((ps_integer)from->data.u < to->type->value->data.t->def.g.i.min ||
+             (ps_integer)from->data.u > to->type->value->data.t->def.g.i.max))
             return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
         to->data.i = (ps_integer)from->data.u;
         goto OK;

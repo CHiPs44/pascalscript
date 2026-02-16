@@ -36,8 +36,9 @@ Var
     I: Unsigned;
     Characteristic, Minimum, Maximum, Count2: Unsigned;
     Total2: Real;
-
+    Start, Finish: Unsigned;
 Begin
+    Start := GetTickCount();
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Launching 3d6 for ', Count, ' tries (until minimum=3 and maximum=18)...');
     WriteLn('Theorical mean = ', 10.5);
@@ -59,8 +60,10 @@ Begin
             Count2 := Count2 + 1;
             If I Mod 16 = 0 Then WriteLn(' Mean = ', (Total2 / Count2):8:4, ' Total2 = ', Total2:10:2);
         End;
-    Until (Minimum = 3 And Maximum = 18) Or (Count2 >= 1000);
+    Until (Count2 > 500 And Minimum = 3 And Maximum = 18) Or (Count2 >= 1000);
     WriteLn;
     WriteLn('Minimum = ', Minimum, ', Maximum = ', Maximum, ', Mean = ', Total2 / Count2:8:4, ' Count = ', Count2);
     WriteLn('--------------------------------------------------------------------------------');
+    Finish := GetTickCount();
+    WriteLn('Execution time: ', (Finish - Start):8:4, ' ms');
 End.
