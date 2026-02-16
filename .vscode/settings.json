@@ -16,5 +16,6 @@
     "makefile.configureOnOpen": false,
     "workbench.iconTheme": "fira-code-material-minimal",
     "editor.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
-    "editor.fontLigatures": true
+    "editor.fontLigatures": true,
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
 }
