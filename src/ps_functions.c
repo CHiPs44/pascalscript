@@ -32,10 +32,12 @@ PS_SYSTEM_FUNCTION (function , even          , "EVEN"        , .func_1arg      ,
 PS_SYSTEM_FUNCTION (function , exp           , "EXP"         , .func_1arg      , &ps_function_exp               );
 PS_SYSTEM_FUNCTION (function , frac          , "FRAC"        , .func_1arg      , &ps_function_frac              );
 PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", .func_1arg      , &ps_function_get_tick_count    );
+PS_SYSTEM_FUNCTION (function , high          , "HIGH"        , .func_1arg_s    , &ps_function_high              );
 PS_SYSTEM_FUNCTION (function , int           , "INT"         , .func_1arg      , &ps_function_int               );
 PS_SYSTEM_FUNCTION (function , length        , "LENGTH"      , .func_1arg      , &ps_function_length            );
 PS_SYSTEM_FUNCTION (function , ln            , "LN"          , .func_1arg      , &ps_function_ln                );
 PS_SYSTEM_FUNCTION (function , log           , "LOG"         , .func_1arg      , &ps_function_log               );
+PS_SYSTEM_FUNCTION (function , low           , "LOW"         , .func_1arg_s    , &ps_function_low               );
 PS_SYSTEM_FUNCTION (function , lowercase     , "LOWERCASE"   , .func_1arg      , &ps_function_lowercase         );
 PS_SYSTEM_FUNCTION (function , odd           , "ODD"         , .func_1arg      , &ps_function_odd               );
 PS_SYSTEM_FUNCTION (function , ord           , "ORD"         , .func_1arg      , &ps_function_ord               );
@@ -44,7 +46,7 @@ PS_SYSTEM_FUNCTION (function , pred          , "PRED"        , .func_1arg      ,
 PS_SYSTEM_FUNCTION (function , random        , "RANDOM"      , .func_1arg      , &ps_function_random            );
 PS_SYSTEM_FUNCTION (function , round         , "ROUND"       , .func_1arg      , &ps_function_round             );
 PS_SYSTEM_FUNCTION (function , sin           , "SIN"         , .func_1arg      , &ps_function_sin               );
-PS_SYSTEM_FUNCTION (function , sqr           , "SQR"         , .func_1arg      , &ps_function_sqr               );   
+PS_SYSTEM_FUNCTION (function , sqr           , "SQR"         , .func_1arg      , &ps_function_sqr               );
 PS_SYSTEM_FUNCTION (function , sqrt          , "SQRT"        , .func_1arg      , &ps_function_sqrt              );
 PS_SYSTEM_FUNCTION (function , succ          , "SUCC"        , .func_1arg      , &ps_function_succ              );
 PS_SYSTEM_FUNCTION (function , tan           , "TAN"         , .func_1arg      , &ps_function_tan               );
@@ -62,10 +64,12 @@ bool ps_functions_init(ps_environment *system)
     ADD_SYSTEM_SYMBOL(ps_system_function_exp);
     ADD_SYSTEM_SYMBOL(ps_system_function_frac);
     ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count);
+    ADD_SYSTEM_SYMBOL(ps_system_function_high);
     ADD_SYSTEM_SYMBOL(ps_system_function_int);
     ADD_SYSTEM_SYMBOL(ps_system_function_length);
     ADD_SYSTEM_SYMBOL(ps_system_function_ln);
     ADD_SYSTEM_SYMBOL(ps_system_function_log);
+    ADD_SYSTEM_SYMBOL(ps_system_function_low);
     ADD_SYSTEM_SYMBOL(ps_system_function_lowercase);
     ADD_SYSTEM_SYMBOL(ps_system_function_odd);
     ADD_SYSTEM_SYMBOL(ps_system_function_ord);
@@ -99,6 +103,22 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, p
         return PS_ERROR_NOT_IMPLEMENTED;
     }
     return function(interpreter, value, result);
+}
+
+ps_error ps_function_exec_1arg_s(ps_interpreter *interpreter, ps_symbol *symbol, ps_symbol *type, ps_value *result)
+{
+    assert(interpreter != NULL);
+    assert(symbol != NULL);
+    assert(symbol->value != NULL);
+    assert(symbol->value->data.x != NULL);
+    assert(result != NULL);
+    ps_function_1arg_s function = (ps_function_1arg_s)(symbol->value->data.x->func_1arg_s);
+    if (function == NULL)
+    {
+        ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
+        return PS_ERROR_NOT_IMPLEMENTED;
+    }
+    return function(interpreter, type, result);
 }
 
 ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *a, ps_value *b,
@@ -213,6 +233,114 @@ ps_error ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value 
         return PS_ERROR_UNEXPECTED_TYPE;
     }
     result->type = &ps_system_char;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+{
+    ((void)interpreter);
+    switch (type->value->data.t->type)
+    {
+    case PS_TYPE_CHAR:
+        result->type = &ps_system_char;
+        result->data.c = (ps_char)0;
+        break;
+    case PS_TYPE_INTEGER:
+        result->type = &ps_system_integer;
+        result->data.i = PS_INTEGER_MIN;
+        break;
+    case PS_TYPE_UNSIGNED:
+        result->type = &ps_system_unsigned;
+        result->data.u = (ps_unsigned)0;
+        break;
+    case PS_TYPE_ENUM:
+        result->type = type;
+        result->data.u = (ps_unsigned)0;
+        break;
+    case PS_TYPE_SUBRANGE:
+        result->type = type;
+        switch (type->value->data.t->base)
+        {
+        case PS_TYPE_CHAR:
+            result->type = &ps_system_char;
+            result->data.c = (ps_char)type->value->data.t->def.g.c.min;
+            break;
+        case PS_TYPE_INTEGER:
+            result->type = &ps_system_integer;
+            result->data.i = type->value->data.t->def.g.i.min;
+            break;
+        case PS_TYPE_UNSIGNED:
+            result->type = &ps_system_unsigned;
+            result->data.u = type->value->data.t->def.g.u.min;
+            break;
+        default:
+            return PS_ERROR_UNEXPECTED_TYPE;
+        }
+        break;
+    case PS_TYPE_BOOLEAN:
+        result->type = &ps_system_boolean;
+        result->data.b = (ps_boolean) false;
+        break;
+    case PS_TYPE_ARRAY:
+        return PS_ERROR_NOT_IMPLEMENTED;
+    default:
+        return PS_ERROR_UNEXPECTED_TYPE;
+    }
+    ps_value_debug(NULL, "LOW => result", result);
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+{
+    ((void)interpreter);
+    switch (type->value->data.t->type)
+    {
+    case PS_TYPE_CHAR:
+        result->type = &ps_system_char;
+        result->data.c = PS_CHAR_MAX;
+        break;
+    case PS_TYPE_INTEGER:
+        result->type = &ps_system_integer;
+        result->data.i = PS_INTEGER_MAX;
+        break;
+    case PS_TYPE_UNSIGNED:
+        result->type = &ps_system_unsigned;
+        result->data.u = PS_UNSIGNED_MAX;
+        break;
+    case PS_TYPE_ENUM:
+        result->type = type;
+        result->data.u = type->value->data.t->def.e.count - 1;
+        break;
+    case PS_TYPE_SUBRANGE:
+        result->type = type;
+        switch (type->value->data.t->base)
+        {
+        case PS_TYPE_CHAR:
+            result->type = &ps_system_char;
+            result->data.c = type->value->data.t->def.g.c.max;
+            break;
+        case PS_TYPE_INTEGER:
+            result->type = &ps_system_integer;
+            result->data.i = type->value->data.t->def.g.i.max;
+            break;
+        case PS_TYPE_UNSIGNED:
+            result->type = &ps_system_unsigned;
+            result->data.u = type->value->data.t->def.g.u.max;
+            break;
+        default:
+            return PS_ERROR_UNEXPECTED_TYPE;
+        }
+        break;
+    case PS_TYPE_BOOLEAN:
+        result->type = &ps_system_boolean;
+        result->data.b = (ps_boolean) true;
+        break;
+    case PS_TYPE_ARRAY:
+        return PS_ERROR_NOT_IMPLEMENTED;
+    default:
+        return PS_ERROR_UNEXPECTED_TYPE;
+    }
+    ps_value_debug(NULL, "HIGH => result", result);
     return PS_ERROR_NONE;
 }
 
