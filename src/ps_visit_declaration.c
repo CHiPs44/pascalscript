@@ -166,8 +166,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         READ_NEXT_TOKEN;
         EXPECT_TOKEN(PS_TOKEN_EQ);
         READ_NEXT_TOKEN;
-        // TODO allow constant expression
-        // For now keep track of '-' so "Const Foo = -4;" works as expected
+        // For now only keep track of '-' so "Const Foo = -4;" or "Const Bar = -Foo;" work as expected
         if (lexer->current_token.type == PS_TOKEN_MINUS)
         {
             negate = true;

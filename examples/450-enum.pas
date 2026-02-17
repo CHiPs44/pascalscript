@@ -1,4 +1,5 @@
 Program Enums;
+
 Type
   TGender = (Male, Female, Other);
   TAbilities = (Strength, Intelligence, Wisdom, Dexterity, Constitution, Charisma);
@@ -6,27 +7,31 @@ Type
   TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, HalfOrc);
   TDie = (D4, D6, D8, D10, D12, D20, D100);
   Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+
 Var
   Gender: TGender;
   Ability: TAbilities;
   CharacterClass: TCharacterClass;
   Race: TCharacterRace;
   Die: TDie;
-  Day: Days;
   I: Integer;
+
+Procedure DisplayCharacter();
 Begin
-  I := Female;
-  Gender := Other;
-  Ability := Wisdom;
-  CharacterClass := Cleric;
-  Race := HalfOrc;
-  Die := D12;
   WriteLn('Character details:');
-  WriteLn(' Gender: ', Gender);
-  WriteLn('Ability: ', Ability);
-  WriteLn('  Class: ', CharacterClass);
-  WriteLn('   Race: ', Race);
-  WriteLn('    Die: ', Die);
+  WriteLn('  Gender: ', Gender);
+  WriteLn(' Ability: ', Ability);
+  WriteLn('   Class: ', CharacterClass);
+  WriteLn('    Race: ', Race);
+  WriteLn('     Die: ', Die);
+End;
+
+Procedure DisplayDays();
+// Type
+//   Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+Var
+  Day: Days;
+Begin
   WriteLn('Days of the week:');
   For Day := Monday to Sunday do
   Begin
@@ -34,5 +39,17 @@ Begin
     If Day <> Sunday then
       Write(', ');
   End;
-  WriteLn();
+  WriteLn;
+End;
+
+Begin
+  I := Female;
+  Gender := Other;
+  Ability := Wisdom;
+  CharacterClass := Cleric;
+  Race := HalfOrc;
+  Die := D12;
+  DisplayCharacter;
+  WriteLn;
+  DisplayDays;
 End.

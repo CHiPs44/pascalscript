@@ -132,8 +132,6 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     {
         if (!ps_formal_signature_add_parameter(signature, byref, &names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        // if (mode == MODE_EXEC)
-        // {
         value = ps_value_alloc(type_reference, (ps_value_data){.v = NULL});
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
@@ -142,7 +140,6 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
         if (!ps_interpreter_add_symbol(interpreter, parameter))
             TRACE_ERROR("ADD SYMBOL");
-        // }
     }
 
     VISIT_END("OK");
@@ -294,7 +291,6 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     ps_executable *executable = NULL;
     uint16_t line = 0;
     uint16_t column = 0;
-    // ps_value result = {0};
     bool has_environment = false;
     ps_symbol *result_symbol = NULL;
     ps_value *result_value = NULL;

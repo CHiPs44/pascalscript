@@ -61,19 +61,16 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         TRACE_ERROR("TYPE REFERENCE");
 
-    if (mode == MODE_EXEC)
-    {
-        // Register new type definition in symbol table
-        data.t = type_symbol->value->data.t;
-        value = ps_value_alloc(type, data);
-        if (value == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
-        if (type_symbol == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-        if (!ps_interpreter_add_symbol(interpreter, type_symbol))
-            TRACE_ERROR("ADD SYMBOL");
-    }
+    // Register new type definition in symbol table
+    data.t = type_symbol->value->data.t;
+    value = ps_value_alloc(type, data);
+    if (value == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
+    if (type_symbol == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    if (!ps_interpreter_add_symbol(interpreter, type_symbol))
+        TRACE_ERROR("ADD SYMBOL");
 
     VISIT_END("OK");
 }
