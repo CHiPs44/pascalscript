@@ -21,7 +21,7 @@ extern "C"
     ps_string *ps_string_alloc(ps_string_len max);
 
     /// @brief Free previously allocated string
-    void ps_string_free(ps_string *str);
+    ps_string *ps_string_free(ps_string *str);
 
     /// @brief Set existing string to new value if length fits
     /// @return string NULL if len > max

@@ -20,6 +20,11 @@ extern "C"
 #define PS_STRING_HEAP_SIZE (256)
 #endif
 
+    /**
+     * @brief String heap to hold string constants with a simple hash table and linear probing for collisions.
+     *        The heap is not resized for simplicity and performance as we expect a limited number of string constants
+     *        in typical Pascal programs.
+     */
     typedef struct s_ps_string_heap
     {
         size_t size;
@@ -32,7 +37,7 @@ extern "C"
     ps_string_heap *ps_string_heap_alloc(size_t size);
     ps_string_heap *ps_string_heap_free(ps_string_heap *heap);
     ps_string *ps_string_heap_create(ps_string_heap *heap, char *z);
-    // bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
+    bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
     void ps_string_heap_dump(ps_string_heap *heap, FILE *f);
 
 #ifdef __cplusplus

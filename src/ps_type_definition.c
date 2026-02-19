@@ -40,17 +40,17 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
     case PS_TYPE_SUBRANGE:
         // nothing to free
         break;
-    // case PS_TYPE_SET:
-    //     ps_memory_free(type_def->def.t.values);
-    //     break;
-    // case PS_TYPE_POINTER:
-    //     ps_type_definition_free(type_def->def.p.type_def);
-    //     break;
     case PS_TYPE_STRING:
         // nothing to free
         break;
     // case PS_TYPE_ARRAY:
     //     ps_type_definition_free(type_def->def.a.type_def);
+    //     break;
+    // case PS_TYPE_SET:
+    //     ps_memory_free(type_def->def.t.values);
+    //     break;
+    // case PS_TYPE_POINTER:
+    //     ps_type_definition_free(type_def->def.p.type_def);
     //     break;
     // case PS_TYPE_RECORD:
     //     // TODO free fields
@@ -64,6 +64,15 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
     }
     ps_memory_free(type_def);
     return NULL;
+}
+
+ps_type_definition *ps_type_definition_create_string(ps_string_len max)
+{
+    ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_STRING, PS_TYPE_STRING);
+    if (type_def == NULL)
+        return NULL; // errno = ENOMEM
+    type_def->def.s.max = max;
+    return type_def;
 }
 
 ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **values)
@@ -85,7 +94,7 @@ ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **va
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max)
+ps_type_definition *ps_type_definition_create_subrange_char(ps_char min, ps_char max)
 {
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_CHAR);
     if (type_def == NULL)
@@ -115,7 +124,8 @@ ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min,
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, uint8_t min, uint8_t max)
+ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, ps_enum_value min,
+                                                            ps_enum_value max)
 {
     ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_SUBRANGE, PS_TYPE_ENUM);
     if (type_def == NULL)

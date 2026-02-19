@@ -44,7 +44,7 @@ extern "C"
     typedef struct s_ps_interpreter
     {
         ps_parser *parser;           /** @brief Parser with lexer with source code buffer                    */
-        ps_string_heap *string_heap; /** @brief Strings heap to hold string constants                        */
+        ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
         char message[128];           /** @brief Additional error message                                     */
@@ -100,28 +100,13 @@ extern "C"
      */
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
 
-    // /**
-    //  * @brief Allocate new value
-    //  * @return NULL if no free memory (errno = ENOMEM)
-    //  */
-    // ps_value *ps_interpreter_alloc_value(ps_interpreter *interpreter);
-
-    // /** @brief Free existing value */
-    // void ps_interpreter_free_value(ps_interpreter *interpreter, ps_value *value);
-
-    // /** @brief Get global symbol */
-    // ps_symbol *ps_interpreter_global_get(ps_interpreter *interpreter, char *name);
-
-    // /** @brief Add global symbol */
-    // int ps_interpreter_global_add(ps_interpreter *interpreter, ps_symbol *symbol);
-
-    // /** @brief Delete global symbol */
-    // int ps_interpreter_global_delete(ps_interpreter *interpreter, char *name);
-
+    /** @brief Load source code from string */
     bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length);
 
+    /** @brief Load source code from file */
     bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename);
 
+    /** @brief Run the interpreter on the loaded source code, with option to execute or just parse */
     bool ps_interpreter_run(ps_interpreter *interpreter, bool exec);
 
 #ifdef __cplusplus

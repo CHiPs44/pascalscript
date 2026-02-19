@@ -35,10 +35,10 @@ ps_string *ps_string_alloc(ps_string_len max)
     return s;
 }
 
-void ps_string_free(ps_string *s)
+ps_string *ps_string_free(ps_string *s)
 {
-    // fprintf(stderr, "FREE\tSTRING: %p, '%s'\n", s, s->str);
     ps_memory_free(s);
+    return NULL;
 }
 
 ps_string *ps_string_set(ps_string *s, char *z)
@@ -70,7 +70,7 @@ ps_string *ps_string_create(char *z, ps_string_len max)
         return NULL; // errno = ENOMEM
     if (ps_string_set(s, z) == NULL)
     {
-        ps_string_free(s);
+        s = ps_string_free(s);
         return NULL; // errno = EINVAL
     }
     return s;

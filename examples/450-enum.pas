@@ -6,7 +6,6 @@ Type
   TCharacterClass = (Fighter, Wizard, Cleric, Rogue);
   TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, Half_Orc);
   TDie = (D4, D6, D8, D10, D12, D20, D100);
-  Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
 
 Var
   Gender: TGender;
@@ -27,8 +26,8 @@ Begin
 End;
 
 Procedure DisplayDays();
-// Type
-//   Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+Type
+  Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
 Var
   Day, Min, Max: Days;
 Begin
@@ -45,8 +44,12 @@ Begin
 End;
 
 Begin
-  // should not work!
-  I := Female;
+  // // should not work!
+  // I := Female;
+  // WriteLn('I = ', I);
+  // should work!
+  I := Ord(Female);
+  WriteLn('I = ', I);
   // RPG Character
   Gender := Other;
   Ability := Wisdom;

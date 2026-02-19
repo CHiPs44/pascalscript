@@ -76,13 +76,73 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
 }
 
 /**
+ * Visit constant expression:
+ *      INTEGER_VALUE | UNSIGNED_VALUE | CHAR_VALUE | REAL_VALUE | BOOLEAN_VALUE | IDENTIFIER
+ * Next steps:
+ *      | STRING_VALUE
+ *      | NIL
+ *      | CONSTANT_EXPRESSION
+ */
+bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *constant)
+{
+    VISIT_BEGIN("CONSTANT_EXPRESSION", "");
+
+    ps_identifier identifier = {0};
+    ps_symbol *symbol = NULL;
+
+    switch (lexer->current_token.type)
+    {
+    case PS_TOKEN_INTEGER_VALUE:
+        constant->type = &ps_system_integer;
+        constant->data.i = lexer->current_token.value.i;
+        break;
+    case PS_TOKEN_UNSIGNED_VALUE:
+        constant->type = &ps_system_unsigned;
+        constant->data.u = lexer->current_token.value.u;
+        break;
+    case PS_TOKEN_CHAR_VALUE:
+        constant->type = &ps_system_char;
+        constant->data.c = lexer->current_token.value.c;
+        break;
+    case PS_TOKEN_BOOLEAN_VALUE:
+        constant->type = &ps_system_boolean;
+        constant->data.b = lexer->current_token.value.b;
+        break;
+    // case PS_TOKEN_STRING_VALUE:
+    //     constant->type = &ps_system_string;
+    //     constant->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+    //     if (constant->data.s == NULL)
+    //     {
+    //         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+    //         TRACE_ERROR("STRING_VALUE");
+    //     }
+    //     break;
+    case PS_TOKEN_IDENTIFIER:
+        COPY_IDENTIFIER(identifier);
+        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
+        constant->type = &ps_system_none;
+        constant->data.v = NULL;
+        if (!ps_interpreter_copy_value(interpreter, symbol->value, constant))
+            TRACE_ERROR("COPY");
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+    }
+    READ_NEXT_TOKEN;
+
+    VISIT_END("OK");
+}
+
+/**
  * @details
  *  Visit type reference, for now, only base types:
  *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
- *      | 'STRING'
- *      | IDENTIFIER
- *  Next steps:
  *      | 'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
+ *      | IDENTIFIER
  *      | ENUMERATION =   '(' IDENTIFIER [ ',' IDENTIFIER ]* ')'
  *        Examples:
  *          TGender = (Male, Female, Other)
@@ -98,6 +158,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
  *          WeekEnd = Saturday..Sunday
  *          UppercaseLetters = 'A'..'Z'
  *        LOW_OR_HIGH =   UNSIGNED | INTEGER | ORDINAL_CONSTANT_IDENTIFIER
+ *  Next steps:
  *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  *        Examples:
  *          CheckerBoard = Array [1..8, 1..8] Of Boolean
@@ -139,11 +200,9 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 {
     VISIT_BEGIN("TYPE_REFERENCE", "");
 
-    // ps_unsigned len = 0;
     ps_symbol *symbol = NULL;
-    // ps_value_data data = {.t = ps_system_none.value->data.t};
-    // ps_type_definition *type_def = NULL;
     bool advance = true;
+    ssize_t len = 0;
 
     *type_symbol = NULL;
     switch (lexer->current_token.type)
@@ -169,34 +228,32 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         advance = false;
         if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
         {
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
-            // READ_NEXT_TOKEN;
-            // if (lexer->current_token.type == PS_TOKEN_UNSIGNED_VALUE)
-            // {
-            //     // String[123]
-            //     len = lexer->current_token.value.u;
-            // }
-            // else if (lexer->current_token.type == PS_TOKEN_IDENTIFIER)
-            // {
-            //     // String[MY_CONSTANT]
-            //     symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
-            //     if (symbol == NULL)
-            //         RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
-            //     if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
-            //         RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
-            //     if (symbol->value->type != &ps_system_unsigned ||
-            //         symbol->value->type != &ps_system_integer || symbol->value->data.i <= 0)
-            //         RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED);
-            //     len = symbol->value->type != &ps_system_unsigned ? symbol->value->data.u
-            //                                                                   : symbol->value->data.i;
-            // }
-            // else
-            //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-            // if (len < 1 || len > PS_STRING_MAX_LEN)
-            //     RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
-            // // data.t.def.s.length = len;
-            // // type_def
-            // // value = ps_value_alloc(&ps_system_type_def, data);
+            // String[MY_CONSTANT]
+            READ_NEXT_TOKEN;
+            ps_value constant = {.type = &ps_system_none, .data.v = NULL};
+            if (!ps_visit_constant_expression(interpreter, mode, &constant))
+                TRACE_ERROR("CONSTANT_EXPRESSION");
+            switch (constant.type->value->data.t->base)
+            {
+            case PS_TYPE_INTEGER:
+                len = constant.data.i;
+                break;
+            case PS_TYPE_UNSIGNED:
+                len = constant.data.u;
+                break;
+            default:
+                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
+            }
+            if (len < 1 || len > PS_STRING_MAX_LEN)
+                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
+            ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_STRING, PS_TYPE_STRING);
+            if (type_def == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            type_def->def.s.max = (ps_string_len)len;
+            ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+            ps_identifier name = {0};
+            snprintf(name, sizeof(name) - 1, "#STRING_%d", (int)len);
+            *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &name, value);
         }
         else
         {
@@ -286,8 +343,8 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             RETURN_ERROR(PS_ERROR_OVERFLOW);
         if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-        // fprintf(stderr, " ENUM VALUE #%d '%*s'\n", count+1, -(int)PS_IDENTIFIER_LEN, lexer->current_token.value.identifier);
-        // Check that enumeration value does not already exist as symbol
+        // Check that enumeration value does not already exist locally (in the same enumeration) or globally (in the
+        // symbol table)
         if (ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true) != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         // Create a new symbol for the enumeration value

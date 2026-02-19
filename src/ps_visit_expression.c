@@ -495,7 +495,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         }
         else if (function == &ps_system_function_low || function == &ps_system_function_high)
         {
-            // Low and High functions have one "symbol" argument, i.e. Low(Days) or High(Days)
+            // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
@@ -505,24 +505,13 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-            // fprintf(stderr, "%cINFO\tFUNCTION_CALL: '%s' argument is symbol '%s' of kind '%s'\n",
-            //         mode == MODE_EXEC ? '*' : ' ', function->name, symbol->name,
-            //         symbol->kind == PS_SYMBOL_KIND_AUTO              ? "AUTO"
-            //         : symbol->kind == PS_SYMBOL_KIND_CONSTANT        ? "CONSTANT"
-            //         : symbol->kind == PS_SYMBOL_KIND_VARIABLE        ? "VARIABLE"
-            //         : symbol->kind == PS_SYMBOL_KIND_FUNCTION        ? "FUNCTION"
-            //         : symbol->kind == PS_SYMBOL_KIND_PROCEDURE       ? "PROCEDURE"
-            //         : symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION ? "TYPE_DEFINITION"
-            //         : symbol->kind == PS_SYMBOL_KIND_PROGRAM         ? "PROGRAM"
-            //         : symbol->kind == PS_SYMBOL_KIND_UNIT            ? "UNIT"
-            //                                                          : "???");
             READ_NEXT_TOKEN;
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
             symbol_arg = true;
-            fprintf(stderr, "%cINFO\tFUNCTION_CALL: '%s' argument is symbol '%s' of type '%s'\n",
-                    mode == MODE_EXEC ? '*' : ' ', function->name, symbol->name,
-                    ps_type_definition_get_name(symbol->value->type->value->data.t));
+            // fprintf(stderr, "%cINFO\tFUNCTION_CALL: '%s' argument is symbol '%s' of type '%s'\n",
+            //         mode == MODE_EXEC ? '*' : ' ', function->name, symbol->name,
+            //         ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
         else if (function == &ps_system_function_power)
         {
@@ -531,11 +520,13 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, mode, &arg1))
-                TRACE_ERROR("FIRST_PARAMETER");
+                TRACE_ERROR("ARG1");
+            // TODO? check that arg1 is integer, unsigned or real?
             EXPECT_TOKEN(PS_TOKEN_COMMA);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, mode, &arg2))
-                TRACE_ERROR("SECOND_PARAMETER");
+                TRACE_ERROR("ARG2");
+            // TODO? check that arg2 is integer, unsigned or real?
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
         }
@@ -546,7 +537,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN;
             if (!ps_visit_expression(interpreter, mode, &arg1))
-                TRACE_ERROR("PARAMETER");
+                TRACE_ERROR("ARG");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN;
         }

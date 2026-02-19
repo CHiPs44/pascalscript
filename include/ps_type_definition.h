@@ -40,10 +40,11 @@ extern "C"
         ps_unsigned min, max;
     } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
 
+    typedef uint8_t ps_enum_value;
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        uint8_t min, max;      /** @brief min and max values in the enumeration for the subrange */
+        ps_enum_value min, max; /** @brief min and max values in the enumeration for the subrange */
     } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
@@ -68,12 +69,18 @@ extern "C"
     } __attribute__((__packed__)) ps_type_definition_enum;
 
     /** @brief Sets are stored in 32 bytes as a 256 bits field,
-     *         each value of referenced enum is corresponding
-     *         to 2^ord(enum_value)
-     *         Set Of Char is special case */
+     *         each value of referenced enumeration or Char is corresponding 
+     *         to 2^Ord(enum_value or char_code)
+     * @details For example, for a set of (One, Two, Three):
+     *  - empty set is 0
+     *  - set with One and Three is <253 zeroes>101 (5 in decimal)
+     *  - set with Two only is <253 zeroes>010 (2 in decimal)
+     *  - full set is <253 zeroes>111 (7 in decimal)
+     *  NB: Set Of Char is a special case, as Char is not an enumeration, but the principle is the same
+     */
     typedef struct s_ps_type_definition_set
     {
-        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the set values, NULL for Set Of Char */
+        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the set values */
     } __attribute__((__packed__)) ps_type_definition_set;
 
     /** @brief Pointer type is stored in a symbol */
@@ -136,7 +143,7 @@ extern "C"
             ps_type_definition_array a;
             ps_type_definition_record r;
             ps_type_definition_file f;
-        } def; /** @brief  */
+        } def;
     } /*__attribute__((__packed__))*/ ps_type_definition;
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
@@ -145,13 +152,16 @@ extern "C"
 
     void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
 
-    ps_type_definition *ps_type_definition_create(ps_value_type type, ps_value_type base);
-    ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
-    ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **values);
-    ps_type_definition *ps_type_definition_create_subrange_char(ps_integer min, ps_integer max);
-    ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);
+    // clang-format off
+    ps_type_definition *ps_type_definition_create                  (ps_value_type type, ps_value_type base);
+    ps_type_definition *ps_type_definition_free                    (ps_type_definition *type_def);
+    ps_type_definition *ps_type_definition_create_string           (ps_string_len max);
+    ps_type_definition *ps_type_definition_create_enum             (uint8_t count, ps_symbol **values);
+    ps_type_definition *ps_type_definition_create_subrange_char    (ps_char     min, ps_char     max);
+    ps_type_definition *ps_type_definition_create_subrange_integer (ps_integer  min, ps_integer  max);
     ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max);
-    ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, uint8_t min, uint8_t max);
+    ps_type_definition *ps_type_definition_create_subrange_enum    (ps_symbol *symbol_enum, ps_enum_value min, ps_enum_value max);
+    // clang-format on
 
 #ifdef __cplusplus
 }

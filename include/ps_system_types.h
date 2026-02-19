@@ -44,7 +44,7 @@ extern "C"
     } __attribute__((__packed__)) ps_string;
 
     // typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
-    typedef uint8_t ps_set[8]; /** @brief Set */
+    typedef uint8_t ps_set[32]; /** @brief Set */
 
     typedef struct s_ps_file
     {
@@ -56,14 +56,18 @@ extern "C"
     /** @brief  */
     typedef void *ps_pointer;
 
-#define PS_INTEGER_SIZE sizeof(ps_integer)
-#define PS_UNSIGNED_SIZE sizeof(ps_unsigned)
-#define PS_REAL_SIZE sizeof(ps_real)
-#define PS_BOOLEAN_SIZE sizeof(ps_boolean)
-#define PS_CHAR_SIZE sizeof(ps_char)
-#define PS_STRING_SIZE sizeof(ps_string)
-#define PS_FILE_SIZE sizeof(ps_file)
-#define PS_POINTER_SIZE sizeof(ps_pointer)
+    // clang-format off
+
+    #define PS_INTEGER_SIZE  sizeof(ps_integer )
+    #define PS_UNSIGNED_SIZE sizeof(ps_unsigned)
+    #define PS_REAL_SIZE     sizeof(ps_real    )
+    #define PS_BOOLEAN_SIZE  sizeof(ps_boolean )
+    #define PS_CHAR_SIZE     sizeof(ps_char    )
+    #define PS_STRING_SIZE   sizeof(ps_string  )
+    #define PS_FILE_SIZE     sizeof(ps_file    )
+    #define PS_POINTER_SIZE  sizeof(ps_pointer )
+
+    // clang-format on
 
 #ifdef __cplusplus
 }
