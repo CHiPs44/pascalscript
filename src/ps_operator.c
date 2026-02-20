@@ -33,6 +33,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
         switch (token_type)
         {
         case PS_TOKEN_NOT:
+            // fprintf(stderr, "I/NOT %d = %d\n", value->data.i, ~value->data.i);
             result->data.i = ~value->data.i;
             break;
         case PS_TOKEN_MINUS:
@@ -48,6 +49,7 @@ bool ps_function_unary_op(ps_interpreter *interpreter, ps_value *value, ps_value
         switch (token_type)
         {
         case PS_TOKEN_NOT:
+            // fprintf(stderr, "U/NOT %u = %u\n", value->data.u, ~value->data.u);
             result->data.u = ~value->data.u;
             break;
         default:
@@ -195,7 +197,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         NUMBER_CASE(PS_TOKEN_OR << 8 | UI, u, i, |, i, PS_TYPE_INTEGER)
         NUMBER_CASE(PS_TOKEN_OR << 8 | UU, u, u, |, u, PS_TYPE_UNSIGNED)
         // XOR.U/I/B
-    case PS_TOKEN_XOR << 8 | BB:
+    case PS_TOKEN_XOR << 8 | BB: // C does not have a logical exclusive or operator, so we use a xor b = !a != !b
         result->data.b = !(a->data.b) != !(b->data.b);
         r = PS_TYPE_BOOLEAN;
         break;
@@ -222,6 +224,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         s->len = 1;
         result->data.s = ps_string_concat(s, b->data.s, PS_STRING_MAX_LEN);
         ps_string_free(s);
+        if (result->data.s == NULL)
+            return false;
         r = PS_TYPE_STRING;
         break;
     case PS_TOKEN_PLUS << 8 | SC: // string + char => string
@@ -232,6 +236,8 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         s->len = 1;
         result->data.s = ps_string_concat(a->data.s, s, PS_STRING_MAX_LEN);
         ps_string_free(s);
+        if (result->data.s == NULL)
+            return false;
         r = PS_TYPE_STRING;
         break;
     case PS_TOKEN_PLUS << 8 | SS: // string + string => string
@@ -242,31 +248,34 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         r = PS_TYPE_STRING;
         break;
         NUMBER_CASE(PS_TOKEN_PLUS << 8 | II, i, i, +, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_PLUS << 8 | IU, i, u, +, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_PLUS << 8 | UI, u, i, +, u, PS_TYPE_UNSIGNED)
-        NUMBER_CASE(PS_TOKEN_PLUS << 8 | UU, u, u, +, u, PS_TYPE_UNSIGNED)
         NUMBER_CASE(PS_TOKEN_PLUS << 8 | IR, i, r, +, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_PLUS << 8 | IU, i, u, +, i, PS_TYPE_INTEGER)
         NUMBER_CASE(PS_TOKEN_PLUS << 8 | RI, r, i, +, r, PS_TYPE_REAL)
         NUMBER_CASE(PS_TOKEN_PLUS << 8 | RR, r, r, +, r, PS_TYPE_REAL)
         NUMBER_CASE(PS_TOKEN_PLUS << 8 | RU, r, u, +, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_PLUS << 8 | UI, u, i, +, u, PS_TYPE_UNSIGNED)
+        NUMBER_CASE(PS_TOKEN_PLUS << 8 | UR, u, r, +, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_PLUS << 8 | UU, u, u, +, u, PS_TYPE_UNSIGNED)
         // SUB.I/U/R
         NUMBER_CASE(PS_TOKEN_MINUS << 8 | II, i, i, -, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | IU, i, u, -, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | UI, u, i, -, u, PS_TYPE_UNSIGNED)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RR, r, r, -, r, PS_TYPE_REAL)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RI, r, i, -, r, PS_TYPE_REAL)
-        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RU, r, u, -, r, PS_TYPE_REAL)
         NUMBER_CASE(PS_TOKEN_MINUS << 8 | IR, i, r, -, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | IU, i, u, -, i, PS_TYPE_INTEGER)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RI, r, i, -, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RR, r, r, -, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | RU, r, u, -, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | UI, u, i, -, u, PS_TYPE_UNSIGNED)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | UR, u, r, -, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_MINUS << 8 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
         // MUL.I/U/R
         NUMBER_CASE(PS_TOKEN_STAR << 8 | II, i, i, *, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | IU, i, u, *, i, PS_TYPE_INTEGER)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | UI, u, i, *, u, PS_TYPE_UNSIGNED)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | UU, u, u, *, u, PS_TYPE_UNSIGNED)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | RR, r, r, *, r, PS_TYPE_REAL)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | RI, r, i, *, r, PS_TYPE_REAL)
-        NUMBER_CASE(PS_TOKEN_STAR << 8 | RU, r, u, *, r, PS_TYPE_REAL)
         NUMBER_CASE(PS_TOKEN_STAR << 8 | IR, i, r, *, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | IU, i, u, *, i, PS_TYPE_INTEGER)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | RI, r, i, *, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | RR, r, r, *, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | RU, r, u, *, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | UI, u, i, *, u, PS_TYPE_UNSIGNED)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | UR, u, r, *, r, PS_TYPE_REAL)
+        NUMBER_CASE(PS_TOKEN_STAR << 8 | UU, u, u, *, u, PS_TYPE_UNSIGNED)
         // DIV.I/U
         NUMBER_CASE_DIV_MOD(PS_TOKEN_DIV << 8 | II, i, i, /, i, PS_TYPE_INTEGER)
         NUMBER_CASE_DIV_MOD(PS_TOKEN_DIV << 8 | IU, i, u, /, i, PS_TYPE_INTEGER)
@@ -274,14 +283,14 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         NUMBER_CASE_DIV_MOD(PS_TOKEN_DIV << 8 | UU, u, u, /, u, PS_TYPE_UNSIGNED)
         // DIV.R
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | II, i, i)
-        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | IU, i, u)
-        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | UI, u, i)
-        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | UU, u, u)
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | IR, i, i)
+        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | IU, i, u)
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | RI, r, i)
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | RR, r, r)
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | RU, r, u)
+        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | UI, u, i)
         NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | UR, u, r)
+        NUMBER_CASE_DIV_REAL(PS_TOKEN_SLASH << 8 | UU, u, u)
         // MOD.I/U
         NUMBER_CASE_DIV_MOD(PS_TOKEN_MOD << 8 | II, i, i, %, i, PS_TYPE_INTEGER)
         NUMBER_CASE_DIV_MOD(PS_TOKEN_MOD << 8 | IU, i, u, %, i, PS_TYPE_INTEGER)
@@ -318,7 +327,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, ps_value *a, ps_value *b
         // LT.I/U/R/C/S
         NUMBER_CASE_SIGNED(PS_TOKEN_LT << 8 | IU, i, u, <, b, PS_TYPE_BOOLEAN, ps_integer)
         NUMBER_CASE_SIGNED(PS_TOKEN_LT << 8 | UI, u, i, <, b, PS_TYPE_BOOLEAN, ps_unsigned)
-        NUMBER_CASE(PS_TOKEN_LT << 8 | CC, c, r, <, b, PS_TYPE_BOOLEAN)
+        NUMBER_CASE(PS_TOKEN_LT << 8 | CC, c, c, <, b, PS_TYPE_BOOLEAN)
         NUMBER_CASE(PS_TOKEN_LT << 8 | II, i, i, <, b, PS_TYPE_BOOLEAN)
         NUMBER_CASE(PS_TOKEN_LT << 8 | IR, i, r, <, b, PS_TYPE_BOOLEAN)
         NUMBER_CASE(PS_TOKEN_LT << 8 | RI, r, i, <, b, PS_TYPE_BOOLEAN)

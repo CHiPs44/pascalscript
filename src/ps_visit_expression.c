@@ -248,7 +248,9 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         PS_TOKEN_SLASH,
         PS_TOKEN_DIV,
         PS_TOKEN_MOD,
-        // PS_TOKEN_AND,  PS_TOKEN_SHL,   PS_TOKEN_SHR
+        // PS_TOKEN_AND,
+        PS_TOKEN_SHL,
+        PS_TOKEN_SHR
     };
     ps_value left = {.type = result->type, .data.v = NULL};
     ps_value right = {.type = result->type, .data.v = NULL};
