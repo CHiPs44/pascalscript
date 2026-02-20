@@ -4,7 +4,7 @@ Type
   TGender = (Male, Female, Other);
   TAbilities = (Strength, Intelligence, Wisdom, Dexterity, Constitution, Charisma);
   TCharacterClass = (Fighter, Wizard, Cleric, Rogue);
-  TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, Half_Orc);
+  TCharacterRace = (Human, Elf, Dwarf, Halfling, Gnome, HalfOrc);
   TDie = (D4, D6, D8, D10, D12, D20, D100);
 
 Var

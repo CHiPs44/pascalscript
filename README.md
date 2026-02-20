@@ -252,7 +252,7 @@ Remarks:
 - Comments will be paired, beginning with `{` means we go until `}`, no mix with `(*` and `*)`, so they can be imbricated on one level
 - `//` one line comments came essentially for free when digging an already made set of rules for the lexical analyzer
 
-### Step 1b: improvements to this first sight:
+### Step 1b: improvements to this first sight
 
 - `var a, b, c: integer;` should be implemented
 - `Write` variant to output without a line break
@@ -498,6 +498,20 @@ Or should we have a simpler "interpreter status" like:
 
 ## Other notes
 
+### CMake, GCC & CLang
+
+`CMakeLists.txt` now supports use of either GCC (default) or CLang to compile PascalScript.
+
+To initialize, use:
+
+- `cmake -DCMAKE_C_COMPILER=gcc -B build-gcc` or
+- `cmake -DCMAKE_C_COMPILER=clang -B build-clang`
+
+Compile with:
+
+- `make -C build-gcc -j$(nproc)`
+- `make -C build-clang -j$(nproc)`
+
 ### Tests in 32 bits mode and 3M of RAM
 
 Tests (folder `test`) are now intended to compile as 32 bits executable so we're not too far of our RP2040 target.
@@ -569,5 +583,6 @@ Each file should contains this header, this example is for C:
 ```
 
 NB:
+
 - year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
 - some files coming from other sources like Tao Yue's examples from his site and Free Pascal Wiki have their own license.

@@ -459,7 +459,8 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
     switch (value->type->value->data.t->type)
     {
     case PS_TYPE_REAL:
-        if (interpreter->range_check && (value->data.r < PS_INTEGER_MIN || value->data.r > PS_INTEGER_MAX))
+        if (interpreter->range_check && (value->data.r < (ps_real)PS_INTEGER_MIN ||
+            value->data.r > (ps_real)PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);

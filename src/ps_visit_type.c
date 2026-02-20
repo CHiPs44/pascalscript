@@ -345,9 +345,9 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
 {
     VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "CHAR");
 
-    ps_type_definition_subrange_char c;
-    ps_type_definition_subrange_integer i;
-    ps_type_definition_subrange_unsigned u;
+    ps_type_definition_subrange_char c = {0};
+    ps_type_definition_subrange_integer i = {0};
+    ps_type_definition_subrange_unsigned u = {0};
     // ps_type_definition_subrange_enum e;
 
     // Parse min value for subrange
@@ -430,15 +430,15 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     {
     case PS_TYPE_CHAR:
         type_def = ps_type_definition_create_subrange_char(c.min, c.max);
-        snprintf(name, sizeof(name) - 1, "#SUBRANGE_CHAR_%d_%d", c.min, c.max);
+        snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%d_%d", c.min, c.max);
         break;
     case PS_TYPE_INTEGER:
         type_def = ps_type_definition_create_subrange_integer(i.min, i.max);
-        snprintf(name, sizeof(name) - 1, "#SUBRANGE_INTEGER_%" PS_INTEGER_FMT_10 "_%" PS_INTEGER_FMT_10, i.min, i.max);
+        snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%" PS_INTEGER_FMT_10 "_%" PS_INTEGER_FMT_10, i.min, i.max);
         break;
     case PS_TYPE_UNSIGNED:
         type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
-        snprintf(name, sizeof(name) - 1, "#SUBRANGE_UNSIGNED_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min,
+        snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min,
                  u.max);
         break;
     default:

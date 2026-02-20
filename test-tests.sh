@@ -6,22 +6,23 @@ REPORT_FILE="./test/report.txt"
 OK=0
 KO=0
 TOTAL=0
-printf "%-47s %15s %-10s\n" "Test" "ms" "Result" >> "$REPORT_FILE"
+printf "%-7s %-40s %15s %s\n" "CC" "Test" "us" "Result" >> "$REPORT_FILE"
 for TEST in ./test/test_*.c; do
     BASENAME=$(basename "${TEST}")
     TESTNAME="${BASENAME%.*}"
     for CC in gcc clang; do
         OUT_FILE="./test/${TESTNAME}.${CC}.out"
         ERR_FILE="./test/${TESTNAME}.${CC}.err"
-        echo -n "Executing ${TESTNAME} with ${CC}... "
+        echo -n "Compiling ${TESTNAME} with ${CC}... "
         ${CC} -m32 -std=c17 -Wall -I./include -Wall -Wextra -Wpedantic -ggdb -O3 -o ./test/test ${TEST} -lm  > "$OUT_FILE" 2> "$ERR_FILE"
         if [[ $? -ne 0 ]]; then
-            printf "%-47s %15s %-10s\n" "${CC}:${TESTNAME}" "N/A" "KO (compile error)"  >> "$REPORT_FILE"
+            printf "%-7s %-40s %15s %s\n" "${CC}" "${TESTNAME}" "N/A" "KO (compile error)"  >> "$REPORT_FILE"
             KO=$((KO + 1))
             echo "KO (compile error)"
             TOTAL=$((TOTAL + 1))
             continue
         fi
+        echo -n "Executing ${TESTNAME} compiled with ${CC}... "
         START=$(date +%s%N)
         ./test/test > "$OUT_FILE" 2> "$ERR_FILE"
         RESULT=$?
@@ -29,11 +30,11 @@ for TEST in ./test/test_*.c; do
         rm -f ./test/test
         DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
         if [[ ${RESULT} -eq 0 ]]; then
-            printf "%-47s %15s %s\n" "${CC}:${TESTNAME}" "${DURATION}" "OK"  >> "$REPORT_FILE"
+            printf "%-7s %-40s %15s %s\n" "${CC}" "${TESTNAME}" "${DURATION}" "OK"  >> "$REPORT_FILE"
             OK=$((OK + 1))
             echo "OK"
         else
-            printf "%-47s %15s %-10s\n" "${CC}:${TESTNAME}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
+            printf "%-7s %-40s %15s %s\n" "${CC}" "${TESTNAME}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
             KO=$((KO + 1))
             echo "KO"
         fi
