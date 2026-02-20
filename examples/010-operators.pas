@@ -14,6 +14,13 @@ Var
     b1, b2, b3: Boolean;
 
 Begin
+    WriteLn('TODO addition below should display $FFFFFFFF in decimal, but it displays -1 because of the signed/unsigned mismatch somewhere...');
+    WriteLn(MaxInt, ' ', $55555555, '+', $AAAAAAAA, '=', $55555555 + $AAAAAAAA, ' ', $FFFFFFFF, ' ', MaxUInt);
+    WriteLn();
+
+    WriteLn('PascalScript Operators Demo');
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn();
     WriteLn('* Assignment operator');
     k := 42;
     WriteLn('  - Integer:                        = ', k:12);
@@ -150,4 +157,8 @@ Begin
     x := 3.5;
     z := (i + j) * x / u - k; // Mixed expression with parentheses
     WriteLn('  - Complex expression:    (10 + 3) * 3.5 / 5 - 42 = ', z:12:8);
+
+    WriteLn();
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('OK');
 END.
