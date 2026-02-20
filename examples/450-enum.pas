@@ -44,10 +44,10 @@ Begin
 End;
 
 Begin
-  // // should not work!
-  // I := Female;
-  // WriteLn('I = ', I);
-  // should work!
+  // should not work! (and does not with FPC) because enumeration values are not implicitly convertible to integers
+  I := Female;
+  WriteLn('I = ', I);
+  // should work! and does with FPC because Ord() is used to explicitly convert the enumeration value to an integer
   I := Ord(Female);
   WriteLn('I = ', I);
   // RPG Character

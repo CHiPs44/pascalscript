@@ -43,7 +43,7 @@ extern "C"
 
     typedef struct s_ps_interpreter
     {
-        ps_parser *parser;           /** @brief Parser with lexer with source code buffer                    */
+        ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)              */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
@@ -93,6 +93,11 @@ extern "C"
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
+
+    /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
+    bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);
+    /** @brief Check if current token or value is an ordinal (integer, unsigned, char or integer / unsigned / char subrange) */
+    bool ps_interpreter_is_ordinal(ps_interpreter *interpreter, ps_value *value);
 
     /**
      *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa,

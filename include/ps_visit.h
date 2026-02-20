@@ -44,6 +44,7 @@ extern "C"
     bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
     bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
     bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result);
+    bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *constant);
 
     /* src/ps_visit_statement.c */
     bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_interpreter_mode mode);

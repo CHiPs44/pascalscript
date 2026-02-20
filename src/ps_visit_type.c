@@ -76,68 +76,6 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
 }
 
 /**
- * Visit constant expression:
- *      INTEGER_VALUE | UNSIGNED_VALUE | CHAR_VALUE | REAL_VALUE | BOOLEAN_VALUE | IDENTIFIER
- * Next steps:
- *      | STRING_VALUE
- *      | NIL
- *      | CONSTANT_EXPRESSION
- */
-bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *constant)
-{
-    VISIT_BEGIN("CONSTANT_EXPRESSION", "");
-
-    ps_identifier identifier = {0};
-    ps_symbol *symbol = NULL;
-
-    switch (lexer->current_token.type)
-    {
-    case PS_TOKEN_INTEGER_VALUE:
-        constant->type = &ps_system_integer;
-        constant->data.i = lexer->current_token.value.i;
-        break;
-    case PS_TOKEN_UNSIGNED_VALUE:
-        constant->type = &ps_system_unsigned;
-        constant->data.u = lexer->current_token.value.u;
-        break;
-    case PS_TOKEN_CHAR_VALUE:
-        constant->type = &ps_system_char;
-        constant->data.c = lexer->current_token.value.c;
-        break;
-    case PS_TOKEN_BOOLEAN_VALUE:
-        constant->type = &ps_system_boolean;
-        constant->data.b = lexer->current_token.value.b;
-        break;
-    // case PS_TOKEN_STRING_VALUE:
-    //     constant->type = &ps_system_string;
-    //     constant->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
-    //     if (constant->data.s == NULL)
-    //     {
-    //         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-    //         TRACE_ERROR("STRING_VALUE");
-    //     }
-    //     break;
-    case PS_TOKEN_IDENTIFIER:
-        COPY_IDENTIFIER(identifier);
-        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-        if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
-            RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
-        constant->type = &ps_system_none;
-        constant->data.v = NULL;
-        if (!ps_interpreter_copy_value(interpreter, symbol->value, constant))
-            TRACE_ERROR("COPY");
-        break;
-    default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    }
-    READ_NEXT_TOKEN;
-
-    VISIT_END("OK");
-}
-
-/**
  * @details
  *  Visit type reference, for now, only base types:
  *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
