@@ -33,7 +33,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
         c = ps_buffer_peek_char(lexer->buffer);                                                                        \
     }
 
-ps_lexer *ps_lexer_alloc()
+ps_lexer *ps_lexer_alloc(void)
 {
     ps_lexer *lexer = ps_memory_malloc(sizeof(ps_lexer));
     if (lexer == NULL)

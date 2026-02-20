@@ -104,13 +104,19 @@ ps_token_type quotes_expected[] = {
     // EOF
 };
 
-void test_lexer(char *name, char *source, ps_token_type *expected, int count)
+void test_lexer(char *name, char *source, const ps_token_type *expected, int count)
 {
     int index;
 
     printf("TEST LEXER: INIT %s\n", name);
-    lexer = ps_lexer_alloc(NULL);
-    ps_buffer_load_string(lexer->buffer, source, strlen(source));
+    lexer = ps_lexer_alloc();
+    printf("TEST LEXER: LOAD %s\n", name);
+    if (!ps_buffer_load_string(lexer->buffer, source, strlen(source)))
+    {
+        printf("TEST LEXER: ERROR %d %s / %d %s\n", lexer->error, ps_error_get_message(lexer->error),
+               lexer->buffer->error, ps_error_get_message(lexer->buffer->error));
+        return;
+    }
     ps_buffer_dump(stdout, lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
     printf("TEST LEXER: LOOP ON %s\n", name);

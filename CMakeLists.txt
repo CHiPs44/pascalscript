@@ -1,4 +1,12 @@
 cmake_minimum_required(VERSION 3.10.0)
+
+# Allow users to specify compiler (gcc or clang)
+# Usage: cmake -DCMAKE_C_COMPILER=gcc .. or cmake -DCMAKE_C_COMPILER=clang ..
+# Default compiler is gcc if not specified
+if(NOT CMAKE_C_COMPILER)
+  set(CMAKE_C_COMPILER gcc)
+endif()
+
 project(pascalscript VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 17)

@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,7 +17,7 @@
 #include "ps_memory.h"
 #include "ps_readall.h"
 
-ps_buffer *ps_buffer_alloc()
+ps_buffer *ps_buffer_alloc(void)
 {
     ps_buffer *buffer = ps_memory_malloc(sizeof(ps_buffer));
     if (buffer == NULL)
@@ -52,7 +53,7 @@ void ps_buffer_reset(ps_buffer *buffer)
     buffer->error = PS_ERROR_NONE;
 }
 
-char *ps_buffer_show_error(ps_buffer *buffer)
+char *ps_buffer_show_error(const ps_buffer *buffer)
 {
     static char error_message[128];
     snprintf(error_message, sizeof(error_message) - 1, "BUFFER: %d %s, line %d, column %d", buffer->error,
@@ -80,7 +81,7 @@ char *ps_buffer_debug_char(char c)
     return tmp;
 }
 
-void ps_buffer_debug(FILE *output, ps_buffer *buffer, char *message)
+void ps_buffer_debug(FILE *output, const ps_buffer *buffer, char *message)
 {
     if (output == NULL)
         output = stderr;
@@ -92,10 +93,11 @@ void ps_buffer_debug(FILE *output, ps_buffer *buffer, char *message)
 bool ps_buffer_scan_text(ps_buffer *buffer)
 {
     int line = 0;
-    int column = 0;
+    // int column = 0;
     char *text = buffer->text;
     char *start = text;
-    char current_char, previous_char;
+    char current_char;
+    char previous_char;
     // Count lines
     buffer->line_count = 0;
     current_char = *text++;
@@ -159,7 +161,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
     // Find and memorize line starts
     // should work for Macintosh CR only files and DOS/Windows/Internet CR+LF files.
     text = buffer->text;
-    int line_length;
+    ptrdiff_t line_length;
     bool stop = false;
     while (!stop)
     {
@@ -180,9 +182,8 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             }
             buffer->line_starts[line] = start;
             buffer->line_lengths[line] = line_length;
-            // fprintf(stderr, "%05d %05d %s\n", line, buffer->line_lengths[line], buffer->line_starts[line]);
             line += 1;
-            column = 0;
+            // column = 0;
             text += 1;
             // Skip LF if CR encountered
             if (current_char == '\r' && *text == '\n')
@@ -213,7 +214,7 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
             stop = true;
             break;
         default:
-            column += 1;
+            // column += 1;
             text += 1;
             break;
         }
@@ -270,9 +271,6 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
     case PS_READALL_NOMEM:
         buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
-    // case PS_READALL_ERROR:
-    //     buffer->error = PS_ERROR_READING_FILE;
-    //     return false;
     default:
         buffer->error = PS_ERROR_READING_FILE;
         return false;
@@ -282,7 +280,12 @@ bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
 bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
 {
     buffer->text = text;
-    buffer->length = length;
+    if (length > PS_BUFFER_MAX_SIZE)
+    {
+        buffer->error = PS_ERROR_OVERFLOW;
+        return false;
+    }
+    buffer->length = (uint16_t)length;
     if (buffer->line_starts != NULL)
     {
         ps_memory_free(buffer->line_starts);
@@ -297,7 +300,7 @@ bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
     return ps_buffer_scan_text(buffer);
 }
 
-int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
+int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, uint16_t line_count)
 {
     char line[80 + 1];
     int length;
@@ -331,18 +334,19 @@ int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t
     return 16;
 }
 
-char ps_buffer_peek_char(ps_buffer *buffer)
+char ps_buffer_peek_char(const ps_buffer *buffer)
 {
     return buffer->error == PS_ERROR_NONE ? buffer->current_char : '\0';
 }
 
-char ps_buffer_peek_next_char(ps_buffer *buffer)
+char ps_buffer_peek_next_char(const ps_buffer *buffer)
 {
     return buffer->error == PS_ERROR_NONE ? buffer->next_char : '\0';
 }
 
 bool ps_buffer_read_next_char(ps_buffer *buffer)
 {
+    // reset current and next char
     buffer->current_char = '\0';
     buffer->next_char = '\0';
     // already at end of buffer?

@@ -10,33 +10,35 @@ printf "%-47s %15s %-10s\n" "Test" "ms" "Result" >> "$REPORT_FILE"
 for TEST in ./test/test_*.c; do
     BASENAME=$(basename "${TEST}")
     TESTNAME="${BASENAME%.*}"
-    OUT_FILE="./test/${TESTNAME}.out"
-    ERR_FILE="./test/${TESTNAME}.err"
-    echo -n "Executing ${TESTNAME}... "
-    gcc -m32 -std=c17 -Wall -I./include -Wall -Wextra -Wpedantic -ggdb -O3 -o ./test/test ${TEST} -lm  > "$OUT_FILE" 2> "$ERR_FILE"
-    if [[ $? -ne 0 ]]; then
-        printf "%-47s %15s %-10s\n" "${TESTNAME}" "N/A" "KO (compile error)"  >> "$REPORT_FILE"
-        KO=$((KO + 1))
-        echo "KO (compile error)"
+    for CC in gcc clang; do
+        OUT_FILE="./test/${TESTNAME}.${CC}.out"
+        ERR_FILE="./test/${TESTNAME}.${CC}.err"
+        echo -n "Executing ${TESTNAME} with ${CC}... "
+        ${CC} -m32 -std=c17 -Wall -I./include -Wall -Wextra -Wpedantic -ggdb -O3 -o ./test/test ${TEST} -lm  > "$OUT_FILE" 2> "$ERR_FILE"
+        if [[ $? -ne 0 ]]; then
+            printf "%-47s %15s %-10s\n" "${CC}:${TESTNAME}" "N/A" "KO (compile error)"  >> "$REPORT_FILE"
+            KO=$((KO + 1))
+            echo "KO (compile error)"
+            TOTAL=$((TOTAL + 1))
+            continue
+        fi
+        START=$(date +%s%N)
+        ./test/test > "$OUT_FILE" 2> "$ERR_FILE"
+        RESULT=$?
+        END=$(date +%s%N)
+        rm -f ./test/test
+        DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
+        if [[ ${RESULT} -eq 0 ]]; then
+            printf "%-47s %15s %s\n" "${CC}:${TESTNAME}" "${DURATION}" "OK"  >> "$REPORT_FILE"
+            OK=$((OK + 1))
+            echo "OK"
+        else
+            printf "%-47s %15s %-10s\n" "${CC}:${TESTNAME}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
+            KO=$((KO + 1))
+            echo "KO"
+        fi
         TOTAL=$((TOTAL + 1))
-        continue
-    fi
-    START=$(date +%s%N)
-    ./test/test > "$OUT_FILE" 2> "$ERR_FILE"
-    RESULT=$?
-    END=$(date +%s%N)
-    rm -f ./test/test
-    DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
-    if [[ ${RESULT} -eq 0 ]]; then
-        printf "%-47s %15s %s\n" "${TESTNAME}" "${DURATION}" "OK"  >> "$REPORT_FILE"
-        OK=$((OK + 1))
-        echo "OK"
-    else
-        printf "%-47s %15s %-10s\n" "${TESTNAME}" "${DURATION}" "KO (${RESULT})"  >> "$REPORT_FILE"
-        KO=$((KO + 1))
-        echo "KO"
-    fi
-    TOTAL=$((TOTAL + 1))
+    done
 done
 
 echo "Total: $TOTAL, OK $OK, KO $KO" >> "$REPORT_FILE"

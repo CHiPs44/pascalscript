@@ -50,7 +50,7 @@ extern "C"
 #define PS_BUFFER_SIZE sizeof(ps_buffer)
 
     /** @brief Initialize buffer */
-    ps_buffer *ps_buffer_alloc();
+    ps_buffer *ps_buffer_alloc(void);
 
     /** @brief Release buffer */
     ps_buffer *ps_buffer_free(ps_buffer *buffer);
@@ -59,7 +59,7 @@ extern "C"
     void ps_buffer_reset(ps_buffer *buffer);
 
     /** @brief Show error message */
-    char *ps_buffer_show_error(ps_buffer *buffer);
+    char *ps_buffer_show_error(const ps_buffer *buffer);
 
     /** @brief Scan source for line starts & lengths */
     bool ps_buffer_scan_text(ps_buffer *buffer);
@@ -71,19 +71,19 @@ extern "C"
     bool ps_buffer_load_string(ps_buffer *buffer, char *source, size_t length);
 
     /** @brief Dump content from given line for one "page", returning left margin */
-    int ps_buffer_dump(FILE *output, ps_buffer *buffer, uint16_t from_line, uint16_t line_count);
+    int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, uint16_t line_count);
 
     /** @brief Read next char of buffer */
     bool ps_buffer_read_next_char(ps_buffer *buffer);
 
     /** @brief Get current char of buffer */
-    char ps_buffer_peek_char(ps_buffer *buffer);
+    char ps_buffer_peek_char(const ps_buffer *buffer);
 
     /** @brief Peek next char of buffer */
-    char ps_buffer_peek_next_char(ps_buffer *buffer);
+    char ps_buffer_peek_next_char(const ps_buffer *buffer);
 
     /** @brief Send debug message for buffer to file (stderr if NULL)  */
-    void ps_buffer_debug(FILE *output, ps_buffer *buffer, char *message);
+    void ps_buffer_debug(FILE *output, const ps_buffer *buffer, char *message);
 
 #ifdef __cplusplus
 }

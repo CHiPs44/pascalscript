@@ -25,7 +25,7 @@ extern "C"
     } ps_lexer;
 
     /** @brief Allocate new lexer */
-    ps_lexer *ps_lexer_alloc();
+    ps_lexer *ps_lexer_alloc(void);
 
     /** @brief Free lexer */
     ps_lexer *ps_lexer_free(ps_lexer *lexer);

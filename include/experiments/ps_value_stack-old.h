@@ -29,7 +29,7 @@ extern "C"
     } ps_value_stack;
 
     // clang-format off
-    ps_value_stack *ps_value_stack_alloc();
+    ps_value_stack *ps_value_stack_alloc(void);
     size_t          ps_value_stack_size(ps_value_stack *stack);
     bool            ps_value_stack_full(ps_value_stack *stack);
     bool            ps_value_stack_push(ps_value_stack *stack, ps_value *symbol);

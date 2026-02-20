@@ -2,38 +2,41 @@
 
 ## Status
 
-As of 2025-09-19, the interpreter itself implements:
+As of 2026-02-20, the interpreter itself implements:
 
 - Assignment to variable from an expression with `:=`
-- Expressions
+- Expressions with full operator support
 - Writing values to standard output with `Write` / `WriteLn`
 - `If` / `Then` / `Else`
 - `Repeat` / `Until`
 - `While` / `Do`
 - `For` / `To` / `Downto` / `Do`
-- `Procedure` definition and procedure calls
-  - parameters by value and reference are WIP)
-  - imbrication works, too
-  - did not try recursivity
+- **Procedure** definition and procedure calls
+  - parameters by value and reference
+  - imbrication works
+  - recursion supported
+- **Function** definition and user function calls with parameters
+  - `Result` pseudo-variable for return values
+  - recursion supported
+- **Type** definitions including:
+  - **Enumerations**: (e.g., `TGender = (Male, Female, Other)`)
+  - **Subranges**: (e.g., `Score = 1..20`, `LettersAZ = 'A'..'Z'`)
 - Many functions (scalar / ordinal / math) in the `System` library
-- Strings, but without memory management, just filling the heap...
+- Strings with fixed-size buffers (max 255 chars)
 
 ## TODO
 
 Next steps should be implementing:
 
-- `Function` definition and user function calls with parameters
-  - with proper handling of `Result` pseudo variable?
-- 'Type' definition
-- Other missing features:
-  - Enumerations
-  - Subranges
-  - `Case` ... `Of` ... `Else` (and/or `Otherwise`?) `End` statement
-  - Arrays
-  - Sets
-  - Records
-  - Files
-  - Units
+- `Case` ... `Of` ... `Else` statement (switch-case logic)
+- **Arrays** - Full array support
+- **Records** - Record/struct type definitions
+- **Sets** - Set type operations
+- **Files** - File I/O operations
+- **Units** - Module/unit system
+- **String memory management** - Better string handling with garbage collection
+- Additional system procedures: `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
+- Memory access arrays: `Mem`, `MemW`
 
 ## Performance
 
@@ -566,6 +569,5 @@ Each file should contains this header, this example is for C:
 ```
 
 NB:
-
 - year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
 - some files coming from other sources like Tao Yue's examples from his site and Free Pascal Wiki have their own license.

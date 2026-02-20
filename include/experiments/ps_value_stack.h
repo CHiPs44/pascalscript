@@ -32,7 +32,7 @@ extern "C"
     } ps_value_stack;
 
     // clang-format off
-    ps_value_stack     *ps_value_stack_alloc();
+    ps_value_stack     *ps_value_stack_alloc(void);
     ps_value_stack     *ps_value_stack_free(ps_value_stack *stack);
     void                ps_value_stack_dump(ps_value_stack *stack, char *title);
     ps_value_stack_size ps_value_stack_get_size(ps_value_stack *stack);

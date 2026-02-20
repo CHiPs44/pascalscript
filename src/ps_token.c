@@ -65,7 +65,7 @@ char *ps_token_type_dump_value(ps_token_type token_type, char *default_value)
 
 char *ps_token_dump_value(ps_token *token)
 {
-    ps_token_type token_type;
+    ps_token_type token_type = PS_TOKEN_NONE;
     char *type_name;
     static char buffer[128];
     static char value[80];

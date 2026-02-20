@@ -53,8 +53,9 @@ dkms.conf
 
 # CMake build
 build/
+build-*/
 
-# Pascal tool?
+# Pascal tool
 GPATH
 GRTAGS
 GTAGS
