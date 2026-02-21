@@ -96,8 +96,6 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
-    // if (mode == MODE_EXEC)
-    //     interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("ASSIGNMENT", "");
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
@@ -129,9 +127,14 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
         TRACE_ERROR("COPY");
 
-    // if (mode == MODE_EXEC)
-    //     interpreter->debug = DEBUG_NONE;
     VISIT_END("OK");
+}
+
+bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
+{
+    (void)newline;
+    VISIT_BEGIN("READ_OR_READLN", "");
+    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
 }
 
 /**
@@ -177,13 +180,13 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
 
     while (loop)
     {
-        // interpreter->debug = DEBUG_VERBOSE;
         result.type = &ps_system_none;
         if (interpreter->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "\n%cINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n",
                     mode == MODE_EXEC ? '*' : ' ');
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
+        // retrieve numeric format
         width = 0;
         precision = 0;
         if (lexer->current_token.type == PS_TOKEN_COLON)
@@ -200,11 +203,8 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
                 READ_NEXT_TOKEN;
             }
         }
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_procedure_write(interpreter, stdout, &result, width, precision))
-                TRACE_ERROR("WRITE");
-        }
+        if (mode == MODE_EXEC && !ps_procedure_write(interpreter, stdout, &result, width, precision))
+            TRACE_ERROR(newline ? "WRITELN" : "WRITE");
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             READ_NEXT_TOKEN;
@@ -235,20 +235,21 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
 
     COPY_IDENTIFIER(identifier);
     READ_NEXT_TOKEN;
+
     // Check if identifier is the current function as defined in its parent environment
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (environment == NULL)
         RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
-    
+
     // First, check if this is an assignment to the current function name
     symbol = ps_environment_find_symbol(environment->parent, &identifier, true);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
     {
         if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n",
-                    mode == MODE_EXEC ? '*' : ' ', (char *)identifier);
-        // Assign to the not so implicit "Result" variable
-        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
+            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
+                    (char *)identifier);
+        // Assign to the not so implicit "Result" local variable
+        symbol = ps_interpreter_find_symbol(interpreter, (const ps_identifier *)"RESULT", false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     }
@@ -257,10 +258,10 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
         // Normal lookup - can be variable, constant, procedure, or function
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
     }
-    
+
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-    
+
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_VARIABLE:
@@ -276,7 +277,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name = assignment to Result
-        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
+        symbol = ps_interpreter_find_symbol(interpreter, (const ps_identifier *)"RESULT", false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (!ps_visit_assignment(interpreter, mode, symbol))

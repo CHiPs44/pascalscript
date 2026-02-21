@@ -148,14 +148,16 @@ char *ps_token_dump_value(ps_token *token)
     return buffer;
 }
 
-/** @brief PascalScript reserved keywords */
-/** @note *MUST* be sorted in alphabetical order for dichotomic search below to work */
-struct s_ps_keyword
+typedef struct s_ps_keyword
 {
     char *keyword;
     ps_token_type token_type;
     bool is_symbol;
-} ps_keywords[] = {
+} ps_keyword;
+
+/** @brief PascalScript reserved keywords */
+/** @note *MUST* be sorted in alphabetical order for dichotomic search below to work */
+const ps_keyword keywords[] = {
     // clang-format off
     { .keyword = "-"                , .token_type = PS_TOKEN_MINUS            , .is_symbol = true  },
     { .keyword = ","                , .token_type = PS_TOKEN_COMMA            , .is_symbol = true  },
@@ -232,30 +234,31 @@ struct s_ps_keyword
     { .keyword = "XOR"              , .token_type = PS_TOKEN_XOR              , .is_symbol = false },
     // clang-format on.
 };
-#define PS_KEYWORDS_COUNT (sizeof(ps_keywords) / sizeof(struct s_ps_keyword))
+#define PS_KEYWORDS_COUNT (sizeof(keywords) / sizeof(struct s_ps_keyword))
 
 char *ps_token_get_keyword(ps_token_type token_type)
 {
     for (size_t i = 0; i < PS_KEYWORDS_COUNT; i++)
     {
-        if (ps_keywords[i].token_type == token_type)
-            return ps_keywords[i].keyword;
+        if (keywords[i].token_type == token_type)
+            return keywords[i].keyword;
     }
     return NULL;
 }
 
-ps_token_type ps_token_is_keyword(char *identifier)
+ps_token_type ps_token_is_keyword(const char *identifier)
 {
     // NB: identifier must already be normalized to uppercase
     int left = 0;
     int right = PS_KEYWORDS_COUNT - 1;
-    int mid, cmp;
+    int mid;
+    int cmp;
     while (left <= right)
     {
         mid = left + (right - left) / 2;
-        cmp = strcmp(identifier, ps_keywords[mid].keyword);
+        cmp = strcmp(identifier, keywords[mid].keyword);
         if (cmp == 0)
-            return ps_keywords[mid].token_type;
+            return keywords[mid].token_type;
         else if (cmp < 0)
             right = mid - 1;
         else

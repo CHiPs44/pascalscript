@@ -50,7 +50,7 @@ bool ps_environment_add_symbol(ps_environment *environment, ps_symbol *symbol)
     return environment->error == PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
-ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name, bool local)
+ps_symbol *ps_environment_find_symbol(ps_environment *environment, const ps_identifier *name, bool local)
 {
     assert(environment != NULL);
     assert(name != NULL);

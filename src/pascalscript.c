@@ -19,7 +19,7 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/450-enum.pas"
+#define DEBUGGER_SOURCE "examples/010-operators.pas"
 
 ps_interpreter *interpreter = NULL;
 
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
     /* List program */
     if (dump_buffer)
     {
-        ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
+        const ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
         ps_buffer_dump(stderr, lexer->buffer, 0, PS_BUFFER_MAX_LINES);
         if (verbose)
             fprintf(stderr, "Listed!\n");

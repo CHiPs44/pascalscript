@@ -84,7 +84,7 @@ bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byre
     return true;
 }
 
-void ps_formal_signature_debug(FILE *output, char *message, ps_formal_signature *signature)
+void ps_formal_signature_dump(FILE *output, char *message, ps_formal_signature *signature)
 {
     if (output == NULL)
         output = stderr;

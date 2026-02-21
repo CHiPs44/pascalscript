@@ -41,7 +41,6 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
             table->symbols[i] = NULL;
         }
     }
-    // table->error = PS_SYMBOL_TABLE_ERROR_NONE;
     table->used = 0;
 }
 
@@ -49,7 +48,6 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 {
     ps_symbol_table *table;
     table = ps_memory_malloc(sizeof(ps_symbol_table));
-    // fprintf(stderr, "ALLOC\tSYMBOL TABLE: %p, size %d\n", table, size);
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
@@ -78,17 +76,17 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-ps_symbol_table_size ps_symbol_table_get_used(ps_symbol_table *table)
+ps_symbol_table_size ps_symbol_table_get_used(const ps_symbol_table *table)
 {
     return table == NULL ? 0 : table->used;
 }
 
-ps_symbol_table_size ps_symbol_table_get_free(ps_symbol_table *table)
+ps_symbol_table_size ps_symbol_table_get_free(const ps_symbol_table *table)
 {
     return table == NULL ? 0 : table->size - table->used;
 }
 
-ps_symbol_hash_key ps_symbol_get_hash_key(char *name)
+ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
 {
     // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
     //  NB: 33 * x => 32 * x + x => x << 5 + x
@@ -103,16 +101,16 @@ ps_symbol_hash_key ps_symbol_get_hash_key(char *name)
     return hash;
 }
 
-ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier *name)
+ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier *name)
 {
-    ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)name);
+    ps_symbol_hash_key hash = ps_symbol_get_hash_key((const char *)name);
     ps_symbol_table_size index = hash % table->size;
     if (table->symbols[index] == NULL)
     {
-        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
+        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (const char *)name);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
-    if (strcmp((char *)(table->symbols[index]->name), (char *)name) != 0)
+    if (strcmp((char *)(table->symbols[index]->name), (const char *)name) != 0)
     {
         // Key collision: search for the symbol in the table
         ps_symbol_table_size start_index = index;
@@ -139,7 +137,7 @@ ps_symbol_table_size ps_symbol_table_find(ps_symbol_table *table, ps_identifier 
     return index;
 }
 
-ps_symbol *ps_symbol_table_get(ps_symbol_table *table, ps_identifier *name)
+ps_symbol *ps_symbol_table_get(ps_symbol_table *table, const ps_identifier *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)

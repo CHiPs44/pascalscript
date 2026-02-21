@@ -58,6 +58,7 @@ extern "C"
     bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
+    bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
 
     /* src/ps_visit_type.c */
     bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode);

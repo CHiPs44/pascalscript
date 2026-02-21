@@ -21,18 +21,19 @@ extern "C"
     // Forward reference
     typedef struct s_ps_interpreter ps_interpreter;
 
+    /** @brief Formal parameter definition */
     typedef struct s_ps_formal_parameter
     {
-        bool byref;         // true if parameter is passed by reference
-        ps_identifier name; // TODO? allocate dynamically
-        ps_symbol *type;
+        bool byref;         /** @brief true if parameter has to be passed by reference */
+        ps_identifier name; /** @brief parameter name */
+        ps_symbol *type;    /** @brief parameter type */
     } ps_formal_parameter;
 
     typedef struct s_ps_formal_signature
     {
-        ps_symbol *result_type; // NULL or ps_system_none for procedures
+        ps_symbol *result_type; /** @brief NULL or ps_system_none for procedures */
         uint8_t parameter_count;
-        uint8_t size;
+        uint8_t size; /** @brief size can be bigger than count */
         ps_formal_parameter *parameters;
     } __attribute__((__packed__)) ps_formal_signature;
 
@@ -46,14 +47,14 @@ extern "C"
     ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature);
 
     /** @brief Find a parameter in a formal signature by name */
-    ps_formal_parameter * ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name);
+    ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name);
 
     /** @brief Add parameter to formal signature */
     bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name,
                                            ps_symbol *type);
 
-    /** @brief Debug a formal signature */
-    void ps_formal_signature_debug(FILE *output, char *message, ps_formal_signature *signature);
+    /** @brief Dump formal signature */
+    void ps_formal_signature_dump(FILE *output, char *message, ps_formal_signature *signature);
 
 #ifdef __cplusplus
 }

@@ -207,7 +207,7 @@ extern "C"
     void ps_token_debug(FILE *output, char *message, ps_token *token);
     char *ps_token_dump_value(ps_token *token);
     char *ps_token_get_keyword(ps_token_type token_type);
-    ps_token_type ps_token_is_keyword(char *identifier);
+    ps_token_type ps_token_is_keyword(const char *identifier);
 
 #ifdef __cplusplus
 }

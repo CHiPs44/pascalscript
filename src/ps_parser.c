@@ -11,7 +11,7 @@
 #include "ps_memory.h"
 #include "ps_parser.h"
 
-ps_parser *ps_parser_alloc()
+ps_parser *ps_parser_alloc(void)
 {
     ps_parser *parser = ps_memory_malloc( sizeof(ps_parser));
     if (parser == NULL)

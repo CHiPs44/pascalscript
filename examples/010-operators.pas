@@ -5,19 +5,19 @@
 *)
 Program TestOperators;
 
-Var
-    i, j, k: Integer;
-    u, v, w: Unsigned;
-    x, y, z: Real;
-    c1, c2: Char;
-    s1, s2, s3: String;
-    b1, b2, b3: Boolean;
+// Var
+//     i, j, k: Integer;
+//     u, v, w: Unsigned;
+//     x, y, z: Real;
+//     c1, c2: Char;
+//     s1, s2, s3: String;
+//     b1, b2, b3: Boolean;
 
 Begin
-    WriteLn('TODO addition below should display $FFFFFFFF in decimal, but it displays -1 because of the signed/unsigned mismatch somewhere...');
-    WriteLn(MaxInt, ' ', $55555555, '+', $AAAAAAAA, '=', $55555555 + $AAAAAAAA, ' ', $FFFFFFFF, ' ', MaxUInt);
-    WriteLn();
-
+    // WriteLn('TODO addition below should display $FFFFFFFF in decimal, but it displays -1 because of the signed/unsigned mismatch somewhere...');
+    WriteLn({MaxInt, ' ', $55555555, '+', $AAAAAAAA, '=', }$55555555 + $AAAAAAAA{, ' ', $FFFFFFFF, ' ', MaxUInt});
+    // WriteLn();
+{
     WriteLn('PascalScript Operators Demo');
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn();
@@ -161,4 +161,5 @@ Begin
     WriteLn();
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK');
+}
 END.

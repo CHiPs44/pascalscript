@@ -49,7 +49,7 @@ extern "C"
 
     typedef uint32_t ps_symbol_hash_key;
 
-    ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value);
+    ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const ps_identifier *name, ps_value *value);
     ps_symbol *ps_symbol_free(ps_symbol *symbol);
 
     /** @brief Get name of symbol kind */
@@ -65,7 +65,7 @@ extern "C"
     void ps_symbol_normalize_name(ps_symbol *symbol);
 
     /** @brief Get hash key of symbol name (using DJB2's algorithm) */
-    ps_symbol_hash_key ps_symbol_get_hash_key(char *name);
+    ps_symbol_hash_key ps_symbol_get_hash_key(const char *name);
 
 #ifdef __cplusplus
 }

@@ -40,7 +40,7 @@ extern "C"
 
     /** @brief Find symbol in environment, or in parent environments if local is false */
     /** @return NULL if not found */
-    ps_symbol *ps_environment_find_symbol(ps_environment *environment, ps_identifier *name, bool local);
+    ps_symbol *ps_environment_find_symbol(ps_environment *environment, const ps_identifier *name, bool local);
 
 #ifdef __cplusplus
 }

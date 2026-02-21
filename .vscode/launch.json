@@ -58,10 +58,10 @@
             ]
         },
         {
-            "name": "(gdb) Launch pascalscript",
+            "name": "(gdb) Launch pascalscript (GCC)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/pascalscript",
+            "program": "${workspaceFolder}/build-gcc/pascalscript",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

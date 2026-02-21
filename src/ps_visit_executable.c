@@ -200,16 +200,15 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 argument->allocated = false;
             if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
             {
-                argument = ps_symbol_free(argument);
+                ps_symbol_free(argument);
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 TRACE_ERROR("ADD_BYREF");
             }
         }
         else
         {
-            result.type = parameter->type; //&ps_system_none;
+            result.type = parameter->type;
             result.data.v = NULL;
-            // interpreter->debug = DEBUG_VERBOSE;
             if (!ps_visit_expression(interpreter, mode, &result))
                 TRACE_ERROR("EXPRESSION");
             if (mode == MODE_EXEC)
@@ -222,19 +221,19 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                 }
                 if (!ps_interpreter_copy_value(interpreter, &result, value))
                 {
-                    value = ps_value_free(value);
+                    ps_value_free(value);
                     TRACE_ERROR("COPY");
                 }
                 argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, value);
                 if (argument == NULL)
                 {
-                    value = ps_value_free(value);
+                    ps_value_free(value);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("ARGUMENT_BYVAL");
                 }
                 if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), argument))
                 {
-                    argument = ps_symbol_free(argument);
+                    ps_symbol_free(argument);
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                     TRACE_ERROR("ADD_BYVAL");
                 }
@@ -249,15 +248,12 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            // fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ',' encountered\n");
             READ_NEXT_TOKEN;
             continue;
         }
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            // fprintf(stderr, " INFO\tACTUAL_SIGNATURE: ')' encountered\n");
             READ_NEXT_TOKEN;
-            break;
         }
     } while (true);
 
@@ -276,8 +272,6 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
  * Done:
  *  - allow procedure parameters
  *  - allow by reference parameters
- * TODO:
- *  - debug core dump...
  */
 bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_interpreter_mode mode,
                                                 ps_symbol_kind kind)
@@ -335,7 +329,6 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         }
         else
         {
-            // interpreter->debug = DEBUG_TRACE;
             do
             {
                 if (!ps_visit_parameter_definition(interpreter, mode, signature))
@@ -357,7 +350,6 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
             } while (true);
         }
     }
-    // ps_formal_signature_debug(stderr, "SIGNATURE", signature);
 
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
@@ -387,7 +379,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     {
         fprintf(stderr, "================================================================================\n");
         ps_executable_debug(stderr, "EXECUTABLE", executable);
-        ps_formal_signature_debug(stderr, "SIGNATURE", signature);
+        ps_formal_signature_dump(stderr, "SIGNATURE", signature);
         fprintf(stderr, "================================================================================\n");
     }
 
@@ -426,7 +418,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         result_value->type = signature->result_type;
         result_value->data.v = NULL;
         result_value->allocated = true;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -463,7 +455,7 @@ cleanup:
     {
         if (interpreter->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
-        executable_symbol = ps_symbol_free(executable_symbol);
+        ps_symbol_free(executable_symbol);
         value = NULL;
     }
     if (interpreter->debug >= DEBUG_VERBOSE)
@@ -473,17 +465,15 @@ cleanup:
     {
         if (interpreter->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
-        result_symbol = ps_symbol_free(result_symbol);
+        ps_symbol_free(result_symbol);
         result_value = NULL;
     }
     if (value != NULL)
-    {
-        value = ps_value_free(value);
-    }
+        ps_value_free(value);
     if (interpreter->error != PS_ERROR_NONE)
     {
         if (executable != NULL)
-            executable = ps_executable_free(executable);
+            ps_executable_free(executable);
         TRACE_ERROR("CLEANUP");
     }
     VISIT_END("OK");
@@ -514,10 +504,8 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
     {
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        TRACE_ERROR("READ[LN] NOT IMPLEMENTED");
-        // Read or ReadLn
-        // if (!ps_visit_read_or_readln(interpreter, mode, executable == &ps_system_procedure_readln))
-        //     TRACE_ERROR("READ[LN]");
+        if (!ps_visit_read_or_readln(interpreter, mode, executable == &ps_system_procedure_readln))
+            TRACE_ERROR("READ[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)
     {
@@ -528,11 +516,11 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     }
     else
     {
-        // User defined procedure call
+        // User defined procedure or function call
         // Enter environment for procedure or function
-        if (!ps_interpreter_enter_environment(interpreter, &executable->name))
+        has_environment = ps_interpreter_enter_environment(interpreter, &executable->name);
+        if (!has_environment)
             TRACE_ERROR("ENTER_ENVIRONMENT");
-        has_environment = true;
         // Parse actual parameters
         if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         {
@@ -545,7 +533,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         else
         {
             // No parameters
-            ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
+            const ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
             if (formal_signature->parameter_count != 0)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
             SAVE_CURSOR(line, column);
@@ -565,7 +553,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             result_value->type = executable->value->data.x->formal_signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -573,7 +561,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             }
             if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
             {
-                result_symbol = ps_symbol_free(result_symbol);
+                ps_symbol_free(result_symbol);
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 goto cleanup;
             }

@@ -38,12 +38,10 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
 
     if (!ps_visit_and_expression(interpreter, mode, &left))
         TRACE_ERROR("AND1");
-    if (mode == MODE_EXEC && result->type == &ps_system_none)
-    {
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tOR_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    ps_value_type_get_name(left.type->value->data.t->base));
-    }
+    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tOR_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                ps_value_type_get_name(left.type->value->data.t->base));
+
     do
     {
         or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
@@ -90,12 +88,9 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (!ps_visit_relational_expression(interpreter, mode, &left))
         TRACE_ERROR("RELATIONAL0");
-    if (mode == MODE_EXEC && result->type == &ps_system_none)
-    {
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    ps_value_type_get_name(left.type->value->data.t->base));
-    }
+    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
         and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
@@ -120,12 +115,9 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
         }
     } while (true);
 
-    if (mode == MODE_EXEC && result->type == &ps_system_none)
-    {
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n",
-                    mode == MODE_EXEC ? '*' : ' ');
-    }
+    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n",
+                mode == MODE_EXEC ? '*' : ' ');
 
     VISIT_END("AND2");
 }
@@ -153,12 +145,9 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         interpreter->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
-        if (mode == MODE_EXEC && result->type == &ps_system_none)
-        {
-            if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
-                        mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-        }
+        if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
+                    mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
         if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
             TRACE_ERROR("COPY");
         VISIT_END("RELATIONAL1");
@@ -172,11 +161,8 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
         fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n",
                 mode == MODE_EXEC ? '*' : ' ');
     result->type = &ps_system_boolean;
-    if (mode == MODE_EXEC)
-    {
-        if (!ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
-            TRACE_ERROR("BINARY");
-    }
+    if (mode == MODE_EXEC && !ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
+        TRACE_ERROR("BINARY");
 
     VISIT_END("RELATIONAL2");
 }
@@ -197,12 +183,9 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
 
     if (!ps_visit_term(interpreter, mode, &left))
         TRACE_ERROR("TERM");
-    if (mode == MODE_EXEC && result->type == &ps_system_none)
-    {
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    ps_value_type_get_name(left.type->value->data.t->base));
-    }
+    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
         additive_operator = ps_parser_expect_token_types(
@@ -243,27 +226,18 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 {
     VISIT_BEGIN("TERM", "");
 
-    static ps_token_type multiplicative_operators[] = {
-        PS_TOKEN_STAR,
-        PS_TOKEN_SLASH,
-        PS_TOKEN_DIV,
-        PS_TOKEN_MOD,
-        // PS_TOKEN_AND,
-        PS_TOKEN_SHL,
-        PS_TOKEN_SHR
-    };
+    static ps_token_type multiplicative_operators[] = {PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD,
+                                                       // PS_TOKEN_AND,
+                                                       PS_TOKEN_SHL, PS_TOKEN_SHR};
     ps_value left = {.type = result->type, .data.v = NULL};
     ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
 
     if (!ps_visit_factor(interpreter, mode, &left))
         TRACE_ERROR("FACTOR");
-    if (mode == MODE_EXEC && result->type == &ps_system_none)
-    {
-        if (interpreter->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tTERM: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    ps_value_type_get_name(left.type->value->data.t->base));
-    }
+    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "%cINFO\tTERM: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
         multiplicative_operator = ps_parser_expect_token_types(

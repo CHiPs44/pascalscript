@@ -15,7 +15,7 @@
 
 static uint32_t ps_symbol_auto_index = 0;
 
-ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *value)
+ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const ps_identifier *name, ps_value *value)
 {
     ps_symbol *symbol = (ps_symbol *)ps_memory_malloc(sizeof(ps_symbol));
     if (symbol == NULL)
@@ -36,16 +36,11 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, ps_identifier *name, ps_value *v
 
 ps_symbol *ps_symbol_free(ps_symbol *symbol)
 {
-    if (symbol != NULL)
+    // free only allocated symbols
+    if (symbol != NULL && symbol->allocated)
     {
-        // free only allocated symbols
-        if (symbol->allocated)
-        {
-            // fprintf(stderr, "FREE\tSYMBOL: %p, name '%*s', value %p\n", (void *)symbol, -(int)PS_IDENTIFIER_LEN,
-            //         symbol->name, (void *)symbol->value);
-            symbol->value = ps_value_free(symbol->value);
-            ps_memory_free(symbol);
-        }
+        symbol->value = ps_value_free(symbol->value);
+        ps_memory_free(symbol);
     }
     return NULL;
 }
@@ -59,11 +54,12 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
             *name++ += ('A' - 'a');
 }
 
-const struct s_ps_symbol_kind_name
+typedef struct s_ps_symbol_kind_name
 {
     ps_symbol_kind kind;
     char *name;
-} ps_symbol_kind_names[] = {
+} ps_symbol_kind_name;
+const ps_symbol_kind_name ps_symbol_kind_names[] = {
     // clang-format off
     //                                123456789
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
