@@ -22,9 +22,6 @@
 #include "../src/ps_readall.c"
 #include "../src/ps_token.c"
 
-ps_lexer _lexer;
-ps_lexer *lexer = &_lexer;
-
 char *empty_source = "Program Empty;\n"
                      "{ Comment made with curly brackets }   \n"
                      "Begin\n"
@@ -41,44 +38,43 @@ ps_token_type empty_expected[] = {
     PS_TOKEN_BEGIN,
     // END.
     PS_TOKEN_END, PS_TOKEN_DOT
-    //
+    // EOF
 };
 
-// char *hello_source =
-//     "Program HelloWorld;\n"
-//     "Const\n"
-//     "  K1 = 1234;\n"
-//     "  K2 = 'Select A or B.';\n"
-//     "Begin\n"
-//     "  { Comment1 (* Comment2 *) }\n"
-//     "  WriteLn('Hello, World!');\n"
-//     "  WriteLn(K1, K2);\n"
-//     "End.\n"
-//     "";
-// ps_token_type hello_expected[] = {
-//     // PROGRAM HELLOWORLD;
-//     PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
-//     // CONST
-//     PS_TOKEN_CONST,
-//     // K1 = 1234;
-//     PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_UNSIGNED_VALUE, PS_TOKEN_SEMI_COLON,
-//     // K2 = 'Choose ''A'' or ''B''.';\n"
-//     PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
-//     // BEGIN
-//     PS_TOKEN_BEGIN,
-//     // WRITELN('Hello, World!');
-//     PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_STRING_VALUE, PS_TOKEN_RIGHT_PARENTHESIS,
-//     PS_TOKEN_SEMI_COLON,
-//     // WRITELN(K1, K2);
-//     PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_IDENTIFIER, PS_TOKEN_COMMA, PS_TOKEN_IDENTIFIER,
-//     PS_TOKEN_RIGHT_PARENTHESIS, PS_TOKEN_SEMI_COLON,
-//     // END.
-//     PS_TOKEN_END, PS_TOKEN_DOT
-//     // EOF
-// };
+char *hello_source = "Program HelloWorld;\n"
+                     "Const\n"
+                     "  K1 = 1234;\n"
+                     "  K2 = 'Select A or B.';\n"
+                     "Begin\n"
+                     "  { Comment1 (* Comment2 *) }\n"
+                     "  WriteLn('Hello, World!');\n"
+                     "  WriteLn(K1, K2);\n"
+                     "End.\n"
+                     "";
+ps_token_type hello_expected[] = {
+    // PROGRAM HELLOWORLD;
+    PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
+    // CONST
+    PS_TOKEN_CONST,
+    // K1 = 1234;
+    PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_UNSIGNED_VALUE, PS_TOKEN_SEMI_COLON,
+    // K2 = 'Choose ''A'' or ''B''.';\n"
+    PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
+    // BEGIN
+    PS_TOKEN_BEGIN,
+    // WRITELN('Hello, World!');
+    PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_STRING_VALUE, PS_TOKEN_RIGHT_PARENTHESIS,
+    PS_TOKEN_SEMI_COLON,
+    // WRITELN(K1, K2);
+    PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_IDENTIFIER, PS_TOKEN_COMMA, PS_TOKEN_IDENTIFIER,
+    PS_TOKEN_RIGHT_PARENTHESIS, PS_TOKEN_SEMI_COLON,
+    // END.
+    PS_TOKEN_END, PS_TOKEN_DOT
+    // EOF
+};
 
 char *quotes_source = "Program Quotes;\n"
-                      // "Const K = '''X''=''Y''';\n"
+                      "Const K = '''X''=''Y''';\n"
                       "Const K1 = 'X';\n"
                       "Const K2 = '''';\n"
                       "Begin\n"
@@ -88,9 +84,9 @@ char *quotes_source = "Program Quotes;\n"
 ps_token_type quotes_expected[] = {
     // PROGRAM QUOTES;
     PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
-    // // CONST K = '''X''=''Y'' ';
-    // PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
-    // CONST K1 = 'K';
+    // CONST K = '''X''=''Y'' ';
+    PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
+    // CONST K1 = 'X';
     PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_CHAR_VALUE, PS_TOKEN_SEMI_COLON,
     // CONST K2 = '''';
     PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_CHAR_VALUE, PS_TOKEN_SEMI_COLON,
@@ -108,13 +104,21 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
 {
     int index;
 
+    // ps_memory_debug_enabled = true;
+
     printf("TEST LEXER: INIT %s\n", name);
-    lexer = ps_lexer_alloc();
+    ps_lexer *lexer = ps_lexer_alloc();
+    if (lexer == NULL)
+    {
+        printf("TEST LEXER: ERROR allocating lexer\n");
+        return;
+    }
     printf("TEST LEXER: LOAD %s\n", name);
     if (!ps_buffer_load_string(lexer->buffer, source, strlen(source)))
     {
         printf("TEST LEXER: ERROR %d %s / %d %s\n", lexer->error, ps_error_get_message(lexer->error),
                lexer->buffer->error, ps_error_get_message(lexer->buffer->error));
+        lexer = ps_lexer_free(lexer);
         return;
     }
     ps_buffer_dump(stdout, lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
@@ -154,20 +158,21 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
         // printf("TEST LEXER: %02d/%02d END\n", index + 1, count);
         index += 1;
     } while (index < count);
+    lexer = ps_lexer_free(lexer);
 }
 
 int main(void)
 {
-    struct rlimit rl = {1024 * 1024 * 3, 1024 * 1024 * 3};
+    struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
     printf("TEST LEXER: BEGIN\n");
 
-    // printf("================================================================================\n");
-    // test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type));
+    printf("================================================================================\n");
+    test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type));
 
-    // printf("================================================================================\n");
-    // test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type));
+    printf("================================================================================\n");
+    test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type));
 
     printf("================================================================================\n");
     test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type));
