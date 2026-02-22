@@ -31,6 +31,8 @@ extern "C"
 #define PS_BUFFER_MAX_COLUMNS UINT16_MAX
 #endif
 
+    /** @brief Text buffer for source code */
+    /** @details Registers line starts and lengths when loading string or file */
     typedef struct s_ps_buffer
     {
         char *text;
@@ -65,7 +67,7 @@ extern "C"
     bool ps_buffer_scan_text(ps_buffer *buffer);
 
     /** @brief Load file into source buffer */
-    bool ps_buffer_load_file(ps_buffer *buffer, char *filename);
+    bool ps_buffer_load_file(ps_buffer *buffer, const char *filename);
 
     /** @brief Set source code from memory buffer */
     bool ps_buffer_load_string(ps_buffer *buffer, char *source, size_t length);

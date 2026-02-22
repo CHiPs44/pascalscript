@@ -6,9 +6,9 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,6 +16,39 @@
 #include "ps_error.h"
 #include "ps_memory.h"
 #include "ps_readall.h"
+
+bool ps_buffer_alloc_lines(ps_buffer *buffer)
+{
+    buffer->line_starts = ps_memory_calloc(buffer->line_count, sizeof(char *));
+    if (buffer->line_starts == NULL)
+    {
+        buffer->error = PS_ERROR_OUT_OF_MEMORY;
+        return false;
+    }
+    buffer->line_lengths = ps_memory_calloc(buffer->line_count, sizeof(uint16_t));
+    if (buffer->line_lengths == NULL)
+    {
+        ps_memory_free(buffer->line_starts);
+        buffer->line_starts = NULL;
+        buffer->error = PS_ERROR_OUT_OF_MEMORY;
+        return false;
+    }
+    return true;
+}
+
+void ps_buffer_free_lines(ps_buffer *buffer)
+{
+    if (buffer->line_starts != NULL)
+    {
+        ps_memory_free(buffer->line_starts);
+        buffer->line_starts = NULL;
+    }
+    if (buffer->line_lengths != NULL)
+    {
+        ps_memory_free(buffer->line_lengths);
+        buffer->line_lengths = NULL;
+    }
+}
 
 ps_buffer *ps_buffer_alloc(void)
 {
@@ -90,22 +123,15 @@ void ps_buffer_debug(FILE *output, const ps_buffer *buffer, char *message)
             buffer->error, ps_error_get_message(buffer->error));
 }
 
-bool ps_buffer_scan_text(ps_buffer *buffer)
+static int ps_buffer_count_lines(const char *text)
 {
-    int line = 0;
-    // int column = 0;
-    char *text = buffer->text;
-    char *start = text;
-    char current_char;
-    char previous_char;
-    // Count lines
-    buffer->line_count = 0;
-    current_char = *text++;
-    previous_char = '\0';
+    int line_count = 0;
+    char current_char = *text++;
+    char previous_char = '\0';
     while (current_char)
     {
         if (current_char == '\r' || current_char == '\n')
-            buffer->line_count += 1;
+            line_count += 1;
         previous_char = current_char;
         current_char = *text++;
         // Skip LF if CR encountered
@@ -122,108 +148,92 @@ bool ps_buffer_scan_text(ps_buffer *buffer)
      * newline (and text is non-empty).
      */
     if (previous_char != '\0' && previous_char != '\n' && previous_char != '\r')
-        buffer->line_count += 1;
-    if (buffer->line_count >= PS_BUFFER_MAX_LINES)
-    {
-        buffer->error = PS_ERROR_OVERFLOW;
-        return false;
-    }
-    // Allocate arrays for line starts and lengths
-    if (buffer->line_starts != NULL)
-    {
-        ps_memory_free(buffer->line_starts);
-        buffer->line_starts = NULL;
-    }
-    if (buffer->line_lengths != NULL)
-    {
-        ps_memory_free(buffer->line_lengths);
-        buffer->line_lengths = NULL;
-    }
-    if (buffer->line_count == 0)
-    {
-        buffer->error = PS_ERROR_NONE;
-        return true;
-    }
-    buffer->line_starts = ps_memory_calloc(buffer->line_count, sizeof(char *));
-    if (buffer->line_starts == NULL)
-    {
-        buffer->error = PS_ERROR_OUT_OF_MEMORY;
-        return false;
-    }
-    buffer->line_lengths = ps_memory_calloc(buffer->line_count, sizeof(uint16_t));
-    if (buffer->line_lengths == NULL)
-    {
-        ps_memory_free(buffer->line_starts);
-        buffer->line_starts = NULL;
-        buffer->error = PS_ERROR_OUT_OF_MEMORY;
-        return false;
-    }
-    // Find and memorize line starts
-    // should work for Macintosh CR only files and DOS/Windows/Internet CR+LF files.
-    text = buffer->text;
+        line_count += 1;
+    return line_count;
+}
+
+static bool ps_buffer_index_lines(ps_buffer *buffer)
+{
+    int line = 0;
+    char *text = buffer->text;
+    char *start = text;
+    char current_char;
     ptrdiff_t line_length;
-    bool stop = false;
-    while (!stop)
+
+    while (true)
     {
         current_char = *text;
-        switch (current_char)
+        // At EOL?
+        if (current_char == '\r' || current_char == '\n')
         {
-        case '\r':
-        case '\n':
             line_length = text - start;
             if (line_length > PS_BUFFER_MAX_COLUMNS)
             {
-                ps_memory_free(buffer->line_starts);
-                buffer->line_starts = NULL;
-                ps_memory_free(buffer->line_lengths);
-                buffer->line_lengths = NULL;
+                ps_buffer_free_lines(buffer);
                 buffer->error = PS_ERROR_OVERFLOW;
                 return false;
             }
             buffer->line_starts[line] = start;
-            buffer->line_lengths[line] = line_length;
+            buffer->line_lengths[line] = (uint16_t)line_length;
             line += 1;
-            // column = 0;
             text += 1;
             // Skip LF if CR encountered
             if (current_char == '\r' && *text == '\n')
                 text += 1;
             start = text;
-            break;
-        case '\0':
-            /*
-             * End of text: if there is a remaining partial line (no trailing
-             * newline), record it here.
-             */
-            if (start < text)
-            {
-                line_length = text - start;
-                if (line_length > PS_BUFFER_MAX_COLUMNS)
-                {
-                    ps_memory_free(buffer->line_starts);
-                    buffer->line_starts = NULL;
-                    ps_memory_free(buffer->line_lengths);
-                    buffer->line_lengths = NULL;
-                    buffer->error = PS_ERROR_OVERFLOW;
-                    return false;
-                }
-                buffer->line_starts[line] = start;
-                buffer->line_lengths[line] = line_length;
-                line += 1;
-            }
-            stop = true;
-            break;
-        default:
-            // column += 1;
-            text += 1;
-            break;
+            continue;
         }
+        /*
+         * End of text: if there is a remaining partial line (no trailing
+         * newline), record it here.
+         */
+        if (current_char == '\0' && start < text)
+        {
+            line_length = text - start;
+            if (line_length > PS_BUFFER_MAX_COLUMNS)
+            {
+                ps_buffer_free_lines(buffer);
+                buffer->error = PS_ERROR_OVERFLOW;
+                return false;
+            }
+            buffer->line_starts[line] = start;
+            buffer->line_lengths[line] = (uint16_t)line_length;
+        }
+        if (current_char == '\0')
+            break;
+        text += 1;
     }
     buffer->error = PS_ERROR_NONE;
     return true;
 }
 
-bool ps_buffer_load_file(ps_buffer *buffer, char *filename)
+bool ps_buffer_scan_text(ps_buffer *buffer)
+{
+    int line_count = ps_buffer_count_lines(buffer->text);
+    if (line_count >= PS_BUFFER_MAX_LINES)
+    {
+        buffer->error = PS_ERROR_OVERFLOW;
+        return false;
+    }
+    // No lines?
+    if (line_count == 0)
+    {
+        buffer->error = PS_ERROR_NONE;
+        return true;
+    }
+    buffer->line_count = (uint16_t)line_count;
+    // Allocate arrays for line starts and lengths
+    ps_buffer_free_lines(buffer);
+    if (!ps_buffer_alloc_lines(buffer))
+    {
+        return false;
+    }
+    // Find and memorize line starts
+    // should work for Macintosh CR only files and DOS/Windows/Internet CR+LF files.
+    return ps_buffer_index_lines(buffer);
+}
+
+bool ps_buffer_load_file(ps_buffer *buffer, const char *filename)
 {
     int result;
     size_t length;

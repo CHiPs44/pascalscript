@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-    // Forward reference to value
+    // Forward reference to symbol value
     typedef struct s_ps_value ps_value;
 
     /** @brief Only?! 8 kinds of symbols for now... */
@@ -24,13 +24,13 @@ extern "C"
         PS_SYMBOL_KIND_AUTO,
         PS_SYMBOL_KIND_TYPE_DEFINITION,
         PS_SYMBOL_KIND_PROGRAM,
-        PS_SYMBOL_KIND_UNIT, /* *FUTURE* */
+        PS_SYMBOL_KIND_UNIT, /** @brief *FUTURE* */
         PS_SYMBOL_KIND_CONSTANT,
         PS_SYMBOL_KIND_VARIABLE,
         PS_SYMBOL_KIND_PROCEDURE,
         PS_SYMBOL_KIND_FUNCTION,
         // ...
-    } __attribute__((__packed__)) ps_symbol_kind;
+    } /*__attribute__((__packed__))*/ ps_symbol_kind;
 
     /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
@@ -40,7 +40,7 @@ extern "C"
         ps_symbol_kind kind : 6; /** @brief Auto, type definition, program, ... */
         bool system : 1;         /** @brief true if symbol is a system symbol (predefined) */
         bool allocated : 1;      /** @brief true if symbol was allocated (and must be freed) */
-    } __attribute__((__packed__)) ps_symbol;
+    } /*__attribute__((__packed__))*/ ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
