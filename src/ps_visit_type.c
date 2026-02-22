@@ -21,18 +21,18 @@ bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
     VISIT_BEGIN("TYPE", "");
 
     EXPECT_TOKEN(PS_TOKEN_TYPE);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     do
     {
         if (!ps_visit_type_definition(interpreter, mode))
             TRACE_ERROR("TYPE_DEFINITION");
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -51,12 +51,12 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
 
     // IDENTIFIER
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     COPY_IDENTIFIER(type_name);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     // '='
     EXPECT_TOKEN(PS_TOKEN_EQ);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     // TYPE_REFERENCE
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
         TRACE_ERROR("TYPE REFERENCE");
@@ -65,14 +65,14 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     data.t = type_symbol->value->data.t;
     value = ps_value_alloc(type, data);
     if (value == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
     if (type_symbol == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     if (!ps_interpreter_add_symbol(interpreter, type_symbol))
         TRACE_ERROR("ADD SYMBOL");
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -162,12 +162,12 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         *type_symbol = &ps_system_char;
         break;
     case PS_TOKEN_STRING:
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         advance = false;
         if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
         {
             // String[MY_CONSTANT]
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             ps_value constant = {.type = &ps_system_none, .data.v = NULL};
             if (!ps_visit_constant_expression(interpreter, mode, &constant))
                 TRACE_ERROR("CONSTANT_EXPRESSION");
@@ -180,13 +180,13 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
                 len = constant.data.u;
                 break;
             default:
-                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
+                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
             }
             if (len < 1 || len > PS_STRING_MAX_LEN)
-                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH);
+                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
             ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_STRING, PS_TYPE_STRING);
             if (type_def == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             type_def->def.s.max = (ps_string_len)len;
             ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
             ps_identifier name = {0};
@@ -236,7 +236,8 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_UNSIGNED))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
         break;
-    // case PS_TOKEN_BOOLEAN_VALUE:    // subrange => not really useful but possible
+    // case PS_TOKEN_BOOLEAN_VALUE:
+    // subrange => not really useful but possible
     case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
         advance = false;
         if (!ps_visit_type_reference_enum(interpreter, mode, type_symbol))
@@ -249,11 +250,40 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     case PS_TOKEN_CARET:  // pointer
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
     default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
     if (advance)
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
+
+    VISIT_END("OK")
+}
+
+static bool register_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_identifier *name,
+                                     ps_type_definition *type_def, ps_symbol **symbol)
+{
+    VISIT_BEGIN("REGISTER", "")
+
+    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+    if (value == NULL)
+    {
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    }
+    *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
+    if (*symbol == NULL)
+    {
+        ps_value_free(value);
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    }
+    if (!ps_interpreter_add_symbol(interpreter, *symbol))
+    {
+        ps_symbol_free(*symbol);
+        ps_value_free(value);
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_GENERIC) // TODO better error code / specific error
+    }
 
     VISIT_END("OK");
 }
@@ -268,11 +298,11 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
 
     // re-check that current token is '('
     if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    READ_NEXT_TOKEN;
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
     // empty enumeration not allowed
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     // Parse enumeration values
     // fprintf(stderr, "ENUM VALUES:\n");
     do
@@ -280,7 +310,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         if (count == 256)
             RETURN_ERROR(PS_ERROR_OVERFLOW);
         if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         // Check that enumeration value does not already exist locally (in the same enumeration) or globally (in the
         // symbol table)
         if (ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true) != NULL)
@@ -290,54 +320,34 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         ps_symbol *value_symbol =
             ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &lexer->current_token.value.identifier, value);
         if (value_symbol == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, value_symbol))
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_ADDED);
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_ADDED)
         values[count] = value_symbol;
         count += 1;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             continue;
         }
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
             break;
     } while (true);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
     // Register new type definition in symbol table
     ps_symbol_hash_key hash_key_0 = ps_symbol_get_hash_key((char *)values[0]->name);
     ps_symbol_hash_key hash_key_1 = ps_symbol_get_hash_key((char *)values[count - 1]->name);
     ps_identifier name = {0};
     snprintf(name, sizeof(name) - 1, "#ENUM_%d_%08x_%08x", count, hash_key_0, hash_key_1);
-    // fprintf(stderr, "ENUM TYPE NAME: '%*s'\n", -(int)PS_IDENTIFIER_LEN, name);
-    ps_type_definition *type_def = ps_type_definition_create_enum(count, values);
+    ps_type_definition *type_def = ps_type_definition_create_enum((uint8_t)count, values);
     if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
-    if (value == NULL)
-    {
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &name, value);
-    if (symbol == NULL)
-    {
-        value = ps_value_free(value);
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    if (!ps_interpreter_add_symbol(interpreter, symbol))
-    {
-        symbol = ps_symbol_free(symbol);
-        value = ps_value_free(value);
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_GENERIC); // TODO: specific error
-    }
-    *type_symbol = symbol;
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    if (!register_type_definition(interpreter, mode, &name, type_def, type_symbol))
+        RETURN_ERROR(interpreter->error)
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
@@ -348,13 +358,12 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_type_definition_subrange_char c = {0};
     ps_type_definition_subrange_integer i = {0};
     ps_type_definition_subrange_unsigned u = {0};
-    // ps_type_definition_subrange_enum e;
 
     // Parse min value for subrange
     if (base == PS_TYPE_CHAR)
     {
         if (lexer->current_token.type != PS_TOKEN_CHAR_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         c.min = lexer->current_token.value.c;
     }
     else if (base == PS_TYPE_INTEGER)
@@ -362,67 +371,67 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
         if (lexer->current_token.type == PS_TOKEN_MINUS)
         {
             // Negative integer subrange: -10..-1
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             i.min = -lexer->current_token.value.i;
         }
         else
         {
             if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             i.min = lexer->current_token.value.i;
         }
     }
     else if (base == PS_TYPE_UNSIGNED)
     {
         if (lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         u.min = lexer->current_token.value.u;
     }
     else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     // Parse '..'
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     EXPECT_TOKEN(PS_TOKEN_RANGE);
     // Parse max value for subrange
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (base == PS_TYPE_CHAR)
     {
         if (lexer->current_token.type != PS_TOKEN_CHAR_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         c.max = lexer->current_token.value.c;
         if (c.max <= c.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE);
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
     else if (base == PS_TYPE_INTEGER)
     {
         if (lexer->current_token.type == PS_TOKEN_MINUS)
         {
             // Negative integer subrange: -10..-1
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             i.max = -lexer->current_token.value.i;
         }
         else
         {
             if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             i.max = lexer->current_token.value.i;
         }
         if (i.max <= i.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE);
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
     else if (base == PS_TYPE_UNSIGNED)
     {
         if (lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         u.max = lexer->current_token.value.u;
     }
     else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    READ_NEXT_TOKEN;
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
     // Create type definition for subrange
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
@@ -438,37 +447,16 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
         break;
     case PS_TYPE_UNSIGNED:
         type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
-        snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min,
-                 u.max);
+        snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min, u.max);
         break;
     default:
-        RETURN_ERROR(PS_ERROR_GENERIC);
+        RETURN_ERROR(PS_ERROR_GENERIC) // TODO better error code
     }
     if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     // Register new type definition in symbol table
-    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
-    if (value == NULL)
-    {
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &name, value);
-    if (symbol == NULL)
-    {
-        value = ps_value_free(value);
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    if (!ps_interpreter_add_symbol(interpreter, symbol))
-    {
-        symbol = ps_symbol_free(symbol);
-        value = ps_value_free(value);
-        type_def = ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_GENERIC); // TODO: specific error
-    }
-    *type_symbol = symbol;
+    if (!register_type_definition(interpreter, mode, &name, type_def, type_symbol))
+        RETURN_ERROR(interpreter->error)
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }

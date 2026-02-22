@@ -110,6 +110,7 @@ extern "C"
                     "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
+        ps_interpreter_set_message(interpreter, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));             \
         interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                \
         return false;                                                                                                  \
     }
@@ -135,22 +136,12 @@ extern "C"
                     "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
+        ps_interpreter_set_message(interpreter, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));             \
         goto cleanup;                                                                                                  \
     }
 
 #define COPY_IDENTIFIER(__IDENTIFIER__)                                                                                \
-    memcpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE)
-
-#define VISIT_ERROR(__PLUS__)                                                                                          \
-    {                                                                                                                  \
-        if (interpreter->debug >= DEBUG_TRACE)                                                                         \
-        {                                                                                                              \
-            fprintf(stderr, "%*cRETURN\t%-32s %-32s ", (interpreter->level - 1) * 8 - 1,                               \
-                    mode == MODE_EXEC ? '*' : ' ', visit, __PLUS__);                                                   \
-            ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
-        }                                                                                                              \
-        return false;                                                                                                  \
-    }
+    memcpy(__IDENTIFIER__, lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE);
 
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \

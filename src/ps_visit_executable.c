@@ -40,7 +40,7 @@ bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mod
 
     *variable = NULL;
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-    COPY_IDENTIFIER(identifier);
+    COPY_IDENTIFIER(identifier)
     if (mode == MODE_EXEC)
     {
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
@@ -54,9 +54,9 @@ bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mod
         }
         *variable = symbol;
     }
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -83,7 +83,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     if (lexer->current_token.type == PS_TOKEN_VAR || lexer->current_token.type == PS_TOKEN_OUT)
     {
         byref = true;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
     }
 
     // One or more parameter names
@@ -106,21 +106,21 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         // e.g. procedure P(a: Integer; a: Boolean);
         if (ps_formal_signature_find_parameter(signature, &names[index]) != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         // ',' introduces another parameter name, for example: procedure P(a, b, c: Integer);
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             continue;
         }
         // ':' introduces the parameter(s) type
         if (lexer->current_token.type == PS_TOKEN_COLON)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             break;
         }
         // Anything else is an error
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
 
     // Then parameter type
@@ -131,18 +131,18 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     for (int i = 0; i <= index; i++)
     {
         if (!ps_formal_signature_add_parameter(signature, byref, &names[i], type_reference))
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         value = ps_value_alloc(type_reference, (ps_value_data){.v = NULL});
         if (value == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         parameter = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
         if (parameter == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, parameter))
             TRACE_ERROR("ADD SYMBOL");
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -167,15 +167,15 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
 
     // No parameters?
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
         if (parameter_count != 0)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         VISIT_END("NO_PARAMETERS");
     }
     if (parameter_count == 0)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Parse actual parameters
     do
@@ -243,21 +243,21 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         if (i >= parameter_count)
         {
             if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             break;
         }
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             continue;
         }
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
         }
     } while (true);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -292,13 +292,13 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     bool executable_symbol_added = false;
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Get procedure or function name
     READ_NEXT_TOKEN_OR_CLEANUP;
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     // Does it already exist in the current environment?
-    COPY_IDENTIFIER(identifier);
+    COPY_IDENTIFIER(identifier)
     executable_symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
@@ -308,7 +308,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         goto cleanup;
     }
     has_environment = true;
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
     // Initialize signature
     signature = ps_formal_signature_alloc(0, &ps_system_none);
@@ -418,7 +418,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         result_value->type = signature->result_type;
         result_value->data.v = NULL;
         result_value->allocated = true;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -435,13 +435,13 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     }
 
     // Skip block
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (!ps_visit_block(interpreter, MODE_SKIP))
     {
         goto cleanup;
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
 cleanup:
     if (interpreter->debug >= DEBUG_VERBOSE)
@@ -476,7 +476,7 @@ cleanup:
             ps_executable_free(executable);
         TRACE_ERROR("CLEANUP");
     }
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -528,14 +528,14 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
                 TRACE_ERROR("SIGNATURE");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             SAVE_CURSOR(line, column);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
         }
         else
         {
             // No parameters
             const ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
             if (formal_signature->parameter_count != 0)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             SAVE_CURSOR(line, column);
         }
         if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
@@ -553,7 +553,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             result_value->type = executable->value->data.x->formal_signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -571,14 +571,14 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         {
             if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
                 GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             // Run procedure body
             if (!ps_visit_block(interpreter, mode))
                 goto cleanup;
             // Restore cursor position
             if (!ps_lexer_set_cursor(lexer, line, column))
                 GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
-            // READ_NEXT_TOKEN;
+            // READ_NEXT_TOKEN
         }
     }
 
@@ -601,5 +601,5 @@ cleanup:
     }
     if (interpreter->error != PS_ERROR_NONE)
         TRACE_ERROR("CLEANUP");
-    VISIT_END("OK");
+    VISIT_END("OK")
 }

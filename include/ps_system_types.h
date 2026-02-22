@@ -15,6 +15,7 @@ extern "C"
 #endif
 
     typedef struct s_ps_type_definition ps_type_definition;
+    typedef struct s_ps_file ps_file;
 
     /** @brief signed integer */
     typedef PS_INTEGER ps_integer;
@@ -43,15 +44,7 @@ extern "C"
         ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
     } __attribute__((__packed__)) ps_string;
 
-    // typedef ps_unsigned ps_set_handle; /** @brief Set type handle */
-    typedef uint8_t ps_set[32]; /** @brief Set */
-
-    typedef struct s_ps_file
-    {
-        ps_type_definition *type; /** @brief Type definition of the file */
-        FILE *f;                  /** @brief "C" file pointer */
-        bool is_text;             /** @brief true if text file, false if binary */
-    } __attribute__((__packed__)) ps_file;
+    typedef uint32_t ps_set[8]; /** @brief Set of 256 bits */
 
     /** @brief  */
     typedef void *ps_pointer;
@@ -64,7 +57,6 @@ extern "C"
     #define PS_BOOLEAN_SIZE  sizeof(ps_boolean )
     #define PS_CHAR_SIZE     sizeof(ps_char    )
     #define PS_STRING_SIZE   sizeof(ps_string  )
-    #define PS_FILE_SIZE     sizeof(ps_file    )
     #define PS_POINTER_SIZE  sizeof(ps_pointer )
 
     // clang-format on

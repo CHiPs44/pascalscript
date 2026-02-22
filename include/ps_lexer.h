@@ -37,7 +37,7 @@ extern "C"
     bool ps_lexer_read_token(ps_lexer *lexer);
 
     /** @brief Get current "cursor" */
-    bool ps_lexer_get_cursor(ps_lexer *lexer, uint16_t *line, uint16_t *column);
+    bool ps_lexer_get_cursor(const ps_lexer *lexer, uint16_t *line, uint16_t *column);
 
     /** @brief Set "cursor" to previously saved position */
     bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column);

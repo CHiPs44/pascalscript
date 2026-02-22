@@ -23,7 +23,7 @@ bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("START", "");
 
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
@@ -34,9 +34,9 @@ bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         break;
     default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
     return false;
 }

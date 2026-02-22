@@ -52,7 +52,7 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
                 TRACE_ERROR("COPY");
             VISIT_END("LEFT");
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
         if (!ps_visit_and_expression(interpreter, mode, &right))
@@ -101,7 +101,7 @@ bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mo
                 TRACE_ERROR("COPY");
             VISIT_END("AND1");
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
         if (!ps_visit_relational_expression(interpreter, mode, &right))
@@ -152,7 +152,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
             TRACE_ERROR("COPY");
         VISIT_END("RELATIONAL1");
     }
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     right.type = &ps_system_none;
     right.data.v = NULL;
     if (!ps_visit_simple_expression(interpreter, mode, &right))
@@ -196,7 +196,7 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
                 TRACE_ERROR("COPY");
             VISIT_END("SIMPLE1");
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
         if (!ps_visit_term(interpreter, mode, &right))
@@ -248,7 +248,7 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
                 TRACE_ERROR("COPY");
             VISIT_END("TERM1");
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
         if (!ps_visit_factor(interpreter, mode, &right))
@@ -295,15 +295,15 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     {
     // ***Parenthesized expression ***
     case PS_TOKEN_LEFT_PARENTHESIS:
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_expression(interpreter, mode, result))
             TRACE_ERROR("EXPRESSION");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
-        COPY_IDENTIFIER(identifier);
+        COPY_IDENTIFIER(identifier)
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -321,7 +321,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             result->type = symbol->value->type;
             if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
                 TRACE_ERROR("COPY");
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             break;
         case PS_SYMBOL_KIND_FUNCTION:
             // interpreter->debug = DEBUG_VERBOSE;
@@ -330,7 +330,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                 TRACE_ERROR("FUNCTION");
             break;
         default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
         break;
     // ***Literal values ***
@@ -338,31 +338,31 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         result->type = &ps_system_char;
         if (mode == MODE_EXEC)
             result->data.c = lexer->current_token.value.c;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_INTEGER_VALUE:
         result->type = &ps_system_integer;
         if (mode == MODE_EXEC)
             result->data.i = lexer->current_token.value.i;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
         result->type = &ps_system_unsigned;
         if (mode == MODE_EXEC)
             result->data.u = lexer->current_token.value.u;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_REAL_VALUE:
         result->type = &ps_system_real;
         if (mode == MODE_EXEC)
             result->data.r = lexer->current_token.value.r;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
         result->type = &ps_system_boolean;
         if (mode == MODE_EXEC)
             result->data.b = lexer->current_token.value.b;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_STRING_VALUE:
         result->type = &ps_system_string;
@@ -375,21 +375,21 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                 TRACE_ERROR("STRING_VALUE");
             }
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_NIL:
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         TRACE_ERROR("NIL");
     // *** Unary operators ***
     case PS_TOKEN_PLUS:
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_factor(interpreter, mode, result))
             TRACE_ERROR("UNARY_PLUS");
         break;
     case PS_TOKEN_MINUS:
     case PS_TOKEN_NOT:
         unary_operator = lexer->current_token.type;
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_factor(interpreter, mode, &factor))
             TRACE_ERROR("UNARY_MINUS_NOT");
         if (mode == MODE_EXEC && !ps_function_unary_op(interpreter, &factor, result, unary_operator))
@@ -400,7 +400,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         TRACE_ERROR("?");
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -419,7 +419,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
     ps_symbol *symbol = NULL;
     int arg_count = 1;
 
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (function->system)
     {
         // System functions
@@ -432,10 +432,10 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
             {
                 // Skip '(' and ')' or get parameter enclosed in parentheses
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
                 if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 {
-                    READ_NEXT_TOKEN;
+                    READ_NEXT_TOKEN
                     null_arg = true;
                     result->type = &ps_system_real;
                 }
@@ -447,7 +447,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
                         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
                     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
                     result->type = arg1.type;
-                    READ_NEXT_TOKEN;
+                    READ_NEXT_TOKEN
                 }
             }
             else
@@ -462,9 +462,9 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             // Skip '(' and ')'
             if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
             {
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
                 EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
             }
             null_arg = true;
             result->type = &ps_system_unsigned;
@@ -473,17 +473,17 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         {
             // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             ps_identifier identifier = {0};
-            COPY_IDENTIFIER(identifier);
+            COPY_IDENTIFIER(identifier)
             symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             symbol_arg = true;
             // fprintf(stderr, "%cINFO\tFUNCTION_CALL: '%s' argument is symbol '%s' of type '%s'\n",
             //         mode == MODE_EXEC ? '*' : ' ', function->name, symbol->name,
@@ -494,28 +494,28 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             arg_count = 2;
             // Power function has two "by value" arguments
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (!ps_visit_expression(interpreter, mode, &arg1))
                 TRACE_ERROR("ARG1");
             // TODO? check that arg1 is integer, unsigned or real?
             EXPECT_TOKEN(PS_TOKEN_COMMA);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (!ps_visit_expression(interpreter, mode, &arg2))
                 TRACE_ERROR("ARG2");
             // TODO? check that arg2 is integer, unsigned or real?
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
         }
         else
         {
             // all other functions have one "by value" argument for now
             // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (!ps_visit_expression(interpreter, mode, &arg1))
                 TRACE_ERROR("ARG");
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
         }
         if (mode == MODE_EXEC)
         {
@@ -538,7 +538,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
         }
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -584,7 +584,7 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
     //     }
     //     break;
     case PS_TOKEN_IDENTIFIER:
-        COPY_IDENTIFIER(identifier);
+        COPY_IDENTIFIER(identifier)
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -596,9 +596,9 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
             TRACE_ERROR("COPY");
         break;
     default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }

@@ -22,16 +22,16 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_symbol *program;
 
     EXPECT_TOKEN(PS_TOKEN_PROGRAM);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-    COPY_IDENTIFIER(identifier);
-    READ_NEXT_TOKEN;
+    COPY_IDENTIFIER(identifier)
+    READ_NEXT_TOKEN
     // Skip optional parameters enclosed in parentheses
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
         do
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 break;
             EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
@@ -44,7 +44,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
         } while (true);
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (!ps_interpreter_enter_environment(interpreter, &identifier))
         TRACE_ERROR("ENTER ENVIRONMENT");
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
@@ -57,7 +57,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     EXPECT_TOKEN(PS_TOKEN_DOT);
     // NB: text after '.' is not analyzed and has not to be
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -74,7 +74,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
  */
 bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
-    VISIT_BEGIN("BLOCK", "");
+    VISIT_BEGIN("BLOCK", "")
 
     bool loop = true;
     do
@@ -83,37 +83,37 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
         {
         case PS_TOKEN_CONST:
             if (!ps_visit_const(interpreter, mode))
-                TRACE_ERROR("CONST");
+                TRACE_ERROR("CONST")
             break;
         case PS_TOKEN_TYPE:
             if (!ps_visit_type(interpreter, mode))
-                TRACE_ERROR("TYPE");
+                TRACE_ERROR("TYPE")
             break;
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
         case PS_TOKEN_VAR:
             if (!ps_visit_var(interpreter, mode))
-                TRACE_ERROR("VAR");
+                TRACE_ERROR("VAR")
             break;
         case PS_TOKEN_PROCEDURE:
             if (!ps_visit_procedure_or_function_declaration(interpreter, MODE_SKIP, PS_SYMBOL_KIND_PROCEDURE))
-                TRACE_ERROR("PROCEDURE");
+                TRACE_ERROR("PROCEDURE")
             break;
         case PS_TOKEN_FUNCTION:
             if (!ps_visit_procedure_or_function_declaration(interpreter, MODE_SKIP, PS_SYMBOL_KIND_FUNCTION))
-                TRACE_ERROR("FUNCTION");
+                TRACE_ERROR("FUNCTION")
             break;
         case PS_TOKEN_BEGIN:
             loop = false;
             break;
         default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
     } while (loop);
 
     if (!ps_visit_compound_statement(interpreter, mode))
-        TRACE_ERROR("COMPOUND");
+        TRACE_ERROR("COMPOUND")
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -147,7 +147,7 @@ bool ps_visit_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  */
 bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
-    VISIT_BEGIN("CONST", "");
+    VISIT_BEGIN("CONST", "")
 
     ps_identifier identifier;
     ps_symbol *type;
@@ -157,34 +157,34 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
     bool negate = false;
     ps_string *s = NULL;
 
-    EXPECT_TOKEN(PS_TOKEN_CONST);
-    READ_NEXT_TOKEN;
+    EXPECT_TOKEN(PS_TOKEN_CONST)
+    READ_NEXT_TOKEN
     do
     {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-        COPY_IDENTIFIER(identifier);
-        READ_NEXT_TOKEN;
-        EXPECT_TOKEN(PS_TOKEN_EQ);
-        READ_NEXT_TOKEN;
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        COPY_IDENTIFIER(identifier)
+        READ_NEXT_TOKEN
+        EXPECT_TOKEN(PS_TOKEN_EQ)
+        READ_NEXT_TOKEN
         // For now only keep track of '-' so "Const Foo = -4;" or "Const Bar = -Foo;" work as expected
         if (lexer->current_token.type == PS_TOKEN_MINUS)
         {
             negate = true;
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type != PS_TOKEN_IDENTIFIER &&
                 lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
                 lexer->current_token.type != PS_TOKEN_REAL_VALUE &&
                 lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_IDENTIFIER:
             constant = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
             if (constant == NULL)
-                RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+                RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
             if (constant->kind != PS_SYMBOL_KIND_CONSTANT)
-                RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
+                RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT)
             type = constant->value->type;
             data = constant->value->data;
             if (negate)
@@ -196,7 +196,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
                     break;
                 case PS_TYPE_UNSIGNED:
                     if (data.u > PS_INTEGER_MAX)
-                        RETURN_ERROR(PS_ERROR_OUT_OF_RANGE);
+                        RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
                     type = &ps_system_integer;
                     data.i = -data.u;
                     break;
@@ -205,7 +205,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
                     data.r = -data.r;
                     break;
                 default:
-                    RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER);
+                    RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
                 }
             }
             break;
@@ -245,31 +245,28 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             {
                 s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
                 if (s == NULL)
-                    RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+                    RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             }
             type = &ps_system_string;
             data.s = s;
             break;
         default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
-        // if (mode == MODE_EXEC)
-        // {
+        READ_NEXT_TOKEN
         value = ps_value_alloc(type, data);
         if (value == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
         if (constant == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, constant))
-            TRACE_ERROR("ADD SYMBOL");
-        // }
+            TRACE_ERROR("ADD SYMBOL")
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -283,7 +280,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
  */
 bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
-    VISIT_BEGIN("VAR", "");
+    VISIT_BEGIN("VAR", "")
 
     ps_identifier identifier[8];
     int var_count;
@@ -292,48 +289,45 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_value_data data = {0};
     ps_symbol *variable = NULL;
 
-    EXPECT_TOKEN(PS_TOKEN_VAR);
-    READ_NEXT_TOKEN;
+    EXPECT_TOKEN(PS_TOKEN_VAR)
+    READ_NEXT_TOKEN
     do
     {
         var_count = 0;
         do
         {
             EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-            COPY_IDENTIFIER(identifier[var_count]);
+            COPY_IDENTIFIER(identifier[var_count])
             variable = ps_interpreter_find_symbol(interpreter, &identifier[var_count], true);
             if (variable != NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_COLON)
                 break;
             if (lexer->current_token.type == PS_TOKEN_COMMA)
             {
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
                 var_count++;
                 if (var_count > 8 - 1)
-                    RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
+                    RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
                 continue;
             }
         } while (true);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_type_reference(interpreter, mode, &type))
-            TRACE_ERROR("TYPE REFERENCE");
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN;
-        // if (mode==MODE_EXEC)
-        // {
+            TRACE_ERROR("TYPE REFERENCE")
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
+        READ_NEXT_TOKEN
         for (int i = 0; i <= var_count; i++)
         {
             value = ps_value_alloc(type, data);
             variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
             if (variable == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             if (!ps_interpreter_add_symbol(interpreter, variable))
-                TRACE_ERROR("ADD SYMBOL");
+                TRACE_ERROR("ADD SYMBOL")
         }
-        // }
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }

@@ -44,9 +44,9 @@ extern "C"
             ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(variable)" system procedure */
             ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(value)" system procedure */
         };
-        ps_formal_signature *formal_signature; /** @brief Parameters and return type of the executable */
-        uint16_t line;                         /** @brief Line number in the source code */
-        uint16_t column;                       /** @brief Column number in the source code */
+        ps_formal_signature *formal_signature; /** @brief Parameters and return type for user executables */
+        uint16_t line;                         /** @brief Line number in source code */
+        uint16_t column;                       /** @brief Column number in source code */
     } __attribute__((__packed__)) ps_executable;
 
 #define PS_EXECUTABLE_SIZE sizeof(ps_executable)

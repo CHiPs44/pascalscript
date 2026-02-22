@@ -46,10 +46,6 @@ void ps_config_report(FILE *output)
     fprintf(output, "┃ *** PASCALSCRIPT CONFIGURATION ***                                           ┃\n");
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     REPORT_FORMAT(PS_VERSION, "s");
-    // REPORT_FORMAT(PS_VERSION_MAJOR, "d");
-    // REPORT_FORMAT(PS_VERSION_MINOR, "d");
-    // REPORT_FORMAT(PS_VERSION_PATCH, "d");
-    // REPORT_FORMAT(PS_VERSION_INDEX, "d");
     REPORT_FORMAT(PS_BITNESS, "d");
     REPORT_SECTION("*** INTEGER TYPE ***");
     REPORT_STRING(PS_INTEGER);
@@ -84,13 +80,10 @@ void ps_config_report(FILE *output)
     REPORT_STRING(PS_STRING_LEN_TYPE);
     REPORT_FORMAT(PS_STRING_MAX_LEN, "u");
     REPORT_FORMAT(PS_STRING_SIZE, FMT_SIZE);
-    // REPORT_STRING(PS_STRING_REF_TYPE);
     REPORT_SECTION("*** IDENTIFIER ***");
     REPORT_FORMAT(PS_IDENTIFIER_LEN, "u");
     REPORT_FORMAT(PS_IDENTIFIER_SIZE, FMT_SIZE);
     REPORT_SECTION("*** SIZES ***");
-    // REPORT_FORMAT(PS_FILE_SIZE, FMT_SIZE);
-    // REPORT_FORMAT(PS_POINTER_SIZE, FMT_SIZE);
     REPORT_FORMAT(PS_VALUE_DATA_SIZE, FMT_SIZE);
     REPORT_FORMAT(PS_VALUE_SIZE, FMT_SIZE);
     REPORT_FORMAT(PS_SYMBOL_SIZE, FMT_SIZE);

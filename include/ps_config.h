@@ -152,12 +152,14 @@ extern "C"
 // "Short" strings
 #define PS_STRING_LEN_TYPE uint8_t
 #define PS_STRING_MAX_LEN UINT8_MAX
-// "Wide" strings
-// #define PS_STRING_LEN_TYPE uint16_t
-// #define PS_STRING_MAX_LEN UINT16_MAX
-// "Ultra-wide" strings
-// #define PS_STRING_LEN_TYPE uint32_t
-// #define PS_STRING_MAX_LEN UINT32_MAX
+/**
+ * "Wide" strings
+ * #define PS_STRING_LEN_TYPE uint16_t
+ * #define PS_STRING_MAX_LEN UINT16_MAX
+ * "Ultra-wide" strings
+ * #define PS_STRING_LEN_TYPE uint32_t
+ * #define PS_STRING_MAX_LEN UINT32_MAX
+ */
 #endif
 
 #ifndef PS_STRING_REF_TYPE

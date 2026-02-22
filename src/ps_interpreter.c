@@ -19,7 +19,6 @@
 ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check)
 {
     ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
-    // fprintf(stderr, "ALLOC\tINTERPRETER: %p\n", interpreter);
     if (interpreter == NULL)
         return NULL;
     // Set default state
@@ -58,7 +57,6 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
 {
     if (interpreter != NULL)
     {
-        // fprintf(stderr, "FREE\tINTERPRETER: %p\n", interpreter);
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
         if (interpreter->parser != NULL)
@@ -86,11 +84,11 @@ void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error)
     return NULL;
 }
 
-bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...)
+bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) // NOSONAR
 {
     va_list args;
     va_start(args, format);
-    vsnprintf(interpreter->message, sizeof(interpreter->message), format, args);
+    vsnprintf(interpreter->message, sizeof(interpreter->message), format, args); // NOSONAR
     va_end(args);
     return true;
 }
@@ -137,21 +135,18 @@ ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 {
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM || interpreter->level >= PS_INTERPRETER_ENVIRONMENTS)
     {
-        // interpreter->error = PS_ERROR_INVALID_ENVIRONMENT;
-        return NULL; // Invalid environment level
+        ps_interpreter_set_message(interpreter, "Invalid environment level %d", interpreter->level);
+        return NULL;
     }
     return interpreter->environments[interpreter->level];
 }
 
-ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const ps_identifier *name, bool local)
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local)
 {
-    // char tmp[128];
     int level = interpreter->level;
     ps_symbol *symbol;
     do
     {
-        // snprintf(tmp, sizeof(tmp), "ENVIRONMENT %d: %s", level, interpreter->environments[level]->name);
-        // ps_symbol_table_dump(NULL, tmp, interpreter->environments[level]->symbols);
         symbol = ps_environment_find_symbol(interpreter->environments[level], name, local);
         if (symbol != NULL)
             return symbol;
@@ -159,7 +154,8 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const ps_iden
             break;
         level -= 1;
     } while (level != PS_INTERPRETER_ENVIRONMENT_SYSTEM);
-    return NULL; // Symbol not found in any environment
+    ps_interpreter_set_message(interpreter, "Symbol '%s 'not found in any environment", name);
+    return NULL;
 }
 
 bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
@@ -179,7 +175,7 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
     return true;
 }
 
-bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to)
+bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to) // NOSONAR
 {
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
@@ -286,7 +282,7 @@ bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_
     return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
-bool ps_interpreter_load_file(ps_interpreter *interpreter, char *filename)
+bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_file(lexer->buffer, filename);

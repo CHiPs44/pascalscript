@@ -29,33 +29,33 @@ bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode)
     {
     case PS_TOKEN_BEGIN:
         if (!ps_visit_compound_statement(interpreter, mode))
-            TRACE_ERROR("COMPOUND");
+            TRACE_ERROR("COMPOUND")
         break;
     case PS_TOKEN_IDENTIFIER:
         if (!ps_visit_assignment_or_procedure_call(interpreter, mode))
-            TRACE_ERROR("ASSIGNMENT/PROCEDURE");
+            TRACE_ERROR("ASSIGNMENT/PROCEDURE")
         break;
     case PS_TOKEN_IF:
         if (!ps_visit_if_then_else(interpreter, mode))
-            TRACE_ERROR("IF");
+            TRACE_ERROR("IF")
         break;
     case PS_TOKEN_REPEAT:
         if (!ps_visit_repeat_until(interpreter, mode))
-            TRACE_ERROR("REPEAT");
+            TRACE_ERROR("REPEAT")
         break;
     case PS_TOKEN_WHILE:
         if (!ps_visit_while_do(interpreter, mode))
-            TRACE_ERROR("WHILE");
+            TRACE_ERROR("WHILE")
         break;
     case PS_TOKEN_FOR:
         if (!ps_visit_for_do(interpreter, mode))
-            TRACE_ERROR("FOR");
+            TRACE_ERROR("FOR")
         break;
     default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -70,18 +70,15 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
     VISIT_BEGIN("COMPOUND_STATEMENT", "");
 
     EXPECT_TOKEN(PS_TOKEN_BEGIN);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
-        READ_NEXT_TOKEN;
-    if (lexer->current_token.type != PS_TOKEN_END)
-    {
-        if (!ps_visit_statement_list(interpreter, mode, PS_TOKEN_END))
-            TRACE_ERROR("STATEMENTS");
-    }
-    EXPECT_TOKEN(PS_TOKEN_END);
-    READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_END && !ps_visit_statement_list(interpreter, mode, PS_TOKEN_END))
+        TRACE_ERROR("STATEMENTS")
+    EXPECT_TOKEN(PS_TOKEN_END)
+    READ_NEXT_TOKEN
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -101,7 +98,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
 
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
 
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
@@ -127,7 +124,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
         TRACE_ERROR("COPY");
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
@@ -168,13 +165,13 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         VISIT_END("EMPTY1");
     }
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     // "Write[Ln]()"?
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
         if (mode == MODE_EXEC && newline)
             fprintf(stdout, "\n");
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         loop = false;
     }
 
@@ -191,34 +188,34 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         precision = 0;
         if (lexer->current_token.type == PS_TOKEN_COLON)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
             width = (int16_t)(lexer->current_token.value.i);
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_COLON)
             {
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
                 EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
                 precision = (int16_t)(lexer->current_token.value.i);
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
             }
         }
         if (mode == MODE_EXEC && !ps_procedure_write(interpreter, stdout, &result, width, precision))
             TRACE_ERROR(newline ? "WRITELN" : "WRITE");
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
             continue;
         }
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         loop = false;
     }
 
     if (mode == MODE_EXEC && newline)
         fprintf(stdout, "\n");
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -233,8 +230,8 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     ps_identifier identifier;
     ps_symbol *symbol;
 
-    COPY_IDENTIFIER(identifier);
-    READ_NEXT_TOKEN;
+    COPY_IDENTIFIER(identifier)
+    READ_NEXT_TOKEN
 
     // Check if identifier is the current function as defined in its parent environment
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
@@ -249,7 +246,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
                     (char *)identifier);
         // Assign to the not so implicit "Result" local variable
-        symbol = ps_interpreter_find_symbol(interpreter, (const ps_identifier *)"RESULT", false);
+        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     }
@@ -266,28 +263,28 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     {
     case PS_SYMBOL_KIND_VARIABLE:
         if (!ps_visit_assignment(interpreter, mode, symbol))
-            TRACE_ERROR("ASSIGNMENT");
+            TRACE_ERROR("ASSIGNMENT")
         break;
     case PS_SYMBOL_KIND_CONSTANT:
         ps_interpreter_set_message(interpreter, "Constant '%s' cannot be assigned", symbol->name);
-        RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST);
+        RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_visit_procedure_or_function_call(interpreter, mode, symbol, NULL))
-            TRACE_ERROR("PROCEDURE_CALL");
+            TRACE_ERROR("PROCEDURE_CALL")
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name = assignment to Result
-        symbol = ps_interpreter_find_symbol(interpreter, (const ps_identifier *)"RESULT", false);
+        symbol = ps_interpreter_find_symbol(interpreter, (ps_identifier *)"RESULT", false);
         if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_visit_assignment(interpreter, mode, symbol))
-            TRACE_ERROR("ASSIGNMENT");
+            TRACE_ERROR("ASSIGNMENT")
         break;
     default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -296,27 +293,27 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
  */
 bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
-    VISIT_BEGIN("IF", "");
+    VISIT_BEGIN("IF", "")
 
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
 
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (!ps_visit_expression(interpreter, mode, &result))
-        TRACE_ERROR("CONDITION");
+        TRACE_ERROR("CONDITION")
     if (result.type != &ps_system_boolean)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
-    EXPECT_TOKEN(PS_TOKEN_THEN);
-    READ_NEXT_TOKEN;
+    EXPECT_TOKEN(PS_TOKEN_THEN)
+    READ_NEXT_TOKEN
     if (!ps_visit_statement(interpreter, mode == MODE_EXEC && result.data.b ? MODE_EXEC : MODE_SKIP))
-        TRACE_ERROR("THEN");
+        TRACE_ERROR("THEN")
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_statement(interpreter, mode == MODE_EXEC && !result.data.b ? MODE_EXEC : MODE_SKIP))
-            TRACE_ERROR("ELSE");
+            TRACE_ERROR("ELSE")
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -331,16 +328,16 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
     uint16_t column = 0;
 
     ps_lexer_get_cursor(lexer, &line, &column);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     do
     {
         if (!ps_visit_statement_list(interpreter, mode, PS_TOKEN_UNTIL))
             TRACE_ERROR("STATEMENTS");
         // Skip optional ';'
         if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
-            READ_NEXT_TOKEN;
+            READ_NEXT_TOKEN
         EXPECT_TOKEN(PS_TOKEN_UNTIL);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION");
         if (result.type != &ps_system_boolean)
@@ -349,10 +346,10 @@ bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode
             break;
         if (!ps_lexer_set_cursor(lexer, line, column))
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
     } while (true);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -369,7 +366,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     // Save "cursor" position
     if (!ps_lexer_get_cursor(lexer, &line, &column))
         TRACE_ERROR("CURSOR!");
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     do
     {
         if (!ps_visit_expression(interpreter, mode, &result))
@@ -377,17 +374,17 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         if (result.type != &ps_system_boolean)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         EXPECT_TOKEN(PS_TOKEN_DO);
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
         if (!ps_visit_statement(interpreter, result.data.b ? mode : MODE_SKIP))
             TRACE_ERROR("STATEMENT");
         if (mode != MODE_EXEC || !result.data.b)
             break;
         if (!ps_lexer_set_cursor(lexer, line, column))
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
-        READ_NEXT_TOKEN;
+            RETURN_ERROR(PS_ERROR_GENERIC) // TODO better error code
+        READ_NEXT_TOKEN
     } while (true);
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -409,12 +406,12 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     uint16_t column = 0;
 
     // FOR
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     if (mode == MODE_EXEC)
     {
-        COPY_IDENTIFIER(identifier);
+        COPY_IDENTIFIER(identifier)
         variable = ps_interpreter_find_symbol(interpreter, &identifier, true);
         if (variable == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -424,10 +421,10 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         finish.type = variable->value->type;
     }
     // :=
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
     // START VALUE
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (!ps_visit_expression(interpreter, mode, &start))
         TRACE_ERROR("START");
     // TO | DOWNTO
@@ -436,19 +433,19 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
     else if (lexer->current_token.type == PS_TOKEN_DOWNTO)
         step.data.i = -1;
     else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
-    READ_NEXT_TOKEN;
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
     // FINISH VALUE
     if (!ps_visit_expression(interpreter, mode, &finish))
         TRACE_ERROR("FINISH");
     // DO
     EXPECT_TOKEN(PS_TOKEN_DO);
     ps_lexer_get_cursor(lexer, &line, &column);
-    READ_NEXT_TOKEN;
+    READ_NEXT_TOKEN
     if (mode != MODE_EXEC)
     {
         if (!ps_visit_statement_or_compound_statement(interpreter, MODE_SKIP))
-            TRACE_ERROR("STATEMENT_OR_COMPOUND");
+            TRACE_ERROR("STATEMENT_OR_COMPOUND")
     }
     else
     {
@@ -461,38 +458,38 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         {
             if (!ps_function_binary_op(interpreter, variable->value, &finish, &result,
                                        step.data.i > 0 ? PS_TOKEN_LE : PS_TOKEN_GE))
-                TRACE_ERROR("BINARY");
+                TRACE_ERROR("BINARY")
             if (result.type != &ps_system_boolean)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
             if (!result.data.b)
             {
                 // End of loop => skip statement
                 if (!ps_visit_statement_or_compound_statement(interpreter, MODE_SKIP))
-                    TRACE_ERROR("BODY");
+                    TRACE_ERROR("BODY")
                 break;
             }
             if (!ps_visit_statement_or_compound_statement(interpreter, mode))
                 TRACE_ERROR("BODY");
             if (!ps_lexer_set_cursor(lexer, line, column))
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
-            READ_NEXT_TOKEN;
-            // VARIABLE := SUCC/PRED(VARIABLE)
+            READ_NEXT_TOKEN
+            // compute VARIABLE := SUCC/PRED(VARIABLE)
             if (step.data.i > 0)
             {
                 interpreter->error = ps_function_succ(interpreter, variable->value, variable->value);
                 if (interpreter->error != PS_ERROR_NONE)
-                    TRACE_ERROR("STEP/SUCC");
+                    TRACE_ERROR("STEP/SUCC")
             }
             else
             {
                 interpreter->error = ps_function_pred(interpreter, variable->value, variable->value);
                 if (interpreter->error != PS_ERROR_NONE)
-                    TRACE_ERROR("STEP/PRED");
+                    TRACE_ERROR("STEP/PRED")
             }
         } while (true);
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -504,7 +501,7 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     if (lexer->current_token.type == stop)
     {
-        READ_NEXT_TOKEN;
+        READ_NEXT_TOKEN
     }
     else
     {
@@ -516,7 +513,7 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
             // NB: semi-colon at statement list end is optional
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
-                READ_NEXT_TOKEN;
+                READ_NEXT_TOKEN
                 if (lexer->current_token.type == stop)
                     break;
             }
@@ -526,12 +523,12 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
             }
             else
             {
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             }
         } while (true);
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }
 
 /**
@@ -553,5 +550,5 @@ bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_in
             TRACE_ERROR("STATEMENT");
     }
 
-    VISIT_END("OK");
+    VISIT_END("OK")
 }

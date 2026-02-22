@@ -20,7 +20,7 @@ extern "C"
     {
         /* -------------------- GENERAL -------------------- */
         PS_ERROR_NONE = 0,
-        PS_ERROR_GENERIC,
+        PS_ERROR_GENERIC = 128,
         PS_ERROR_NOT_IMPLEMENTED,
         PS_ERROR_OUT_OF_MEMORY,
         PS_ERROR_OVERFLOW,
@@ -79,7 +79,7 @@ extern "C"
 
 #define PS_ERROR_SIZE sizeof(ps_error)
 
-    char *ps_error_get_message(ps_error error);
+    const char *ps_error_get_message(ps_error error);
 
     int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...);
     int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...);
