@@ -17,7 +17,7 @@ static uint32_t ps_symbol_auto_index = 0;
 
 ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const ps_identifier *name, ps_value *value)
 {
-    ps_symbol *symbol = (ps_symbol *)ps_memory_malloc(sizeof(ps_symbol));
+    ps_symbol *symbol = (ps_symbol *)ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol));
     if (symbol == NULL)
         return NULL;
     symbol->kind = kind;
@@ -40,7 +40,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     if (symbol != NULL && symbol->allocated)
     {
         symbol->value = ps_value_free(symbol->value);
-        ps_memory_free(symbol);
+        ps_memory_free(PS_MEMORY_SYMBOL, symbol);
     }
     return NULL;
 }

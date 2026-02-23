@@ -14,10 +14,24 @@ extern "C"
 {
 #endif
 
-    void *ps_memory_malloc(size_t size);
-    void *ps_memory_calloc(size_t count, size_t size);
-    void *ps_memory_realloc(void *ptr, size_t size);
-    void ps_memory_free(void *ptr);
+#define PS_MEMORY_SYSTEM 0
+#define PS_MEMORY_BUFFER 1
+#define PS_MEMORY_ENVIRONMENT 2
+#define PS_MEMORY_EXECUTABLE 3
+#define PS_MEMORY_INTERPRETER 4
+#define PS_MEMORY_LEXER 5
+#define PS_MEMORY_PARSER 6
+#define PS_MEMORY_SIGNATURE 7
+#define PS_MEMORY_STRING 8
+#define PS_MEMORY_SYMBOL 9
+#define PS_MEMORY_TYPE 10
+#define PS_MEMORY_VALUE 11
+#define PS_MEMORY_CLASS_COUNT 12
+
+    void *ps_memory_malloc(int memory_class, size_t size);
+    void *ps_memory_calloc(int memory_class, size_t count, size_t size);
+    void *ps_memory_realloc(int memory_class, void *ptr, size_t size);
+    void ps_memory_free(int memory_class, void *ptr);
     void ps_memory_debug(FILE *output);
 
 #ifdef __cplusplus

@@ -42,13 +42,13 @@ int ps_readall(FILE *in, char **dataptr, size_t *sizeptr)
             /* Overflow check. Some ANSI C compilers may optimize this away, though. */
             if (size <= used)
             {
-                ps_memory_free(data);
+                ps_memory_free(PS_MEMORY_BUFFER, data);
                 return PS_READALL_TOOMUCH;
             }
-            temp = ps_memory_realloc(data, size);
+            temp = ps_memory_realloc(PS_MEMORY_BUFFER, data, size);
             if (temp == NULL)
             {
-                ps_memory_free(data);
+                ps_memory_free(PS_MEMORY_BUFFER, data);
                 return PS_READALL_NOMEM;
             }
             data = temp;
@@ -60,13 +60,13 @@ int ps_readall(FILE *in, char **dataptr, size_t *sizeptr)
     }
     if (ferror(in))
     {
-        ps_memory_free(data);
+        ps_memory_free(PS_MEMORY_BUFFER, data);
         return PS_READALL_ERROR;
     }
-    temp = ps_memory_realloc(data, used + 1);
+    temp = ps_memory_realloc(PS_MEMORY_BUFFER, data, used + 1);
     if (temp == NULL)
     {
-        ps_memory_free(data);
+        ps_memory_free(PS_MEMORY_BUFFER, data);
         return PS_READALL_NOMEM;
     }
     data = temp;

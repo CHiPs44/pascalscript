@@ -19,16 +19,16 @@
 
 bool ps_buffer_alloc_lines(ps_buffer *buffer)
 {
-    buffer->line_starts = ps_memory_calloc(buffer->line_count, sizeof(char *));
+    buffer->line_starts = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count, sizeof(char *));
     if (buffer->line_starts == NULL)
     {
         buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     }
-    buffer->line_lengths = ps_memory_calloc(buffer->line_count, sizeof(uint16_t));
+    buffer->line_lengths = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count, sizeof(uint16_t));
     if (buffer->line_lengths == NULL)
     {
-        ps_memory_free(buffer->line_starts);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
         buffer->line_starts = NULL;
         buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
@@ -40,19 +40,19 @@ void ps_buffer_free_lines(ps_buffer *buffer)
 {
     if (buffer->line_starts != NULL)
     {
-        ps_memory_free(buffer->line_starts);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
         buffer->line_starts = NULL;
     }
     if (buffer->line_lengths != NULL)
     {
-        ps_memory_free(buffer->line_lengths);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->line_lengths);
         buffer->line_lengths = NULL;
     }
 }
 
 ps_buffer *ps_buffer_alloc(void)
 {
-    ps_buffer *buffer = ps_memory_malloc(sizeof(ps_buffer));
+    ps_buffer *buffer = ps_memory_malloc(PS_MEMORY_BUFFER, sizeof(ps_buffer));
     if (buffer == NULL)
         return NULL;
     buffer->error = PS_ERROR_NONE;
@@ -70,10 +70,10 @@ ps_buffer *ps_buffer_alloc(void)
 ps_buffer *ps_buffer_free(ps_buffer *buffer)
 {
     if (buffer->from_file)
-        ps_memory_free(buffer->text);
-    ps_memory_free(buffer->line_starts);
-    ps_memory_free(buffer->line_lengths);
-    ps_memory_free(buffer);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->text);
+    ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
+    ps_memory_free(PS_MEMORY_BUFFER, buffer->line_lengths);
+    ps_memory_free(PS_MEMORY_BUFFER, buffer);
     return NULL;
 }
 
@@ -298,12 +298,12 @@ bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
     buffer->length = (uint16_t)length;
     if (buffer->line_starts != NULL)
     {
-        ps_memory_free(buffer->line_starts);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
         buffer->line_starts = NULL;
     }
     if (buffer->line_lengths != NULL)
     {
-        ps_memory_free(buffer->line_lengths);
+        ps_memory_free(PS_MEMORY_BUFFER, buffer->line_lengths);
         buffer->line_lengths = NULL;
     }
     buffer->from_file = false;

@@ -12,16 +12,16 @@
 
 ps_string_heap *ps_string_heap_alloc(size_t size)
 {
-    ps_string_heap *heap = (ps_string_heap *)ps_memory_malloc(sizeof(ps_string_heap));
+    ps_string_heap *heap = (ps_string_heap *)ps_memory_malloc(PS_MEMORY_STRING, sizeof(ps_string_heap));
     if (heap == NULL)
         return NULL; // errno = ENOMEM
     heap->size = size > 0 ? size : PS_STRING_HEAP_SIZE;
     // heap->more = heap->size;
     heap->used = 0;
-    heap->data = (ps_string **)ps_memory_calloc(heap->size, sizeof(ps_string *));
+    heap->data = (ps_string **)ps_memory_calloc(PS_MEMORY_STRING, heap->size, sizeof(ps_string *));
     if (heap->data == NULL)
     {
-        ps_memory_free(heap);
+        ps_memory_free(PS_MEMORY_STRING, heap);
         return NULL; // errno = ENOMEM
     }
     return heap;
@@ -29,21 +29,18 @@ ps_string_heap *ps_string_heap_alloc(size_t size)
 
 ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
 {
-    if (heap != NULL)
+    if (heap != NULL && heap->data != NULL)
     {
-        if (heap->data != NULL)
+        for (size_t i = 0; i < heap->size; i++)
         {
-            for (size_t i = 0; i < heap->size; i++)
+            if (heap->data[i] != NULL)
             {
-                if (heap->data[i] != NULL)
-                {
-                    heap->data[i] = ps_string_free(heap->data[i]);
-                }
+                heap->data[i] = ps_string_free(heap->data[i]);
             }
-            ps_memory_free(heap->data);
         }
-        ps_memory_free(heap);
+        ps_memory_free(PS_MEMORY_STRING, heap->data);
     }
+    ps_memory_free(PS_MEMORY_STRING, heap);
     return NULL;
 }
 
@@ -97,11 +94,12 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
     {
         if (heap->data[index] == NULL)
         {
-            ps_string *s = (ps_string *)ps_memory_malloc(sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
+            ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING,
+                                                         sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
             if (s == NULL)
                 return NULL; // errno = ENOMEM
-            s->max = len;
-            s->len = len;
+            s->max = (ps_string_len)len;
+            s->len = (ps_string_len)len;
             memcpy((char *)s->str, z, len);
             s->str[len] = '\0'; // Ensure null-termination
             heap->data[index] = s;
@@ -111,7 +109,8 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
         }
         else if (strcmp((char *)(heap->data[index]->str), z) == 0)
         {
-            // fprintf(stderr, "ps_string_heap_create: found existing string '%s' at index %zu\n", heap->data[index]->str,
+            // fprintf(stderr, "ps_string_heap_create: found existing string '%s' at index %zu\n",
+            // heap->data[index]->str,
             //         index);
             return heap->data[index];
         }
@@ -129,7 +128,7 @@ bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)
             ps_string_free(s);
             heap->data[i] = NULL;
             heap->used -= 1;
-            ps_memory_free(s);
+            // ??? ps_memory_free(s);
             return true;
         }
     }

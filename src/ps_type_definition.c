@@ -18,7 +18,7 @@
 
 ps_type_definition *ps_type_definition_create(ps_value_type type, ps_value_type base)
 {
-    ps_type_definition *type_def = ps_memory_malloc(sizeof(ps_type_definition));
+    ps_type_definition *type_def = ps_memory_malloc(PS_MEMORY_TYPE, sizeof(ps_type_definition));
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
     type_def->type = type;
@@ -33,7 +33,7 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
     switch (type_def->type)
     {
     case PS_TYPE_ENUM:
-        ps_memory_free(type_def->def.e.values);
+        ps_memory_free(PS_MEMORY_TYPE, type_def->def.e.values);
         type_def->def.e.values = NULL;
         type_def->def.e.count = 0;
         break;
@@ -62,7 +62,7 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
         // nothing to free
         break;
     }
-    ps_memory_free(type_def);
+    ps_memory_free(PS_MEMORY_TYPE, type_def);
     return NULL;
 }
 
@@ -81,10 +81,10 @@ ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **va
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
     type_def->def.e.count = count;
-    type_def->def.e.values = ps_memory_calloc(count, sizeof(ps_symbol *));
+    type_def->def.e.values = ps_memory_calloc(PS_MEMORY_TYPE, count, sizeof(ps_symbol *));
     if (type_def->def.e.values == NULL)
     {
-        ps_memory_free(type_def);
+        ps_memory_free(PS_MEMORY_TYPE, type_def);
         return NULL; // errno = ENOMEM
     }
     for (ps_unsigned i = 0; i < count; i++)

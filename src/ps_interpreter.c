@@ -18,7 +18,7 @@
 
 ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check)
 {
-    ps_interpreter *interpreter = ps_memory_malloc(sizeof(ps_interpreter));
+    ps_interpreter *interpreter = ps_memory_malloc(PS_MEMORY_INTERPRETER, sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
     // Set default state
@@ -67,7 +67,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
             if (interpreter->environments[i] != NULL)
                 interpreter->environments[i] = ps_environment_free(interpreter->environments[i]);
         }
-        ps_memory_free(interpreter);
+        ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);
     }
     return NULL;
 }

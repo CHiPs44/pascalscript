@@ -47,14 +47,14 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 {
     ps_symbol_table *table;
-    table = ps_memory_malloc(sizeof(ps_symbol_table));
+    table = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table));
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
-    table->symbols = ps_memory_calloc(table->size, sizeof(ps_symbol *));
+    table->symbols = ps_memory_calloc(PS_MEMORY_SYMBOL, table->size, sizeof(ps_symbol *));
     if (table->symbols == NULL)
     {
-        ps_memory_free(table);
+        ps_memory_free(PS_MEMORY_SYMBOL, table);
         return NULL; // errno = ENOMEM
     }
     ps_symbol_table_reset(table, false);
@@ -63,16 +63,13 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 
 void *ps_symbol_table_free(ps_symbol_table *table)
 {
-    if (table != NULL)
+    if (table != NULL && table->symbols != NULL)
     {
-        if (table->symbols != NULL)
-        {
-            // fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
-            ps_symbol_table_reset(table, true);
-            ps_memory_free(table->symbols);
-        }
-        ps_memory_free(table);
+        // fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
+        ps_symbol_table_reset(table, true);
+        ps_memory_free(PS_MEMORY_SYMBOL, table->symbols);
     }
+    ps_memory_free(PS_MEMORY_SYMBOL, table);
     return NULL;
 }
 
@@ -158,8 +155,8 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;
     ps_symbol_table_size start_index = index;
-    // fprintf(stderr, "ADD\tps_symbol_table_add: '%*s' at index %05d (hash %08x)\n", -(int)PS_IDENTIFIER_LEN, symbol->name, index, hash);
-    // Find an empty slot in the table
+    // fprintf(stderr, "ADD\tps_symbol_table_add: '%*s' at index %05d (hash %08x)\n", -(int)PS_IDENTIFIER_LEN,
+    // symbol->name, index, hash); Find an empty slot in the table
     while (table->symbols[index] != NULL)
     {
         index += 1;
@@ -193,9 +190,12 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(output, "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "┃      #┃Hash / index  ┃Name                           ┃Kind      ┃Type      ┃Value                          ┃\n");
-    fprintf(output, "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    fprintf(output, "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┓\n");
+    fprintf(output, "┃      #┃Hash / index  ┃Name                           ┃Kind      ┃Type      ┃Value               "
+                    "           ┃\n");
+    fprintf(output, "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┫\n");
     for (unsigned int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -221,7 +221,8 @@ void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
             // clang-format on
         }
     }
-    fprintf(output, "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    fprintf(output, "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
+                    "━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }

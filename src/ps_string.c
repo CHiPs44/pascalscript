@@ -27,7 +27,7 @@ ps_string *ps_string_alloc(ps_string_len max)
     if (max == 0)
         max = PS_STRING_MAX_LEN;
     size_t size = sizeof(ps_string_len) + sizeof(ps_string_len) + (max + 1) * sizeof(ps_char);
-    ps_string *s = (ps_string *)ps_memory_malloc(size);
+    ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM;
     s->max = max;
@@ -37,7 +37,7 @@ ps_string *ps_string_alloc(ps_string_len max)
 
 ps_string *ps_string_free(ps_string *s)
 {
-    ps_memory_free(s);
+    ps_memory_free(PS_MEMORY_STRING, s);
     return NULL;
 }
 

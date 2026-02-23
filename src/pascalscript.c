@@ -19,7 +19,8 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/010-operators.pas"
+// #define DEBUGGER_SOURCE "examples/010-operators.pas"
+#define DEBUGGER_SOURCE "examples/000-minimal.pas"
 
 ps_interpreter *interpreter = NULL;
 
@@ -223,11 +224,13 @@ int main(int argc, char *argv[])
     if (dump_symbols)
         ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
+    /* Terminate interpreter */
+    fprintf(stderr, "ps_interpreter_free(%p)\n", (void *)interpreter);
+    interpreter = ps_interpreter_free(interpreter);
+
     if (memory)
         ps_memory_debug(stderr);
 
-    /* Terminate interpreter */
-    interpreter = ps_interpreter_free(interpreter);
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

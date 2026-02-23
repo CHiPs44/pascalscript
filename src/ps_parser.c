@@ -13,13 +13,13 @@
 
 ps_parser *ps_parser_alloc(void)
 {
-    ps_parser *parser = ps_memory_malloc( sizeof(ps_parser));
+    ps_parser *parser = ps_memory_malloc(PS_MEMORY_PARSER, sizeof(ps_parser));
     if (parser == NULL)
         return NULL;
     parser->lexers[0] = ps_lexer_alloc();
     if (parser->lexers[0] == NULL)
     {
-        ps_memory_free(parser);
+        ps_memory_free(PS_MEMORY_PARSER, parser);
         return NULL;
     }
     for (uint8_t i = 1; i < PS_PARSER_LEXER_COUNT; i++)
@@ -43,17 +43,17 @@ ps_parser *ps_parser_free(ps_parser *parser)
             parser->lexers[i] = NULL;
         }
     }
-    ps_memory_free(parser);
+    ps_memory_free(PS_MEMORY_PARSER, parser);
     return NULL;
 }
 
-// bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
-// {
-//     if (current_lexer > PS_PARSER_LEXER_COUNT || parser->lexers[current_lexer] == NULL)
-//         return false;
-//     parser->current_lexer = current_lexer;
-//     return true;
-// }
+bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
+{
+    if (current_lexer > PS_PARSER_LEXER_COUNT || parser->lexers[current_lexer] == NULL)
+        return false;
+    parser->current_lexer = current_lexer;
+    return true;
+}
 
 ps_lexer *ps_parser_get_lexer(ps_parser *parser)
 {

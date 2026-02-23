@@ -19,7 +19,7 @@
 
 ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 {
-    ps_value *value = ps_memory_malloc(sizeof(ps_value));
+    ps_value *value = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_value));
     if (value == NULL)
         return NULL;
     value->type = type;
@@ -32,7 +32,15 @@ ps_value *ps_value_free(ps_value *value)
 {
     if (value == NULL || !value->allocated)
         return NULL;
-    ps_memory_free(value);
+    switch (value->type->kind)
+    {
+    case PS_TYPE_EXECUTABLE:
+        ps_executable_free(value->data.x);
+        break;
+    default:
+        break;
+    }
+    ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;
 }
 
@@ -212,7 +220,8 @@ char *ps_value_to_string(ps_value *value, bool debug, int16_t width, int16_t pre
     if (value->type->value->data.t->type == PS_TYPE_ENUM)
     {
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s(%u)", value->type->value->data.t->def.e.values[value->data.u]->name, value->data.u);
+            snprintf(buffer, sizeof(buffer) - 1, "%s(%u)",
+                     value->type->value->data.t->def.e.values[value->data.u]->name, value->data.u);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->value->data.t->def.e.values[value->data.u]->name);
         return buffer;

@@ -13,8 +13,8 @@ Var
   T1While, T2While: Unsigned;
   T1Repeat, T2Repeat: Unsigned;
 Begin
-  Start := GetTickCount();
   WriteLn('Starting big loops...');
+  Start := GetTickCount();
 
   T1For := GetTickCount();
   For I := 1 To MaxLoops Do
@@ -37,13 +37,14 @@ Begin
   End;
   T2While := GetTickCount();
 
+  Finish := GetTickCount();
+
   WriteLn('PascalScript - Comparison of execution times for ', MaxLoops,' iterations:');
   WriteLn(' - for         : ', T2For - T1For, ' ms');
   WriteLn(' - while       : ', T2While - T1While, ' ms');
   WriteLn(' - repeat until: ', T2Repeat - T1Repeat, ' ms');
 
   WriteLn('Finished big loops.');
-  Finish := GetTickCount();
   WriteLn('Overall time: ', Finish - Start, ' ms');
   WriteLn('OK!');
 End.

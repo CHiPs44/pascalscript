@@ -14,7 +14,7 @@
 
 ps_executable *ps_executable_alloc(ps_formal_signature *signature, uint16_t line, uint16_t column)
 {
-    ps_executable *executable = ps_memory_malloc(sizeof(ps_executable));
+    ps_executable *executable = ps_memory_malloc(PS_MEMORY_EXECUTABLE, sizeof(ps_executable));
     if (executable == NULL)
         return NULL;
     executable->address = NULL;
@@ -28,9 +28,12 @@ ps_executable *ps_executable_free(ps_executable *executable)
 {
     if (executable == NULL)
         return NULL;
+    // System function?
+    if (executable->address != NULL)
+        return NULL;
     if (executable->formal_signature != NULL)
         executable->formal_signature = ps_formal_signature_free(executable->formal_signature);
-    ps_memory_free(executable);
+    ps_memory_free(PS_MEMORY_EXECUTABLE, executable);
     return NULL;
 }
 

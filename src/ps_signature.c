@@ -16,7 +16,7 @@
 
 ps_formal_signature *ps_formal_signature_alloc(uint8_t parameter_count, ps_symbol *result_type)
 {
-    ps_formal_signature *signature = ps_memory_malloc(sizeof(ps_formal_signature));
+    ps_formal_signature *signature = ps_memory_malloc(PS_MEMORY_SIGNATURE, sizeof(ps_formal_signature));
     if (signature == NULL)
         return NULL;
     signature->size = parameter_count;
@@ -25,7 +25,7 @@ ps_formal_signature *ps_formal_signature_alloc(uint8_t parameter_count, ps_symbo
     signature->parameters = NULL;
     if (parameter_count > 0)
     {
-        signature->parameters = ps_memory_calloc(parameter_count, sizeof(ps_formal_parameter));
+        signature->parameters = ps_memory_calloc(PS_MEMORY_SIGNATURE, parameter_count, sizeof(ps_formal_parameter));
         if (signature->parameters == NULL)
         {
             ps_formal_signature_free(signature);
@@ -40,8 +40,8 @@ ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature)
     if (signature != NULL)
     {
         if (signature->parameters != NULL)
-            ps_memory_free(signature->parameters);
-        ps_memory_free(signature);
+            ps_memory_free(PS_MEMORY_SIGNATURE, signature->parameters);
+        ps_memory_free(PS_MEMORY_SIGNATURE, signature);
     }
     return NULL;
 }
@@ -63,7 +63,7 @@ bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byre
     ps_formal_parameter *new_parameters;
     if (signature->parameter_count == 0)
     {
-        signature->parameters = ps_memory_calloc(1, sizeof(ps_formal_parameter));
+        signature->parameters = ps_memory_calloc(PS_MEMORY_SIGNATURE, 1, sizeof(ps_formal_parameter));
         if (signature->parameters == NULL)
             return false;
         signature->size = 1;
@@ -71,7 +71,8 @@ bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byre
     else if (signature->parameter_count >= signature->size)
     {
         // Increment size and ps_memory_realloc if needed
-        new_parameters = ps_memory_realloc(signature->parameters, (signature->size + 1) * sizeof(ps_formal_parameter));
+        new_parameters = ps_memory_realloc(PS_MEMORY_SIGNATURE, signature->parameters,
+                                           (signature->size + 1) * sizeof(ps_formal_parameter));
         if (new_parameters == NULL)
             return false;
         signature->size += 1;
