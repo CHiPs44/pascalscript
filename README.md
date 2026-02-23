@@ -466,7 +466,7 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (even with 8M
 
 #### Mathematical functions and constant(s)
 
-- `sqrt` `pow` or `**`?
+- `sqrt` `sqr` `power` (not) `**` operator) 
 - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
 - `ln` `log` `exp`
 - ...
@@ -514,7 +514,7 @@ Compile with:
 
 ### Tests in 32 bits mode and 3M of RAM
 
-Tests (folder `test`) are now intended to compile as 32 bits executable so we're not too far of our RP2040 target.
+Tests (folder `test`) are now intended to compile as 32 bits executable so we're not too far of our RP2040/RP2350 target.
 
 To install a 32 bits capable GCC on our modern 64 bits machines, you need to install multilib version of it:
 
@@ -526,7 +526,7 @@ To compile a 32 bits executable, use `-m32`:
 
 ```bash
 cd test/
-gcc -m32 -std=c17 -Wall -I../include test_value.c
+gcc -m32 -std=c23 -Wall -I../include test_value.c
 ```
 
 Programs "core dump" with 256K of RAM, I had to go up to 3M to make them running.
