@@ -10,13 +10,13 @@
 #include "ps_memory.h"
 #include "ps_string_heap.h"
 
-ps_string_heap *ps_string_heap_alloc(size_t size)
+ps_string_heap *ps_string_heap_alloc(size_t size, size_t more)
 {
     ps_string_heap *heap = (ps_string_heap *)ps_memory_malloc(PS_MEMORY_STRING, sizeof(ps_string_heap));
     if (heap == NULL)
         return NULL; // errno = ENOMEM
     heap->size = size > 0 ? size : PS_STRING_HEAP_SIZE;
-    // heap->more = heap->size;
+    heap->more = more > 0 ? more : heap->size;
     heap->used = 0;
     heap->data = (ps_string **)ps_memory_calloc(PS_MEMORY_STRING, heap->size, sizeof(ps_string *));
     if (heap->data == NULL)
@@ -44,19 +44,22 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
     return NULL;
 }
 
-// bool ps_string_heap_grow(ps_string_heap *heap)
-// {
-//     if (heap->more == 0)
-//         return false;
-//     ps_string **data = (ps_string **)ps_memory_realloc(heap->data, (heap->size + heap->more) * sizeof(ps_string *));
-//     if (data == NULL)
-//         return false; // errno = ENOMEM
-//     heap->data = data;
-//     heap->size += heap->more;
-//     return true;
-// }
+bool ps_string_heap_grow(ps_string_heap *heap)
+{
+    if (heap->more == 0)
+        return false;
+    ps_string **data = (ps_string **)ps_memory_realloc(
+        PS_MEMORY_STRING,
+        heap->data,
+        (heap->size + heap->more) * sizeof(ps_string *));
+    if (data == NULL)
+        return false; // errno = ENOMEM
+    heap->data = data;
+    heap->size += heap->more;
+    return true;
+}
 
-unsigned int ps_string_heap_get_hash_key(char *z)
+unsigned int ps_string_heap_get_hash_key(const char *z)
 {
     // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
     // 33 * x => 32 * x + x => x << 5 + x
@@ -71,7 +74,7 @@ unsigned int ps_string_heap_get_hash_key(char *z)
     return hash;
 }
 
-ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
+ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
 {
     if (z == NULL)
         return NULL;
@@ -94,8 +97,9 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
     {
         if (heap->data[index] == NULL)
         {
-            ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING,
-                                                         sizeof(ps_string_len) * 2 + len + 1); // +1 for null-terminator
+            // +1 for null-terminator
+            ps_string *s = (ps_string *)ps_memory_malloc(
+                PS_MEMORY_STRING, sizeof(ps_string_len) * 2 + len + 1);
             if (s == NULL)
                 return NULL; // errno = ENOMEM
             s->max = (ps_string_len)len;
@@ -109,9 +113,6 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, char *z)
         }
         else if (strcmp((char *)(heap->data[index]->str), z) == 0)
         {
-            // fprintf(stderr, "ps_string_heap_create: found existing string '%s' at index %zu\n",
-            // heap->data[index]->str,
-            //         index);
             return heap->data[index];
         }
         index = (index + 1) % heap->size;
@@ -128,20 +129,19 @@ bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)
             ps_string_free(s);
             heap->data[i] = NULL;
             heap->used -= 1;
-            // ??? ps_memory_free(s);
             return true;
         }
     }
     return false; // String not found in the heap
 }
 
-void ps_string_heap_dump(ps_string_heap *heap, FILE *f)
+void ps_string_heap_dump(const ps_string_heap *heap, FILE *f)
 {
     size_t free = 0;
     size_t used = 0;
     if (f == NULL)
         f = stderr;
-    fprintf(f, "String Heap: size=%zu, used=%zu\n" /*, more=%zu\n"*/, heap->size, heap->used /*, heap->more*/);
+    fprintf(f, "String Heap: size=%zu, used=%zu\n, more=%zu\n", heap->size, heap->used, heap->more);
     for (size_t i = 0; i < heap->size; i++)
     {
         if (heap->data[i] != NULL)

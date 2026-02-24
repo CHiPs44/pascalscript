@@ -30,7 +30,7 @@ extern "C"
     bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value);
     bool ps_procedure_write    (ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision);
     bool ps_procedure_writeln  (ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision);
-    bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value);
+    bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value);
     /* clang-format on */
 
 #ifdef __cplusplus

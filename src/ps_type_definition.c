@@ -136,7 +136,7 @@ ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_en
     return type_def;
 }
 
-char *ps_type_definition_get_name(ps_type_definition *type_def)
+char *ps_type_definition_get_name(const ps_type_definition *type_def)
 {
     static char buffer[128];
     if (type_def == NULL)

@@ -18,13 +18,13 @@
 
 bool ps_symbol_table_trace = false;
 
-void ps_symbol_table_log(const char *format, ...)
+void ps_symbol_table_log(const char *format, ...) // NOSONAR
 {
     if (!ps_symbol_table_trace)
         return;
     va_list args;
     va_start(args, format);
-    vfprintf(stderr, format, args);
+    vfprintf(stderr, format, args); // NOSONAR
     va_end(args);
 }
 
@@ -118,23 +118,23 @@ ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps
                 index = 0; // wrap around
             if (index == start_index)
             {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (char *)name);
+                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (const char *)name);
                 return PS_SYMBOL_TABLE_NOT_FOUND;
             }
             if (table->symbols[index] == NULL)
                 continue;
-            if (strcmp((char *)(table->symbols[index]->name), (char *)name) == 0)
+            if (strcmp((char *)(table->symbols[index]->name), (const char *)name) == 0)
             {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);
+                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (const char *)name, index);
                 return index;
             }
         } while (true);
     }
-    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (char *)name, index);
+    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (const char *)name, index);
     return index;
 }
 
-ps_symbol *ps_symbol_table_get(ps_symbol_table *table, const ps_identifier *name)
+ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
@@ -174,7 +174,7 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
     return PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
-void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table)
+void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table)
 {
     ps_symbol *symbol;
     ps_symbol_table_size free = 0;

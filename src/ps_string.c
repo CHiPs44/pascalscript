@@ -41,7 +41,7 @@ ps_string *ps_string_free(ps_string *s)
     return NULL;
 }
 
-ps_string *ps_string_set(ps_string *s, char *z)
+ps_string *ps_string_set(ps_string *s, const char *z)
 {
     size_t len = strlen(z);
     if (len > s->max)
@@ -55,7 +55,7 @@ ps_string *ps_string_set(ps_string *s, char *z)
     return s;
 }
 
-ps_string *ps_string_create(char *z, ps_string_len max)
+ps_string *ps_string_create(const char *z, ps_string_len max)
 {
     size_t len = strlen(z);
     if (max == 0)
@@ -70,7 +70,7 @@ ps_string *ps_string_create(char *z, ps_string_len max)
         return NULL; // errno = ENOMEM
     if (ps_string_set(s, z) == NULL)
     {
-        s = ps_string_free(s);
+        ps_string_free(s);
         return NULL; // errno = EINVAL
     }
     return s;
@@ -87,7 +87,7 @@ ps_string *ps_string_create_char(ps_char c)
     return s;
 }
 
-ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max)
+ps_string *ps_string_concat(const ps_string *a, const ps_string *b, ps_string_len max)
 {
     size_t len = a->len + b->len;
     // exit if max length is specified and exceeded
@@ -116,7 +116,7 @@ ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max)
     memcpy(c->str, a->str, a->len);
     memcpy(c->str + a->len, b->str, b->len);
     c->str[len] = '\0'; // null terminate
-    c->len = len;
+    c->len = (ps_string_len)len;
     return c;
 }
 
@@ -132,7 +132,7 @@ ps_string *ps_string_concat_chars(ps_char a, ps_char b)
     return s;
 }
 
-ps_string *ps_string_append(ps_string *a, ps_string *b)
+ps_string *ps_string_append(ps_string *a, const ps_string *b)
 {
     size_t len = a->len + b->len;
     if (len > a->max)
@@ -140,11 +140,11 @@ ps_string *ps_string_append(ps_string *a, ps_string *b)
         return NULL; // errno = EINVAL;
     }
     memcpy(a->str + a->len, b->str, b->len);
-    a->len = len;
+    a->len = (ps_string_len)len;
     return a;
 }
 
-ps_string *ps_string_copy(ps_string *a, ps_string_len from, ps_string_len len)
+ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len len)
 {
     if (from > a->len)
     {
@@ -170,7 +170,7 @@ int ps_string_compare(ps_string *a, ps_string *b)
 
 ps_string_len ps_string_position(ps_string *substr, ps_string *s)
 {
-    char *pos = strstr((char *)s->str, (char *)substr->str);
+    const char *pos = strstr((char *)s->str, (char *)substr->str);
     if (pos == NULL)
         return 0;
     return (ps_string_len)(pos - (char *)s->str + 1);
@@ -178,10 +178,6 @@ ps_string_len ps_string_position(ps_string *substr, ps_string *s)
 
 ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len count)
 {
-    // (void)s;
-    // (void)index;
-    // (void)count;
-    // return NULL; // TODO
     if (index < 1 || index > s->len)
     {
         errno = EINVAL;
@@ -198,7 +194,7 @@ ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len cou
     return s;
 }
 
-ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index)
+ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index) // NOSONAR
 {
     (void)source;
     (void)s;
@@ -206,7 +202,7 @@ ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_le
     return NULL; // TODO
 }
 
-ps_string *ps_string_lowercase(ps_string *s)
+ps_string *ps_string_lowercase(const ps_string *s)
 {
     ps_string *t = ps_string_alloc(s->max);
     if (t == NULL)
@@ -222,7 +218,7 @@ ps_string *ps_string_lowercase(ps_string *s)
     return t;
 }
 
-ps_string *ps_string_uppercase(ps_string *s)
+ps_string *ps_string_uppercase(const ps_string *s)
 {
     ps_string *t = ps_string_alloc(s->max);
     if (t == NULL)

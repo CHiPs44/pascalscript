@@ -60,13 +60,13 @@ extern "C"
     ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier *name);
 
     /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_get(ps_symbol_table *table, const ps_identifier *name);
+    ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier *name);
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
     ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
 
     /** @brief Dump symbol table to stderr */
-    void ps_symbol_table_dump(FILE *output, char *title, ps_symbol_table *table);
+    void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table);
 
 #ifdef __cplusplus
 }

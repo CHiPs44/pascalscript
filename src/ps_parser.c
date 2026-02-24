@@ -55,12 +55,12 @@ bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
     return true;
 }
 
-ps_lexer *ps_parser_get_lexer(ps_parser *parser)
+ps_lexer *ps_parser_get_lexer(const ps_parser *parser)
 {
     return parser->lexers[parser->current_lexer];
 }
 
-void ps_parser_debug(ps_parser *parser, char *message)
+void ps_parser_debug(const ps_parser *parser, char *message)
 {
     if (message == NULL)
         fprintf(stderr, "ERROR %s\n", ps_error_get_message(parser->error));
@@ -80,7 +80,7 @@ bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
     return true;
 }
 
-ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[])
+ps_token_type ps_parser_expect_token_types(const ps_parser *parser, size_t token_type_count, const ps_token_type token_types[])
 {
     ps_token_type token_type = ps_parser_get_lexer(parser)->current_token.type;
     for (size_t i = 0; i < token_type_count; i++)
@@ -91,7 +91,7 @@ ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_
     return PS_TOKEN_NONE;
 }
 
-ps_token_type ps_parser_expect_statement_end_token(ps_parser *parser)
+ps_token_type ps_parser_expect_statement_end_token(const ps_parser *parser)
 {
     return ps_parser_expect_token_types(
         parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});

@@ -28,8 +28,8 @@ extern "C"
         ps_lexer *lexers[PS_PARSER_LEXER_COUNT];
         int current_lexer;
         ps_error error;
-        bool trace;     // : 1;
-        bool debug;     // : 1;
+        bool trace;
+        bool debug;
     } ps_parser;
 
 #define PS_PARSER_SIZE sizeof(ps_parser)
@@ -39,13 +39,13 @@ extern "C"
     /** @brief Free parser & lexers */
     ps_parser *ps_parser_free(ps_parser *parser);
     /** @brief Get current lexer */
-    ps_lexer *ps_parser_get_lexer(ps_parser *parser);
+    ps_lexer *ps_parser_get_lexer(const ps_parser *parser);
     /** @brief Expect token type */
     bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type);
     /** @brief Expect token types */
-    ps_token_type ps_parser_expect_token_types(ps_parser *parser, size_t token_type_count, ps_token_type token_types[]);
+    ps_token_type ps_parser_expect_token_types(const ps_parser *parser, size_t token_type_count, const ps_token_type token_types[]);
     /** @brief Expect end of statement token: ';', END, ELSE, UNTIL */
-    ps_token_type ps_parser_expect_statement_end_token(ps_parser *parser);
+    ps_token_type ps_parser_expect_statement_end_token(const ps_parser *parser);
 
 #ifdef __cplusplus
 }

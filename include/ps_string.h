@@ -25,13 +25,13 @@ extern "C"
 
     /// @brief Set existing string to new value if length fits
     /// @return string NULL if len > max
-    ps_string *ps_string_set(ps_string *s, char *z);
+    ps_string *ps_string_set(ps_string *s, const char *z);
 
     /// @brief Allocate and set a new string from a null terminated "C" string
     /// @example create("Hello") => "Hello"
     /// @example create("...String longer than 255 chars...") =>  NULL with errno = EINVAL
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_create(char *z, ps_string_len max);
+    ps_string *ps_string_create(const char *z, ps_string_len max);
 
     /// @brief Allocate and set a new string from a char
     /// @example create_char('A') => "A"
@@ -41,7 +41,7 @@ extern "C"
     /// @brief Concatenate two strings into another one if lengths are OK
     /// @example concat('ABC', 'DEF') => 'ABCDEF'
     /// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_concat(ps_string *a, ps_string *b, ps_string_len max);
+    ps_string *ps_string_concat(const ps_string *a, const ps_string *b, ps_string_len max);
 
     /// @brief Concatenate two chars into a new string
     /// @example concat('A', 'B') => "AB"
@@ -51,7 +51,7 @@ extern "C"
     /// @brief Append string b to string a if lengths are OK
     /// @example append('ABC', 'DEF') => "ABCDEF"
     /// @return a or NULL if error
-    ps_string *ps_string_append(ps_string *a, ps_string *b);
+    ps_string *ps_string_append(ps_string *a, const ps_string *b);
 
     /// @brief Get substring beginning at 'start' for 'length' chars (1 based)
     /// @example substring('ABCDEFGHI',  3, 5) => "CDEFG"
@@ -59,7 +59,7 @@ extern "C"
     /// @example substring('ABCDEFGHI',  1, 9) => "ABCDEFGHI"
     /// @example substring('ABCDEFGHI', 10, 1) => NULL as 10 > 9
     /// @return Newly allocated string or NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_copy(ps_string *a, ps_string_len start, ps_string_len length);
+    ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len len);
 
     /// @brief Compare two strings
     /// @return -1 if a<b, 0 if a=b, 1 if a>b (same as strcmp)
@@ -89,12 +89,12 @@ extern "C"
     /// @brief Convert string to lowercase
     /// @example lowercase('AbC') => 'abc'
     /// @return New string or NULL if error
-    ps_string *ps_string_lowercase(ps_string *s);
+    ps_string *ps_string_lowercase(const ps_string *s);
 
     /// @brief Convert string to uppercase
     /// @example uppercase('aBc') => 'ABC'
     /// @return New string or NULL if error
-    ps_string *ps_string_uppercase(ps_string *s);
+    ps_string *ps_string_uppercase(const ps_string *s);
 
     /// @brief Dump string to buffer
     char *ps_string_dump(ps_string *s);

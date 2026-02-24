@@ -31,17 +31,17 @@ PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , .proc_file_write, &ps_pro
 bool ps_procedures_init(ps_environment *system)
 {
     (void)system;
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_read);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_readln);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_write);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln);
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_read)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_readln)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_write)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln)
     return true;
 error:
     return false;
 }
 
-bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
+bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
 {
     unsigned int seed = 0;
     // No argument: use current time as seed
@@ -54,7 +54,7 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
             seed = (unsigned int)(value->data.i);
             break;
         case PS_TYPE_UNSIGNED:
-            seed = (unsigned int)(value->data.u);
+            seed = (unsigned int)(value->data.u); // NOSONAR
             break;
         default:
             interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
@@ -71,7 +71,7 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, ps_value *value)
     return true;
 }
 
-bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);
@@ -80,7 +80,7 @@ bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value)
     return false;
 }
 
-bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value)
+bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);

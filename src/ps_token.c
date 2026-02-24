@@ -9,7 +9,7 @@
 #include "ps_error.h"
 #include "ps_token.h"
 
-void ps_token_debug(FILE *output, char *message, ps_token *token)
+void ps_token_debug(FILE *output, const char *message, ps_token *token)
 {
     if (output == NULL)
         output = stderr;
@@ -21,7 +21,7 @@ char *ps_token_type_dump_value(ps_token_type token_type, char *default_value)
 {
     char *type_name;
     // clang-format off
-    switch (token_type)
+    switch (token_type) // NOSONAR
     {
     case PS_TOKEN_NONE:              return "NONE";
     case PS_TOKEN_INTEGER_VALUE:     return "INTEGER";
@@ -73,7 +73,7 @@ char *ps_token_dump_value(ps_token *token)
 
     type_name = ps_token_type_dump_value(token->type, "UNKNOWN");
     memset(value, 0, sizeof(value));
-    switch (token->type)
+    switch (token->type) // NOSONAR
     {
     case PS_TOKEN_NONE:
         snprintf(value, sizeof(value) - 1, "%04d: %s", token->type, type_name);
@@ -102,29 +102,29 @@ char *ps_token_dump_value(ps_token *token)
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;
     /* These are now handled as keywords, see below */
-    case PS_TOKEN_AT_SIGN:           // @
-    case PS_TOKEN_CARET:             // ^
-    case PS_TOKEN_COLON:             // :
-    case PS_TOKEN_COMMA:             // ,
-    case PS_TOKEN_DOT:               // .
-    case PS_TOKEN_EQ:                // =
-    case PS_TOKEN_GT:                // >
-    case PS_TOKEN_LEFT_BRACKET:      // [
-    case PS_TOKEN_LEFT_PARENTHESIS:  // (
-    case PS_TOKEN_LT:                // <
-    case PS_TOKEN_MINUS:             // -
-    case PS_TOKEN_PLUS:              // +
-    case PS_TOKEN_RIGHT_BRACKET:     // ]
-    case PS_TOKEN_RIGHT_PARENTHESIS: // )
-    case PS_TOKEN_SEMI_COLON:        // ;
-    case PS_TOKEN_SLASH:             // /
-    case PS_TOKEN_STAR:              // *
-    case PS_TOKEN_ASSIGN:            // :=
-    case PS_TOKEN_GE:                // >=
-    case PS_TOKEN_LE:                // <=
-    case PS_TOKEN_NE:                // <>
-    case PS_TOKEN_POWER:             // **
-    case PS_TOKEN_RANGE:             // ..
+    case PS_TOKEN_AT_SIGN:           // "@"
+    case PS_TOKEN_CARET:             // "^"
+    case PS_TOKEN_COLON:             // ":"
+    case PS_TOKEN_COMMA:             // ","
+    case PS_TOKEN_DOT:               // "."
+    case PS_TOKEN_EQ:                // "="
+    case PS_TOKEN_GT:                // ">"
+    case PS_TOKEN_LEFT_BRACKET:      // "["
+    case PS_TOKEN_LEFT_PARENTHESIS:  // "("
+    case PS_TOKEN_LT:                // "<"
+    case PS_TOKEN_MINUS:             // "-"
+    case PS_TOKEN_PLUS:              // "+"
+    case PS_TOKEN_RIGHT_BRACKET:     // "]"
+    case PS_TOKEN_RIGHT_PARENTHESIS: // ")"
+    case PS_TOKEN_SEMI_COLON:        // ";"
+    case PS_TOKEN_SLASH:             // "/"
+    case PS_TOKEN_STAR:              // "*"
+    case PS_TOKEN_ASSIGN:            // ":="
+    case PS_TOKEN_GE:                // ">="
+    case PS_TOKEN_LE:                // "<="
+    case PS_TOKEN_NE:                // "<>"
+    case PS_TOKEN_POWER:             // "**"
+    case PS_TOKEN_RANGE:             // ".."
         type_name = "KEYWORD";
         snprintf(value, sizeof(value) - 1, "%04d: '%s'", token->type, token->value.identifier);
         break;

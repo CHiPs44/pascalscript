@@ -23,7 +23,8 @@
 */
 int ps_readall(FILE *in, char **dataptr, size_t *sizeptr)
 {
-    char *data = NULL, *temp;
+    char *data = NULL;
+    char *temp;
     size_t size = 0;
     size_t used = 0;
     size_t n;

@@ -31,7 +31,7 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
     interpreter->bool_eval = bool_eval;
     interpreter->io_check = io_check;
     // Allocate string heap
-    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE);
+    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
     if (interpreter->string_heap == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate parser
@@ -276,13 +276,13 @@ OK:
     return true;
 }
 
-bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
+bool ps_interpreter_load_string(const ps_interpreter *interpreter, char *source, size_t length)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
-bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
+bool ps_interpreter_load_file(const ps_interpreter *interpreter, const char *filename)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_file(lexer->buffer, filename);
@@ -290,7 +290,7 @@ bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
 
 bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 {
-    ps_parser *parser = interpreter->parser;
+    const ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     ps_lexer_reset(lexer);
 

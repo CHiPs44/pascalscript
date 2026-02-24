@@ -31,14 +31,14 @@ ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def          
 ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .system = true, .allocated = false};
 
 /* clang-format on */
-#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                                             \
-    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__};                      \
-    ps_value ps_value_##__name__ = {                                                                                   \
-        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
-    ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
-                                      .name = __NAME__,                                                                \
-                                      .value = &ps_value_##__name__,                                                   \
-                                      .system = true,                                                                  \
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                        \
+    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__}; \
+    ps_value ps_value_##__name__ = {                                                              \
+        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}}; \
+    ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                     \
+                                      .name = __NAME__,                                           \
+                                      .value = &ps_value_##__name__,                              \
+                                      .system = true,                                             \
                                       .allocated = false}
 /* clang-format off */
 
@@ -64,12 +64,12 @@ PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_T
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
-    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,                                  \
-                                                     .name = NAME,                                                     \
-                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
-                                                     .system = true,                                                   \
+#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                     \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}}; \
+    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,            \
+                                                     .name = NAME,                               \
+                                                     .value = &ps_value_##TYPE##_##VALUE,        \
+                                                     .system = true,                             \
                                                      .allocated = false}
 /* clang-format off */
 
@@ -81,7 +81,7 @@ PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, (ps_unsigned)PS_UNSIGNED_MAX
 PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX                                              );
 PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                                              );
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                          );
-// PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
+// does not work with (ps_real)M_PI...
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323846                                   );
 
 /**********************************************************************************************************************/
@@ -89,12 +89,12 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
-    ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,                                  \
-                                                     .name = NAME,                                                     \
-                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
-                                                     .system = true,                                                   \
+#define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                     \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}}; \
+    ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,            \
+                                                     .name = NAME,                               \
+                                                     .value = &ps_value_##TYPE##_##VALUE,        \
+                                                     .system = true,                             \
                                                      .allocated = false}
 /* clang-format off */
 
@@ -120,69 +120,72 @@ bool ps_system_init(ps_environment *system)
     /* TYPES                                                                  */
     /**************************************************************************/
 
-    // // Array: empty
-    // ps_system_array.value->type->def.a.count = 0;
-    // ps_system_array.value->type->def.a.range = NULL;
-    // ps_system_array.value->type->def.a.type_def = NULL;
-    // // String: max length
-    // ps_system_string.value->type->def.s.max = PS_STRING_MAX_LEN;
-    // // Enum: empty
-    // ps_system_enum.value->type->def.e.count = 0;
-    // ps_system_enum.value->type->def.e.values = NULL;
+    // String: max length
+    ps_system_string.value->type->value->data.t->def.s.max = PS_STRING_MAX_LEN;
+    // Enum: empty
+    ps_system_enum.value->type->value->data.t->def.e.count = 0;
+    ps_system_enum.value->type->value->data.t->def.e.values = NULL;
+    // Subranges: "empty"
+    ps_system_subrange_char.value->data.t->def.g.c.min = '\0';
+    ps_system_subrange_char.value->data.t->def.g.c.max = '\0';
+    ps_system_subrange_integer.value->data.t->def.g.i.min = 0;
+    ps_system_subrange_integer.value->data.t->def.g.i.max = 0;
+    ps_system_subrange_unsigned.value->data.t->def.g.u.min = 0;
+    ps_system_subrange_unsigned.value->data.t->def.g.u.max = 0;
+    ps_system_subrange_enum.value->data.t->def.e.count = 0;
+    ps_system_subrange_enum.value->data.t->def.e.values = NULL;
     // Register the system types
-    ADD_SYSTEM_SYMBOL(ps_system_none);
-    ADD_SYSTEM_SYMBOL(ps_system_type_def);
-    ADD_SYSTEM_SYMBOL(ps_system_boolean);
-    ADD_SYSTEM_SYMBOL(ps_system_char);
-    ADD_SYSTEM_SYMBOL(ps_system_integer);
-    ADD_SYSTEM_SYMBOL(ps_system_unsigned);
-    ADD_SYSTEM_SYMBOL(ps_system_real);
-    ADD_SYSTEM_SYMBOL(ps_system_string);
-    ADD_SYSTEM_SYMBOL(ps_system_procedure);
-    ADD_SYSTEM_SYMBOL(ps_system_function);
-    ADD_SYSTEM_SYMBOL(ps_system_subrange_char);
-    ADD_SYSTEM_SYMBOL(ps_system_subrange_integer);
-    ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned);
-    ADD_SYSTEM_SYMBOL(ps_system_subrange_enum);
-    ADD_SYSTEM_SYMBOL(ps_system_enum);
-    ADD_SYSTEM_SYMBOL(ps_system_array);
-    ADD_SYSTEM_SYMBOL(ps_system_record);
+    ADD_SYSTEM_SYMBOL(ps_system_none)
+    ADD_SYSTEM_SYMBOL(ps_system_type_def)
+    ADD_SYSTEM_SYMBOL(ps_system_boolean)
+    ADD_SYSTEM_SYMBOL(ps_system_char)
+    ADD_SYSTEM_SYMBOL(ps_system_integer)
+    ADD_SYSTEM_SYMBOL(ps_system_unsigned)
+    ADD_SYSTEM_SYMBOL(ps_system_real)
+    ADD_SYSTEM_SYMBOL(ps_system_string)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure)
+    ADD_SYSTEM_SYMBOL(ps_system_function)
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_char)
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_integer)
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned)
+    ADD_SYSTEM_SYMBOL(ps_system_subrange_enum)
+    ADD_SYSTEM_SYMBOL(ps_system_enum)
+    ADD_SYSTEM_SYMBOL(ps_system_array)
+    ADD_SYSTEM_SYMBOL(ps_system_record)
 
     /**************************************************************************/
     /* VARIABLES                                                              */
     /**************************************************************************/
 
-    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_exitcode);
-    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_ioresult);
+    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_exitcode)
+    ADD_SYSTEM_SYMBOL(ps_system_variable_integer_ioresult)
 
     /**************************************************************************/
     /* CONSTANTS                                                              */
     /**************************************************************************/
 
-    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_false);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_true);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_maxint);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_minint);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_maxuint);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_real_maxreal);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_real_minreal);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_real_epsreal);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_real_pi);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_false)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_boolean_true)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_maxint)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_integer_minint)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_maxuint)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_maxreal)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_minreal)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_epsreal)
+    ADD_SYSTEM_SYMBOL(ps_system_constant_real_pi)
 
     /**************************************************************************/
     /* BITNESS & VERSION                                                      */
     /**************************************************************************/
 
-    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_bitness);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_bitness)
     ps_system_constant_string_ps_version.value->data.s->len = strlen(PS_VERSION);
     ps_system_constant_string_ps_version.value->data.s->max = strlen(PS_VERSION);
-    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_major);
-    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_minor);
-    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_patch);
-    // ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_version_index);
-    ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version);
+    ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version)
 
-    // ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
+#ifdef DEBUG_INIT
+    ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
+#endif
 
     return true;
 
@@ -190,7 +193,7 @@ error:
     return false;
 }
 
-void ps_system_done(ps_environment *system)
+void ps_system_done(const ps_environment *system)
 {
     (void)system;
 }

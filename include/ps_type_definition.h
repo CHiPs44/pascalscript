@@ -27,30 +27,34 @@ extern "C"
 
     typedef struct s_ps_type_definition_subrange_char
     {
-        ps_char min, max;
+        ps_char min;
+        ps_char max;
     } __attribute__((__packed__)) ps_type_definition_subrange_char;
 
     typedef struct s_ps_type_definition_subrange_integer
     {
-        ps_integer min, max;
+        ps_integer min;
+        ps_integer max;
     } __attribute__((__packed__)) ps_type_definition_subrange_integer;
 
     typedef struct s_ps_type_definition_subrange_unsigned
     {
-        ps_unsigned min, max;
+        ps_unsigned min;
+        ps_unsigned max;
     } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
 
     typedef uint8_t ps_enum_value;
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_enum_value min, max; /** @brief min and max values in the enumeration for the subrange */
+        ps_enum_value min;      /** @brief min value in the enumeration for the subrange */
+        ps_enum_value max;      /** @brief max value in the enumeration for the subrange */
     } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
     {
-        // ps_value_type base; /** @brief type of subrange: integer, unsigned, char, enum */
-        union {
+        union
+        {
             ps_type_definition_subrange_char c;
             ps_type_definition_subrange_integer i;
             ps_type_definition_subrange_unsigned u;
@@ -69,7 +73,7 @@ extern "C"
     } __attribute__((__packed__)) ps_type_definition_enum;
 
     /** @brief Sets are stored in 32 bytes as a 256 bits field,
-     *         each value of referenced enumeration or Char is corresponding 
+     *         each value of referenced enumeration or Char is corresponding
      *         to 2^Ord(enum_value or char_code)
      * @details For example, for a set of (One, Two, Three):
      *  - empty set is 0
@@ -134,7 +138,8 @@ extern "C"
         ps_value_type type; /** @brief visible value type */
         ps_value_type base; /** @brief same as type for internal types like integer or char,
                                        values for sub-type for subranges and enums, ... */
-        union {
+        union
+        {
             ps_type_definition_enum e;
             ps_type_definition_subrange g;
             ps_type_definition_set t;
@@ -148,7 +153,7 @@ extern "C"
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
-    char *ps_type_definition_get_name(ps_type_definition *type_def);
+    char *ps_type_definition_get_name(const ps_type_definition *type_def);
 
     void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
 

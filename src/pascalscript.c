@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
     bool verbose = false;
     // Paths & file names
     char *current_path = NULL;
-    char *example_path = NULL;
     char *program_file = NULL;
     char source_file[256] = {0};
 
@@ -145,7 +144,6 @@ int main(int argc, char *argv[])
     current_path = getcwd(NULL, 0);
     if (verbose)
         fprintf(stderr, "Current working directory: %s\n", current_path);
-    example_path = "";
     if (arg + 1 < argc)
     {
         program_file = argv[argc - 1];
@@ -153,12 +151,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        example_path = "..";
-        if (verbose)
-            fprintf(stderr, "Example path: %s\n", example_path);
         program_file = DEBUGGER_SOURCE;
         if (program_file != NULL)
-            snprintf(source_file, sizeof(source_file) - 1, "%s/%s/%s", current_path, example_path, program_file);
+            snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
         else
             source_file[0] = '\0';
     }
