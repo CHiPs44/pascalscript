@@ -63,9 +63,9 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
 
 void *ps_symbol_table_free(ps_symbol_table *table)
 {
+    fprintf(stderr, "ps_symbol_table_free(%p)\n", (void *)table);
     if (table != NULL && table->symbols != NULL)
     {
-        // fprintf(stderr, "FREE\tSYMBOL TABLE: %p, symbols at %p\n", table, table->symbols);
         ps_symbol_table_reset(table, true);
         ps_memory_free(PS_MEMORY_SYMBOL, table->symbols);
     }

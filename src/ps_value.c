@@ -30,11 +30,16 @@ ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 
 ps_value *ps_value_free(ps_value *value)
 {
+    fprintf(stderr, "ps_value_free(%p)\n", (void *)value);
+    ps_value_debug(stderr, "VALUE", value);
     if (value == NULL || !value->allocated)
         return NULL;
-    switch (value->type->kind)
+    switch (value->type->value->data.t->base)
     {
+    // case PS_SYMBOL_KIND_FUNCTION:
+    // case PS_SYMBOL_KIND_PROCEDURE:
     case PS_TYPE_EXECUTABLE:
+        fprintf(stderr, "\tps_value_free(%p): EXECUTABLE(%p)\n", (void *)value, (void *)(value->data.x));
         ps_executable_free(value->data.x);
         break;
     default:

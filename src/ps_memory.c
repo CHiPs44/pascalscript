@@ -24,7 +24,7 @@ size_t reallocated[PS_MEMORY_CLASS_COUNT] = {0};
 size_t frees[PS_MEMORY_CLASS_COUNT] = {0};
 size_t freed[PS_MEMORY_CLASS_COUNT] = {0};
 
-bool ps_memory_debug_enabled = true;
+bool ps_memory_debug_enabled = false;
 
 /**
  * @brief Allocate and count size allocated
