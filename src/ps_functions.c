@@ -89,7 +89,8 @@ error:
     return false;
 }
 
-ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *value, ps_value *result)
+ps_error ps_function_exec_1arg(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *value,
+                               ps_value *result)
 {
     assert(interpreter != NULL);
     assert(symbol != NULL);
@@ -105,7 +106,8 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, p
     return function(interpreter, value, result);
 }
 
-ps_error ps_function_exec_1arg_s(ps_interpreter *interpreter, ps_symbol *symbol, ps_symbol *type, ps_value *result)
+ps_error ps_function_exec_1arg_s(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_symbol *type,
+                                 ps_value *result)
 {
     assert(interpreter != NULL);
     assert(symbol != NULL);
@@ -121,8 +123,8 @@ ps_error ps_function_exec_1arg_s(ps_interpreter *interpreter, ps_symbol *symbol,
     return function(interpreter, type, result);
 }
 
-ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, ps_value *a, ps_value *b,
-                                ps_value *result)
+ps_error ps_function_exec_2args(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *a,
+                                const ps_value *b, ps_value *result)
 {
     assert(interpreter != NULL);
     assert(symbol != NULL);
@@ -134,7 +136,7 @@ ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, 
     ps_function_2args function = (ps_function_2args)(symbol->value->data.x->func_2args);
     if (function == NULL)
     {
-        ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
+        ps_interpreter_set_message((ps_interpreter *)interpreter, "Function '%s' not implemented", symbol->name);
         return PS_ERROR_NOT_IMPLEMENTED;
     }
     return function(interpreter, a, b, result);
@@ -145,7 +147,7 @@ ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, 
 /******************************************************************************/
 
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
-ps_error ps_function_odd(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_odd(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -164,7 +166,7 @@ ps_error ps_function_odd(const ps_interpreter *interpreter, ps_value *value, ps_
 }
 
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
-ps_error ps_function_even(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_even(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -183,7 +185,7 @@ ps_error ps_function_even(const ps_interpreter *interpreter, ps_value *value, ps
 }
 
 /** @brief ORD - Get ordinal value of boolean / char */
-ps_error ps_function_ord(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_ord(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     switch (value->type->value->data.t->base)
@@ -215,7 +217,7 @@ ps_error ps_function_ord(const ps_interpreter *interpreter, ps_value *value, ps_
 }
 
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
-ps_error ps_function_chr(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_chr(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -236,7 +238,7 @@ ps_error ps_function_chr(const ps_interpreter *interpreter, ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low(const ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+ps_error ps_function_low(const ps_interpreter *interpreter, const ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -279,7 +281,7 @@ ps_error ps_function_low(const ps_interpreter *interpreter, ps_symbol *type, ps_
         break;
     case PS_TYPE_BOOLEAN:
         result->type = &ps_system_boolean;
-        result->data.b = (ps_boolean) false;
+        result->data.b = ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_ARRAY:
         return PS_ERROR_NOT_IMPLEMENTED;
@@ -290,7 +292,7 @@ ps_error ps_function_low(const ps_interpreter *interpreter, ps_symbol *type, ps_
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_high(const ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+ps_error ps_function_high(const ps_interpreter *interpreter, const ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -333,7 +335,7 @@ ps_error ps_function_high(const ps_interpreter *interpreter, ps_symbol *type, ps
         break;
     case PS_TYPE_BOOLEAN:
         result->type = &ps_system_boolean;
-        result->data.b = (ps_boolean) true;
+        result->data.b = ps_system_constant_boolean_true.value->data.b;
         break;
     case PS_TYPE_ARRAY:
         return PS_ERROR_NOT_IMPLEMENTED;
@@ -345,7 +347,7 @@ ps_error ps_function_high(const ps_interpreter *interpreter, ps_symbol *type, ps
 }
 
 /** @brief PRED - Get previous value (predecessor) of scalar value */
-ps_error ps_function_pred(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_pred(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -370,7 +372,7 @@ ps_error ps_function_pred(const ps_interpreter *interpreter, ps_value *value, ps
         if (interpreter->range_check && value->data.b == false)
             return PS_ERROR_OUT_OF_RANGE;
         // this will make pred(false) = false
-        result->data.b = (ps_boolean) false;
+        result->data.b = ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_CHAR:
         // pred(NUL) => error / pred(c) => c - 1
@@ -386,7 +388,7 @@ ps_error ps_function_pred(const ps_interpreter *interpreter, ps_value *value, ps
 }
 
 /** @brief SUCC - Get next value (successor) of ordinal value */
-ps_error ps_function_succ(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_succ(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -411,7 +413,7 @@ ps_error ps_function_succ(const ps_interpreter *interpreter, ps_value *value, ps
         if (interpreter->range_check && value->data.b == true)
             return PS_ERROR_OUT_OF_RANGE;
         // this will make succ(true) = true
-        result->data.b = true;
+        result->data.b = ps_system_constant_boolean_true.value->data.b;
         break;
     case PS_TYPE_CHAR:
         // succ(char_max) => error / succ(c) => c + 1
@@ -441,7 +443,7 @@ ps_error ps_function_abs(const ps_interpreter *interpreter, const ps_value *valu
         result->data.u = value->data.u;
         break;
     case PS_TYPE_INTEGER:
-        result->data.i = (ps_integer)abs(value->data.i);
+        result->data.i = (ps_integer)abs(value->data.i); // NOSONAR
         break;
     case PS_TYPE_REAL:
         result->data.r = (ps_real)fabs(value->data.r);
@@ -454,250 +456,188 @@ ps_error ps_function_abs(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
-ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_trunc(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    switch (value->type->value->data.t->type)
-    {
-    case PS_TYPE_REAL:
-        if (interpreter->range_check && (value->data.r < (ps_real)PS_INTEGER_MIN ||
-                                         value->data.r > (ps_real)PS_INTEGER_MAX))
-            return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_integer;
-        result->data.i = (ps_integer)trunc(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    if (interpreter->range_check &&
+        (value->data.r < (ps_real)PS_INTEGER_MIN || value->data.r > (ps_real)PS_INTEGER_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_integer;
+    result->data.i = (ps_integer)trunc(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief ROUND(REAL): INTEGER - Round real as integer */
-ps_error ps_function_round(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_round(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    double r;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        r = round(value->data.r);
-        if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
-            return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_integer;
-        result->data.i = (ps_integer)r;
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    double r = round(value->data.r);
+    if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_integer;
+    result->data.i = (ps_integer)r;
     return PS_ERROR_NONE;
 }
 
 /** @brief INT(REAL): REAL - Get integer part of floating point value */
-ps_error ps_function_int(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_int(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    ((void)interpreter);
     double r;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        result->type = &ps_system_real;
-        modf(value->data.r, &r);
-        result->data.r = (ps_real)r;
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    if (interpreter->range_check &&
+        (value->data.r < (ps_real)PS_INTEGER_MIN || value->data.r > (ps_real)PS_INTEGER_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_real;
+    modf(value->data.r, &r);
+    result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
 /** @brief FRAC(REAL): REAL - Get fractional part of floating point value */
-ps_error ps_function_frac(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_frac(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     double int_part;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)modf(value->data.r, &int_part);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)modf(value->data.r, &int_part);
     return PS_ERROR_NONE;
 }
 
 /** @brief SIN(REAL): REAL - Get sinus of floating point value */
-ps_error ps_function_sin(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_sin(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)sin(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)sin(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief COS(REAL): REAL - Get cosinus of floating point value */
-ps_error ps_function_cos(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_cos(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        result->data.r = (ps_real)cos(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
     result->type = &ps_system_real;
+    result->data.r = (ps_real)cos(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief TAN(REAL): REAL - Get tangent of floating point value */
-ps_error ps_function_tan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_tan(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    double c, s;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        c = cos(value->data.r);
-        if (c == 0.0)
-            return PS_ERROR_DIVISION_BY_ZERO;
-        s = sin(value->data.r);
-        result->data.r = (ps_real)(s / c);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    double c = cos(value->data.r);
+    if (c == 0.0)
+        return PS_ERROR_DIVISION_BY_ZERO;
+    double s = sin(value->data.r);
+    result->data.r = (ps_real)(s / c);
     result->type = &ps_system_real;
     return PS_ERROR_NONE;
 }
 
 /** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
-ps_error ps_function_arctan(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_arctan(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    double r;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        r = atan(value->data.r);
-        if (errno != 0 || isnan(r) || isinf(r))
-            return PS_ERROR_MATH_NAN_INF;
-        if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
-            return PS_ERROR_OUT_OF_RANGE;
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    double r = atan(value->data.r);
+    if (errno != 0 || isnan(r) || isinf(r))
+        return PS_ERROR_MATH_NAN_INF;
+    if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
     result->type = &ps_system_real;
     result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
 /** @brief SQR(REAL): REAL - Get square (x²) of floating point value */
-ps_error ps_function_sqr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_sqr(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    ((void)interpreter);
-    ps_real r;
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        // TODO range check for overflow?
-        r = value->data.r * value->data.r;
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    double r = value->data.r * value->data.r;
+    if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
     result->type = &ps_system_real;
-    result->data.r = r;
+    result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
 /** @brief SQRT(REAL): REAL - Get square root (√x) of floating point value */
-ps_error ps_function_sqrt(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_sqrt(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        if (value->data.r < 0.0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)sqrt(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    if (value->data.r < 0.0)
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)sqrt(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief EXP(REAL): REAL - Get exponential of floating point value */
-ps_error ps_function_exp(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_exp(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        result->type = &ps_system_real;
-        // TODO range check for overflow?
-        result->data.r = (ps_real)exp(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    result->type = &ps_system_real;
+    double r = exp(value->data.r);
+    if (interpreter->range_check && r > PS_REAL_MAX)
+        return PS_ERROR_OUT_OF_RANGE;
+    result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
 /** @brief LN(REAL): REAL - Get logarithm of floating point value */
-ps_error ps_function_ln(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_ln(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        if (value->data.r <= 0.0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)log(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    if (value->data.r <= 0.0)
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)log(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
-ps_error ps_function_log(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_log(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_REAL:
-        if (value->data.r <= 0.0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->type = &ps_system_real;
-        result->data.r = (ps_real)log10(value->data.r);
-        break;
-    default:
+    if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
-    }
+    if (value->data.r <= 0.0)
+        return PS_ERROR_OUT_OF_RANGE;
+    result->type = &ps_system_real;
+    result->data.r = (ps_real)log10(value->data.r);
     return PS_ERROR_NONE;
 }
 
 /** @brief POWER(REAL, REAL): REAL - Get power of floating point value */
-ps_error ps_function_power(ps_interpreter *interpreter, ps_value *a, ps_value *b, ps_value *result)
+ps_error ps_function_power(const ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
 {
     ((void)interpreter);
     if (a->type->value->data.t->base != PS_TYPE_REAL || b->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
-    result->data.r = (ps_real)pow(a->data.r, b->data.r);
+    double r = pow(a->data.r, b->data.r);
+    if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
+        return PS_ERROR_OUT_OF_RANGE;
+    result->data.r = (ps_real)r;
     return PS_ERROR_NONE;
 }
 
@@ -706,7 +646,7 @@ ps_error ps_function_power(ps_interpreter *interpreter, ps_value *a, ps_value *b
 /******************************************************************************/
 
 /** @brief LENGTH(): UNSIGNED - Get string length */
-ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_length(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -716,7 +656,7 @@ ps_error ps_function_length(ps_interpreter *interpreter, ps_value *value, ps_val
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_lowercase(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_lowercase(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -728,7 +668,7 @@ ps_error ps_function_lowercase(ps_interpreter *interpreter, ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_uppercase(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_uppercase(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -745,7 +685,7 @@ ps_error ps_function_uppercase(ps_interpreter *interpreter, ps_value *value, ps_
 /******************************************************************************/
 
 /** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
-ps_error ps_function_get_tick_count(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_get_tick_count(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     // NB: value parameter is not used
@@ -784,7 +724,7 @@ unsigned int rand_range_unsigned(unsigned int n)
 /** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value,
  *         either real between 0 and 1 (excluded) or between 0 and N - 1
  */
-ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_random(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value == NULL)
@@ -793,7 +733,8 @@ ps_error ps_function_random(ps_interpreter *interpreter, ps_value *value, ps_val
         result->type = &ps_system_real;
         do
         {
-            result->data.r = (double)rand() / (double)RAND_MAX;
+            double r = (double)rand() / (double)RAND_MAX;
+            result->data.r = (ps_real)r;
         } while (result->data.r >= 1.0);
     }
     else

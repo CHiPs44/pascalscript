@@ -41,7 +41,7 @@ error:
     return false;
 }
 
-bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
+bool ps_procedure_randomize(const ps_interpreter *interpreter, const ps_value *value)
 {
     unsigned int seed = 0;
     // No argument: use current time as seed
@@ -57,8 +57,7 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
             seed = (unsigned int)(value->data.u); // NOSONAR
             break;
         default:
-            interpreter->error = PS_ERROR_UNEXPECTED_TYPE;
-            return false;
+            return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
         }
         srand(seed);
         if (interpreter->debug >= DEBUG_VERBOSE)
@@ -71,32 +70,28 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
     return true;
 }
 
-bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
+bool ps_procedure_read(const ps_interpreter *interpreter, const FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);
     ps_interpreter_set_message(interpreter, "READ not implemented");
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
+bool ps_procedure_readln(const ps_interpreter *interpreter, const FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);
     ps_interpreter_set_message(interpreter, "READLN not implemented");
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision)
+bool ps_procedure_write(const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width,
+                        int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
-    {
-        interpreter->error = PS_ERROR_EXPECTED_STRING;
-        return false;
-    }
+        return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
     if (interpreter->debug)
         fprintf(f, "WRITE('%s')\n", display_value);
     else
@@ -104,14 +99,12 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, ps_value *value, i
     return true;
 }
 
-bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, ps_value *value, int16_t width, int16_t precision)
+bool ps_procedure_writeln(const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width,
+                          int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
-    {
-        interpreter->error = PS_ERROR_EXPECTED_STRING;
-        return false;
-    }
+        return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
     if (interpreter->debug)
         fprintf(f, "WRITELN('%s')\n", display_value);
     else

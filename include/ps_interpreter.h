@@ -59,15 +59,15 @@ extern "C"
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
     /**
-     * @brief Initialize interpreter
-     * @param range_check enable range checking for integer and real values
-     * @param bool_eval enable short circuit boolean evaluation
-     * @param io_check enable I/O error checking
+     * @brief Initialize interpreter and children objects
+     * @param range_check enable range checking for values
+     * @param bool_eval *FUTURE* enable short circuit boolean evaluation
+     * @param io_check *FUTURE* enable I/O error checking
      * @return NULL if no free memory (errno = ENOMEM)
      */
     ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check);
 
-    /** @brief Release interpreter */
+    /** @brief Release interpreter and children objects */
     ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter);
 
     /** @brief Set error & return false */
@@ -86,10 +86,10 @@ extern "C"
     bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
 
     /** @brief Get current environment */
-    ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
+    ps_environment *ps_interpreter_get_environment(const ps_interpreter *interpreter);
 
     /** @brief Find symbol by name in current environment (or its parents if not local) */
-    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local);
+    ps_symbol *ps_interpreter_find_symbol(const ps_interpreter *interpreter, ps_identifier *name, bool local);
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);

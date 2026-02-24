@@ -57,11 +57,11 @@ extern "C"
     extern ps_symbol ps_system_function;
 
     /* Derived types */
+    extern ps_symbol ps_system_enum;
     extern ps_symbol ps_system_subrange_char;
     extern ps_symbol ps_system_subrange_integer;
     extern ps_symbol ps_system_subrange_unsigned;
     extern ps_symbol ps_system_subrange_enum;
-    extern ps_symbol ps_system_enum;
 
     /* System constants */
     extern ps_symbol ps_system_constant_boolean_false;
@@ -81,7 +81,7 @@ extern "C"
     extern ps_symbol ps_system_constant_unsigned_ps_version_patch;
 
     bool ps_system_init(ps_environment *system);
-    void ps_system_done(ps_environment *system);
+    void ps_system_done(const ps_environment *system);
 
 #ifdef __cplusplus
 }

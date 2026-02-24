@@ -94,7 +94,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         index += 1;
         if (index > 7)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
-        COPY_IDENTIFIER(names[index]);
+        COPY_IDENTIFIER(names[index])
         // Check that the parameter name does not already exist in the other parameters
         // e.g. procedure P(a, b, a: Integer);
         for (int i = 0; i < index; i++)
@@ -418,7 +418,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         result_value->type = signature->result_type;
         result_value->data.v = NULL;
         result_value->allocated = true;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -526,8 +526,8 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
         {
             if (!ps_visit_actual_signature(interpreter, mode, executable))
                 TRACE_ERROR("SIGNATURE");
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            SAVE_CURSOR(line, column);
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
+            SAVE_CURSOR(line, column)
             READ_NEXT_TOKEN
         }
         else
@@ -553,7 +553,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             result_value->type = executable->value->data.x->formal_signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (ps_identifier *)"RESULT", result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -588,7 +588,7 @@ cleanup:
         // Empty byref parameters to avoid freeing values still used in the caller environment
         for (uint8_t i = 0; i < executable->value->data.x->formal_signature->parameter_count; i++)
         {
-            ps_formal_parameter *parameter = &executable->value->data.x->formal_signature->parameters[i];
+            const ps_formal_parameter *parameter = &executable->value->data.x->formal_signature->parameters[i];
             if (parameter->byref)
             {
                 ps_symbol *symbol =
