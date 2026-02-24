@@ -96,7 +96,7 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, ps_symbol *symbol, p
     assert(symbol->value != NULL);
     assert(symbol->value->data.x != NULL);
     assert(result != NULL);
-    ps_function_1arg function = (ps_function_1arg)(symbol->value->data.x->func_1arg);
+    ps_function_1arg function = symbol->value->data.x->func_1arg;
     if (function == NULL)
     {
         ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
@@ -145,7 +145,7 @@ ps_error ps_function_exec_2args(ps_interpreter *interpreter, ps_symbol *symbol, 
 /******************************************************************************/
 
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
-ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_odd(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -164,7 +164,7 @@ ps_error ps_function_odd(ps_interpreter *interpreter, ps_value *value, ps_value 
 }
 
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
-ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_even(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -183,7 +183,7 @@ ps_error ps_function_even(ps_interpreter *interpreter, ps_value *value, ps_value
 }
 
 /** @brief ORD - Get ordinal value of boolean / char */
-ps_error ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_ord(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     switch (value->type->value->data.t->base)
@@ -215,7 +215,7 @@ ps_error ps_function_ord(ps_interpreter *interpreter, ps_value *value, ps_value 
 }
 
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
-ps_error ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_chr(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -236,7 +236,7 @@ ps_error ps_function_chr(ps_interpreter *interpreter, ps_value *value, ps_value 
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+ps_error ps_function_low(const ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -290,7 +290,7 @@ ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value 
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
+ps_error ps_function_high(const ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -345,7 +345,7 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
 }
 
 /** @brief PRED - Get previous value (predecessor) of scalar value */
-ps_error ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_pred(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -386,7 +386,7 @@ ps_error ps_function_pred(ps_interpreter *interpreter, ps_value *value, ps_value
 }
 
 /** @brief SUCC - Get next value (successor) of ordinal value */
-ps_error ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_succ(const ps_interpreter *interpreter, ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -431,7 +431,7 @@ ps_error ps_function_succ(ps_interpreter *interpreter, ps_value *value, ps_value
 /******************************************************************************/
 
 /** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer, unsigned or real */
-ps_error ps_function_abs(ps_interpreter *interpreter, ps_value *value, ps_value *result)
+ps_error ps_function_abs(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     switch (value->type->value->data.t->type)
@@ -460,7 +460,7 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, ps_value *value, ps_valu
     {
     case PS_TYPE_REAL:
         if (interpreter->range_check && (value->data.r < (ps_real)PS_INTEGER_MIN ||
-            value->data.r > (ps_real)PS_INTEGER_MAX))
+                                         value->data.r > (ps_real)PS_INTEGER_MAX))
             return PS_ERROR_OUT_OF_RANGE;
         result->type = &ps_system_integer;
         result->data.i = (ps_integer)trunc(value->data.r);

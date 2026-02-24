@@ -25,17 +25,18 @@ extern "C"
     typedef struct s_ps_value ps_value;
     typedef struct s_ps_symbol ps_symbol;
 
-    typedef ps_error (*ps_function_1arg)(ps_interpreter *i, ps_value *v, ps_value *r);
-    typedef ps_error (*ps_function_1arg_s)(ps_interpreter *i, ps_symbol *t, ps_value *r);
-    typedef ps_error (*ps_function_2args)(ps_interpreter *i, ps_value *a, ps_value *b, ps_value *r);
-    typedef bool (*ps_procedure_1arg)(ps_interpreter *i, ps_value *v);
-    typedef bool (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, ps_value *v, int16_t w, int16_t p);
+    typedef ps_error (*ps_function_1arg)(ps_interpreter *i, const ps_value *v, ps_value *r);
+    typedef ps_error (*ps_function_1arg_s)(ps_interpreter *i, const ps_symbol *t, ps_value *r);
+    typedef ps_error (*ps_function_2args)(ps_interpreter *i, const ps_value *a, const ps_value *b, ps_value *r);
+    typedef bool (*ps_procedure_1arg)(ps_interpreter *i, const ps_value *v);
+    typedef bool (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, const ps_value *v, int16_t w, int16_t p);
     typedef bool (*ps_procedure_file_read)(ps_interpreter *i, FILE *f, ps_value *s);
 
     /** @brief Executable is a function or procedure, address is NULL for user defined executables */
     typedef struct s_ps_executable
     {
-        union {
+        union
+        {
             void *address;                           /** @brief Generic pointer to function/procedure */
             ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument */
             ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 symbol argument */
