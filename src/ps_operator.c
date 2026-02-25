@@ -23,7 +23,7 @@
  *  and return true
  *  otherwise return false and set PS_ERROR_OPERATOR_NOT_APPLICABLE
  */
-bool ps_function_unary_op(const ps_interpreter *interpreter, const ps_value *value, ps_value *result, ps_token_type token_type)
+bool ps_function_unary_op(ps_interpreter *interpreter, const ps_value *value, ps_value *result, ps_token_type token_type)
 {
     result->type = value->type;
     // NB: with FPC, not(subrange) or not(enum) yields integer result without range checking
@@ -187,7 +187,7 @@ static inline bool ps_string_gt(ps_string *a, ps_string *b) { return ps_string_c
 static inline bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_compare(a, b) >= 0; }
 /* clang-format on */
 
-bool ps_function_binary_op(const ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
+bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
                            ps_token_type token_type)
 {
     //                               OOOOOOOO | AAAA                                | BBBB

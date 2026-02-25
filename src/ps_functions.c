@@ -56,40 +56,40 @@ PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , .func_1arg      ,
 
 bool ps_functions_init(ps_environment *system)
 {
-    ADD_SYSTEM_SYMBOL(ps_system_function_abs);
-    ADD_SYSTEM_SYMBOL(ps_system_function_arctan);
-    ADD_SYSTEM_SYMBOL(ps_system_function_chr);
-    ADD_SYSTEM_SYMBOL(ps_system_function_cos);
-    ADD_SYSTEM_SYMBOL(ps_system_function_even);
-    ADD_SYSTEM_SYMBOL(ps_system_function_exp);
-    ADD_SYSTEM_SYMBOL(ps_system_function_frac);
-    ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count);
-    ADD_SYSTEM_SYMBOL(ps_system_function_high);
-    ADD_SYSTEM_SYMBOL(ps_system_function_int);
-    ADD_SYSTEM_SYMBOL(ps_system_function_length);
-    ADD_SYSTEM_SYMBOL(ps_system_function_ln);
-    ADD_SYSTEM_SYMBOL(ps_system_function_log);
-    ADD_SYSTEM_SYMBOL(ps_system_function_low);
-    ADD_SYSTEM_SYMBOL(ps_system_function_lowercase);
-    ADD_SYSTEM_SYMBOL(ps_system_function_odd);
-    ADD_SYSTEM_SYMBOL(ps_system_function_ord);
-    ADD_SYSTEM_SYMBOL(ps_system_function_power);
-    ADD_SYSTEM_SYMBOL(ps_system_function_pred);
-    ADD_SYSTEM_SYMBOL(ps_system_function_random);
-    ADD_SYSTEM_SYMBOL(ps_system_function_round);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sin);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sqr);
-    ADD_SYSTEM_SYMBOL(ps_system_function_sqrt);
-    ADD_SYSTEM_SYMBOL(ps_system_function_succ);
-    ADD_SYSTEM_SYMBOL(ps_system_function_tan);
-    ADD_SYSTEM_SYMBOL(ps_system_function_trunc);
-    ADD_SYSTEM_SYMBOL(ps_system_function_uppercase);
+    ADD_SYSTEM_SYMBOL(ps_system_function_abs)
+    ADD_SYSTEM_SYMBOL(ps_system_function_arctan)
+    ADD_SYSTEM_SYMBOL(ps_system_function_chr)
+    ADD_SYSTEM_SYMBOL(ps_system_function_cos)
+    ADD_SYSTEM_SYMBOL(ps_system_function_even)
+    ADD_SYSTEM_SYMBOL(ps_system_function_exp)
+    ADD_SYSTEM_SYMBOL(ps_system_function_frac)
+    ADD_SYSTEM_SYMBOL(ps_system_function_get_tick_count)
+    ADD_SYSTEM_SYMBOL(ps_system_function_high)
+    ADD_SYSTEM_SYMBOL(ps_system_function_int)
+    ADD_SYSTEM_SYMBOL(ps_system_function_length)
+    ADD_SYSTEM_SYMBOL(ps_system_function_ln)
+    ADD_SYSTEM_SYMBOL(ps_system_function_log)
+    ADD_SYSTEM_SYMBOL(ps_system_function_low)
+    ADD_SYSTEM_SYMBOL(ps_system_function_lowercase)
+    ADD_SYSTEM_SYMBOL(ps_system_function_odd)
+    ADD_SYSTEM_SYMBOL(ps_system_function_ord)
+    ADD_SYSTEM_SYMBOL(ps_system_function_power)
+    ADD_SYSTEM_SYMBOL(ps_system_function_pred)
+    ADD_SYSTEM_SYMBOL(ps_system_function_random)
+    ADD_SYSTEM_SYMBOL(ps_system_function_round)
+    ADD_SYSTEM_SYMBOL(ps_system_function_sin)
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqr)
+    ADD_SYSTEM_SYMBOL(ps_system_function_sqrt)
+    ADD_SYSTEM_SYMBOL(ps_system_function_succ)
+    ADD_SYSTEM_SYMBOL(ps_system_function_tan)
+    ADD_SYSTEM_SYMBOL(ps_system_function_trunc)
+    ADD_SYSTEM_SYMBOL(ps_system_function_uppercase)
     return true;
 error:
     return false;
 }
 
-ps_error ps_function_exec_1arg(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *value,
+ps_error ps_function_exec_1arg(ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *value,
                                ps_value *result)
 {
     assert(interpreter != NULL);
@@ -106,7 +106,7 @@ ps_error ps_function_exec_1arg(const ps_interpreter *interpreter, const ps_symbo
     return function(interpreter, value, result);
 }
 
-ps_error ps_function_exec_1arg_s(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_symbol *type,
+ps_error ps_function_exec_1arg_s(ps_interpreter *interpreter, const ps_symbol *symbol, ps_symbol *type,
                                  ps_value *result)
 {
     assert(interpreter != NULL);
@@ -123,7 +123,7 @@ ps_error ps_function_exec_1arg_s(const ps_interpreter *interpreter, const ps_sym
     return function(interpreter, type, result);
 }
 
-ps_error ps_function_exec_2args(const ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *a,
+ps_error ps_function_exec_2args(ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *a,
                                 const ps_value *b, ps_value *result)
 {
     assert(interpreter != NULL);
@@ -136,7 +136,7 @@ ps_error ps_function_exec_2args(const ps_interpreter *interpreter, const ps_symb
     ps_function_2args function = (ps_function_2args)(symbol->value->data.x->func_2args);
     if (function == NULL)
     {
-        ps_interpreter_set_message((ps_interpreter *)interpreter, "Function '%s' not implemented", symbol->name);
+        ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
         return PS_ERROR_NOT_IMPLEMENTED;
     }
     return function(interpreter, a, b, result);
@@ -147,7 +147,7 @@ ps_error ps_function_exec_2args(const ps_interpreter *interpreter, const ps_symb
 /******************************************************************************/
 
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
-ps_error ps_function_odd(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -166,7 +166,7 @@ ps_error ps_function_odd(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
-ps_error ps_function_even(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     result->type = &ps_system_boolean;
@@ -185,7 +185,7 @@ ps_error ps_function_even(const ps_interpreter *interpreter, const ps_value *val
 }
 
 /** @brief ORD - Get ordinal value of boolean / char */
-ps_error ps_function_ord(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     switch (value->type->value->data.t->base)
@@ -217,7 +217,7 @@ ps_error ps_function_ord(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
-ps_error ps_function_chr(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -238,7 +238,7 @@ ps_error ps_function_chr(const ps_interpreter *interpreter, const ps_value *valu
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low(const ps_interpreter *interpreter, const ps_symbol *type, ps_value *result)
+ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -265,7 +265,7 @@ ps_error ps_function_low(const ps_interpreter *interpreter, const ps_symbol *typ
         {
         case PS_TYPE_CHAR:
             result->type = &ps_system_char;
-            result->data.c = (ps_char)type->value->data.t->def.g.c.min;
+            result->data.c = type->value->data.t->def.g.c.min;
             break;
         case PS_TYPE_INTEGER:
             result->type = &ps_system_integer;
@@ -286,13 +286,14 @@ ps_error ps_function_low(const ps_interpreter *interpreter, const ps_symbol *typ
     case PS_TYPE_ARRAY:
         return PS_ERROR_NOT_IMPLEMENTED;
     default:
+        ps_interpreter_set_message(interpreter, "Unexpected type '%s' in function Low", ps_type_definition_get_name(type->value->data.t));
         return PS_ERROR_UNEXPECTED_TYPE;
     }
     ps_value_debug(NULL, "LOW => result", result);
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_high(const ps_interpreter *interpreter, const ps_symbol *type, ps_value *result)
+ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
     ((void)interpreter);
     switch (type->value->data.t->type)
@@ -340,6 +341,7 @@ ps_error ps_function_high(const ps_interpreter *interpreter, const ps_symbol *ty
     case PS_TYPE_ARRAY:
         return PS_ERROR_NOT_IMPLEMENTED;
     default:
+        ps_interpreter_set_message(interpreter, "Unexpected type '%s' in function High", ps_type_definition_get_name(type->value->data.t));
         return PS_ERROR_UNEXPECTED_TYPE;
     }
     ps_value_debug(NULL, "HIGH => result", result);
@@ -347,7 +349,7 @@ ps_error ps_function_high(const ps_interpreter *interpreter, const ps_symbol *ty
 }
 
 /** @brief PRED - Get previous value (predecessor) of scalar value */
-ps_error ps_function_pred(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -388,7 +390,7 @@ ps_error ps_function_pred(const ps_interpreter *interpreter, const ps_value *val
 }
 
 /** @brief SUCC - Get next value (successor) of ordinal value */
-ps_error ps_function_succ(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (value->type->value->data.t->base)
     {
@@ -433,7 +435,7 @@ ps_error ps_function_succ(const ps_interpreter *interpreter, const ps_value *val
 /******************************************************************************/
 
 /** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer, unsigned or real */
-ps_error ps_function_abs(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_abs(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     switch (value->type->value->data.t->type)
@@ -456,7 +458,7 @@ ps_error ps_function_abs(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
-ps_error ps_function_trunc(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
@@ -469,7 +471,7 @@ ps_error ps_function_trunc(const ps_interpreter *interpreter, const ps_value *va
 }
 
 /** @brief ROUND(REAL): INTEGER - Round real as integer */
-ps_error ps_function_round(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
@@ -482,7 +484,7 @@ ps_error ps_function_round(const ps_interpreter *interpreter, const ps_value *va
 }
 
 /** @brief INT(REAL): REAL - Get integer part of floating point value */
-ps_error ps_function_int(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     double r;
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -497,7 +499,7 @@ ps_error ps_function_int(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief FRAC(REAL): REAL - Get fractional part of floating point value */
-ps_error ps_function_frac(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     double int_part;
@@ -509,7 +511,7 @@ ps_error ps_function_frac(const ps_interpreter *interpreter, const ps_value *val
 }
 
 /** @brief SIN(REAL): REAL - Get sinus of floating point value */
-ps_error ps_function_sin(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -520,7 +522,7 @@ ps_error ps_function_sin(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief COS(REAL): REAL - Get cosinus of floating point value */
-ps_error ps_function_cos(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -531,7 +533,7 @@ ps_error ps_function_cos(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief TAN(REAL): REAL - Get tangent of floating point value */
-ps_error ps_function_tan(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -546,7 +548,7 @@ ps_error ps_function_tan(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
-ps_error ps_function_arctan(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -562,7 +564,7 @@ ps_error ps_function_arctan(const ps_interpreter *interpreter, const ps_value *v
 }
 
 /** @brief SQR(REAL): REAL - Get square (x²) of floating point value */
-ps_error ps_function_sqr(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (value->type->value->data.t->base != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
@@ -575,7 +577,7 @@ ps_error ps_function_sqr(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief SQRT(REAL): REAL - Get square root (√x) of floating point value */
-ps_error ps_function_sqrt(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -588,7 +590,7 @@ ps_error ps_function_sqrt(const ps_interpreter *interpreter, const ps_value *val
 }
 
 /** @brief EXP(REAL): REAL - Get exponential of floating point value */
-ps_error ps_function_exp(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -602,7 +604,7 @@ ps_error ps_function_exp(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief LN(REAL): REAL - Get logarithm of floating point value */
-ps_error ps_function_ln(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -615,7 +617,7 @@ ps_error ps_function_ln(const ps_interpreter *interpreter, const ps_value *value
 }
 
 /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
-ps_error ps_function_log(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_REAL)
@@ -628,7 +630,7 @@ ps_error ps_function_log(const ps_interpreter *interpreter, const ps_value *valu
 }
 
 /** @brief POWER(REAL, REAL): REAL - Get power of floating point value */
-ps_error ps_function_power(const ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
+ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
 {
     ((void)interpreter);
     if (a->type->value->data.t->base != PS_TYPE_REAL || b->type->value->data.t->base != PS_TYPE_REAL)
@@ -646,7 +648,7 @@ ps_error ps_function_power(const ps_interpreter *interpreter, const ps_value *a,
 /******************************************************************************/
 
 /** @brief LENGTH(): UNSIGNED - Get string length */
-ps_error ps_function_length(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -656,7 +658,7 @@ ps_error ps_function_length(const ps_interpreter *interpreter, const ps_value *v
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_lowercase(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -668,7 +670,7 @@ ps_error ps_function_lowercase(const ps_interpreter *interpreter, const ps_value
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_uppercase(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value->type->value->data.t->base != PS_TYPE_STRING)
@@ -685,7 +687,7 @@ ps_error ps_function_uppercase(const ps_interpreter *interpreter, const ps_value
 /******************************************************************************/
 
 /** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
-ps_error ps_function_get_tick_count(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     // NB: value parameter is not used
@@ -724,7 +726,7 @@ unsigned int rand_range_unsigned(unsigned int n)
 /** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value,
  *         either real between 0 and 1 (excluded) or between 0 and N - 1
  */
-ps_error ps_function_random(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     ((void)interpreter);
     if (value == NULL)

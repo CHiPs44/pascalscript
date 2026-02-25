@@ -41,7 +41,7 @@ error:
     return false;
 }
 
-bool ps_procedure_randomize(const ps_interpreter *interpreter, const ps_value *value)
+bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
 {
     unsigned int seed = 0;
     // No argument: use current time as seed
@@ -70,7 +70,7 @@ bool ps_procedure_randomize(const ps_interpreter *interpreter, const ps_value *v
     return true;
 }
 
-bool ps_procedure_read(const ps_interpreter *interpreter, const FILE *f, ps_value *value) // NOSONAR
+bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);
@@ -78,7 +78,7 @@ bool ps_procedure_read(const ps_interpreter *interpreter, const FILE *f, ps_valu
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-bool ps_procedure_readln(const ps_interpreter *interpreter, const FILE *f, ps_value *value) // NOSONAR
+bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
     ((void)value);
@@ -86,7 +86,7 @@ bool ps_procedure_readln(const ps_interpreter *interpreter, const FILE *f, ps_va
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-bool ps_procedure_write(const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width,
+bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
                         int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
@@ -99,7 +99,7 @@ bool ps_procedure_write(const ps_interpreter *interpreter, const FILE *f, const 
     return true;
 }
 
-bool ps_procedure_writeln(const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width,
+bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
                           int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);

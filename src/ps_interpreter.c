@@ -131,7 +131,7 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
     return true;
 }
 
-ps_environment *ps_interpreter_get_environment(const ps_interpreter *interpreter)
+ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
 {
     if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM || interpreter->level >= PS_INTERPRETER_ENVIRONMENTS)
     {
@@ -141,7 +141,7 @@ ps_environment *ps_interpreter_get_environment(const ps_interpreter *interpreter
     return interpreter->environments[interpreter->level];
 }
 
-ps_symbol *ps_interpreter_find_symbol(const ps_interpreter *interpreter, ps_identifier *name, bool local)
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local)
 {
     int level = interpreter->level;
     ps_symbol *symbol;
@@ -276,13 +276,13 @@ OK:
     return true;
 }
 
-bool ps_interpreter_load_string(const ps_interpreter *interpreter, char *source, size_t length)
+bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
-bool ps_interpreter_load_file(const ps_interpreter *interpreter, const char *filename)
+bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
 {
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_file(lexer->buffer, filename);

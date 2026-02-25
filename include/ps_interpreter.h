@@ -86,10 +86,10 @@ extern "C"
     bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
 
     /** @brief Get current environment */
-    ps_environment *ps_interpreter_get_environment(const ps_interpreter *interpreter);
+    ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
 
     /** @brief Find symbol by name in current environment (or its parents if not local) */
-    ps_symbol *ps_interpreter_find_symbol(const ps_interpreter *interpreter, ps_identifier *name, bool local);
+    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local);
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
@@ -106,10 +106,10 @@ extern "C"
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
 
     /** @brief Load source code from string */
-    bool ps_interpreter_load_string(const ps_interpreter *interpreter, char *source, size_t length);
+    bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length);
 
     /** @brief Load source code from file */
-    bool ps_interpreter_load_file(const ps_interpreter *interpreter, const char *filename);
+    bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename);
 
     /** @brief Run the interpreter on the loaded source code, with option to execute or just parse */
     bool ps_interpreter_run(ps_interpreter *interpreter, bool exec);

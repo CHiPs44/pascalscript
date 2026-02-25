@@ -34,34 +34,28 @@ ps_value *ps_value_free(ps_value *value)
     ps_value_debug(stderr, "VALUE", value);
     if (value == NULL || !value->allocated)
         return NULL;
-    switch (value->type->value->data.t->base)
+    if (value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
     {
-    // case PS_SYMBOL_KIND_FUNCTION:
-    // case PS_SYMBOL_KIND_PROCEDURE:
-    case PS_TYPE_EXECUTABLE:
         fprintf(stderr, "\tps_value_free(%p): EXECUTABLE(%p)\n", (void *)value, (void *)(value->data.x));
         ps_executable_free(value->data.x);
-        break;
-    default:
-        break;
     }
     ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;
 }
 
-#define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
-    if (value == NULL)                                                                                                 \
-    {                                                                                                                  \
-        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__});                                            \
-        if (value == NULL)                                                                                             \
-            return NULL;                                                                                               \
-    }                                                                                                                  \
-    else                                                                                                               \
-    {                                                                                                                  \
-        value->type = &__TYPE__;                                                                                       \
-        value->data.__X__ = __X__;                                                                                     \
-    }                                                                                                                  \
-    return value;
+#define PS_VALUE_SET(__TYPE__, __X__)                                       \
+    if (value == NULL)                                                      \
+    {                                                                       \
+        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__}); \
+        if (value == NULL)                                                  \
+            return NULL;                                                    \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+        value->type = &__TYPE__;                                            \
+        value->data.__X__ = __X__;                                          \
+    }                                                                       \
+    return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
 {
@@ -191,7 +185,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 //     PS_VALUE_SET(type_def, p);
 // }
 
-char *ps_value_to_string(ps_value *value, bool debug, int16_t width, int16_t precision)
+char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
     ps_executable *executable;
@@ -327,20 +321,21 @@ char *ps_value_to_string(ps_value *value, bool debug, int16_t width, int16_t pre
     return buffer;
 }
 
-char *ps_value_get_display_string(ps_value *value, int16_t width, int16_t precision)
+char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision)
 {
     return ps_value_to_string(value, false, width, precision);
 }
 
-char *ps_value_get_debug_string(ps_value *value)
+char *ps_value_get_debug_string(const ps_value *value)
 {
     return ps_value_to_string(value, true, 0, 0);
 }
 
-char *ps_value_dump(ps_value *value)
+char *ps_value_dump(const ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!"
+                                                               : value->type->name;
     char *base = value == NULL                ? "NULL!"
                  : value->type == NULL        ? "TYPE!"
                  : value->type->value == NULL ? "BASE!"

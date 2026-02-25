@@ -121,19 +121,19 @@ bool ps_system_init(ps_environment *system)
     /**************************************************************************/
 
     // String: max length
-    ps_system_string.value->type->value->data.t->def.s.max = PS_STRING_MAX_LEN;
+    // ps_system_string.value->type->value->data.t->def.s.max = PS_STRING_MAX_LEN;
     // Enum: empty
-    ps_system_enum.value->type->value->data.t->def.e.count = 0;
-    ps_system_enum.value->type->value->data.t->def.e.values = NULL;
+    // ps_system_enum.value->type->value->data.t->def.e.count = 0;
+    // ps_system_enum.value->type->value->data.t->def.e.values = NULL;
     // Subranges: "empty"
-    ps_system_subrange_char.value->data.t->def.g.c.min = '\0';
-    ps_system_subrange_char.value->data.t->def.g.c.max = '\0';
-    ps_system_subrange_integer.value->data.t->def.g.i.min = 0;
-    ps_system_subrange_integer.value->data.t->def.g.i.max = 0;
-    ps_system_subrange_unsigned.value->data.t->def.g.u.min = 0;
-    ps_system_subrange_unsigned.value->data.t->def.g.u.max = 0;
-    ps_system_subrange_enum.value->data.t->def.e.count = 0;
-    ps_system_subrange_enum.value->data.t->def.e.values = NULL;
+    // ps_system_subrange_char.value->data.t->def.g.c.min = '\0';
+    // ps_system_subrange_char.value->data.t->def.g.c.max = '\0';
+    // ps_system_subrange_integer.value->data.t->def.g.i.min = 0;
+    // ps_system_subrange_integer.value->data.t->def.g.i.max = 0;
+    // ps_system_subrange_unsigned.value->data.t->def.g.u.min = 0;
+    // ps_system_subrange_unsigned.value->data.t->def.g.u.max = 0;
+    // ps_system_subrange_enum.value->data.t->def.e.count = 0;
+    // ps_system_subrange_enum.value->data.t->def.e.values = NULL;
     // Register the system types
     ADD_SYSTEM_SYMBOL(ps_system_none)
     ADD_SYSTEM_SYMBOL(ps_system_type_def)

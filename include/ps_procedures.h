@@ -26,11 +26,11 @@ extern "C"
     extern ps_symbol ps_system_procedure_randomize;
 
     /* clang-format off */
-    bool ps_procedure_read     (const ps_interpreter *interpreter, const FILE *f, ps_value *value);
-    bool ps_procedure_readln   (const ps_interpreter *interpreter, const FILE *f, ps_value *value);
-    bool ps_procedure_write    (const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width, int16_t precision);
-    bool ps_procedure_writeln  (const ps_interpreter *interpreter, const FILE *f, const ps_value *value, int16_t width, int16_t precision);
-    bool ps_procedure_randomize(const ps_interpreter *interpreter, const ps_value *value);
+    bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value);
+    bool ps_procedure_write    (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
+    bool ps_procedure_writeln  (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
+    bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value);
     /* clang-format on */
 
 #ifdef __cplusplus

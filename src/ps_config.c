@@ -22,12 +22,20 @@
 
 #define REPORT_STRING(__MACRO__) fprintf(output, "┃ %-36s ┃ %-37s ┃\n", #__MACRO__, STRING(__MACRO__))
 
-#define REPORT_SECTION(__TITLE__)                                                                                      \
-    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");             \
-    fprintf(output, "┃ %-76s ┃\n", __TITLE__);                                                                         \
+#define REPORT_SECTION(__TITLE__)                                                                          \
+    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n"); \
+    fprintf(output, "┃ %-76s ┃\n", __TITLE__);                                                             \
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n")
 
 #define PS_SIZE_T_SIZE sizeof(size_t)
+
+#if defined(__clang__)
+#define COMPILER_VERSION __VERSION__
+#else
+#if defined(__GNUC__)
+#define COMPILER_VERSION "GCC " __VERSION__
+#endif
+#endif
 
 void ps_config_report(FILE *output)
 {
@@ -45,6 +53,7 @@ void ps_config_report(FILE *output)
     fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(output, "┃ *** PASCALSCRIPT CONFIGURATION ***                                           ┃\n");
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    REPORT_FORMAT(COMPILER_VERSION, "s");
     REPORT_FORMAT(PS_VERSION, "s");
     REPORT_FORMAT(PS_BITNESS, "d");
     REPORT_SECTION("*** INTEGER TYPE ***");
