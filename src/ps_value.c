@@ -30,13 +30,13 @@ ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 
 ps_value *ps_value_free(ps_value *value)
 {
-    fprintf(stderr, "ps_value_free(%p)\n", (void *)value);
-    ps_value_debug(stderr, "VALUE", value);
+    // fprintf(stderr, "ps_value_free(%p)\n", (void *)value);
+    // ps_value_debug(stderr, "VALUE", value);
     if (value == NULL || !value->allocated)
         return NULL;
     if (value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
     {
-        fprintf(stderr, "\tps_value_free(%p): EXECUTABLE(%p)\n", (void *)value, (void *)(value->data.x));
+        // fprintf(stderr, "\tps_value_free(%p): EXECUTABLE(%p)\n", (void *)value, (void *)(value->data.x));
         ps_executable_free(value->data.x);
     }
     ps_memory_free(PS_MEMORY_VALUE, value);

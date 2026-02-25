@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
     /* Terminate interpreter */
-    fprintf(stderr, "ps_interpreter_free(%p)\n", (void *)interpreter);
+    // fprintf(stderr, "ps_interpreter_free(%p)\n", (void *)interpreter);
     interpreter = ps_interpreter_free(interpreter);
 
     if (memory)

@@ -26,7 +26,7 @@ ps_executable *ps_executable_alloc(ps_formal_signature *signature, uint16_t line
 
 ps_executable *ps_executable_free(ps_executable *executable)
 {
-    fprintf(stderr, "ps_executable_free(%p)\n", (void *)executable);
+    // fprintf(stderr, "ps_executable_free(%p)\n", (void *)executable);
     if (executable == NULL)
         return NULL;
     // System function?

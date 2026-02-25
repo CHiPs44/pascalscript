@@ -29,8 +29,8 @@ ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name
 
 ps_environment *ps_environment_free(ps_environment *environment)
 {
-    fprintf(stderr, "ps_environment_free(%p, '%s')\n", (void *)environment,
-            NULL == environment ? "NULL" : environment->name);
+    // fprintf(stderr, "ps_environment_free(%p, '%s')\n", (void *)environment,
+    //         NULL == environment ? "NULL" : environment->name);
     if (environment != NULL)
     {
         if (environment->symbols != NULL)

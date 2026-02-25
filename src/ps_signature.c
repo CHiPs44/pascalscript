@@ -37,7 +37,7 @@ ps_formal_signature *ps_formal_signature_alloc(uint8_t parameter_count, ps_symbo
 
 ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature)
 {
-    fprintf(stderr, "ps_formal_signature_free(%p)\n", (void *)signature);
+    // fprintf(stderr, "ps_formal_signature_free(%p)\n", (void *)signature);
     if (signature != NULL)
     {
         if (signature->parameters != NULL)

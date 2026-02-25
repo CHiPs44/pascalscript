@@ -10,9 +10,9 @@ printf "%-7s %-40s %15s %s\n" "CC" "Example" "ms" "Result" >> "$REPORT_FILE"
 for example in ./examples/*.pas; do
     if [[ -x "${example}" ]]; then
         for CC in gcc clang; do
-            OUT_FILE="./test/${example##*/}.${CC}.out"
-            ERR_FILE="./test/${example##*/}.${CC}.err"
-            echo -n "Executing ${example} with ${CC} version... "
+            OUT_FILE="./examples/${example##*/}.${CC}.out"
+            ERR_FILE="./examples/${example##*/}.${CC}.err"
+            echo -n "Executing ${example} with ${CC}... "
             START=$(date +%s%N)
             ./build-${CC}/pascalscript "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
             RESULT=$?

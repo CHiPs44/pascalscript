@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
-Program Example20Procedure0;
+Program Procedure0;
 
 Var
     Variable1, I, Variable2: Integer;

@@ -22,9 +22,9 @@
 
 #define REPORT_STRING(__MACRO__) fprintf(output, "┃ %-36s ┃ %-37s ┃\n", #__MACRO__, STRING(__MACRO__))
 
-#define REPORT_SECTION(__TITLE__)                                                                          \
-    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n"); \
-    fprintf(output, "┃ %-76s ┃\n", __TITLE__);                                                             \
+#define REPORT_SECTION(__TITLE__)                                                                                      \
+    fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");             \
+    fprintf(output, "┃ %-76s ┃\n", __TITLE__);                                                                         \
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n")
 
 #define PS_SIZE_T_SIZE sizeof(size_t)
@@ -36,6 +36,11 @@
 #define COMPILER_VERSION "GCC " __VERSION__
 #endif
 #endif
+#if __BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__
+#define BYTE_ORDER "LITTLE_ENDIAN"
+#else
+#define BYTE_ORDER "BIG_ENDIAN"
+#endif
 
 void ps_config_report(FILE *output)
 {
@@ -46,14 +51,12 @@ void ps_config_report(FILE *output)
     //                 1         2         3         4         5         6         7
     //      ┃ 1234567890123456789012345678901234567890123456789012345678901234567890123456 ┃
     //      ┃ 123456789012345678901234567890123456 ┃ 1234567890123456789012345678901234567 ┃
-    // fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    // fprintf(output, "┃ KEY                                  ┃ VALUE                                 ┃\n");
-    // fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    // REPORT_SECTION("*** CONFIGURATION ***");
     fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    fprintf(output, "┃ *** PASCALSCRIPT CONFIGURATION ***                                           ┃\n");
+    fprintf(output, "┃ *** COMPILER ***                                                             ┃\n");
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
     REPORT_FORMAT(COMPILER_VERSION, "s");
+    REPORT_FORMAT(BYTE_ORDER, "s");
+    REPORT_SECTION("*** PASCALSCRIPT CONFIGURATION ***");
     REPORT_FORMAT(PS_VERSION, "s");
     REPORT_FORMAT(PS_BITNESS, "d");
     REPORT_SECTION("*** INTEGER TYPE ***");
