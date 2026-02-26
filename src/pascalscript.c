@@ -20,7 +20,8 @@
 #include "ps_version.h"
 
 // #define DEBUGGER_SOURCE "examples/010-operators.pas"
-#define DEBUGGER_SOURCE "examples/000-minimal.pas"
+// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
+#define DEBUGGER_SOURCE "examples/002-strings.pas"
 
 ps_interpreter *interpreter = NULL;
 

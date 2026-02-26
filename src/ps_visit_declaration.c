@@ -172,7 +172,6 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
             ps_value_free(value);
             TRACE_ERROR("CONSTANT_EXPRESSION")
         }
-        READ_NEXT_TOKEN
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
