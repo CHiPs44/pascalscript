@@ -21,17 +21,17 @@
  */
 bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
-    VISIT_BEGIN("START", "");
+    VISIT_BEGIN("START", "")
 
     READ_NEXT_TOKEN
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
         if (!ps_visit_program(interpreter, mode))
-            TRACE_ERROR("PROGRAM");
+            TRACE_ERROR("PROGRAM")
         break;
     case PS_TOKEN_UNIT:
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)

@@ -30,16 +30,16 @@
 #define PS_SIZE_T_SIZE sizeof(size_t)
 
 #if defined(__clang__)
-#define COMPILER_VERSION __VERSION__
+#define PS_COMPILER_VERSION __VERSION__
 #else
 #if defined(__GNUC__)
-#define COMPILER_VERSION "GCC " __VERSION__
+#define PS_COMPILER_VERSION "GCC " __VERSION__
 #endif
 #endif
 #if __BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__
-#define BYTE_ORDER "LITTLE_ENDIAN"
+#define PS_BYTE_ORDER "LITTLE_ENDIAN"
 #else
-#define BYTE_ORDER "BIG_ENDIAN"
+#define PS_BYTE_ORDER "BIG_ENDIAN"
 #endif
 
 void ps_config_report(FILE *output)
@@ -54,8 +54,8 @@ void ps_config_report(FILE *output)
     fprintf(output, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
     fprintf(output, "┃ *** COMPILER ***                                                             ┃\n");
     fprintf(output, "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
-    REPORT_FORMAT(COMPILER_VERSION, "s");
-    REPORT_FORMAT(BYTE_ORDER, "s");
+    REPORT_FORMAT(PS_COMPILER_VERSION, "s");
+    REPORT_FORMAT(PS_BYTE_ORDER, "s");
     REPORT_SECTION("*** PASCALSCRIPT CONFIGURATION ***");
     REPORT_FORMAT(PS_VERSION, "s");
     REPORT_FORMAT(PS_BITNESS, "d");

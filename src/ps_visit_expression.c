@@ -543,7 +543,12 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
 
 /**
  * Visit constant expression:
- *      INTEGER_VALUE | UNSIGNED_VALUE | CHAR_VALUE | REAL_VALUE | BOOLEAN_VALUE | IDENTIFIER
+ *      [ '-' ] INTEGER_VALUE
+ *      | UNSIGNED_VALUE
+ *      | CHAR_VALUE
+ *      | [ '-' ] REAL_VALUE
+ *      | BOOLEAN_VALUE
+ *      | [ '-' ] IDENTIFIER
  * Next steps:
  *      | STRING_VALUE
  *      | NIL
@@ -552,19 +557,51 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
 bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *constant)
 {
     VISIT_BEGIN("CONSTANT_EXPRESSION", "");
+    bool negate = false;
 
     ps_identifier identifier = {0};
     ps_symbol *symbol = NULL;
 
+    // For now only keep track of '-' so "Const Foo = -4;" or "Const Bar = -Foo;" work as expected
+    if (lexer->current_token.type == PS_TOKEN_MINUS)
+    {
+        negate = true;
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
+            lexer->current_token.type != PS_TOKEN_REAL_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+    else
+    {
+        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
+            lexer->current_token.type != PS_TOKEN_REAL_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE &&
+            lexer->current_token.type != PS_TOKEN_CHAR_VALUE && lexer->current_token.type != PS_TOKEN_STRING_VALUE &&
+            lexer->current_token.type != PS_TOKEN_BOOLEAN_VALUE)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_INTEGER_VALUE:
         constant->type = &ps_system_integer;
-        constant->data.i = lexer->current_token.value.i;
+        constant->data.i = negate ? -lexer->current_token.value.i : lexer->current_token.value.i;
+        break;
+    case PS_TOKEN_REAL_VALUE:
+        constant->type = &ps_system_real;
+        constant->data.r = negate ? -lexer->current_token.value.r : lexer->current_token.value.r;
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        constant->type = &ps_system_unsigned;
-        constant->data.u = lexer->current_token.value.u;
+        if (negate)
+        {
+            if (constant->data.u > PS_INTEGER_MAX)
+                RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
+            constant->type = &ps_system_integer;
+            constant->data.i = -(ps_integer)lexer->current_token.value.u;
+        }
+        else
+        {
+            constant->type = &ps_system_unsigned;
+            constant->data.u = lexer->current_token.value.u;
+        }
         break;
     case PS_TOKEN_CHAR_VALUE:
         constant->type = &ps_system_char;
@@ -574,15 +611,15 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
         constant->type = &ps_system_boolean;
         constant->data.b = lexer->current_token.value.b;
         break;
-    // case PS_TOKEN_STRING_VALUE:
-    //     constant->type = &ps_system_string;
-    //     constant->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
-    //     if (constant->data.s == NULL)
-    //     {
-    //         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-    //         TRACE_ERROR("STRING_VALUE");
-    //     }
-    //     break;
+    case PS_TOKEN_STRING_VALUE:
+        constant->type = &ps_system_string;
+        constant->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+        if (constant->data.s == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            TRACE_ERROR("STRING_VALUE")
+        }
+        break;
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
         symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
@@ -590,10 +627,29 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
             RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);
-        constant->type = &ps_system_none;
-        constant->data.v = NULL;
-        if (!ps_interpreter_copy_value(interpreter, symbol->value, constant))
-            TRACE_ERROR("COPY");
+        constant->type = symbol->value->type;
+        constant->data = symbol->value->data;
+        if (negate)
+        {
+            switch (constant->type->value->type->value->data.t->base)
+            {
+            case PS_TYPE_INTEGER:
+                constant->data.i = -constant->data.i;
+                break;
+            case PS_TYPE_UNSIGNED:
+                if (constant->data.u > PS_INTEGER_MAX)
+                    RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
+                constant->type = &ps_system_integer;
+                constant->data.i = -(ps_integer)constant->data.u;
+                break;
+            case PS_TYPE_REAL:
+                constant->type = &ps_system_real;
+                constant->data.r = -constant->data.r;
+                break;
+            default:
+                RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+            }
+        }
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
