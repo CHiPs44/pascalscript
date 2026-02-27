@@ -49,7 +49,7 @@ extern "C"
 
     typedef uint32_t ps_symbol_hash_key;
 
-    ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const ps_identifier *name, ps_value *value);
+    ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const ps_identifier name, ps_value *value);
     ps_symbol *ps_symbol_free(ps_symbol *symbol);
 
     /** @brief Get name of symbol kind */

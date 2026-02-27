@@ -47,7 +47,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     READ_NEXT_TOKEN
     if (!ps_interpreter_enter_environment(interpreter, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
-    program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
+    program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
         TRACE_ERROR("ADD SYMBOL")
     if (!ps_visit_block(interpreter, mode))
@@ -174,7 +174,7 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         }
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN
-        constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &identifier, value);
+        constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, identifier, value);
         if (constant == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, constant))

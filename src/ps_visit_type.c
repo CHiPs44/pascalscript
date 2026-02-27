@@ -66,7 +66,7 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     value = ps_value_alloc(type, data);
     if (value == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &type_name, value);
+    type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, type_name, value);
     if (type_symbol == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     if (!ps_interpreter_add_symbol(interpreter, type_symbol))
@@ -191,7 +191,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
             ps_identifier name = {0};
             snprintf(name, sizeof(name) - 1, "#STRING_%d", (int)len);
-            *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, &name, value);
+            *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
         }
         else
         {
@@ -259,7 +259,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     VISIT_END("OK")
 }
 
-static bool register_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_identifier *name,
+static bool register_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_identifier name,
                                      ps_type_definition *type_def, ps_symbol **symbol)
 {
     VISIT_BEGIN("REGISTER", "")
@@ -317,8 +317,10 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         // Create a new symbol for the enumeration value
         ps_value *value = ps_value_alloc(&ps_system_unsigned, (ps_value_data){.u = count});
+        if (value == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         ps_symbol *value_symbol =
-            ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, &lexer->current_token.value.identifier, value);
+            ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, lexer->current_token.value.identifier, value);
         if (value_symbol == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, value_symbol))

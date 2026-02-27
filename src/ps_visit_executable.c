@@ -176,7 +176,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
         {
             if (!ps_visit_variable_reference(interpreter, mode, &variable))
                 TRACE_ERROR("VARIABLE");
-            argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, variable->value);
+            argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, variable->value);
             if (argument == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -215,7 +215,7 @@ bool ps_visit_actual_signature(ps_interpreter *interpreter, ps_interpreter_mode 
                     ps_value_free(value);
                     TRACE_ERROR("COPY");
                 }
-                argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &parameter->name, value);
+                argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, value);
                 if (argument == NULL)
                 {
                     ps_value_free(value);
@@ -374,7 +374,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         fprintf(stderr, "================================================================================\n");
     }
 
-    executable_symbol = ps_symbol_alloc(kind, &identifier, NULL);
+    executable_symbol = ps_symbol_alloc(kind, identifier, NULL);
     if (executable_symbol == NULL)
     {
         interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -409,7 +409,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         result_value->type = signature->result_type;
         result_value->data.v = NULL;
         result_value->allocated = true;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, ps_identifier_result, result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -544,7 +544,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             result_value->type = executable->value->data.x->formal_signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, (const ps_identifier *)"RESULT", result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, ps_identifier_result, result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;

@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,6 +23,20 @@
 // #define DEBUGGER_SOURCE "examples/010-operators.pas"
 // #define DEBUGGER_SOURCE "examples/000-minimal.pas"
 #define DEBUGGER_SOURCE "examples/002-strings.pas"
+
+// Runtime options
+bool bool_eval = false;
+bool io_check = true;
+bool range_check = true;
+
+// Others options
+bool debug = false;
+bool dump_buffer = false;
+bool dump_symbols = false;
+bool exec = true;
+bool memory = false;
+bool trace = false;
+bool verbose = false;
 
 ps_interpreter *interpreter = NULL;
 
@@ -51,29 +66,8 @@ void usage(char *program_name)
     fprintf(stderr, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUGGER_SOURCE);
 }
 
-int main(int argc, char *argv[])
+int get_options(int argc, char *argv[])
 {
-    // Runtime options
-    bool bool_eval = false;
-    bool io_check = true;
-    bool range_check = true;
-    // Others options
-    bool debug = false;
-    bool dump_buffer = false;
-    bool dump_symbols = false;
-    bool exec = true;
-    bool memory = false;
-    bool trace = false;
-    bool verbose = false;
-    // Paths & file names
-    char *current_path = NULL;
-    char *program_file = NULL;
-    char source_file[256] = {0};
-
-    // Force when debugging as I didn't find how to pass command line options
-    // trace = true;
-    // debug = true;
-
     int opt;
     int arg = 0;
     while ((opt = getopt(argc, argv, "bircdhmnstuv")) != -1)
@@ -131,54 +125,20 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
     }
+    return arg;
+}
 
-    /* Display banner and intepreter runtime options */
-    if (verbose)
-    {
-        banner(stdout);
-        fprintf(stdout, "Runtime options:\n");
-        fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
-        fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
-        fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
-    }
+bool run(const char *source_file)
+{
+    assert(NULL != interpreter);
 
-    current_path = getcwd(NULL, 0);
-    if (verbose)
-        fprintf(stderr, "Current working directory: %s\n", current_path);
-    if (arg + 1 < argc)
-    {
-        program_file = argv[argc - 1];
-        snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
-    }
-    else
-    {
-        program_file = DEBUGGER_SOURCE;
-        if (program_file != NULL)
-            snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
-        else
-            source_file[0] = '\0';
-    }
-    free(current_path);
-    current_path = NULL;
-    if (strlen(source_file) == 0)
-    {
-        fprintf(stderr, "No file to run!\n");
-        usage(argv[0]);
-        return EXIT_FAILURE;
-    }
-    if (verbose)
-    {
-        fprintf(stderr, "Source file: %s\n", source_file);
-    }
+    bool ok = false;
 
-    /* Initialize interpreter */
-    interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
-    if (interpreter == NULL)
-    {
-        fprintf(stderr, "Could not initialize interpreter!\n");
-        return EXIT_FAILURE;
-    }
-    interpreter->debug = trace ? DEBUG_VERBOSE : debug ? DEBUG_TRACE : DEBUG_NONE;
+    interpreter->debug = DEBUG_NONE;
+    if (trace)
+        interpreter->debug = DEBUG_VERBOSE;
+    else if (debug)
+        interpreter->debug = DEBUG_TRACE;
     interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
     interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
 
@@ -212,7 +172,7 @@ int main(int argc, char *argv[])
     /* Run program */
     if (verbose)
         printf("===================================== BEGIN ====================================\n");
-    bool ok = ps_interpreter_run(interpreter, exec);
+    ok = ps_interpreter_run(interpreter, exec);
     if (verbose)
         printf("====================================== END =====================================\n");
 
@@ -220,8 +180,68 @@ int main(int argc, char *argv[])
     if (dump_symbols)
         ps_symbol_table_dump(NULL, "End", interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
 
+    return ok;
+}
+
+int main(int argc, char *argv[])
+{
+    // Paths & file names
+    char *current_path = NULL;
+    char *program_file = NULL;
+    char source_file[256] = {0};
+
+    int arg = get_options(argc, argv);
+
+    // Force when debugging as I didn't find how to pass command line options
+    // trace = true;
+    // debug = true;
+
+    current_path = getcwd(NULL, 0);
+    if (arg + 1 < argc)
+    {
+        program_file = argv[argc - 1];
+        snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
+    }
+    else
+    {
+        program_file = DEBUGGER_SOURCE;
+        if (program_file != NULL)
+            snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
+        else
+            source_file[0] = '\0';
+    }
+    if (strlen(source_file) == 0)
+    {
+        fprintf(stderr, "No file to run!\n");
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    /* Display banner, intepreter runtime options, current path & source file, ...  */
+    if (verbose)
+    {
+        banner(stdout);
+        fprintf(stdout, "Runtime options:\n");
+        fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+        fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
+        fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
+        fprintf(stdout, "Current working directory: %s\n", current_path);
+        fprintf(stdout, "Source file: %s\n", source_file);
+    }
+    free(current_path);
+    current_path = NULL;
+
+    /* Initialize interpreter */
+    interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
+    if (interpreter == NULL)
+    {
+        fprintf(stderr, "Could not initialize interpreter!\n");
+        return EXIT_FAILURE;
+    }
+
+    bool ok = run(source_file);
+
     /* Terminate interpreter */
-    // fprintf(stderr, "ps_interpreter_free(%p)\n", (void *)interpreter);
     interpreter = ps_interpreter_free(interpreter);
 
     if (memory)
