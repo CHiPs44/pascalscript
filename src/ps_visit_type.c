@@ -75,6 +75,51 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     VISIT_END("OK")
 }
 
+bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_STRING", "")
+    ssize_t len = 0;
+
+    if (lexer->current_token.type != PS_TOKEN_STRING)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+    {
+        // String[MY_CONSTANT]
+        READ_NEXT_TOKEN
+        ps_value constant = {.type = &ps_system_none, .data.v = NULL};
+        if (!ps_visit_constant_expression(interpreter, mode, &constant))
+            TRACE_ERROR("CONSTANT_EXPRESSION");
+        switch (constant.type->value->data.t->base)
+        {
+        case PS_TYPE_INTEGER:
+            len = constant.data.i;
+            break;
+        case PS_TYPE_UNSIGNED:
+            len = constant.data.u;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
+        }
+        if (len < 1 || len > PS_STRING_MAX_LEN)
+            RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
+        ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_DEFINITION, PS_TYPE_STRING);
+        if (type_def == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        type_def->def.s.max = (ps_string_len)len;
+        ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+        ps_identifier name = {0};
+        snprintf(name, sizeof(name) - 1, "#STRING_%d", (int)len);
+        *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
+    }
+    else
+    {
+        *type_symbol = &ps_system_string;
+    }
+
+    VISIT_END("OK")
+}
+
 /**
  * @details
  *  Visit type reference, for now, only base types:
@@ -140,7 +185,6 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
     ps_symbol *symbol = NULL;
     bool advance = true;
-    ssize_t len = 0;
 
     *type_symbol = NULL;
     switch (lexer->current_token.type)
@@ -162,41 +206,9 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         *type_symbol = &ps_system_char;
         break;
     case PS_TOKEN_STRING:
-        READ_NEXT_TOKEN
         advance = false;
-        if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-        {
-            // String[MY_CONSTANT]
-            READ_NEXT_TOKEN
-            ps_value constant = {.type = &ps_system_none, .data.v = NULL};
-            if (!ps_visit_constant_expression(interpreter, mode, &constant))
-                TRACE_ERROR("CONSTANT_EXPRESSION");
-            switch (constant.type->value->data.t->base)
-            {
-            case PS_TYPE_INTEGER:
-                len = constant.data.i;
-                break;
-            case PS_TYPE_UNSIGNED:
-                len = constant.data.u;
-                break;
-            default:
-                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
-            }
-            if (len < 1 || len > PS_STRING_MAX_LEN)
-                RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
-            ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_STRING, PS_TYPE_STRING);
-            if (type_def == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            type_def->def.s.max = (ps_string_len)len;
-            ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
-            ps_identifier name = {0};
-            snprintf(name, sizeof(name) - 1, "#STRING_%d", (int)len);
-            *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
-        }
-        else
-        {
-            *type_symbol = &ps_system_string;
-        }
+        if (!ps_visit_type_reference_string(interpreter, mode, type_symbol))
+            TRACE_ERROR("TYPE_REFERENCE_STRING")
         break;
     case PS_TOKEN_IDENTIFIER:
         // TODO could be a subrange definition from an enumeration

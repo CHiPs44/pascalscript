@@ -471,16 +471,10 @@ cleanup:
     VISIT_END("OK")
 }
 
-/**
- * Visit procedure or function call:
- *    IDENTIFIER [ '(' actual_parameter [ ',' actual_parameter ]* ')' ]
- *    where actual_parameter is:
- *      expression or variable_reference
- */
-bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
-                                         ps_value *result_value)
+bool ps_visit_procedure_or_function_call_user(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                              ps_symbol *executable, ps_value *result_value)
 {
-    VISIT_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "");
+    VISIT_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "")
 
     uint16_t line = 0;
     uint16_t column = 0;
@@ -488,91 +482,68 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     ps_symbol *result_symbol = NULL;
     ps_identifier result_identifier = "RESULT";
 
-    if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
+    // Enter environment for procedure or function
+    has_environment = ps_interpreter_enter_environment(interpreter, executable->name);
+    if (!has_environment)
+        TRACE_ERROR("ENTER_ENVIRONMENT")
+    // Parse actual parameters
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
-        // Write or WriteLn
-        if (!ps_visit_write_or_writeln(interpreter, mode, executable == &ps_system_procedure_writeln))
-            TRACE_ERROR("WRITE[LN]");
-    }
-    else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
-    {
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        if (!ps_visit_read_or_readln(interpreter, mode, executable == &ps_system_procedure_readln))
-            TRACE_ERROR("READ[LN]");
-    }
-    else if (executable == &ps_system_procedure_randomize)
-    {
-        // Randomize
-        if (mode == MODE_EXEC)
-            if (!ps_procedure_randomize(interpreter, NULL))
-                TRACE_ERROR("RANDOMIZE");
+        if (!ps_visit_actual_signature(interpreter, mode, executable))
+            TRACE_ERROR("SIGNATURE")
+        EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_RIGHT_PARENTHESIS)
+        SAVE_CURSOR_OR_CLEANUP(line, column)
+        READ_NEXT_TOKEN_OR_CLEANUP
     }
     else
     {
-        // User defined procedure or function call
-        // Enter environment for procedure or function
-        has_environment = ps_interpreter_enter_environment(interpreter, executable->name);
-        if (!has_environment)
-            TRACE_ERROR("ENTER_ENVIRONMENT");
-        // Parse actual parameters
-        if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+        // No parameters
+        const ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
+        if (formal_signature->parameter_count != 0)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        SAVE_CURSOR(line, column)
+    }
+    if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
+    {
+        ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
+        if (token_type == PS_TOKEN_NONE)
         {
-            if (!ps_visit_actual_signature(interpreter, mode, executable))
-                TRACE_ERROR("SIGNATURE");
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
-            SAVE_CURSOR(line, column)
-            READ_NEXT_TOKEN
+            interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
+            goto cleanup;
         }
-        else
+    }
+    else if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
+    {
+        // Function have a return value
+        result_value->type = executable->value->data.x->formal_signature->result_type;
+        result_value->data.v = NULL;
+        result_value->allocated = false;
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
+        if (result_symbol == NULL)
         {
-            // No parameters
-            const ps_formal_signature *formal_signature = executable->value->data.x->formal_signature;
-            if (formal_signature->parameter_count != 0)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            SAVE_CURSOR(line, column);
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
         }
-        if (executable->kind == PS_SYMBOL_KIND_PROCEDURE)
+        if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
         {
-            ps_token_type token_type = ps_parser_expect_statement_end_token(interpreter->parser);
-            if (token_type == PS_TOKEN_NONE)
-            {
-                interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-                goto cleanup;
-            }
+            ps_symbol_free(result_symbol);
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            goto cleanup;
         }
-        else if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
-        {
-            // Function have a return value
-            result_value->type = executable->value->data.x->formal_signature->result_type;
-            result_value->data.v = NULL;
-            result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
-            if (result_symbol == NULL)
-            {
-                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                goto cleanup;
-            }
-            if (!ps_environment_add_symbol(ps_interpreter_get_environment(interpreter), result_symbol))
-            {
-                ps_symbol_free(result_symbol);
-                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                goto cleanup;
-            }
-        }
-        // Execute procedure or function
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
-                GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
-            READ_NEXT_TOKEN
-            // Run procedure body
-            if (!ps_visit_block(interpreter, mode))
-                goto cleanup;
-            // Restore cursor position
-            if (!ps_lexer_set_cursor(lexer, line, column))
-                GOTO_CLEANUP(PS_ERROR_GENERIC); // TODO better error code
-            // READ_NEXT_TOKEN
-        }
+    }
+    // Execute procedure or function
+    if (mode == MODE_EXEC)
+    {
+        if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
+            GOTO_CLEANUP(PS_ERROR_GENERIC) // TODO better error code
+        READ_NEXT_TOKEN
+        // Run procedure body
+        if (!ps_visit_block(interpreter, mode))
+            goto cleanup;
+        // Restore cursor position
+        if (!ps_lexer_set_cursor(lexer, line, column))
+            GOTO_CLEANUP(PS_ERROR_GENERIC) // TODO better error code
+        // READ_NEXT_TOKEN
     }
 
 cleanup:
@@ -594,5 +565,48 @@ cleanup:
     }
     if (interpreter->error != PS_ERROR_NONE)
         TRACE_ERROR("CLEANUP");
+    VISIT_END("OK")
+}
+
+/**
+ * Visit procedure or function call, be it system or user defined:
+ *    IDENTIFIER [ '(' actual_parameter [ ',' actual_parameter ]* ')' ]
+ *    where actual_parameter is:
+ *      expression or variable_reference
+ */
+bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *executable,
+                                         ps_value *result_value)
+{
+    VISIT_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "")
+
+    if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
+    {
+        // Write or WriteLn
+        if (!ps_visit_write_or_writeln(interpreter, mode, executable == &ps_system_procedure_writeln))
+            TRACE_ERROR("WRITE[LN]");
+    }
+    else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
+    {
+        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+        if (!ps_visit_read_or_readln(interpreter, mode, executable == &ps_system_procedure_readln))
+            TRACE_ERROR("READ[LN]");
+    }
+    else if (executable == &ps_system_procedure_randomize)
+    {
+        // Randomize
+        if (mode == MODE_EXEC)
+            if (!ps_procedure_randomize(interpreter, NULL))
+                TRACE_ERROR("RANDOMIZE");
+    }
+    else if (executable->system)
+    {
+        // All other system procedures and functions have 1 argument
+        ps_interpreter_set_message(interpreter, "TODO: call %s", executable->name);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    }
+    // User defined procedure or function call
+    else if (!ps_visit_procedure_or_function_call_user(interpreter, mode, executable, result_value))
+        TRACE_ERROR("USER");
+
     VISIT_END("OK")
 }
