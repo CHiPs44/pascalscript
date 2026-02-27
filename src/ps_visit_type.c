@@ -52,14 +52,14 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     // IDENTIFIER
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    COPY_IDENTIFIER(type_name);
+    COPY_IDENTIFIER(type_name)
     READ_NEXT_TOKEN
     // '='
-    EXPECT_TOKEN(PS_TOKEN_EQ);
+    EXPECT_TOKEN(PS_TOKEN_EQ)
     READ_NEXT_TOKEN
     // TYPE_REFERENCE
     if (!ps_visit_type_reference(interpreter, mode, &type_symbol))
-        TRACE_ERROR("TYPE REFERENCE");
+        TRACE_ERROR("TYPE REFERENCE")
 
     // Register new type definition in symbol table
     data.t = type_symbol->value->data.t;
@@ -214,7 +214,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         break;
         /* ********** Other types ********** */
     case PS_TOKEN_ARRAY:
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         // NB: array can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
         // and may recursively call ps_visit_type_reference()
         // type = ps_system_array.value->data.t; // TODO: parse array definition
@@ -223,36 +223,35 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     case PS_TOKEN_CHAR_VALUE: // subrange
         advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_CHAR))
-            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
+            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     case PS_TOKEN_INTEGER_VALUE: // subrange
     case PS_TOKEN_MINUS:         // subrange with negative integer
         advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_INTEGER))
-            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
+            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     case PS_TOKEN_UNSIGNED_VALUE: // subrange
         advance = false;
         if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, PS_TYPE_UNSIGNED))
-            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE");
+            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     // case PS_TOKEN_BOOLEAN_VALUE:
     // subrange => not really useful but possible
     case PS_TOKEN_LEFT_PARENTHESIS: // enumeration
         advance = false;
         if (!ps_visit_type_reference_enum(interpreter, mode, type_symbol))
-            TRACE_ERROR("TYPE_REFERENCE_ENUM");
+            TRACE_ERROR("TYPE_REFERENCE_ENUM")
         break;
     case PS_TOKEN_SET:    // set
     case PS_TOKEN_FILE:   // file
     case PS_TOKEN_TEXT:   // text
     case PS_TOKEN_RECORD: // record
     case PS_TOKEN_CARET:  // pointer
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
-
     if (advance)
         READ_NEXT_TOKEN
 
@@ -346,7 +345,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     ps_type_definition *type_def = ps_type_definition_create_enum((uint8_t)count, values);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    if (!register_type_definition(interpreter, mode, &name, type_def, type_symbol))
+    if (!register_type_definition(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)
 
     VISIT_END("OK")
@@ -457,7 +456,7 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     // Register new type definition in symbol table
-    if (!register_type_definition(interpreter, mode, &name, type_def, type_symbol))
+    if (!register_type_definition(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)
 
     VISIT_END("OK")

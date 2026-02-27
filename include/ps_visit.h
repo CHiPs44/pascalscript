@@ -17,8 +17,6 @@ extern "C"
 {
 #endif
 
-    extern const ps_identifier ps_identifier_result;
-
     /* src/ps_visit.c */
     bool ps_visit_start(ps_interpreter *interpreter, ps_interpreter_mode mode);
 

@@ -13,8 +13,6 @@
 #include "ps_system.h"
 #include "ps_visit.h"
 
-const ps_identifier ps_identifier_result = "RESULT";
-
 /**
  * Visit
  *  PROGRAM IDENTIFIER ';'

@@ -281,6 +281,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     ps_value *result_value = NULL;
     bool result_symbol_added = false;
     bool executable_symbol_added = false;
+    ps_identifier result_identifier = "RESULT";
 
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -409,7 +410,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         result_value->type = signature->result_type;
         result_value->data.v = NULL;
         result_value->allocated = true;
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, ps_identifier_result, result_value);
+        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
         if (result_symbol == NULL)
         {
             interpreter->error = PS_ERROR_OUT_OF_MEMORY;
@@ -485,6 +486,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     uint16_t column = 0;
     bool has_environment = false;
     ps_symbol *result_symbol = NULL;
+    ps_identifier result_identifier = "RESULT";
 
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
     {
@@ -544,7 +546,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
             result_value->type = executable->value->data.x->formal_signature->result_type;
             result_value->data.v = NULL;
             result_value->allocated = false;
-            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, ps_identifier_result, result_value);
+            result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
             if (result_symbol == NULL)
             {
                 interpreter->error = PS_ERROR_OUT_OF_MEMORY;

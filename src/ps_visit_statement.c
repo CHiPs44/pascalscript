@@ -229,6 +229,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     VISIT_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
     ps_identifier identifier;
     ps_symbol *symbol;
+    ps_identifier result_identifier = "RESULT";
 
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
@@ -246,7 +247,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
                     (char *)identifier);
         // Assign to the not so implicit "Result" local variable
-        symbol = ps_interpreter_find_symbol(interpreter, ps_identifier_result, false);
+        symbol = ps_interpreter_find_symbol(interpreter, &result_identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     }
@@ -274,7 +275,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name = assignment to Result
-        symbol = ps_interpreter_find_symbol(interpreter, ps_identifier_result, false);
+        symbol = ps_interpreter_find_symbol(interpreter, &result_identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_visit_assignment(interpreter, mode, symbol))

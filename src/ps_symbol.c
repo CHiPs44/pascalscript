@@ -107,7 +107,7 @@ char *ps_symbol_dump_value(const ps_symbol *symbol)
     return buffer;
 }
 
-void ps_symbol_debug(FILE *output, char *message, ps_symbol *symbol)
+void ps_symbol_debug(FILE *output, char *message, const ps_symbol *symbol)
 {
     if (output == NULL)
         output = stderr;

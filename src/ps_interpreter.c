@@ -190,7 +190,7 @@ bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifie
     assert('\0' != identifier[0]);
     assert(NULL != type);
     ps_value *value = ps_value_alloc(type, data);
-    const ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
+    ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
     if (variable == NULL)
         ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     if (!ps_interpreter_add_symbol(interpreter, variable))

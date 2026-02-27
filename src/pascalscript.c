@@ -171,10 +171,10 @@ bool run(const char *source_file)
 
     /* Run program */
     if (verbose)
-        printf("===================================== BEGIN ====================================\n");
+        fprintf(stdout, "===================================== BEGIN ====================================\n");
     ok = ps_interpreter_run(interpreter, exec);
     if (verbose)
-        printf("====================================== END =====================================\n");
+        fprintf(stdout, "====================================== END =====================================\n");
 
     /* List symbols */
     if (dump_symbols)
