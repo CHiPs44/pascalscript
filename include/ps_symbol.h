@@ -56,7 +56,7 @@ extern "C"
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);
 
     /** @brief Get symbol info */
-    char *ps_symbol_dump_value(ps_symbol *symbol);
+    char *ps_symbol_dump_value(const ps_symbol *symbol);
 
     /** @brief Print symbol info to stderr (if output is NULL) */
     void ps_symbol_debug(FILE *output, char *message, ps_symbol *symbol);

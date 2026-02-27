@@ -42,6 +42,7 @@ extern "C"
         PS_ERROR_CONSTANT_VALUE,
         PS_ERROR_INVALID_SUBRANGE,
         /* -------------------- RUNTIME -------------------- */
+        PS_ERROR_ENVIRONMENT_NOT_FOUND,
         PS_ERROR_ENVIRONMENT_UNDERFLOW,
         PS_ERROR_ENVIRONMENT_OVERFLOW,
         PS_ERROR_STACK_UNDERFLOW,

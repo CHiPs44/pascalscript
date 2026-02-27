@@ -39,7 +39,6 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     // free only allocated symbols
     if (symbol != NULL && symbol->allocated)
     {
-        // fprintf(stderr, "ps_symbol_free(%p, '%s')\n", (void *)symbol, symbol->name);
         symbol->value = ps_value_free(symbol->value);
         ps_memory_free(PS_MEMORY_SYMBOL, symbol);
     }
@@ -90,7 +89,7 @@ char *ps_symbol_get_kind_name(ps_symbol_kind kind)
     return kind_name;
 }
 
-char *ps_symbol_dump_value(ps_symbol *symbol)
+char *ps_symbol_dump_value(const ps_symbol *symbol)
 {
     static char buffer[192];
     static char value[48];

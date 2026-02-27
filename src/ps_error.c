@@ -47,6 +47,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_CONSTANT_VALUE, "Constant value"},
     {PS_ERROR_INVALID_SUBRANGE, "Invalid subrange"},
     /* ==================== RUNTIME  ==================== */
+    {PS_ERROR_ENVIRONMENT_NOT_FOUND, "Environment not found"},
     {PS_ERROR_ENVIRONMENT_UNDERFLOW, "Environment underflow"},
     {PS_ERROR_ENVIRONMENT_OVERFLOW, "Environment overflow"},
     {PS_ERROR_STACK_UNDERFLOW, "Stack empty"},

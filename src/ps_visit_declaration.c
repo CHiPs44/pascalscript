@@ -45,7 +45,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
-    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+    if (!ps_interpreter_enter_environment(interpreter, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, &identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
@@ -200,9 +200,8 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_identifier identifier[8];
     int var_count;
     ps_symbol *type = NULL;
-    ps_value *value = NULL;
     ps_value_data data = {0};
-    ps_symbol *variable = NULL;
+    const ps_symbol *variable = NULL;
 
     EXPECT_TOKEN(PS_TOKEN_VAR)
     READ_NEXT_TOKEN
@@ -211,37 +210,29 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
         var_count = 0;
         do
         {
-            EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+            EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
             COPY_IDENTIFIER(identifier[var_count])
             variable = ps_interpreter_find_symbol(interpreter, &identifier[var_count], true);
             if (variable != NULL)
-                RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+                RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
             READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_COLON)
                 break;
-            if (lexer->current_token.type == PS_TOKEN_COMMA)
-            {
-                READ_NEXT_TOKEN
-                var_count++;
-                if (var_count > 8 - 1)
-                    RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
-                continue;
-            }
+            if (lexer->current_token.type != PS_TOKEN_COMMA)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+            READ_NEXT_TOKEN
+            var_count += 1;
+            if (var_count == 8)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
         } while (true);
         READ_NEXT_TOKEN
         if (!ps_visit_type_reference(interpreter, mode, &type))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
-        READ_NEXT_TOKEN
         for (int i = 0; i <= var_count; i++)
-        {
-            value = ps_value_alloc(type, data);
-            variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier[i], value);
-            if (variable == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            if (!ps_interpreter_add_symbol(interpreter, variable))
-                TRACE_ERROR("ADD SYMBOL")
-        }
+            if (!ps_interpreter_add_variable(interpreter, identifier[i], type, data))
+                TRACE_ERROR("ADD VARIABLE")
+        READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     VISIT_END("OK")

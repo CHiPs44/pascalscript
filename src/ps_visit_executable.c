@@ -8,6 +8,7 @@
 
 #include "ps_executable.h"
 #include "ps_functions.h"
+#include "ps_interpreter.h"
 #include "ps_lexer.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
@@ -73,10 +74,8 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
 
     ps_identifier names[8] = {0};
     int index = -1;
-    ps_symbol *parameter = NULL;
     ps_symbol __attribute__((aligned(4))) *type_reference = NULL;
     bool byref;
-    ps_value *value = NULL;
 
     // Default is "by value"
     byref = false;
@@ -92,7 +91,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         // Parameter name
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
         index += 1;
-        if (index > 7)
+        if (index == 8)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
         COPY_IDENTIFIER(names[index])
         // Check that the parameter name does not already exist in the other parameters
@@ -122,23 +121,15 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         // Anything else is an error
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
-
     // Then parameter type
     if (!ps_visit_type_reference(interpreter, mode, &type_reference))
         TRACE_ERROR("TYPE REFERENCE");
-
-    // Add the parameters to the signature and to the current environment if executing
+    // Add the parameters to the signature and to the current environment
     for (int i = 0; i <= index; i++)
     {
         if (!ps_formal_signature_add_parameter(signature, byref, &names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        value = ps_value_alloc(type_reference, (ps_value_data){.v = NULL});
-        if (value == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        parameter = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &names[i], value);
-        if (parameter == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_interpreter_add_symbol(interpreter, parameter))
+        if (!ps_interpreter_add_variable(interpreter, names[i], type_reference, (ps_value_data){.v = NULL}))
             TRACE_ERROR("ADD SYMBOL");
     }
 
@@ -303,7 +294,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
     // Create new environment for the procedure/function
-    if (!ps_interpreter_enter_environment(interpreter, &identifier))
+    if (!ps_interpreter_enter_environment(interpreter, identifier))
     {
         goto cleanup;
     }
@@ -518,7 +509,7 @@ bool ps_visit_procedure_or_function_call(ps_interpreter *interpreter, ps_interpr
     {
         // User defined procedure or function call
         // Enter environment for procedure or function
-        has_environment = ps_interpreter_enter_environment(interpreter, &executable->name);
+        has_environment = ps_interpreter_enter_environment(interpreter, executable->name);
         if (!has_environment)
             TRACE_ERROR("ENTER_ENVIRONMENT");
         // Parse actual parameters

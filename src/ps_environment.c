@@ -12,7 +12,7 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
-ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size)
+ps_environment *ps_environment_alloc(ps_environment *parent, const ps_identifier name, ps_symbol_table_size size)
 {
     assert(name != NULL);
     assert(size > 0);
@@ -29,8 +29,6 @@ ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name
 
 ps_environment *ps_environment_free(ps_environment *environment)
 {
-    // fprintf(stderr, "ps_environment_free(%p, '%s')\n", (void *)environment,
-    //         NULL == environment ? "NULL" : environment->name);
     if (environment != NULL)
     {
         if (environment->symbols != NULL)

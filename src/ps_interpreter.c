@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <string.h>
 
 #include "ps_error.h"
@@ -40,7 +41,7 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
         return ps_interpreter_free(interpreter);
     // Allocate system environment
     ps_identifier system = "SYSTEM";
-    interpreter->environments[0] = ps_environment_alloc(NULL, &system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    interpreter->environments[0] = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
     if (interpreter->environments[0] == NULL)
         return ps_interpreter_free(interpreter);
     // Initialize system environment
@@ -74,18 +75,22 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
 
 bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error)
 {
+    assert(NULL != interpreter);
     interpreter->error = error;
     return false;
 }
 
 void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error)
 {
+    assert(NULL != interpreter);
     interpreter->error = error;
     return NULL;
 }
 
 bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) // NOSONAR
 {
+    assert(NULL != interpreter);
+    assert(NULL != format);
     va_list args;
     va_start(args, format);
     vsnprintf(interpreter->message, sizeof(interpreter->message), format, args); // NOSONAR
@@ -93,8 +98,9 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) 
     return true;
 }
 
-bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name)
+bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name)
 {
+    assert(NULL != interpreter);
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
@@ -106,8 +112,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
-                (char *)name);
+        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS, name);
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
     }
     return true;
@@ -115,7 +120,10 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
 
 bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
+    assert(NULL != interpreter);
     ps_environment *environment = interpreter->environments[interpreter->level];
+    if (environment == NULL)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
@@ -160,23 +168,41 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
 
 bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
 {
+    assert(NULL != interpreter);
+    assert(NULL != symbol);
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
+    if (environment == NULL)
+        ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
     if (interpreter->debug >= DEBUG_TRACE)
         fprintf(stderr, "ADD %*s SYMBOL '%*s' TO ENVIRONMENT '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
                 environment->name, (void *)symbol->value,
                 symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        ps_symbol_table_dump(NULL, "BEFORE ADD", environment->symbols);
     if (!ps_environment_add_symbol(environment, symbol))
         return ps_interpreter_return_false(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        ps_symbol_table_dump(NULL, "AFTER ADD", environment->symbols);
+    return true;
+}
+
+bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type,
+                                ps_value_data data)
+{
+    assert(NULL != interpreter);
+    assert('\0' != identifier[0]);
+    assert(NULL != type);
+    ps_value *value = ps_value_alloc(type, data);
+    const ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, &identifier, value);
+    if (variable == NULL)
+        ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+    if (!ps_interpreter_add_symbol(interpreter, variable))
+        return false;
     return true;
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to) // NOSONAR
 {
+    assert(NULL != interpreter);
+    assert(NULL != from);
+    assert(NULL != to);
     if (interpreter->debug >= DEBUG_VERBOSE)
     {
         fputc('>', stderr);
@@ -278,18 +304,24 @@ OK:
 
 bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
 {
+    assert(NULL != interpreter);
+    assert(NULL != source);
+    interpreter->error = PS_ERROR_NONE;
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
 bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
 {
+    assert(NULL != interpreter);
+    interpreter->error = PS_ERROR_NONE;
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
     return ps_buffer_load_file(lexer->buffer, filename);
 }
 
 bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
 {
+    assert(NULL != interpreter);
     const ps_parser *parser = interpreter->parser;
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     ps_lexer_reset(lexer);

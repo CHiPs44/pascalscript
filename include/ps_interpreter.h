@@ -80,7 +80,7 @@ extern "C"
     bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...);
 
     /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
-    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier *name);
+    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name);
 
     /** @brief Release current environment */
     bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
@@ -94,9 +94,15 @@ extern "C"
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
+    /** @brief Add variable to current environment */
+    bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type,
+                                    ps_value_data data);
+
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);
-    /** @brief Check if current token or value is an ordinal (integer, unsigned, char or integer / unsigned / char subrange) */
+
+    /** @brief Check if current token or value is an ordinal (integer, unsigned, char or integer / unsigned / char
+     * subrange) */
     bool ps_interpreter_is_ordinal(ps_interpreter *interpreter, ps_value *value);
 
     /**

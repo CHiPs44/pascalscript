@@ -28,7 +28,7 @@ extern "C"
 
     /** @brief Initialize environment */
     /** @return NULL if not enough free memory (errno = ENOMEM) */
-    ps_environment *ps_environment_alloc(ps_environment *parent, ps_identifier *name, ps_symbol_table_size size);
+    ps_environment *ps_environment_alloc(ps_environment *parent, const ps_identifier name, ps_symbol_table_size size);
 
     /** @brief Free environment */
     /** @return NULL */
