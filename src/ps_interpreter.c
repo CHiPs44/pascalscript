@@ -162,7 +162,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
             break;
         level -= 1;
     } while (level != PS_INTERPRETER_ENVIRONMENT_SYSTEM);
-    ps_interpreter_set_message(interpreter, "Symbol '%s 'not found in any environment", name);
+    ps_interpreter_set_message(interpreter, "Symbol '%s' not found in any environment", name);
     return NULL;
 }
 

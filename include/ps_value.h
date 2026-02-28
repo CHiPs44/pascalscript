@@ -51,7 +51,7 @@ extern "C"
 
     char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision);
     char *ps_value_get_debug_string(const ps_value *value);
-    void ps_value_debug(FILE *output, char *message, ps_value *value);
+    void ps_value_debug(FILE *output, const char *message, const ps_value *value);
 
 #ifdef __cplusplus
 }

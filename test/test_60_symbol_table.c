@@ -16,6 +16,7 @@
 
 #include "../src/ps_environment.c"
 #include "../src/ps_memory.c"
+#include "../src/ps_executable.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
@@ -36,7 +37,7 @@ int main(void)
     setrlimit(RLIMIT_AS, &rl);
 
     ps_identifier system = "SYSTEM";
-    ps_environment *environment = ps_environment_alloc(NULL, &system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    ps_environment *environment = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
     ps_system_init(environment);
 
     ps_value value1 = {.type = ps_system_integer.value->type, .allocated = false, .data.i = 0x55aa55aa};
@@ -50,7 +51,6 @@ int main(void)
 
     ps_symbol_table *table = environment->symbols;
     int result;
-    ps_symbol *symbol;
     ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
 
     ps_value_set_integer(constant1.value, 1234567890);
@@ -59,7 +59,6 @@ int main(void)
     ps_value_set_integer(constant4.value, 0x87654321);
 
     printf("TEST SYMBOL TABLE: BEGIN\n");
-    // ps_symbol_table_alloc(table);
     printf("TEST SYMBOL TABLE: INIT OK\n");
     // Add constant1 & variable2 => 0 & 1
     result = ps_symbol_table_add(table, &constant1);
@@ -82,7 +81,7 @@ int main(void)
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     printf("TEST SYMBOL TABLE: END\n");
 
-    environment = ps_environment_free(environment);
+    ps_environment_free(environment);
 
     return 0;
 }

@@ -15,6 +15,8 @@
 #include "../include/ps_value.h"
 
 #include "../src/ps_memory.c"
+#include "../src/ps_executable.c"
+#include "../src/ps_signature.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
@@ -30,23 +32,23 @@ int main(void)
     setrlimit(RLIMIT_AS, &rl);
 
     ps_identifier system = "SYSTEM";
-    ps_environment *environment = ps_environment_alloc(NULL, &system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    ps_environment *environment = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
     ps_system_init(environment);
 
     printf("TEST VALUE: BEGIN\n");
     ps_value *dummy = ps_value_alloc(ps_system_integer.value->type, (ps_value_data){.i = 0});
     ps_value_debug(stdout, "DUMMY=", dummy);
-    dummy = ps_value_free(dummy);
+    ps_value_free(dummy);
 
     printf("TEST VALUE: INTEGER\n");
     ps_value *integer_value = ps_value_set_integer(NULL, -1234567890);
     ps_value_debug(stdout, "I=", integer_value);
-    integer_value = ps_value_free(integer_value);
+    ps_value_free(integer_value);
 
     printf("TEST VALUE: UNSIGNED\n");
     ps_value *unsigned_value = ps_value_set_unsigned(NULL, 0xDEADBEEF);
     ps_value_debug(stdout, "U=", unsigned_value);
-    unsigned_value = ps_value_free(unsigned_value);
+    ps_value_free(unsigned_value);
 
     printf("TEST VALUE: BOOLEAN\n");
     ps_value *boolean_true = ps_value_set_boolean(NULL, true);

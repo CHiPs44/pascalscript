@@ -6,6 +6,7 @@ REPORT_FILE="./test/report.txt"
 OK=0
 KO=0
 TOTAL=0
+RUNS=1
 printf "%-7s %-40s %15s %s\n" "CC" "Test" "ms?" "Result" >> "$REPORT_FILE"
 for TEST in ./test/test_*.c; do
     BASENAME=$(basename "${TEST}")
@@ -26,14 +27,19 @@ for TEST in ./test/test_*.c; do
         fi
         echo -n "Executing ${TESTNAME} compiled with ${CC}... "
         START=$(date +%s%N)
-        for I in {1..10}; do
-            echo -n "#$I "
-            ./test/test > "$OUT_FILE" 2> "$ERR_FILE"
+        if [[ ${RUNS} -eq 1 ]]; then
+            { ./test/test; } > "$OUT_FILE" 2> "$ERR_FILE"
             RESULT=$?
-        done
+        else
+            for I in {1..${RUNS}}; do
+                echo -n "#$I "
+                { ./test/test; } > "$OUT_FILE" 2> "$ERR_FILE"
+                RESULT=$?
+            done
+        fi
         END=$(date +%s%N)
         rm -f ./test/test
-        DURATION=$(( (END - START) / (10 * 1000) )) # Duration in milliseconds?
+        DURATION=$(( (END - START) / (${RUNS} * 1000) )) # Duration in milliseconds?
         if [[ ${RESULT} -eq 0 ]]; then
             printf "%-7s %-40s %15s %s\n" "${CC}" "${TESTNAME}" "${DURATION}" "OK"  >> "$REPORT_FILE"
             OK=$((OK + 1))

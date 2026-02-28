@@ -30,31 +30,28 @@ ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
 
 ps_value *ps_value_free(ps_value *value)
 {
-    // fprintf(stderr, "ps_value_free(%p)\n", (void *)value);
-    // ps_value_debug(stderr, "VALUE", value);
     if (value == NULL || !value->allocated)
         return NULL;
     if (value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
     {
-        // fprintf(stderr, "\tps_value_free(%p): EXECUTABLE(%p)\n", (void *)value, (void *)(value->data.x));
         ps_executable_free(value->data.x);
     }
     ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;
 }
 
-#define PS_VALUE_SET(__TYPE__, __X__)                                       \
-    if (value == NULL)                                                      \
-    {                                                                       \
-        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__}); \
-        if (value == NULL)                                                  \
-            return NULL;                                                    \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-        value->type = &__TYPE__;                                            \
-        value->data.__X__ = __X__;                                          \
-    }                                                                       \
+#define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
+    if (value == NULL)                                                                                                 \
+    {                                                                                                                  \
+        value = ps_value_alloc(&__TYPE__, (ps_value_data){.__X__ = __X__});                                            \
+        if (value == NULL)                                                                                             \
+            return NULL;                                                                                               \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+        value->type = &__TYPE__;                                                                                       \
+        value->data.__X__ = __X__;                                                                                     \
+    }                                                                                                                  \
     return value
 
 ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
@@ -219,7 +216,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
     if (value->type->value->data.t->type == PS_TYPE_ENUM)
     {
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s(%u)",
+            snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", value->type->name,
                      value->type->value->data.t->def.e.values[value->data.u]->name, value->data.u);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->value->data.t->def.e.values[value->data.u]->name);
@@ -334,8 +331,7 @@ char *ps_value_get_debug_string(const ps_value *value)
 char *ps_value_dump(const ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!"
-                                                               : value->type->name;
+    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
     char *base = value == NULL                ? "NULL!"
                  : value->type == NULL        ? "TYPE!"
                  : value->type->value == NULL ? "BASE!"
@@ -345,7 +341,7 @@ char *ps_value_dump(const ps_value *value)
     return buffer;
 }
 
-void ps_value_debug(FILE *output, char *message, ps_value *value)
+void ps_value_debug(FILE *output, const char *message, const ps_value *value)
 {
     if (output == NULL)
         output = stderr;
