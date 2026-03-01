@@ -23,7 +23,8 @@
  *  and return true
  *  otherwise return false and set PS_ERROR_OPERATOR_NOT_APPLICABLE
  */
-bool ps_function_unary_op(ps_interpreter *interpreter, const ps_value *value, ps_value *result, ps_token_type token_type)
+bool ps_function_unary_op(ps_interpreter *interpreter, const ps_value *value, ps_value *result,
+                          ps_token_type token_type)
 {
     result->type = value->type;
     // NB: with FPC, not(subrange) or not(enum) yields integer result without range checking
@@ -252,6 +253,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const
         if (s == NULL)
             return false;
         s->str[0] = b->data.c;
+        s->str[1] = '\0';
         s->len = 1;
         result->data.s = ps_string_concat(a->data.s, s, PS_STRING_MAX_LEN);
         ps_string_free(s);
@@ -418,6 +420,7 @@ bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const
                                    ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
+    // Convert type to symbolic type
     switch (r)
     {
     case PS_TYPE_REAL:
@@ -439,10 +442,10 @@ bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const
         result->type = &ps_system_string;
         break;
     default:
-        ps_interpreter_set_message(interpreter, "Unknown binary operator %s (%d) for types %s and %s\n",
-                                   ps_token_get_keyword(token_type), token_type,
-                                   ps_value_type_get_name(a->type->value->data.t->base),
-                                   ps_value_type_get_name(b->type->value->data.t->base));
+        ps_interpreter_set_message(
+            interpreter, "Unknown binary operator %s (%d) result type %s (%) for types %s and %s\n",
+            ps_token_get_keyword(token_type), token_type, ps_value_type_get_name(r), r,
+            ps_value_type_get_name(a->type->value->data.t->base), ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
     if (expected_type != &ps_system_none && result->type != expected_type)

@@ -29,7 +29,7 @@ ps_string *ps_string_alloc(ps_string_len max)
     size_t size = sizeof(ps_string_len) + sizeof(ps_string_len) + (max + 1) * sizeof(ps_char);
     ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING, size);
     if (s == NULL)
-        return NULL; // errno = ENOMEM;
+        return NULL; // errno = ENOMEM
     s->max = max;
     s->len = 0;
     return s;
@@ -137,7 +137,7 @@ ps_string *ps_string_append(ps_string *a, const ps_string *b)
     size_t len = a->len + b->len;
     if (len > a->max)
     {
-        return NULL; // errno = EINVAL;
+        return NULL; // errno = EINVAL
     }
     memcpy(a->str + a->len, b->str, b->len);
     a->len = (ps_string_len)len;
@@ -199,7 +199,7 @@ ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_le
     (void)source;
     (void)s;
     (void)index;
-    return NULL; // TODO
+    return NULL;
 }
 
 ps_string *ps_string_lowercase(const ps_string *s)

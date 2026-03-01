@@ -15,8 +15,8 @@
 #include "../include/ps_value.h"
 
 #include "../src/ps_environment.c"
-#include "../src/ps_memory.c"
 #include "../src/ps_executable.c"
+#include "../src/ps_memory.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
@@ -25,11 +25,10 @@
 #include "../src/ps_value.c"
 #include "../src/ps_value_type.c"
 
-// ps_symbol_table table = {.size = PS_SYMBOL_TABLE_DEFAULT_SIZE, .used = 0}, .symbols = {NULL};
 ps_symbol constant1 = {.name = "CONSTANT1", .kind = PS_SYMBOL_KIND_CONSTANT, .allocated = false, .system = false};
-ps_symbol variable2 = {.name = "VARIABLE2", .kind = PS_SYMBOL_KIND_VARIABLE};
-ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO};
-ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_KIND_CONSTANT};
+ps_symbol variable2 = {.name = "VARIABLE2", .kind = PS_SYMBOL_KIND_VARIABLE, .allocated = false, .system = false};
+ps_symbol auto_var3 = {.name = "AUTO_VAR3", .kind = PS_SYMBOL_KIND_AUTO, .allocated = false, .system = false};
+ps_symbol constant4 = {.name = "CONSTANT4", .kind = PS_SYMBOL_KIND_CONSTANT, .allocated = false, .system = false};
 
 int main(void)
 {

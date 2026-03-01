@@ -79,109 +79,6 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
     PS_VALUE_SET(ps_system_char, c);
 }
 
-// ps_value *ps_value_set_string(ps_value *value, ps_string *s)
-// {
-//     if (NULL == value)
-//     {
-//         return ps_string_create(s, 0);
-//     }
-//     if (ps_string_set(value->data.s, s) == NULL)
-//     {
-//         return NULL; // errno = ENOMEM or EINVAL
-//     }
-//     return value;
-// }
-
-// ps_value *ps_value_set_enum(ps_value *value, ps_unsigned e, ps_type_definition *type_def)
-// {
-//     if (PS_TYPE_ENUM != type_def->base)
-//     {
-//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
-//         return NULL;
-//     }
-//     PS_VALUE_SET(type_def, e);
-// }
-
-// ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_type_definition *type_def)
-// {
-//     if (PS_TYPE_ENUM != type_def->base)
-//     {
-//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
-//         return NULL;
-//     }
-//     PS_VALUE_SET(type_def, g);
-// }
-
-// ps_string *ps_value_new_string(char *s, ps_string_len max, ps_string_len len)
-// {
-//     ps_value_error = PS_ERROR_NOT_IMPLEMENTED;
-//     return NULL;
-//     // if (max == 0)
-//     //     max = len;
-//     // if (value == NULL && max == 0)
-//     // {
-//     //     ps_value_error = PS_ERROR_INVALID_PARAMETERS;
-//     //     return NULL;
-//     // }
-//     // bool is_new = false;
-//     // if (value == NULL)
-//     // {
-//     //     is_new = true;
-//     //     value = ps_memory_malloc( sizeof(ps_value));
-//     //     if (value == NULL)
-//     //     {
-//     //         ps_value_error = PS_ERROR_OUT_OF_MEMORY;
-//     //         return NULL;
-//     //     }
-//     // }
-//     // value->type = PS_TYPE_STRING;
-//     // // value->size = sizeof(ps_string);
-//     // if (max > 0 || is_new)
-//     // {
-//     //     // (Re)allocate to new max length
-//     //     if (!is_new)
-//     //         ps_string_free(value->data.s);
-//     //     value->data.s = ps_string_create(max, s);
-//     //     if (value->data.s == NULL)
-//     //     {
-//     //         ps_value_error = errno == ENOMEM
-//     //                              ? PS_ERROR_OUT_OF_MEMORY
-//     //                              : PS_ERROR_OUT_OF_RANGE;
-//     //         if (is_new)
-//     //             ps_memory_free(value);
-//     //         return NULL;
-//     //     }
-//     // }
-//     // else
-//     // {
-//     //     // Try to put new value in existing one
-//     //     ps_string *p = ps_string_set(value->data.s, s);
-//     //     if (p == NULL)
-//     //     {
-//     //         ps_value_error = errno == ENOMEM
-//     //                              ? PS_ERROR_OUT_OF_MEMORY
-//     //                              : PS_ERROR_OUT_OF_RANGE;
-//     //         if (is_new)
-//     //         {
-//     //             ps_string_free(value->data.s);
-//     //             ps_memory_free(value);
-//     //         }
-//     //         return NULL;
-//     //     }
-//     // }
-//     // return value;
-// }
-
-// ps_value *ps_value_set_pointer(ps_value *value, ps_pointer p, ps_type_definition *type_def)
-// {
-//     if (PS_TYPE_POINTER != type_def->base)
-//     {
-//         ps_value_error = PS_ERROR_TYPE_MISMATCH;
-//         return NULL;
-//     }
-//     PS_VALUE_SET(type_def, p);
-// }
-
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
@@ -328,14 +225,38 @@ char *ps_value_get_debug_string(const ps_value *value)
     return ps_value_to_string(value, true, 0, 0);
 }
 
+char *ps_value_get_type_name(ps_value *value)
+{
+    char *type = "NULL!";
+    if (value != NULL)
+    {
+        if (value->type == NULL)
+            type = "TYPE!";
+        else
+            type = value->type->name;
+    }
+    return type;
+}
+
+char *ps_value_get_type_name(ps_value *value)
+{
+
+}
+
 char *ps_value_dump(const ps_value *value)
 {
     static char buffer[512];
-    char *type = value == NULL ? "NULL!" : value->type == NULL ? "TYPE!" : value->type->name;
-    char *base = value == NULL                ? "NULL!"
-                 : value->type == NULL        ? "TYPE!"
-                 : value->type->value == NULL ? "BASE!"
-                                              : ps_value_type_get_name(value->type->value->data.t->base);
+    char *type= ps_value_get_type_name(value);
+    char *base = "NULL!";
+    if (value != NULL)
+    {
+        if (value->type == NULL)
+            base = "TYPE!";
+        else if (value->type->value == NULL)
+            base = "BASE!";
+        else
+            base = ps_value_type_get_name(value->type->value->data.t->base);
+    }
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_string(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s (base=%s), value=%s", type, base, data);
     return buffer;

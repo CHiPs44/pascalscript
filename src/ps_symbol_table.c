@@ -97,16 +97,16 @@ ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
     return hash;
 }
 
-ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier *name)
+ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier name)
 {
-    ps_symbol_hash_key hash = ps_symbol_get_hash_key((const char *)name);
+    ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
     ps_symbol_table_size index = hash % table->size;
     if (table->symbols[index] == NULL)
     {
         ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (const char *)name);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
-    if (strcmp((char *)(table->symbols[index]->name), (const char *)name) != 0)
+    if (strcmp(table->symbols[index]->name, name) != 0)
     {
         // Key collision: search for the symbol in the table
         ps_symbol_table_size start_index = index;
@@ -133,7 +133,7 @@ ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps
     return index;
 }
 
-ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier *name)
+ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
@@ -149,7 +149,7 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
     if (table->used >= table->size)
         return PS_SYMBOL_TABLE_ERROR_FULL;
     // check if symbol already exists
-    if (ps_symbol_table_get(table, &symbol->name) != NULL)
+    if (ps_symbol_table_get(table, symbol->name) != NULL)
         return PS_SYMBOL_TABLE_ERROR_EXISTS;
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;

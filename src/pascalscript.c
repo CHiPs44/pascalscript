@@ -20,8 +20,6 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-// #define DEBUGGER_SOURCE "examples/010-operators.pas"
-// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
 #define DEBUGGER_SOURCE "examples/002-strings.pas"
 
 // Runtime options
@@ -150,12 +148,8 @@ bool run(const char *source_file)
     if (!ps_interpreter_load_file(interpreter, source_file))
     {
         fprintf(stderr, "File %s not loaded!\n", source_file);
-        fprintf(stderr, "Error %d %s\n", interpreter->error, ps_error_get_message(interpreter->error));
-        fprintf(stderr, "Error %d %s\n", interpreter->parser->error, ps_error_get_message(interpreter->parser->error));
-        fprintf(stderr, "Error %d %s\n", interpreter->parser->lexers[0]->error,
-                ps_error_get_message(interpreter->parser->lexers[0]->error));
-        interpreter = ps_interpreter_free(interpreter);
-        return EXIT_FAILURE;
+        fprintf(stderr, "Error %d %s\n", interpreter->error, ps_error_get_message(interpreter->error)); // NOSONAR false positive
+        return false;
     }
     if (verbose)
         fprintf(stderr, "Loaded %s!\n", source_file);

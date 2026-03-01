@@ -53,23 +53,23 @@ int main(void)
     printf("TEST VALUE: BOOLEAN\n");
     ps_value *boolean_true = ps_value_set_boolean(NULL, true);
     ps_value_debug(stdout, "B=", boolean_true);
-    boolean_true = ps_value_free(boolean_true);
+    ps_value_free(boolean_true);
     ps_value *boolean_false = ps_value_set_boolean(NULL, false);
     ps_value_debug(stdout, "B=", boolean_false);
-    boolean_false = ps_value_free(boolean_false);
+    ps_value_free(boolean_false);
 
     printf("TEST VALUE: CHAR\n");
     ps_value *char_value = ps_value_set_char(NULL, '@');
     ps_value_debug(stdout, "C=", char_value);
-    char_value = ps_value_free(char_value);
+    ps_value_free(char_value);
 
     printf("TEST VALUE: REAL\n");
-    ps_value *real_value = ps_value_set_real(NULL, 3.141592653589793115997963468544185161590576171875);
+    ps_value *real_value = ps_value_set_real(NULL, (ps_real)3.141592653589793115997963468544185161590576171875);
     ps_value_debug(stdout, "R=", real_value);
-    real_value = ps_value_free(real_value);
+    ps_value_free(real_value);
 
     printf("TEST VALUE: END\n");
 
-    environment = ps_environment_free(environment);
+    ps_environment_free(environment);
     return 0;
 }
