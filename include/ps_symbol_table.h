@@ -15,7 +15,7 @@ extern "C"
 #endif
 
 #ifndef PS_SYMBOL_TABLE_DEFAULT_SIZE
-#define PS_SYMBOL_TABLE_DEFAULT_SIZE 256
+#define PS_SYMBOL_TABLE_DEFAULT_SIZE 512
 #endif
 
 #define PS_SYMBOL_TABLE_NOT_FOUND UINT16_MAX
@@ -57,10 +57,10 @@ extern "C"
     ps_symbol_table_size ps_symbol_table_get_free(const ps_symbol_table *table);
 
     /** @brief Find symbol's index in table by name or return PS_SYMBOL_TABLE_NOT_FOUND */
-    ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier name);
+    ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const char *name);
 
     /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier name);
+    ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name);
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
     ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);

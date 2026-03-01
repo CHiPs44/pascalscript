@@ -44,7 +44,7 @@ bool ps_visit_variable_reference(ps_interpreter *interpreter, ps_interpreter_mod
     COPY_IDENTIFIER(identifier)
     if (mode == MODE_EXEC)
     {
-        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
         if (symbol == NULL)
         {
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -103,7 +103,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         }
         // Check that the parameter name does not already exist in the signature
         // e.g. procedure P(a: Integer; a: Boolean);
-        if (ps_formal_signature_find_parameter(signature, &names[index]) != NULL)
+        if (ps_formal_signature_find_parameter(signature, names[index]) != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         READ_NEXT_TOKEN
         // ',' introduces another parameter name, for example: procedure P(a, b, c: Integer);
@@ -127,7 +127,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     // Add the parameters to the signature and to the current environment
     for (int i = 0; i <= index; i++)
     {
-        if (!ps_formal_signature_add_parameter(signature, byref, &names[i], type_reference))
+        if (!ps_formal_signature_add_parameter(signature, byref, names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_variable(interpreter, names[i], type_reference, (ps_value_data){.v = NULL}))
             TRACE_ERROR("ADD SYMBOL");
@@ -291,7 +291,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     // Does it already exist in the current environment?
     COPY_IDENTIFIER(identifier)
-    executable_symbol = ps_interpreter_find_symbol(interpreter, &identifier, true);
+    executable_symbol = ps_interpreter_find_symbol(interpreter, identifier, true);
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
     // Create new environment for the procedure/function
@@ -556,7 +556,7 @@ cleanup:
             if (parameter->byref)
             {
                 ps_symbol *symbol =
-                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), &parameter->name, true);
+                    ps_environment_find_symbol(ps_interpreter_get_environment(interpreter), parameter->name, true);
                 if (symbol != NULL)
                     symbol->value = NULL;
             }

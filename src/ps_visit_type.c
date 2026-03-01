@@ -212,7 +212,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         break;
     case PS_TOKEN_IDENTIFIER:
         // TODO could be a subrange definition from an enumeration
-        symbol = ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, false);
+        symbol = ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
         if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -270,7 +270,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     VISIT_END("OK")
 }
 
-static bool register_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_identifier name,
+static bool register_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *name,
                                      ps_type_definition *type_def, ps_symbol **symbol)
 {
     VISIT_BEGIN("REGISTER", "")
@@ -324,7 +324,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         // Check that enumeration value does not already exist locally (in the same enumeration) or globally (in the
         // symbol table)
-        if (ps_interpreter_find_symbol(interpreter, &lexer->current_token.value.identifier, true) != NULL)
+        if (ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, true) != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
         // Create a new symbol for the enumeration value
         ps_value *value = ps_value_alloc(&ps_system_unsigned, (ps_value_data){.u = count});

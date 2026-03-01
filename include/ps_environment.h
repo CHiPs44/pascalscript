@@ -28,7 +28,7 @@ extern "C"
 
     /** @brief Initialize environment */
     /** @return NULL if not enough free memory (errno = ENOMEM) */
-    ps_environment *ps_environment_alloc(ps_environment *parent, const ps_identifier name, ps_symbol_table_size size);
+    ps_environment *ps_environment_alloc(ps_environment *parent, const char *name, ps_symbol_table_size size);
 
     /** @brief Free environment */
     /** @return NULL */
@@ -40,7 +40,7 @@ extern "C"
 
     /** @brief Find symbol in environment, or in parent environments if local is false */
     /** @return NULL if not found */
-    ps_symbol *ps_environment_find_symbol(ps_environment *environment, const ps_identifier name, bool local);
+    ps_symbol *ps_environment_find_symbol(ps_environment *environment, const char *name, bool local);
 
 #ifdef __cplusplus
 }

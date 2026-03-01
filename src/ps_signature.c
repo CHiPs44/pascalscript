@@ -46,7 +46,7 @@ ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature)
     return NULL;
 }
 
-ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, ps_identifier *name)
+ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, char *name)
 {
     if (signature->parameter_count == 0)
         return NULL;
@@ -58,7 +58,7 @@ ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *sig
     return NULL;
 }
 
-bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, ps_identifier *name, ps_symbol *type)
+bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, char *name, ps_symbol *type)
 {
     ps_formal_parameter *new_parameters;
     if (signature->parameter_count == 0)

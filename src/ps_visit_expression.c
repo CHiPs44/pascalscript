@@ -304,7 +304,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         switch (symbol->kind)
@@ -478,7 +478,7 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             ps_identifier identifier = {0};
             COPY_IDENTIFIER(identifier)
-            symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+            symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
             if (symbol == NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
             READ_NEXT_TOKEN
@@ -622,7 +622,7 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
         break;
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_interpreter_find_symbol(interpreter, &identifier, false);
+        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)

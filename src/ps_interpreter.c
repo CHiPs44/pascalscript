@@ -149,12 +149,15 @@ ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
     return interpreter->environments[interpreter->level];
 }
 
-ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier *name, bool local)
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const char *name, bool local)
 {
     int level = interpreter->level;
     ps_symbol *symbol;
     do
     {
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "ps_interpreter_find_symbol(%s, %s, %s)\n", interpreter->environments[level]->name, name,
+                    local ? "Local" : "Global");
         symbol = ps_environment_find_symbol(interpreter->environments[level], name, local);
         if (symbol != NULL)
             return symbol;
@@ -162,7 +165,6 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_identifier
             break;
         level -= 1;
     } while (level != PS_INTERPRETER_ENVIRONMENT_SYSTEM);
-    ps_interpreter_set_message(interpreter, "Symbol '%s' not found in any environment", name);
     return NULL;
 }
 

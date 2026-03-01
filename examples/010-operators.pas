@@ -19,7 +19,7 @@ Begin
     // WriteLn();
     WriteLn('PascalScript Operators Demo');
     WriteLn('--------------------------------------------------------------------------------');
-    WriteLn();
+
     WriteLn('* Assignment operator');
     k := 42;
     WriteLn('  - Integer:                        = ', k:12);
@@ -148,16 +148,15 @@ Begin
     z := u + i + x;
     WriteLn('  - Mixed:                 5 + 2 + 3.5 = ', z:12:8);
 
-    WriteLn('* Complex expression');
-    i := 10;
-    j := 3;
-    k := 42;
-    u := 5;
-    x := 3.5;
-    z := (i + j) * x / u - k; // Mixed expression with parentheses
-    WriteLn('  - Complex expression:    (10 + 3) * 3.5 / 5 - 42 = ', z:12:8);
+    // WriteLn('* Complex expression');
+    // i := 10;
+    // j := 3;
+    // k := 42;
+    // u := 5;
+    // x := 3.5;
+    // z := (i + j) * x / u - k; // Mixed expression with parentheses
+    // WriteLn('  - Complex expression:    (10 + 3) * 3.5 / 5 - 42 = ', z:12:8);
 
-    WriteLn();
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK');
 END.

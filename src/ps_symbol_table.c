@@ -97,13 +97,13 @@ ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
     return hash;
 }
 
-ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps_identifier name)
+ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const char *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
     ps_symbol_table_size index = hash % table->size;
     if (table->symbols[index] == NULL)
     {
-        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (const char *)name);
+        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
         return PS_SYMBOL_TABLE_NOT_FOUND;
     }
     if (strcmp(table->symbols[index]->name, name) != 0)
@@ -117,23 +117,23 @@ ps_symbol_table_size ps_symbol_table_find(const ps_symbol_table *table, const ps
                 index = 0; // wrap around
             if (index == start_index)
             {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", (const char *)name);
+                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
                 return PS_SYMBOL_TABLE_NOT_FOUND;
             }
             if (table->symbols[index] == NULL)
                 continue;
-            if (strcmp((char *)(table->symbols[index]->name), (const char *)name) == 0)
+            if (strcmp((char *)(table->symbols[index]->name), name) == 0)
             {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (const char *)name, index);
+                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", name, index);
                 return index;
             }
         } while (true);
     }
-    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", (const char *)name, index);
+    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", name, index);
     return index;
 }
 
-ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const ps_identifier name)
+ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name)
 {
     ps_symbol_table_size index = ps_symbol_table_find(table, name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
@@ -208,12 +208,12 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
             type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
             value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
             // clang-format off
-            fprintf(output, 
-                    "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-10s┃%-*s┃\n", 
-                    symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i, 
+            fprintf(output,
+                    "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-10s┃%-*s┃\n",
+                    symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i,
                     hash, hash % table->size == i ? '=' : '!', hash % table->size,
-                    PS_IDENTIFIER_LEN, symbol->name, 
-                    kind_name, 
+                    PS_IDENTIFIER_LEN, symbol->name,
+                    kind_name,
                     type_name,
                     PS_IDENTIFIER_LEN, value
             );

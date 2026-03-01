@@ -212,7 +212,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
         {
             EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
             COPY_IDENTIFIER(identifier[var_count])
-            variable = ps_interpreter_find_symbol(interpreter, &identifier[var_count], true);
+            variable = ps_interpreter_find_symbol(interpreter, identifier[var_count], true);
             if (variable != NULL)
                 RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
             READ_NEXT_TOKEN

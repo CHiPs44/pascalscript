@@ -225,7 +225,7 @@ char *ps_value_get_debug_string(const ps_value *value)
     return ps_value_to_string(value, true, 0, 0);
 }
 
-char *ps_value_get_type_name(ps_value *value)
+char *ps_value_get_type_name(const ps_value *value)
 {
     char *type = "NULL!";
     if (value != NULL)
@@ -238,15 +238,8 @@ char *ps_value_get_type_name(ps_value *value)
     return type;
 }
 
-char *ps_value_get_type_name(ps_value *value)
+char *ps_value_get_base_name(const ps_value *value)
 {
-
-}
-
-char *ps_value_dump(const ps_value *value)
-{
-    static char buffer[512];
-    char *type= ps_value_get_type_name(value);
     char *base = "NULL!";
     if (value != NULL)
     {
@@ -257,6 +250,14 @@ char *ps_value_dump(const ps_value *value)
         else
             base = ps_value_type_get_name(value->type->value->data.t->base);
     }
+    return base;
+}
+
+char *ps_value_dump(const ps_value *value)
+{
+    static char buffer[512];
+    char *type = ps_value_get_type_name(value);
+    char *base = ps_value_get_base_name(value);
     char *data = value == NULL ? "NULL!" : ps_value_get_debug_string(value);
     snprintf(buffer, sizeof(buffer) - 1, "VALUE: type=%s (base=%s), value=%s", type, base, data);
     return buffer;
