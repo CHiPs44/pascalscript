@@ -70,6 +70,7 @@ tmp*
 examples/*.out
 examples/*.err
 examples/report.txt
+test/test
 test/*.out
 test/*.err
 test/report.txt
