@@ -5,6 +5,7 @@
 */
 
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "ps_memory.h"
@@ -48,14 +49,13 @@ bool ps_string_heap_grow(ps_string_heap *heap)
 {
     if (heap->more == 0)
         return false;
-    ps_string **data = (ps_string **)ps_memory_realloc(
-        PS_MEMORY_STRING,
-        heap->data,
-        (heap->size + heap->more) * sizeof(ps_string *));
+    ps_string **data =
+        (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string *));
     if (data == NULL)
         return false; // errno = ENOMEM
     heap->data = data;
     heap->size += heap->more;
+    fprintf(stderr, "ps_string_heap_grow: size=%d, more=%d\n", heap->size, heap->more);
     return true;
 }
 
@@ -84,7 +84,7 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
         errno = EINVAL;
         return NULL;
     }
-    if (heap->used >= heap->size) // && !ps_string_heap_grow(heap))
+    if (heap->used >= heap->size && !ps_string_heap_grow(heap))
     {
         errno = EOVERFLOW;
         return NULL;
@@ -98,8 +98,7 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
         if (heap->data[index] == NULL)
         {
             // +1 for null-terminator
-            ps_string *s = (ps_string *)ps_memory_malloc(
-                PS_MEMORY_STRING, sizeof(ps_string_len) * 2 + len + 1);
+            ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING, sizeof(ps_string_len) * 2 + len + 1);
             if (s == NULL)
                 return NULL; // errno = ENOMEM
             s->max = (ps_string_len)len;

@@ -20,7 +20,7 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/002-strings.pas"
+#define DEBUGGER_SOURCE "examples/010-operators.pas"
 
 // Runtime options
 bool bool_eval = false;

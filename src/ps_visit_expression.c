@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <errno.h>
 #include <string.h>
 
 #include "ps_functions.h"
@@ -371,7 +372,10 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
             if (result->data.s == NULL)
             {
-                interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                if (errno == ENOMEM)
+                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+                else if (errno == EOVERFLOW)
+                    interpreter->error = PS_ERROR_OVERFLOW;
                 TRACE_ERROR("STRING_VALUE");
             }
         }
