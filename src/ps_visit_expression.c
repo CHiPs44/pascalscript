@@ -376,6 +376,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                     interpreter->error = PS_ERROR_OUT_OF_MEMORY;
                 else if (errno == EOVERFLOW)
                     interpreter->error = PS_ERROR_OVERFLOW;
+                else if (errno == EINVAL)
+                    interpreter->error = PS_ERROR_STRING_TOO_LONG;
                 TRACE_ERROR("STRING_VALUE");
             }
         }

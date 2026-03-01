@@ -55,7 +55,6 @@ bool ps_string_heap_grow(ps_string_heap *heap)
         return false; // errno = ENOMEM
     heap->data = data;
     heap->size += heap->more;
-    fprintf(stderr, "ps_string_heap_grow: size=%d, more=%d\n", heap->size, heap->more);
     return true;
 }
 
