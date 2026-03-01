@@ -1,9 +1,10 @@
-{ from https://rosettacode.org/wiki/99_Bottles_of_Beer/Pascal }
-{ see also https://www.99-bottles-of-beer.net/language-pascal-1067.html }
+{ From https://rosettacode.org/wiki/99_Bottles_of_Beer/Pascal }
+{ See also https://www.99-bottles-of-beer.net/language-pascal-1067.html }
+{     SPDX-License-Identifier:  GFDL-1.3-only }
 
 Program NinetyNineBottlesOfBeer;
 
-Var 
+Var
   I: Integer;
 
 Begin

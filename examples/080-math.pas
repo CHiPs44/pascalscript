@@ -4,16 +4,13 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Math; { With UTF-8 chars for fun! }
+
 Var
   I: Integer;
+
 Begin
-  WriteLn('PascalScript version ', PS_VERSION, ' (', PS_BITNESS, ' bits)'                   );
-  WriteLn('--------------------------------------------------------------------------------');
-  WriteLn('Math constants and functions'                                                    );
-  For I := 1 To 2 Do
-  Begin
+    WriteLn('Math constants and functions'                                                    );
     WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('12345678 | 1234567890123456789012345678901234567890'                             );
     WriteLn('ε        = ', EpsReal                                                            );
     WriteLn('Min      = ', MinReal                                                            );
     WriteLn('Max      = ', MaxReal                                                            );
@@ -35,7 +32,6 @@ Begin
     WriteLn('e        = ', Exp(1.0)                                                           );
     WriteLn('round(e) = ', Round(Exp(1.0))                                                    );
     WriteLn('1.2^3.4  = ', Power(1.2, 3.4)                                                    );
-  End;
-  WriteLn('--------------------------------------------------------------------------------');
-  WriteLn('OK!'                                                                             );
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('OK!'                                                                             );
 End.

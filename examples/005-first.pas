@@ -4,10 +4,13 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program First;
+
 Const
     THOUSAND = 1000;
+
 Var
     a, b, c, d: Integer;
+
 Begin
     a := +1;
     b := -2;

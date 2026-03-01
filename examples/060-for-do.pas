@@ -4,10 +4,10 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program ForDo;
-Const 
+Const
   Limit = 99;
   PerLine = 25;
-Var 
+Var
   I: Integer;
   C: Char;
   BOL: Boolean;
@@ -34,7 +34,7 @@ Begin
       End;
   End;
   If Not BOL Then
-      WriteLn;    
+      WriteLn;
   WriteLn('OK!');
   WriteLn('--------------------------------------------------------------------------------');
   WriteLn('From ''A'' to ''Z'' with ordinal values:');
@@ -58,6 +58,6 @@ Begin
     End;
   if Not BOL Then
     WriteLn;
-  WriteLn('OK!');
   WriteLn('--------------------------------------------------------------------------------');
+  WriteLn('OK!');
 End.

@@ -4,29 +4,30 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program RepeatUntil;
+
 Const
     Limit = 100000000;
+    Delta = 10000000;
+
 Var
-    C: Integer;
-    I: Integer;
+    Column: Integer;
+    Value: Integer;
+
 Begin
     WriteLn('Example 040: Repeat-Until Loop with Integer numbers');
     WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('         1         2         3         4         5         6         7         8');
-    WriteLn('12345678901234567890123456789012345678901234567890123456789012345678901234567890');
-    WriteLn('--------------------------------------------------------------------------------');
-    I := -Limit;
-    C := 1;
+    Value := -Limit;
+    Column := 1;
     Repeat
-        Write(I:10);
-        C := C + 10;
-        If C > 80 Then
+        Write(Value:10);
+        Column := Column + 10;
+        If Column > 80 Then
         Begin
-            C := 1;
+            Column := 1;
             WriteLn;
         End;
-        I := I + 10000000;
-    Until I > Limit;
+        Value := Value + Delta;
+    Until Value > Limit;
     WriteLn;
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK!');

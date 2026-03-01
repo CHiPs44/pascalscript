@@ -4,20 +4,21 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program RandomExample;
+
 Const
     MaxD20 = 98;
     MaxRandom = 99;
+
 Var
     I: Integer;
     D20, Min, Max, Total: Integer;
     R, MinR, MaxR, TotalR: Real;
+
 Begin
-    WriteLn('--------------------------------------------------------------------------------');
     WriteLn('PascalScript Random Number Generation Example');
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Seeding RNG...');
     Randomize;
-    WriteLn('--------------------------------------------------------------------------------');
     WriteLn(MaxD20, ' random d20 rolls:');
     Min := MaxInt;
     Max := 0;

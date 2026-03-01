@@ -4,13 +4,16 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Second;
+
 Const
     FOO = 11;
     BAR = 22;
     BAZ = 76.54321;
+
 Var
     A, B, C, D: Integer;
     R, R1, R2, R3, R4: Real;
+
 Begin
     WriteLn('FOO=', FOO, ', BAR=', BAR, ', BAZ=', BAZ);
     A := FOO;
