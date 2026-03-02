@@ -43,7 +43,6 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
 {
     VISIT_BEGIN("TYPE_DEFINITION", "");
 
-    ps_symbol *type = NULL;
     ps_value *value = NULL;
     ps_symbol *type_symbol = NULL;
     ps_identifier type_name = {0};
@@ -62,8 +61,9 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
         TRACE_ERROR("TYPE REFERENCE")
 
     // Register new type definition in symbol table
+    // TODO? 2 symbols reference 1 type definition, check when freeing?
     data.t = type_symbol->value->data.t;
-    value = ps_value_alloc(type, data);
+    value = ps_value_alloc(&ps_system_type_def, data);
     if (value == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, type_name, value);

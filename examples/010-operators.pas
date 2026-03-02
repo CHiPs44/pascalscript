@@ -20,7 +20,7 @@ Begin
     WriteLn('PascalScript Operators Demo');
     WriteLn('--------------------------------------------------------------------------------');
 
-    WriteLn('* Assignment operator');
+    WriteLn('*** Assignment operator');
     k := 42;
     WriteLn('  - Integer:                        = ', k:12);
     u := $FFFFFFFF;
@@ -34,7 +34,7 @@ Begin
     b3 := True;
     WriteLn('  - Boolean:                        = ', b3);
 
-    WriteLn('* Arithmetic Integer operators');
+    WriteLn('*** Arithmetic Integer operators');
     i := 10;
     j := 3;
     k := i + j;
@@ -48,7 +48,7 @@ Begin
     k := i Mod j;
     WriteLn('  - Modulo:                10 Mod 3 = ', k:12);
 
-    WriteLn('* Arithmetic Unsigned operators');
+    WriteLn('*** Arithmetic Unsigned operators');
     u := 10;
     v := 3;
     w := u + v;
@@ -61,8 +61,13 @@ Begin
     WriteLn('  - Division:              10 Div 3 = ', w:12);
     w := u Mod v;
     WriteLn('  - Modulo:                10 Mod 3 = ', w:12);
+    u := $55555555;
+    v := $AAAAAAAA;
+    w := u + v;
+    WriteLn('  - Addition:             $FFFFFFFF = ', w:12);
 
-    WriteLn('* Arithmetic Real operators');
+
+    WriteLn('*** Arithmetic Real operators');
     x := 10.0;
     y := 3.0;
     z := x + y;
@@ -74,7 +79,7 @@ Begin
     z := x / y;
     WriteLn('  - Division:              10.0 / 3.0 = ', z:12:8);
 
-    WriteLn('* Unary operators');
+    WriteLn('*** Unary operators');
     k := MaxInt;
     k := -k;
     WriteLn('  - Unary minus:           -Maxint       = ', k:12);
@@ -88,7 +93,7 @@ Begin
     else
         WriteLn('    (does NOT match expected value $AAAAAAAA)');
 
-    WriteLn('* Comparison operators');
+    WriteLn('*** Comparison operators');
     b1 := i = j;
     WriteLn('  - Equal:                 10 =  3 is ', b1);
     b1 := i <> j;
@@ -102,7 +107,7 @@ Begin
     b1 := i >= j;
     WriteLn('  - Greater or equal:      10 >= 3 is ', b1);
 
-    WriteLn('* Logical operators');
+    WriteLn('*** Logical operators');
     b1 := True;
     b2 := False;
     b3 := b1 And b2;
@@ -116,7 +121,7 @@ Begin
     b3 := b1 Xor b2;
     WriteLn('  - Xor:                   True Xor False is ', b3);
 
-    WriteLn('* String operators');
+    WriteLn('*** String operators');
     s1 := 'Hello';
     s2 := 'World';
     s3 := s1 + ' ' + s2;
@@ -134,7 +139,7 @@ Begin
     s3 := c1 + ' ' + s2;
     WriteLn('  - Char + String:         ''', c1, '''     + ''', s2, ''' = ''', s3, '''');
 
-    WriteLn('* Type mixing and real promotion');
+    WriteLn('*** Type mixing and real promotion');
     u := 5;
     i := 2;
     x := 3.5;
@@ -148,7 +153,7 @@ Begin
     z := u + i + x;
     WriteLn('  - Mixed:                 5 + 2 + 3.5 = ', z:12:8);
 
-    WriteLn('* Complex expression');
+    WriteLn('*** Complex expression');
     i := 10;
     j := 3;
     k := 42;
