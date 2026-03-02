@@ -14,7 +14,7 @@ for example in ./examples/*.pas; do
             ERR_FILE="./examples/${example##*/}.${CC}.err"
             echo -n "Executing ${example} with ${CC}... "
             START=$(date +%s%N)
-            ./build-${CC}/pascalscript "${example}" > "$OUT_FILE" 2> "$ERR_FILE"
+            { ./build-${CC}/pascalscript "${example}"; } > "$OUT_FILE" 2> "$ERR_FILE"
             RESULT=$?
             END=$(date +%s%N)
             DURATION=$(( (END - START) / 1000000 )) # Duration in milliseconds
