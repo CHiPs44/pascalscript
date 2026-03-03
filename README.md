@@ -468,7 +468,7 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (even with 8M
 
 #### Mathematical functions and constant(s)
 
-- `sqrt` `sqr` `power` (not) `**` operator) 
+- `sqrt` `sqr` `power` (not) `**` operator)
 - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
 - `ln` `log` `exp`
 - ...
@@ -506,13 +506,17 @@ Or should we have a simpler "interpreter status" like:
 
 To initialize, use:
 
-- `cmake -DCMAKE_C_COMPILER=gcc -B build-gcc` or
-- `cmake -DCMAKE_C_COMPILER=clang -B build-clang`
+```bash
+cmake -DCMAKE_C_COMPILER=gcc -B build-gcc
+cmake -DCMAKE_C_COMPILER=clang -B build-clang
+```
 
 Compile with:
 
-- `make -C build-gcc -j$(nproc)`
-- `make -C build-clang -j$(nproc)`
+```bash
+make -C build-gcc -j$(nproc)
+make -C build-clang -j$(nproc)
+```
 
 ### Tests in 32 bits mode and 3M of RAM
 

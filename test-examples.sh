@@ -1,7 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 REPORT_FILE="./examples/report.txt"
-> "$REPORT_FILE"
+date --iso-8601=seconds > "$REPORT_FILE"
+
+# make -C build-clang/ -j$(nproc) clean
+make -C build-clang/ -j$(nproc)
+# make -C build-gcc/ -j$(nproc) clean
+make -C build-gcc/ -j$(nproc)
 
 OK=0
 KO=0
@@ -33,4 +38,7 @@ for example in ./examples/*.pas; do
 done
 
 echo "Total: $TOTAL, OK $OK, KO $KO" >> "$REPORT_FILE"
+date --iso-8601=seconds >> "$REPORT_FILE"
 cat ${REPORT_FILE}
+
+# EOF
