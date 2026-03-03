@@ -29,18 +29,25 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     // Skip optional parameters enclosed in parentheses
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
+        READ_NEXT_TOKEN
         do
         {
-            READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+            {
+                READ_NEXT_TOKEN
                 break;
+            }
             EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
             if (interpreter->debug >= DEBUG_TRACE)
             {
                 ps_token_debug(stderr, "PROGRAM PARAMETER SKIPPED", &lexer->current_token);
             }
+            READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_COMMA)
+            {
+                READ_NEXT_TOKEN
                 continue;
+            }
         } while (true);
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
