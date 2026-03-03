@@ -17,6 +17,7 @@
 #include "../src/ps_environment.c"
 #include "../src/ps_executable.c"
 #include "../src/ps_memory.c"
+#include "../src/ps_signature.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
