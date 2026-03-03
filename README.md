@@ -1,5 +1,7 @@
 # `PascalScript` - an interpreted Pascal dialect
 
+NB: this project has no link with [RemObjects Pascal Script](https://github.com/remobjects/pascalscript).
+
 ## Status
 
 As of 2026-02-20, the interpreter itself implements:
