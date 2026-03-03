@@ -39,7 +39,8 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     // free only allocated symbols
     if (symbol != NULL && symbol->allocated)
     {
-        symbol->value = ps_value_free(symbol->value);
+        if (symbol->value!=NULL)
+            symbol->value = ps_value_free(symbol->value);
         ps_memory_free(PS_MEMORY_SYMBOL, symbol);
     }
     return NULL;

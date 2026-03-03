@@ -32,7 +32,8 @@ ps_value *ps_value_free(ps_value *value)
 {
     if (value == NULL || !value->allocated)
         return NULL;
-    if (value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
+    if (value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL &&
+        value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
     {
         ps_executable_free(value->data.x);
     }
@@ -129,7 +130,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         break;
     case PS_TYPE_DEFINITION:
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->name);
+            snprintf(buffer, sizeof(buffer) - 1, "%s@%p", value->type->name, (void *)(value->data.t));
         else
             return NULL;
         break;
