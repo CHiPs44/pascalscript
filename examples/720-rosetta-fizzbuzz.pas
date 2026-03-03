@@ -1,6 +1,5 @@
 { from https://rosettacode.org/wiki/FizzBuzz#Pascal-P }
-
-program fizzbuzz{(output)};
+program fizzbuzz(output);
 var
   i: integer;
 begin
