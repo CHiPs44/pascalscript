@@ -41,6 +41,16 @@ ps_value *ps_value_free(ps_value *value)
     return NULL;
 }
 
+ps_value_type ps_value_get_base_type(const ps_value *value)
+{
+    ps_value_type value_type = PS_TYPE_NONE;
+    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    {
+        value_type = value->type->value->data.t->base;
+    }
+    return value_type;
+}
+
 #define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
     if (value == NULL)                                                                                                 \
     {                                                                                                                  \
