@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 REPORT_FILE="./test/report.txt"
-> "$REPORT_FILE"
+date --iso-8601=seconds > "$REPORT_FILE"
 
 OK=0
 KO=0
@@ -54,4 +54,5 @@ for TEST in ./test/test_*.c; do
 done
 
 echo "Total: $TOTAL, OK $OK, KO $KO" >> "$REPORT_FILE"
+date --iso-8601=seconds >> "$REPORT_FILE"
 cat ${REPORT_FILE}
