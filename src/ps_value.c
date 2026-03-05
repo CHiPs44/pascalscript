@@ -55,7 +55,28 @@ bool ps_value_is_scalar(const ps_value *value)
     return false;
 }
 
-ps_value_type ps_value_get_base_type(const ps_value *value)
+bool ps_value_is_ordinal(const ps_value *value)
+{
+    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        if (type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || type == PS_TYPE_ENUM)
+            return true;
+    }
+    return false;
+}
+
+ps_value_type ps_value_get_type(const ps_value *value)
+{
+    ps_value_type value_type = PS_TYPE_NONE;
+    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    {
+        value_type = value->type->value->data.t->type;
+    }
+    return value_type;
+}
+
+ps_value_type ps_value_get_base(const ps_value *value)
 {
     ps_value_type value_type = PS_TYPE_NONE;
     if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)

@@ -33,11 +33,18 @@ extern "C"
     ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data);
     /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
+
     /** @brief Scalar is Integer, Unsigned, Integer or Unsigned subrange */
     bool ps_value_is_scalar(const ps_value *value);
+    /** @brief Ordinal is Boolean, Char or Enum */
+    bool ps_value_is_ordinal(const ps_value *value);
+
+    /** @brief Get type */
+    /** @returns PS_TYPE_NONE if value is invalid */
+    ps_value_type ps_value_get_type(const ps_value *value);
     /** @brief Get base type */
     /** @returns PS_TYPE_NONE if value is invalid */
-    ps_value_type ps_value_get_base_type(const ps_value *value);
+    ps_value_type ps_value_get_base(const ps_value *value);
 
     /* clang-format off */
     ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);

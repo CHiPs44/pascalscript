@@ -103,7 +103,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
         }
         if (len < 1 || len > PS_STRING_MAX_LEN)
             RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
-        ps_type_definition *type_def = ps_type_definition_create(PS_TYPE_DEFINITION, PS_TYPE_STRING);
+        ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_DEFINITION, PS_TYPE_STRING);
         if (type_def == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         type_def->def.s.max = (ps_string_len)len;

@@ -169,8 +169,12 @@ ps_error ps_function_return_error_with_message(ps_interpreter *interpreter, ps_e
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
 ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    if (!ps_value_is_scalar(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Odd: Scalar expected, got %s",
+                                                     ps_type_definition_get_name(value->type->value->type));
     result->type = &ps_system_boolean;
-    switch (ps_value_get_base_type(value))
+    switch (ps_value_get_base(value))
     {
     case PS_TYPE_UNSIGNED:
         result->data.b = (ps_boolean)((value->data.u & 1) != 0);
@@ -179,9 +183,7 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
         result->data.b = (ps_boolean)((value->data.i & 1) != 0);
         break;
     default:
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Odd: Unsigned or Integer expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->type));
+        break;
     }
     return PS_ERROR_NONE;
 }
@@ -189,8 +191,12 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
 ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    if (!ps_value_is_scalar(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Even: Scalar expected, got %s",
+                                                     ps_type_definition_get_name(value->type->value->type));
     result->type = &ps_system_boolean;
-    switch (ps_value_get_base_type(value))
+    switch (ps_value_get_base(value))
     {
     case PS_TYPE_UNSIGNED:
         result->data.b = (ps_boolean)((value->data.u & 1) == 0);
@@ -199,28 +205,20 @@ ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps
         result->data.b = (ps_boolean)((value->data.i & 1) == 0);
         break;
     default:
-        ps_interpreter_set_message(interpreter, "Function %s: Unsigned or Integer operand expected, %s used", "even",
-                                   ps_value_type_get_name(ps_value_get_base_type(value)));
-        return PS_ERROR_UNEXPECTED_TYPE;
+        break;
     }
     return PS_ERROR_NONE;
 }
 
-/** @brief ORD - Get ordinal value of boolean / char */
+/** @brief ORD - Get ordinal value of boolean / char / enum */
 ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    switch (ps_value_get_base_type(value))
+    if (!ps_value_is_ordinal(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Ord: Ordinal expected, got %s",
+                                                     ps_type_definition_get_name(value->type->value->type));
+    switch (ps_value_get_base(value))
     {
-    case PS_TYPE_UNSIGNED:
-        // case PS_TYPE_ENUM:
-        result->type = &ps_system_unsigned;
-        result->data.u = value->data.u;
-        break;
-    case PS_TYPE_INTEGER:
-        // case PS_TYPE_SUBRANGE:
-        result->type = &ps_system_integer;
-        result->data.i = value->data.i;
-        break;
     case PS_TYPE_BOOLEAN:
         // ord(false) => 0 / ord(true) => 1
         result->type = &ps_system_integer;
@@ -228,11 +226,11 @@ ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_
         break;
     case PS_TYPE_CHAR:
         // ord('0') => 48 / ord('A') => 65 / ...
-        result->type = &ps_system_unsigned;
+        result->type = &ps_system_integer;
         result->data.u = (ps_unsigned)(value->data.c);
         break;
     default:
-        return PS_ERROR_UNEXPECTED_TYPE;
+        break;
     }
     return PS_ERROR_NONE;
 }
@@ -240,7 +238,12 @@ ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
 ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    switch (ps_value_get_base_type(value))
+    if (!ps_value_is_scalar(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Chr: Scalar expected, got %s",
+                                                     ps_type_definition_get_name(value->type->value->type));
+    result->type = &ps_system_char;
+    switch (ps_value_get_base(value))
     {
     case PS_TYPE_UNSIGNED:
         if (interpreter->range_check && value->data.u > PS_CHAR_MAX)
@@ -253,19 +256,22 @@ ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_
         result->data.c = (ps_char)(value->data.i);
         break;
     default:
-        return PS_ERROR_UNEXPECTED_TYPE;
+        break;
     }
-    result->type = &ps_system_char;
     return PS_ERROR_NONE;
 }
 
 ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
+    if (type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION && type->kind != PS_SYMBOL_KIND_VARIABLE)
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Low: Type or Variable expected, got %s",
+                                                     ps_symbol_get_kind_name(type->kind));
     switch (type->value->data.t->type)
     {
     case PS_TYPE_CHAR:
         result->type = &ps_system_char;
-        result->data.c = (ps_char)0;
+        result->data.c = (ps_char)'\0';
         break;
     case PS_TYPE_INTEGER:
         result->type = &ps_system_integer;
@@ -273,11 +279,15 @@ ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value 
         break;
     case PS_TYPE_UNSIGNED:
         result->type = &ps_system_unsigned;
-        result->data.u = (ps_unsigned)0;
+        result->data.u = 0;
         break;
     case PS_TYPE_ENUM:
         result->type = type;
-        result->data.u = (ps_unsigned)0;
+        result->data.u = 0;
+        break;
+    case PS_TYPE_BOOLEAN:
+        result->type = &ps_system_boolean;
+        result->data.b = ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_SUBRANGE:
         result->type = type;
@@ -298,23 +308,20 @@ ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value 
             return PS_ERROR_UNEXPECTED_TYPE;
         }
         break;
-    case PS_TYPE_BOOLEAN:
-        result->type = &ps_system_boolean;
-        result->data.b = ps_system_constant_boolean_false.value->data.b;
-        break;
-    case PS_TYPE_ARRAY:
-        return PS_ERROR_NOT_IMPLEMENTED;
     default:
-        ps_interpreter_set_message(interpreter, "Unexpected type '%s' in function Low",
-                                   ps_type_definition_get_name(type->value->data.t));
-        return PS_ERROR_UNEXPECTED_TYPE;
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Low: Type or Variable expected, got %s",
+                                                     ps_type_definition_get_name(type->value->type));
     }
-    ps_value_debug(NULL, "LOW => result", result);
     return PS_ERROR_NONE;
 }
 
 ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value *result)
 {
+    if (type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION && type->kind != PS_SYMBOL_KIND_VARIABLE)
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "High: Type or Variable expected, got %s",
+                                                     ps_symbol_get_kind_name(type->kind));
     switch (type->value->data.t->type)
     {
     case PS_TYPE_CHAR:
@@ -356,27 +363,29 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
         result->type = &ps_system_boolean;
         result->data.b = ps_system_constant_boolean_true.value->data.b;
         break;
-    case PS_TYPE_ARRAY:
-        return PS_ERROR_NOT_IMPLEMENTED;
     default:
-        ps_interpreter_set_message(interpreter, "Unexpected type '%s' in function High",
-                                   ps_type_definition_get_name(type->value->data.t));
-        return PS_ERROR_UNEXPECTED_TYPE;
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "High: Type or Variable expected, got %s",
+                                                     ps_type_definition_get_name(type->value->type));
     }
-    ps_value_debug(NULL, "HIGH => result", result);
     return PS_ERROR_NONE;
 }
 
-/** @brief PRED - Get previous value (predecessor) of scalar value */
+/** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
 ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    switch (ps_value_get_base_type(value))
+    if (!ps_value_is_scalar(value) && !ps_value_is_ordinal(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                     "Pred: Scalar or Ordinal expected, got %s",
+                                                     ps_type_definition_get_name(value->type->value->type));
+    result->type = value->type;
+    switch (ps_value_get_type(value))
     {
     case PS_TYPE_CHAR:
         // pred(NUL) => error / pred(c) => c - 1
         if (interpreter->range_check && value->data.c == 0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->data.c = value->data.c - 1;
+        result->data.c = (ps_char)(value->data.c - 1);
         break;
     case PS_TYPE_INTEGER:
         // pred(min) => error / pred(i) => i - 1
@@ -385,6 +394,7 @@ ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps
         result->data.i = value->data.i - 1;
         break;
     case PS_TYPE_UNSIGNED:
+    case PS_TYPE_ENUM:
         // pred(0) => error / pred(u) => u - 1
         if (interpreter->range_check && value->data.u == 0)
             return PS_ERROR_OUT_OF_RANGE;
@@ -397,14 +407,40 @@ ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps
         // this will make pred(false) = false
         result->data.b = ps_system_constant_boolean_false.value->data.b;
         break;
-    // case PS_TYPE_SUBRANGE:
-    //   TODO needs low()
-    // case PS_TYPE_ENUM:
-    //   TODO needs low()
+        if (interpreter->range_check && value->data.u == 0)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.u = value->data.u - 1;
+        break;
+    case PS_TYPE_SUBRANGE:
+        switch (ps_value_get_base(value))
+        {
+        case PS_TYPE_CHAR:
+            if (interpreter->range_check && value->data.c <= value->type->value->data.t->def.g.c.min)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.c = value->data.c - 1;
+            break;
+        case PS_TYPE_INTEGER:
+            if (interpreter->range_check && value->data.i <= value->type->value->data.t->def.g.i.min)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.i = value->data.i - 1;
+            break;
+        case PS_TYPE_UNSIGNED:
+            if (interpreter->range_check && value->data.u <= value->type->value->data.t->def.g.u.min)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.u = value->data.u - 1;
+            break;
+        case PS_TYPE_ENUM:
+            if (interpreter->range_check && value->data.u <= value->type->value->data.t->def.g.e.min)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.u = value->data.u - 1;
+            break;
+        default:
+            break;
+        }
+        break;
     default:
-        return PS_ERROR_UNEXPECTED_TYPE;
+        break;
     }
-    result->type = value->type;
     return PS_ERROR_NONE;
 }
 
@@ -414,7 +450,7 @@ ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps
     assert(NULL != interpreter);
     assert(NULL != value);
     assert(NULL != result);
-    switch (ps_value_get_base_type(value))
+    switch (ps_value_get_base(value))
     {
     case PS_TYPE_CHAR:
         // succ(char_max) => error / succ(c) => c + 1
@@ -481,7 +517,7 @@ ps_error ps_function_abs(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
 ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     if (interpreter->range_check &&
         (value->data.r < (ps_real)PS_INTEGER_MIN || value->data.r > (ps_real)PS_INTEGER_MAX))
@@ -494,7 +530,7 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, p
 /** @brief ROUND(REAL): INTEGER - Round real as integer */
 ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     double r = round(value->data.r);
     if (interpreter->range_check && (r < PS_INTEGER_MIN || r > PS_INTEGER_MAX))
@@ -508,7 +544,7 @@ ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, p
 ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     double r;
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     if (interpreter->range_check &&
         (value->data.r < (ps_real)PS_INTEGER_MIN || value->data.r > (ps_real)PS_INTEGER_MAX))
@@ -523,7 +559,7 @@ ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     double int_part;
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
     result->data.r = (ps_real)modf(value->data.r, &int_part);
@@ -533,7 +569,7 @@ ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps
 /** @brief SIN(REAL): REAL - Get sinus of floating point value */
 ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
     result->data.r = (ps_real)sin(value->data.r);
@@ -543,7 +579,7 @@ ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief COS(REAL): REAL - Get cosinus of floating point value */
 ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
     result->data.r = (ps_real)cos(value->data.r);
@@ -553,7 +589,7 @@ ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief TAN(REAL): REAL - Get tangent of floating point value */
 ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     double c = cos(value->data.r);
     if (c == 0.0)
@@ -567,7 +603,7 @@ ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
 ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     double r = atan(value->data.r);
     if (errno != 0 || isnan(r) || isinf(r))
@@ -582,7 +618,7 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, 
 /** @brief SQR(REAL): REAL - Get square (x²) of floating point value */
 ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     double r = value->data.r * value->data.r;
     if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
@@ -595,7 +631,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief SQRT(REAL): REAL - Get square root (√x) of floating point value */
 ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     if (value->data.r < 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -607,7 +643,7 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps
 /** @brief EXP(REAL): REAL - Get exponential of floating point value */
 ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
     double r = exp(value->data.r);
@@ -620,7 +656,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief LN(REAL): REAL - Get logarithm of floating point value */
 ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     if (value->data.r <= 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -632,7 +668,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_v
 /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
 ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_REAL)
+    if (ps_value_get_base(value) != PS_TYPE_REAL)
         return PS_ERROR_EXPECTED_REAL;
     if (value->data.r <= 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -661,7 +697,7 @@ ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const
 /** @brief LENGTH(): UNSIGNED - Get string length */
 ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_STRING)
+    if (ps_value_get_base(value) != PS_TYPE_STRING)
         return PS_ERROR_EXPECTED_STRING;
     result->type = &ps_system_unsigned;
     result->data.u = value->data.s->len;
@@ -670,7 +706,7 @@ ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, 
 
 ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_STRING)
+    if (ps_value_get_base(value) != PS_TYPE_STRING)
         return PS_ERROR_EXPECTED_STRING;
     result->type = &ps_system_string;
     result->data.s = ps_string_lowercase(value->data.s);
@@ -681,7 +717,7 @@ ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *valu
 
 ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_get_base_type(value) != PS_TYPE_STRING)
+    if (ps_value_get_base(value) != PS_TYPE_STRING)
         return PS_ERROR_EXPECTED_STRING;
     result->type = &ps_system_string;
     result->data.s = ps_string_uppercase(value->data.s);
@@ -748,7 +784,7 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
     else
     {
         // one argument, return random integer / unsigned
-        switch (ps_value_get_base_type(value))
+        switch (ps_value_get_base(value))
         {
         case PS_TYPE_INTEGER:
             result->type = &ps_system_integer;

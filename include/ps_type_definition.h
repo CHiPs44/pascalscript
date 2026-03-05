@@ -155,10 +155,10 @@ extern "C"
 
     char *ps_type_definition_get_name(const ps_type_definition *type_def);
 
-    void ps_type_definition_debug(FILE *output, char *message, ps_type_definition *type_def);
+    void ps_type_definition_debug(FILE *output, char *message, const ps_type_definition *type_def);
 
     // clang-format off
-    ps_type_definition *ps_type_definition_create                  (ps_value_type type, ps_value_type base);
+    ps_type_definition *ps_type_definition_alloc                  (ps_value_type type, ps_value_type base);
     ps_type_definition *ps_type_definition_free                    (ps_type_definition *type_def);
     ps_type_definition *ps_type_definition_create_string           (ps_string_len max);
     ps_type_definition *ps_type_definition_create_enum             (uint8_t count, ps_symbol **values);
