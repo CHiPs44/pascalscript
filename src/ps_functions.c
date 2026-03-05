@@ -181,7 +181,7 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
     default:
         return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                      "Odd: Unsigned or Integer expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->type->name));
+                                                     ps_type_definition_get_name(value->type->value->type));
     }
     return PS_ERROR_NONE;
 }
