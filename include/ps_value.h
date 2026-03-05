@@ -22,7 +22,6 @@ extern "C"
     /** @brief Value: type + data */
     typedef struct s_ps_value
     {
-        // ps_type_definition *type;
         ps_symbol *type;    /** @brief symbol with type definition */
         ps_value_data data; /** @brief current value */
         bool allocated : 1; /** @brief true if value was allocated (and must be freed) */
@@ -34,6 +33,8 @@ extern "C"
     ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data);
     /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
+    /** @brief Scalar is Integer, Unsigned, Integer or Unsigned subrange */
+    bool ps_value_is_scalar(const ps_value *value);
     /** @brief Get base type */
     /** @returns PS_TYPE_NONE if value is invalid */
     ps_value_type ps_value_get_base_type(const ps_value *value);
