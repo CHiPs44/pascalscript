@@ -152,8 +152,8 @@ ps_error ps_function_exec_2args(ps_interpreter *interpreter, const ps_symbol *sy
     return function(interpreter, a, b, result);
 }
 
-ps_error ps_function_return_error_message(ps_interpreter *interpreter, ps_error error, const char *format,
-                                          ...) // NOSONAR
+ps_error ps_function_return_error_message(ps_interpreter *interpreter, ps_error error, const char *format, // NOSONAR
+                                          ...)
 {
     va_list args;
     va_start(args, format);
@@ -179,7 +179,7 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
         result->data.b = (ps_boolean)((value->data.i & 1) != 0);
         break;
     default:
-        return PS_ERROR_UNEXPECTED_TYPE;
+        return ps_function_return_error_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,"");
     }
     return PS_ERROR_NONE;
 }
