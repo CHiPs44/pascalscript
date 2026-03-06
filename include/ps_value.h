@@ -38,6 +38,10 @@ extern "C"
     bool ps_value_is_scalar(const ps_value *value);
     /** @brief Ordinal is Boolean, Char or Enum */
     bool ps_value_is_ordinal(const ps_value *value);
+    /** @brief Number is Integer, Unsigned, Real, Integer or Unsigned subrange */
+    bool ps_value_is_number(const ps_value *value);
+    /** @brief Real is Real */
+    bool ps_value_is_real(const ps_value *value);
 
     /** @brief Get type */
     /** @returns PS_TYPE_NONE if value is invalid */
