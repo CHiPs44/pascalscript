@@ -25,7 +25,7 @@
 
 /* clang-format off */
 // Math
-// PS_SYSTEM_FUNCTION (function , abs           , "ABS"         , .func_1arg      , &ps_function_abs               );
+PS_SYSTEM_FUNCTION (function , abs           , "ABS"         , .func_1arg      , &ps_function_abs               );
 PS_SYSTEM_FUNCTION (function , arctan        , "ARCTAN"      , .func_1arg      , &ps_function_arctan            );
 PS_SYSTEM_FUNCTION (function , cos           , "COS"         , .func_1arg      , &ps_function_cos               );
 PS_SYSTEM_FUNCTION (function , even          , "EVEN"        , .func_1arg      , &ps_function_even              );
@@ -104,8 +104,8 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, const ps_symbol *sym
     assert(symbol != NULL);
     assert(symbol->value != NULL);
     assert(symbol->value->data.x != NULL);
-    if (symbol->value->data.x != &ps_function_random)
-        assert(value != NULL);
+    // if (symbol->value->data.x != &ps_function_random)
+    //     assert(value != NULL);
     assert(result != NULL);
     ps_function_1arg function = symbol->value->data.x->func_1arg;
     if (function == NULL)
@@ -303,7 +303,8 @@ ps_error ps_function_low(ps_interpreter *interpreter, ps_symbol *type, ps_value 
             result->data.u = type->value->data.t->def.g.u.min;
             break;
         case PS_TYPE_ENUM:
-            result->data.u = type->value->data.t->def.g.e.max;
+            result->data.u = type->value->data.t->def.g.e.min;
+            break;
         default:
             return PS_ERROR_UNEXPECTED_TYPE;
         }
@@ -355,6 +356,7 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
             break;
         case PS_TYPE_ENUM:
             result->data.u = type->value->data.t->def.g.e.max;
+            break;
         default:
             return PS_ERROR_UNEXPECTED_TYPE;
         }
@@ -371,22 +373,10 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
     return PS_ERROR_NONE;
 }
 
-/** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
-ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_pred_scalar(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_scalar(value) && !ps_value_is_ordinal(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Pred: Scalar or Ordinal expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->type));
-    result->type = value->type;
     switch (ps_value_get_type(value))
     {
-    case PS_TYPE_CHAR:
-        // pred(NUL) => error / pred(c) => c - 1
-        if (interpreter->range_check && value->data.c == 0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->data.c = (ps_char)(value->data.c - 1);
-        break;
     case PS_TYPE_INTEGER:
         // pred(min) => error / pred(i) => i - 1
         if (interpreter->range_check && value->data.i == PS_INTEGER_MIN)
@@ -394,19 +384,7 @@ ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps
         result->data.i = value->data.i - 1;
         break;
     case PS_TYPE_UNSIGNED:
-    case PS_TYPE_ENUM:
         // pred(0) => error / pred(u) => u - 1
-        if (interpreter->range_check && value->data.u == 0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->data.u = value->data.u - 1;
-        break;
-    case PS_TYPE_BOOLEAN:
-        // pred(true) => false / pred(false) => error
-        if (interpreter->range_check && value->data.b == false)
-            return PS_ERROR_OUT_OF_RANGE;
-        // this will make pred(false) = false
-        result->data.b = ps_system_constant_boolean_false.value->data.b;
-        break;
         if (interpreter->range_check && value->data.u == 0)
             return PS_ERROR_OUT_OF_RANGE;
         result->data.u = value->data.u - 1;
@@ -441,32 +419,120 @@ ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps
     default:
         break;
     }
+    result->type = value->type;
     return PS_ERROR_NONE;
 }
 
-/** @brief SUCC - Get next value (successor) of ordinal value */
-ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_pred_ordinal(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    assert(NULL != interpreter);
-    assert(NULL != value);
-    assert(NULL != result);
-    switch (ps_value_get_base(value))
+    switch (ps_value_get_type(value))
     {
     case PS_TYPE_CHAR:
-        // succ(char_max) => error / succ(c) => c + 1
-        if (interpreter->range_check && value->data.c == PS_CHAR_MAX)
+        // pred(NUL) => error / pred(c) => c - 1
+        if (interpreter->range_check && value->data.c == 0)
             return PS_ERROR_OUT_OF_RANGE;
-        result->data.c = value->data.c + 1;
+        result->data.c = (ps_char)(value->data.c - 1);
         break;
+    case PS_TYPE_ENUM:
+        // pred(0) => error / pred(u) => u - 1
+        if (interpreter->range_check && value->data.u == 0)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.u = value->data.u - 1;
+        break;
+    case PS_TYPE_BOOLEAN:
+        // pred(true) => false / pred(false) => error
+        if (interpreter->range_check && value->data.b == false)
+            return PS_ERROR_OUT_OF_RANGE;
+        // this will make pred(false) = false
+        result->data.b = ps_system_constant_boolean_false.value->data.b;
+        break;
+        if (interpreter->range_check && value->data.u == 0)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.u = value->data.u - 1;
+        break;
+    default:
+        break;
+    }
+    result->type = value->type;
+    return PS_ERROR_NONE;
+}
+
+/** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
+ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+{
+    if (ps_value_is_scalar(value))
+        return ps_function_pred_scalar(interpreter, value, result);
+    if (ps_value_is_ordinal(value))
+        return ps_function_pred_ordinal(interpreter, value, result);
+    return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                 "Pred: Scalar or Ordinal expected, got %s",
+                                                 ps_type_definition_get_name(value->type->value->type));
+}
+
+ps_error ps_function_succ_scalar(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+{
+    switch (ps_value_get_type(value))
+    {
     case PS_TYPE_INTEGER:
         // succ(max) => error / succ(i) => i + 1
-        if (interpreter->range_check && value->data.u == PS_INTEGER_MAX)
+        if (interpreter->range_check && value->data.i >= PS_INTEGER_MAX)
             return PS_ERROR_OUT_OF_RANGE;
         result->data.i = value->data.i + 1;
         break;
     case PS_TYPE_UNSIGNED:
         // succ(max) => error / succ(u) => u + 1
-        if (interpreter->range_check && value->data.u == PS_UNSIGNED_MAX)
+        if (interpreter->range_check && value->data.u >= PS_UNSIGNED_MAX)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.u = value->data.u + 1;
+        break;
+    case PS_TYPE_SUBRANGE:
+        switch (ps_value_get_base(value))
+        {
+        case PS_TYPE_CHAR:
+            if (interpreter->range_check && value->data.c >= value->type->value->data.t->def.g.c.max)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.c = value->data.c + 1;
+            break;
+        case PS_TYPE_INTEGER:
+            if (interpreter->range_check && value->data.i >= value->type->value->data.t->def.g.i.max)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.i = value->data.i + 1;
+            break;
+        case PS_TYPE_UNSIGNED:
+            if (interpreter->range_check && value->data.u >= value->type->value->data.t->def.g.u.max)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.u = value->data.u + 1;
+            break;
+        case PS_TYPE_ENUM:
+            if (interpreter->range_check && value->data.u >= value->type->value->data.t->def.g.e.max)
+                return PS_ERROR_OUT_OF_RANGE;
+            result->data.u = value->data.u + 1;
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+    result->type = value->type;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+{
+    result->type = value->type;
+    switch (ps_value_get_type(value))
+    {
+    case PS_TYPE_CHAR:
+        // succ(max) => error / succ(c) => c + 1
+        if (interpreter->range_check && value->data.c >= PS_CHAR_MAX)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.c = (ps_char)(value->data.c + 1);
+        break;
+    case PS_TYPE_ENUM:
+        // succ(max) => error / succ(u) => u + 1
+        if (interpreter->range_check && value->data.u >= value->type->value->data.t->def.e.count - 1)
             return PS_ERROR_OUT_OF_RANGE;
         result->data.u = value->data.u + 1;
         break;
@@ -477,15 +543,27 @@ ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps
         // this will make succ(true) = true
         result->data.b = ps_system_constant_boolean_true.value->data.b;
         break;
-    // case PS_TYPE_SUBRANGE:
-    //   TODO needs high()
-    // case PS_TYPE_ENUM:
-    //   TODO needs high()
+        if (interpreter->range_check && value->data.u == 0)
+            return PS_ERROR_OUT_OF_RANGE;
+        result->data.u = value->data.u - 1;
+        break;
     default:
-        return PS_ERROR_UNEXPECTED_TYPE;
+        break;
     }
     result->type = value->type;
     return PS_ERROR_NONE;
+}
+
+/** @brief SUCC - Get next value (successor) of ordinal value */
+ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+{
+    if (ps_value_is_scalar(value))
+        return ps_function_succ_scalar(interpreter, value, result);
+    if (ps_value_is_ordinal(value))
+        return ps_function_succ_ordinal(interpreter, value, result);
+    return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                 "Pred: Scalar or Ordinal expected, got %s",
+                                                 ps_type_definition_get_name(value->type->value->type));
 }
 
 /******************************************************************************/
