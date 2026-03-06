@@ -63,7 +63,8 @@ GTAGS
 
 # Project
 pascalscript
-test/test_value
+include/ps_version.h
+test/test
 tmp*
 .antlr*
 *.ppu

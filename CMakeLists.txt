@@ -11,11 +11,18 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-project(pascalscript VERSION 0.1.0 LANGUAGES C)
+project(pascalscript VERSION 0.1.2.3 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
+
+set(PS_VERSION_MAJOR 0)
+set(PS_VERSION_MINOR 1)
+set(PS_VERSION_PATCH 2)
+set(PS_VERSION_BUILD 3)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

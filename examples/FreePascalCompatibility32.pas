@@ -20,7 +20,7 @@ Const
   PS_VERSION_MAJOR = 1;
   PS_VERSION_MINOR = 2;
   PS_VERSION_PATCH = 3;
-  PS_VERSION_INDEX = 4;
+  PS_VERSION_BUILD = 4;
   PS_BITNESS = 32;
   { Maximum unsigned integer }
   MaxUint    = $FFFFFFFF;
