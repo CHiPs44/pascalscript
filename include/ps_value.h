@@ -42,6 +42,8 @@ extern "C"
     bool ps_value_is_number(const ps_value *value);
     /** @brief Real is Real */
     bool ps_value_is_real(const ps_value *value);
+    /** @brief String is String */
+    bool ps_value_is_string(const ps_value *value);
 
     /** @brief Get type */
     /** @returns PS_TYPE_NONE if value is invalid */
