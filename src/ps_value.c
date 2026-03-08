@@ -60,7 +60,7 @@ bool ps_value_is_ordinal(const ps_value *value)
     if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
     {
         ps_value_type type = value->type->value->data.t->type;
-        if (type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || type == PS_TYPE_ENUM)
+        if (type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || value->type == &ps_system_enum_value)
             return true;
     }
     return false;
@@ -163,128 +163,147 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
     PS_VALUE_SET(ps_system_char, c);
 }
 
+#define NULL_VALUE                                                                                                     \
+    {                                                                                                                  \
+        if (debug)                                                                                                     \
+        {                                                                                                              \
+            snprintf(buffer, sizeof(buffer) - 1, "NULL VALUE");                                                        \
+            return buffer;                                                                                             \
+        }                                                                                                              \
+        return NULL;                                                                                                   \
+    }
+
+#define NULL_TYPE                                                                                                      \
+    {                                                                                                                  \
+        if (debug)                                                                                                     \
+        {                                                                                                              \
+            snprintf(buffer, sizeof(buffer) - 1, "NULL __TYPE__ VALUE");                                               \
+            return buffer;                                                                                             \
+        }                                                                                                              \
+        return NULL;                                                                                                   \
+    }
+
+#define ENUM_VALUE                                                                                                     \
+    {                                                                                                                  \
+        if (debug)                                                                                                     \
+            snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", value->type->name,                                      \
+                     value->type->value->data.t->def.e.values[value->data.u]->name, value->data.u);                    \
+        else                                                                                                           \
+            snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->value->data.t->def.e.values[value->data.u]->name); \
+        return buffer;                                                                                                 \
+    }
+
+#define NONE_TYPE                                                                                                      \
+    if (debug)                                                                                                         \
+        snprintf(buffer, sizeof(buffer) - 1, "[none]");                                                                \
+    else                                                                                                               \
+        return NULL;
+
+#define TYPE_DEF_VALUE                                                                                                 \
+    if (debug)                                                                                                         \
+        snprintf(buffer, sizeof(buffer) - 1, "%s@%p", value->type->name, (void *)(value->data.t));                     \
+    else                                                                                                               \
+        return NULL;
+
+#define REAL_VALUE                                                                                                     \
+    if (width > 0)                                                                                                     \
+        if (precision == 0)                                                                                            \
+            snprintf(buffer, sizeof(buffer) - 1, "%*" PS_REAL_FMT_WP, width, value->data.r);                           \
+        else                                                                                                           \
+            snprintf(buffer, sizeof(buffer) - 1, "%*.*" PS_REAL_FMT_WP, width, precision, value->data.r);              \
+    else                                                                                                               \
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_REAL_FMT, value->data.r);
+
+#define INTEGER_VALUE                                                                                                  \
+    if (debug)                                                                                                         \
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i,         \
+                 value->data.i);                                                                                       \
+    else if (width > 0)                                                                                                \
+        snprintf(buffer, sizeof(buffer) - 1, "%*" PS_INTEGER_FMT_10, width, value->data.i);                            \
+    else                                                                                                               \
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10, value->data.i);
+
+#define UNSIGNED_VALUE                                                                                                 \
+    if (debug)                                                                                                         \
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u,        \
+                 value->data.u);                                                                                       \
+    else if (width > 0)                                                                                                \
+        snprintf(buffer, sizeof(buffer) - 1, "%*" PS_UNSIGNED_FMT_10, width, value->data.i);                           \
+    else                                                                                                               \
+        snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10, value->data.u);
+
+#define CHAR_VALUE                                                                                                     \
+    if (debug)                                                                                                         \
+        snprintf(buffer, sizeof(buffer) - 1, "'%c' / %03d / 0x%02x", isprint(value->data.c) ? value->data.c : '.',     \
+                 value->data.c, value->data.c);                                                                        \
+    else                                                                                                               \
+        snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
+
+#define STRING_VALUE                                                                                                   \
+    if (debug)                                                                                                         \
+        if (value->data.s == NULL)                                                                                     \
+            snprintf(buffer, sizeof(buffer) - 1, "NULL!");                                                             \
+        else                                                                                                           \
+            snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"", value->data.s->len, value->data.s->max,         \
+                     PS_IDENTIFIER_LEN - 10, value->data.s->str);                                                      \
+    else                                                                                                               \
+    {                                                                                                                  \
+        memset(buffer, 0, sizeof(buffer));                                                                             \
+        if (value->data.s != NULL)                                                                                     \
+            memcpy(buffer, value->data.s->str, value->data.s->len);                                                    \
+    }
+
+#define EXECUTABLE_VALUE                                                                                               \
+    const ps_executable *executable = value->data.x;                                                                   \
+    if (executable == NULL)                                                                                            \
+        snprintf(buffer, sizeof(buffer) - 1, "NULL!");                                                                 \
+    else if (executable->address != NULL)                                                                              \
+        snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", executable->address);                                        \
+    else                                                                                                               \
+        snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",                                                       \
+                 executable->formal_signature->result_type == NULL ||                                                  \
+                         executable->formal_signature->result_type == &ps_system_none                                  \
+                     ? "PROCEDURE"                                                                                     \
+                     : "FUNCTION",                                                                                     \
+                 executable->line + 1, executable->column + 1);
+
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
-    ps_executable *executable;
     if (value == NULL)
-    {
-        if (debug)
-        {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL VALUE");
-            return buffer;
-        }
-        return NULL;
-    }
-    if (value->type == NULL)
-    {
-        if (debug)
-        {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL TYPE");
-            return buffer;
-        }
-        return NULL;
-    }
+        NULL_VALUE
     if (value->type->value == NULL)
-    {
-        if (debug)
-        {
-            snprintf(buffer, sizeof(buffer) - 1, "NULL __TYPE__ VALUE");
-            return buffer;
-        }
-        return NULL;
-    }
+        NULL_TYPE
     if (value->type->value->data.t->type == PS_TYPE_ENUM)
-    {
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", value->type->name,
-                     value->type->value->data.t->def.e.values[value->data.u]->name, value->data.u);
-        else
-            snprintf(buffer, sizeof(buffer) - 1, "%s", value->type->value->data.t->def.e.values[value->data.u]->name);
-        return buffer;
-    }
+        ENUM_VALUE
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_NONE:
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "[none]");
-        else
-            return NULL;
+        NONE_TYPE
         break;
     case PS_TYPE_DEFINITION:
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s@%p", value->type->name, (void *)(value->data.t));
-        else
-            return NULL;
+        TYPE_DEF_VALUE
         break;
     case PS_TYPE_REAL:
-        if (width > 0)
-            if (precision == 0)
-                snprintf(buffer, sizeof(buffer) - 1, "%*" PS_REAL_FMT_WP, width, value->data.r);
-            else
-                snprintf(buffer, sizeof(buffer) - 1, "%*.*" PS_REAL_FMT_WP, width, precision, value->data.r);
-        else
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_REAL_FMT, value->data.r);
+        REAL_VALUE
         break;
     case PS_TYPE_INTEGER:
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.i,
-                     value->data.i);
-        else if (width > 0)
-            snprintf(buffer, sizeof(buffer) - 1, "%*" PS_INTEGER_FMT_10, width, value->data.i);
-        else
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_INTEGER_FMT_10, value->data.i);
+        INTEGER_VALUE
         break;
     case PS_TYPE_UNSIGNED:
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10 " / 0x%" PS_UNSIGNED_FMT_16, value->data.u,
-                     value->data.u);
-        else if (width > 0)
-            snprintf(buffer, sizeof(buffer) - 1, "%*" PS_UNSIGNED_FMT_10, width, value->data.i);
-        else
-            snprintf(buffer, sizeof(buffer) - 1, "%" PS_UNSIGNED_FMT_10, value->data.u);
+        UNSIGNED_VALUE
         break;
     case PS_TYPE_BOOLEAN:
         snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "TRUE" : "FALSE");
         break;
     case PS_TYPE_CHAR:
-        if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "'%c' / %03d / 0x%02x", isprint(value->data.c) ? value->data.c : '.',
-                     value->data.c, value->data.c);
-        else
-            snprintf(buffer, sizeof(buffer) - 1, "%c", value->data.c);
+        CHAR_VALUE
         break;
     case PS_TYPE_STRING:
-        if (debug)
-            if (value->data.s == NULL)
-                snprintf(buffer, sizeof(buffer) - 1, "NULL!");
-            else
-                snprintf(buffer, sizeof(buffer) - 1, "%03d/%03d \"%.*s\"", value->data.s->len, value->data.s->max,
-                         PS_IDENTIFIER_LEN - 10, value->data.s->str);
-        else
-        {
-            memset(buffer, 0, sizeof(buffer));
-            if (value->data.s != NULL)
-                memcpy(buffer, value->data.s->str, value->data.s->len);
-        }
+        STRING_VALUE
         break;
     case PS_TYPE_EXECUTABLE:
-        executable = value->data.x;
-        if (executable == NULL)
-            snprintf(buffer, sizeof(buffer) - 1, "NULL!");
-        else if (executable->address != NULL)
-        {
-            snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", executable->address);
-        }
-        else
-        {
-            snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",
-                     executable->formal_signature->result_type == NULL ||
-                             executable->formal_signature->result_type == &ps_system_none
-                         ? "PROCEDURE"
-                         : "FUNCTION",
-                     executable->line + 1, executable->column + 1);
-        }
+        EXECUTABLE_VALUE
         break;
     case PS_TYPE_POINTER:
         snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);

@@ -25,6 +25,16 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
+    /** @brief Enumerations are stored as unsigned bytes (first=0, second=1, ...) */
+    /** @example Months: (January, February, March, April, ..., December) */
+    typedef struct s_ps_type_definition_enum
+    {
+        /** @brief Array of symbols for each item in the enumeration */
+        ps_symbol **values;
+        /** @brief Number of items in the enumeration */
+        uint8_t count;
+    } __attribute__((__packed__)) ps_type_definition_enum;
+
     typedef struct s_ps_type_definition_subrange_char
     {
         ps_char min;
@@ -47,30 +57,19 @@ extern "C"
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_enum_value min;      /** @brief min value in the enumeration for the subrange */
-        ps_enum_value max;      /** @brief max value in the enumeration for the subrange */
+        ps_enum_value min;      /** @brief Minimum value in the enumeration for the subrange      */
+        ps_enum_value max;      /** @brief Maximum value in the enumeration for the subrange      */
     } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
     {
-        union
-        {
+        union {
             ps_type_definition_subrange_char c;
             ps_type_definition_subrange_integer i;
             ps_type_definition_subrange_unsigned u;
             ps_type_definition_subrange_enum e;
         };
     } __attribute__((__packed__)) ps_type_definition_subrange;
-
-    /** @brief Enumerations are stored as unsigned bytes (first=0, second=1, ...) */
-    /** @example Months: (January, February, March, April, ..., December) */
-    typedef struct s_ps_type_definition_enum
-    {
-        /** @brief Array of symbols for each item in the enumeration */
-        ps_symbol **values;
-        /** @brief Number of items in the enumeration */
-        uint8_t count;
-    } __attribute__((__packed__)) ps_type_definition_enum;
 
     /** @brief Sets are stored in 32 bytes as a 256 bits field,
      *         each value of referenced enumeration or Char is corresponding
@@ -138,8 +137,7 @@ extern "C"
         ps_value_type type; /** @brief visible value type */
         ps_value_type base; /** @brief same as type for internal types like integer or char,
                                        values for sub-type for subranges and enums, ... */
-        union
-        {
+        union {
             ps_type_definition_enum e;
             ps_type_definition_subrange g;
             ps_type_definition_set t;
@@ -158,7 +156,7 @@ extern "C"
     void ps_type_definition_debug(FILE *output, char *message, const ps_type_definition *type_def);
 
     // clang-format off
-    ps_type_definition *ps_type_definition_alloc                  (ps_value_type type, ps_value_type base);
+    ps_type_definition *ps_type_definition_alloc                   (ps_value_type type, ps_value_type base);
     ps_type_definition *ps_type_definition_free                    (ps_type_definition *type_def);
     ps_type_definition *ps_type_definition_create_string           (ps_string_len max);
     ps_type_definition *ps_type_definition_create_enum             (uint8_t count, ps_symbol **values);

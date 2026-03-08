@@ -19,7 +19,7 @@ extern "C"
 {
 #endif
 
-    /** @brief Value: type + data */
+    /** @brief Value: type + data + allocated */
     typedef struct s_ps_value
     {
         ps_symbol *type;    /** @brief symbol with type definition */

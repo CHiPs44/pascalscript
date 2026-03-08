@@ -122,7 +122,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
     // Then parameter type
-    if (!ps_visit_type_reference(interpreter, mode, &type_reference))
+    if (!ps_visit_type_reference(interpreter, mode, &type_reference, NULL))
         TRACE_ERROR("TYPE REFERENCE");
     // Add the parameters to the signature and to the current environment
     for (int i = 0; i <= index; i++)
@@ -349,7 +349,7 @@ bool ps_visit_procedure_or_function_declaration(ps_interpreter *interpreter, ps_
         EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_COLON);
         READ_NEXT_TOKEN_OR_CLEANUP;
         ps_symbol *type_reference = NULL;
-        if (!ps_visit_type_reference(interpreter, mode, &type_reference))
+        if (!ps_visit_type_reference(interpreter, mode, &type_reference, NULL))
             goto cleanup;
         signature->result_type = type_reference;
     }

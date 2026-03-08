@@ -233,7 +233,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
         } while (true);
         READ_NEXT_TOKEN
-        if (!ps_visit_type_reference(interpreter, mode, &type))
+        if (!ps_visit_type_reference(interpreter, mode, &type, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         for (int i = 0; i <= var_count; i++)

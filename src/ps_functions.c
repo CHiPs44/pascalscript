@@ -211,6 +211,7 @@ ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps
 /** @brief ORD - Get ordinal value of boolean / char / enum */
 ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    ps_value_debug(NULL, "ORD", value);
     if (!ps_value_is_ordinal(value))
         return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                      "Ord: Ordinal expected, got %s",

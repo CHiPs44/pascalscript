@@ -31,14 +31,14 @@ ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def          
 ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .system = true, .allocated = false};
 
 /* clang-format on */
-#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                        \
-    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__}; \
-    ps_value ps_value_##__name__ = {                                                              \
-        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}}; \
-    ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                     \
-                                      .name = __NAME__,                                           \
-                                      .value = &ps_value_##__name__,                              \
-                                      .system = true,                                             \
+#define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                                             \
+    ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__};                      \
+    ps_value ps_value_##__name__ = {                                                                                   \
+        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
+    ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
+                                      .name = __NAME__,                                                                \
+                                      .value = &ps_value_##__name__,                                                   \
+                                      .system = true,                                                                  \
                                       .allocated = false}
 /* clang-format off */
 
@@ -54,7 +54,8 @@ PS_SYSTEM_TYPE(subrange_char    , "#SUBRANGE_CHAR"    , PS_TYPE_SUBRANGE  , PS_T
 PS_SYSTEM_TYPE(subrange_integer , "#SUBRANGE_INTEGER" , PS_TYPE_SUBRANGE  , PS_TYPE_INTEGER                           );
 PS_SYSTEM_TYPE(subrange_unsigned, "#SUBRANGE_UNSIGNED", PS_TYPE_SUBRANGE  , PS_TYPE_UNSIGNED                          );
 PS_SYSTEM_TYPE(subrange_enum    , "#SUBRANGE_ENUM"    , PS_TYPE_SUBRANGE  , PS_TYPE_ENUM                              );
-PS_SYSTEM_TYPE(enum             , "#ENUM"             , PS_TYPE_ENUM      , PS_TYPE_UNSIGNED                          );
+PS_SYSTEM_TYPE(enum             , "#ENUM"             , PS_TYPE_ENUM      , PS_TYPE_ENUM                              );
+PS_SYSTEM_TYPE(enum_value       , "#ENUM_VALUE"       , PS_TYPE_ENUM      , PS_TYPE_UNSIGNED                          );
 PS_SYSTEM_TYPE(record           , "#RECORD"           , PS_TYPE_RECORD    , PS_TYPE_RECORD                            );
 PS_SYSTEM_TYPE(procedure        , "#PROCEDURE"        , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
 PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
@@ -64,12 +65,12 @@ PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_T
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                     \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}}; \
-    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,            \
-                                                     .name = NAME,                               \
-                                                     .value = &ps_value_##TYPE##_##VALUE,        \
-                                                     .system = true,                             \
+#define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
+    ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,                                  \
+                                                     .name = NAME,                                                     \
+                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
+                                                     .system = true,                                                   \
                                                      .allocated = false}
 /* clang-format off */
 
@@ -89,12 +90,12 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323
 /**********************************************************************************************************************/
 
 /* clang-format on */
-#define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                     \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}}; \
-    ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,            \
-                                                     .name = NAME,                               \
-                                                     .value = &ps_value_##TYPE##_##VALUE,        \
-                                                     .system = true,                             \
+#define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
+    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
+    ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,                                  \
+                                                     .name = NAME,                                                     \
+                                                     .value = &ps_value_##TYPE##_##VALUE,                              \
+                                                     .system = true,                                                   \
                                                      .allocated = false}
 /* clang-format off */
 
@@ -150,6 +151,7 @@ bool ps_system_init(ps_environment *system)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_enum)
     ADD_SYSTEM_SYMBOL(ps_system_enum)
+    ADD_SYSTEM_SYMBOL(ps_system_enum_value)
     ADD_SYSTEM_SYMBOL(ps_system_array)
     ADD_SYSTEM_SYMBOL(ps_system_record)
 

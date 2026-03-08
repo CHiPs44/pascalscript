@@ -30,37 +30,11 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
 {
     if (type_def == NULL)
         return NULL;
-    switch (type_def->type)
+    if (type_def->type == PS_TYPE_ENUM)
     {
-    case PS_TYPE_ENUM:
         ps_memory_free(PS_MEMORY_TYPE, type_def->def.e.values);
         type_def->def.e.values = NULL;
         type_def->def.e.count = 0;
-        break;
-    case PS_TYPE_SUBRANGE:
-        // nothing to free
-        break;
-    case PS_TYPE_STRING:
-        // nothing to free
-        break;
-    // case PS_TYPE_ARRAY:
-    //     ps_type_definition_free(type_def->def.a.type_def);
-    //     break;
-    // case PS_TYPE_SET:
-    //     ps_memory_free(type_def->def.t.values);
-    //     break;
-    // case PS_TYPE_POINTER:
-    //     ps_type_definition_free(type_def->def.p.type_def);
-    //     break;
-    // case PS_TYPE_RECORD:
-    //     // TODO free fields
-    //     break;
-    // case PS_TYPE_FILE:
-    //     ps_type_definition_free(type_def->def.f.type_def);
-    //     break;
-    default:
-        // nothing to free
-        break;
     }
     ps_memory_free(PS_MEMORY_TYPE, type_def);
     return NULL;
@@ -185,24 +159,15 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
                      type_def->def.g.u.max);
             break;
         case PS_TYPE_ENUM:
-            // TODO: get symbol names for min and max values
-            // snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %s..%s)", type_name, base_name, type_def->def.g.e.min,
-            //          type_def->def.g.e.max);
-            snprintf(buffer, sizeof(buffer) - 1, "%s(%s)", type_name, base_name);
+            ps_symbol **values = type_def->def.g.e.symbol_enum->value->type->value->data.t->def.e.values;
+            snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %s..%s)", type_name, base_name,
+                     values[type_def->def.g.e.min]->name, values[type_def->def.g.e.max]->name);
             break;
         default:
             snprintf(buffer, sizeof(buffer) - 1, "%s(%s, ?..?)", type_name, base_name);
             break;
         }
         break;
-    // case PS_TYPE_SET:
-    //     snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %d, '%s', ...)", type_name, base_name, type_def->def.t.count,
-    //              type_def->def.t.count == 0 ? "???" : type_def->def.t.values[0]);
-    //     break;
-    // case PS_TYPE_POINTER:
-    //     snprintf(buffer, sizeof(buffer) - 1, "^%s", ps_type_names[i].name,
-    //              type_def->def.p.type_def == NULL ? "???" : type_def->def.p.type_def->name);
-    //     break;
     default:
         snprintf(buffer, sizeof(buffer) - 1, "%s(%s)???", type_name, base_name);
         break;
