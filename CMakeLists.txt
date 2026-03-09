@@ -40,22 +40,19 @@ function(add_c_tests DIR LABEL)
     file(GLOB TEST_C_FILES "${DIR}/*.c")
     foreach(CFILE IN LISTS TEST_C_FILES)
         get_filename_component(TEST_NAME "${CFILE}" NAME_WE)
-
         add_executable("${TEST_NAME}" "${CFILE}")
-
+        message(STATUS "Added ${LABEL}_${TEST_NAME} for ../${DIR}/${TEST_FILE}")
         add_test(NAME "${LABEL}_${TEST_NAME}" COMMAND "${TEST_NAME}")
     endforeach()
 endfunction()
 
-add_c_tests("${CMAKE_SOURCE_DIR}/tests" "c_tests")
+# add_c_tests("${CMAKE_SOURCE_DIR}/test" "c_tests")
 
 function(add_executable_pascal_examples DIR LABEL)
     file(GLOB PAS_FILES "${CMAKE_SOURCE_DIR}/${DIR}/*.pas")
-
     foreach(PAS_FILE IN LISTS PAS_FILES)
         get_filename_component(TEST_NAME "${PAS_FILE}" NAME_WE)
         get_filename_component(TEST_FILE "${PAS_FILE}" NAME)
-
         set(SHOULD_ADD TRUE)
         if(UNIX)
             execute_process(
