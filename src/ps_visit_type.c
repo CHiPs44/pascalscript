@@ -365,21 +365,6 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     VISIT_END("OK")
 }
 
-// bool ps_visit_type_reference_subrange_char(ps_interpreter *interpreter, ps_interpreter_mode mode,
-//                                            ps_symbol **type_symbol)
-// {
-// }
-
-// bool ps_visit_type_reference_subrange_integer(ps_interpreter *interpreter, ps_interpreter_mode mode,
-//                                               ps_symbol **type_symbol)
-// {
-// }
-
-// bool ps_visit_type_reference_subrange_unsigned(ps_interpreter *interpreter, ps_interpreter_mode mode,
-//                                               ps_symbol **type_symbol)
-// {
-// }
-
 bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                       const char *type_name, ps_value_type base)
 {
