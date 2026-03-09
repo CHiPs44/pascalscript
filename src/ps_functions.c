@@ -104,10 +104,10 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, const ps_symbol *sym
     assert(symbol != NULL);
     assert(symbol->value != NULL);
     assert(symbol->value->data.x != NULL);
-    if (symbol->value->data.x->func_1arg != &ps_function_random)
+    ps_function_1arg function = symbol->value->data.x->func_1arg;
+    if (function != &ps_function_random && function != &ps_function_get_tick_count)
         assert(value != NULL);
     assert(result != NULL);
-    ps_function_1arg function = symbol->value->data.x->func_1arg;
     if (function == NULL)
     {
         ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
@@ -807,7 +807,7 @@ ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const
 /** @brief LENGTH(): UNSIGNED - Get string length */
 ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_real(value))
+    if (!ps_value_is_string(value))
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
                                                      "Length: String expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
