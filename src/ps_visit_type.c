@@ -465,26 +465,32 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     // Create type definition for subrange
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
-    if (type_name == NULL)
-        switch (base)
-        {
-        case PS_TYPE_CHAR:
-            type_def = ps_type_definition_create_subrange_char(c.min, c.max);
+    switch (base)
+    {
+    case PS_TYPE_CHAR:
+        type_def = ps_type_definition_create_subrange_char(c.min, c.max);
+        if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%d_%d", c.min, c.max);
-            break;
-        case PS_TYPE_INTEGER:
-            type_def = ps_type_definition_create_subrange_integer(i.min, i.max);
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_INTEGER:
+        type_def = ps_type_definition_create_subrange_integer(i.min, i.max);
+        if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%" PS_INTEGER_FMT_10 "_%" PS_INTEGER_FMT_10, i.min, i.max);
-            break;
-        case PS_TYPE_UNSIGNED:
-            type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_UNSIGNED:
+        type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
+        if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min, u.max);
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-        }
-    else
-        memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    }
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     // Register new type definition in symbol table
