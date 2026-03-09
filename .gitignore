@@ -55,6 +55,9 @@ dkms.conf
 build/
 build-*/
 
+# CMake tests
+Testing/**
+
 # Pascal tool
 GPATH
 GRTAGS

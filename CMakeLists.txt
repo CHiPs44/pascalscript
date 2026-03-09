@@ -50,10 +50,11 @@ endfunction()
 add_c_tests("${CMAKE_SOURCE_DIR}/tests" "c_tests")
 
 function(add_executable_pascal_examples DIR LABEL)
-    file(GLOB PAS_FILES "${DIR}/*.pas")
+    file(GLOB PAS_FILES "${CMAKE_SOURCE_DIR}/${DIR}/*.pas")
 
     foreach(PAS_FILE IN LISTS PAS_FILES)
         get_filename_component(TEST_NAME "${PAS_FILE}" NAME_WE)
+        get_filename_component(TEST_FILE "${PAS_FILE}" NAME)
 
         set(SHOULD_ADD TRUE)
         if(UNIX)
@@ -65,14 +66,14 @@ function(add_executable_pascal_examples DIR LABEL)
                 set(SHOULD_ADD FALSE)
             endif()
         endif()
-
         if(SHOULD_ADD)
             add_test(
                 NAME "${LABEL}_${TEST_NAME}"
-                COMMAND $<TARGET_FILE:pascalscript> "${PAS_FILE}"
+                COMMAND $<TARGET_FILE:pascalscript> "../${DIR}/${TEST_FILE}"
             )
+            message(STATUS "Added ${LABEL}_${TEST_NAME} for ../${DIR}/${TEST_FILE}")
         endif()
     endforeach()
 endfunction()
 
-add_executable_pascal_examples("${CMAKE_SOURCE_DIR}/examples" "examples")
+add_executable_pascal_examples("examples" "examples")
