@@ -20,7 +20,7 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/400-subrange.pas"
+#define DEBUGGER_SOURCE "examples/450-enum.pas"
 
 // Runtime options
 bool bool_eval = false;
