@@ -55,7 +55,6 @@ PS_SYSTEM_TYPE(subrange_integer , "#SUBRANGE_INTEGER" , PS_TYPE_SUBRANGE  , PS_T
 PS_SYSTEM_TYPE(subrange_unsigned, "#SUBRANGE_UNSIGNED", PS_TYPE_SUBRANGE  , PS_TYPE_UNSIGNED                          );
 PS_SYSTEM_TYPE(subrange_enum    , "#SUBRANGE_ENUM"    , PS_TYPE_SUBRANGE  , PS_TYPE_ENUM                              );
 PS_SYSTEM_TYPE(enum             , "#ENUM"             , PS_TYPE_ENUM      , PS_TYPE_ENUM                              );
-PS_SYSTEM_TYPE(enum_value       , "#ENUM_VALUE"       , PS_TYPE_ENUM      , PS_TYPE_UNSIGNED                          );
 PS_SYSTEM_TYPE(record           , "#RECORD"           , PS_TYPE_RECORD    , PS_TYPE_RECORD                            );
 PS_SYSTEM_TYPE(procedure        , "#PROCEDURE"        , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
 PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
@@ -136,7 +135,6 @@ bool ps_system_init(ps_environment *system)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_enum)
     ADD_SYSTEM_SYMBOL(ps_system_enum)
-    ADD_SYSTEM_SYMBOL(ps_system_enum_value)
     ADD_SYSTEM_SYMBOL(ps_system_array)
     ADD_SYSTEM_SYMBOL(ps_system_record)
 
