@@ -206,7 +206,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
     ps_identifier identifier[8];
     int var_count;
-    ps_symbol *type = NULL;
+    ps_symbol *type_symbol = NULL;
     ps_value_data data = {0};
     const ps_symbol *variable = NULL;
 
@@ -233,11 +233,11 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
         } while (true);
         READ_NEXT_TOKEN
-        if (!ps_visit_type_reference(interpreter, mode, &type, NULL))
+        if (!ps_visit_type_reference(interpreter, mode, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         for (int i = 0; i <= var_count; i++)
-            if (!ps_interpreter_add_variable(interpreter, identifier[i], type, data))
+            if (!ps_interpreter_add_variable(interpreter, identifier[i], type_symbol, data))
                 TRACE_ERROR("ADD VARIABLE")
         READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);

@@ -53,7 +53,7 @@ extern "C"
         ps_unsigned max;
     } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
 
-    typedef uint8_t ps_enum_value;
+    typedef ps_unsigned ps_enum_value;
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */

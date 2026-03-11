@@ -300,13 +300,13 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
 typedef struct s_ps_enum_values_pool
 {
-    uint8_t size;
-    uint8_t more;
-    uint8_t used;
+    int size;
+    int more;
+    int used;
     ps_symbol **values;
 } ps_enum_values_pool;
 
-ps_enum_values_pool *ps_enum_values_pool_alloc(uint8_t size, uint8_t more)
+ps_enum_values_pool *ps_enum_values_pool_alloc(int size, int more)
 {
     ps_enum_values_pool *pool = ps_memory_malloc(PS_MEMORY_PARSER, sizeof(ps_enum_values_pool));
     if (pool == NULL)
@@ -327,7 +327,7 @@ ps_enum_values_pool *ps_enum_values_pool_alloc(uint8_t size, uint8_t more)
 void ps_enum_values_pool_free(ps_enum_values_pool *pool, bool free)
 {
     if (free)
-        for (uint8_t i = 0; i < pool->used; i++)
+        for (int i = 0; i < pool->used; i++)
         {
             ps_symbol_free(pool->values[i]);
         }
@@ -341,7 +341,7 @@ bool ps_enum_values_pool_grow(ps_enum_values_pool *pool)
     if (pool->used < pool->size)
         return true;
     // grow pool
-    if(pool->size + pool->more>256)
+    if (pool->size + pool->more > 256)
         return false;
     ps_symbol **new_values =
         ps_memory_realloc(PS_MEMORY_PARSER, pool->values, (pool->size + pool->more) * sizeof(ps_symbol *));
@@ -354,13 +354,13 @@ bool ps_enum_values_pool_grow(ps_enum_values_pool *pool)
 
 bool ps_enum_values_pool_find(const ps_enum_values_pool *pool, const char *name)
 {
-    for (uint8_t i = 0; i < pool->used; i++)
+    for (int i = 0; i < pool->used; i++)
         if (strcmp(name, pool->values[i]->name) == 0)
             return true;
     return false;
 }
 
-ps_symbol *ps_enum_values_pool_add(ps_enum_values_pool *pool, const ps_symbol *type_symbol, const char *name)
+ps_symbol *ps_enum_values_pool_add(ps_enum_values_pool *pool, ps_symbol *type_symbol, const char *name)
 {
     // Create a new symbol for the enumeration value
     ps_value *value = ps_value_alloc(type_symbol, (ps_value_data){.u = pool->used});
@@ -402,7 +402,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     if (!ps_type_definition_register(interpreter, mode, type_name, type_def, type_symbol))
         GOTO_CLEANUP(interpreter->error)
-
+    fprintf(stderr, "Type %s registered at %p/%p\n", type_name, (void *)type_symbol, (void *)(*type_symbol));
     // Parse enumeration values
     do // NOSONAR
     {
@@ -416,13 +416,14 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         if (ps_enum_values_pool_find(pool, lexer->current_token.value.identifier) ||
             (ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false) != NULL))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
-        ps_symbol *value_symbol = ps_enum_values_pool_add(pool, type_symbol, lexer->current_token.value.identifier);
+        ps_symbol *value_symbol = ps_enum_values_pool_add(pool, *type_symbol, lexer->current_token.value.identifier);
         if (value_symbol == NULL)
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+        fprintf(stderr, "ADD SYMBOL %s at %p\n", value_symbol->name, (void *)value_symbol);
         if (!ps_interpreter_add_symbol(interpreter, value_symbol))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
-        READ_NEXT_TOKEN_OR_CLEANUP
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        fprintf(stderr, "ADDED SYMBOL %s at %p\n", value_symbol->name, (void *)value_symbol);
+        READ_NEXT_TOKEN_OR_CLEANUP if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             READ_NEXT_TOKEN_OR_CLEANUP
             continue;
@@ -439,7 +440,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         ps_memory_free(PS_MEMORY_TYPE, type_def);
         return NULL; // errno = ENOMEM
     }
-    for (uint8_t i = 0; i < pool->used; i++)
+    for (int i = 0; i < pool->used; i++)
     {
         type_def->def.e.values[i] = pool->values[i];
     }

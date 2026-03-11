@@ -179,7 +179,7 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
     if (interpreter->debug >= DEBUG_TRACE)
         fprintf(stderr, "ADD %*s SYMBOL '%*s' TO ENVIRONMENT '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
-                environment->name, (void *)symbol->value,
+                environment->name, (void *)(symbol->value),
                 symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
     if (!ps_environment_add_symbol(environment, symbol))
         return ps_interpreter_return_false(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
