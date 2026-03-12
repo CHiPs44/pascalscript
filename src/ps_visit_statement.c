@@ -474,7 +474,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (!ps_lexer_set_cursor(lexer, line, column))
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
             READ_NEXT_TOKEN
-            // compute VARIABLE := SUCC/PRED(VARIABLE)
+            // Compute VARIABLE := SUCC/PRED(VARIABLE)
             if (step.data.i > 0)
             {
                 interpreter->error = ps_function_succ(interpreter, variable->value, variable->value);

@@ -49,26 +49,29 @@ ps_type_definition *ps_type_definition_create_string(ps_string_len max)
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_enum(uint8_t count, ps_symbol **values)
+ps_type_definition *ps_type_definition_create_enum()
 {
     ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_ENUM, PS_TYPE_UNSIGNED);
     if (type_def == NULL)
         return NULL; // errno = ENOMEM
-    if (count > 0 && values != NULL)
-    {
-        type_def->def.e.count = count;
-        type_def->def.e.values = ps_memory_calloc(PS_MEMORY_TYPE, count, sizeof(ps_symbol *));
-        if (type_def->def.e.values == NULL)
-        {
-            ps_memory_free(PS_MEMORY_TYPE, type_def);
-            return NULL; // errno = ENOMEM
-        }
-        for (int i = 0; i < count; i++)
-        {
-            type_def->def.e.values[i] = values[i];
-        }
-    }
+    type_def->def.e.count = 0;
+    type_def->def.e.values = NULL;
     return type_def;
+}
+
+bool ps_type_definition_set_enum_values(ps_type_definition *type_def, ps_unsigned count, ps_symbol **values)
+{
+    type_def->def.e.count = count;
+    type_def->def.e.values = ps_memory_calloc(PS_MEMORY_TYPE, count, sizeof(ps_symbol *));
+    if (type_def->def.e.values == NULL)
+    {
+        return false; // errno = ENOMEM
+    }
+    for (ps_unsigned i = 0; i < count; i++)
+    {
+        type_def->def.e.values[i] = values[i];
+    }
+    return true;
 }
 
 ps_type_definition *ps_type_definition_create_subrange_char(ps_char min, ps_char max)

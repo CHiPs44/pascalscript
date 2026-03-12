@@ -300,9 +300,9 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
 
 typedef struct s_ps_enum_values_pool
 {
-    int size;
-    int more;
-    int used;
+    ps_unsigned size;
+    ps_unsigned more;
+    ps_unsigned used;
     ps_symbol **values;
 } ps_enum_values_pool;
 
@@ -311,7 +311,6 @@ ps_enum_values_pool *ps_enum_values_pool_alloc(int size, int more)
     ps_enum_values_pool *pool = ps_memory_malloc(PS_MEMORY_PARSER, sizeof(ps_enum_values_pool));
     if (pool == NULL)
         return NULL; // errno = ENOMEM
-    assert(size > 0);
     pool->values = ps_memory_calloc(PS_MEMORY_PARSER, size, sizeof(ps_symbol *));
     if (pool->values == NULL)
     {
@@ -327,7 +326,7 @@ ps_enum_values_pool *ps_enum_values_pool_alloc(int size, int more)
 void ps_enum_values_pool_free(ps_enum_values_pool *pool, bool free)
 {
     if (free)
-        for (int i = 0; i < pool->used; i++)
+        for (ps_unsigned i = 0; i < pool->used; i++)
         {
             ps_symbol_free(pool->values[i]);
         }
@@ -354,7 +353,7 @@ bool ps_enum_values_pool_grow(ps_enum_values_pool *pool)
 
 bool ps_enum_values_pool_find(const ps_enum_values_pool *pool, const char *name)
 {
-    for (int i = 0; i < pool->used; i++)
+    for (ps_unsigned i = 0; i < pool->used; i++)
         if (strcmp(name, pool->values[i]->name) == 0)
             return true;
     return false;
@@ -389,7 +388,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     if (pool == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
-    // re-check that current token is '('
+    // Re-check that current token is '('
     if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN_OR_CLEANUP
@@ -397,12 +396,11 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
 
-    ps_type_definition *type_def = ps_type_definition_create_enum(0, NULL);
+    ps_type_definition *type_def = ps_type_definition_create_enum();
     if (type_def == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     if (!ps_type_definition_register(interpreter, mode, type_name, type_def, type_symbol))
         GOTO_CLEANUP(interpreter->error)
-    fprintf(stderr, "Type %s registered at %p/%p\n", type_name, (void *)type_symbol, (void *)(*type_symbol));
     // Parse enumeration values
     do // NOSONAR
     {
@@ -419,10 +417,8 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         ps_symbol *value_symbol = ps_enum_values_pool_add(pool, *type_symbol, lexer->current_token.value.identifier);
         if (value_symbol == NULL)
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        fprintf(stderr, "ADD SYMBOL %s at %p\n", value_symbol->name, (void *)value_symbol);
         if (!ps_interpreter_add_symbol(interpreter, value_symbol))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
-        fprintf(stderr, "ADDED SYMBOL %s at %p\n", value_symbol->name, (void *)value_symbol);
         READ_NEXT_TOKEN_OR_CLEANUP if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             READ_NEXT_TOKEN_OR_CLEANUP
@@ -432,18 +428,9 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             break;
     } while (true);
     READ_NEXT_TOKEN_OR_CLEANUP
-
-    type_def->def.e.count = pool->used;
-    type_def->def.e.values = ps_memory_calloc(PS_MEMORY_TYPE, pool->used, sizeof(ps_symbol *));
-    if (type_def->def.e.values == NULL)
-    {
-        ps_memory_free(PS_MEMORY_TYPE, type_def);
-        return NULL; // errno = ENOMEM
-    }
-    for (int i = 0; i < pool->used; i++)
-    {
-        type_def->def.e.values[i] = pool->values[i];
-    }
+    // Copy enum values to enum type definition
+    if (!ps_type_definition_set_enum_values(type_def, pool->used, pool->values))
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     ps_enum_values_pool_free(pool, false);
     VISIT_END("OK")
 cleanup:

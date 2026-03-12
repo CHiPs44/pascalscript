@@ -480,7 +480,8 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
             // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
             EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
             READ_NEXT_TOKEN
-            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
+                lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
             ps_identifier identifier = {0};
             COPY_IDENTIFIER(identifier)

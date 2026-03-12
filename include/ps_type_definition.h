@@ -32,7 +32,7 @@ extern "C"
         /** @brief Array of symbols for each item in the enumeration */
         ps_symbol **values;
         /** @brief Number of items in the enumeration */
-        uint8_t count;
+        ps_unsigned count;
     } __attribute__((__packed__)) ps_type_definition_enum;
 
     typedef struct s_ps_type_definition_subrange_char
@@ -155,16 +155,16 @@ extern "C"
 
     void ps_type_definition_debug(FILE *output, char *message, const ps_type_definition *type_def);
 
-    // clang-format off
-    ps_type_definition *ps_type_definition_alloc                   (ps_value_type type, ps_value_type base);
-    ps_type_definition *ps_type_definition_free                    (ps_type_definition *type_def);
-    ps_type_definition *ps_type_definition_create_string           (ps_string_len max);
-    ps_type_definition *ps_type_definition_create_enum             (uint8_t count, ps_symbol **values);
-    ps_type_definition *ps_type_definition_create_subrange_char    (ps_char     min, ps_char     max);
-    ps_type_definition *ps_type_definition_create_subrange_integer (ps_integer  min, ps_integer  max);
+    ps_type_definition *ps_type_definition_alloc(ps_value_type type, ps_value_type base);
+    ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
+    ps_type_definition *ps_type_definition_create_string(ps_string_len max);
+    ps_type_definition *ps_type_definition_create_enum();
+    bool ps_type_definition_set_enum_values(ps_type_definition *type_def, ps_unsigned count, ps_symbol **values);
+    ps_type_definition *ps_type_definition_create_subrange_char(ps_char min, ps_char max);
+    ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);
     ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max);
-    ps_type_definition *ps_type_definition_create_subrange_enum    (ps_symbol *symbol_enum, ps_enum_value min, ps_enum_value max);
-    // clang-format on
+    ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, ps_enum_value min,
+                                                                ps_enum_value max);
 
 #ifdef __cplusplus
 }

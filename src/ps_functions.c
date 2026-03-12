@@ -211,7 +211,7 @@ ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps
 /** @brief ORD - Get ordinal value of boolean / char / enum */
 ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    ps_value_debug(NULL, "ORD", value);
+    // ps_value_debug(NULL, "ORD: value=", value);
     if (!ps_value_is_ordinal(value))
         return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                      "Ord: Ordinal expected, got %s",
@@ -220,17 +220,21 @@ ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_
     {
     case PS_TYPE_BOOLEAN:
         // ord(false) => 0 / ord(true) => 1
-        result->type = &ps_system_integer;
-        result->data.i = value->data.b ? 1 : 0;
+        result->data.u = value->data.b ? 1 : 0;
         break;
     case PS_TYPE_CHAR:
         // ord('0') => 48 / ord('A') => 65 / ...
-        result->type = &ps_system_integer;
         result->data.u = (ps_unsigned)(value->data.c);
+        break;
+    case PS_TYPE_UNSIGNED:
+        // enum has unsigned as base type
+        result->data.u = value->data.u;
         break;
     default:
         break;
     }
+    result->type = &ps_system_unsigned;
+    // ps_value_debug(NULL, "ORD: result=", result);
     return PS_ERROR_NONE;
 }
 
@@ -525,13 +529,13 @@ ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_va
     {
     case PS_TYPE_CHAR:
         // succ(max) => error / succ(c) => c + 1
-        if (interpreter->range_check && value->data.c >= PS_CHAR_MAX)
+        if (interpreter->range_check && (int)value->data.c > PS_CHAR_MAX)
             return PS_ERROR_OUT_OF_RANGE;
         result->data.c = (ps_char)(value->data.c + 1);
         break;
     case PS_TYPE_ENUM:
         // succ(max) => error / succ(u) => u + 1
-        if (interpreter->range_check && value->data.u >= (ps_unsigned)(value->type->value->data.t->def.e.count - 1))
+        if (interpreter->range_check && value->data.u > (value->type->value->data.t->def.e.count))
             return PS_ERROR_OUT_OF_RANGE;
         result->data.u = value->data.u + 1;
         break;
