@@ -529,7 +529,7 @@ ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_va
     {
     case PS_TYPE_CHAR:
         // succ(max) => error / succ(c) => c + 1
-        if (interpreter->range_check && (int)value->data.c > PS_CHAR_MAX)
+        if (interpreter->range_check && value->data.c == PS_CHAR_MAX)
             return PS_ERROR_OUT_OF_RANGE;
         result->data.c = (ps_char)(value->data.c + 1);
         break;
