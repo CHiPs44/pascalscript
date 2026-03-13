@@ -53,6 +53,11 @@ bool ps_string_heap_grow(ps_string_heap *heap)
         (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string *));
     if (data == NULL)
         return false; // errno = ENOMEM
+    // Clear newly allocated memory
+    for (size_t i = 0; i < heap->more; i += 1)
+    {
+        data[heap->size + i] = NULL;
+    }
     heap->data = data;
     heap->size += heap->more;
     return true;
@@ -92,6 +97,10 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
     size_t index = hash % heap->size;
     size_t start = index;
     // Loop until we find an empty slot or looped back to the start
+    if (strcmp("√2       = ", z) == 0)
+    {
+        fprintf(stderr, "BREAK!\n");
+    }
     do
     {
         if (heap->data[index] == NULL)
