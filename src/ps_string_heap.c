@@ -47,8 +47,10 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
 
 bool ps_string_heap_grow(ps_string_heap *heap)
 {
+    // Allowed to grow?
     if (heap->more == 0)
         return false;
+    // Reallocate memory
     ps_string **data =
         (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string *));
     if (data == NULL)
@@ -58,6 +60,7 @@ bool ps_string_heap_grow(ps_string_heap *heap)
     {
         data[heap->size + i] = NULL;
     }
+    // Refresh heap values
     heap->data = data;
     heap->size += heap->more;
     return true;

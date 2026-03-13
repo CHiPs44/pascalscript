@@ -25,16 +25,15 @@ extern "C"
 #endif
 
     /**
-     * @brief String heap to hold string constants with a simple hash table and linear probing for collisions.
-     *        The heap is not resized for simplicity and performance as we expect a limited number of string constants
-     *        in typical Pascal programs.
+     * @brief String heap to make string constants unique instead of duplicating them.
+     *        It saves a lot of memory for string constants used in loops.
      */
     typedef struct s_ps_string_heap
     {
-        size_t size;
-        size_t used;
-        size_t more;
-        ps_string **data;
+        size_t size;      /** @brief allocated count            */
+        size_t used;      /** @brief currently used count       */
+        size_t more;      /** @brief amount added for each grow */
+        ps_string **data; /** @brief the strings thmeselves     */
     } ps_string_heap;
 
 #define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
