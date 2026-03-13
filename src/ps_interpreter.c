@@ -41,7 +41,8 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
         return ps_interpreter_free(interpreter);
     // Allocate system environment
     ps_identifier system = "SYSTEM";
-    interpreter->environments[0] = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
+    interpreter->environments[0] =
+        ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
     if (interpreter->environments[0] == NULL)
         return ps_interpreter_free(interpreter);
     // Initialize system environment
@@ -104,7 +105,7 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
-    ps_environment *environment = ps_environment_alloc(parent, name, PS_SYMBOL_TABLE_DEFAULT_SIZE);
+    ps_environment *environment = ps_environment_alloc(parent, name, 0, 0);
     if (environment == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     interpreter->level += 1;

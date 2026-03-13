@@ -12,14 +12,14 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 
-ps_environment *ps_environment_alloc(ps_environment *parent, const char *name, ps_symbol_table_size size)
+ps_environment *ps_environment_alloc(ps_environment *parent, const char *name, ps_symbol_table_size size,
+                                     ps_symbol_table_size more)
 {
     assert(name != NULL);
-    assert(size > 0);
     ps_environment *environment = ps_memory_malloc(PS_MEMORY_ENVIRONMENT, sizeof(ps_environment));
     if (environment == NULL)
         return NULL; // errno = ENOMEM
-    environment->symbols = ps_symbol_table_alloc(size);
+    environment->symbols = ps_symbol_table_alloc(size, more);
     if (environment->symbols == NULL)
         return ps_environment_free(environment);
     environment->parent = parent;

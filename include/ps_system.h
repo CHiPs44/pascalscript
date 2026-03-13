@@ -16,7 +16,11 @@ extern "C"
 #endif
 
 #ifndef PS_SYSTEM_SYMBOL_TABLE_SIZE
-#define PS_SYSTEM_SYMBOL_TABLE_SIZE 64
+#define PS_SYSTEM_SYMBOL_TABLE_SIZE 32
+#endif
+
+#ifndef PS_SYSTEM_SYMBOL_TABLE_MORE
+#define PS_SYSTEM_SYMBOL_TABLE_MORE 16
 #endif
 
 #define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, CALLABLE_FIELD, CALLABLE)                                                \

@@ -51,7 +51,7 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size, ps_symbol_tabl
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
-    table->more = more > 0 ? more : PS_SYMBOL_TABLE_DEFAULT_SIZE;
+    table->more = more > 0 ? more : PS_SYMBOL_TABLE_DEFAULT_MORE;
     table->symbols = ps_memory_calloc(PS_MEMORY_SYMBOL, table->size, sizeof(ps_symbol *));
     if (table->symbols == NULL)
     {
@@ -73,6 +73,33 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
+ps_symbol_table_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
+{
+    if (table->used >= table->size)
+        return PS_SYMBOL_TABLE_ERROR_FULL;
+    // check if symbol already exists
+    if (ps_symbol_table_get(table, symbol->name) != NULL)
+        return PS_SYMBOL_TABLE_ERROR_EXISTS;
+    ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
+    ps_symbol_table_size index = hash % table->size;
+    ps_symbol_table_size start_index = index;
+    // Find an empty slot in the table
+    while (table->symbols[index] != NULL)
+    {
+        index += 1;
+        if (index >= table->size)
+            index = 0; // wrap around
+        if (index == start_index)
+        {
+            ps_symbol_table_log("DEBUG\tps_symbol_table_add_internal: %s => table is full\n", symbol->name);
+            return PS_SYMBOL_TABLE_ERROR_FULL;
+        }
+    }
+    table->symbols[index] = symbol;
+    table->used += 1;
+    return PS_SYMBOL_TABLE_ERROR_NONE;
+}
+
 ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
 {
     ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
@@ -84,12 +111,14 @@ ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
         return PS_SYMBOL_TABLE_ERROR_FULL;
     ps_symbol **old_symbols = table->symbols;
     table->symbols = new_symbols;
+    table->size = new_size;
+    table->used = 0;
     ps_symbol_table_reset(table, false);
     for (ps_symbol_table_size i = 0; i < old_size; i++)
     {
         if (old_symbols[i] != NULL)
         {
-            error = ps_symbol_table_add(table, old_symbols[i]);
+            error = ps_symbol_table_add_internal(table, old_symbols[i]);
             if (error != PS_SYMBOL_TABLE_ERROR_NONE)
                 goto cleanup;
         }
@@ -99,10 +128,14 @@ ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
         error = PS_SYMBOL_TABLE_ERROR_INVALID;
         goto cleanup;
     }
+    ps_symbol_table_log("*** GROW from %u to %u ***\n", old_size, table->size);
     return PS_SYMBOL_TABLE_ERROR_NONE;
 cleanup:
     if (new_symbols != NULL)
-        ps_memory_free(PS_MEMORY_SYMBOL, table->symbols);
+        ps_memory_free(PS_MEMORY_SYMBOL, new_symbols);
+    table->symbols = old_symbols;
+    table->size = old_size;
+    table->used = old_used;
     return error;
 }
 
@@ -177,44 +210,31 @@ ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name)
 
 ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
-    // NB: refuse to add symbol if kind is AUTO or table is full
+    ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
+    // NB: refuse to add symbol if kind is AUTO
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         return PS_SYMBOL_TABLE_ERROR_INVALID;
     if (table->used >= table->size)
-        return PS_SYMBOL_TABLE_ERROR_FULL;
-    // check if symbol already exists
-    if (ps_symbol_table_get(table, symbol->name) != NULL)
-        return PS_SYMBOL_TABLE_ERROR_EXISTS;
-    ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
-    ps_symbol_table_size index = hash % table->size;
-    ps_symbol_table_size start_index = index;
-    // fprintf(stderr, "ADD\tps_symbol_table_add: '%*s' at index %05d (hash %08x)\n", -(int)PS_IDENTIFIER_LEN,
-    // symbol->name, index, hash); Find an empty slot in the table
-    while (table->symbols[index] != NULL)
     {
-        index += 1;
-        if (index >= table->size)
-            index = 0; // wrap around
-        if (index == start_index)
-        {
-            ps_symbol_table_log("DEBUG\tps_symbol_table_add: %s => table is full\n", symbol->name);
-            return PS_SYMBOL_TABLE_ERROR_FULL;
-        }
+        error = ps_symbol_table_grow(table);
+        if (error != PS_SYMBOL_TABLE_ERROR_NONE)
+            return error;
     }
-    table->symbols[index] = symbol;
-    table->used += 1;
-    ps_symbol_table_log("TRACE\tps_symbol_table_add: %d/%d %d '%s' \n", table->used, table->size, index, symbol->name);
-    return PS_SYMBOL_TABLE_ERROR_NONE;
+    error = ps_symbol_table_add_internal(table, symbol);
+    return error;
 }
 
 ps_symbol_table_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol)
 {
-    ps_symbol_table_size index = ps_symbol_table_find(table, symbol);
+    ps_symbol_table_log("TRACE\tps_symbol_table_remove:\tBEGIN\t%d/%d %d '%s' \n", table->used, table->size, index,
+                        symbol->name);
+    ps_symbol_table_size index = ps_symbol_table_find(table, symbol->name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
         return PS_SYMBOL_TABLE_ERROR_NOT_FOUND;
     table->symbols[index] = NULL;
     table->used -= 1;
-    ps_symbol_table_log("TRACE\tps_symbol_table_remove: %d/%d %d '%s' \n", table->used, table->size, index, symbol->name);
+    ps_symbol_table_log("TRACE\tps_symbol_table_remove:\tEND\t%d/%d %d '%s' \n", table->used, table->size, index,
+                        symbol->name);
     return PS_SYMBOL_TABLE_ERROR_NONE;
 }
 
@@ -234,12 +254,18 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(output, "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
-                    "━━━━━━━━━━━┓\n");
-    fprintf(output, "┃      #┃Hash  /  index┃Name                           ┃Kind      ┃Type                ┃Value               "
-                    "           ┃\n");
-    fprintf(output, "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
-                    "━━━━━━━━━━━┫\n");
+    fprintf(
+        output,
+        "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━━┓\n");
+    fprintf(
+        output,
+        "┃      #┃Hash  /  index┃Name                           ┃Kind      ┃Type                ┃Value               "
+        "           ┃\n");
+    fprintf(
+        output,
+        "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━━┫\n");
     for (unsigned int i = 0; i < table->size; i++)
     {
         if (table->symbols[i] == NULL)
@@ -265,9 +291,11 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
             // clang-format on
         }
     }
-    fprintf(output, "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
-                    "━━━━━━━━━━━┛\n");
-    fprintf(output, "(free=%d/used=%d/size=%d => %s)\n", free, used, free + used,
+    fprintf(
+        output,
+        "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━━┛\n");
+    fprintf(output, "(free=%d/used=%u/size=%u => %s)\n", free, used, free + used,
             free + used == table->size ? "OK" : "KO");
 }
 

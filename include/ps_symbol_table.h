@@ -15,7 +15,11 @@ extern "C"
 #endif
 
 #ifndef PS_SYMBOL_TABLE_DEFAULT_SIZE
-#define PS_SYMBOL_TABLE_DEFAULT_SIZE 512
+#define PS_SYMBOL_TABLE_DEFAULT_SIZE 16
+#endif
+
+#ifndef PS_SYMBOL_TABLE_DEFAULT_MORE
+#define PS_SYMBOL_TABLE_DEFAULT_MORE 16
 #endif
 
 #define PS_SYMBOL_TABLE_NOT_FOUND UINT16_MAX
@@ -47,7 +51,7 @@ extern "C"
     extern bool ps_symbol_table_trace;
 
     /** @brief Allocate and initialize symbol table, use 0 for default size (PS_SYMBOL_TABLE_DEFAULT_SIZE) */
-    ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size);
+    ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size, ps_symbol_table_size more);
 
     /** @brief Free symbol table */
     void *ps_symbol_table_free(ps_symbol_table *table);
