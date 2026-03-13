@@ -29,12 +29,14 @@ extern "C"
         PS_SYMBOL_TABLE_ERROR_EXISTS,
         PS_SYMBOL_TABLE_ERROR_FULL,
         PS_SYMBOL_TABLE_ERROR_INVALID,
+        PS_SYMBOL_TABLE_ERROR_NOT_FOUND,
     } __attribute__((__packed__)) ps_symbol_table_error;
 
     /** @brief Symbol table holding names & their values */
     typedef struct s_ps_symbol_table
     {
         ps_symbol_table_size size; /** @brief max count of symbols */
+        ps_symbol_table_size more; /** @brief count of symbols to grow with */
         ps_symbol_table_size used; /** @brief current count of symbols */
         ps_symbol **symbols;       /** @brief symbols array */
     } __attribute__((__packed__)) ps_symbol_table;
@@ -50,6 +52,9 @@ extern "C"
     /** @brief Free symbol table */
     void *ps_symbol_table_free(ps_symbol_table *table);
 
+    /** @brief Grow symbol table */
+    ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table);
+
     /** @brief How many used symbols? */
     ps_symbol_table_size ps_symbol_table_get_used(const ps_symbol_table *table);
 
@@ -64,6 +69,9 @@ extern "C"
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
     ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
+
+    /** @brief Remove symbol, returning error if symbol does not exist */
+    ps_symbol_table_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol);
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table);

@@ -72,6 +72,39 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
+ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
+{
+    ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
+    ps_symbol_table_size new_size = table->size + table->more;
+    ps_symbol_table_size old_size = table->size;
+    ps_symbol_table_size old_used = table->used;
+    ps_symbol **new_symbols = ps_memory_calloc(PS_MEMORY_SYMBOL, new_size, sizeof(ps_symbol *));
+    if (new_symbols == NULL)
+        return PS_SYMBOL_TABLE_ERROR_FULL;
+    ps_symbol **old_symbols = table->symbols;
+    table->symbols = new_symbols;
+    ps_symbol_table_reset(table, false);
+    for (ps_symbol_table_size i = 0; i < old_size; i++)
+    {
+        if (old_symbols[i] != NULL)
+        {
+            error = ps_symbol_table_add(table, old_symbols[i]);
+            if (error != PS_SYMBOL_TABLE_ERROR_NONE)
+                goto cleanup;
+        }
+    }
+    if (table->used != old_used)
+    {
+        error = PS_SYMBOL_TABLE_ERROR_INVALID;
+        goto cleanup;
+    }
+    return PS_SYMBOL_TABLE_ERROR_NONE;
+cleanup:
+    if (new_symbols != NULL)
+        ps_memory_free(PS_MEMORY_SYMBOL, table->symbols);
+    return error;
+}
+
 ps_symbol_table_size ps_symbol_table_get_used(const ps_symbol_table *table)
 {
     return table == NULL ? 0 : table->used;
@@ -170,6 +203,17 @@ ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *sym
     table->symbols[index] = symbol;
     table->used += 1;
     ps_symbol_table_log("TRACE\tps_symbol_table_add: %d/%d %d '%s' \n", table->used, table->size, index, symbol->name);
+    return PS_SYMBOL_TABLE_ERROR_NONE;
+}
+
+ps_symbol_table_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol)
+{
+    ps_symbol_table_size index = ps_symbol_table_find(table, symbol);
+    if (index == PS_SYMBOL_TABLE_NOT_FOUND)
+        return PS_SYMBOL_TABLE_ERROR_NOT_FOUND;
+    table->symbols[index] = NULL;
+    table->used -= 1;
+    ps_symbol_table_log("TRACE\tps_symbol_table_remove: %d/%d %d '%s' \n", table->used, table->size, index, symbol->name);
     return PS_SYMBOL_TABLE_ERROR_NONE;
 }
 

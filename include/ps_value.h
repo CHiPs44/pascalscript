@@ -52,19 +52,12 @@ extern "C"
     /** @returns PS_TYPE_NONE if value is invalid */
     ps_value_type ps_value_get_base(const ps_value *value);
 
-    /* clang-format off */
     ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
     ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
     ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
     ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
     ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
     ps_value *ps_value_set_string  (ps_value *value, ps_string  *s);
-    /*
-    ps_value *ps_value_set_subrange(ps_value *value, ps_subrange g, ps_symbol *type);
-    ps_value *ps_value_set_enum    (ps_value *value, ps_enum     e, ps_symbol *type);
-    ps_value *ps_value_set_pointer (ps_value *value, ps_pointer  p, ps_symbol *type);
-    */
-    /* clang-format on */
 
     char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision);
     char *ps_value_get_debug_string(const ps_value *value);
