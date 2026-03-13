@@ -44,13 +44,14 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
     table->used = 0;
 }
 
-ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size)
+ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size, ps_symbol_table_size more)
 {
     ps_symbol_table *table;
     table = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table));
     if (table == NULL)
         return NULL;
     table->size = size > 0 ? size : PS_SYMBOL_TABLE_DEFAULT_SIZE;
+    table->more = more > 0 ? more : PS_SYMBOL_TABLE_DEFAULT_SIZE;
     table->symbols = ps_memory_calloc(PS_MEMORY_SYMBOL, table->size, sizeof(ps_symbol *));
     if (table->symbols == NULL)
     {
