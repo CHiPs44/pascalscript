@@ -5,7 +5,7 @@
 *)
 (* Won't work with first versions *)
 
-Program Strings;
+Program Strings1;
 
 Const
     QUOTE_CHAR      = '''';

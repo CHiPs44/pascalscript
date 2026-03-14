@@ -69,6 +69,8 @@ extern "C"
                                       const char *type_name);
     bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode,
                                           ps_symbol **type_symbol, const char *type_name, ps_value_type base);
+    bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+                                       const char *type_name);
 
 #define VISIT_BEGIN(__VISIT__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);                                                        \

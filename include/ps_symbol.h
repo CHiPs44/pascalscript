@@ -45,12 +45,12 @@ extern "C"
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)
 
-#define PS_SYMBOL_AUTO_FORMAT "#AUTO_%08X"
-
     typedef uint32_t ps_symbol_hash_key;
 
     ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const char *name, ps_value *value);
     ps_symbol *ps_symbol_free(ps_symbol *symbol);
+
+    uint32_t ps_symbol_get_auto_num();
 
     /** @brief Get name of symbol kind */
     char *ps_symbol_get_kind_name(ps_symbol_kind kind);

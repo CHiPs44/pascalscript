@@ -132,7 +132,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
         ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
         ps_identifier name = {0};
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#STRING_%d", (int)len);
+            snprintf(name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
@@ -167,10 +167,13 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *          WeekEnd          = Saturday..Sunday
  *          UppercaseLetters = 'A'..'Z'
  *          LowercaseLetters = 'a'..'z'
+ *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER ']' 'OF' TYPE_REFERENCE
+ *        Example:
+ *          TCharacterics = Array [1..10] Of Integer
  *  Next steps:
  *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
- *        Examples:
- *          CheckerBoard = Array [1..8, 1..8] Of Boolean
+ *        Example:
+ *          CheckerBoard = Array [1..8, 1..8] Of (Empty, White, Black)
  *      | SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
  *        Examples:
  *          Options = Set Of UppercaseLetters
@@ -283,6 +286,10 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     case PS_TOKEN_ARRAY:
         // NB: array can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
         // and may recursively call ps_visit_type_reference()
+        advance = false;
+        if (!ps_visit_type_reference_array(interpreter, mode, type_symbol, type_name))
+            TRACE_ERROR("TYPE_REFERENCE_ARRAY")
+        break;
     case PS_TOKEN_SET:    // set
     case PS_TOKEN_FILE:   // file
     case PS_TOKEN_TEXT:   // text
@@ -529,21 +536,21 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     case PS_TYPE_CHAR:
         type_def = ps_type_definition_create_subrange_char(c.min, c.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%d_%d", c.min, c.max);
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_INTEGER:
         type_def = ps_type_definition_create_subrange_integer(i.min, i.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%" PS_INTEGER_FMT_10 "_%" PS_INTEGER_FMT_10, i.min, i.max);
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_UNSIGNED:
         type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%" PS_UNSIGNED_FMT_10 "_%" PS_UNSIGNED_FMT_10, u.min, u.max);
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
@@ -552,6 +559,53 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     }
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    // Register new type definition in symbol table
+    if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
+        RETURN_ERROR(interpreter->error)
+
+    VISIT_END("OK")
+}
+
+/**
+ * 'ARRAY' '[' SUBRANGE | IDENTIFIER ']' 'OF' TYPE_REFERENCE
+ */
+bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+                                   const char *type_name)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_ARRAY", "");
+
+    ps_symbol *dimension = NULL;
+    ps_symbol *item_type = NULL;
+
+    if (lexer->current_token.type != PS_TOKEN_ARRAY)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+    if (!ps_visit_type_reference(interpreter, mode, &dimension, NULL))
+        TRACE_ERROR("DIMENSION")
+    // Dimension *must* be a subrange
+    if (dimension->kind != PS_SYMBOL_KIND_TYPE_DEFINITION ||
+        dimension->value->type->value->data.t->base != PS_TYPE_SUBRANGE)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    if (lexer->current_token.type != PS_TOKEN_RIGHT_BRACKET)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_OF)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+    if (!ps_visit_type_reference(interpreter, mode, &item_type, NULL))
+        TRACE_ERROR("ITEM_TYPE")
+    // Item type can be any type
+
+    // Create type definition for array
+    ps_type_definition *type_def = NULL;
+    ps_identifier name = {0};
+    if (type_name == NULL)
+        snprintf(name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
+    else
+        memcpy(name, type_name, PS_IDENTIFIER_SIZE);
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)

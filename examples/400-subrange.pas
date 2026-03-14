@@ -8,6 +8,8 @@ Program SubRange;
 
 Type
   UpperCaseLetter = 'A'..'Z';
+  TDay = 1 .. 31; // 1..31 doesn't work for now as it is interpreted as an incorrect real value
+  TMonth = 1 .. 12;
 
 Procedure TestInnerType;
 Type
@@ -27,6 +29,8 @@ Var
   J: 1 .. 10;
   K: Unsigned;
   L: UpperCaseLetter;
+  Day: TDay;
+  Month: TMonth;
 
 Begin
   I := 5;
@@ -43,4 +47,16 @@ Begin
   // L := 'a';
   // WriteLn('L = ''', L, '''');
   TestInnerType;
+  // "Calendar"
+  Write('  |');
+  For Day := Low(TDay) To High(TDay) Do
+    Write(Day:2, '|');
+  WriteLn;
+  For Month := Low(TMonth) To High(TMonth) Do
+  Begin
+    Write(Month:2, '|');
+    For Day := Low(TDay) To High(TDay) Do
+      Write(' -', '|');
+    WriteLn;
+  End;
 End.

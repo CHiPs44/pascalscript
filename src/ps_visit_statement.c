@@ -390,8 +390,7 @@ bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
 /**
  * Visit
- *      'FOR' control_variable ':=' expression ( 'TO' |
- * 'DOWNTO' ) expression 'DO' statement ;
+ *      'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
  */
 bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
@@ -454,10 +453,10 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         // VARIABLE := START
         if (!ps_interpreter_copy_value(interpreter, &start, variable->value))
             TRACE_ERROR("COPY");
-        // Loop while variable <= finish for "TO"
-        //         or variable >= finish for "DOWNTO"
         do
         {
+            // Loop while variable <= finish for "TO"
+            //         or variable >= finish for "DOWNTO"
             if (!ps_function_binary_op(interpreter, variable->value, &finish, &result,
                                        downto ? PS_TOKEN_GE : PS_TOKEN_LE))
                 TRACE_ERROR("BINARY")
@@ -476,8 +475,11 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (!ps_lexer_set_cursor(lexer, line, column))
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
             READ_NEXT_TOKEN
+            bool range_check = interpreter->range_check;
+            interpreter->range_check = false;
             interpreter->error = downto ? ps_function_pred(interpreter, variable->value, variable->value)
                                         : ps_function_succ(interpreter, variable->value, variable->value);
+            interpreter->range_check = range_check;
             if (interpreter->error != PS_ERROR_NONE)
                 TRACE_ERROR(downto ? "STEP/PRED" : "STEP/SUCC")
         } while (true);

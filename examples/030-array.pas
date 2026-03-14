@@ -5,10 +5,10 @@
 *)
 Program Arrays;
 
-Const Count = 20;
+Const Count = 10;
 
-Var Numbers: Array[1..Count] of Integer;
-    Strings: Array[1..Count] of String;
+Var Numbers: Array[1 .. 10] of Integer;
+    Strings: Array[1 .. 10] of String;
     i, n: Integer;
 
 { Same as Free Pascal SysUtils }
@@ -34,8 +34,8 @@ Begin
             While number > 0 Do
             Begin
                 digit := number Mod 10;
-                number := number Div 10;
                 s := Chr(Ord('0') + digit) + s;
+                number := number Div 10;
             End;
         End;
     Int2Str := s;
@@ -54,7 +54,7 @@ End;
 
 Begin
     n := 1;
-    For i := 1 To Count Do
+    For i := 1 To 10 Do
     Begin
         Numbers[i] := n;
         Strings[i] := '#' + Pad(i, 2) + ' ' + Int2Str(n);
@@ -62,7 +62,7 @@ Begin
     End;
     WriteLn('#  | Number | String    ');
     WriteLn('---|--------|-----------');
-    For i := 1 To Count Do
+    For i := 1 To 10 Do
     Begin
         WriteLn(Pad(i, 2), ' | ', Numbers[i]:6, ' | ', Strings[i]);
     End;

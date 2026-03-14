@@ -26,7 +26,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const char *name, ps_value *valu
     else
     {
         memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);
-        snprintf((char *)&symbol->name, PS_IDENTIFIER_LEN, PS_SYMBOL_AUTO_FORMAT, ps_symbol_auto_index++);
+        snprintf(symbol->name, PS_IDENTIFIER_LEN, "#AUTO_%08X", ps_symbol_get_auto_num());
     }
     symbol->system = false;
     symbol->allocated = true;
@@ -39,11 +39,16 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     // free only allocated symbols
     if (symbol != NULL && symbol->allocated)
     {
-        if (symbol->value!=NULL)
+        if (symbol->value != NULL)
             symbol->value = ps_value_free(symbol->value);
         ps_memory_free(PS_MEMORY_SYMBOL, symbol);
     }
     return NULL;
+}
+
+uint32_t ps_symbol_get_auto_num()
+{
+    return ps_symbol_auto_index++;
 }
 
 void ps_symbol_normalize_name(ps_symbol *symbol)
