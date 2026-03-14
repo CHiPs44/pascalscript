@@ -18,8 +18,8 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 {
     VISIT_BEGIN("PROGRAM", "")
 
-    ps_identifier identifier;
-    ps_symbol *program;
+    ps_identifier identifier = {0};
+    ps_symbol *program = NULL;
 
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
     READ_NEXT_TOKEN
@@ -30,25 +30,26 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
         READ_NEXT_TOKEN
-        do
-        {
-            if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-            {
-                READ_NEXT_TOKEN
-                break;
-            }
-            EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-            if (interpreter->debug >= DEBUG_TRACE)
-            {
-                ps_token_debug(stderr, "PROGRAM PARAMETER SKIPPED", &lexer->current_token);
-            }
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
             READ_NEXT_TOKEN
-            if (lexer->current_token.type == PS_TOKEN_COMMA)
+        else
+        {
+            do
             {
+                EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
                 READ_NEXT_TOKEN
-                continue;
-            }
-        } while (true);
+                if (lexer->current_token.type == PS_TOKEN_COMMA)
+                {
+                    READ_NEXT_TOKEN
+                    continue;
+                }
+                if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+                {
+                    READ_NEXT_TOKEN
+                    break;
+                }
+            } while (true);
+        }
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
@@ -63,6 +64,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
         TRACE_ERROR("EXIT ENVIRONMENT");
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
+    ps_symbol_free(program);
 
     VISIT_END("OK")
 }

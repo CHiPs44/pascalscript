@@ -157,7 +157,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const char *n
         ps_interpreter_return_null(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
     ps_symbol *symbol = ps_environment_find_symbol(environment, name, local);
     if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "*** \tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", environment->name, name,
+        fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", environment->name, name,
                 local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     return symbol;
 }
