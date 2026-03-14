@@ -399,7 +399,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
     ps_value start = {.type = &ps_system_none, .data.v = NULL};
     ps_value finish = {.type = &ps_system_none, .data.v = NULL};
-    ps_value step = {.type = &ps_system_none, .data.v = NULL};
+    bool downto = false;
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
     ps_identifier identifier = {0};
     ps_symbol *variable = NULL;
@@ -430,9 +430,9 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         TRACE_ERROR("START");
     // TO | DOWNTO
     if (lexer->current_token.type == PS_TOKEN_TO)
-        step.data.i = 1;
+        downto = false;
     else if (lexer->current_token.type == PS_TOKEN_DOWNTO)
-        step.data.i = -1;
+        downto = true;
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
@@ -441,6 +441,7 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         TRACE_ERROR("FINISH");
     // DO
     EXPECT_TOKEN(PS_TOKEN_DO);
+    // Save "cursor"
     ps_lexer_get_cursor(lexer, &line, &column);
     READ_NEXT_TOKEN
     if (mode != MODE_EXEC)
@@ -454,11 +455,11 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
         if (!ps_interpreter_copy_value(interpreter, &start, variable->value))
             TRACE_ERROR("COPY");
         // Loop while variable <= finish for "TO"
-        // (or variable >= finish for "DOWNTO")
+        //         or variable >= finish for "DOWNTO"
         do
         {
             if (!ps_function_binary_op(interpreter, variable->value, &finish, &result,
-                                       step.data.i > 0 ? PS_TOKEN_LE : PS_TOKEN_GE))
+                                       downto ? PS_TOKEN_GE : PS_TOKEN_LE))
                 TRACE_ERROR("BINARY")
             if (result.type != &ps_system_boolean)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
@@ -471,22 +472,14 @@ bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode)
             }
             if (!ps_visit_statement_or_compound_statement(interpreter, mode))
                 TRACE_ERROR("BODY");
+            // Next iteration
             if (!ps_lexer_set_cursor(lexer, line, column))
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
             READ_NEXT_TOKEN
-            // Compute VARIABLE := SUCC/PRED(VARIABLE)
-            if (step.data.i > 0)
-            {
-                interpreter->error = ps_function_succ(interpreter, variable->value, variable->value);
-                if (interpreter->error != PS_ERROR_NONE)
-                    TRACE_ERROR("STEP/SUCC")
-            }
-            else
-            {
-                interpreter->error = ps_function_pred(interpreter, variable->value, variable->value);
-                if (interpreter->error != PS_ERROR_NONE)
-                    TRACE_ERROR("STEP/PRED")
-            }
+            interpreter->error = downto ? ps_function_pred(interpreter, variable->value, variable->value)
+                                        : ps_function_succ(interpreter, variable->value, variable->value);
+            if (interpreter->error != PS_ERROR_NONE)
+                TRACE_ERROR(downto ? "STEP/PRED" : "STEP/SUCC")
         } while (true);
     }
 
@@ -500,13 +493,15 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
 {
     VISIT_BEGIN("STATEMENT_LIST", "");
 
+    // Empty block?
     if (lexer->current_token.type == stop)
     {
         READ_NEXT_TOKEN
     }
     else
     {
-        // let's go!
+        // Let's go!
+        bool loop = true;
         do
         {
             if (!ps_visit_statement(interpreter, mode))
@@ -515,18 +510,14 @@ bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mo
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
                 READ_NEXT_TOKEN
-                if (lexer->current_token.type == stop)
-                    break;
+                if (lexer->current_token.type == stop) // NOSONAR
+                    loop = false;
             }
             else if (lexer->current_token.type == stop)
-            {
-                break;
-            }
+                loop = false;
             else
-            {
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            }
-        } while (true);
+        } while (loop);
     }
 
     VISIT_END("OK")

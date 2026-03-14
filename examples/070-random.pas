@@ -17,7 +17,7 @@ Var
 Begin
     WriteLn('PascalScript Random Number Generation Example');
     WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('Seeding RNG...');
+    WriteLn('Seeding Random Number Generator...');
     Randomize;
     WriteLn(MaxD20, ' random d20 rolls:');
     Min := MaxInt;
@@ -45,7 +45,7 @@ Begin
     Begin
         If I Mod 2 = 0 Then R := Random Else R := Random();
         If I < 10 Then Write(' ');
-        Write(I, ': ', R);
+        Write(I, ': ', R:10:9);
         If (I+1) Mod 5 = 0 Then WriteLn Else Write(' ');
         if R < MinR Then MinR := R;
         if R > MaxR Then MaxR := R;
@@ -55,11 +55,11 @@ Begin
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Random real d6:');
     R := Random(6) + 1.0;
-    WriteLn('R=', R);
-    R := Random(6) + 1;
-    WriteLn('R=', R);
+    WriteLn('R=', R:10:9);
+    R := 1 + Random(6);
+    WriteLn('R=', R:10:9);
     R := Random(6) + 1.0;
-    WriteLn('R=', R);
+    WriteLn('R=', R:10:9);
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK!');
 End.

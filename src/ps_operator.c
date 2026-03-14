@@ -195,8 +195,8 @@ static inline bool ps_string_gt(ps_string *a, ps_string *b) { return ps_string_c
 static inline bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_compare(a, b) >= 0; }
 /* clang-format on */
 
-bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
-                           ps_token_type token_type) // NOSONAR
+bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result, // NOSONAR
+                           ps_token_type token_type)
 {
     //                               OOOOOOOO | AAAA                                | BBBB
     //                        ----------------+-------------------------------------+-----------------------------
