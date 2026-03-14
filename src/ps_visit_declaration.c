@@ -64,7 +64,6 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
         TRACE_ERROR("EXIT ENVIRONMENT");
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
-    ps_symbol_free(program);
 
     VISIT_END("OK")
 }
