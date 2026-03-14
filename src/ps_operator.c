@@ -196,7 +196,7 @@ static inline bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_c
 /* clang-format on */
 
 bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
-                           ps_token_type token_type)
+                           ps_token_type token_type) // NOSONAR
 {
     //                               OOOOOOOO | AAAA                                | BBBB
     //                        ----------------+-------------------------------------+-----------------------------

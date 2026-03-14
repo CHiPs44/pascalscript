@@ -147,7 +147,7 @@ bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mo
  *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *      ')' ] ;
  */
-bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
+bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline) // NOSONAR
 {
     VISIT_BEGIN("WRITE_OR_WRITELN", "");
 
