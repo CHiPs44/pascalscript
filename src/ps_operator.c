@@ -50,6 +50,13 @@ bool ps_function_unary_op(ps_interpreter *interpreter, const ps_value *value, ps
         {
             result->data.u = ~value->data.u;
         }
+        else if (token_type == PS_TOKEN_MINUS)
+        {
+            if (interpreter->range_check && value->data.u > PS_INTEGER_MAX)
+                return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
+            result->type = &ps_system_integer;
+            result->data.i = -((ps_integer)(value->data.u));
+        }
         else
         {
             ps_interpreter_set_message(interpreter, "Unexpected token type %s (%d) for UNSIGNED unary operation",

@@ -189,14 +189,14 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
         if (lexer->current_token.type == PS_TOKEN_COLON)
         {
             READ_NEXT_TOKEN
-            EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
-            width = (int16_t)(lexer->current_token.value.i);
+            EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+            width = (int16_t)(lexer->current_token.value.u);
             READ_NEXT_TOKEN
             if (lexer->current_token.type == PS_TOKEN_COLON)
             {
                 READ_NEXT_TOKEN
-                EXPECT_TOKEN(PS_TOKEN_INTEGER_VALUE);
-                precision = (int16_t)(lexer->current_token.value.i);
+                EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+                precision = (int16_t)(lexer->current_token.value.u);
                 READ_NEXT_TOKEN
             }
         }
