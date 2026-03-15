@@ -70,6 +70,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_EXPECTED_CHAR, "Char expected"},
     {PS_ERROR_EXPECTED_STRING, "String expected"},
     {PS_ERROR_EXPECTED_STRING_LENGTH, "String length expected"},
+    {PS_ERROR_EXPECTED_SUBRANGE, "Subrange expected"},
     {PS_ERROR_EXPECTED_TYPE, "Type expected"},
     {PS_ERROR_ASSIGN_TO_CONST, "Constants can't be changed"},
     {PS_ERROR_TYPE_MISMATCH, "Type mismatch"},

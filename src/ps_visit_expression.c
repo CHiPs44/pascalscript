@@ -638,7 +638,7 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
         constant->data = symbol->value->data;
         if (negate)
         {
-            switch (constant->type->value->type->value->data.t->base)
+            switch (ps_value_get_type(constant))
             {
             case PS_TYPE_INTEGER:
                 constant->data.i = -constant->data.i;

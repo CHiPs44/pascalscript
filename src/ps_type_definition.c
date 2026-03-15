@@ -121,31 +121,31 @@ ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension)
     ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
     if (type_def == NULL)
         return NULL;
-    type_def->def.a.range = dimension;
-    ps_unsigned min = 0;
-    ps_unsigned max = 0;
-    switch (dimension->value->data.t->base)
-    {
-    case PS_TYPE_CHAR:
-        min = dimension->value->data.t->def.g.c.min;
-        max = dimension->value->data.t->def.g.c.max;
-        break;
-    case PS_TYPE_UNSIGNED:
-        min = dimension->value->data.t->def.g.u.min;
-        max = dimension->value->data.t->def.g.u.max;
-        break;
-    case PS_TYPE_INTEGER:
-        min = dimension->value->data.t->def.g.i.min;
-        max = dimension->value->data.t->def.g.i.max;
-        break;
-    case PS_TYPE_ENUM:
-        min = dimension->value->data.t->def.g.e.min;
-        max = dimension->value->data.t->def.g.e.max;
-        break;
-    default:
-        break;
-    }
-    type_def->def.a.count = max - min + 1;
+    type_def->def.a.subrange = dimension;
+    // ps_unsigned min = 0;
+    // ps_unsigned max = 0;
+    // switch (dimension->value->data.t->base)
+    // {
+    // case PS_TYPE_CHAR:
+    //     min = dimension->value->data.t->def.g.c.min;
+    //     max = dimension->value->data.t->def.g.c.max;
+    //     break;
+    // case PS_TYPE_UNSIGNED:
+    //     min = dimension->value->data.t->def.g.u.min;
+    //     max = dimension->value->data.t->def.g.u.max;
+    //     break;
+    // case PS_TYPE_INTEGER:
+    //     min = dimension->value->data.t->def.g.i.min;
+    //     max = dimension->value->data.t->def.g.i.max;
+    //     break;
+    // case PS_TYPE_ENUM:
+    //     min = dimension->value->data.t->def.g.e.min;
+    //     max = dimension->value->data.t->def.g.e.max;
+    //     break;
+    // default:
+    //     break;
+    // }
+    // type_def->def.a.count = max - min + 1;
     return type_def;
 }
 
