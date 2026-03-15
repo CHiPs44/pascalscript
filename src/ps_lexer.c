@@ -281,6 +281,8 @@ bool ps_lexer_read_number_dec(ps_lexer *lexer)
                                              "Only one dot allowed in real constants");
             if (has_exp)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "no dot in exponent allowed");
+            if (ps_buffer_peek_next_char(lexer->buffer) == '.')
+                break;
             is_real = true;
             APPEND_CHAR_DEC()
         }

@@ -8,8 +8,8 @@ Program SubRange;
 
 Type
   UpperCaseLetter = 'A'..'Z';
-  TDay = 1 .. 31; // 1..31 doesn't work for now as it is interpreted as an incorrect real value
-  TMonth = 1 .. 12;
+  TDay = 1..31; // 1..31 doesn't work for now as it is interpreted as an incorrect real value
+  TMonth = 1..12;
 
 Procedure TestInnerType;
 Type
