@@ -186,6 +186,13 @@ extern "C"
         TRACE_ERROR("CURSOR!");
 
 #define SAVE_CURSOR_OR_CLEANUP(__LINE__, __COLUMN__)                                                                   \
+    if (interpreter->debug >= DEBUG_TRACE)                                                                             \
+    {                                                                                                                  \
+        fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (interpreter->level - 1) * 8 - 1,                             \
+                mode == MODE_EXEC ? '*' : ' ', visit, "SAVE", lexer->buffer->current_line,                             \
+                lexer->buffer->current_column);                                                                        \
+        ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
+    }                                                                                                                  \
     if (!ps_lexer_get_cursor(lexer, &__LINE__, &__COLUMN__))                                                           \
     {                                                                                                                  \
         if (interpreter->debug >= DEBUG_TRACE)                                                                         \
@@ -198,6 +205,12 @@ extern "C"
     }
 
 #define RESTORE_CURSOR(__LINE__, __COLUMN__)                                                                           \
+    if (interpreter->debug >= DEBUG_TRACE)                                                                             \
+    {                                                                                                                  \
+        fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (interpreter->level - 1) * 8 - 1,                             \
+                mode == MODE_EXEC ? '*' : ' ', visit, "RESTORE", __LINE__, __COLUMN__);                                \
+        ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
+    }                                                                                                                  \
     if (!ps_lexer_set_cursor(lexer, __LINE__, __COLUMN__))                                                             \
         TRACE_ERROR("CURSOR!");
 

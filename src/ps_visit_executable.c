@@ -534,16 +534,36 @@ bool ps_visit_procedure_or_function_call_user(ps_interpreter *interpreter, ps_in
     // Execute procedure or function
     if (mode == MODE_EXEC)
     {
+        if (interpreter->debug >= DEBUG_TRACE)
+        {
+            fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (interpreter->level - 1) * 8 - 1,
+                    mode == MODE_EXEC ? '*' : ' ', visit, "GOTO TO BLOCK", executable->value->data.x->line,
+                    executable->value->data.x->column);
+            ps_token_debug(stderr, "TRACE", &lexer->current_token);
+        }
         if (!ps_lexer_set_cursor(lexer, executable->value->data.x->line, executable->value->data.x->column))
             GOTO_CLEANUP(PS_ERROR_GENERIC) // TODO better error code
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_CLEANUP
         // Run procedure body
         if (!ps_visit_block(interpreter, mode))
             goto cleanup;
         // Restore cursor position
+        if (interpreter->debug >= DEBUG_TRACE)
+        {
+            fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (interpreter->level - 1) * 8 - 1,
+                    mode == MODE_EXEC ? '*' : ' ', visit, "RETURN TO CALLER", line, column);
+            ps_token_debug(stderr, "TRACE", &lexer->current_token);
+        }
         if (!ps_lexer_set_cursor(lexer, line, column))
             GOTO_CLEANUP(PS_ERROR_GENERIC) // TODO better error code
-        // READ_NEXT_TOKEN
+        // READ_NEXT_TOKEN_OR_CLEANUP
+        if (interpreter->debug >= DEBUG_TRACE)
+        {
+            fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (interpreter->level - 1) * 8 - 1,
+                    mode == MODE_EXEC ? '*' : ' ', visit, "READ NEXT TOKEN", lexer->buffer->current_line,
+                    lexer->buffer->current_column);
+            ps_token_debug(stderr, "TRACE", &lexer->current_token);
+        }
     }
 
 cleanup:
