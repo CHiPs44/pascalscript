@@ -243,7 +243,8 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
             if (ps_type_definition_is_array(type_symbol->value->data.t))
             {
                 data.a =
-                    ps_memory_calloc(PS_MEMORY_VALUE, ps_type_definition_get_subrange_count(type_symbol->value->data.t), sizeof(ps_value_data));
+                    ps_memory_calloc(PS_MEMORY_VALUE, ps_type_definition_get_subrange_count(type_symbol->value->data.t),
+                                     sizeof(ps_value_data));
                 if (data.a == NULL)
                     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             }
