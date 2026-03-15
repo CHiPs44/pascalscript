@@ -122,31 +122,38 @@ ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension)
     if (type_def == NULL)
         return NULL;
     type_def->def.a.subrange = dimension;
-    // ps_unsigned min = 0;
-    // ps_unsigned max = 0;
-    // switch (dimension->value->data.t->base)
-    // {
-    // case PS_TYPE_CHAR:
-    //     min = dimension->value->data.t->def.g.c.min;
-    //     max = dimension->value->data.t->def.g.c.max;
-    //     break;
-    // case PS_TYPE_UNSIGNED:
-    //     min = dimension->value->data.t->def.g.u.min;
-    //     max = dimension->value->data.t->def.g.u.max;
-    //     break;
-    // case PS_TYPE_INTEGER:
-    //     min = dimension->value->data.t->def.g.i.min;
-    //     max = dimension->value->data.t->def.g.i.max;
-    //     break;
-    // case PS_TYPE_ENUM:
-    //     min = dimension->value->data.t->def.g.e.min;
-    //     max = dimension->value->data.t->def.g.e.max;
-    //     break;
-    // default:
-    //     break;
-    // }
-    // type_def->def.a.count = max - min + 1;
     return type_def;
+}
+
+bool ps_type_definition_is_array(const ps_type_definition *type_def)
+{
+    if (type_def == NULL || type_def->type != PS_TYPE_ARRAY)
+        return false;
+    return true;
+}
+
+ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def)
+{
+    ps_unsigned count = 0;
+    if (type_def->type == PS_TYPE_SUBRANGE)
+        switch (type_def->base)
+        {
+        case PS_TYPE_CHAR:
+            count = type_def->def.g.c.max - type_def->def.g.c.min + 1;
+            break;
+        case PS_TYPE_UNSIGNED:
+            count = type_def->def.g.u.max - type_def->def.g.u.min + 1;
+            break;
+        case PS_TYPE_INTEGER:
+            count = type_def->def.g.i.max - type_def->def.g.i.min + 1;
+            break;
+        case PS_TYPE_ENUM:
+            count = type_def->def.g.e.max - type_def->def.g.e.min + 1;
+            break;
+        default:
+            break;
+        }
+    return count;
 }
 
 char *ps_type_definition_get_name(const ps_type_definition *type_def)

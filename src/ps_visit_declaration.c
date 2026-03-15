@@ -5,6 +5,7 @@
 */
 
 #include "ps_executable.h"
+#include "ps_memory.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_visit.h"
@@ -238,8 +239,21 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         for (int i = 0; i <= var_count; i++)
+        {
+            if (ps_type_definition_is_array(type_symbol->value->data.t))
+            {
+                data.a =
+                    ps_memory_calloc(PS_MEMORY_VALUE, ps_type_definition_get_subrange_count(type_symbol->value->data.t), sizeof(ps_value_data));
+                if (data.a == NULL)
+                    RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            }
+            else
+            {
+                data.v = NULL;
+            }
             if (!ps_interpreter_add_variable(interpreter, identifier[i], type_symbol, data))
                 TRACE_ERROR("ADD VARIABLE")
+        }
         READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 

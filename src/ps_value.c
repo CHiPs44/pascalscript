@@ -124,6 +124,16 @@ ps_value_type ps_value_get_base(const ps_value *value)
     return value_type;
 }
 
+ps_value *ps_value_get_array_at(const ps_value *array, const ps_value *index)
+{
+    ps_value *value = NULL;
+    // Check if index type & base are compatible with array subrange
+    // Check if index value is between low and high values of subrange
+    // Normalize index so it is between 0 and count-1
+    // Return array[normalized]
+    return value;
+}
+
 #define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
     if (value == NULL)                                                                                                 \
     {                                                                                                                  \
@@ -281,6 +291,14 @@ char *ps_value_get_enum(const ps_value *value)
                      : "FUNCTION",                                                                                     \
                  executable->line + 1, executable->column + 1);
 
+#define ARRAY_VALUE                                                                                                    \
+    if (debug)                                                                                                         \
+    {                                                                                                                  \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+    }
+
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
@@ -326,6 +344,10 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         break;
     case PS_TYPE_EXECUTABLE:
         EXECUTABLE_VALUE
+        break;
+    case PS_TYPE_ARRAY:
+        // ARRAY_VALUE
+        snprintf(buffer, sizeof(buffer) - 1, "ARRAY OF %s", value->type->value->data.t->def.a.item_type->name);
         break;
     case PS_TYPE_POINTER:
         snprintf(buffer, sizeof(buffer) - 1, "%p", value->data.p);

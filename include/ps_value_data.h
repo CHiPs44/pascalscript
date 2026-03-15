@@ -21,6 +21,7 @@ extern "C"
 #endif
 
     typedef struct s_ps_type_definition ps_type_definition;
+    typedef struct s_ps_array_data ps_array_data;
 
     /** @brief Value union */
     typedef union u_ps_value_data {
@@ -34,6 +35,7 @@ extern "C"
         ps_string          *s; /** @brief "s" is for "_s_tring"     */
         ps_type_definition *t; /** @brief "t" is for "_t_ype"       */
         ps_executable      *x; /** @brief "x" is for "e_x_ecutable" */
+        ps_array_data      *a; /** @brief "a" is for "_a_rray"      */
         ps_pointer          p; /** @brief "p" is for "_p_ointer"    */
         ps_file            *f; /** @brief "f" is for "_f_ile"       */
         void               *v; /** @brief "v" is for "_v_oid"       */

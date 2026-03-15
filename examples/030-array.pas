@@ -64,6 +64,7 @@ Var
     s: String;
 
 Begin
+    Numbers[1] = 1;
     n := 1;
     // For i := 1 To ValueCount Do
     // Begin

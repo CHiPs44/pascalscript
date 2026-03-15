@@ -165,6 +165,7 @@ extern "C"
     ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, ps_enum_value min,
                                                                 ps_enum_value max);
     ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension);
+    ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def);
 
 #ifdef __cplusplus
 }

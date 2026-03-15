@@ -81,6 +81,12 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
     VISIT_END("OK")
 }
 
+// bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
+// {
+//     VISIT_BEGIN("ASSIGNMENT", "");
+//     VISIT_END("OK");
+// }
+
 /**
  * Visit assignment:
  *      IDENTIFIER := EXPRESSION
@@ -93,12 +99,11 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
+    interpreter->debug = DEBUG_TRACE;
     VISIT_BEGIN("ASSIGNMENT", "");
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
-
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN);
-    READ_NEXT_TOKEN
+    ps_value index = {.type = &ps_system_none, .data.v = NULL};
 
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
@@ -115,14 +120,35 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (interpreter->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
-    result.type = variable->value->type;
-    if (!ps_visit_expression(interpreter, mode, &result))
-        TRACE_ERROR("EXPRESSION1");
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
-    if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
-        TRACE_ERROR("COPY");
+    if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
+    {
+        EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+        READ_NEXT_TOKEN
+        index.type = variable->value->type->value->data.t->def.a.subrange;
+        if (!ps_visit_expression(interpreter, mode, &index))
+            TRACE_ERROR("INDEX")
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+        READ_NEXT_TOKEN
+        EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+        READ_NEXT_TOKEN
+        result.type = variable->value->type->value->data.t->def.a.item_type;
+        if (!ps_visit_expression(interpreter, mode, &result))
+            TRACE_ERROR("EXPRESSION1");
+        TRACE_ERROR("TODO!")
+    }
+    else
+    {
+        EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+        READ_NEXT_TOKEN
+        result.type = variable->value->type;
+        if (!ps_visit_expression(interpreter, mode, &result))
+            TRACE_ERROR("EXPRESSION1");
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
+        if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
+            TRACE_ERROR("COPY");
+    }
 
     VISIT_END("OK")
 }
