@@ -250,8 +250,10 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
         if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
         {
-            // Subrange from enumeration
-            if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name, PS_TYPE_ENUM))
+            // Subrange from enumeration/char/integer/unsigned constant
+            ps_value_type type = ps_value_get_type(symbol->value);
+            if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
+                !ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
                 RETURN_ERROR(interpreter->error)
             break;
         }
@@ -260,20 +262,12 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         *type_symbol = symbol;
         break;
         /* ********** Other types ********** */
-    case PS_TOKEN_CHAR_VALUE: // subrange
+    case PS_TOKEN_CHAR_VALUE:
+    case PS_TOKEN_INTEGER_VALUE:
+    case PS_TOKEN_MINUS:
+    case PS_TOKEN_UNSIGNED_VALUE:
         advance = false;
-        if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name, PS_TYPE_CHAR))
-            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
-        break;
-    case PS_TOKEN_INTEGER_VALUE: // subrange
-    case PS_TOKEN_MINUS:         // subrange with negative integer or constant
-        advance = false;
-        if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name, PS_TYPE_INTEGER))
-            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
-        break;
-    case PS_TOKEN_UNSIGNED_VALUE: // subrange
-        advance = false;
-        if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name, PS_TYPE_UNSIGNED))
+        if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     // case PS_TOKEN_BOOLEAN_VALUE:
@@ -447,83 +441,88 @@ cleanup:
 }
 
 bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
-                                      const char *type_name, ps_value_type base)
+                                      const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "CHAR");
+    interpreter->debug = DEBUG_VERBOSE;
+    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
     ps_type_definition_subrange_char c = {0};
     ps_type_definition_subrange_integer i = {0};
     ps_type_definition_subrange_unsigned u = {0};
+    ps_value_type min_base = PS_TYPE_NONE;
+    ps_value_type max_base = PS_TYPE_NONE;
+    ps_value min_value = {0};
+    ps_value max_value = {0};
 
     // Parse min value of subrange
-    if (base == PS_TYPE_CHAR)
+    if (!ps_visit_constant_expression(interpreter, mode, &min_value))
+        TRACE_ERROR("MIN")
+    ps_value_debug(stderr, "==> MIN_VALUE: ", &min_value);
+    min_base = ps_value_get_type(&min_value);
+    if (min_base == PS_TYPE_CHAR)
     {
-        if (lexer->current_token.type != PS_TOKEN_CHAR_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        c.min = lexer->current_token.value.c;
+        if (ps_value_get_type(&min_value) != PS_TYPE_CHAR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
+        c.min = min_value.data.c;
     }
-    else if (base == PS_TYPE_INTEGER)
+    else if (min_base == PS_TYPE_INTEGER)
     {
-        if (lexer->current_token.type == PS_TOKEN_MINUS)
-        {
-            // Negative integer subrange: -10..-1
-            READ_NEXT_TOKEN
-            if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            i.min = -lexer->current_token.value.i;
-        }
-        else
-        {
-            if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            i.min = lexer->current_token.value.i;
-        }
+        if (ps_value_get_type(&min_value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        i.min = min_value.data.i;
     }
-    else if (base == PS_TYPE_UNSIGNED)
+    else if (min_base == PS_TYPE_UNSIGNED)
     {
-        if (lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        u.min = lexer->current_token.value.u;
+        if (ps_value_get_type(&min_value) != PS_TYPE_UNSIGNED)
+            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
+        u.min = min_value.data.u;
     }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+
     // Parse '..'
+    // fprintf(stderr, "==> TOKEN => %s\n", ps_token_dump_value(&lexer->current_token));
+    EXPECT_TOKEN(PS_TOKEN_RANGE)
+    // fprintf(stderr,"======================================================================\n");
     READ_NEXT_TOKEN
-    EXPECT_TOKEN(PS_TOKEN_RANGE);
+    // fprintf(stderr, "==> TOKEN => %s\n", ps_token_dump_value(&lexer->current_token));
+    // fprintf(stderr,"======================================================================\n");
+
     // Parse max value of subrange
-    READ_NEXT_TOKEN
-    if (base == PS_TYPE_CHAR)
+    if (!ps_visit_constant_expression(interpreter, mode, &max_value))
+        TRACE_ERROR("MAX");
+    ps_value_debug(stderr, "==> MAX_VALUE: ", &max_value);
+    fprintf(stderr,"======================================================================\n");
+    max_base = ps_value_get_type(&max_value);
+    if (max_base != min_base)
     {
-        if (lexer->current_token.type != PS_TOKEN_CHAR_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        c.max = lexer->current_token.value.c;
+        ps_interpreter_set_message(interpreter, "Min and max value type mismatch: %s %s", min_value.type->name,
+                                   max_value.type->name);
+        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+    }
+    if (max_base == PS_TYPE_CHAR)
+    {
+        if (ps_value_get_type(&min_value) != PS_TYPE_CHAR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
+        c.max = max_value.data.c;
         if (c.max <= c.min)
             RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
-    else if (base == PS_TYPE_INTEGER)
+    else if (max_base == PS_TYPE_INTEGER)
     {
-        if (lexer->current_token.type == PS_TOKEN_MINUS)
-        {
-            // Negative integer subrange: -10..-1
-            READ_NEXT_TOKEN
-            if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            i.max = -lexer->current_token.value.i;
-        }
-        else
-        {
-            if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            i.max = lexer->current_token.value.i;
-        }
+        if (ps_value_get_type(&min_value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        i.max = max_value.data.i;
         if (i.max <= i.min)
             RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
-    else if (base == PS_TYPE_UNSIGNED)
+    else if (max_base == PS_TYPE_UNSIGNED)
     {
-        if (lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        u.max = lexer->current_token.value.u;
+        if (ps_value_get_type(&min_value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        u.max = max_value.data.u;
+        if (u.max <= u.min)
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -531,7 +530,7 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     // Create type definition for subrange
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
-    switch (base)
+    switch (min_base)
     {
     case PS_TYPE_CHAR:
         type_def = ps_type_definition_create_subrange_char(c.min, c.max);

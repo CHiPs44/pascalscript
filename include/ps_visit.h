@@ -68,7 +68,7 @@ extern "C"
     bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                       const char *type_name);
     bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode,
-                                          ps_symbol **type_symbol, const char *type_name, ps_value_type base);
+                                          ps_symbol **type_symbol, const char *type_name);
     bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                        const char *type_name);
 
