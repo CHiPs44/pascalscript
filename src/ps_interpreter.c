@@ -179,19 +179,29 @@ bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
     return true;
 }
 
-bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type,
-                                 ps_value_data data)
+bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type_symbol)
 {
     assert(NULL != interpreter);
     assert('\0' != identifier[0]);
-    assert(NULL != type);
-    ps_value *value = ps_value_alloc(type, data);
+    assert(NULL != type_symbol);
+    assert(NULL != type_symbol->value);
+    ps_value_data data = {0};
+    if (ps_type_definition_is_array(type_symbol->value->data.t))
+    {
+        data.a = ps_memory_calloc(PS_MEMORY_VALUE, ps_type_definition_get_subrange_count(type_symbol->value->data.t),
+                                  sizeof(ps_value_data));
+        if (data.a == NULL)
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+    }
+    ps_value *value = ps_value_alloc(type_symbol, data);
     ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
     if (variable == NULL)
-        ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    if (!ps_interpreter_add_symbol(interpreter, variable))
-        return false;
-    return true;
+    {
+        if (ps_type_definition_is_array(type_symbol->value->data.t))
+            ps_memory_free(PS_MEMORY_VALUE, data.a);
+        return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+    }
+    return ps_interpreter_add_symbol(interpreter, variable);
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to) // NOSONAR

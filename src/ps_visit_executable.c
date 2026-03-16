@@ -129,7 +129,7 @@ bool ps_visit_parameter_definition(ps_interpreter *interpreter, ps_interpreter_m
     {
         if (!ps_formal_signature_add_parameter(signature, byref, names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_interpreter_add_variable(interpreter, names[i], type_reference, (ps_value_data){.v = NULL}))
+        if (!ps_interpreter_add_variable(interpreter, names[i], type_reference))
             TRACE_ERROR("ADD SYMBOL");
     }
 

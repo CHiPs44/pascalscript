@@ -156,6 +156,43 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type
     return count;
 }
 
+ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, ps_value *index)
+{
+    ps_unsigned offset = PS_UNSIGNED_MAX;
+    if (type_def->type == PS_TYPE_SUBRANGE)
+        switch (type_def->base)
+        {
+        case PS_TYPE_CHAR:
+            // 'C' from 'A'..'Z' => Ord('C') - Ord('A') => 2
+            if (ps_value_get_type(index) == PS_TYPE_CHAR && index->data.c >= type_def->def.g.c.min &&
+                index->data.c <= type_def->def.g.c.max)
+                offset = index->data.c - type_def->def.g.c.min;
+            break;
+        case PS_TYPE_UNSIGNED:
+            // 3 from 1..10 => 3 - 1 => 2
+            if (ps_value_get_type(index) == PS_TYPE_UNSIGNED && index->data.u >= type_def->def.g.u.min &&
+                index->data.u <= type_def->def.g.u.max)
+                offset = index->data.u - type_def->def.g.u.min;
+            break;
+        case PS_TYPE_INTEGER:
+            // 3 from -4..4 => 3 - -4 => 7
+            //         0..8
+            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= type_def->def.g.i.min &&
+                index->data.i <= type_def->def.g.i.max)
+                offset = index->data.i - type_def->def.g.i.min;
+            break;
+        case PS_TYPE_ENUM:
+            // Wednesday from Monday..Friday (from (Monday, ..., Sunday) => Ord(Wednesday) - Ord(Monday) => 2
+            if (ps_value_get_type(index) == PS_TYPE_ENUM && index->data.u >= type_def->def.g.e.min &&
+                index->data.u <= type_def->def.g.e.max)
+                offset = index->data.u - type_def->def.g.u.min;
+            break;
+        default:
+            break;
+        }
+    return offset;
+}
+
 char *ps_type_definition_get_name(const ps_type_definition *type_def)
 {
     static char buffer[128];

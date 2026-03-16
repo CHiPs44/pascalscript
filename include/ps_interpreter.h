@@ -94,9 +94,9 @@ extern "C"
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
-    /** @brief Add variable to current environment */
-    bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type,
-                                    ps_value_data data);
+    /** @brief Add variable to current environment, allocate values for arrays */
+    bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier,
+                                     ps_symbol *type_symbol);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);
