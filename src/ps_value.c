@@ -124,16 +124,6 @@ ps_value_type ps_value_get_base(const ps_value *value)
     return value_type;
 }
 
-ps_value *ps_value_get_array_at(const ps_value *array, const ps_value *index)
-{
-    ps_value *value = NULL;
-    // Check if index type & base are compatible with array subrange
-    // Check if index value is between low and high values of subrange
-    // Normalize index so it is between 0 and count-1
-    // Return array[normalized]
-    return value;
-}
-
 #define PS_VALUE_SET(__TYPE__, __X__)                                                                                  \
     if (value == NULL)                                                                                                 \
     {                                                                                                                  \

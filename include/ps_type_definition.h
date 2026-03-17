@@ -167,7 +167,7 @@ extern "C"
     ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension);
     bool ps_type_definition_is_array(const ps_type_definition *type_def);
     ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def);
-    ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, ps_value *index);
+    ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, const ps_value *index);
 
 #ifdef __cplusplus
 }

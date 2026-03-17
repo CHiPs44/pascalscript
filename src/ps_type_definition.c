@@ -134,16 +134,20 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
 
 ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def)
 {
+    ps_type_definition_debug(stderr, "ps_type_definition_get_subrange_count, type_def:", type_def);
     ps_unsigned count = PS_UNSIGNED_MAX;
+    fprintf(stderr, "SUBRANGE? %s\n", type_def->type == PS_TYPE_SUBRANGE ? "YES" : "NO");
     if (type_def->type == PS_TYPE_SUBRANGE)
         switch (type_def->base)
         {
         case PS_TYPE_CHAR:
-            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.c.max, type_def->def.g.c.min, type_def->def.g.c.max - type_def->def.g.c.min + 1);
+            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.c.max,
+                    type_def->def.g.c.min, type_def->def.g.c.max - type_def->def.g.c.min + 1);
             count = type_def->def.g.c.max - type_def->def.g.c.min + 1;
             break;
         case PS_TYPE_UNSIGNED:
-            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.u.max, type_def->def.g.u.min, type_def->def.g.u.max - type_def->def.g.u.min + 1);
+            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.u.max,
+                    type_def->def.g.u.min, type_def->def.g.u.max - type_def->def.g.u.min + 1);
             count = type_def->def.g.u.max - type_def->def.g.u.min + 1;
             break;
         case PS_TYPE_INTEGER:
@@ -158,7 +162,7 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type
     return count;
 }
 
-ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, ps_value *index)
+ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, const ps_value *index)
 {
     ps_unsigned offset = PS_UNSIGNED_MAX;
     if (type_def->type == PS_TYPE_SUBRANGE)
@@ -209,7 +213,7 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
         snprintf(buffer, sizeof(buffer), "UNKNOWN");
         return buffer;
     }
-    if (type_def->type == type_def->base)
+    if (type_def->type == type_def->base && type_def->type != PS_TYPE_ARRAY)
     {
         snprintf(buffer, sizeof(buffer), "%s", type_name);
         return buffer;
@@ -253,6 +257,11 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
             break;
         }
         break;
+    case PS_TYPE_ARRAY:
+        // ARRAY[1..10] OF INTEGER => "ARRAY(SUBRANGE, INTEGER)"
+        snprintf(buffer, sizeof(buffer) - 1, "ARRAY(%s, %s)", type_def->def.a.subrange->name,
+                 type_def->def.a.item_type->name);
+        break;
     default:
         snprintf(buffer, sizeof(buffer) - 1, "%s(%s)???", type_name, base_name);
         break;
@@ -266,5 +275,5 @@ void ps_type_definition_debug(FILE *output, char *message, const ps_type_definit
         output = stderr;
     if (message == NULL)
         message = "TYPE DEFINITION";
-    fprintf(output, "%s: %s\n", message, ps_type_definition_get_name(type_def));
+    fprintf(output, "%s: %s\n", message, type_def == NULL ? "NULL!" : ps_type_definition_get_name(type_def));
 }

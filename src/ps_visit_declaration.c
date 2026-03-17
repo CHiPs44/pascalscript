@@ -238,7 +238,7 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         ps_symbol_debug(stderr, "ps_visit_var: ", type_symbol);
-        const ps_type_definition *type_def = type_symbol->value->data.t;
+        const ps_type_definition *type_def = type_symbol->value->type->value->data.t;
         ps_type_definition_debug(stderr, "ps_visit_var: ", type_def);
         for (int i = 0; i <= var_count; i++)
         {

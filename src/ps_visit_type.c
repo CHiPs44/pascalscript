@@ -581,23 +581,29 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     ps_symbol *subrange = NULL;
     ps_symbol *item_type = NULL;
 
+    // ARRAY
     if (lexer->current_token.type != PS_TOKEN_ARRAY)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+    // '['
     if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+    // SUBRANGE (LOW '..' HIGH)
     if (!ps_visit_type_reference(interpreter, mode, &subrange, NULL))
         TRACE_ERROR("DIMENSION")
     // Dimension *must* be a subrange
     if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
         RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
+    // ']'
     if (lexer->current_token.type != PS_TOKEN_RIGHT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+    // 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+    // ITEM_TYPE
     if (!ps_visit_type_reference(interpreter, mode, &item_type, NULL))
         TRACE_ERROR("ITEM_TYPE")
     // Item type can be any type, even another array

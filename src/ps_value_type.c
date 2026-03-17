@@ -15,15 +15,15 @@ char *ps_type_names[] = {
     "INTEGER",
     "UNSIGNED",
     "BOOLEAN",
-    "CHAR", 
+    "CHAR",
     "STRING",
-    "SET",
     "TYPE_DEF",
     "EXECUTABLE",
     "SUBRANGE",
     "ENUM",
-    "POINTER",
     "ARRAY",
+    "SET",
+    "POINTER",
     "RECORD",
     "FILE"
     // clang-format on

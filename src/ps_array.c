@@ -12,13 +12,14 @@
 ps_array_data *ps_array_alloc(const ps_symbol *array)
 {
     ps_symbol_debug(stderr, "ps_array_alloc, symbol: ", array);
-    const ps_type_definition *type_def = array->value->data.t;
+    const ps_type_definition *type_def = array->value->data.t; //->value->data.t;
     ps_type_definition_debug(stderr, "ps_array_alloc, type_def: ", type_def);
     ps_array_data *array_data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data));
     if (array_data == NULL)
         return NULL;
-    array_data->count = ps_type_definition_get_subrange_count(type_def);
-    fprintf(stderr, "ps_array_alloc: %u x %lu = %u\n", array_data->count, sizeof(ps_value_data), array_data->count * sizeof(ps_value_data));
+    array_data->count = ps_type_definition_get_subrange_count(type_def->def.a.subrange->value->data.t);
+    fprintf(stderr, "ps_array_alloc: %u x %zu = %zu\n", array_data->count, sizeof(ps_value_data),
+            array_data->count * sizeof(ps_value_data));
     array_data->values = ps_memory_calloc(PS_MEMORY_VALUE, array_data->count, sizeof(ps_value_data));
     if (array_data->values == NULL)
     {
@@ -37,8 +38,7 @@ ps_array_data *ps_array_free(ps_array_data *array_data)
 
 ps_type_definition *ps_array_get_type_def(const ps_symbol *array)
 {
-    if (array == NULL || array->value == NULL || array->value->type == NULL ||
-        array->value->type->value == NULL)
+    if (array == NULL || array->value == NULL || array->value->type == NULL || array->value->type->value == NULL)
         return NULL;
     return array->value->type->value->data.t;
 }
