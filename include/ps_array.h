@@ -21,14 +21,18 @@ extern "C"
     } ps_array_data;
 
     /** @brief Allocate array and values */
-    ps_array_data *ps_array_alloc(ps_symbol *type_symbol);
+    ps_array_data *ps_array_alloc(const ps_symbol *type_symbol);
     /** @brief Free array and values */
     ps_array_data *ps_array_free(ps_array_data *data);
 
+    /** @brief Get array type definition */
+    ps_type_definition *ps_array_get_type_def(const ps_symbol *array);
+    /** @brief Get array subrange */
+    ps_symbol *ps_array_get_subrange(const ps_symbol *array);
     /** @brief Get array item type */
-    ps_symbol *ps_array_get_item_type(ps_symbol *array);
+    ps_symbol *ps_array_get_item_type(const ps_symbol *array);
     /** @brief value := array[index] (allocating value if NULL) */
-    bool ps_array_get_value(ps_symbol *array, ps_value *index, ps_value *value);
+    bool ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value);
     /** @brief array[index] := value */
     bool ps_array_set_value(ps_symbol *array, ps_value *index, ps_value_data data);
 

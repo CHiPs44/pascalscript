@@ -134,14 +134,16 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
 
 ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def)
 {
-    ps_unsigned count = 0;
+    ps_unsigned count = PS_UNSIGNED_MAX;
     if (type_def->type == PS_TYPE_SUBRANGE)
         switch (type_def->base)
         {
         case PS_TYPE_CHAR:
+            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.c.max, type_def->def.g.c.min, type_def->def.g.c.max - type_def->def.g.c.min + 1);
             count = type_def->def.g.c.max - type_def->def.g.c.min + 1;
             break;
         case PS_TYPE_UNSIGNED:
+            fprintf(stderr, "ps_type_definition_get_subrange_count: %u x %u = %u\n", type_def->def.g.u.max, type_def->def.g.u.min, type_def->def.g.u.max - type_def->def.g.u.min + 1);
             count = type_def->def.g.u.max - type_def->def.g.u.min + 1;
             break;
         case PS_TYPE_INTEGER:
