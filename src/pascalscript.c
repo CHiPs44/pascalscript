@@ -20,7 +20,8 @@
 #include "ps_symbol_table.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/030-array.pas"
+// #define DEBUGGER_SOURCE "examples/030-array.pas"
+#define DEBUGGER_SOURCE "examples/005-first.pas"
 
 // Runtime options
 bool bool_eval = false;
