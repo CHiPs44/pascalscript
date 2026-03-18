@@ -591,4 +591,6 @@ Each file should contains this header, this example is for C:
 NB:
 
 - year in `SPDX-FileCopyrightText` should be file's creation year, there's no need to change it every year.
-- some files coming from other sources like Tao Yue's examples from his site and Free Pascal Wiki have their own license.
+- some files coming from other sources have their own license like:
+  - Tao Yue's examples from his site (and authorized copies in Free Pascal Wiki)
+  - Rosetta Code <https://rosettacode.org/wiki/Category:Pascal>
