@@ -61,9 +61,9 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array)
 
 bool ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value)
 {
-    const ps_type_definition *type_def = array->value->type->value->data.t;
+    const ps_type_definition *type_def = ps_array_get_type_def(array); // array->value->type->value->data.t;
     // Get offset from index
-    ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def, index);
+    ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subrange->value->data.t, index);
     if (offset >= array->value->data.a->count)
         return false;
     if (value == NULL)
@@ -78,6 +78,7 @@ bool ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value 
         // Store value data to already "box" value
         value->data = array->value->data.a->values[offset];
     }
+    fprintf(stderr, "33333 value=%s\n", ps_value_get_debug_string(value));
     return true;
 }
 

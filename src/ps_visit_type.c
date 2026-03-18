@@ -462,7 +462,7 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     // Parse min value of subrange as a constant expression
     if (!ps_visit_constant_expression(interpreter, mode, &min_value))
         TRACE_ERROR("MIN")
-    ps_value_debug(stderr, "==> MIN_VALUE: ", &min_value);
+    // ps_value_debug(stderr, "==> MIN_VALUE: ", &min_value);
     min_base = ps_value_get_type(&min_value);
     if (min_base == PS_TYPE_CHAR)
     {
@@ -492,12 +492,12 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     // Parse max value of subrange as a constant expression
     if (!ps_visit_constant_expression(interpreter, mode, &tmp_value))
         TRACE_ERROR("MAX");
-    ps_value_debug(stderr, "==> TMP_VALUE: ", &tmp_value);
+    // ps_value_debug(stderr, "==> TMP_VALUE: ", &tmp_value);
     max_value.type = min_value.type;
     if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
         TRACE_ERROR("COPY")
-    ps_value_debug(stderr, "==> MAX_VALUE: ", &max_value);
-    fprintf(stderr, "======================================================================\n");
+    // ps_value_debug(stderr, "==> MAX_VALUE: ", &max_value);
+    // fprintf(stderr, "======================================================================\n");
     max_base = ps_value_get_type(&max_value);
     if (max_base != min_base)
     {

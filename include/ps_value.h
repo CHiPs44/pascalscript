@@ -44,6 +44,8 @@ extern "C"
     bool ps_value_is_real(const ps_value *value);
     /** @brief String is String */
     bool ps_value_is_string(const ps_value *value);
+    /** @brief Array is Array */
+    bool ps_value_is_array(const ps_value *value);
 
     /** @brief Get type */
     /** @returns PS_TYPE_NONE if value is invalid */
@@ -52,12 +54,12 @@ extern "C"
     /** @returns PS_TYPE_NONE if value is invalid */
     ps_value_type ps_value_get_base(const ps_value *value);
 
-    ps_value *ps_value_set_integer (ps_value *value, ps_integer  i);
+    ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
     ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
-    ps_value *ps_value_set_real    (ps_value *value, ps_real     r);
-    ps_value *ps_value_set_boolean (ps_value *value, ps_boolean  b);
-    ps_value *ps_value_set_char    (ps_value *value, ps_char     c);
-    ps_value *ps_value_set_string  (ps_value *value, ps_string  *s);
+    ps_value *ps_value_set_real(ps_value *value, ps_real r);
+    ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b);
+    ps_value *ps_value_set_char(ps_value *value, ps_char c);
+    ps_value *ps_value_set_string(ps_value *value, ps_string *s);
 
     char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision);
     char *ps_value_get_debug_string(const ps_value *value);

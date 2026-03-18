@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "ps_array.h"
 #include "ps_functions.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
@@ -313,16 +314,49 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         case PS_SYMBOL_KIND_AUTO:
         case PS_SYMBOL_KIND_CONSTANT:
         case PS_SYMBOL_KIND_VARIABLE:
+            // interpreter->debug = DEBUG_VERBOSE;
             if (interpreter->debug >= DEBUG_VERBOSE)
                 fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
                         symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
                         : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
                                                                   : "VARIABLE",
                         ps_type_definition_get_name(symbol->value->type->value->data.t));
-            result->type = symbol->value->type;
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
-                TRACE_ERROR("COPY");
-            READ_NEXT_TOKEN
+            if (ps_value_is_array(symbol->value))
+            {
+                ps_type_definition *type_def = ps_array_get_type_def(symbol);
+                if (type_def == NULL)
+                    RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+                READ_NEXT_TOKEN
+                if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+                {
+                    ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
+                    ps_value_debug(stderr, "INDEX      ", &index);
+                    ps_symbol_debug(stderr, "ITEM_TYPE  ", type_def->def.a.item_type);
+                    ps_symbol_debug(stderr, "SUBRANGE1  ", type_def->def.a.subrange);
+                    ps_type_definition_debug(stderr, "SUBRANGE2  ", type_def->def.a.subrange->value->data.t);
+                    READ_NEXT_TOKEN
+                    if (!ps_visit_expression(interpreter, mode, &index))
+                    {
+                        ps_interpreter_set_message(interpreter, "Index is invalid");
+                        TRACE_ERROR("INDEX")
+                    }
+                    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+                    READ_NEXT_TOKEN
+                    if (!ps_array_get_value(symbol, &index, result))
+                    {
+                        ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
+                                                   ps_value_get_debug_string(&index));
+                        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+                    }
+                }
+            }
+            else
+            {
+                result->type = symbol->value->type;
+                if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
+                    TRACE_ERROR("COPY");
+                READ_NEXT_TOKEN
+            }
             break;
         case PS_SYMBOL_KIND_FUNCTION:
             // interpreter->debug = DEBUG_VERBOSE;

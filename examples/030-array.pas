@@ -60,11 +60,12 @@ Type
 Var
     Numbers: NumberArray;
     // Strings: StringArray;
-    // i, n: Integer;
+    i, n: Integer;
     // s: String;
 
 Begin
-    Numbers[1] = 1;
+    I := Numbers[1];
+    // Numbers[1] = 1;
     // n := 1;
     // // For i := 1 To ValueCount Do
     // // Begin
