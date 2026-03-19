@@ -134,7 +134,12 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
 
     static ps_token_type relational_operators[] = {
         // <            <=            >           >=           =               <>
-        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
+        PS_TOKEN_LT,
+        PS_TOKEN_LE,
+        PS_TOKEN_GT,
+        PS_TOKEN_GE,
+        PS_TOKEN_EQ,
+        PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -395,8 +400,74 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        if (!ps_visit_factor_identifier(interpreter, mode, identifier, result))
-            TRACE_ERROR("IDENTIFIER")
+        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+        switch (symbol->kind)
+        {
+        case PS_SYMBOL_KIND_AUTO:
+        case PS_SYMBOL_KIND_CONSTANT:
+        case PS_SYMBOL_KIND_VARIABLE:
+            if (ps_value_is_array(symbol->value))
+            {
+                // interpreter->debug = DEBUG_VERBOSE;
+                // if (interpreter->debug >= DEBUG_VERBOSE)
+                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
+                        ps_symbol_get_kind_name(symbol->kind),
+                        ps_type_definition_get_name(symbol->value->type->value->data.t));
+                ps_type_definition *type_def = ps_array_get_type_def(symbol);
+                if (type_def == NULL)
+                    RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+                READ_NEXT_TOKEN
+                if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+                {
+                    ps_value_type base = type_def->def.a.subrange->value->data.t->base;
+                    ps_symbol *index_type = base == PS_TYPE_CHAR ? &ps_system_char : base == PS_TYPE_UNSIGNED ? &ps_system_unsigned
+                                                                                 : base == PS_TYPE_INTEGER    ? &ps_system_integer
+                                                                                                              : NULL; // PS_TYPE_ENUM
+                    ps_value index = {.type = index_type, .allocated = false, .data.v = NULL};
+                    // clang-format off
+                    ps_symbol_debug         (stderr, "ARRAY     ", symbol);
+                    ps_value_debug          (stderr, "INDEX1    ", &index);
+                    ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
+                    ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
+                    ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
+                    // clang-format on
+                    READ_NEXT_TOKEN
+                    if (!ps_visit_expression(interpreter, mode, &index))
+                    {
+                        ps_interpreter_set_message(interpreter, "Index is invalid");
+                        TRACE_ERROR("INDEX")
+                    }
+                    ps_value_debug(stderr, "INDEX2    ", &index);
+                    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+                    READ_NEXT_TOKEN
+                    if (mode == MODE_EXEC && !ps_array_get_value(symbol, &index, result))
+                    {
+                        ps_interpreter_set_message(interpreter, "Can't get array %s value for index %s",
+                                                   symbol->name,
+                                                   ps_value_get_debug_string(&index));
+                        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+                    }
+                }
+            }
+            else
+            {
+                result->type = symbol->value->type;
+                if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
+                    TRACE_ERROR("COPY");
+                READ_NEXT_TOKEN
+            }
+            break;
+        case PS_SYMBOL_KIND_FUNCTION:
+            // interpreter->debug = DEBUG_VERBOSE;
+            // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
+            if (!ps_visit_function_call(interpreter, mode, symbol, result))
+                TRACE_ERROR("FUNCTION");
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        }
         break;
     // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
