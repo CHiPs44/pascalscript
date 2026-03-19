@@ -132,33 +132,33 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
     return true;
 }
 
-ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def)
+ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *subrange)
 {
-    ps_type_definition_debug(stderr, "ps_type_definition_get_subrange_count, type_def:", type_def);
+    ps_type_definition_debug(stderr, "ps_type_definition_get_subrange_count, type_def:", subrange);
     ps_unsigned count = PS_UNSIGNED_MAX;
-    fprintf(stderr, "SUBRANGE? %s\n", type_def->type == PS_TYPE_SUBRANGE ? "YES" : "NO");
-    if (type_def->type == PS_TYPE_SUBRANGE)
-        switch (type_def->base)
+    fprintf(stderr, "SUBRANGE? %s\n", subrange->type == PS_TYPE_SUBRANGE ? "YES" : "NO");
+    if (subrange->type == PS_TYPE_SUBRANGE)
+        switch (subrange->base)
         {
         case PS_TYPE_CHAR:
-            count = type_def->def.g.c.max - type_def->def.g.c.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: CHAR %u - %u + 1 = %u\n", type_def->def.g.c.max,
-                    type_def->def.g.c.min, count);
+            count = subrange->def.g.c.max - subrange->def.g.c.min + 1;
+            fprintf(stderr, "ps_type_definition_get_subrange_count: CHAR %u - %u + 1 = %u\n", subrange->def.g.c.max,
+                    subrange->def.g.c.min, count);
             break;
         case PS_TYPE_UNSIGNED:
-            count = type_def->def.g.u.max - type_def->def.g.u.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: UNSIGNED %u - %u + 1 = %u\n", type_def->def.g.u.max,
-                    type_def->def.g.u.min, count);
+            count = subrange->def.g.u.max - subrange->def.g.u.min + 1;
+            fprintf(stderr, "ps_type_definition_get_subrange_count: UNSIGNED %u - %u + 1 = %u\n", subrange->def.g.u.max,
+                    subrange->def.g.u.min, count);
             break;
         case PS_TYPE_INTEGER:
-            count = type_def->def.g.i.max - type_def->def.g.i.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: INTEGER %d - %d + 1 = %d\n", type_def->def.g.i.max,
-                    type_def->def.g.i.min, count);
+            count = subrange->def.g.i.max - subrange->def.g.i.min + 1;
+            fprintf(stderr, "ps_type_definition_get_subrange_count: INTEGER %d - %d + 1 = %d\n", subrange->def.g.i.max,
+                    subrange->def.g.i.min, count);
             break;
         case PS_TYPE_ENUM:
-            count = type_def->def.g.e.max - type_def->def.g.e.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: ENUM %u - %u + 1 = %u\n", type_def->def.g.e.max,
-                    type_def->def.g.e.min, count);
+            count = subrange->def.g.e.max - subrange->def.g.e.min + 1;
+            fprintf(stderr, "ps_type_definition_get_subrange_count: ENUM %u - %u + 1 = %u\n", subrange->def.g.e.max,
+                    subrange->def.g.e.min, count);
             break;
         default:
             break;
@@ -166,36 +166,49 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type
     return count;
 }
 
-ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, const ps_value *index)
+ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *subrange, const ps_value *index)
 {
+    fprintf(stderr, " DEBUG\tSUBRANGE3 type=%s base=%s\n", ps_value_type_get_name(subrange->type),
+            ps_value_type_get_name(subrange->base));
     ps_unsigned offset = PS_UNSIGNED_MAX;
-    if (type_def->type == PS_TYPE_SUBRANGE)
-        switch (type_def->base)
+    if (subrange->type == PS_TYPE_SUBRANGE)
+        switch (subrange->base)
         {
         case PS_TYPE_CHAR:
             // 'C' from 'A'..'Z' => Ord('C') - Ord('A') => 2
-            if (ps_value_get_type(index) == PS_TYPE_CHAR && index->data.c >= type_def->def.g.c.min &&
-                index->data.c <= type_def->def.g.c.max)
-                offset = index->data.c - type_def->def.g.c.min;
+            if (ps_value_get_type(index) == PS_TYPE_CHAR && index->data.c >= subrange->def.g.c.min &&
+                index->data.c <= subrange->def.g.c.max)
+                offset = index->data.c - subrange->def.g.c.min;
             break;
         case PS_TYPE_UNSIGNED:
             // 3 from 1..10 => 3 - 1 => 2
-            if (ps_value_get_type(index) == PS_TYPE_UNSIGNED && index->data.u >= type_def->def.g.u.min &&
-                index->data.u <= type_def->def.g.u.max)
-                offset = index->data.u - type_def->def.g.u.min;
+            ps_unsigned index2 = index->data.u;
+            bool valid = false;
+            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= 0)
+            {
+                index2 = index->data.i;
+                valid = true;
+            }
+            else if (ps_value_get_type(index) == PS_TYPE_UNSIGNED)
+            {
+                index2 = index->data.u;
+                valid = true;
+            }
+            if (valid && index2 >= subrange->def.g.u.min && index2 <= subrange->def.g.u.max)
+                offset = index->data.u - subrange->def.g.u.min;
             break;
         case PS_TYPE_INTEGER:
             // 3 from -4..4 => 3 - -4 => 7
             //         0..8
-            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= type_def->def.g.i.min &&
-                index->data.i <= type_def->def.g.i.max)
-                offset = index->data.i - type_def->def.g.i.min;
+            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= subrange->def.g.i.min &&
+                index->data.i <= subrange->def.g.i.max)
+                offset = index->data.i - subrange->def.g.i.min;
             break;
         case PS_TYPE_ENUM:
             // Wednesday from Monday..Friday (from (Monday, ..., Sunday) => Ord(Wednesday) - Ord(Monday) => 2
-            if (ps_value_get_type(index) == PS_TYPE_ENUM && index->data.u >= type_def->def.g.e.min &&
-                index->data.u <= type_def->def.g.e.max)
-                offset = index->data.u - type_def->def.g.u.min;
+            if (ps_value_get_type(index) == PS_TYPE_ENUM && index->data.u >= subrange->def.g.e.min &&
+                index->data.u <= subrange->def.g.e.max)
+                offset = index->data.u - subrange->def.g.u.min;
             break;
         default:
             break;
