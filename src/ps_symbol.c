@@ -117,7 +117,7 @@ void ps_symbol_debug(FILE *output, char *message, const ps_symbol *symbol)
 {
     if (output == NULL)
         output = stderr;
-    fprintf(output, "DEBUG\t%s%s\n", message, ps_symbol_dump_value(symbol));
+    fprintf(output, " DEBUG\t%s%s\n", message, ps_symbol_dump_value(symbol));
 }
 
 /* EOF */

@@ -330,10 +330,13 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                 if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
                 {
                     ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
-                    ps_value_debug(stderr, "INDEX      ", &index);
-                    ps_symbol_debug(stderr, "ITEM_TYPE  ", type_def->def.a.item_type);
-                    ps_symbol_debug(stderr, "SUBRANGE1  ", type_def->def.a.subrange);
-                    ps_type_definition_debug(stderr, "SUBRANGE2  ", type_def->def.a.subrange->value->data.t);
+                    // clang-format off
+                    ps_symbol_debug         (stderr, "ARRAY     ", symbol);
+                    ps_value_debug          (stderr, "INDEX     ", &index);
+                    ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
+                    ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
+                    ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
+                    // clang-format on
                     READ_NEXT_TOKEN
                     if (!ps_visit_expression(interpreter, mode, &index))
                     {

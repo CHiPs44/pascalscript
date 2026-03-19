@@ -416,7 +416,7 @@ void ps_value_debug(FILE *output, const char *message, const ps_value *value)
 {
     if (output == NULL)
         output = stderr;
-    fprintf(output, "DEBUG\t%s%s\n", message == NULL ? "" : message, ps_value_dump(value));
+    fprintf(output, " DEBUG\t%s%s\n", message == NULL ? "" : message, ps_value_dump(value));
 }
 
 /* EOF */

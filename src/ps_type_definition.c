@@ -279,5 +279,5 @@ void ps_type_definition_debug(FILE *output, char *message, const ps_type_definit
         output = stderr;
     if (message == NULL)
         message = "TYPE DEFINITION";
-    fprintf(output, "%s: %s\n", message, type_def == NULL ? "NULL!" : ps_type_definition_get_name(type_def));
+    fprintf(output, " DEBUG\t%s%s\n", message, type_def == NULL ? "NULL!" : ps_type_definition_get_name(type_def));
 }
