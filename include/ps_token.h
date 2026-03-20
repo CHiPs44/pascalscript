@@ -206,7 +206,9 @@ extern "C"
     char *ps_token_type_dump_value(ps_token_type token_type, char *default_value);
     void ps_token_debug(FILE *output, const char *message, ps_token *token);
     char *ps_token_dump_value(ps_token *token);
+    /** @brief Convert token type to string */
     char *ps_token_get_keyword(ps_token_type token_type);
+    /** @brief Convert identifier to keyword */
     ps_token_type ps_token_is_keyword(const char *identifier);
 
 #ifdef __cplusplus

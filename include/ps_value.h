@@ -34,17 +34,17 @@ extern "C"
     /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
 
-    /** @brief Scalar is Integer, Unsigned, Integer or Unsigned subrange */
+    /** @brief Scalar is: Integer, Unsigned, Integer or Unsigned subrange */
     bool ps_value_is_scalar(const ps_value *value);
-    /** @brief Ordinal is Boolean, Char or Enum */
+    /** @brief Ordinal is: Boolean, Char or Enum */
     bool ps_value_is_ordinal(const ps_value *value);
-    /** @brief Number is Integer, Unsigned, Real, Integer or Unsigned subrange */
+    /** @brief Number is: Integer, Unsigned, Real, Integer or Unsigned subrange */
     bool ps_value_is_number(const ps_value *value);
-    /** @brief Real is Real */
+    /** @brief is Real? */
     bool ps_value_is_real(const ps_value *value);
-    /** @brief String is String */
+    /** @brief Is String? */
     bool ps_value_is_string(const ps_value *value);
-    /** @brief Array is Array */
+    /** @brief Is Array? */
     bool ps_value_is_array(const ps_value *value);
 
     /** @brief Get type */
@@ -53,6 +53,9 @@ extern "C"
     /** @brief Get base type */
     /** @returns PS_TYPE_NONE if value is invalid */
     ps_value_type ps_value_get_base(const ps_value *value);
+    /** @brief Copy value from "from" to "to" */
+    /** @returns PS_ERROR_NONE if successful */
+    ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check);
 
     ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
     ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);

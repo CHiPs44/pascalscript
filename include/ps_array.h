@@ -32,9 +32,9 @@ extern "C"
     /** @brief Get array item type */
     ps_symbol *ps_array_get_item_type(const ps_symbol *array);
     /** @brief value := array[index] (allocating value if NULL) */
-    bool ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value);
+    ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check);
     /** @brief array[index] := value */
-    bool ps_array_set_value(ps_symbol *array, ps_value *index, ps_value_data data);
+    ps_error ps_array_set_value(ps_symbol *array, const ps_value *index, const ps_value *value, bool range_check);
 
 #ifdef __cplusplus
 }

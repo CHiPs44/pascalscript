@@ -59,36 +59,30 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array)
     return type_def->def.a.item_type;
 }
 
-bool ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value)
+ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check)
 {
-    const ps_type_definition *type_def = ps_array_get_type_def(array); // array->value->type->value->data.t;
-    // Get offset from index
+    const ps_type_definition *type_def = ps_array_get_type_def(array); // WIP: "array->value->type->value->data.t"
     ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subrange->value->data.t, index);
     if (offset >= array->value->data.a->count)
-        return false;
-    if (value == NULL)
-    {
-        // Allocate value to "box" value data
-        value = ps_value_alloc(ps_array_get_item_type(array), array->value->data.a->values[offset]);
-        if (value == NULL)
-            return false;
-    }
-    else
-    {
-        // Store value data to already "box" value
-        value->data = array->value->data.a->values[offset];
-    }
-    fprintf(stderr, "33333 value=%s\n", ps_value_get_debug_string(value));
-    return true;
+        return PS_ERROR_OUT_OF_RANGE;
+    ps_value array_value = {
+        .allocated = false, .type = ps_array_get_item_type(array), .data = array->value->data.a->values[offset]};
+    return ps_value_copy(&array_value, value, range_check);
 }
 
-bool ps_array_set_value(ps_symbol *array, ps_value *index, ps_value_data data)
+ps_error ps_array_set_value(ps_symbol *array, const ps_value *index, const ps_value *value, bool range_check)
 {
+    if (array == NULL || array->value == NULL || array->value->data.a->values == NULL)
+        return PS_ERROR_INVALID_PARAMETERS;
     const ps_type_definition *type_def = ps_array_get_type_def(array);
     // Get offset from index
     ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def, index);
     if (offset >= array->value->data.a->count)
-        return false;
-    array->value->data.a->values[offset] = data;
-    return true;
+        return PS_ERROR_INVALID_SUBRANGE;
+    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array), .data.v = NULL};
+    ps_error error = ps_value_copy(value, &array_value, range_check);
+    if (error != PS_ERROR_NONE)
+        return error;
+    array->value->data.a->values[offset] = value->data;
+    return PS_ERROR_NONE;
 }

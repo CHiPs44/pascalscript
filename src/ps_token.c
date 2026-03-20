@@ -232,7 +232,7 @@ const ps_keyword keywords[] = {
     { .keyword = "WHILE"            , .token_type = PS_TOKEN_WHILE            , .is_symbol = false },
     { .keyword = "WITH"             , .token_type = PS_TOKEN_WITH             , .is_symbol = false },
     { .keyword = "XOR"              , .token_type = PS_TOKEN_XOR              , .is_symbol = false },
-    // clang-format on.
+    // clang-format on
 };
 #define PS_KEYWORDS_COUNT (sizeof(keywords) / sizeof(struct s_ps_keyword))
 

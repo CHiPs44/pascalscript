@@ -274,15 +274,97 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 }
 
 /**
- * Visit
+ * @brief Visit constant or variable reference or function call
+ * @details
+ *  constant reference = identifier
+ *  variable reference = identifier [ '[' expression ']' ]
+ *  function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
+ */
+bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *identifier,
+                                ps_value *result)
+{
+    VISIT_BEGIN("FACTOR", "IDENTIFIER");
+
+    ps_symbol *symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+    if (symbol == NULL)
+        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+    switch (symbol->kind)
+    {
+    case PS_SYMBOL_KIND_AUTO:
+    case PS_SYMBOL_KIND_CONSTANT:
+    case PS_SYMBOL_KIND_VARIABLE:
+        // DEBUG "interpreter->debug = DEBUG_VERBOSE;"
+        if (interpreter->debug >= DEBUG_VERBOSE)
+        {
+            fprintf(stderr, "%cINFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", mode == MODE_EXEC ? '*' : ' ',
+                    symbol->name, ps_symbol_get_kind_name(symbol->kind),
+                    ps_type_definition_get_name(symbol->value->type->value->data.t));
+        }
+        if (ps_value_is_array(symbol->value))
+        {
+            ps_type_definition *type_def = ps_array_get_type_def(symbol);
+            if (type_def == NULL)
+                RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+            READ_NEXT_TOKEN
+            if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+            {
+                ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
+                // clang-format off
+                ps_symbol_debug         (stderr, "ARRAY     ", symbol);
+                ps_value_debug          (stderr, "INDEX     ", &index);
+                ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
+                ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
+                ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
+                // clang-format on
+                READ_NEXT_TOKEN
+                if (!ps_visit_expression(interpreter, mode, &index))
+                {
+                    ps_interpreter_set_message(interpreter, "Index is invalid");
+                    TRACE_ERROR("INDEX")
+                }
+                EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+                READ_NEXT_TOKEN
+                ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
+                if (error != PS_ERROR_NONE)
+                {
+                    ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
+                                               ps_value_get_debug_string(&index));
+                    RETURN_ERROR(error)
+                }
+            }
+        }
+        else
+        {
+            result->type = symbol->value->type;
+            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
+                TRACE_ERROR("COPY");
+            READ_NEXT_TOKEN
+        }
+        break;
+    case PS_SYMBOL_KIND_FUNCTION:
+        // interpreter->debug = DEBUG_VERBOSE;
+        // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
+        if (!ps_visit_function_call(interpreter, mode, symbol, result))
+            TRACE_ERROR("FUNCTION");
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+
+    VISIT_END("OK")
+}
+
+/**
+ * @brief Visit factor
+ * @details
  *  factor  = '(' , expression , ')'
  *          | variable_reference
  *          | constant_reference
  *          | function_call
  *          | string_value | char_value | integer_value | unsigned_value | real_value | boolean_value
  *          | [ '+' | '-' | 'NOT' ] factor
+ * Next steps:
  *          | nil
- *          ;
  */
 bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
 {
@@ -290,7 +372,6 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
 
     ps_value factor = {.type = &ps_system_none, .data.v = NULL};
     ps_identifier identifier;
-    ps_symbol *symbol;
     ps_token_type unary_operator;
 
     switch (lexer->current_token.type)
@@ -306,70 +387,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-        switch (symbol->kind)
-        {
-        case PS_SYMBOL_KIND_AUTO:
-        case PS_SYMBOL_KIND_CONSTANT:
-        case PS_SYMBOL_KIND_VARIABLE:
-            // interpreter->debug = DEBUG_VERBOSE;
-            if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
-                        symbol->kind == PS_SYMBOL_KIND_AUTO       ? "AUTO"
-                        : symbol->kind == PS_SYMBOL_KIND_CONSTANT ? "CONSTANT"
-                                                                  : "VARIABLE",
-                        ps_type_definition_get_name(symbol->value->type->value->data.t));
-            if (ps_value_is_array(symbol->value))
-            {
-                ps_type_definition *type_def = ps_array_get_type_def(symbol);
-                if (type_def == NULL)
-                    RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-                READ_NEXT_TOKEN
-                if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-                {
-                    ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
-                    // clang-format off
-                    ps_symbol_debug         (stderr, "ARRAY     ", symbol);
-                    ps_value_debug          (stderr, "INDEX     ", &index);
-                    ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
-                    ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
-                    ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
-                    // clang-format on
-                    READ_NEXT_TOKEN
-                    if (!ps_visit_expression(interpreter, mode, &index))
-                    {
-                        ps_interpreter_set_message(interpreter, "Index is invalid");
-                        TRACE_ERROR("INDEX")
-                    }
-                    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-                    READ_NEXT_TOKEN
-                    if (!ps_array_get_value(symbol, &index, result))
-                    {
-                        ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
-                                                   ps_value_get_debug_string(&index));
-                        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-                    }
-                }
-            }
-            else
-            {
-                result->type = symbol->value->type;
-                if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
-                    TRACE_ERROR("COPY");
-                READ_NEXT_TOKEN
-            }
-            break;
-        case PS_SYMBOL_KIND_FUNCTION:
-            // interpreter->debug = DEBUG_VERBOSE;
-            // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
-            if (!ps_visit_function_call(interpreter, mode, symbol, result))
-                TRACE_ERROR("FUNCTION");
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        }
+        if (!ps_visit_factor_identifier(interpreter, mode, identifier, result))
+            RETURN_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
