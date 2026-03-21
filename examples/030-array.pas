@@ -1,6 +1,6 @@
 (*
     This file is part of the PascalScript Pascal interpreter.
-    SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
+    SPDX-FileCopyrightText: 2026 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program Arrays;
@@ -46,10 +46,10 @@ Type
 //     IntToStr := S;
 // End;
 
-// function Pad(n: Integer, w: Integer): String;
+// function Pad(N: Integer, w: Integer): String;
 // Var S: String;
 // Begin
-//     S := IntToStr(n);
+//     S := IntToStr(N);
 //     while Length(S) < w do
 //     Begin
 //         S := '0' + S;
@@ -60,25 +60,27 @@ Type
 Var
     Numbers: NumberArray;
     // Strings: StringArray;
-    i, n: Integer;
-    // s: String;
+    I, N: Integer;
+    // S: String;
 
 Begin
-    I := Numbers[1];
-    // Numbers[1] = 1;
-    // n := 1;
-    // // For i := 1 To ValueCount Do
+    // I := Numbers[1];
+    // WriteLn(I);
+    Numbers[1] := 1;
+    WriteLn(Numbers[1]);
+    // N := 1;
+    // // For I := 1 To ValueCount Do
     // // Begin
-    // //     Numbers[i] := n;
-    // //     Strings[i] := '#' + Pad(i, 2) + ' ' + IntToStr(n);
-    // //     n := n * 2;
+    // //     Numbers[I] := N;
+    // //     Strings[I] := '#' + Pad(I, 2) + ' ' + IntToStr(N);
+    // //     N := N * 2;
     // // End;
     // WriteLn('#  | Number | String    ');
     // WriteLn('---|--------|-----------');
-    // For i := 1 To ValueCount Do
+    // For I := 1 To ValueCount Do
     // Begin
-    //     // WriteLn(Pad(i, 2), ' | ', Numbers[i]:6, ' | ', Strings[i]);
-    //     s := IntToStr(i);
-    //     WriteLn(i:2, ' | ', i:6, ' | ', s);
+    //     // WriteLn(Pad(I, 2), ' | ', Numbers[I]:6, ' | ', Strings[I]);
+    //     S := IntToStr(I);
+    //     WriteLn(I:2, ' | ', I:6, ' | ', S);
     // End;
 End.

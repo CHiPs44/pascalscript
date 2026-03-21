@@ -134,31 +134,38 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
 
 ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *subrange)
 {
-    ps_type_definition_debug(stderr, "ps_type_definition_get_subrange_count, type_def:", subrange);
+    bool debug = false;
+    if (debug)
+        ps_type_definition_debug(stderr, "ps_type_definition_get_subrange_count, type_def:", subrange);
     ps_unsigned count = PS_UNSIGNED_MAX;
-    fprintf(stderr, "SUBRANGE? %s\n", subrange->type == PS_TYPE_SUBRANGE ? "YES" : "NO");
+    if (debug)
+        fprintf(stderr, "SUBRANGE? %s\n", subrange->type == PS_TYPE_SUBRANGE ? "YES" : "NO");
     if (subrange->type == PS_TYPE_SUBRANGE)
         switch (subrange->base)
         {
         case PS_TYPE_CHAR:
             count = subrange->def.g.c.max - subrange->def.g.c.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: CHAR %u - %u + 1 = %u\n", subrange->def.g.c.max,
-                    subrange->def.g.c.min, count);
+            if (debug)
+                fprintf(stderr, "ps_type_definition_get_subrange_count: CHAR %u - %u + 1 = %u\n", subrange->def.g.c.max,
+                        subrange->def.g.c.min, count);
             break;
         case PS_TYPE_UNSIGNED:
             count = subrange->def.g.u.max - subrange->def.g.u.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: UNSIGNED %u - %u + 1 = %u\n", subrange->def.g.u.max,
-                    subrange->def.g.u.min, count);
+            if (debug)
+                fprintf(stderr, "ps_type_definition_get_subrange_count: UNSIGNED %u - %u + 1 = %u\n",
+                        subrange->def.g.u.max, subrange->def.g.u.min, count);
             break;
         case PS_TYPE_INTEGER:
             count = subrange->def.g.i.max - subrange->def.g.i.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: INTEGER %d - %d + 1 = %d\n", subrange->def.g.i.max,
-                    subrange->def.g.i.min, count);
+            if (debug)
+                fprintf(stderr, "ps_type_definition_get_subrange_count: INTEGER %d - %d + 1 = %d\n",
+                        subrange->def.g.i.max, subrange->def.g.i.min, count);
             break;
         case PS_TYPE_ENUM:
             count = subrange->def.g.e.max - subrange->def.g.e.min + 1;
-            fprintf(stderr, "ps_type_definition_get_subrange_count: ENUM %u - %u + 1 = %u\n", subrange->def.g.e.max,
-                    subrange->def.g.e.min, count);
+            if (debug)
+                fprintf(stderr, "ps_type_definition_get_subrange_count: ENUM %u - %u + 1 = %u\n", subrange->def.g.e.max,
+                        subrange->def.g.e.min, count);
             break;
         default:
             break;
@@ -168,8 +175,10 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *subr
 
 ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *subrange, const ps_value *index)
 {
-    fprintf(stderr, " DEBUG\tSUBRANGE3 type=%s base=%s\n", ps_value_type_get_name(subrange->type),
-            ps_value_type_get_name(subrange->base));
+    bool debug = false;
+    if (debug)
+        fprintf(stderr, " DEBUG\tSUBRANGE3 type=%s base=%s\n", ps_value_type_get_name(subrange->type),
+                ps_value_type_get_name(subrange->base));
     ps_unsigned offset = PS_UNSIGNED_MAX;
     if (subrange->type == PS_TYPE_SUBRANGE)
         switch (subrange->base)

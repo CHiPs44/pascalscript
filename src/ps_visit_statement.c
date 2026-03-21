@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_array.h"
 #include "ps_functions.h"
 #include "ps_procedures.h"
 #include "ps_symbol.h"
@@ -71,10 +72,8 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
 
     EXPECT_TOKEN(PS_TOKEN_BEGIN);
     READ_NEXT_TOKEN
-    if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
-        READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_END && !ps_visit_statement_list(interpreter, mode, PS_TOKEN_END))
-        TRACE_ERROR("STATEMENTS")
+        TRACE_ERROR("STATEMENT_LIST")
     EXPECT_TOKEN(PS_TOKEN_END)
     READ_NEXT_TOKEN
 
@@ -99,8 +98,8 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
-    // interpreter->debug = DEBUG_TRACE;
-    VISIT_BEGIN("ASSIGNMENT", "");
+    interpreter->debug = DEBUG_TRACE;
+    VISIT_BEGIN("ASSIGNMENT", "")
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
     ps_value index = {.type = &ps_system_none, .data.v = NULL};
@@ -109,19 +108,20 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     {
         interpreter->error = PS_ERROR_ASSIGN_TO_CONST;
         ps_interpreter_set_message(interpreter, "Constant '%s' cannot be assigned", variable->name);
-        TRACE_ERROR("CONST");
+        TRACE_ERROR("CONSTANT");
     }
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
         ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
-        TRACE_ERROR("VARIABLE2");
+        TRACE_ERROR("VARIABLE");
     }
     if (interpreter->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
+        // array[index] := expression
         EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
         READ_NEXT_TOKEN
         index.type = variable->value->type->value->data.t->def.a.subrange;
@@ -129,12 +129,17 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
             TRACE_ERROR("INDEX")
         EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
         READ_NEXT_TOKEN
-        EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+        EXPECT_TOKEN(PS_TOKEN_ASSIGN)
         READ_NEXT_TOKEN
         result.type = variable->value->type->value->data.t->def.a.item_type;
         if (!ps_visit_expression(interpreter, mode, &result))
-            TRACE_ERROR("EXPRESSION1");
-        TRACE_ERROR("TODO!")
+            TRACE_ERROR("EXPRESSION1")
+        ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
+        if (error != PS_ERROR_NONE)
+        {
+            interpreter->error = error;
+            TRACE_ERROR("ARRAY_ASSIGN")
+        }
     }
     else
     {
@@ -156,8 +161,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
 bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline)
 {
     (void)newline;
-    VISIT_BEGIN("READ_OR_READLN", "");
-    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED);
+    VISIT_BEGIN("READ_OR_READLN", "")
+    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
 }
 
 /**
@@ -264,7 +269,6 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     ps_environment *environment = ps_interpreter_get_environment(interpreter);
     if (environment == NULL)
         RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
-
     // First, check if this is an assignment to the current function name
     symbol = ps_environment_find_symbol(environment->parent, identifier, true);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)

@@ -310,11 +310,11 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
             {
                 ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
                 // clang-format off
-                ps_symbol_debug         (stderr, "ARRAY     ", symbol);
-                ps_value_debug          (stderr, "INDEX     ", &index);
-                ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
-                ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
-                ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
+                // ps_symbol_debug         (stderr, "ARRAY     ", symbol);
+                // ps_value_debug          (stderr, "INDEX     ", &index);
+                // ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
+                // ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
+                // ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
                 // clang-format on
                 READ_NEXT_TOKEN
                 if (!ps_visit_expression(interpreter, mode, &index))
@@ -345,7 +345,7 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
         // interpreter->debug = DEBUG_VERBOSE;
         // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
         if (!ps_visit_function_call(interpreter, mode, symbol, result))
-            TRACE_ERROR("FUNCTION");
+            TRACE_ERROR("FUNCTION")
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -388,7 +388,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
         if (!ps_visit_factor_identifier(interpreter, mode, identifier, result))
-            RETURN_ERROR("IDENTIFIER")
+            TRACE_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
@@ -434,7 +434,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
                     interpreter->error = PS_ERROR_OVERFLOW;
                 else if (errno == EINVAL)
                     interpreter->error = PS_ERROR_STRING_TOO_LONG;
-                TRACE_ERROR("STRING_VALUE");
+                TRACE_ERROR("STRING_VALUE")
             }
         }
         READ_NEXT_TOKEN
@@ -458,8 +458,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             TRACE_ERROR("UNARY");
         break;
     default:
-        interpreter->error = PS_ERROR_UNEXPECTED_TOKEN;
-        TRACE_ERROR("?");
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
     VISIT_END("OK")
