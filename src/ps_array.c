@@ -63,8 +63,8 @@ ps_symbol *ps_array_get_subrange(const ps_symbol *array)
     ps_type_definition_debug(stderr, "GET_SUBRANGE\tTYPE_DEF\t", type_def);
     if (type_def == NULL)
         return NULL;
-    ps_type_definition *subrange = type_def->def.a.subrange;
-    ps_type_definition_debug(stderr, "GET_SUBRANGE\tSUBRANGE\t", subrange);
+    ps_symbol *subrange = type_def->def.a.subrange;
+    ps_symbol_debug(stderr, "GET_SUBRANGE\tSUBRANGE\t", subrange);
     return subrange;
 }
 
@@ -89,12 +89,14 @@ ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_va
 
 ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const ps_value *value, bool range_check)
 {
-    if (array_var == NULL || array_var->value == NULL || array_var->value->data.a->values == NULL)
+    if (array_var == NULL || array_var->value == NULL || array_var->value->type == NULL ||
+        array_var->value->data.a->values == NULL)
         return PS_ERROR_INVALID_PARAMETERS;
-    const ps_type_definition *subrange = ps_array_get_subrange(array_var->value);
-    ps_type_definition_debug(stderr, "SET_VALUE ", subrange);
+    const ps_symbol *subrange = ps_array_get_subrange(array_var->value->type);
+    ps_symbol_debug(stderr, "SET_VALUE ", subrange);
+    ps_type_definition_debug(stderr, "SET_VALUE ", subrange->value->data.t);
     // Get offset from index
-    ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange, index);
+    ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange->value->data.t, index);
     if (offset >= array_var->value->data.a->count)
         return PS_ERROR_INVALID_SUBRANGE;
     ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};

@@ -175,12 +175,19 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *subr
 
 ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *subrange, const ps_value *index)
 {
-    bool debug = false;
-    if (debug)
-        fprintf(stderr, " DEBUG\tSUBRANGE3 type=%s base=%s\n", ps_value_type_get_name(subrange->type),
-                ps_value_type_get_name(subrange->base));
+    bool debug = true;
     ps_unsigned offset = PS_UNSIGNED_MAX;
     if (subrange->type == PS_TYPE_SUBRANGE)
+    {
+        if (debug)
+        {
+            fprintf(stderr, " DEBUG\tSUBRANGE\ttype = %s\n", ps_value_type_get_name(subrange->type));
+            fprintf(stderr, " DEBUG\tSUBRANGE\tbase = %s\n", ps_value_type_get_name(subrange->base));
+            fprintf(stderr, " DEBUG\tSUBRANGE\trange= %u..%u\n", subrange->def.g.u.min, subrange->def.g.u.max);
+            fprintf(stderr, " DEBUG\tSUBRANGE\tindex= %s/%s/%s: %s\n", index->type->name,
+                    ps_value_type_get_name(ps_value_get_type(index)), ps_value_type_get_name(ps_value_get_base(index)),
+                    ps_value_get_debug_string(index));
+        }
         switch (subrange->base)
         {
         case PS_TYPE_CHAR:
@@ -193,18 +200,22 @@ ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *sub
             // 3 from 1..10 => 3 - 1 => 2
             ps_unsigned index2 = index->data.u;
             bool valid = false;
-            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= 0)
+            if (ps_value_get_base(index) == PS_TYPE_INTEGER && index->data.i >= 0)
             {
                 index2 = index->data.i;
                 valid = true;
             }
-            else if (ps_value_get_type(index) == PS_TYPE_UNSIGNED)
+            else if (ps_value_get_base(index) == PS_TYPE_UNSIGNED)
             {
                 index2 = index->data.u;
                 valid = true;
             }
+            else if (debug)
+                fprintf(stderr, "NOT INTEGER NOR UNSIGNED\n");
             if (valid && index2 >= subrange->def.g.u.min && index2 <= subrange->def.g.u.max)
                 offset = index->data.u - subrange->def.g.u.min;
+            if (debug)
+                fprintf(stderr, " DEBUG\tSUBRANGE\toffset= %u, %u, %s\n", offset, index2, valid ? "YES" : "NO");
             break;
         case PS_TYPE_INTEGER:
             // 3 from -4..4 => 3 - -4 => 7
@@ -222,6 +233,7 @@ ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *sub
         default:
             break;
         }
+    }
     return offset;
 }
 

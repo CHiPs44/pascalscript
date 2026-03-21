@@ -66,8 +66,9 @@ Var
 Begin
     // I := Numbers[1];
     // WriteLn(I);
-    Numbers[1] := 1;
-    WriteLn(Numbers[1]);
+    Numbers[10] := 42;
+    I := Numbers[10];
+    WriteLn(I);
     // N := 1;
     // // For I := 1 To ValueCount Do
     // // Begin
