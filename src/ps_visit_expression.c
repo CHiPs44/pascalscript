@@ -276,9 +276,13 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 /**
  * @brief Visit constant or variable reference or function call
  * @details
- *  constant reference = identifier
- *  variable reference = identifier [ '[' expression ']' ]
- *  function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
+ * Actual:
+ *      constant reference = identifier
+ *      variable reference = identifier [ '[' expression ']' ]
+ *      function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
+ * Next step:
+ *  multi-dimensional arrays instead of vectors
+ *      variable reference = identifier [ '[' expression [ ',' expression ]* ']' ]
  */
 bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *identifier,
                                 ps_value *result)
