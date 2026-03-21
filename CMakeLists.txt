@@ -20,7 +20,8 @@ project(pascalscript VERSION ${PS_VERSION_MAJOR}.${PS_VERSION_MINOR}.${PS_VERSIO
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
+# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
+set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O1")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h)
 

@@ -98,7 +98,7 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
-    interpreter->debug = DEBUG_TRACE;
+    // interpreter->debug = DEBUG_TRACE;
     VISIT_BEGIN("ASSIGNMENT", "")
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};

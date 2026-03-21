@@ -9,12 +9,12 @@
 #include "ps_array.h"
 #include "ps_memory.h"
 
-ps_array_data *ps_array_alloc(const ps_symbol *array)
+ps_array_data *ps_array_alloc(const ps_symbol *array_type)
 {
     bool debug = false;
     if (debug)
-        ps_symbol_debug(stderr, "ps_array_alloc, symbol: ", array);
-    const ps_type_definition *type_def = array->value->data.t; //->value->data.t;
+        ps_symbol_debug(stderr, "ps_array_alloc, symbol: ", array_type);
+    const ps_type_definition *type_def = array_type->value->data.t;
     if (debug)
         ps_type_definition_debug(stderr, "ps_array_alloc, type_def: ", type_def);
     ps_array_data *array_data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data));
@@ -35,16 +35,21 @@ ps_array_data *ps_array_alloc(const ps_symbol *array)
 
 ps_array_data *ps_array_free(ps_array_data *array_data)
 {
+    // TODO do not forget to call this when necessary
     ps_memory_free(PS_MEMORY_VALUE, array_data->values);
     ps_memory_free(PS_MEMORY_VALUE, array_data);
     return NULL;
 }
 
-ps_type_definition *ps_array_get_type_def(const ps_symbol *array)
+ps_type_definition *ps_array_get_type_def(const ps_symbol *array_type)
 {
-    if (array == NULL || array->value == NULL || array->value->type == NULL || array->value->type->value == NULL)
+    if (array_type == NULL || array_type->value == NULL || array_type->value->type == NULL ||
+        array_type->value->type->value == NULL)
         return NULL;
-    return array->value->type->value->data.t;
+    ps_type_definition *type_def = array_type->value->data.t;
+    if (!ps_type_definition_is_array(type_def))
+        return NULL;
+    return type_def;
 }
 
 ps_symbol *ps_array_get_subrange(const ps_symbol *array)
@@ -82,20 +87,20 @@ ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_va
     return ps_value_copy(&array_value, value, range_check);
 }
 
-ps_error ps_array_set_value(ps_symbol *array, const ps_value *index, const ps_value *value, bool range_check)
+ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const ps_value *value, bool range_check)
 {
-    if (array == NULL || array->value == NULL || array->value->data.a->values == NULL)
+    if (array_var == NULL || array_var->value == NULL || array_var->value->data.a->values == NULL)
         return PS_ERROR_INVALID_PARAMETERS;
-    const ps_type_definition *subrange = ps_array_get_subrange(array);
+    const ps_type_definition *subrange = ps_array_get_subrange(array_var->value);
     ps_type_definition_debug(stderr, "SET_VALUE ", subrange);
     // Get offset from index
     ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange, index);
-    if (offset >= array->value->data.a->count)
+    if (offset >= array_var->value->data.a->count)
         return PS_ERROR_INVALID_SUBRANGE;
-    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array), .data.v = NULL};
+    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};
     ps_error error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
         return error;
-    array->value->data.a->values[offset] = value->data;
+    array_var->value->data.a->values[offset] = value->data;
     return PS_ERROR_NONE;
 }
