@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -117,28 +118,36 @@ bool ps_value_is_array(const ps_value *value)
 
 ps_value_type ps_value_get_type(const ps_value *value)
 {
-    ps_value_type value_type = PS_TYPE_NONE;
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
-    {
-        value_type = value->type->value->data.t->type;
-    }
-    return value_type;
+    // if (value == NULL)
+    //     fprintf(stderr, "ps_value_get_type: NULL!\n");
+    // else
+    //     ps_value_debug(stderr, "ps_value_get_type: ", value);
+    if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
+        return PS_TYPE_NONE;
+    return value->type->value->data.t->type;
 }
 
 ps_value_type ps_value_get_base(const ps_value *value)
 {
-    ps_value_type value_type = PS_TYPE_NONE;
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
-    {
-        value_type = value->type->value->data.t->base;
-    }
-    return value_type;
+    // if (value == NULL)
+    //     fprintf(stderr, "ps_value_get_base: NULL!\n");
+    // else
+    //     ps_value_debug(stderr, "ps_value_get_base: ", value);
+    if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
+        return PS_TYPE_NONE;
+    return value->type->value->data.t->base;
 }
 
 ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
 {
+    assert(NULL != from);
+    assert(NULL != from->type);
+    assert(NULL != to);
+    assert(NULL != to->type);
+    ps_value_type from_base = ps_value_get_base(from);
+    ps_value_type to_base = ps_value_get_base(to);
     // If destination type is NONE, set it to source type
-    if (to->type == NULL || to->type == &ps_system_none || ps_value_get_base(to) == PS_TYPE_NONE)
+    if (to->type == &ps_system_none || to_base == PS_TYPE_NONE)
         to->type = from->type;
     // Same type, just copy value
     if (from->type == to->type)
@@ -147,7 +156,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Char => Char? (subrange)
-    if (ps_value_get_base(from) == PS_TYPE_CHAR && ps_value_get_base(to) == PS_TYPE_CHAR)
+    if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_CHAR)
     {
         if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
             (from->data.c < to->type->value->data.t->def.g.c.min ||
@@ -157,7 +166,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Integer => Integer? (subrange)
-    if (ps_value_get_base(from) == PS_TYPE_INTEGER && ps_value_get_base(to) == PS_TYPE_INTEGER)
+    if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_INTEGER)
     {
         if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
             (from->data.i < to->type->value->data.t->def.g.i.min ||
@@ -167,7 +176,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Unsigned => Unsigned? (subrange)
-    if (ps_value_get_base(from) == PS_TYPE_UNSIGNED && ps_value_get_base(to) == PS_TYPE_UNSIGNED)
+    if (from_base == PS_TYPE_UNSIGNED && to_base == PS_TYPE_UNSIGNED)
     {
         if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
             (from->data.u < to->type->value->data.t->def.g.u.min ||
@@ -177,7 +186,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Integer => Unsigned?
-    if (ps_value_get_base(from) == PS_TYPE_INTEGER && ps_value_get_base(to) == PS_TYPE_UNSIGNED)
+    if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_UNSIGNED)
     {
         if (range_check && from->data.i < 0)
             return PS_ERROR_OUT_OF_RANGE;
@@ -189,7 +198,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Unsigned => Integer?
-    if (ps_value_get_base(from) == PS_TYPE_UNSIGNED && ps_value_get_base(to) == PS_TYPE_INTEGER)
+    if (from_base == PS_TYPE_UNSIGNED && to_base == PS_TYPE_INTEGER)
     {
         if (range_check && from->data.u > PS_INTEGER_MAX)
             return PS_ERROR_OUT_OF_RANGE;
@@ -201,13 +210,13 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         return PS_ERROR_NONE;
     }
     // Integer => Real? (no range check needed, as real can hold all integer values)
-    if (ps_value_get_base(from) == PS_TYPE_INTEGER && ps_value_get_base(to) == PS_TYPE_REAL)
+    if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_REAL)
     {
         to->data.r = (ps_real)from->data.i;
         return PS_ERROR_NONE;
     }
     // Unsigned => Real? (no range check needed, as real can hold all unsigned values)
-    if (ps_value_get_base(from) == PS_TYPE_UNSIGNED && ps_value_get_base(to) == PS_TYPE_REAL)
+    if (from_base == PS_TYPE_UNSIGNED && to_base == PS_TYPE_REAL)
     {
         to->data.r = (ps_real)from->data.u;
         return PS_ERROR_NONE;

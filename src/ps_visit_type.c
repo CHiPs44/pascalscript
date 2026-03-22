@@ -453,6 +453,7 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_type_definition_subrange_char c = {0};
     ps_type_definition_subrange_integer i = {0};
     ps_type_definition_subrange_unsigned u = {0};
+    ps_type_definition_subrange_enum e = {0};
     ps_value min_value = {0};
     ps_value tmp_value = {0};
     ps_value max_value = {0};
@@ -460,6 +461,7 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_value_type max_base = PS_TYPE_NONE;
 
     // Parse min value of subrange as a constant expression
+    //  can't be an enum for now
     if (!ps_visit_constant_expression(interpreter, mode, &min_value))
         TRACE_ERROR("MIN")
     // ps_value_debug(stderr, "==> MIN_VALUE: ", &min_value);
@@ -481,6 +483,12 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
         if (ps_value_get_type(&min_value) != PS_TYPE_UNSIGNED)
             RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
         u.min = min_value.data.u;
+    }
+    else if (min_base == PS_TYPE_ENUM)
+    {
+        if (ps_value_get_type(&min_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
+        e.min = min_value.data.u;
     }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -529,6 +537,14 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
         if (u.max <= u.min)
             RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
+    else if (max_base == PS_TYPE_ENUM)
+    {
+        if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        u.max = max_value.data.u;
+        if (u.max <= u.min)
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     // Create type definition for subrange
@@ -554,6 +570,13 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
         type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_ENUM:
+        type_def = ps_type_definition_create_subrange_enum(min_value.type, e.min, e.max);
+        if (type_name == NULL)
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;

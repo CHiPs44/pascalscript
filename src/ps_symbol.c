@@ -48,7 +48,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
 
 uint32_t ps_symbol_get_auto_num()
 {
-    return ps_symbol_auto_index++;
+    return ++ps_symbol_auto_index;
 }
 
 void ps_symbol_normalize_name(ps_symbol *symbol)

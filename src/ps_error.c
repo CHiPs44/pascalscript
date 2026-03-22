@@ -68,6 +68,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_EXPECTED_REAL, "Real expected"},
     {PS_ERROR_EXPECTED_BOOLEAN, "Boolean expected"},
     {PS_ERROR_EXPECTED_CHAR, "Char expected"},
+    {PS_ERROR_EXPECTED_ENUM, "Enum expected"},
     {PS_ERROR_EXPECTED_STRING, "String expected"},
     {PS_ERROR_EXPECTED_STRING_LENGTH, "String length expected"},
     {PS_ERROR_EXPECTED_SUBRANGE, "Subrange expected"},

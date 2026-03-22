@@ -9,21 +9,24 @@
 #include "ps_array.h"
 #include "ps_memory.h"
 
+bool ps_array_debug = true;
+
 ps_array_data *ps_array_alloc(const ps_symbol *array_type)
 {
-    bool debug = false;
-    if (debug)
-        ps_symbol_debug(stderr, "ps_array_alloc, symbol: ", array_type);
+    if (ps_array_debug)
+        ps_symbol_debug(stderr, "ps_array_alloc, array_type: ", array_type);
     const ps_type_definition *type_def = array_type->value->data.t;
-    if (debug)
+    if (ps_array_debug)
         ps_type_definition_debug(stderr, "ps_array_alloc, type_def: ", type_def);
     ps_array_data *array_data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data));
     if (array_data == NULL)
         return NULL;
     array_data->count = ps_type_definition_get_subrange_count(type_def->def.a.subrange->value->data.t);
-    if (debug)
-        fprintf(stderr, "ps_array_alloc: %u x %zu = %zu\n", array_data->count, sizeof(ps_value_data),
+    if (ps_array_debug)
+        fprintf(stderr, " DEBUG\tps_array_alloc, size: %u * %zu = %zu\n", array_data->count, sizeof(ps_value_data),
                 array_data->count * sizeof(ps_value_data));
+    if (array_data->count == PS_UNSIGNED_MAX)
+        return NULL;
     array_data->values = ps_memory_calloc(PS_MEMORY_VALUE, array_data->count, sizeof(ps_value_data));
     if (array_data->values == NULL)
     {
@@ -33,9 +36,11 @@ ps_array_data *ps_array_alloc(const ps_symbol *array_type)
     return array_data;
 }
 
+// TODO do not forget to call this when necessary
 ps_array_data *ps_array_free(ps_array_data *array_data)
 {
-    // TODO do not forget to call this when necessary
+    if (ps_array_debug)
+        fprintf(stderr, "ps_array_free, array_data: %p\n", (void *)array_data);
     ps_memory_free(PS_MEMORY_VALUE, array_data->values);
     ps_memory_free(PS_MEMORY_VALUE, array_data);
     return NULL;
@@ -43,6 +48,8 @@ ps_array_data *ps_array_free(ps_array_data *array_data)
 
 ps_type_definition *ps_array_get_type_def(const ps_symbol *array_type)
 {
+    if (ps_array_debug)
+        ps_symbol_debug(stderr, "ps_array_get_type_def, array_type: ", array_type);
     if (array_type == NULL || array_type->value == NULL || array_type->value->type == NULL ||
         array_type->value->type->value == NULL)
         return NULL;
@@ -52,14 +59,16 @@ ps_type_definition *ps_array_get_type_def(const ps_symbol *array_type)
     return type_def;
 }
 
-ps_symbol *ps_array_get_subrange(const ps_symbol *array)
+ps_symbol *ps_array_get_subrange(const ps_symbol *array_type)
 {
+    if (ps_array_debug)
+        ps_symbol_debug(stderr, "ps_array_get_subrange, array_type: ", array_type);
     // WORKS(?) => array->value->type->value->data.t->def.a.subrange
-    ps_symbol_debug(stderr, "GET_SUBRANGE\tARRAY\t\t", array);
-    ps_value_debug(stderr, "GET_SUBRANGE\tVALUE\t\t", array->value);
-    ps_symbol_debug(stderr, "GET_SUBRANGE\tTYPE\t\t", array->value->type);
-    ps_value_debug(stderr, "GET_SUBRANGE\tTYPE\t\t", array->value->type->value);
-    const ps_type_definition *type_def = ps_array_get_type_def(array);
+    ps_symbol_debug(stderr, "GET_SUBRANGE\tARRAY\t\t", array_type);
+    ps_value_debug(stderr, "GET_SUBRANGE\tVALUE\t\t", array_type->value);
+    ps_symbol_debug(stderr, "GET_SUBRANGE\tTYPE\t\t", array_type->value->type);
+    ps_value_debug(stderr, "GET_SUBRANGE\tTYPE\t\t", array_type->value->type->value);
+    const ps_type_definition *type_def = ps_array_get_type_def(array_type);
     ps_type_definition_debug(stderr, "GET_SUBRANGE\tTYPE_DEF\t", type_def);
     if (type_def == NULL)
         return NULL;
@@ -68,9 +77,11 @@ ps_symbol *ps_array_get_subrange(const ps_symbol *array)
     return subrange;
 }
 
-ps_symbol *ps_array_get_item_type(const ps_symbol *array)
+ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
 {
-    const ps_type_definition *type_def = ps_array_get_type_def(array);
+    if (ps_array_debug)
+        ps_symbol_debug(stderr, "ps_array_get_item_type, array_type: ", array_type);
+    const ps_type_definition *type_def = ps_array_get_type_def(array_type);
     if (type_def == NULL)
         return NULL;
     return type_def->def.a.item_type;
@@ -78,6 +89,11 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array)
 
 ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check)
 {
+    if (ps_array_debug)
+    {
+        ps_symbol_debug(stderr, "ps_array_get_value, array: ", array);
+        ps_value_debug(stderr, "ps_array_get_value, index: ", index);
+    }
     const ps_type_definition *type_def = ps_array_get_type_def(array); // WIP: "array->value->type->value->data.t"
     ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subrange->value->data.t, index);
     if (offset >= array->value->data.a->count)
@@ -89,6 +105,11 @@ ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_va
 
 ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const ps_value *value, bool range_check)
 {
+    if (ps_array_debug)
+    {
+        ps_symbol_debug(stderr, "ps_array_set_value, array_var: ", array_var);
+        ps_value_debug(stderr, "ps_array_set_value, index: ", index);
+    }
     if (array_var == NULL || array_var->value == NULL || array_var->value->type == NULL ||
         array_var->value->data.a->values == NULL)
         return PS_ERROR_INVALID_PARAMETERS;
@@ -103,6 +124,6 @@ ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const p
     ps_error error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
         return error;
-    array_var->value->data.a->values[offset] = value->data;
+    array_var->value->data.a->values[offset] = array_value.data;
     return PS_ERROR_NONE;
 }
