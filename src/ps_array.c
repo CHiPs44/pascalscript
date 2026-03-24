@@ -87,19 +87,23 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
     return type_def->def.a.item_type;
 }
 
-ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check)
+ps_error ps_array_get_value(const ps_symbol *array_var, const ps_value *index, ps_value *value, bool range_check)
 {
     if (ps_array_debug)
     {
-        ps_symbol_debug(stderr, "ps_array_get_value, array: ", array);
+        ps_symbol_debug(stderr, "ps_array_get_value, array: ", array_var);
         ps_value_debug(stderr, "ps_array_get_value, index: ", index);
     }
-    const ps_type_definition *type_def = ps_array_get_type_def(array); // WIP: "array->value->type->value->data.t"
+    const ps_type_definition *type_def = // ps_array_get_type_def(array->value->type);
+        array_var->value->type->value->data.t;
+    if (ps_array_debug)
+        ps_type_definition_debug(stderr, "*** ps_array_get_value, type_def: ", type_def);
     ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subrange->value->data.t, index);
-    if (offset >= array->value->data.a->count)
+    if (offset >= array_var->value->data.a->count)
         return PS_ERROR_OUT_OF_RANGE;
-    ps_value array_value = {
-        .allocated = false, .type = ps_array_get_item_type(array), .data = array->value->data.a->values[offset]};
+    ps_value array_value = {.allocated = false,
+                            .type = ps_array_get_item_type(array_var),
+                            .data = array_var->value->data.a->values[offset]};
     return ps_value_copy(&array_value, value, range_check);
 }
 

@@ -276,8 +276,8 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_symbol *symbol,
                                       ps_value *result)
 {
+    // interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("FACTOR", "ARRAY");
-    TRACE_ERROR("FUNCTION")
 
     ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     if (type_def == NULL)
@@ -299,9 +299,7 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
             ps_interpreter_set_message(interpreter, "Index is invalid");
             TRACE_ERROR("INDEX")
         }
-        ps_value_debug(stderr, "INDEX     ", &index);
         EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-        READ_NEXT_TOKEN
         ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
         if (error != PS_ERROR_NONE)
         {
@@ -344,6 +342,7 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
                     symbol->name, ps_symbol_get_kind_name(symbol->kind),
                     ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
+        // fprintf(stderr, "ARRAY? %s\n", ps_value_is_array(symbol->value) ? "YES" : "NO");
         if (ps_value_is_array(symbol->value))
         {
             if (!ps_visit_factor_identifier_array(interpreter, mode, symbol, result))
