@@ -46,16 +46,36 @@ ps_array_data *ps_array_free(ps_array_data *array_data)
     return NULL;
 }
 
-ps_type_definition *ps_array_get_type_def(const ps_symbol *array_type)
+ps_type_definition *ps_array_get_type_def(const ps_symbol *symbol)
 {
     if (ps_array_debug)
-        ps_symbol_debug(stderr, "ps_array_get_type_def, array_type: ", array_type);
-    if (array_type == NULL || array_type->value == NULL || array_type->value->type == NULL ||
-        array_type->value->type->value == NULL)
+        ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => array    : ", symbol);
+    if (symbol == NULL || symbol->value == NULL || symbol->value->type == NULL)
         return NULL;
-    ps_type_definition *type_def = array_type->value->data.t;
+    ps_symbol *symbol2;
+    if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
+    {
+        symbol2 = symbol;
+        if (ps_array_debug)
+            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type_def : ", symbol2);
+    }
+    else if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+    {
+        symbol2 = symbol->value->type;
+        if (ps_array_debug)
+            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => variable : ", symbol2);
+    }
+    else
+    {
+        if (ps_array_debug)
+            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type/var!: ", symbol);
+        return NULL;
+    }
+    ps_type_definition *type_def = symbol2->value->data.t;
     if (!ps_type_definition_is_array(type_def))
         return NULL;
+    if (ps_array_debug)
+        ps_type_definition_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type/var!: ", type_def);
     return type_def;
 }
 
@@ -104,15 +124,18 @@ ps_error ps_array_get_value(const ps_symbol *array_var, const ps_value *index, p
     ps_value array_value = {.allocated = false,
                             .type = ps_array_get_item_type(array_var),
                             .data = array_var->value->data.a->values[offset]};
-    return ps_value_copy(&array_value, value, range_check);
+    ps_error error = ps_value_copy(&array_value, value, range_check);
+    if (ps_array_debug)
+        ps_value_debug(stderr, "ps_array_get_value, array: ", &array_value);
+    return error;
 }
 
 ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const ps_value *value, bool range_check)
 {
     if (ps_array_debug)
     {
-        ps_symbol_debug(stderr, "ps_array_set_value, array_var: ", array_var);
-        ps_value_debug(stderr, "ps_array_set_value, index: ", index);
+        ps_symbol_debug(stderr, "PS_ARRAY_SET_VALUE, array_var: ", array_var);
+        ps_value_debug(stderr, "PS_ARRAY_SET_VALUE, index: ", index);
     }
     if (array_var == NULL || array_var->value == NULL || array_var->value->type == NULL ||
         array_var->value->data.a->values == NULL)

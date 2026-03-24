@@ -121,7 +121,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
                 variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
-        // array[index] := expression
+        // => array[index] := expression
         EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
         READ_NEXT_TOKEN
         index.type = variable->value->type->value->data.t->def.a.subrange;
@@ -134,12 +134,14 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         result.type = variable->value->type->value->data.t->def.a.item_type;
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION1")
+        ps_value_debug(stderr, "*** RESULT ", &result);
         ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
         if (error != PS_ERROR_NONE)
         {
             interpreter->error = error;
             TRACE_ERROR("ARRAY_ASSIGN")
         }
+        fprintf(stderr, "*** HERE! ***");
     }
     else
     {

@@ -13,7 +13,8 @@ Var
     I: Integer;
 
 Begin
-    I := Numbers[1];
+    Numbers[1] := 42;
+    // I := Numbers[1];
     // WriteLn(I);
     // Numbers[10] := 42;
     // I := Numbers[10];
