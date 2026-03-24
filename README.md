@@ -594,3 +594,7 @@ NB:
 - some files coming from other sources have their own license like:
   - Tao Yue's examples from his site (and authorized copies in Free Pascal Wiki)
   - Rosetta Code <https://rosettacode.org/wiki/Category:Pascal>
+
+## Links
+
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/pascalscript)
