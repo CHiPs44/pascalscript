@@ -13,7 +13,8 @@ Var
     I: Integer;
 
 Begin
-    Numbers[1] := 42;
+    For I := 1 To 10 Do
+        Numbers[I] := 42 * I;
     // I := Numbers[1];
     // WriteLn(I);
     // Numbers[10] := 42;

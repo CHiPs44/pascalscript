@@ -36,6 +36,8 @@ extern "C"
     /** @brief array[index] := value */
     ps_error ps_array_set_value(ps_symbol *array, const ps_value *index, const ps_value *value, bool range_check);
 
+    void ps_array_debug_values(FILE *out, ps_symbol *array_var);
+
 #ifdef __cplusplus
 }
 #endif

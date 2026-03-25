@@ -141,7 +141,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
             interpreter->error = error;
             TRACE_ERROR("ARRAY_ASSIGN")
         }
-        fprintf(stderr, "*** HERE! ***");
+        fprintf(stderr, "\n\n*** HERE! ***\n\n");
+        ps_array_debug_values(stderr, variable);
     }
     else
     {
