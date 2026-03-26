@@ -86,6 +86,38 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
 //     VISIT_END("OK");
 // }
 
+bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
+{
+    VISIT_BEGIN("ASSIGNMENT", "ARRAY")
+
+    ps_value result = {.type = &ps_system_none, .data.v = NULL};
+    ps_value index = {.type = &ps_system_none, .data.v = NULL};
+
+    EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+    READ_NEXT_TOKEN
+    index.type = variable->value->type->value->data.t->def.a.subrange;
+    if (!ps_visit_expression(interpreter, mode, &index))
+        TRACE_ERROR("INDEX")
+    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+    READ_NEXT_TOKEN
+    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
+    READ_NEXT_TOKEN
+    result.type = variable->value->type->value->data.t->def.a.item_type;
+    if (!ps_visit_expression(interpreter, mode, &result))
+        TRACE_ERROR("EXPRESSION1")
+    if (mode == MODE_EXEC)
+    {
+        ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
+        if (error != PS_ERROR_NONE)
+        {
+            interpreter->error = error;
+            TRACE_ERROR("ARRAY_ASSIGN")
+        }
+    }
+
+    VISIT_END("OK")
+}
+
 /**
  * Visit assignment:
  *      IDENTIFIER := EXPRESSION
@@ -98,11 +130,9 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
  */
 bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
-    // interpreter->debug = DEBUG_TRACE;
     VISIT_BEGIN("ASSIGNMENT", "")
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
-    ps_value index = {.type = &ps_system_none, .data.v = NULL};
 
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
@@ -122,28 +152,8 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
         // => array[index] := expression
-        EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
-        READ_NEXT_TOKEN
-        index.type = variable->value->type->value->data.t->def.a.subrange;
-        if (!ps_visit_expression(interpreter, mode, &index))
-            TRACE_ERROR("INDEX")
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-        READ_NEXT_TOKEN
-        EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-        READ_NEXT_TOKEN
-        result.type = variable->value->type->value->data.t->def.a.item_type;
-        if (!ps_visit_expression(interpreter, mode, &result))
-            TRACE_ERROR("EXPRESSION1")
-        ps_value_debug(stderr, "*** RESULT ", &result);
-        ps_value_debug(stderr, "*** INDEX  ", &index);
-        ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
-        if (error != PS_ERROR_NONE)
-        {
-            interpreter->error = error;
-            TRACE_ERROR("ARRAY_ASSIGN")
-        }
-        fprintf(stderr, "\n\n*** HERE! ***\n\n");
-        ps_array_debug_values(stderr, variable);
+        if (!ps_visit_assignment_array(interpreter, mode, variable))
+            TRACE_ERROR("ARRAY")
     }
     else
     {

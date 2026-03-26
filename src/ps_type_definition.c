@@ -175,7 +175,7 @@ ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *subr
 
 ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *subrange, const ps_value *index)
 {
-    bool debug = true;
+    bool debug = false;
     ps_unsigned offset = PS_UNSIGNED_MAX;
     if (subrange->type == PS_TYPE_SUBRANGE)
     {
@@ -192,7 +192,7 @@ ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *sub
         {
         case PS_TYPE_CHAR:
             // 'C' from 'A'..'Z' => Ord('C') - Ord('A') => 2
-            if (ps_value_get_type(index) == PS_TYPE_CHAR && index->data.c >= subrange->def.g.c.min &&
+            if (ps_value_get_base(index) == PS_TYPE_CHAR && index->data.c >= subrange->def.g.c.min &&
                 index->data.c <= subrange->def.g.c.max)
                 offset = index->data.c - subrange->def.g.c.min;
             break;
@@ -220,7 +220,7 @@ ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *sub
         case PS_TYPE_INTEGER:
             // 3 from -4..4 => 3 - -4 => 7
             //         0..8
-            if (ps_value_get_type(index) == PS_TYPE_INTEGER && index->data.i >= subrange->def.g.i.min &&
+            if (ps_value_get_base(index) == PS_TYPE_INTEGER && index->data.i >= subrange->def.g.i.min &&
                 index->data.i <= subrange->def.g.i.max)
                 offset = index->data.i - subrange->def.g.i.min;
             break;

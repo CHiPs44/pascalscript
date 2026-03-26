@@ -276,23 +276,15 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
 bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_symbol *symbol,
                                       ps_value *result)
 {
-    // interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("FACTOR", "ARRAY");
 
-    ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
+    const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
     READ_NEXT_TOKEN
     if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
     {
-        ps_value index = {.type = type_def->def.a.item_type, .allocated = false, .data.v = NULL};
-        // clang-format off
-        ps_symbol_debug         (stderr, "ARRAY     ", symbol);
-        ps_value_debug          (stderr, "INDEX     ", &index);
-        ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
-        ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
-        ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
-        // clang-format on
+        ps_value index = {.type = &ps_system_none/*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
         READ_NEXT_TOKEN
         if (!ps_visit_expression(interpreter, mode, &index))
         {
@@ -300,13 +292,17 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
             TRACE_ERROR("INDEX")
         }
         EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-        ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
-        if (error != PS_ERROR_NONE)
+        if (mode == MODE_EXEC)
         {
-            ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
-                                       ps_value_get_debug_string(&index));
-            RETURN_ERROR(error)
+            ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
+            if (error != PS_ERROR_NONE)
+            {
+                ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
+                                           ps_value_get_debug_string(&index));
+                RETURN_ERROR(error)
+            }
         }
+        READ_NEXT_TOKEN
     }
 
     VISIT_END("OK")
@@ -342,7 +338,6 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
                     symbol->name, ps_symbol_get_kind_name(symbol->kind),
                     ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
-        // fprintf(stderr, "ARRAY? %s\n", ps_value_is_array(symbol->value) ? "YES" : "NO");
         if (ps_value_is_array(symbol->value))
         {
             if (!ps_visit_factor_identifier_array(interpreter, mode, symbol, result))
