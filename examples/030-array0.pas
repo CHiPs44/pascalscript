@@ -6,24 +6,19 @@
 Program Arrays;
 
 Type
-    // NumberArray = Array[1..10] Of Integer;
-    NumberArray = Array['A'..'F'] Of Integer;
+    NumberArray = Array[1..10] Of Integer;
 
 Var
     Numbers: NumberArray;
-    // I: Integer;
-    I: Char;
-    N: Integer;
+    I, N: Integer;
 
 Begin
-    // For I := 1 To 10 Do
-    N := 10;
-    For I := 'A' To 'F' Do
+    N := 2;
+    For I := 1 To 10 Do
     Begin
         Numbers[I] := N;
-        N := N + 1;
+        N := N * 2;
     End;
-    // For I := 1 To 10 Do
-    For I := 'A' To 'F' Do
-        WriteLn(I:2, ' * ', I:2, ' = ', Numbers[I]:3);
+    For I := 1 To 10 Do
+        WriteLn(I:2, ' = ', Numbers[I]:4);
 End.
