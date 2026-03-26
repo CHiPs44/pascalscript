@@ -10,19 +10,16 @@ Type
 
 Var
     Numbers: NumberArray;
-    // I: Integer;
-    I: Char;
+    C: Char;
     N: Integer;
 
 Begin
-    // For I := 1 To 10 Do
     N := 10;
-    For I := 'A' To 'F' Do
+    For C := 'A' To 'F' Do
     Begin
-        Numbers[I] := N;
+        Numbers[C] := N;
         N := N + 1;
     End;
-    // For I := 1 To 10 Do
-    For I := 'A' To 'F' Do
-        WriteLn('''', I:2, ''' = ', Numbers[I]:3);
+    For C := 'A' To 'F' Do
+        WriteLn('''', C:2, ''' = ', Numbers[C]:3);
 End.
