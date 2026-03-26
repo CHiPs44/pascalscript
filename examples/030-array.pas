@@ -15,6 +15,7 @@ Var
 Begin
     For I := 1 To 10 Do
         Numbers[I] := 42 * I;
+    WriteLn('STOP!');
     // I := Numbers[1];
     // WriteLn(I);
     // Numbers[10] := 42;

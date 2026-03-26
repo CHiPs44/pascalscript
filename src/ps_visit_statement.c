@@ -135,6 +135,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION1")
         ps_value_debug(stderr, "*** RESULT ", &result);
+        ps_value_debug(stderr, "*** INDEX  ", &index);
         ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
         if (error != PS_ERROR_NONE)
         {

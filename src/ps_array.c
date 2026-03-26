@@ -144,9 +144,13 @@ ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const p
     ps_symbol_debug(stderr, "SET_VALUE ", subrange);
     ps_type_definition_debug(stderr, "SET_VALUE ", subrange->value->data.t);
     // Get offset from index
+    fprintf(stderr, "11111 OFFSET\n");
+    ps_array_debug = true;
     ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange->value->data.t, index);
+    fprintf(stderr, "22222 offset=%u, count=%u\n", offset, array_var->value->data.a->count);
     if (offset >= array_var->value->data.a->count)
         return PS_ERROR_INVALID_SUBRANGE;
+    ps_array_debug = false;
     ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};
     ps_error error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
