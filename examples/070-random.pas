@@ -25,11 +25,7 @@ Begin
     For I := 1 To MaxD20 Do
     Begin
         D20 := Random(10 + 10) + 1;
-        Write('d20(');
-        If I < 10 Then Write(' ');
-        Write(I, ')=');
-        If D20 < 10 Then Write(' ');
-        Write(D20);
+        Write('d20(', I:2, ')=', D20:2);
         If I Mod 7 = 0 Then WriteLn Else Write(' ');
         if D20 < Min Then Min := D20;
         if D20 > Max Then Max := D20;

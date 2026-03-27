@@ -134,12 +134,7 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
 
     static ps_token_type relational_operators[] = {
         // <            <=            >           >=           =               <>
-        PS_TOKEN_LT,
-        PS_TOKEN_LE,
-        PS_TOKEN_GT,
-        PS_TOKEN_GE,
-        PS_TOKEN_EQ,
-        PS_TOKEN_NE,
+        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -289,7 +284,7 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
     READ_NEXT_TOKEN
     if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
     {
-        ps_value index = {.type = &ps_system_none/*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
+        ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
         READ_NEXT_TOKEN
         if (!ps_visit_expression(interpreter, mode, &index))
         {
@@ -400,74 +395,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-        switch (symbol->kind)
-        {
-        case PS_SYMBOL_KIND_AUTO:
-        case PS_SYMBOL_KIND_CONSTANT:
-        case PS_SYMBOL_KIND_VARIABLE:
-            if (ps_value_is_array(symbol->value))
-            {
-                // interpreter->debug = DEBUG_VERBOSE;
-                // if (interpreter->debug >= DEBUG_VERBOSE)
-                fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
-                        ps_symbol_get_kind_name(symbol->kind),
-                        ps_type_definition_get_name(symbol->value->type->value->data.t));
-                ps_type_definition *type_def = ps_array_get_type_def(symbol);
-                if (type_def == NULL)
-                    RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-                READ_NEXT_TOKEN
-                if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-                {
-                    ps_value_type base = type_def->def.a.subrange->value->data.t->base;
-                    ps_symbol *index_type = base == PS_TYPE_CHAR ? &ps_system_char : base == PS_TYPE_UNSIGNED ? &ps_system_unsigned
-                                                                                 : base == PS_TYPE_INTEGER    ? &ps_system_integer
-                                                                                                              : NULL; // PS_TYPE_ENUM
-                    ps_value index = {.type = index_type, .allocated = false, .data.v = NULL};
-                    // clang-format off
-                    ps_symbol_debug         (stderr, "ARRAY     ", symbol);
-                    ps_value_debug          (stderr, "INDEX1    ", &index);
-                    ps_symbol_debug         (stderr, "ITEM_TYPE ", type_def->def.a.item_type);
-                    ps_symbol_debug         (stderr, "SUBRANGE1 ", type_def->def.a.subrange);
-                    ps_type_definition_debug(stderr, "SUBRANGE2 ", type_def->def.a.subrange->value->data.t);
-                    // clang-format on
-                    READ_NEXT_TOKEN
-                    if (!ps_visit_expression(interpreter, mode, &index))
-                    {
-                        ps_interpreter_set_message(interpreter, "Index is invalid");
-                        TRACE_ERROR("INDEX")
-                    }
-                    ps_value_debug(stderr, "INDEX2    ", &index);
-                    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-                    READ_NEXT_TOKEN
-                    if (mode == MODE_EXEC && !ps_array_get_value(symbol, &index, result))
-                    {
-                        ps_interpreter_set_message(interpreter, "Can't get array %s value for index %s",
-                                                   symbol->name,
-                                                   ps_value_get_debug_string(&index));
-                        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-                    }
-                }
-            }
-            else
-            {
-                result->type = symbol->value->type;
-                if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
-                    TRACE_ERROR("COPY");
-                READ_NEXT_TOKEN
-            }
-            break;
-        case PS_SYMBOL_KIND_FUNCTION:
-            // interpreter->debug = DEBUG_VERBOSE;
-            // fprintf(stderr, " INFO\tFACTOR: identifier '%s' is a FUNCTION\n", symbol->name);
-            if (!ps_visit_function_call(interpreter, mode, symbol, result))
-                TRACE_ERROR("FUNCTION");
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        }
+        if (!ps_visit_factor_identifier(interpreter, mode, identifier, result))
+            TRACE_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
@@ -543,6 +472,180 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     VISIT_END("OK")
 }
 
+bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result,
+                                   int *arg_count, ps_value *arg1)
+{
+    VISIT_BEGIN("FUNCTION_CALL", "RANDOM");
+
+    // Random function can be called with 3 signatures:
+    //  1. Random or Random() => Real from 0.0 to 1.0 excluded
+    //  2. Random(Integer) => Integer
+    //  3. Random(Unsigned) => Unsigned
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    {
+        // Skip '(' and ')' or get parameter enclosed in parentheses
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        {
+            *arg_count = 0;
+            result->type = &ps_system_real;
+            READ_NEXT_TOKEN
+        }
+        else
+        {
+            *arg_count = 1;
+            if (!ps_visit_expression(interpreter, mode, arg1))
+                TRACE_ERROR("PARAMETER");
+            if (arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
+                RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+            result->type = arg1->type;
+            READ_NEXT_TOKEN
+        }
+    }
+    else
+    {
+        *arg_count = 0;
+        result->type = &ps_system_real;
+    }
+
+    VISIT_END("OK")
+}
+
+bool ps_visit_function_call_low_high(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *symbol)
+{
+    VISIT_BEGIN("FUNCTION_CALL", "LOW_HIGH");
+
+    // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
+    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
+        lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    ps_identifier identifier = {0};
+    COPY_IDENTIFIER(identifier)
+    symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+    if (symbol == NULL)
+        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+    READ_NEXT_TOKEN
+    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+    READ_NEXT_TOKEN
+
+    VISIT_END("OK")
+}
+
+bool ps_visit_function_call_power(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *arg1, ps_value *arg2)
+{
+    VISIT_BEGIN("FUNCTION_CALL", "POWER");
+
+    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
+    READ_NEXT_TOKEN
+    if (!ps_visit_expression(interpreter, mode, arg1))
+        TRACE_ERROR("ARG1")
+    if (!ps_value_is_number(arg1) && !ps_value_is_real(arg1))
+        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    EXPECT_TOKEN(PS_TOKEN_COMMA)
+    READ_NEXT_TOKEN
+    if (!ps_visit_expression(interpreter, mode, arg2))
+        TRACE_ERROR("ARG2")
+    if (!ps_value_is_number(arg2) && !ps_value_is_real(arg2))
+        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
+    READ_NEXT_TOKEN
+
+    VISIT_END("OK")
+}
+
+/**
+ * Visit system or user function call:
+ *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
+ */
+bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_symbol *function,
+                                   ps_value *result)
+{
+    VISIT_BEGIN("FUNCTION_CALL", "SYSTEM");
+
+    ps_value arg1 = {.type = &ps_system_none, .data.v = NULL};
+    ps_value arg2 = {.type = &ps_system_none, .data.v = NULL};
+    ps_symbol *symbol = NULL;
+    int arg_count = 0;
+
+    // Handle specific function types with dedicated handlers
+    if (function == &ps_system_function_random)
+    {
+        if (!ps_visit_function_call_random(interpreter, mode, result, &arg_count, &arg1))
+            TRACE_ERROR("RANDOM")
+    }
+    else if (function == &ps_system_function_get_tick_count)
+    {
+        // No arguments, skip optional '(' and ')'
+        if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+        {
+            READ_NEXT_TOKEN
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+            READ_NEXT_TOKEN
+        }
+        arg_count = 0;
+        result->type = &ps_system_unsigned;
+    }
+    else if (function == &ps_system_function_low || function == &ps_system_function_high)
+    {
+        arg_count = -1;
+        if (!ps_visit_function_call_low_high(interpreter, mode, symbol))
+            TRACE_ERROR("LOW_HIGH")
+    }
+    else if (function == &ps_system_function_power)
+    {
+        // Power function has two "by value" numeric arguments
+        arg_count = 2;
+        if (!ps_visit_function_call_power(interpreter, mode, &arg1, &arg2))
+            TRACE_ERROR("POWER")
+    }
+    else
+    {
+        // all other functions have one "by value" argument for now
+        // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
+        arg_count = 1;
+        EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+        READ_NEXT_TOKEN
+        if (!ps_visit_expression(interpreter, mode, &arg1))
+            TRACE_ERROR("ARG");
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+        READ_NEXT_TOKEN
+    }
+
+    // Execute the function based on its type
+    if (mode == MODE_EXEC)
+    {
+        ps_error error = PS_ERROR_NONE;
+        switch (arg_count)
+        {
+        case -1:
+            error = ps_function_exec_1arg_s(interpreter, function, symbol, result);
+            break;
+        case 0:
+            error = ps_function_exec_1arg(interpreter, function, NULL, result);
+            break;
+        case 1:
+            error = ps_function_exec_1arg(interpreter, function, &arg1, result);
+            break;
+        case 2:
+            error = ps_function_exec_2args(interpreter, function, &arg1, &arg2, result);
+            break;
+        default:
+            error = PS_ERROR_INVALID_PARAMETERS;
+            break;
+        }
+        if (error != PS_ERROR_NONE)
+        {
+            interpreter->error = error;
+            TRACE_ERROR("SYSTEM_FUNCTION")
+        }
+    }
+
+    VISIT_END("OK")
+}
+
 /**
  * Visit system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
@@ -552,131 +655,17 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
 {
     VISIT_BEGIN("FUNCTION_CALL", "");
 
-    ps_value arg1 = {.type = &ps_system_none, .data.v = NULL};
-    ps_value arg2 = {.type = &ps_system_none, .data.v = NULL};
-    bool null_arg = false;
-    bool symbol_arg = false;
-    ps_symbol *symbol = NULL;
-    int arg_count = 1;
-
     READ_NEXT_TOKEN
     if (function->system)
     {
-        // System functions
-        if (function == &ps_system_function_random)
-        {
-            // Random function can be called with 3 signatures:
-            //  1. Random or Random() => Real from 0.0 to 1.0 excluded
-            //  2. Random(Integer) => Integer
-            //  3. Random(Unsigned) => Unsigned
-            if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-            {
-                // Skip '(' and ')' or get parameter enclosed in parentheses
-                READ_NEXT_TOKEN
-                if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-                {
-                    READ_NEXT_TOKEN
-                    null_arg = true;
-                    result->type = &ps_system_real;
-                }
-                else
-                {
-                    if (!ps_visit_expression(interpreter, mode, &arg1))
-                        TRACE_ERROR("PARAMETER");
-                    if (mode == MODE_EXEC && arg1.type != &ps_system_integer && arg1.type != &ps_system_unsigned)
-                        RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
-                    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-                    result->type = arg1.type;
-                    READ_NEXT_TOKEN
-                }
-            }
-            else
-            {
-                arg_count = 0;
-                null_arg = true;
-                result->type = &ps_system_real;
-            }
-        }
-        else if (function == &ps_system_function_get_tick_count)
-        {
-            // Skip '(' and ')'
-            if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-            {
-                READ_NEXT_TOKEN
-                EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-                READ_NEXT_TOKEN
-            }
-            null_arg = true;
-            result->type = &ps_system_unsigned;
-        }
-        else if (function == &ps_system_function_low || function == &ps_system_function_high)
-        {
-            // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
-            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN
-            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
-                lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            ps_identifier identifier = {0};
-            COPY_IDENTIFIER(identifier)
-            symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
-            if (symbol == NULL)
-                RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-            READ_NEXT_TOKEN
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN
-            symbol_arg = true;
-            // fprintf(stderr, "%cINFO\tFUNCTION_CALL: '%s' argument is symbol '%s' of type '%s'\n",
-            //         mode == MODE_EXEC ? '*' : ' ', function->name, symbol->name,
-            //         ps_type_definition_get_name(symbol->value->type->value->data.t));
-        }
-        else if (function == &ps_system_function_power)
-        {
-            arg_count = 2;
-            // Power function has two "by value" arguments
-            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN
-            if (!ps_visit_expression(interpreter, mode, &arg1))
-                TRACE_ERROR("ARG1");
-            // TODO? check that arg1 is integer, unsigned or real?
-            EXPECT_TOKEN(PS_TOKEN_COMMA);
-            READ_NEXT_TOKEN
-            if (!ps_visit_expression(interpreter, mode, &arg2))
-                TRACE_ERROR("ARG2");
-            // TODO? check that arg2 is integer, unsigned or real?
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN
-        }
-        else
-        {
-            // all other functions have one "by value" argument for now
-            // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
-            EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-            READ_NEXT_TOKEN
-            if (!ps_visit_expression(interpreter, mode, &arg1))
-                TRACE_ERROR("ARG");
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN
-        }
-        if (mode == MODE_EXEC)
-        {
-            if (symbol_arg)
-                interpreter->error = ps_function_exec_1arg_s(interpreter, function, symbol, result);
-            else if (arg_count <= 1)
-                interpreter->error = ps_function_exec_1arg(interpreter, function, null_arg ? NULL : &arg1, result);
-            else if (arg_count == 2)
-                interpreter->error = ps_function_exec_2args(interpreter, function, &arg1, &arg2, result);
-            if (interpreter->error != PS_ERROR_NONE)
-                TRACE_ERROR("SYSTEM_FUNCTION");
-        }
+        if (!ps_visit_function_call_system(interpreter, mode, function, result))
+            TRACE_ERROR("SYSTEM")
     }
     else
     {
         // User defined function
         if (!ps_visit_procedure_or_function_call(interpreter, mode, function, result))
-        {
             TRACE_ERROR("FUNCTION_CALL");
-        }
     }
 
     VISIT_END("OK")
@@ -710,14 +699,6 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
         READ_NEXT_TOKEN
         if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
             lexer->current_token.type != PS_TOKEN_REAL_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    }
-    else
-    {
-        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
-            lexer->current_token.type != PS_TOKEN_REAL_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE &&
-            lexer->current_token.type != PS_TOKEN_CHAR_VALUE && lexer->current_token.type != PS_TOKEN_STRING_VALUE &&
-            lexer->current_token.type != PS_TOKEN_BOOLEAN_VALUE)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
     switch (lexer->current_token.type)
