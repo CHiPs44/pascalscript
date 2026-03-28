@@ -496,7 +496,7 @@ bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_m
             *arg_count = 1;
             if (!ps_visit_expression(interpreter, mode, arg1))
                 TRACE_ERROR("PARAMETER");
-            if (arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
+            if (mode==MODE_EXEC&& arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             result->type = arg1->type;
