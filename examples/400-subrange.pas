@@ -8,8 +8,9 @@ Program SubRange;
 
 Type
   UpperCaseLetter = 'A'..'Z';
-  TDay = 1..31; // 1..31 doesn't work for now as it is interpreted as an incorrect real value
   TMonth = 1..12;
+  TDay = 1..31;
+  TYear = -9999..9999;
 
 Procedure TestInnerType;
 Type
@@ -43,7 +44,7 @@ Begin
   // WriteLn('I = ', I, ' J = ', J, ' K = ', K);
   L := 'L';
   WriteLn('L = ''', L, '''');
-  // // { this should/will cause a runtime error because 'a'' is out of range for 'A'..'Z' }
+  // { this should/will cause a runtime error because 'a'' is out of range for 'A'..'Z' }
   // L := 'a';
   // WriteLn('L = ''', L, '''');
   TestInnerType;

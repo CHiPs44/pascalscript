@@ -512,23 +512,23 @@ bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_m
     VISIT_END("OK")
 }
 
-bool ps_visit_function_call_low_high(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *symbol)
+bool ps_visit_function_call_low_high(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **symbol)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "LOW_HIGH");
+    VISIT_BEGIN("FUNCTION_CALL", "LOW_HIGH")
 
     // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
-    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
+    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
         lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     ps_identifier identifier = {0};
     COPY_IDENTIFIER(identifier)
-    symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
-    if (symbol == NULL)
-        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+    *symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+    if (*symbol == NULL)
+        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
     READ_NEXT_TOKEN
-    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
+    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
 
     VISIT_END("OK")
@@ -591,7 +591,7 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
         arg_count = -1;
-        if (!ps_visit_function_call_low_high(interpreter, mode, symbol))
+        if (!ps_visit_function_call_low_high(interpreter, mode, &symbol))
             TRACE_ERROR("LOW_HIGH")
     }
     else if (function == &ps_system_function_power)
