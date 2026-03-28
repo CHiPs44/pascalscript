@@ -1,7 +1,7 @@
 Program SubRange;
 
-// Uses
-//   FreePascalCompatibility32;
+Uses
+  FreePascalCompatibility32;
 
 // Not usable by PascalScript yet: {$R-} {$RANGECHECKS OFF}
 // Use -r to disable range checking from command line.

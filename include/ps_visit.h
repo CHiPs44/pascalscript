@@ -22,6 +22,7 @@ extern "C"
 
     /* src/ps_visit_declaration.c */
     bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_uses(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode);

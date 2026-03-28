@@ -59,6 +59,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_UNEXPECTED_TYPE, "Unexpected type"},
     {PS_ERROR_EXPECTED_VARIABLE, "Variable expected"},
     {PS_ERROR_EXPECTED_CONSTANT, "Constant expected"},
+    {PS_ERROR_EXPECTED_IDENTIFIER, "Identifier expected"},
     {PS_ERROR_EXPECTED_VALUE, "Value expected"},
     {PS_ERROR_EXPECTED_NUMBER, "Number expected"},
     {PS_ERROR_EXPECTED_ORDINAL, "Ordinal expected"},

@@ -35,21 +35,24 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
             READ_NEXT_TOKEN
         else
         {
+            bool loop = true;
             do
             {
                 EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
                 READ_NEXT_TOKEN
-                if (lexer->current_token.type == PS_TOKEN_COMMA)
+                switch (lexer->current_token.type)
                 {
-                    READ_NEXT_TOKEN
-                    continue;
-                }
-                if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-                {
+                case PS_TOKEN_COMMA:
                     READ_NEXT_TOKEN
                     break;
+                case PS_TOKEN_RIGHT_PARENTHESIS:
+                    READ_NEXT_TOKEN
+                    loop = false;
+                    break;
+                default:
+                    RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
                 }
-            } while (true);
+            } while (loop);
         }
     }
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
@@ -59,12 +62,46 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
         TRACE_ERROR("ADD SYMBOL")
+    // One "Uses" clause at most after "Program"
+    if (!ps_visit_uses(interpreter, mode))
+        TRACE_ERROR("USES")
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
     if (!ps_interpreter_exit_environment(interpreter))
         TRACE_ERROR("EXIT ENVIRONMENT");
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
+
+    VISIT_END("OK")
+}
+
+bool ps_visit_uses(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("USES", "")
+
+    if (lexer->current_token.type == PS_TOKEN_USES)
+    {
+        bool loop = true;
+        READ_NEXT_TOKEN
+        do
+        {
+            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+                RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+            READ_NEXT_TOKEN
+            switch (lexer->current_token.type)
+            {
+            case PS_TOKEN_COMMA:
+                READ_NEXT_TOKEN
+                break;
+            case PS_TOKEN_SEMI_COLON:
+                READ_NEXT_TOKEN
+                loop = false;
+                break;
+            default:
+                RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+            }
+        } while (loop);
+    }
 
     VISIT_END("OK")
 }
