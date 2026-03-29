@@ -69,7 +69,7 @@ const ps_symbol_kind_name ps_symbol_kind_names[] = {
     // clang-format off
     //                                123456789
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
-    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE"     },
+    {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE_DEF" },
     {PS_SYMBOL_KIND_PROGRAM        , "PROGRAM"  },
     {PS_SYMBOL_KIND_UNIT           , "UNIT"     },
     {PS_SYMBOL_KIND_CONSTANT       , "CONSTANT" },
