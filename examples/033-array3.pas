@@ -6,7 +6,7 @@
 Program Arrays;
 
 Type
-    ArraySubRange = 1..10;
+    ArraySubRange = -9..9;
     NumberArray = Array[ArraySubRange] Of Integer;
 
 Procedure InitializeArray(Var Numbers: NumberArray);
@@ -14,8 +14,9 @@ Var
     I: Integer;
 Begin
     WriteLn('InitializeArray');
+    Randomize;
     For I := Low(Numbers) To High(Numbers) Do
-        Numbers[I] := Random(1000);
+        Numbers[I] := 100 + Random(900);
 End;
 
 Procedure SortArray(Var Numbers: NumberArray);
