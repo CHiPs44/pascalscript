@@ -63,7 +63,7 @@ static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpre
         ps_symbol_free(*symbol);
         ps_value_free(value);
         ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_ADDED)
+        TRACE_ERROR("REGISTER")
     }
 
     VISIT_END("OK");

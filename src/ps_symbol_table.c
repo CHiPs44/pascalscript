@@ -128,7 +128,8 @@ ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
         error = PS_SYMBOL_TABLE_ERROR_INVALID;
         goto cleanup;
     }
-    ps_symbol_table_log("*** GROW from %u to %u ***\n", old_size, table->size);
+    ps_memory_free(PS_MEMORY_SYMBOL, old_symbols);
+    ps_symbol_table_log("*** GROW from %u to %u ***\n", old_size, new_size);
     return PS_SYMBOL_TABLE_ERROR_NONE;
 cleanup:
     if (new_symbols != NULL)

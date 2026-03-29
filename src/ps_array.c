@@ -36,7 +36,6 @@ ps_array_data *ps_array_alloc(const ps_symbol *array_type)
     return array_data;
 }
 
-// TODO do not forget to call this when necessary
 ps_array_data *ps_array_free(ps_array_data *array_data)
 {
     if (ps_array_debug)

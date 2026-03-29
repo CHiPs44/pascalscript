@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ps_array.h"
 #include "ps_error.h"
 #include "ps_memory.h"
 #include "ps_string.h"
@@ -33,10 +34,23 @@ ps_value *ps_value_free(ps_value *value)
 {
     if (value == NULL || !value->allocated)
         return NULL;
-    if (value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL &&
-        value->type->value->data.t->base == PS_TYPE_EXECUTABLE)
+    ps_value_type type = ps_value_get_type(value);
+    switch(type)
     {
-        ps_executable_free(value->data.x);
+        // case PS_TYPE_STRING:
+        //     ps_string_free(value->data.s);
+        //     break;
+        case PS_TYPE_ARRAY:
+            ps_array_free(value->data.a);
+            break;
+        case PS_TYPE_EXECUTABLE:
+            ps_executable_free(value->data.x);
+            break;
+        case PS_TYPE_DEFINITION:
+            ps_type_definition_free(value->data.t);
+            break;
+        default:
+            break;
     }
     ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;
@@ -118,10 +132,6 @@ bool ps_value_is_array(const ps_value *value)
 
 ps_value_type ps_value_get_type(const ps_value *value)
 {
-    // if (value == NULL)
-    //     fprintf(stderr, "ps_value_get_type: NULL!\n");
-    // else
-    //     ps_value_debug(stderr, "ps_value_get_type: ", value);
     if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
         return PS_TYPE_NONE;
     return value->type->value->data.t->type;
@@ -129,10 +139,6 @@ ps_value_type ps_value_get_type(const ps_value *value)
 
 ps_value_type ps_value_get_base(const ps_value *value)
 {
-    // if (value == NULL)
-    //     fprintf(stderr, "ps_value_get_base: NULL!\n");
-    // else
-    //     ps_value_debug(stderr, "ps_value_get_base: ", value);
     if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
         return PS_TYPE_NONE;
     return value->type->value->data.t->base;
