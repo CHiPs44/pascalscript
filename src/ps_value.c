@@ -35,22 +35,22 @@ ps_value *ps_value_free(ps_value *value)
     if (value == NULL || !value->allocated)
         return NULL;
     ps_value_type type = ps_value_get_type(value);
-    switch(type)
+    switch (type)
     {
-        // case PS_TYPE_STRING:
-        //     ps_string_free(value->data.s);
-        //     break;
-        case PS_TYPE_ARRAY:
-            ps_array_free(value->data.a);
-            break;
-        case PS_TYPE_EXECUTABLE:
-            ps_executable_free(value->data.x);
-            break;
-        case PS_TYPE_DEFINITION:
-            ps_type_definition_free(value->data.t);
-            break;
-        default:
-            break;
+    // case PS_TYPE_STRING:
+    //     ps_string_free(value->data.s);
+    //     break;
+    case PS_TYPE_ARRAY:
+        ps_array_free(value->data.a);
+        break;
+    case PS_TYPE_EXECUTABLE:
+        ps_executable_free(value->data.x);
+        break;
+    case PS_TYPE_DEFINITION:
+        ps_type_definition_free(value->data.t);
+        break;
+    default:
+        break;
     }
     ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;
@@ -155,11 +155,17 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     // If destination type is NONE, set it to source type
     if (to->type == &ps_system_none || to_base == PS_TYPE_NONE)
         to->type = from->type;
-    // Same type, just copy value
+    // Same value type, just copy value
     if (from->type == to->type)
     {
+        // TODO copy array?
         to->data = from->data;
         return PS_ERROR_NONE;
+    }
+    // Enum can only be copied to same enum type
+    if (ps_value_get_type(from) == PS_TYPE_ENUM)
+    {
+        return PS_ERROR_TYPE_MISMATCH;
     }
     // Char => Char? (subrange)
     if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_CHAR)
