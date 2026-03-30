@@ -162,7 +162,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         to->data = from->data;
         return PS_ERROR_NONE;
     }
-    // Enum can only be copied to same enum type
+    // Enum can only be copied to exact same enum type
     if (ps_value_get_type(from) == PS_TYPE_ENUM)
     {
         return PS_ERROR_TYPE_MISMATCH;

@@ -12,7 +12,7 @@ Var
   Ability: TAbilities;
   CharacterClass: TCharacterClass;
   Race: TCharacterRace;
-  Die: TDie;
+  Die, Die2: TDie;
   I: Integer;
   U: Unsigned;
 
@@ -54,6 +54,7 @@ Begin
   WriteLn('   Class: ', CharacterClass);
   WriteLn('    Race: ', Race);
   WriteLn('     Die: ', Die);
+  WriteLn('    Die2: ', Die2);
 End;
 
 Procedure DisplayDays();
@@ -85,6 +86,7 @@ Begin
   CharacterClass := Cleric;
   Race := Gnome;
   Die := D12;
+  Die2 := Die;
   DisplayCharacter;
   // Days of the week
   DisplayDays;
