@@ -5,12 +5,7 @@
 */
 
 #include <assert.h>
-#include <stdarg.h>
-#include <stdio.h>
-
-#include "ps_error.h"
-
-#include <assert.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -127,6 +122,27 @@ int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...) // N
     n += fprintf(output, "\n");
     va_end(args);
     return n;
+}
+
+ps_error ps_error_map_errno()
+{
+    switch (errno)
+    {
+    case 0:
+        return PS_ERROR_NONE;
+    case ENOMEM:
+        return PS_ERROR_OUT_OF_MEMORY;
+    case EOVERFLOW:
+        return PS_ERROR_OVERFLOW;
+    case EINVAL:
+        return PS_ERROR_INVALID_PARAMETERS;
+    case ERANGE:
+        return PS_ERROR_OUT_OF_RANGE;
+    case EDOM:
+        return PS_ERROR_MATH_NAN_INF;
+    default:
+        return PS_ERROR_GENERIC;
+    }
 }
 
 /* EOF */

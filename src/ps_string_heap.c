@@ -84,7 +84,10 @@ unsigned int ps_string_heap_get_hash_key(const char *z)
 ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
 {
     if (z == NULL)
+    {
+        errno = EINVAL;
         return NULL;
+    }
     size_t len = strlen(z);
     if (len > PS_STRING_MAX_LEN)
     {

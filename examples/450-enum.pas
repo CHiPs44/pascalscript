@@ -19,8 +19,8 @@ Var
 Procedure TestLowHighPredSucc();
 Begin
   // should not work! (and does not with FPC) because enumeration values are not implicitly convertible to integer/unsigned
-  // I := Female;
-  // WriteLn('I = ', I);
+  I := Female;
+  WriteLn('I = ', I, ' (SHOULD NOT WORK!');
   // should work! and does with FPC because Ord() is used to explicitly convert the enumeration value to an integer/unsigned
   I := Ord('A');
   WriteLn('I = ', I, ' (=', 65, ')');

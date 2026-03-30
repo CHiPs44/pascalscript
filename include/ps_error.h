@@ -88,6 +88,8 @@ extern "C"
     int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...);
     int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...);
 
+    ps_error ps_error_map_errno();
+
 #ifdef __cplusplus
 }
 #endif

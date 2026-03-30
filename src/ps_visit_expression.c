@@ -134,7 +134,12 @@ bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_
 
     static ps_token_type relational_operators[] = {
         // <            <=            >           >=           =               <>
-        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
+        PS_TOKEN_LT,
+        PS_TOKEN_LE,
+        PS_TOKEN_GT,
+        PS_TOKEN_GE,
+        PS_TOKEN_EQ,
+        PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
@@ -436,12 +441,8 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
             result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
             if (result->data.s == NULL)
             {
-                if (errno == ENOMEM)
-                    interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-                else if (errno == EOVERFLOW)
-                    interpreter->error = PS_ERROR_OVERFLOW;
-                else if (errno == EINVAL)
-                    interpreter->error = PS_ERROR_STRING_TOO_LONG;
+                ps_interpreter_set_message(interpreter, "Failed to create string value: %s", strerror(errno));
+                interpreter->error = ps_error_map_errno();
                 TRACE_ERROR("STRING_VALUE")
             }
         }
