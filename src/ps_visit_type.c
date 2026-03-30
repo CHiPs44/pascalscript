@@ -598,13 +598,14 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
 bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                    const char *type_name)
 {
-    // interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("TYPE_REFERENCE_ARRAY", "");
 
-    ps_symbol *subrange = NULL;
+    ps_symbol *subranges[8] = {0};
+    int dimensions = 0;
     ps_symbol *item_type = NULL;
+    ps_symbol *subrange = NULL;
 
-    // ARRAY
+    // 'ARRAY'
     if (lexer->current_token.type != PS_TOKEN_ARRAY)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
@@ -612,15 +613,28 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
-    // SUBRANGE (LOW '..' HIGH)
-    if (!ps_visit_type_reference(interpreter, mode, &subrange, NULL))
-        TRACE_ERROR("DIMENSION")
-    // Dimension *must* be a subrange
-    if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
-        RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
-    // ']'
-    if (lexer->current_token.type != PS_TOKEN_RIGHT_BRACKET)
+    do
+    {
+        // SUBRANGE (LOW '..' HIGH)
+        if (!ps_visit_type_reference(interpreter, mode, &subrange, NULL))
+            TRACE_ERROR("DIMENSION")
+        // Dimension *must* be a subrange
+        if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
+            RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
+        subranges[dimensions] = subrange;
+        dimensions += 1;
+        // ',' ?
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            if (dimensions == 8)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            continue;
+        }
+        // ']'
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+            break;
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    } while (true);
     READ_NEXT_TOKEN
     // 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
@@ -641,8 +655,15 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    type_def->def.a.subrange = subrange;
+    type_def->def.a.subranges = ps_memory_calloc(PS_MEMORY_TYPE, dimensions, sizeof(ps_symbol *));
+    if (type_def->def.a.subranges == NULL)
+    {
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
+    }
+    memccpy(type_def->def.a.subranges, subranges, dimensions * sizeof(ps_symbol *));
     type_def->def.a.item_type = item_type;
+    type_def->def.a.dimensions = dimensions;
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)
