@@ -27,8 +27,10 @@ extern "C"
 
     /** @brief Get array type definition */
     ps_type_definition *ps_array_get_type_def(const ps_symbol *array);
-    /** @brief Get array subrange */
-    ps_symbol *ps_array_get_subrange(const ps_symbol *array);
+    /** @brief Get array subranges */
+    ps_symbol **ps_array_get_subranges(const ps_symbol *array);
+    /** @brief Get array dimensions */
+    int ps_array_get_dimensions(const ps_symbol *array_type);
     /** @brief Get array item type */
     ps_symbol *ps_array_get_item_type(const ps_symbol *array);
     /** @brief value := array[index] (allocating value if NULL) */

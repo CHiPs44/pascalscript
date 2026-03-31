@@ -80,26 +80,45 @@ bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mod
     VISIT_END("OK")
 }
 
-// bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
-// {
-//     VISIT_BEGIN("ASSIGNMENT", "");
-//     VISIT_END("OK");
-// }
-
 bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *variable)
 {
     VISIT_BEGIN("ASSIGNMENT", "ARRAY")
 
-    ps_value result = {.type = &ps_system_none, .data.v = NULL};
-    ps_value index = {.type = &ps_system_none, .data.v = NULL};
+    ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
+    ps_value indicies[8] = {0};
+    int dimensions = variable->value->type->value->data.t->def.a.dimensions;
+    int dimension = 0;
+
+    for (ps_unsigned i = 0; i < dimensions; i++)
+    {
+        indicies[i].type = variable->value->type->value->data.t->def.a.subranges[i];
+        indicies[i].allocated = false;
+        indicies[i].data.v = NULL;
+    }
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
     READ_NEXT_TOKEN
-    index.type = variable->value->type->value->data.t->def.a.subranges[0];
-    if (!ps_visit_expression(interpreter, mode, &index))
-        TRACE_ERROR("INDEX")
-    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-    READ_NEXT_TOKEN
+    do
+    {
+        if (!ps_visit_expression(interpreter, mode, &indicies[dimension]))
+            TRACE_ERROR("INDEX")
+        dimension += 1;
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            if (dimension == dimensions)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN
+            continue;
+        }
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+        {
+            if (dimension != dimensions)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN
+            break;
+        }
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    } while (true);
     EXPECT_TOKEN(PS_TOKEN_ASSIGN)
     READ_NEXT_TOKEN
     result.type = variable->value->type->value->data.t->def.a.item_type;
@@ -107,7 +126,7 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
         TRACE_ERROR("EXPRESSION1")
     if (mode == MODE_EXEC)
     {
-        ps_error error = ps_array_set_value(variable, &index, &result, interpreter->range_check);
+        ps_error error = ps_array_set_value(variable, &indicies, &result, interpreter->range_check);
         if (error != PS_ERROR_NONE)
         {
             interpreter->error = error;
