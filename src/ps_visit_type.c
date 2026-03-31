@@ -661,7 +661,9 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
         ps_type_definition_free(type_def);
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
     }
-    memccpy(type_def->def.a.subranges, subranges, dimensions * sizeof(ps_symbol *));
+    for (int i = 0; i <= dimensions; i++) {
+        type_def->def.a.subranges[i] = subranges[i];
+    }
     type_def->def.a.item_type = item_type;
     type_def->def.a.dimensions = dimensions;
     // Register new type definition in symbol table

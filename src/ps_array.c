@@ -21,7 +21,7 @@ ps_array_data *ps_array_alloc(const ps_symbol *array_type)
     ps_array_data *array_data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data));
     if (array_data == NULL)
         return NULL;
-    array_data->count = ps_type_definition_get_subrange_count(type_def->def.a.subrange->value->data.t);
+    array_data->count = ps_type_definition_get_subrange_count(type_def->def.a.subranges[0]->value->data.t);
     if (ps_array_debug)
         fprintf(stderr, " DEBUG\tps_array_alloc, size: %u * %zu = %zu\n", array_data->count, sizeof(ps_value_data),
                 array_data->count * sizeof(ps_value_data));
@@ -87,7 +87,7 @@ ps_symbol *ps_array_get_subrange(const ps_symbol *array_type)
         ps_type_definition_debug(stderr, "GET_SUBRANGE\tTYPE_DEF\t", type_def);
     if (type_def == NULL)
         return NULL;
-    ps_symbol *subrange = type_def->def.a.subrange;
+    ps_symbol *subrange = type_def->def.a.subranges[0];
     if (ps_array_debug)
         ps_symbol_debug(stderr, "GET_SUBRANGE\tSUBRANGE\t", subrange);
     return subrange;
@@ -113,7 +113,7 @@ ps_error ps_array_get_value(const ps_symbol *array_var, const ps_value *index, p
     const ps_type_definition *type_def = array_var->value->type->value->data.t;
     if (ps_array_debug)
         ps_type_definition_debug(stderr, "*** ps_array_get_value, type_def: ", type_def);
-    ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subrange->value->data.t, index);
+    ps_unsigned offset = ps_type_definition_get_subrange_offset(type_def->def.a.subranges[0]->value->data.t, index);
     if (offset >= array_var->value->data.a->count)
         return PS_ERROR_OUT_OF_RANGE;
     ps_value array_value = {.allocated = false,

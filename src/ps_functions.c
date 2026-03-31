@@ -294,7 +294,7 @@ ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *ty
             low ? ps_system_constant_boolean_true.value->data.b : ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_ARRAY:
-        ps_symbol *subrange = type_def->def.a.subrange;
+        ps_symbol *subrange = type_def->def.a.subranges[0];
         if (debug)
             ps_symbol_debug(stderr, "ps_function_low/high, array subrange: ", subrange);
         return ps_function_low_or_high_type(interpreter, subrange, result, low);

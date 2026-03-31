@@ -95,7 +95,7 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
     READ_NEXT_TOKEN
-    index.type = variable->value->type->value->data.t->def.a.subrange;
+    index.type = variable->value->type->value->data.t->def.a.subranges[0];
     if (!ps_visit_expression(interpreter, mode, &index))
         TRACE_ERROR("INDEX")
     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)

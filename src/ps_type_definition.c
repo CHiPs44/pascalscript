@@ -121,7 +121,7 @@ ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension)
     ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
     if (type_def == NULL)
         return NULL;
-    type_def->def.a.subrange = dimension;
+    type_def->def.a.subranges[0] = dimension;
     return type_def;
 }
 
@@ -297,7 +297,7 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
         break;
     case PS_TYPE_ARRAY:
         // ARRAY[1..10] OF INTEGER => "ARRAY(SUBRANGE, INTEGER)"
-        snprintf(buffer, sizeof(buffer) - 1, "ARRAY(%s, %s)", type_def->def.a.subrange->name,
+        snprintf(buffer, sizeof(buffer) - 1, "ARRAY(%s, %s)", type_def->def.a.subranges[0]->name,
                  type_def->def.a.item_type->name);
         break;
     default:
