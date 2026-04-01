@@ -444,6 +444,57 @@ cleanup:
     return false;
 }
 
+bool ps_visit_type_reference_subrange_min_or_max(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *value,
+                                                 ps_value_type *base, ps_type_definition_subrange_char *c,
+                                                 ps_type_definition_subrange_integer *i,
+                                                 ps_type_definition_subrange_unsigned *u,
+                                                 ps_type_definition_subrange_enum *e, bool is_for_min)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+
+    *base = ps_value_get_type(value);
+    if (*base == PS_TYPE_CHAR)
+    {
+        if (ps_value_get_type(value) != PS_TYPE_CHAR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
+        if (is_for_min)
+            c->min = value->data.c;
+        else
+            c->max = value->data.c;
+    }
+    else if (*base == PS_TYPE_INTEGER)
+    {
+        if (ps_value_get_type(value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        if (is_for_min)
+            i->min = value->data.i;
+        else
+            i->max = value->data.i;
+    }
+    else if (*base == PS_TYPE_UNSIGNED)
+    {
+        if (ps_value_get_type(value) != PS_TYPE_UNSIGNED)
+            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
+        if (is_for_min)
+            u->min = value->data.u;
+        else
+            u->max = value->data.u;
+    }
+    else if (base == PS_TYPE_ENUM)
+    {
+        if (ps_value_get_type(value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
+        if (is_for_min)
+            e->min = value->data.u;
+        else
+            e->max = value->data.u;
+    }
+    else
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+
+    VISIT_END("OK")
+}
+
 bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                       const char *type_name)
 {
@@ -461,37 +512,10 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_value_type max_base = PS_TYPE_NONE;
 
     // Parse min value of subrange as a constant expression
-    //  can't be an enum for now
     if (!ps_visit_constant_expression(interpreter, mode, &min_value))
-        TRACE_ERROR("MIN")
-    // ps_value_debug(stderr, "==> MIN_VALUE: ", &min_value);
-    min_base = ps_value_get_type(&min_value);
-    if (min_base == PS_TYPE_CHAR)
-    {
-        if (ps_value_get_type(&min_value) != PS_TYPE_CHAR)
-            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
-        c.min = min_value.data.c;
-    }
-    else if (min_base == PS_TYPE_INTEGER)
-    {
-        if (ps_value_get_type(&min_value) != PS_TYPE_INTEGER)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        i.min = min_value.data.i;
-    }
-    else if (min_base == PS_TYPE_UNSIGNED)
-    {
-        if (ps_value_get_type(&min_value) != PS_TYPE_UNSIGNED)
-            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
-        u.min = min_value.data.u;
-    }
-    else if (min_base == PS_TYPE_ENUM)
-    {
-        if (ps_value_get_type(&min_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
-        e.min = min_value.data.u;
-    }
-    else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        TRACE_ERROR("MIN1")
+    if (!ps_visit_type_reference_subrange_min_or_max(interpreter, mode, &min_value, &min_base, &c, &i, &u, &e, true))
+        TRACE_ERROR("MIN2")
 
     // Parse '..'
     EXPECT_TOKEN(PS_TOKEN_RANGE)
@@ -499,8 +523,10 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
 
     // Parse max value of subrange as a constant expression
     if (!ps_visit_constant_expression(interpreter, mode, &tmp_value))
-        TRACE_ERROR("MAX");
-    // ps_value_debug(stderr, "==> TMP_VALUE: ", &tmp_value);
+        TRACE_ERROR("MAX1");
+    if (!ps_visit_type_reference_subrange_min_or_max(interpreter, mode, &max_value, &max_base, &c, &i, &u, &e, false))
+        TRACE_ERROR("MAX2")
+
     max_value.type = min_value.type;
     if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
         TRACE_ERROR("COPY")
