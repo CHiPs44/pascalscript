@@ -33,11 +33,12 @@ extern "C"
     int ps_array_get_dimensions(const ps_symbol *array_type);
     /** @brief Get array item type */
     ps_symbol *ps_array_get_item_type(const ps_symbol *array);
-    /** @brief value := array[index] (allocating value if NULL) */
+    /** @brief value := array[indicies] (allocating value if NULL) */
     ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check);
-    /** @brief array[index] := value */
-    ps_error ps_array_set_value(ps_symbol *array, const ps_value *index, const ps_value *value, bool range_check);
-
+    /** @brief array[indicies] := value */
+    ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indicies, const ps_value *value,
+                                bool range_check);
+    /** @brief Display (part of) array values */
     void ps_array_debug_values(FILE *out, ps_symbol *array_var);
 
 #ifdef __cplusplus

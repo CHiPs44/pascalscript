@@ -444,139 +444,91 @@ cleanup:
     return false;
 }
 
-bool ps_visit_type_reference_subrange_min_or_max(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *value,
-                                                 ps_value_type *base, ps_type_definition_subrange_char *c,
-                                                 ps_type_definition_subrange_integer *i,
-                                                 ps_type_definition_subrange_unsigned *u,
-                                                 ps_type_definition_subrange_enum *e, bool is_for_min)
+bool ps_visit_type_reference_subrange_min(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *min_value,
+                                          ps_value_type *min_base, ps_type_definition_subrange *subrange)
 {
     VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    *base = ps_value_get_type(value);
-    if (*base == PS_TYPE_CHAR)
+    if (!ps_visit_constant_expression(interpreter, mode, min_value))
+        TRACE_ERROR("MIN")
+    *min_base = ps_value_get_type(min_value);
+    switch (*min_base)
     {
-        if (ps_value_get_type(value) != PS_TYPE_CHAR)
+    case PS_TYPE_CHAR:
+        if (ps_value_get_type(min_value) != PS_TYPE_CHAR)
             RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
-        if (is_for_min)
-            c->min = value->data.c;
-        else
-            c->max = value->data.c;
-    }
-    else if (*base == PS_TYPE_INTEGER)
-    {
-        if (ps_value_get_type(value) != PS_TYPE_INTEGER)
+        subrange->c.min = min_value->data.c;
+        break;
+    case PS_TYPE_INTEGER:
+        if (ps_value_get_type(min_value) != PS_TYPE_INTEGER)
             RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        if (is_for_min)
-            i->min = value->data.i;
-        else
-            i->max = value->data.i;
-    }
-    else if (*base == PS_TYPE_UNSIGNED)
-    {
-        if (ps_value_get_type(value) != PS_TYPE_UNSIGNED)
+        subrange->i.min = min_value->data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        if (ps_value_get_type(min_value) != PS_TYPE_UNSIGNED)
             RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
-        if (is_for_min)
-            u->min = value->data.u;
-        else
-            u->max = value->data.u;
-    }
-    else if (base == PS_TYPE_ENUM)
-    {
-        if (ps_value_get_type(value) != PS_TYPE_ENUM)
+        subrange->u.min = min_value->data.u;
+        break;
+    case PS_TYPE_ENUM:
+        if (ps_value_get_type(min_value) != PS_TYPE_ENUM)
             RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
-        if (is_for_min)
-            e->min = value->data.u;
-        else
-            e->max = value->data.u;
-    }
-    else
+        subrange->e.min = min_value->data.u;
+        break;
+    default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
 
     VISIT_END("OK")
 }
 
-bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
-                                      const char *type_name)
+bool ps_visit_type_reference_subrange_max(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *max_value,
+                                          ps_value_type *max_base, ps_type_definition_subrange *subrange)
 {
-    // NOSONAR interpreter->debug = DEBUG_VERBOSE;
     VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    ps_type_definition_subrange_char c = {0};
-    ps_type_definition_subrange_integer i = {0};
-    ps_type_definition_subrange_unsigned u = {0};
-    ps_type_definition_subrange_enum e = {0};
-    ps_value min_value = {0};
-    ps_value tmp_value = {0};
-    ps_value max_value = {0};
-    ps_value_type min_base = PS_TYPE_NONE;
-    ps_value_type max_base = PS_TYPE_NONE;
-
-    // Parse min value of subrange as a constant expression
-    if (!ps_visit_constant_expression(interpreter, mode, &min_value))
-        TRACE_ERROR("MIN1")
-    if (!ps_visit_type_reference_subrange_min_or_max(interpreter, mode, &min_value, &min_base, &c, &i, &u, &e, true))
-        TRACE_ERROR("MIN2")
-
-    // Parse '..'
-    EXPECT_TOKEN(PS_TOKEN_RANGE)
-    READ_NEXT_TOKEN
-
-    // Parse max value of subrange as a constant expression
-    if (!ps_visit_constant_expression(interpreter, mode, &tmp_value))
-        TRACE_ERROR("MAX1");
-    if (!ps_visit_type_reference_subrange_min_or_max(interpreter, mode, &max_value, &max_base, &c, &i, &u, &e, false))
-        TRACE_ERROR("MAX2")
-
-    max_value.type = min_value.type;
-    if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
-        TRACE_ERROR("COPY")
-    // ps_value_debug(stderr, "==> MAX_VALUE: ", &max_value);
-    // fprintf(stderr, "======================================================================\n");
-    max_base = ps_value_get_type(&max_value);
-    if (max_base != min_base)
+    if (!ps_visit_constant_expression(interpreter, mode, max_value))
+        TRACE_ERROR("MAX")
+    *max_base = ps_value_get_type(max_value);
+    switch (*max_base)
     {
-        ps_interpreter_set_message(interpreter, "Min and max value of subrange type mismatch: %s %s",
-                                   min_value.type->name, max_value.type->name);
-        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-    }
-    if (max_base == PS_TYPE_CHAR)
-    {
-        if (ps_value_get_type(&max_value) != PS_TYPE_CHAR)
+    case PS_TYPE_CHAR:
+        if (ps_value_get_type(max_value) != PS_TYPE_CHAR)
             RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
-        c.max = max_value.data.c;
-        if (c.max <= c.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    else if (max_base == PS_TYPE_INTEGER)
-    {
-        if (ps_value_get_type(&max_value) != PS_TYPE_INTEGER)
+        subrange->c.max = max_value->data.c;
+        break;
+    case PS_TYPE_INTEGER:
+        if (ps_value_get_type(max_value) != PS_TYPE_INTEGER)
             RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        i.max = max_value.data.i;
-        if (i.max <= i.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    else if (max_base == PS_TYPE_UNSIGNED)
-    {
-        if (ps_value_get_type(&max_value) != PS_TYPE_UNSIGNED)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        u.max = max_value.data.u;
-        if (u.max <= u.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    else if (max_base == PS_TYPE_ENUM)
-    {
-        if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        u.max = max_value.data.u;
-        if (u.max <= u.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    else
+        subrange->i.max = max_value->data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        if (ps_value_get_type(max_value) != PS_TYPE_UNSIGNED)
+            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
+        subrange->u.max = max_value->data.u;
+        break;
+    case PS_TYPE_ENUM:
+        if (ps_value_get_type(max_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
+        subrange->e.max = max_value->data.u;
+        break;
+    default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    // Create type definition for subrange
+    }
+
+    VISIT_END("OK")
+}
+
+bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                                        ps_value_type value_type, char *type_name,
+                                                        ps_symbol **type_symbol)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
-    switch (min_base)
+
+    // Create type definition for subrange
+    switch (value_type)
     {
     case PS_TYPE_CHAR:
         type_def = ps_type_definition_create_subrange_char(c.min, c.max);
@@ -614,6 +566,55 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)
+
+    VISIT_END("OK")
+}
+
+bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+                                      const char *type_name)
+{
+    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+
+    ps_type_definition_subrange subrange = {0};
+    ps_value min_value = {0};
+    ps_value tmp_value = {0};
+    ps_value max_value = {0};
+    ps_value_type min_base = PS_TYPE_NONE;
+    ps_value_type max_base = PS_TYPE_NONE;
+
+    // Parse min value of subrange as a constant expression
+    if (!ps_visit_type_reference_subrange_min(interpreter, mode, &min_value, &min_base, &subrange))
+        TRACE_ERROR("MIN2")
+    // Parse '..'
+    EXPECT_TOKEN(PS_TOKEN_RANGE)
+    READ_NEXT_TOKEN
+    // Parse max value of subrange as a constant expression
+    if (!ps_visit_type_reference_subrange_max(interpreter, mode, &tmp_value, &max_base, &subrange))
+        TRACE_ERROR("MAX2")
+    max_value.type = min_value.type;
+    if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
+    {
+        ps_interpreter_set_message(interpreter, "Min and max value of subrange type mismatch: %s %s",
+                                   min_value.type->name, max_value.type->name);
+        TRACE_ERROR("COPY")
+    }
+    // Check that subrange min is less than max
+    if ((max_base == PS_TYPE_CHAR && subrange.c.max <= subrange.c.min) ||
+        (max_base == PS_TYPE_INTEGER && subrange.i.max <= subrange.i.min) ||
+        (max_base == PS_TYPE_UNSIGNED && subrange.u.max <= subrange.u.min))
+        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    else if (max_base == PS_TYPE_ENUM)
+    {
+        if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        if (subrange.u.max <= subrange.u.min)
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    }
+    else
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
+    // Register subrange
+    if (!ps_visit_type_reference_subrange_register_type_def(interpreter, mode, min_base, type_name, type_symbol))
+        TRACE_ERROR("TYPE_DEF")
 
     VISIT_END("OK")
 }
