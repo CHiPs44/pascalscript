@@ -519,8 +519,8 @@ bool ps_visit_type_reference_subrange_max(ps_interpreter *interpreter, ps_interp
 }
 
 bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpreter, ps_interpreter_mode mode,
-                                                        ps_value_type value_type, char *type_name,
-                                                        ps_symbol **type_symbol)
+                                                        const char *type_name, ps_symbol **type_symbol, ps_symbol *type,
+                                                        const ps_type_definition_subrange *subrange)
 {
     VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
@@ -528,31 +528,31 @@ bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpre
     ps_identifier name = {0};
 
     // Create type definition for subrange
-    switch (value_type)
+    switch (type->value->data.t->type)
     {
     case PS_TYPE_CHAR:
-        type_def = ps_type_definition_create_subrange_char(c.min, c.max);
+        type_def = ps_type_definition_create_subrange_char(subrange->c.min, subrange->c.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_INTEGER:
-        type_def = ps_type_definition_create_subrange_integer(i.min, i.max);
+        type_def = ps_type_definition_create_subrange_integer(subrange->i.min, subrange->i.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_UNSIGNED:
-        type_def = ps_type_definition_create_subrange_unsigned(u.min, u.max);
+        type_def = ps_type_definition_create_subrange_unsigned(subrange->u.min, subrange->u.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_ENUM:
-        type_def = ps_type_definition_create_subrange_enum(min_value.type, e.min, e.max);
+        type_def = ps_type_definition_create_subrange_enum(type, subrange->e.min, subrange->e.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
         else
@@ -582,23 +582,24 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_value_type min_base = PS_TYPE_NONE;
     ps_value_type max_base = PS_TYPE_NONE;
 
-    // Parse min value of subrange as a constant expression
+    // *** Parse min value of subrange as a constant expression
     if (!ps_visit_type_reference_subrange_min(interpreter, mode, &min_value, &min_base, &subrange))
-        TRACE_ERROR("MIN2")
-    // Parse '..'
+        TRACE_ERROR("MIN")
+    // *** Parse '..'
     EXPECT_TOKEN(PS_TOKEN_RANGE)
     READ_NEXT_TOKEN
-    // Parse max value of subrange as a constant expression
+    // *** Parse max value of subrange as a constant expression
     if (!ps_visit_type_reference_subrange_max(interpreter, mode, &tmp_value, &max_base, &subrange))
-        TRACE_ERROR("MAX2")
+        TRACE_ERROR("MAX")
+    // *** Copy value to max with same type as min
     max_value.type = min_value.type;
     if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
     {
         ps_interpreter_set_message(interpreter, "Min and max value of subrange type mismatch: %s %s",
                                    min_value.type->name, max_value.type->name);
-        TRACE_ERROR("COPY")
+        TRACE_ERROR("COPY_MAX")
     }
-    // Check that subrange min is less than max
+    // *** Check that subrange min is less than max
     if ((max_base == PS_TYPE_CHAR && subrange.c.max <= subrange.c.min) ||
         (max_base == PS_TYPE_INTEGER && subrange.i.max <= subrange.i.min) ||
         (max_base == PS_TYPE_UNSIGNED && subrange.u.max <= subrange.u.min))
@@ -612,9 +613,10 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     }
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
-    // Register subrange
-    if (!ps_visit_type_reference_subrange_register_type_def(interpreter, mode, min_base, type_name, type_symbol))
-        TRACE_ERROR("TYPE_DEF")
+    // *** Register subrange
+    if (!ps_visit_type_reference_subrange_register_type_def(interpreter, mode, type_name, type_symbol, min_value.type,
+                                                            &subrange))
+        TRACE_ERROR("TYPE_DEF_SUBRANGE")
 
     VISIT_END("OK")
 }
