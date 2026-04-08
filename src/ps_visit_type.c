@@ -328,9 +328,9 @@ ps_enum_values_pool *ps_enum_values_pool_alloc(int size, int more)
     return pool;
 }
 
-void ps_enum_values_pool_free(ps_enum_values_pool *pool, bool free)
+void ps_enum_values_pool_free(ps_enum_values_pool *pool, bool free_symbols)
 {
-    if (free)
+    if (free_symbols)
         for (ps_unsigned i = 0; i < pool->used; i++)
         {
             ps_symbol_free(pool->values[i]);
