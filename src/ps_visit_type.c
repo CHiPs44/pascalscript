@@ -303,6 +303,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     VISIT_END("OK")
 }
 
+// TODO? replace with a symbol table?
 typedef struct s_ps_enum_values_pool
 {
     ps_unsigned size;
@@ -388,7 +389,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
 {
     VISIT_BEGIN("TYPE_REFERENCE_ENUM", "");
 
-    // Up to 256 values in an enumeration, realloc by 16 more if exhausted
+    // Up to 256 values in an enumeration, re-allocate 16 more if exhausted
     ps_enum_values_pool *pool = ps_enum_values_pool_alloc(16, 16);
     if (pool == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -397,13 +398,15 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN_OR_CLEANUP
-    // empty enumeration not allowed
+    // Empty enumeration not allowed
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
 
+    // Create enumeration type definition
     ps_type_definition *type_def = ps_type_definition_create_enum();
     if (type_def == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    // Register it
     if (!ps_type_definition_register(interpreter, mode, type_name, type_def, type_symbol))
         GOTO_CLEANUP(interpreter->error)
     // Parse enumeration values
@@ -424,7 +427,8 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_interpreter_add_symbol(interpreter, value_symbol))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
-        READ_NEXT_TOKEN_OR_CLEANUP if (lexer->current_token.type == PS_TOKEN_COMMA)
+        READ_NEXT_TOKEN_OR_CLEANUP
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             READ_NEXT_TOKEN_OR_CLEANUP
             continue;
