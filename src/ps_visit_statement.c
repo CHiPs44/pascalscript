@@ -86,42 +86,58 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
 
     ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
     ps_value indicies[8] = {0};
-    int dimensions = variable->value->type->value->data.t->def.a.dimensions;
+    ps_symbol *item_type = variable->value->type->value->data.t->def.a.subrange;
+    int dimensions = 0; // variable->value->type->value->data.t->def.a.dimensions;
     int dimension = 0;
 
-    for (ps_unsigned i = 0; i < dimensions; i++)
+    // Initialize index types for each dimension
+    bool loop = true;
+    do
     {
-        indicies[i].type = variable->value->type->value->data.t->def.a.subranges[i];
-        indicies[i].allocated = false;
-        indicies[i].data.v = NULL;
-    }
+        indicies[dimensions].type = item_type;
+        indicies[dimensions].allocated = false;
+        indicies[dimensions].data.v = NULL;
+        if (!loop)
+            break;
+        dimensions += 1;
+        item_type = item_type->value->type->value->data.t->def.a.subrange;
+        if (item_type->kind != PS_TYPE_ARRAY)
+            loop = false;
+    } while (true);
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
     READ_NEXT_TOKEN
     do
     {
+        // At least one index
         if (!ps_visit_expression(interpreter, mode, &indicies[dimension]))
             TRACE_ERROR("INDEX")
         dimension += 1;
+        // ',' begins another index
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
+            // Too many indicies?
             if (dimension == dimensions)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
             READ_NEXT_TOKEN
             continue;
         }
+        // ']' ends indicies (and loop)
         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
         {
+            // Not enough indicies?
             if (dimension != dimensions)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+                RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
             READ_NEXT_TOKEN
             break;
         }
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
+    // Check for ':='
     EXPECT_TOKEN(PS_TOKEN_ASSIGN)
     READ_NEXT_TOKEN
-    result.type = variable->value->type->value->data.t->def.a.item_type;
+    // Visit expression for value, expected type is item type
+    result.type = item_type;
     if (!ps_visit_expression(interpreter, mode, &result))
         TRACE_ERROR("EXPRESSION1")
     if (mode == MODE_EXEC)
