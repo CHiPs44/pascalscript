@@ -147,7 +147,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
 
 /**
  * @details
- *  Visit type reference, for now, only base types:
+ *  Visit type reference:
  *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
  *      | 'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
  *      | IDENTIFIER
@@ -167,13 +167,12 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *          WeekEnd          = Saturday..Sunday
  *          UppercaseLetters = 'A'..'Z'
  *          LowercaseLetters = 'a'..'z'
- *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER ']' 'OF' TYPE_REFERENCE
- *        Example:
- *          TCharacterics = Array [1..10] Of Integer
- *  Next steps:
  *      | ARRAY       =   'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
- *        Example:
- *          CheckerBoard = Array [1..8, 1..8] Of (Empty, White, Black)
+ *        Examples:
+ *          TCharacterics = Array [1..10] Of Integer
+ *          CellState =  (Empty, White, Black)
+ *          CheckerBoard = Array [1..8, 1..8] Of CellState
+ *  Next steps:
  *      | SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
  *        Examples:
  *          Options = Set Of UppercaseLetters
@@ -204,7 +203,6 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *            Modifiers: Array[TAbilities] Of Integer;
  *          End;
  *        FIELD       = IDENTIFIER ':' TYPE_REFERENCE
- * ???:
  *      | TPOINTER    = '^' TYPE_REFERENCE
  *      | POINTER     = 'POINTER'
  */
@@ -418,9 +416,9 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
             GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
         // Check that enumeration value does not already exist:
         //  - locally in the same enumeration
-        //  - or globally in the symbol tables
+        //  - or globally in the symbol table
         if (ps_symbol_list_find(list, lexer->current_token.value.identifier) ||
-            (ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false) != NULL))
+            (ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, true) != NULL))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
         ps_symbol *value_symbol = ps_symbol_list_add(list, *type_symbol, lexer->current_token.value.identifier);
         if (value_symbol == NULL)
@@ -443,7 +441,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     ps_symbol_list_free(list, false);
     VISIT_END("OK")
 cleanup:
-    // TODO remove type symbol from table
+    // TODO? remove type symbol from table
     ps_symbol_list_free(list, true);
     return false;
 }
