@@ -624,7 +624,8 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
 }
 
 /**
- * 'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
+ * Visit
+ *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  */
 bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                    const char *type_name)
@@ -654,7 +655,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
             RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
         subranges[dimensions] = subrange;
         dimensions += 1;
-        // ',' ?
+        // ',' starts another dimension
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             if (dimensions == 8)
@@ -662,7 +663,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
             READ_NEXT_TOKEN
             continue;
         }
-        // ']'
+        // ']' ends dimensions definitions
         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
         {
             READ_NEXT_TOKEN
@@ -670,19 +671,22 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
         }
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
+    // For now, only accept one dimension
+    if (dimensions > 1)
+    {
+        ps_interpreter_set_message(interpreter, "%d dimensions for an array is on the way...", dimensions);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    }
     // 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
-    // ITEM_TYPE
+    // Item type (may be another array definition)
     if (!ps_visit_type_reference(interpreter, mode, &item_type, NULL))
         TRACE_ERROR("ITEM_TYPE")
     // Item type can be any type, even another array
     if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
         RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
-    // For now, item_type cannot be an array type
-    if (item_type->value->data.t->type == PS_TYPE_ARRAY)
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     // Create type definition for array
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
@@ -693,17 +697,6 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    type_def->def.a.subranges = ps_memory_calloc(PS_MEMORY_TYPE, dimensions, sizeof(ps_symbol *));
-    if (type_def->def.a.subranges == NULL)
-    {
-        ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY);
-    }
-    for (int i = 0; i <= dimensions; i++)
-    {
-        type_def->def.a.subranges[i] = subranges[i];
-    }
-    type_def->def.a.dimensions = dimensions;
     type_def->def.a.item_type = item_type;
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))

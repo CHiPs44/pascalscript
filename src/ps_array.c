@@ -123,20 +123,20 @@ ps_error ps_array_get_value(const ps_symbol *array_var, const ps_value *index, p
     return error;
 }
 
-ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indicies, const ps_value *value, bool range_check)
+ps_error ps_array_set_value(ps_symbol *array_var, const ps_value *index, const ps_value *value, bool range_check)
 {
     if (ps_array_debug)
     {
         ps_symbol_debug(stderr, "PS_ARRAY_SET_VALUE, array_var: ", array_var);
-        ps_value_debug(stderr, "PS_ARRAY_SET_VALUE, index: ", indicies[0]);
+        ps_value_debug(stderr, "PS_ARRAY_SET_VALUE, index: ", index);
     }
     if (array_var == NULL || array_var->value == NULL || array_var->value->type == NULL ||
         array_var->value->data.a->values == NULL)
         return PS_ERROR_INVALID_PARAMETERS;
-    const ps_symbol *subrange = ps_array_get_subranges(array_var->value->type);
+    const ps_symbol *subrange = ps_array_get_subrange(array_var->value->type);
     // Get offset from index
     ps_array_debug = true;
-    ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange->value->data.t, indicies);
+    ps_unsigned offset = ps_type_definition_get_subrange_offset(subrange->value->data.t, index);
     if (offset >= array_var->value->data.a->count)
         return PS_ERROR_INVALID_SUBRANGE;
     ps_array_debug = false;

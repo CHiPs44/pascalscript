@@ -10,7 +10,7 @@ Const
     Cols = 5;
 
 Type
-    NumberArray = Array[1..Rows, 1..Cols] Of Integer;
+    NumberArray = Array[1..Rows] Of Array[1..Cols] Of Integer;
     CharArray = Array[1..Rows] Of Array[1..Cols] Of Char;
 
 Var
