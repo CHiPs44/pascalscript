@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2026 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
-Program Arrays;
+Program Array0;
 
 Type
     NumberArray = Array[1..10] Of Integer;
@@ -20,5 +20,5 @@ Begin
         N := N * 2;
     End;
     For I := 1 To 10 Do
-        WriteLn(I:2, ' = ', Numbers[I]:4);
+        WriteLn('Numbers[', I:2, '] = ', Numbers[I]:4);
 End.

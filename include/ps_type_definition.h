@@ -107,8 +107,12 @@ extern "C"
     /** @brief *FUTURE* => index goes from range->value->g.min to range->value->g.max */
     typedef struct s_ps_type_definition_array
     {
-        ps_symbol *subrange;  /** @brief index range as subrange */
-        ps_symbol *item_type; /** @brief type of elements, may be another array definition */
+        // clang-format off
+        ps_symbol *subrange;     /** @brief index range as subrange */
+        ps_symbol *item_type;    /** @brief type of elements, may be another array definition */
+        bool       is_vector :1; /** @brief "leaf" array with "real" values */
+        uint8_t    dimensions:7; /** @brief 1 for vectors, more than 1 for arrays of arrays of arrays */
+        // clang-format on
     } __attribute__((__packed__)) ps_type_definition_array;
 
     typedef struct s_ps_type_definition_record_field

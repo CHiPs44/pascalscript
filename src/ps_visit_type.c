@@ -633,7 +633,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     VISIT_BEGIN("TYPE_REFERENCE_ARRAY", "");
 
     ps_symbol *subranges[8] = {0};
-    int dimensions = 0;
+    uint8_t dimensions = 0;
     ps_symbol *item_type = NULL;
     ps_symbol *subrange = NULL;
 
@@ -672,9 +672,12 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
     // For now, only accept one dimension
+    // We should define and register an array type definition for each dimension
+    // and "chain" them, exactly as if array[dim1, dim2] of item would have been
+    // written as array[dim1] of array[dim2] of item
     if (dimensions > 1)
     {
-        ps_interpreter_set_message(interpreter, "%d dimensions for an array is on the way...", dimensions);
+        ps_interpreter_set_message(interpreter, "%d dimensions for an array is TODO/WIP", dimensions);
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     }
     // 'OF'
@@ -698,6 +701,8 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     type_def->def.a.item_type = item_type;
+    type_def->def.a.is_vector = item_type->value->data.t->type != PS_TYPE_ARRAY;
+    type_def->def.a.dimensions = dimensions;
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
         RETURN_ERROR(interpreter->error)

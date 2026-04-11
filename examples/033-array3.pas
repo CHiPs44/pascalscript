@@ -3,11 +3,11 @@
     SPDX-FileCopyrightText: 2026 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
-Program Arrays;
+Program Array3;
 
 Type
     ArraySubRange = -9..9;
-    NumberArray = Array[ArraySubRange] Of Integer;
+    NumberArray = Array[ArraySubRange] Of Real;
 
 Procedure InitializeArray(Var Numbers: NumberArray);
 Var
@@ -16,16 +16,15 @@ Begin
     WriteLn('InitializeArray');
     Randomize;
     For I := Low(Numbers) To High(Numbers) Do
-        Numbers[I] := 100 + Random(900);
+        Numbers[I] := Random;
 End;
 
 Procedure SortArray(Var Numbers: NumberArray);
 Var
-    I, J, Temp: Integer;
+    I, J: Integer;
+    Temp: Real;
 Begin
-    WriteLn('SortArray');
-
-    // Bubble sort algorithm
+    WriteLn('SortArray: Bubble sort algorithm');
     For I := Low(Numbers) To High(Numbers) Do
     Begin
         For J := I + 1 To High(Numbers) Do
@@ -48,7 +47,7 @@ Var
 Begin
     WriteLn('PrintArray');
     For I := Low(Numbers) To High(Numbers) Do
-        WriteLn(' - Numbers[', I:2, '] = ', Numbers[I]:4);
+        WriteLn(' - Numbers[', I:2, '] = ', Numbers[I]);
 End;
 
 Var
