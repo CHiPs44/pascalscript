@@ -53,19 +53,18 @@ extern "C"
     bool ps_visit_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_for_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_if_then_else(ps_interpreter *interpreter, ps_interpreter_mode mode);
+    bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
     bool ps_visit_repeat_until(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement_list(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_token_type stop);
     bool ps_visit_statement_or_compound_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_statement(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_while_do(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
-    bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline);
 
     /* src/ps_visit_type.c */
     bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                  const char *type_name);
-    bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode);
     bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                       const char *type_name);
     bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode,

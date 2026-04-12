@@ -10,6 +10,7 @@
 #include "ps_token.h"
 #include "ps_visit.h"
 
+static bool ps_visit_program_parameters(ps_interpreter *interpreter, ps_interpreter_mode mode);
 /**
  * Visit program declaration:
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
@@ -22,57 +23,104 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_identifier identifier = {0};
     ps_symbol *program = NULL;
 
+    // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
     READ_NEXT_TOKEN
+    // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
     // Skip optional parameters enclosed in parentheses
-    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-    {
-        READ_NEXT_TOKEN
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-            READ_NEXT_TOKEN
-        else
-        {
-            bool loop = true;
-            do
-            {
-                EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-                READ_NEXT_TOKEN
-                switch (lexer->current_token.type)
-                {
-                case PS_TOKEN_COMMA:
-                    READ_NEXT_TOKEN
-                    break;
-                case PS_TOKEN_RIGHT_PARENTHESIS:
-                    READ_NEXT_TOKEN
-                    loop = false;
-                    break;
-                default:
-                    RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-                }
-            } while (loop);
-        }
-    }
+    if (!ps_visit_program_parameters(interpreter, mode))
+        TRACE_ERROR("PARAMETERS")
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
+    // Register program in symbol table and visit its block
     if (!ps_interpreter_enter_environment(interpreter, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
-        TRACE_ERROR("ADD SYMBOL")
+        TRACE_ERROR("ADD PROGRAM SYMBOL")
     // One "Uses" clause at most after "Program"
     if (!ps_visit_uses(interpreter, mode))
         TRACE_ERROR("USES")
+    // Block with declarations and compound statement
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
     if (!ps_interpreter_exit_environment(interpreter))
         TRACE_ERROR("EXIT ENVIRONMENT");
+    // Expect '.' at the end of program declaration
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
 
     VISIT_END("OK")
+}
+
+/**
+ * Visit program parameters (identifiers in parentheses)
+ */
+static bool ps_visit_program_parameters(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("PROGRAM", "PARAMETERS")
+
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    {
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        {
+            READ_NEXT_TOKEN
+            VISIT_END("OK")
+        }
+    }
+    bool loop = true;
+    do
+    {
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        READ_NEXT_TOKEN
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_COMMA:
+            READ_NEXT_TOKEN
+            break;
+        case PS_TOKEN_RIGHT_PARENTHESIS:
+            READ_NEXT_TOKEN
+            loop = false;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+        }
+    } while (loop);
+
+    VISIT_END("OK")
+}
+
+/**
+ * Visit uses clause (module names after USES)
+ */
+static bool ps_visit_uses_clause(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("PROGRAM", "USES")
+
+    bool loop = true;
+    do
+    {
+        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+        READ_NEXT_TOKEN
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_COMMA:
+            READ_NEXT_TOKEN
+            break;
+        case PS_TOKEN_SEMI_COLON:
+            READ_NEXT_TOKEN
+            loop = false;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+        }
+    } while (loop);
+    return true;
 }
 
 bool ps_visit_uses(ps_interpreter *interpreter, ps_interpreter_mode mode)
@@ -81,26 +129,9 @@ bool ps_visit_uses(ps_interpreter *interpreter, ps_interpreter_mode mode)
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
-        bool loop = true;
         READ_NEXT_TOKEN
-        do
-        {
-            if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-                RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-            READ_NEXT_TOKEN
-            switch (lexer->current_token.type)
-            {
-            case PS_TOKEN_COMMA:
-                READ_NEXT_TOKEN
-                break;
-            case PS_TOKEN_SEMI_COLON:
-                READ_NEXT_TOKEN
-                loop = false;
-                break;
-            default:
-                RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-            }
-        } while (loop);
+        if (!ps_visit_uses_clause(interpreter, mode))
+            TRACE_ERROR("USES CLAUSE")
     }
 
     VISIT_END("OK")
@@ -231,6 +262,61 @@ bool ps_visit_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
 }
 
 /**
+ * @brief Visit type declaration
+ * @details
+ *      'TYPE' TYPE_DEFINITION ';'
+ *             [ TYPE_DEFINITION ';' ]*
+ */
+bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
+{
+    VISIT_BEGIN("TYPE", "");
+
+    EXPECT_TOKEN(PS_TOKEN_TYPE);
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    do
+    {
+        if (!ps_visit_type_definition(interpreter, mode))
+            TRACE_ERROR("TYPE_DEFINITION");
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+
+    VISIT_END("OK")
+}
+
+/**
+ * Parse variable identifier list with commas
+ */
+static bool ps_visit_var_identifier_list(ps_interpreter *interpreter, ps_interpreter_mode mode,
+                                         ps_identifier *identifier, int *var_count)
+{
+    VISIT_BEGIN("VAR", "IDENTIFIER_LIST")
+
+    *var_count = 0;
+    do
+    {
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        COPY_IDENTIFIER(identifier[*var_count])
+        const ps_symbol *variable = ps_interpreter_find_symbol(interpreter, identifier[*var_count], true);
+        if (variable != NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type == PS_TOKEN_COLON)
+            break;
+        if (lexer->current_token.type != PS_TOKEN_COMMA)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        READ_NEXT_TOKEN
+        *var_count += 1;
+        if (*var_count == 8)
+            RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
+    } while (true);
+
+    VISIT_END("OK")
+}
+
+/**
  * Visit variable declaration:
  *      'VAR' [ IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE ';' ]+
  *      (allow up to 8 identifiers with commas)
@@ -246,37 +332,17 @@ bool ps_visit_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
     ps_identifier identifier[8];
     int var_count;
     ps_symbol *type_symbol = NULL;
-    const ps_symbol *variable = NULL;
 
     EXPECT_TOKEN(PS_TOKEN_VAR)
     READ_NEXT_TOKEN
     do
     {
-        var_count = 0;
-        do
-        {
-            EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-            COPY_IDENTIFIER(identifier[var_count])
-            variable = ps_interpreter_find_symbol(interpreter, identifier[var_count], true);
-            if (variable != NULL)
-                RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
-            READ_NEXT_TOKEN
-            if (lexer->current_token.type == PS_TOKEN_COLON)
-                break;
-            if (lexer->current_token.type != PS_TOKEN_COMMA)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-            READ_NEXT_TOKEN
-            var_count += 1;
-            if (var_count == 8)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
-        } while (true);
+        if (!ps_visit_var_identifier_list(interpreter, mode, identifier, &var_count))
+            TRACE_ERROR("VARIABLE IDENTIFIER LIST")
         READ_NEXT_TOKEN
         if (!ps_visit_type_reference(interpreter, mode, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
-        // ps_symbol_debug(stderr, "ps_visit_var: ", type_symbol);
-        // const ps_type_definition *type_def = type_symbol->value->type->value->data.t;
-        // ps_type_definition_debug(stderr, "ps_visit_var: ", type_def);
         for (int i = 0; i <= var_count; i++)
         {
             if (!ps_interpreter_add_variable(interpreter, identifier[i], type_symbol))

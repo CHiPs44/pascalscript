@@ -9,65 +9,12 @@
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_symbol.h"
+#include "ps_symbol_list.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
 #include "ps_visit.h"
-
-/**
- * @brief Visit type declaration
- * @details
- *      'TYPE' TYPE_DEFINITION ';'
- *             [ TYPE_DEFINITION ';' ]*
- */
-bool ps_visit_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
-{
-    VISIT_BEGIN("TYPE", "");
-
-    EXPECT_TOKEN(PS_TOKEN_TYPE);
-    READ_NEXT_TOKEN
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    do
-    {
-        if (!ps_visit_type_definition(interpreter, mode))
-            TRACE_ERROR("TYPE_DEFINITION");
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN
-    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
-
-    VISIT_END("OK")
-}
-
-static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *name,
-                                        ps_type_definition *type_def, ps_symbol **symbol)
-{
-    VISIT_BEGIN("REGISTER", "")
-
-    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
-    if (value == NULL)
-    {
-        ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    }
-    *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
-    if (*symbol == NULL)
-    {
-        ps_value_free(value);
-        ps_type_definition_free(type_def);
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    }
-    if (!ps_interpreter_add_symbol(interpreter, *symbol))
-    {
-        ps_symbol_free(*symbol);
-        ps_value_free(value);
-        ps_type_definition_free(type_def);
-        TRACE_ERROR("REGISTER")
-    }
-
-    VISIT_END("OK");
-}
 
 /**
  * @brief Visit type definition
@@ -85,6 +32,9 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     COPY_IDENTIFIER(type_name)
+    // Check that type name does not already exist in local symbol table
+    if (ps_interpreter_find_symbol(interpreter, type_name, true) != NULL)
+        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
     READ_NEXT_TOKEN
     // '='
     EXPECT_TOKEN(PS_TOKEN_EQ)
@@ -96,6 +46,49 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
     VISIT_END("OK")
 }
 
+/**
+ * @brief Register type definition in symbol table
+ * @details
+ *  - Allocate value for type definition
+ *  - Allocate symbol for type definition
+ *  - Register type symbol in symbol table
+ */
+static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *name,
+                                        ps_type_definition *type_def, ps_symbol **symbol)
+{
+    VISIT_BEGIN("REGISTER", "")
+
+    // Allocate value for type definition
+    ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+    if (value == NULL)
+    {
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    }
+    // Allocate symbol for type definition
+    *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
+    if (*symbol == NULL)
+    {
+        ps_value_free(value);
+        ps_type_definition_free(type_def);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    }
+    // Register type symbol in symbol table
+    if (!ps_interpreter_add_symbol(interpreter, *symbol))
+    {
+        ps_symbol_free(*symbol);
+        ps_value_free(value);
+        ps_type_definition_free(type_def);
+        TRACE_ERROR("REGISTER")
+    }
+
+    VISIT_END("OK");
+}
+
+/**
+ * @brief Visit type reference for string type
+ *   'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
+ */
 bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                                     const char *type_name)
 {
@@ -107,7 +100,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
     READ_NEXT_TOKEN
     if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
     {
-        // String[MY_CONSTANT]
+        // String[CONSTANT]
         READ_NEXT_TOKEN
         ps_value constant = {.type = &ps_system_none, .data.v = NULL};
         if (!ps_visit_constant_expression(interpreter, mode, &constant))
@@ -146,8 +139,8 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
 }
 
 /**
+ * @brief Visit type reference: base types, alias of existing type, subrange, enumeration, array definition, ...
  * @details
- *  Visit type reference:
  *      'INTEGER' | 'UNSIGNED' | 'REAL' | 'BOOLEAN' | 'CHAR'
  *      | 'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ] |
  *      | IDENTIFIER
@@ -173,13 +166,13 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *          CellState =  (Empty, White, Black)
  *          CheckerBoard = Array [1..8, 1..8] Of CellState
  *  Next steps:
- *      | SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
- *        Examples:
- *          Options = Set Of UppercaseLetters
  *      | FILE        =   'TEXT' | 'FILE' [ 'OF' TYPE_REFERENCE ]
  *        Examples:
  *          InputFile = Text
  *          ResultFile = File Of Integer
+ *      | SET         =   'SET' 'OF' ORDINAL_TYPE_REFERENCE
+ *        Examples:
+ *          Options = Set Of UppercaseLetters
  *      | RECORD      =   'RECORD'
  *                          FIELD [ ';' FIELD ]*
  *                          [ ';' ]
@@ -203,8 +196,8 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *            Modifiers: Array[TAbilities] Of Integer;
  *          End;
  *        FIELD       = IDENTIFIER ':' TYPE_REFERENCE
- *      | TPOINTER    = '^' TYPE_REFERENCE
  *      | POINTER     = 'POINTER'
+ *      | TPOINTER    = '^' TYPE_REFERENCE
  */
 bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
                              const char *type_name)
@@ -212,6 +205,9 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     VISIT_BEGIN("TYPE_REFERENCE", "");
 
     ps_symbol *symbol = NULL;
+    // By default, we advance to next token after processing type reference,
+    // but some cases (like copy of existing type) may already have advanced it,
+    // so we won't advance in those cases
     bool advance = true;
 
     *type_symbol = NULL;
@@ -238,31 +234,6 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         if (!ps_visit_type_reference_string(interpreter, mode, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
         break;
-    case PS_TOKEN_IDENTIFIER:
-        advance = false;
-        // This could be:
-        //  - a copy of an existing type
-        //  - a subrange definition from an enumeration
-        //  - a subrange definition beginning with a constant expression
-        symbol = ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
-        if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
-        {
-            // Subrange from enumeration/char/integer/unsigned constant
-            ps_value_type type = ps_value_get_type(symbol->value);
-            if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
-                !ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
-                RETURN_ERROR(interpreter->error)
-        }
-        else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
-        {
-            *type_symbol = symbol;
-            READ_NEXT_TOKEN
-        }
-        else
-            RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
-        break;
         /* ********** Other types ********** */
     case PS_TOKEN_CHAR_VALUE:
     case PS_TOKEN_INTEGER_VALUE:
@@ -280,12 +251,40 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             TRACE_ERROR("TYPE_REFERENCE_ENUM")
         break;
     case PS_TOKEN_ARRAY:
-        // NB: array can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
+        // => ARRAY
+        // NB: this can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
         // and may recursively call ps_visit_type_reference()
         advance = false;
         if (!ps_visit_type_reference_array(interpreter, mode, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ARRAY")
         break;
+        /* ********** Identifier can be many things ********** */
+    case PS_TOKEN_IDENTIFIER:
+        advance = false;
+        // This could be:
+        //  - a copy of an existing type
+        //  - a subrange definition from an enumeration
+        //  - a subrange definition beginning with a constant expression
+        symbol = ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false);
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
+        if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
+        {
+            // Subrange from enumeration/char/integer/unsigned constant
+            ps_value_type type = ps_value_get_type(symbol->value);
+            if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
+                !ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
+                TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
+        }
+        else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
+        {
+            *type_symbol = symbol;
+            READ_NEXT_TOKEN
+        }
+        else
+            RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
+        break;
+        /* ********** UNIMPLEMENTED ********** */
     case PS_TOKEN_SET:    // set
     case PS_TOKEN_FILE:   // file
     case PS_TOKEN_TEXT:   // text
@@ -299,87 +298,6 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         READ_NEXT_TOKEN
 
     VISIT_END("OK")
-}
-
-// TODO? replace with a symbol table?
-typedef struct s_ps_enum_values_list
-{
-    ps_unsigned size;
-    ps_unsigned more;
-    ps_unsigned used;
-    ps_symbol **values;
-} ps_symbol_list;
-
-ps_symbol_list *ps_symbol_list_alloc(int size, int more)
-{
-    ps_symbol_list *list = ps_memory_malloc(PS_MEMORY_PARSER, sizeof(ps_symbol_list));
-    if (list == NULL)
-        return NULL; // errno = ENOMEM
-    list->values = ps_memory_calloc(PS_MEMORY_PARSER, size, sizeof(ps_symbol *));
-    if (list->values == NULL)
-    {
-        ps_memory_free(PS_MEMORY_PARSER, list);
-        return NULL; // errno = ENOMEM
-    }
-    list->size = size;
-    list->more = more;
-    list->used = 0;
-    return list;
-}
-
-void ps_symbol_list_free(ps_symbol_list *list, bool free_symbols)
-{
-    if (free_symbols)
-        for (ps_unsigned i = 0; i < list->used; i++)
-        {
-            ps_symbol_free(list->values[i]);
-        }
-    ps_memory_free(PS_MEMORY_PARSER, list->values);
-    ps_memory_free(PS_MEMORY_PARSER, list);
-}
-
-bool ps_symbol_list_grow(ps_symbol_list *list)
-{
-    // still room for new values?
-    if (list->used < list->size)
-        return true;
-    // grow list
-    if (list->size + list->more > 256)
-        return false;
-    ps_symbol **new_values =
-        ps_memory_realloc(PS_MEMORY_PARSER, list->values, (list->size + list->more) * sizeof(ps_symbol *));
-    if (new_values == NULL)
-        return false; // errno = ENOMEM
-    list->values = new_values;
-    list->size += list->more;
-    return true;
-}
-
-bool ps_symbol_list_find(const ps_symbol_list *list, const char *name)
-{
-    for (ps_unsigned i = 0; i < list->used; i++)
-        if (strcmp(name, list->values[i]->name) == 0)
-            return true;
-    return false;
-}
-
-ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const char *name)
-{
-    // Create a new symbol for the enumeration value
-    ps_value *value = ps_value_alloc(type_symbol, (ps_value_data){.u = list->used});
-    if (value == NULL)
-        return NULL;
-    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, name, value);
-    if (symbol == NULL)
-    {
-        ps_value_free(value);
-        return NULL;
-    }
-    if (!ps_symbol_list_grow(list))
-        return NULL;
-    list->values[list->used] = symbol;
-    list->used += 1;
-    return symbol;
 }
 
 bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
