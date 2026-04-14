@@ -31,10 +31,10 @@ extern "C"
     ps_symbol *ps_array_get_subrange(const ps_symbol *array);
     /** @brief Get array item type */
     ps_symbol *ps_array_get_item_type(const ps_symbol *array);
-    /** @brief value := array[indicies] (allocating value if NULL) */
+    /** @brief value := array[indexes] (allocating value if NULL) */
     ps_error ps_array_get_value(const ps_symbol *array, const ps_value *index, ps_value *value, bool range_check);
-    /** @brief array[indicies] := value */
-    ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indicies, const ps_value *value,
+    /** @brief array[indexes] := value */
+    ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indexes, const ps_value *value,
                                 bool range_check);
     /** @brief Display (part of) array values */
     void ps_array_debug_values(FILE *out, ps_symbol *array_var);

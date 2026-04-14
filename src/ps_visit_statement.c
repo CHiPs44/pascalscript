@@ -85,7 +85,7 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
     VISIT_BEGIN("ASSIGNMENT", "ARRAY")
 
     ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
-    ps_value indicies[8] = {0};
+    ps_value indexes[8] = {0};
     ps_symbol *item_type = variable->value->type->value->data.t->def.a.subrange;
     int dimensions = 0; // variable->value->type->value->data.t->def.a.dimensions;
     int dimension = 0;
@@ -94,9 +94,9 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
     bool loop = true;
     do
     {
-        indicies[dimensions].type = item_type;
-        indicies[dimensions].allocated = false;
-        indicies[dimensions].data.v = NULL;
+        indexes[dimensions].type = item_type;
+        indexes[dimensions].allocated = false;
+        indexes[dimensions].data.v = NULL;
         if (!loop)
             break;
         dimensions += 1;
@@ -110,22 +110,22 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
     do
     {
         // At least one index
-        if (!ps_visit_expression(interpreter, mode, &indicies[dimension]))
+        if (!ps_visit_expression(interpreter, mode, &indexes[dimension]))
             TRACE_ERROR("INDEX")
         dimension += 1;
         // ',' begins another index
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            // Too many indicies?
+            // Too many indexes?
             if (dimension == dimensions)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
             READ_NEXT_TOKEN
             continue;
         }
-        // ']' ends indicies (and loop)
+        // ']' ends indexes (and loop)
         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
         {
-            // Not enough indicies?
+            // Not enough indexes?
             if (dimension != dimensions)
                 RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
             READ_NEXT_TOKEN
@@ -142,7 +142,7 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
         TRACE_ERROR("EXPRESSION1")
     if (mode == MODE_EXEC)
     {
-        ps_error error = ps_array_set_value(variable, &indicies, &result, interpreter->range_check);
+        ps_error error = ps_array_set_value(variable, &indexes, &result, interpreter->range_check);
         if (error != PS_ERROR_NONE)
         {
             interpreter->error = error;
