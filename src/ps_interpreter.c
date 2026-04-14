@@ -189,7 +189,7 @@ bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifie
     ps_value_data data = {0};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
     {
-        data.a = ps_array_alloc(type_symbol);
+        data.a = ps_array_alloc_data(type_symbol);
         if (data.a == NULL)
             return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     }

@@ -108,10 +108,9 @@ extern "C"
     typedef struct s_ps_type_definition_array
     {
         // clang-format off
-        ps_symbol *subrange;     /** @brief index range as subrange */
-        ps_symbol *item_type;    /** @brief type of elements, may be another array definition */
-        bool       is_vector :1; /** @brief "leaf" array with "real" values */
-        uint8_t    dimensions:7; /** @brief 1 for vectors, more than 1 for arrays of arrays of arrays */
+        ps_symbol *subrange;   /** @brief index range as subrange                           */
+        ps_symbol *item_type;  /** @brief type of elements, may be another array definition */
+        uint8_t    dimensions; /** @brief 1 for vectors, more than 1 for arrays of arrays   */
         // clang-format on
     } __attribute__((__packed__)) ps_type_definition_array;
 
@@ -137,9 +136,9 @@ extern "C"
     /** @brief Type definition: type + base + parameters if needed (simple types have type == base) */
     typedef struct s_ps_type_definition
     {
-        ps_value_type type; /** @brief visible value type */
-        ps_value_type base; /** @brief same as type for internal types like integer or char,
-                                       values for sub-type for subranges and enums, ... */
+        // ps_value_type type; /** @brief visible value type */
+        // ps_value_type base; /** @brief same as type for internal types like integer or char,
+                                    //    values for sub-type for subranges and enums, ... */
         union {
             ps_type_definition_enum e;
             ps_type_definition_subrange g;

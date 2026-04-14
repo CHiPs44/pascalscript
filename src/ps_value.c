@@ -41,7 +41,7 @@ ps_value *ps_value_free(ps_value *value)
     //     ps_string_free(value->data.s);
     //     break;
     case PS_TYPE_ARRAY:
-        ps_array_free(value->data.a);
+        ps_array_free_data(value->data.a);
         break;
     case PS_TYPE_EXECUTABLE:
         ps_executable_free(value->data.x);
