@@ -136,9 +136,9 @@ extern "C"
     /** @brief Type definition: type + base + parameters if needed (simple types have type == base) */
     typedef struct s_ps_type_definition
     {
-        // ps_value_type type; /** @brief visible value type */
-        // ps_value_type base; /** @brief same as type for internal types like integer or char,
-                                    //    values for sub-type for subranges and enums, ... */
+        ps_value_type type; /** @brief visible value type */
+        ps_value_type base; /** @brief same as type for internal types like integer or char,
+                                       values for sub-type for subranges and enums, ... */
         union {
             ps_type_definition_enum e;
             ps_type_definition_subrange g;
