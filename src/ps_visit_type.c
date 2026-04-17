@@ -319,7 +319,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Create enumeration type definition
-    ps_type_definition *type_def = ps_type_definition_create_enum();
+    ps_type_definition *type_def = ps_enum_create();
     if (type_def == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     // Register it
@@ -354,7 +354,7 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     } while (true);
     READ_NEXT_TOKEN_OR_CLEANUP
     // Copy enum values to enum type definition
-    if (!ps_type_definition_set_enum_values(type_def, list->used, list->values))
+    if (!ps_enum_set_values(type_def, list->used, list->values))
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     ps_symbol_list_free(list, false);
     VISIT_END("OK")
@@ -451,28 +451,28 @@ bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpre
     switch (type->value->data.t->type)
     {
     case PS_TYPE_CHAR:
-        type_def = ps_type_definition_create_subrange_char(subrange->c.min, subrange->c.max);
+        type_def = ps_subrange_create_char(subrange->c.min, subrange->c.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_INTEGER:
-        type_def = ps_type_definition_create_subrange_integer(subrange->i.min, subrange->i.max);
+        type_def = ps_subrange_create_integer(subrange->i.min, subrange->i.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_UNSIGNED:
-        type_def = ps_type_definition_create_subrange_unsigned(subrange->u.min, subrange->u.max);
+        type_def = ps_subrange_create_unsigned(subrange->u.min, subrange->u.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_ENUM:
-        type_def = ps_type_definition_create_subrange_enum(type, subrange->e.min, subrange->e.max);
+        type_def = ps_subrange_create_enum(type, subrange->e.min, subrange->e.max);
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
         else

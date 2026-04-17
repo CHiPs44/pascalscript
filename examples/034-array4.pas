@@ -10,8 +10,15 @@ Const
     Cols = 5;
 
 Type
-    NumberArray = Array[1..Rows] Of Array[1..Cols] Of Integer;
-    CharArray = Array[1..Rows] Of Array[1..Cols] Of Char;
+    NumberArray   = Array[1..Rows] Of Array[1..Cols] Of Integer;
+    CharArray     = Array[1..Rows] Of Array[1..Cols] Of Char;
+    ArrayOfArray2 = Array[1..2] Of CharArray;
+    Array3D       = Array[1..10, 1..10, 1..10] Of Integer;
+
+Function GetPoint(Var A: Array3D; X, Y, Z: Integer): Integer;
+Begin
+    Result := A[X, Y, Z];
+End;
 
 Var
     Numbers: NumberArray;

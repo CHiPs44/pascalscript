@@ -25,7 +25,7 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-    /** @brief Enumerations are stored as unsigned bytes (first=0, second=1, ...) */
+    /** @brief Enumerations are stored as unsigned integers (first=0, second=1, ...) */
     /** @example Months: (January, February, March, April, ..., December) */
     typedef struct s_ps_type_definition_enum
     {
@@ -160,17 +160,8 @@ extern "C"
     ps_type_definition *ps_type_definition_alloc(ps_value_type type, ps_value_type base);
     ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
     ps_type_definition *ps_type_definition_create_string(ps_string_len max);
-    ps_type_definition *ps_type_definition_create_enum();
-    bool ps_type_definition_set_enum_values(ps_type_definition *type_def, ps_unsigned count, ps_symbol **values);
-    ps_type_definition *ps_type_definition_create_subrange_char(ps_char min, ps_char max);
-    ps_type_definition *ps_type_definition_create_subrange_integer(ps_integer min, ps_integer max);
-    ps_type_definition *ps_type_definition_create_subrange_unsigned(ps_unsigned min, ps_unsigned max);
-    ps_type_definition *ps_type_definition_create_subrange_enum(ps_symbol *symbol_enum, ps_enum_value min,
-                                                                ps_enum_value max);
     ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension);
     bool ps_type_definition_is_array(const ps_type_definition *type_def);
-    ps_unsigned ps_type_definition_get_subrange_count(const ps_type_definition *type_def);
-    ps_unsigned ps_type_definition_get_subrange_offset(const ps_type_definition *type_def, const ps_value *index);
 
 #ifdef __cplusplus
 }
