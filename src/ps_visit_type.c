@@ -555,17 +555,17 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     ps_symbol *item_type = NULL;
     ps_symbol *subrange = NULL;
 
-    // 'ARRAY'
+    // Expect 'ARRAY'
     if (lexer->current_token.type != PS_TOKEN_ARRAY)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
-    // '['
+    // Expect '['
     if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
     do
     {
-        // SUBRANGE: LOW '..' HIGH | IDENTIFIER
+        // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
         if (!ps_visit_type_reference(interpreter, mode, &subrange, NULL))
             TRACE_ERROR("DIMENSION")
         // Dimension *must* be a subrange
@@ -598,7 +598,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
         ps_interpreter_set_message(interpreter, "%d dimensions for an array is TODO/WIP", dimensions);
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     }
-    // 'OF'
+    // Expect 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
@@ -619,7 +619,6 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     type_def->def.a.item_type = item_type;
-    type_def->def.a.is_vector = item_type->value->data.t->type != PS_TYPE_ARRAY;
     type_def->def.a.dimensions = dimensions;
     // Register new type definition in symbol table
     if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
