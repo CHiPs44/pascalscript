@@ -14,6 +14,10 @@ extern "C"
 
 #include "ps_value_data.h"
 
+#ifndef PS_ARRAY_MAX_DIMENSIONS
+#define PS_ARRAY_MAX_DIMENSIONS 8
+#endif
+
     typedef struct s_ps_array_data
     {
         ps_unsigned count;
@@ -27,15 +31,18 @@ extern "C"
 
     /** @brief Get array type definition */
     ps_type_definition *ps_array_get_type_def(const ps_symbol *var_or_type);
+    /** @brief Get array dimensions count */
+    uint8_t ps_array_get_dimensions(const ps_symbol *array_type);
     /** @brief Get array subrange */
     ps_symbol *ps_array_get_subrange(const ps_symbol *var_or_type);
     /** @brief Get array item type */
     ps_symbol *ps_array_get_item_type(const ps_symbol *var_or_type);
-    /** @brief value := array[indexes] (allocating value if NULL) */
-    ps_error ps_array_get_value(const ps_symbol *array_var, const ps_value *index, ps_value *value, bool range_check);
+    /** @brief value := array[indexes] */
+    ps_error ps_array_get_value(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes,
+                                ps_value *value, bool range_check);
     /** @brief array[indexes] := value */
-    ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indexes, const ps_value *value,
-                                bool range_check);
+    ps_error ps_array_set_value(ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes,
+                                const ps_value *value, bool range_check);
     /** @brief Display (part of) array values */
     void ps_array_debug_values(FILE *out, ps_symbol *array_var);
 
