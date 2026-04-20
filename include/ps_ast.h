@@ -33,6 +33,13 @@ extern "C"
     typedef struct s_ps_ast_node
     {
         ps_ast_node_kind kind;
+        union
+        {
+            ps_ast_node_program *program;
+            ps_ast_node_assignment *assignment;
+            ps_ast_node_binary_operation *binary_operation;
+            ps_ast_node_expression *expression;
+        }
     } ps_ast_node;
 
     ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind, size_t count);
@@ -40,7 +47,6 @@ extern "C"
     typedef struct ps_ast_node_program
     {
         // clang-format off
-        ps_ast_node_kind       kind;
         ps_symbol             *name;
         size_t                 n_consts;
         ps_symbol             *consts;

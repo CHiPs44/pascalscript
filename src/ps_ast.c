@@ -65,7 +65,7 @@ bool ps_ast_visit_node(ps_ast_node *node)
 
 ps_ast_node_program *ps_ast_create_program(size_t n_consts, size_t n_types, size_t n_vars, size_t n_statements)
 {
-    ps_ast_node_program *node = ps_ast_create_node(PS_AST_PROGRAM, 1);
+   ps_ast_node_program *node = ps_ast_create_node(PS_AST_PROGRAM, 1);
     if (node == NULL)
         return NULL;
     node->n_consts = n_consts;
