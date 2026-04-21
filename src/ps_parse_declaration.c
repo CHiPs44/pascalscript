@@ -1,5 +1,5 @@
 /*
-    This file is part of the PascalScript Pascal interpreter.
+    This file is part of the PascalScript Pascal compiler.
     SPDX-FileCopyrightText: 2026 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
@@ -10,13 +10,13 @@
 #include "ps_token.h"
 #include "ps_parse.h"
 
-static bool ps_parse_program_parameters(ps_interpreter *interpreter, ps_interpreter_mode mode);
+static bool ps_parse_program_parameters(ps_compiler *compiler, ps_interpreter_mode mode);
 /**
  * Parse program declaration:
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
  *  identifiers are ignored
  */
-bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_program(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("PROGRAM", "")
 
@@ -31,23 +31,23 @@ bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
     // Skip optional parameters enclosed in parentheses
-    if (!ps_visit_program_parameters(interpreter, mode))
+    if (!ps_visit_program_parameters(compiler, mode))
         TRACE_ERROR("PARAMETERS")
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
     // Register program in symbol table and visit its block
-    if (!ps_interpreter_enter_environment(interpreter, identifier))
+    if (!ps_interpreter_enter_environment(compiler, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
-    if (!ps_interpreter_add_symbol(interpreter, program))
+    if (!ps_interpreter_add_symbol(compiler, program))
         TRACE_ERROR("ADD PROGRAM SYMBOL")
     // One "Uses" clause at most after "Program"
-    if (!ps_visit_uses(interpreter, mode))
+    if (!ps_visit_uses(compiler, mode))
         TRACE_ERROR("USES")
     // Block with declarations and compound statement
-    if (!ps_visit_block(interpreter, mode))
+    if (!ps_visit_block(compiler, mode))
         TRACE_ERROR("BLOCK");
-    if (!ps_interpreter_exit_environment(interpreter))
+    if (!ps_interpreter_exit_environment(compiler))
         TRACE_ERROR("EXIT ENVIRONMENT");
     // Expect '.' at the end of program declaration
     EXPECT_TOKEN(PS_TOKEN_DOT)
@@ -59,7 +59,7 @@ bool ps_parse_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Parse program parameters (identifiers in parentheses)
  */
-static bool ps_parse_program_parameters(ps_interpreter *interpreter, ps_interpreter_mode mode)
+static bool ps_parse_program_parameters(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("PROGRAM", "PARAMETERS")
 
@@ -97,7 +97,7 @@ static bool ps_parse_program_parameters(ps_interpreter *interpreter, ps_interpre
 /**
  * Parse uses clause (module names after USES)
  */
-static bool ps_parse_uses_clause(ps_interpreter *interpreter, ps_interpreter_mode mode)
+static bool ps_parse_uses_clause(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("PROGRAM", "USES")
 
@@ -124,14 +124,14 @@ static bool ps_parse_uses_clause(ps_interpreter *interpreter, ps_interpreter_mod
     PARSE_END("OK")
 }
 
-bool ps_parse_uses(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_uses(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("USES", "")
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
         READ_NEXT_TOKEN
-        if (!ps_parse_uses_clause(interpreter, mode))
+        if (!ps_parse_uses_clause(compiler, mode))
             TRACE_ERROR("USES CLAUSE")
     }
 
@@ -150,7 +150,7 @@ bool ps_parse_uses(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *      COMPOUND_STATEMENT
  * NB: ; or . or whatever after END is analyzed by the caller
  */
-bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_block(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("BLOCK", "")
 
@@ -160,24 +160,24 @@ bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_CONST:
-            if (!ps_parse_const(interpreter, mode))
+            if (!ps_parse_const(compiler, mode))
                 TRACE_ERROR("CONST")
             break;
         case PS_TOKEN_TYPE:
-            if (!ps_parse_type(interpreter, mode))
+            if (!ps_parse_type(compiler, mode))
                 TRACE_ERROR("TYPE")
             break;
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_VAR:
-            if (!ps_parse_var(interpreter, mode))
+            if (!ps_parse_var(compiler, mode))
                 TRACE_ERROR("VAR")
             break;
         case PS_TOKEN_PROCEDURE:
-            if (!ps_parse_procedure_or_function_declaration(interpreter, MODE_SKIP, PS_SYMBOL_KIND_PROCEDURE))
+            if (!ps_parse_procedure_or_function_declaration(compiler, MODE_SKIP, PS_SYMBOL_KIND_PROCEDURE))
                 TRACE_ERROR("PROCEDURE")
             break;
         case PS_TOKEN_FUNCTION:
-            if (!ps_parse_procedure_or_function_declaration(interpreter, MODE_SKIP, PS_SYMBOL_KIND_FUNCTION))
+            if (!ps_parse_procedure_or_function_declaration(compiler, MODE_SKIP, PS_SYMBOL_KIND_FUNCTION))
                 TRACE_ERROR("FUNCTION")
             break;
         case PS_TOKEN_BEGIN:
@@ -188,7 +188,7 @@ bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
         }
     } while (loop);
 
-    if (!ps_parse_compound_statement(interpreter, mode))
+    if (!ps_parse_compound_statement(compiler, mode))
         TRACE_ERROR("COMPOUND")
 
     PARSE_END("OK")
@@ -224,7 +224,7 @@ bool ps_parse_block(ps_interpreter *interpreter, ps_interpreter_mode mode)
  * Not implemented yet in lexer:
  *          Lines       = 'First line' #10 'Second line' #10 'Third line';
  */
-bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_const(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("CONST", "")
 
@@ -245,7 +245,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         value = ps_value_alloc(&ps_system_none, data);
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_visit_constant_expression(interpreter, mode, value))
+        if (!ps_visit_constant_expression(compiler, mode, value))
         {
             ps_value_free(value);
             TRACE_ERROR("CONSTANT_EXPRESSION")
@@ -255,7 +255,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, identifier, value);
         if (constant == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_interpreter_add_symbol(interpreter, constant))
+        if (!ps_interpreter_add_symbol(compiler, constant))
             TRACE_ERROR("ADD SYMBOL")
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
@@ -268,7 +268,7 @@ bool ps_parse_const(ps_interpreter *interpreter, ps_interpreter_mode mode)
  *      'TYPE' TYPE_DEFINITION ';'
  *             [ TYPE_DEFINITION ';' ]*
  */
-bool ps_parse_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_type(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("TYPE", "");
 
@@ -278,7 +278,7 @@ bool ps_parse_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     do
     {
-        if (!ps_parse_type_definition(interpreter, mode))
+        if (!ps_parse_type_definition(compiler, mode))
             TRACE_ERROR("TYPE_DEFINITION");
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
         READ_NEXT_TOKEN
@@ -290,7 +290,7 @@ bool ps_parse_type(ps_interpreter *interpreter, ps_interpreter_mode mode)
 /**
  * Parse variable identifier list with commas
  */
-static bool ps_parse_var_identifier_list(ps_interpreter *interpreter, ps_interpreter_mode mode,
+static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_interpreter_mode mode,
                                          ps_identifier *identifier, int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
@@ -300,7 +300,7 @@ static bool ps_parse_var_identifier_list(ps_interpreter *interpreter, ps_interpr
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifier[*var_count])
-        const ps_symbol *variable = ps_interpreter_find_symbol(interpreter, identifier[*var_count], true);
+        const ps_symbol *variable = ps_interpreter_find_symbol(compiler, identifier[*var_count], true);
         if (variable != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN
@@ -326,7 +326,7 @@ static bool ps_parse_var_identifier_list(ps_interpreter *interpreter, ps_interpr
  *          x: Real;
  *          Name: String;
  */
-bool ps_parse_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_var(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("VAR", "")
 
@@ -338,15 +338,15 @@ bool ps_parse_var(ps_interpreter *interpreter, ps_interpreter_mode mode)
     READ_NEXT_TOKEN
     do
     {
-        if (!ps_parse_var_identifier_list(interpreter, mode, identifier, &var_count))
+        if (!ps_parse_var_identifier_list(compiler, mode, identifier, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
         READ_NEXT_TOKEN
-        if (!ps_parse_type_reference(interpreter, mode, &type_symbol, NULL))
+        if (!ps_parse_type_reference(compiler, mode, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         for (int i = 0; i <= var_count; i++)
         {
-            if (!ps_interpreter_add_variable(interpreter, identifier[i], type_symbol))
+            if (!ps_interpreter_add_variable(compiler, identifier[i], type_symbol))
                 TRACE_ERROR("ADD VARIABLE")
         }
         READ_NEXT_TOKEN

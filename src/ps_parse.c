@@ -1,11 +1,12 @@
 /*
-    This file is part of the PascalScript Pascal interpreter.
+    This file is part of the PascalScript Pascal compiler.
     SPDX-FileCopyrightText: 2026 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
 #include <string.h>
 
+#include "ps_compiler.h"
 #include "ps_functions.h"
 #include "ps_parse_declaration.h"
 #include "ps_parse.h"
@@ -20,7 +21,7 @@
  *  BLOCK
  *  '.'
  */
-bool ps_parse_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_parse_start(ps_compiler *compiler, ps_interpreter_mode mode)
 {
     PARSE_BEGIN("START", "")
 
@@ -28,7 +29,7 @@ bool ps_parse_start(ps_interpreter *interpreter, ps_interpreter_mode mode)
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
-        if (!ps_parse_program(interpreter, mode))
+        if (!ps_parse_program(compiler, mode))
             TRACE_ERROR("PROGRAM")
         break;
     case PS_TOKEN_UNIT:
