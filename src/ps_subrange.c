@@ -96,6 +96,7 @@ ps_unsigned ps_subrange_get_count(const ps_type_definition *subrange)
 ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_value *index)
 {
     ps_unsigned offset = PS_UNSIGNED_MAX;
+    bool valid = false;
     if (subrange->type != PS_TYPE_SUBRANGE)
         return offset;
     if (subrange_debug)
@@ -119,7 +120,7 @@ ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_
     case PS_TYPE_UNSIGNED:
         // 3 from 1..10 => 3 - 1 => 2
         ps_unsigned u = 0;
-        bool valid = false;
+        valid = false;
         if (ps_value_get_base(index) == PS_TYPE_INTEGER && index->data.i >= 0)
         {
             u = index->data.i;
@@ -141,7 +142,7 @@ ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_
         // 3 from -4..4 => 3 - -4 => 7
         //         0..8
         ps_integer i = 0;
-        bool valid = false;
+        valid = false;
         if (ps_value_get_base(index) == PS_TYPE_UNSIGNED && index->data.u <= PS_INTEGER_MAX)
         {
             i = index->data.u;

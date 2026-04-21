@@ -101,75 +101,96 @@ ps_symbol *ps_array_get_subrange(const ps_symbol *array_type)
 ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
 {
     const ps_type_definition *type_def = ps_array_get_type_def(array_type);
-    return type_def == NULL ? NULL : type_def->def.a.item_type;
+    if (type_def == NULL)
+        return NULL;
+    // Traverse through all nested array dimensions to find the actual element type
+    ps_symbol *item_type = type_def->def.a.item_type;
+    while (item_type != NULL)
+    {
+        const ps_type_definition *item_type_def = ps_array_get_type_def(item_type);
+        if (item_type_def == NULL || !ps_type_definition_is_array(item_type_def))
+            break; // reached the actual element type (not an array)
+        item_type = item_type_def->def.a.item_type;
+    }
+    return item_type;
 }
 
-ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t count, const ps_value **indexes,
+ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes,
                                    ps_unsigned *final_offset)
 {
-    ps_unsigned offset = 0;
-    if (ps_array_debug)
-    {
-        ps_symbol_debug(stderr, "ps_array_get_value, array: ", array_var);
-        fprintf(stderr, "ps_array_get_value, count: %u\n", count);
-        for (uint8_t i = 0; i < count; i += 1)
-            ps_value_debug(stderr, "ps_array_get_value, index: ", indexes[i]);
-    }
     const ps_type_definition *type_def = ps_array_get_type_def(array_var);
     if (ps_array_debug)
-        ps_type_definition_debug(stderr, "*** ps_array_get_value, type_def: ", type_def);
+    {
+        ps_symbol_debug(stderr, "ps_array_get_value_offset, array: ", array_var);
+        fprintf(stderr, "ps_array_get_value_offset, dimensions: %u\n", dimensions);
+        for (uint8_t i = 0; i < dimensions; i += 1)
+            ps_value_debug(stderr, "ps_array_get_value_offset, index[%u]: ", indexes[i]);
+        ps_type_definition_debug(stderr, "ps_array_get_value_offset, type_def: ", type_def);
+    }
     if (!ps_type_definition_is_array(type_def))
         return PS_ERROR_INVALID_PARAMETERS;
-    if (type_def->def.a.dimensions < count)
+    if (type_def->def.a.dimensions < dimensions)
         return PS_ERROR_NOT_ENOUGH_DIMENSIONS;
-    if (type_def->def.a.dimensions > count)
+    if (type_def->def.a.dimensions > dimensions)
         return PS_ERROR_TOO_MANY_DIMENSIONS;
+    // Collect all subranges for each dimension
+    ps_symbol *subranges[dimensions];
     ps_symbol *subrange = ps_array_get_subrange(array_var);
-    for (uint8_t i = 0; i < count; i += 1)
+    for (uint8_t i = 0; i < dimensions; i += 1)
     {
-        offset = ps_subrange_get_offset(subrange->value->data.t, indexes[i]);
-        final_offset = offset;
-        if (final_offset >= array_var->value->data.a->count)
-            return PS_ERROR_OUT_OF_RANGE;
+        subranges[i] = subrange;
+        if (i < dimensions - 1)
+            subrange = ps_array_get_subrange(subrange);
     }
+    // Calculate offset using row-major ordering (iterate backwards, right to left)
+    *final_offset = 0;
+    ps_unsigned stride = 1;
+    for (int i = dimensions - 1; i >= 0; i -= 1)
+    {
+        // Copy given index to a local variable of the same type as subrange definition
+        ps_value index = {.allocated = false, .type = subranges[i]->value->data.t, .data.v = NULL};
+        ps_error error = ps_value_copy(indexes[i], &index, true);
+        if (error != PS_ERROR_NONE)
+            return error;
+        ps_unsigned index_offset = ps_subrange_get_offset(subranges[i]->value->data.t, &index);
+        ps_unsigned subrange_count = ps_subrange_get_count(subranges[i]->value->data.t);
+        if (index_offset >= subrange_count)
+            return PS_ERROR_OUT_OF_RANGE;
+        *final_offset += stride * index_offset;
+        stride *= subrange_count;
+    }
+    if (*final_offset >= array_var->value->data.a->count)
+        return PS_ERROR_OUT_OF_RANGE;
+    if (ps_array_debug)
+        fprintf(stderr, "ps_array_get_value_offset, final_offset: %u\n", *final_offset);
     return PS_ERROR_NONE;
 }
 
-ps_error ps_array_get_value(const ps_symbol *array_var, uint8_t count, const ps_value **indexes, ps_value *value,
+ps_error ps_array_get_value(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes, ps_value *value,
                             bool range_check)
 {
     ps_unsigned offset = 0;
-    ps_error error = ps_array_get_value_offset(array_var, count, indexes, &offset);
+    ps_error error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
     if (error != PS_ERROR_NONE)
         return error;
-    ps_value array_value = {.allocated = false, .type = NULL, .data.v = NULL};
-    array_value.type = ps_array_get_item_type(array_var);
-    array_value.data = array_var->value->data.a->values[offset];
-    ps_error error = ps_value_copy(&array_value, value, range_check);
+    ps_value array_value = {.allocated = false,
+                            .type = ps_array_get_item_type(array_var),
+                            .data = array_var->value->data.a->values[offset]};
+    error = ps_value_copy(&array_value, value, range_check);
     if (ps_array_debug)
         ps_value_debug(stderr, "ps_array_get_value, array: ", &array_value);
     return error;
 }
 
-ps_error ps_array_set_value(ps_symbol *array_var, const ps_value **indexes, const ps_value *value, bool range_check)
+ps_error ps_array_set_value(ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes, const ps_value *value,
+                            bool range_check)
 {
-    if (ps_array_debug)
-    {
-        ps_symbol_debug(stderr, "PS_ARRAY_SET_VALUE, array_var: ", array_var);
-        ps_value_debug(stderr, "PS_ARRAY_SET_VALUE, index: ", index);
-    }
-    if (array_var == NULL || array_var->value == NULL || array_var->value->type == NULL ||
-        array_var->value->data.a->values == NULL)
-        return PS_ERROR_INVALID_PARAMETERS;
-    const ps_symbol *subrange = ps_array_get_subrange(array_var->value->type);
-    // Get offset from index
-    ps_array_debug = true;
-    ps_unsigned offset = ps_subrange_get_offset(subrange->value->data.t, index);
-    if (offset >= array_var->value->data.a->count)
-        return PS_ERROR_INVALID_SUBRANGE;
-    ps_array_debug = false;
+    ps_unsigned offset = 0;
+    ps_error error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
+    if (error != PS_ERROR_NONE)
+        return error;
     ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};
-    ps_error error = ps_value_copy(value, &array_value, range_check);
+    error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
         return error;
     array_var->value->data.a->values[offset] = array_value.data;

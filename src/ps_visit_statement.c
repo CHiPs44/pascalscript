@@ -85,21 +85,22 @@ bool ps_visit_assignment_array(ps_interpreter *interpreter, ps_interpreter_mode 
     VISIT_BEGIN("ASSIGNMENT", "ARRAY")
 
     ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
+    ps_symbol *item_type = ps_array_get_subrange(variable);
+    u_int8_t dimensions = ps_array_get_dimensions(variable);
+    if (dimensions > 8)
+        RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
     ps_value indexes[8] = {0};
-    ps_symbol *item_type = variable->value->type->value->data.t->def.a.subrange;
-    int dimensions = 0; // variable->value->type->value->data.t->def.a.dimensions;
     int dimension = 0;
-
     // Initialize index types for each dimension
     bool loop = true;
     do
     {
-        indexes[dimensions].type = item_type;
-        indexes[dimensions].allocated = false;
-        indexes[dimensions].data.v = NULL;
+        indexes[dimension].allocated = false;
+        indexes[dimension].type = item_type;
+        indexes[dimension].data.v = NULL;
         if (!loop)
             break;
-        dimensions += 1;
+        dimension += 1;
         item_type = item_type->value->type->value->data.t->def.a.subrange;
         if (item_type->kind != PS_TYPE_ARRAY)
             loop = false;
@@ -216,16 +217,21 @@ bool ps_visit_read_or_readln(ps_interpreter *interpreter, ps_interpreter_mode mo
 
 /**
  * Visit
- *      'WRITE' | 'WRITELN' ) [ '('
+ *      'WRITE' | 'WRITELN' [ '('
  *          expression [ ':' width [ ':' precision ] ]
  *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *      ')' ] ;
  * Next steps:
- *      'WRITE' | 'WRITELN' ) [ '('
+ *   Write to text file:
+ *      'WRITE' | 'WRITELN' [ '('
  *          [ file_variable ',' ]
  *          expression [ ':' width [ ':' precision ] ]
  *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *      ')' ] ;
+ *   Write to binary file:
+ *      'WRITE' '('
+ *          file_variable ',' expression
+ *      ')' ;
  */
 bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode mode, bool newline) // NOSONAR
 {
