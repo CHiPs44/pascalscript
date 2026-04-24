@@ -8,6 +8,7 @@
 #define _PS_AST_H
 
 #include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -18,11 +19,9 @@ extern "C"
     typedef enum enum_ps_ast_node_kind
     {
         PS_AST_NODE = 0,
-        PS_AST_PROGRAM,
-        PS_AST_CONST,
-        PS_AST_TYPE,
-        PS_AST_VAR,
+        PS_AST_BLOCK,
         PS_AST_STATEMENT,
+        PS_AST_STATEMENT_LIST,
         PS_AST_ASSIGNMENT,
         PS_AST_EXPRESSION,
         PS_AST_UNARY_OPERATION,
@@ -33,9 +32,8 @@ extern "C"
     typedef struct s_ps_ast_node
     {
         ps_ast_node_kind kind;
-        union
-        {
-            ps_ast_node_program *program;
+        union {
+            ps_ast_node_block *block;
             ps_ast_node_assignment *assignment;
             ps_ast_node_binary_operation *binary_operation;
             ps_ast_node_expression *expression;
@@ -44,20 +42,46 @@ extern "C"
 
     ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind, size_t count);
 
-    typedef struct ps_ast_node_program
+    typedef enum enum_ps_ast_block_kind
     {
-        // clang-format off
-        ps_symbol             *name;
-        size_t                 n_consts;
-        ps_symbol             *consts;
-        size_t                 n_types;
-        ps_ast_node_type      *types;
-        size_t                 n_vars;
-        ps_symbol             *vars;
-        size_t                 n_statements;
-        ps_ast_node_statement *statements;
-        // clang-format on
-    } ps_ast_node_program;
+        PS_AST_PROGRAM,
+        PS_AST_UNIT,
+        PS_AST_FUNCTION,
+        PS_AST_PROCEDURE,
+    } ps_ast_block_kind;
+
+    typedef struct ps_ast_node_block
+    {
+        ps_ast_block_kind kind;
+        union {
+            ps_identifier program_name; // for PS_AST_PROGRAM
+            ps_identifier unit_name;    // for PS_AST_UNIT
+            struct
+            {
+                ps_identifier name;
+                size_t parameter_count;
+                ps_parameter *parameters;
+                ps_symbol *result_type; // for functions, NULL for procedures
+            } function_or_procedure;    // for PS_AST_FUNCTION and PS_AST_PROCEDURE
+        };
+        ps_symbol_table
+            *symbol_table; // constants, types, variables, functions and procedures defined in this block
+        ps_ast_node_statement_list instructions;
+    } ps_ast_node_block;
+
+    typedef struct ps_parameter
+    {
+        ps_identifier name;
+        ps_symbol *type;
+        bool byref : 1; // true if parameter is passed by reference (var parameter)
+    } ps_parameter;
+
+    typedef struct ps_ast_node_statement_list
+    {
+        size_t size;
+        size_t used;
+        ps_ast_node_statement **statements;
+    } ps_ast_node_statement_list;
 
     typedef struct
     {

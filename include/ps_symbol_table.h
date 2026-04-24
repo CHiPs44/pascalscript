@@ -24,7 +24,7 @@ extern "C"
 
 #define PS_SYMBOL_TABLE_NOT_FOUND UINT16_MAX
 
-    /** @brief up to 65,535 symbols in a table as UINT16_MAX is used for "not found" */
+    /** @brief up to 65,534 symbols in a table as 0 means empty and UINT16_MAX is used for "not found" */
     typedef uint16_t ps_symbol_table_size;
 
     typedef enum e_ps_symbol_table_error
