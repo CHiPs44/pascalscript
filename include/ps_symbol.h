@@ -30,16 +30,18 @@ extern "C"
         PS_SYMBOL_KIND_PROCEDURE,
         PS_SYMBOL_KIND_FUNCTION,
         // ...
-    } /*__attribute__((__packed__))*/ ps_symbol_kind;
+    } __attribute__((__packed__)) ps_symbol_kind;
 
     /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
     {
-        ps_identifier name;      /** @brief Symbol name in uppercase */
-        ps_value *value;         /** @brief current value, must be a pointer as it is a forward reference */
-        ps_symbol_kind kind : 6; /** @brief Auto, type definition, program, ... */
-        bool system : 1;         /** @brief true if symbol is a system symbol (predefined) */
-        bool allocated : 1;      /** @brief true if symbol was allocated (and must be freed) */
+        // clang-format off
+        ps_identifier   name;        /** @brief Symbol name in uppercase */
+        ps_value       *value;       /** @brief current value, must be a pointer as it is a forward reference */
+        ps_symbol_kind  kind:6;      /** @brief Auto, type definition, program, ... */
+        bool            system:1;    /** @brief true if symbol is a system symbol (predefined) */
+        bool            allocated:1; /** @brief true if symbol was allocated (and must be freed) */
+        // clang-format on
     } /*__attribute__((__packed__))*/ ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)

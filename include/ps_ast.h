@@ -60,7 +60,7 @@ extern "C"
         ps_symbol *result_type;   // for functions, NULL for procedures
         ps_symbol_table
             *symbol_table; /** @brief constants, types, variables, functions and procedures defined in this block */
-        ps_ast_node_statement_list instructions;
+        ps_ast_node_statement_list statements;
     } ps_ast_node_block;
 
     typedef struct ps_parameter
