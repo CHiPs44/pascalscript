@@ -26,6 +26,7 @@ extern "C"
         PS_AST_EXPRESSION,
         PS_AST_UNARY_OPERATION,
         PS_AST_BINARY_OPERATION,
+        PS_AST_FUNCTION_CALL,
         PS_AST_VALUE,
     } ps_ast_node_kind;
 
@@ -44,28 +45,21 @@ extern "C"
 
     typedef enum enum_ps_ast_block_kind
     {
-        PS_AST_PROGRAM,
-        PS_AST_UNIT,
-        PS_AST_FUNCTION,
-        PS_AST_PROCEDURE,
+        PS_BLOCK_PROGRAM,
+        PS_BLOCK_UNIT,
+        PS_BLOCK_FUNCTION,
+        PS_BLOCK_PROCEDURE,
     } ps_ast_block_kind;
 
     typedef struct ps_ast_node_block
     {
         ps_ast_block_kind kind;
-        union {
-            ps_identifier program_name; // for PS_AST_PROGRAM
-            ps_identifier unit_name;    // for PS_AST_UNIT
-            struct
-            {
-                ps_identifier name;
-                size_t parameter_count;
-                ps_parameter *parameters;
-                ps_symbol *result_type; // for functions, NULL for procedures
-            } function_or_procedure;    // for PS_AST_FUNCTION and PS_AST_PROCEDURE
-        };
+        ps_identifier name;
+        size_t parameter_count;   // can be zero
+        ps_parameter *parameters; // NULL if no parameters
+        ps_symbol *result_type;   // for functions, NULL for procedures
         ps_symbol_table
-            *symbol_table; // constants, types, variables, functions and procedures defined in this block
+            *symbol_table; /** @brief constants, types, variables, functions and procedures defined in this block */
         ps_ast_node_statement_list instructions;
     } ps_ast_node_block;
 
@@ -98,26 +92,23 @@ extern "C"
 
     typedef struct
     {
-        ps_ast_node_kind kind;
         ps_symbol *var;
         ps_ast_node_expression *expression;
     } ps_ast_node_assignment;
 
     typedef struct
     {
-        ps_ast_node_kind kind;
         ps_ast_node_statement *next;
     } ps_ast_node_expression;
 
     typedef enum
     {
-        PS_AST_OP_NEG,
-        PS_AST_OP_NOT,
+        PS_OP_NEG,
+        PS_OP_NOT,
     } ps_ast_node_unary_operator;
 
     typedef struct
     {
-        ps_ast_node_kind kind;
         ps_ast_node_statement *next;
         ps_ast_node_unary_operator op;
         ps_ast_node_value arg;
@@ -126,18 +117,25 @@ extern "C"
     typedef enum
     {
         // additive / terms
-        PS_AST_OP_ADD,
-        PS_AST_OP_SUB,
-        PS_AST_OP_OR,
-        PS_AST_OP_XOR,
+        PS_OP_ADD,
+        PS_OP_SUB,
+        PS_OP_OR,
+        PS_OP_XOR,
         // multiply / factors
-        PS_AST_OP_MUL,
-        PS_AST_OP_DIV,
-        PS_AST_OP_DIV_REAL,
-        PS_AST_OP_MOD,
-        PS_AST_OP_AND,
-        PS_AST_OP_SHL,
-        PS_AST_OP_SHR,
+        PS_OP_MUL,
+        PS_OP_DIV,
+        PS_OP_DIV_REAL,
+        PS_OP_MOD,
+        PS_OP_AND,
+        PS_OP_SHL,
+        PS_OP_SHR,
+        // comparison
+        PS_OP_EQ,
+        PS_OP_GE,
+        PS_OP_GT,
+        PS_OP_LE,
+        PS_OP_LT,
+        PS_OP_NE,
     } ps_ast_node_binary_operator;
 
     typedef struct
@@ -150,7 +148,6 @@ extern "C"
 
     typedef struct
     {
-        ps_ast_node_kind kind;
         // unsigned_integer, unsigned_real, character_value, character_string
         ps_value value;
         // variable_reference, constant_reference

@@ -20,7 +20,7 @@
 ps_ast_node *ps_ast_create_node(ps_ast_node_kind kind, size_t count)
 {
     // clang-format off
-    PS_AST_CREATE_NODE(PS_AST_PROGRAM           , ps_ast_node_program           , count)
+    PS_AST_CREATE_NODE(PS_BLOCK_PROGRAM           , ps_ast_node_program           , count)
     PS_AST_CREATE_NODE(PS_AST_TYPE              , ps_ast_node_type              , count)
     PS_AST_CREATE_NODE(PS_AST_STATEMENT         , ps_ast_node_statement         , count)
     PS_AST_CREATE_NODE(PS_AST_ASSIGNMENT        , ps_ast_node_assignment        , count)
@@ -38,7 +38,7 @@ bool ps_ast_free_node(ps_ast_node *node)
 {
     switch (node->kind)
     {
-    case PS_AST_PROGRAM:
+    case PS_BLOCK_PROGRAM:
         return ps_ast_free_program((ps_ast_node_program *)node);
     case PS_AST_ASSIGNMENT:
         return ps_ast_free_assignment((ps_ast_node_assignment *)node);
@@ -52,7 +52,7 @@ bool ps_ast_visit_node(ps_ast_node *node)
 {
     switch (node->kind)
     {
-    case PS_AST_PROGRAM:
+    case PS_BLOCK_PROGRAM:
         return ps_ast_visit_program((ps_ast_node_program *)node);
     case PS_AST_ASSIGNMENT:
         return ps_ast_visit_assignment((ps_ast_node_assignment *)node);
@@ -65,7 +65,7 @@ bool ps_ast_visit_node(ps_ast_node *node)
 
 ps_ast_node_program *ps_ast_create_program(size_t n_consts, size_t n_types, size_t n_vars, size_t n_statements)
 {
-   ps_ast_node_program *node = ps_ast_create_node(PS_AST_PROGRAM, 1);
+   ps_ast_node_program *node = ps_ast_create_node(PS_BLOCK_PROGRAM, 1);
     if (node == NULL)
         return NULL;
     node->n_consts = n_consts;
