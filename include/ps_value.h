@@ -25,7 +25,7 @@ extern "C"
         ps_symbol *type;    /** @brief symbol with type definition */
         ps_value_data data; /** @brief current value */
         bool allocated : 1; /** @brief true if value was allocated (and must be freed) */
-    } __attribute__((__packed__)) ps_value;
+    } /*__attribute__((__packed__))*/ ps_value;
 
 #define PS_VALUE_SIZE sizeof(ps_value)
 
