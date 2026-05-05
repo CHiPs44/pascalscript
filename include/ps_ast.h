@@ -86,7 +86,7 @@ extern "C"
         size_t n_vars;                  /** @brief Number of variables to allocate at startup            */
         ps_symbol_table *symbols;       /** @brief Constants, types, variables, procedures and functions */
         ps_ast_node *statement_list;    /** @brief Statements in this block                              */
-        size_t n_executables;           /** @brief Number of declared procedures and functions           */
+        size_t n_executables;           /** @brief 1 for procedures and functions                        */
         ps_ast_node **executables;      /** @brief declarations of procedures and functions              */
     } ps_ast_node_block;
 
@@ -163,9 +163,9 @@ extern "C"
     /** @example A[I], A[I, J, K], ... */
     typedef struct s_ps_ast_node_variable_array
     {
-        ps_symbol *symbol;    /** @brief Symbol being referenced                */
-        size_t n_indexes;     /** @brief For array access, 0 if not an array    */
-        ps_ast_node *indexes; /** @brief For array access, NULL if not an array */
+        ps_symbol *variable;     /** @brief Symbol being referenced                */
+        size_t n_indexes;      /** @brief For array access, 0 if not an array    */
+        ps_ast_node **indexes; /** @brief For array access, NULL if not an array */
     } ps_ast_node_variable_array;
 
     typedef enum e_ps_ast_node_unary_operator
@@ -218,13 +218,44 @@ extern "C"
     // clang-format on
 
     /** @brief Create a new AST node of the given kind */
-    ps_ast_node *ps_ast_create_node(ps_ast_ ps_ast_node_kind kind);
+    ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind);
+    ps_ast_node *ps_ast_create_node_block(ps_ast_node_kind kind, char *name);
+    ps_ast_node *ps_ast_create_statement_list(size_t count);
+    ps_ast_node *ps_ast_create_assignment(ps_ast_node *variable, ps_ast_node *expression);
+    ps_ast_node *ps_ast_create_if(ps_ast_node *condition, ps_ast_node *then_branch, ps_ast_node *else_branch);
+    ps_ast_node *ps_ast_create_while(ps_ast_node *condition, ps_ast_node *body);
+    ps_ast_node *ps_ast_create_repeat(ps_ast_node *body, ps_ast_node *condition);
+    ps_ast_node *ps_ast_create_for(ps_ast_node *variable, ps_ast_node *start, ps_ast_node *end, int step,
+                                   ps_ast_node *body);
+    ps_ast_node *ps_ast_create_procedure_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args);
+    ps_ast_node *ps_ast_create_function_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args);
+    ps_ast_node *ps_ast_create_unary_operation(ps_ast_node_unary_operator operator, ps_ast_node * operand);
+    ps_ast_node *ps_ast_create_binary_operation(ps_ast_node_binary_operator operator, ps_ast_node * left,
+                                                ps_ast_node *right);
+    ps_ast_node *ps_ast_create_value(ps_value value);
+    ps_ast_node *ps_ast_create_variable_simple(ps_symbol *variable);
+    ps_ast_node *ps_ast_create_variable_array(ps_symbol *symbol, size_t n_indexes, ps_ast_node *indexes);
+    ps_ast_node *ps_ast_create_lvalue_simple(ps_symbol *variable);
+    ps_ast_node *ps_ast_create_lvalue_array(ps_symbol *symbol, size_t n_indexes, ps_ast_node *indexes);
 
     /** @brief Free an AST node and all its children */
-    bool ps_ast_free_node(ps_ast_node *node);
-
-    /** @brief Visit an AST node and execute it if it's a statement or evaluate it if it's an expression */
-    bool ps_ast_visit_node(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_node(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_block(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_statement_list(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_assignment(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_if(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_while(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_repeat(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_for(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_procedure_call(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_unary_operation(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_binary_operation(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_function_call(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_value(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_variable_simple(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_variable_array(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_lvalue_simple(ps_ast_node *node);
+    ps_ast_node *ps_ast_free_lvalue_array(ps_ast_node *node);
 
 #ifdef __cplusplus
 }

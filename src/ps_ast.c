@@ -387,7 +387,7 @@ ps_ast_node *ps_ast_free_value(ps_ast_node *node)
 // ps_ast_variable_simple: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_variable_simple(ps_symbol *symbol)
+ps_ast_node *ps_ast_create_variable_simple(ps_symbol *variable)
 {
     ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_SIMPLE);
     if (node == NULL)
@@ -395,7 +395,7 @@ ps_ast_node *ps_ast_create_variable_simple(ps_symbol *symbol)
     node->variable_simple = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_variable_simple));
     if (node->variable_simple == NULL)
         return ps_ast_free_node(node);
-    node->variable_simple->symbol = symbol;
+    node->variable_simple->variable = variable;
     return node;
 }
 
@@ -411,7 +411,7 @@ ps_ast_node *ps_ast_free_variable_simple(ps_ast_node *node)
 // ps_ast_variable_array: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_variable_array(ps_symbol *symbol, size_t n_indexes, ps_ast_node *indexes)
+ps_ast_node *ps_ast_create_variable_array(ps_symbol *variable, size_t n_indexes, ps_ast_node *indexes)
 {
     ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_ARRAY);
     if (node == NULL)
@@ -419,7 +419,7 @@ ps_ast_node *ps_ast_create_variable_array(ps_symbol *symbol, size_t n_indexes, p
     node->variable_array = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_variable_array));
     if (node->variable_array == NULL)
         return ps_ast_free_node(node);
-    node->variable_array->symbol = symbol;
+    node->variable_array->variable = variable;
     node->variable_array->n_indexes = n_indexes;
     node->variable_array->indexes = indexes;
     return node;
@@ -429,7 +429,10 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_node *node)
 {
     ps_ast_node_variable_array *variable_array = node->variable_array;
     for (size_t i = 0; i < variable_array->n_indexes; i++)
-        variable_array->indexes[i] = ps_ast_free_expression(&variable_array->indexes[i]);
+    {
+        ps_ast_free_node(&variable_array->indexes[i]);
+        variable_array->indexes[i] = NULL;
+    }
     ps_memory_free(PS_MEMORY_AST, variable_array->indexes);
     ps_memory_free(PS_MEMORY_AST, variable_array);
     ps_memory_free(PS_MEMORY_AST, node);

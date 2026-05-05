@@ -79,6 +79,7 @@ void ps_ast_debug_program(ps_ast_node *node)
     ps_ast_debug_line("PROGRAM name: %s\n", node->block->name);
     ps_ast_debug_line(" - Number of variables: %zu", node->block->n_vars);
     ps_ast_debug_line(" - Number of statements: %zu", node->block->statement_list->statement_list->count);
+    ps_ast_debug_line(" - Number of executables: %zu", node->block->n_executables);
 }
 
 void ps_ast_debug_procedure(ps_ast_node *node)

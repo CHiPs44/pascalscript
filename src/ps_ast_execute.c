@@ -49,7 +49,7 @@ bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_node *function)
 bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node_block *block)
 {
     // TODO: handle variable allocation and initialization
-    bool result = ps_ast_run_statement_list(interpreter, &block->statements);
+    bool result = ps_ast_run_statement_list(interpreter, block->statement_list);
     // TODO: handle variable release
     return result;
 }
@@ -89,7 +89,7 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
 
 bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_node_assignment *assignment)
 {
-    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->symbol->name);
+    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->variable->name);
     ps_ast_node_value value = {0};
     bool result = ps_ast_run_expression(interpreter, assignment->expression, &value);
     if (!result)
@@ -163,7 +163,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_node_repeat *repeat_s
 bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_node_for *for_statement)
 {
     ps_ast_debug_line("FOR statement");
-    ps_ast_debug_line(" - Variable: %s", for_statement->variable->symbol->name);
+    ps_ast_debug_line(" - Variable: %s", for_statement->variable->variable_simple->variable->name);
     ps_ast_node_value start_value = {0};
     bool result = ps_ast_run_expression(interpreter, for_statement->start, &start_value);
     if (!result)
