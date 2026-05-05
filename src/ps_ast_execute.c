@@ -89,7 +89,7 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
 
 bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_node_assignment *assignment)
 {
-    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->variable->symbol->name);
+    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->symbol->name);
     ps_ast_node_value value = {0};
     bool result = ps_ast_run_expression(interpreter, assignment->expression, &value);
     if (!result)

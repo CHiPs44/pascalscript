@@ -14,24 +14,28 @@ extern "C"
 {
 #endif
 
-#define PS_MEMORY_SYSTEM 0
-#define PS_MEMORY_BUFFER 1
-#define PS_MEMORY_ENVIRONMENT 2
-#define PS_MEMORY_EXECUTABLE 3
-#define PS_MEMORY_INTERPRETER 4
-#define PS_MEMORY_LEXER 5
-#define PS_MEMORY_PARSER 6
-#define PS_MEMORY_SIGNATURE 7
-#define PS_MEMORY_STRING 8
-#define PS_MEMORY_SYMBOL 9
-#define PS_MEMORY_TYPE 10
-#define PS_MEMORY_VALUE 11
-#define PS_MEMORY_CLASS_COUNT 12
+typedef enum
+{
+    PS_MEMORY_SYSTEM,
+    PS_MEMORY_BUFFER,
+    PS_MEMORY_ENVIRONMENT,
+    PS_MEMORY_EXECUTABLE,
+    PS_MEMORY_INTERPRETER,
+    PS_MEMORY_LEXER,
+    PS_MEMORY_PARSER,
+    PS_MEMORY_SIGNATURE,
+    PS_MEMORY_STRING,
+    PS_MEMORY_SYMBOL,
+    PS_MEMORY_TYPE,
+    PS_MEMORY_VALUE,
+    PS_MEMORY_AST,
+    PS_MEMORY_CLASS_COUNT
+} ps_memory_class;
 
-    void *ps_memory_malloc(int memory_class, size_t size);
-    void *ps_memory_calloc(int memory_class, size_t count, size_t size);
-    void *ps_memory_realloc(int memory_class, void *ptr, size_t size);
-    void ps_memory_free(int memory_class, void *ptr);
+    void *ps_memory_malloc(ps_memory_class memory_class, size_t size);
+    void *ps_memory_calloc(ps_memory_class memory_class, size_t count, size_t size);
+    void *ps_memory_realloc(ps_memory_class memory_class, void *ptr, size_t size);
+    void ps_memory_free(ps_memory_class memory_class, void *ptr);
     void ps_memory_debug(FILE *output);
 
 #ifdef __cplusplus

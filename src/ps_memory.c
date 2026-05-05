@@ -12,8 +12,9 @@
 
 #include "ps_memory.h"
 
-static char *memory_class_names[] = {"SYSTEM", "BUFFER",    "ENVIRONMENT", "EXECUTABLE", "INTERPRETER", "LEXER",
-                                     "PARSER", "SIGNATURE", "STRING",      "SYMBOL",     "TYPE",        "VALUE"};
+static char *memory_class_names[] = {"SYSTEM", "BUFFER", "ENVIRONMENT", "EXECUTABLE", "INTERPRETER",
+                                     "LEXER",  "PARSER", "SIGNATURE",   "STRING",     "SYMBOL",
+                                     "TYPE",   "VALUE",  "AST"};
 
 size_t mallocations[PS_MEMORY_CLASS_COUNT] = {0};
 size_t callocations[PS_MEMORY_CLASS_COUNT] = {0};
@@ -30,7 +31,7 @@ bool ps_memory_debug_enabled = false;
  * @brief Allocate and count size allocated
  * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
  */
-void *ps_memory_malloc(int memory_class, size_t size)
+void *ps_memory_malloc(ps_memory_class memory_class, size_t size)
 {
     mallocations[memory_class] += 1;
     void *ptr = malloc(size);
@@ -55,7 +56,7 @@ void *ps_memory_malloc(int memory_class, size_t size)
  * @brief Allocate count elements of size bytes each, all initialized to 0.
  * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
  */
-void *ps_memory_calloc(int memory_class, size_t count, size_t size)
+void *ps_memory_calloc(ps_memory_class memory_class, size_t count, size_t size)
 {
     callocations[memory_class] += 1;
     if (size == 0 || count == 0)
@@ -79,7 +80,7 @@ void *ps_memory_calloc(int memory_class, size_t count, size_t size)
  * @brief Change the size of the memory block pointed to by ptr to size bytes.
  * @return pointer to reallocated memory or NULL on failure (errno=ENOMEM)
  */
-void *ps_memory_realloc(int memory_class, void *ptr, size_t size)
+void *ps_memory_realloc(ps_memory_class memory_class, void *ptr, size_t size)
 {
     void *new = NULL;
 
@@ -107,7 +108,7 @@ void *ps_memory_realloc(int memory_class, void *ptr, size_t size)
 /**
  * @brief Deallocate memory previously allocated by malloc, calloc or realloc.
  */
-void ps_memory_free(int memory_class, void *ptr)
+void ps_memory_free(ps_memory_class memory_class, void *ptr)
 {
     frees[memory_class] += 1;
     size_t size = malloc_usable_size(ptr);
