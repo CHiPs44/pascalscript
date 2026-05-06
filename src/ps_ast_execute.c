@@ -7,11 +7,23 @@
 #include <stdio.h>
 
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_interpreter.h"
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_check_kind(ps_ast_node *node, ps_ast_node_kind expected_kind)
+bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_group)
+{
+    if (node->group != expected_group)
+    {
+        ps_ast_debug_line("Error: expected AST node group %s but got %s\n", ps_ast_node_get_group_name(expected_group),
+                          ps_ast_node_get_group_name(node->group));
+        return false;
+    }
+    return true;
+}
+
+bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
 {
     if (node->kind != expected_kind)
     {
@@ -46,7 +58,7 @@ bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_node *function)
     return ps_ast_run_block(interpreter, function->block);
 }
 
-bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node_block *block)
+bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node *block)
 {
     // TODO: handle variable allocation and initialization
     bool result = ps_ast_run_statement_list(interpreter, block->statement_list);
@@ -56,6 +68,7 @@ bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node_block *block)
 
 bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_node_statement_list *statement_list)
 {
+    ps_ast_debug_line("STATEMENT_LIST %zu:", statement_list->count);
     for (size_t i = 0; i < statement_list->count; i++)
     {
         ps_ast_debug_line("STATEMENT %zu/%zu:", i + 1, statement_list->count);
@@ -89,7 +102,7 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
 
 bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_node_assignment *assignment)
 {
-    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->variable->name);
+    ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->variable_simple->variable->name);
     ps_ast_node_value value = {0};
     bool result = ps_ast_run_expression(interpreter, assignment->expression, &value);
     if (!result)

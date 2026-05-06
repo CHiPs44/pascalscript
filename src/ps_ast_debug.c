@@ -7,11 +7,13 @@
 #include <stdio.h>
 
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_interpreter.h"
+#include "ps_signature.h"
 #include "ps_system.h"
 #include "ps_value.h"
-#include "ps_signature.h"
 
+/** @brief Global flag to enable/disable AST debug output */
 bool ast_debug = true;
 
 void ps_ast_debug_line(const char *format, ...) // NOSONAR
@@ -24,6 +26,24 @@ void ps_ast_debug_line(const char *format, ...) // NOSONAR
     vfprintf(stderr, format, args); // NOSONAR
     fprintf(stderr, "\n");
     va_end(args);
+}
+
+char *ps_ast_node_get_group_name(ps_ast_node_group group)
+{
+    switch (group)
+    {
+    case PS_AST_GROUP_BLOCK:
+        return "BLOCK";
+    case PS_AST_GROUP_STATEMENT:
+        return "STATEMENT";
+    case PS_AST_GROUP_EXPRESSION:
+        return "EXPRESSION";
+    case PS_AST_GROUP_LVALUE:
+        return "LVALUE";
+    default:
+        ps_ast_debug_line("Error: unknown AST node group %d\n", group);
+        return "UNKNOWN";
+    }
 }
 
 char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
@@ -118,7 +138,7 @@ void ps_ast_debug_statement_list(ps_ast_node *node)
 
 void ps_ast_debug_assignment(ps_ast_node *node)
 {
-    ps_ast_debug_line("ASSIGNMENT variable: %s\n", node->assignment->lvalue->variable_simple->symbol->name);
+    ps_ast_debug_line("ASSIGNMENT variable: %s\n", node->assignment->lvalue->variable_simple->variable->name);
     ps_ast_debug_line(" - Expression:");
     ps_ast_debug_expression(node->assignment->expression);
 }

@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_memory.h"
 
 // ============================================================================
