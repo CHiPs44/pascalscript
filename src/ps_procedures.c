@@ -16,11 +16,13 @@
 #include "ps_token.h"
 #include "ps_value.h"
 
-/******************************************************************************/
-/* STANDARD PROCEDURES                                                        */
-/******************************************************************************/
+/**********************************************************************************************************************/
+/* STANDARD PROCEDURES                                                                                                */
+/**********************************************************************************************************************/
 
 /* clang-format off */
+PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , .proc_1arg      , &ps_procedure_inc      );
+PS_SYSTEM_PROCEDURE(procedure, dec      , "DEC"      , .proc_1arg      , &ps_procedure_dec      );
 PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", .proc_1arg      , &ps_procedure_randomize);
 PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , .proc_file_read , &ps_procedure_read     );
 PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , .proc_file_read , &ps_procedure_readln   );
@@ -31,6 +33,8 @@ PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , .proc_file_write, &ps_pro
 bool ps_procedures_init(ps_environment *system)
 {
     (void)system;
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_inc)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_dec)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_read)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_readln)
@@ -39,6 +43,52 @@ bool ps_procedures_init(ps_environment *system)
     return true;
 error:
     return false;
+}
+
+bool ps_procedure_inc(ps_interpreter *interpreter, ps_value *value, const ps_value *increment)
+{
+    if (value == NULL || value->type == NULL || value->type->value == NULL)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    switch (value->type->value->data.t->base)
+    {
+    case PS_TYPE_CHAR:
+        value->data.c += increment->data.c; // NOSONAR
+        break;
+    case PS_TYPE_INTEGER:
+        value->data.i += increment->data.i; // NOSONAR
+        break;
+    case PS_TYPE_UNSIGNED:
+        value->data.u += increment->data.u; // NOSONAR
+        break;
+    default:
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    }
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "INC(%s)\n", ps_value_get_display_string(value, 0, 0));
+    return true;
+}
+
+bool ps_procedure_dec(ps_interpreter *interpreter, ps_value *value, const ps_value *decrement)
+{
+    if (value == NULL || value->type == NULL || value->type->value == NULL)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    switch (value->type->value->data.t->base)
+    {
+    case PS_TYPE_CHAR:
+        value->data.c -= decrement->data.c; // NOSONAR
+        break;
+    case PS_TYPE_INTEGER:
+        value->data.i -= decrement->data.i; // NOSONAR
+        break;
+    case PS_TYPE_UNSIGNED:
+        value->data.u -= decrement->data.u; // NOSONAR
+        break;
+    default:
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    }
+    if (interpreter->debug >= DEBUG_VERBOSE)
+        fprintf(stderr, "DEC(%s)\n", ps_value_get_display_string(value, 0, 0));
+    return true;
 }
 
 bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
@@ -86,8 +136,7 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
-                        int16_t precision)
+bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
@@ -99,8 +148,7 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *va
     return true;
 }
 
-bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
-                          int16_t precision)
+bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)

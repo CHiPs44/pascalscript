@@ -24,10 +24,10 @@
  * Visit variable reference:
  *      IDENTIFIER
  * Next steps:
- *  "Namespace" access (System.MaxInt, System.Sin, <Program>.<Variable>, <Procedure>.<Variable>, ...):
- *      IDENTIFIER '.' IDENTIFIER
  *  Array access:
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']'
+ *  "Namespace" access (System.MaxInt, System.Sin, <Program>.<Variable>, <Procedure>.<Variable>, ...):
+ *      IDENTIFIER '.' IDENTIFIER
  *  Pointer dereference:
  *      VARIABLE_REFERENCE '^'
  * "Nested" access (Record.Field.SubField, Array[0].Field, Pointer^.Field, ...):

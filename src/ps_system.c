@@ -31,6 +31,7 @@ ps_value           ps_value_type_def    = {.type = &ps_symbol_type_def          
 ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION, .name = "#TYPE_DEF" , .value = &ps_value_type_def, .system = true, .allocated = false};
 
 /* clang-format on */
+
 #define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                                             \
     ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__};                      \
     ps_value ps_value_##__name__ = {                                                                                   \
@@ -40,6 +41,7 @@ ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITIO
                                       .value = &ps_value_##__name__,                                                   \
                                       .system = true,                                                                  \
                                       .allocated = false}
+
 /* clang-format off */
 
 PS_SYSTEM_TYPE(none             , "#NONE"             , PS_TYPE_NONE      , PS_TYPE_NONE                              );
@@ -64,6 +66,7 @@ PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_T
 /**********************************************************************************************************************/
 
 /* clang-format on */
+
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
     ps_symbol ps_system_constant_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_CONSTANT,                                  \
@@ -71,6 +74,7 @@ PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_T
                                                      .value = &ps_value_##TYPE##_##VALUE,                              \
                                                      .system = true,                                                   \
                                                      .allocated = false}
+
 /* clang-format off */
 
 PS_SYSTEM_CONSTANT(boolean , false  , "FALSE"  , b, (ps_boolean)false                                                 );
@@ -82,13 +86,15 @@ PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX        
 PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                                              );
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                          );
 // does not work with (ps_real)M_PI...
-PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323846                                   );
+PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
+// PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323846                                   );
 
 /**********************************************************************************************************************/
 /* VARIABLES                                                                                                          */
 /**********************************************************************************************************************/
 
 /* clang-format on */
+
 #define PS_SYSTEM_VARIABLE(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \
     ps_symbol ps_system_variable_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_VARIABLE,                                  \
@@ -96,6 +102,7 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323
                                                      .value = &ps_value_##TYPE##_##VALUE,                              \
                                                      .system = true,                                                   \
                                                      .allocated = false}
+
 /* clang-format off */
 
 PS_SYSTEM_VARIABLE(integer, ioresult, "IORESULT", i, (ps_integer)0                                                    );
@@ -114,6 +121,7 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 /**********************************************************************************************************************/
 
 /* clang-format on */
+
 bool ps_system_init(ps_environment *system)
 {
     /**************************************************************************/

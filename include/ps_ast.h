@@ -86,7 +86,7 @@ extern "C"
         size_t n_vars;                  /** @brief Number of variables to allocate at startup            */
         ps_symbol_table *symbols;       /** @brief Constants, types, variables, procedures and functions */
         ps_ast_node *statement_list;    /** @brief Statements in this block                              */
-        size_t n_executables;           /** @brief 1 for procedures and functions                        */
+        size_t n_executables;           /** @brief 1 for PS_AST_PROCEDURE and PS_AST_FUNCTION            */
         ps_ast_node **executables;      /** @brief declarations of procedures and functions              */
     } ps_ast_node_block;
 
@@ -163,7 +163,7 @@ extern "C"
     /** @example A[I], A[I, J, K], ... */
     typedef struct s_ps_ast_node_variable_array
     {
-        ps_symbol *variable;     /** @brief Symbol being referenced                */
+        ps_symbol *variable;   /** @brief Symbol being referenced                */
         size_t n_indexes;      /** @brief For array access, 0 if not an array    */
         ps_ast_node **indexes; /** @brief For array access, NULL if not an array */
     } ps_ast_node_variable_array;

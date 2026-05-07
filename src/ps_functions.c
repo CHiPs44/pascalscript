@@ -426,14 +426,9 @@ ps_error ps_function_pred_ordinal(const ps_interpreter *interpreter, const ps_va
         break;
     case PS_TYPE_BOOLEAN:
         // pred(true) => false / pred(false) => error
-        if (interpreter->range_check && value->data.b == false)
+        if (interpreter->range_check && !value->data.b)
             return PS_ERROR_OUT_OF_RANGE;
-        // this will make pred(false) = false
         result->data.b = ps_system_constant_boolean_false.value->data.b;
-        break;
-        if (interpreter->range_check && value->data.u == 0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->data.u = value->data.u - 1;
         break;
     default:
         break;
@@ -523,14 +518,9 @@ ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_va
         break;
     case PS_TYPE_BOOLEAN:
         // succ(true) => error / succ(false) => true
-        if (interpreter->range_check && value->data.b == true)
+        if (interpreter->range_check && value->data.b)
             return PS_ERROR_OUT_OF_RANGE;
-        // this will make succ(true) = true
         result->data.b = ps_system_constant_boolean_true.value->data.b;
-        break;
-        if (interpreter->range_check && value->data.u == 0)
-            return PS_ERROR_OUT_OF_RANGE;
-        result->data.u = value->data.u - 1;
         break;
     default:
         break;
@@ -776,7 +766,7 @@ ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const
 {
     if (!ps_value_is_real(a) || !ps_value_is_real(b))
         return ps_function_return_error_with_message(
-            interpreter, PS_ERROR_EXPECTED_REAL, "ArcTan: Reals expected, got %s and %s",
+            interpreter, PS_ERROR_EXPECTED_REAL, "Power: Reals expected, got %s and %s",
             ps_type_definition_get_name(a->type->value->data.t), ps_type_definition_get_name(b->type->value->data.t));
     result->type = &ps_system_real;
     double r = pow(a->data.r, b->data.r);

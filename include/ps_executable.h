@@ -35,19 +35,18 @@ extern "C"
     /** @brief Executable is a function or procedure, address is NULL for user defined executables */
     typedef struct s_ps_executable
     {
-        union
-        {
-            void *address;                           /** @brief Generic pointer to function/procedure */
-            ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument */
-            ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 symbol argument */
-            ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments */
-            ps_procedure_1arg proc_1arg;             /** @brief Pointer to "procedure(value)" system procedure */
-            ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(variable)" system procedure */
-            ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(value)" system procedure */
+        union {
+            void *address;                           /** @brief Generic pointer to function/procedure              */
+            ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
+            ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 symbol argument  */
+            ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments  */
+            ps_procedure_1arg proc_1arg;             /** @brief Pointer to system procedure with 1 value argument  */
+            ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(file, variable)" system procedure */
+            ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)" system procedure   */
         };
         ps_formal_signature *formal_signature; /** @brief Parameters and return type for user executables */
-        uint16_t line;                         /** @brief Line number in source code */
-        uint16_t column;                       /** @brief Column number in source code */
+        uint16_t line;                         /** @brief Line number in source code                      */
+        uint16_t column;                       /** @brief Column number in source code                    */
     } __attribute__((__packed__)) ps_executable;
 
 #define PS_EXECUTABLE_SIZE sizeof(ps_executable)

@@ -49,8 +49,10 @@ extern "C"
     /** @brief Type definition type defintion (!) */
     extern ps_symbol ps_system_type_def;
 
-    /* System types (with type==base) */
+    /* Unknown or not defined type */
     extern ps_symbol ps_system_none;
+
+    /* System types (with type==base) */
     extern ps_symbol ps_system_boolean;
     extern ps_symbol ps_system_char;
     extern ps_symbol ps_system_integer;
@@ -66,6 +68,8 @@ extern "C"
     extern ps_symbol ps_system_subrange_integer;
     extern ps_symbol ps_system_subrange_unsigned;
     extern ps_symbol ps_system_subrange_enum;
+    extern ps_symbol ps_system_array;
+    extern ps_symbol ps_system_record;
 
     /* System constants */
     extern ps_symbol ps_system_constant_boolean_false;

@@ -14,19 +14,7 @@
 #include "ps_value.h"
 
 /** @brief Global flag to enable/disable AST debug output */
-bool ast_debug = true;
-
-void ps_ast_debug_line(const char *format, ...) // NOSONAR
-{
-    if (!ast_debug)
-        return;
-    va_list args;
-    va_start(args, format);
-    fprintf(stderr, "AST_DEBUG\t");
-    vfprintf(stderr, format, args); // NOSONAR
-    fprintf(stderr, "\n");
-    va_end(args);
-}
+bool ps_ast_debug = true;
 
 char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
@@ -92,6 +80,18 @@ char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
         ps_ast_debug_line("Error: unknown AST node kind %d\n", kind);
         return "UNKNOWN";
     }
+}
+
+void ps_ast_debug_line(const char *format, ...) // NOSONAR
+{
+    if (!ps_ast_debug)
+        return;
+    va_list args;
+    va_start(args, format);
+    fprintf(stderr, "AST_DEBUG\t");
+    vfprintf(stderr, format, args); // NOSONAR
+    fprintf(stderr, "\n");
+    va_end(args);
 }
 
 void ps_ast_debug_program(ps_ast_node *node)

@@ -58,18 +58,9 @@ Begin
   Tan := Sin(X) / Cos(X);
 End;
 
-// Var
-//   StartTicks: QWord;
-
 Function GetTickCount: Unsigned;
-// Var
-//   Ticks64: QWord;
 Begin
-  // Ticks64 := GetTickCount64 - StartTicks;
-  // GetTickCount := Unsigned(Ticks64 And MaxUint);
   GetTickCount := SysUtils.GetTickCount;
 End;
 
-Begin
-  // StartTicks := GetTickCount64;
 End.
