@@ -262,14 +262,38 @@ ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
+ps_error ps_function_low_or_high_subrange(const ps_symbol *type, ps_value *result, bool low)
+{
+    const ps_type_definition *type_def = type->value->data.t;
+    if (type_def->type != PS_TYPE_SUBRANGE)
+        return PS_ERROR_UNEXPECTED_TYPE;
+    switch (type_def->base)
+    {
+    case PS_TYPE_CHAR:
+        result->type = &ps_system_char;
+        result->data.c = low ? type_def->def.g.c.min : type_def->def.g.c.max;
+        break;
+    case PS_TYPE_INTEGER:
+        result->type = &ps_system_integer;
+        result->data.i = low ? type_def->def.g.i.min : type_def->def.g.i.max;
+        break;
+    case PS_TYPE_UNSIGNED:
+        result->type = &ps_system_unsigned;
+        result->data.u = low ? type_def->def.g.u.min : type_def->def.g.u.max;
+        break;
+    case PS_TYPE_ENUM:
+        result->type = type;
+        result->data.u = low ? type_def->def.g.e.min : type_def->def.g.e.max;
+        break;
+    default:
+        return PS_ERROR_UNEXPECTED_TYPE;
+    }
+    return PS_ERROR_NONE;
+}
+
 ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *type, ps_value *result, bool low)
 {
-    bool debug = false;
-    if (debug)
-        ps_symbol_debug(stderr, "ps_function_low/high, type: ", type);
-    ps_type_definition *type_def = type->value->data.t;
-    if (debug)
-        ps_type_definition_debug(stderr, "ps_function_low/high, type_def: ", type_def);
+    const ps_type_definition *type_def = type->value->data.t;
     switch (type_def->type)
     {
     case PS_TYPE_CHAR:
@@ -286,7 +310,7 @@ ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *ty
         break;
     case PS_TYPE_ENUM:
         result->type = type;
-        result->data.u = low ? 0 : type->value->data.t->def.e.count - 1;
+        result->data.u = low ? 0 : type_def->def.e.count - 1;
         break;
     case PS_TYPE_BOOLEAN:
         result->type = &ps_system_boolean;
@@ -295,47 +319,19 @@ ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *ty
         break;
     case PS_TYPE_ARRAY:
         ps_symbol *subrange = type_def->def.a.subrange;
-        if (debug)
-            ps_symbol_debug(stderr, "ps_function_low/high, array subrange: ", subrange);
         return ps_function_low_or_high_type(interpreter, subrange, result, low);
     case PS_TYPE_SUBRANGE:
-        switch (type->value->data.t->base)
-        {
-        case PS_TYPE_CHAR:
-            result->type = &ps_system_char;
-            result->data.c = low ? type->value->data.t->def.g.c.min : type->value->data.t->def.g.c.max;
-            break;
-        case PS_TYPE_INTEGER:
-            result->type = &ps_system_integer;
-            result->data.i = low ? type->value->data.t->def.g.i.min : type->value->data.t->def.g.i.max;
-            break;
-        case PS_TYPE_UNSIGNED:
-            result->type = &ps_system_unsigned;
-            result->data.u = low ? type->value->data.t->def.g.u.min : type->value->data.t->def.g.u.max;
-            break;
-        case PS_TYPE_ENUM:
-            result->type = type;
-            result->data.u = low ? type->value->data.t->def.g.e.min : type->value->data.t->def.g.e.max;
-            break;
-        default:
-            return PS_ERROR_UNEXPECTED_TYPE;
-        }
-        break;
+        return ps_function_low_or_high_subrange(type, result, low);
     default:
         return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                      "%s: (2) Type or Variable expected, got %s", low ? "Low" : "High",
                                                      ps_type_definition_get_name(type->value->data.t));
     }
-    if (debug)
-        ps_value_debug(stderr, "ps_function_low/high, result: ", result);
     return PS_ERROR_NONE;
 }
 
 ps_error ps_function_low_or_high(ps_interpreter *interpreter, ps_symbol *type_or_var, ps_value *result, bool low)
 {
-    bool debug = false;
-    if (debug)
-        ps_symbol_debug(stderr, "ps_function_low/high, type_or_var: ", type_or_var);
     ps_symbol *type = NULL;
     if (type_or_var->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
         type = type_or_var;
@@ -343,7 +339,7 @@ ps_error ps_function_low_or_high(ps_interpreter *interpreter, ps_symbol *type_or
         type = type_or_var->value->type;
     else
         return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "%s: (1) Type or Variable expected, got %s", low ? "Low" : "High",
+                                                     "%s: Type or Variable expected, got %s", low ? "Low" : "High",
                                                      ps_symbol_get_kind_name(type_or_var->kind));
     return ps_function_low_or_high_type(interpreter, type, result, low);
 }

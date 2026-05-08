@@ -80,7 +80,8 @@ extern "C"
     bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...);
 
     /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
-    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name);
+    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name, ps_symbol_table *symbols,
+                                          size_t n_values);
 
     /** @brief Release current environment */
     bool ps_interpreter_exit_environment(ps_interpreter *interpreter);

@@ -36,6 +36,7 @@ extern "C"
     extern ps_symbol ps_system_function_sqrt;
     extern ps_symbol ps_system_function_tan;
     extern ps_symbol ps_system_function_trunc;
+
     // Ordinal
     extern ps_symbol ps_system_function_chr;
     extern ps_symbol ps_system_function_high;
@@ -43,10 +44,12 @@ extern "C"
     extern ps_symbol ps_system_function_ord;
     extern ps_symbol ps_system_function_pred;
     extern ps_symbol ps_system_function_succ;
+
     // String
     extern ps_symbol ps_system_function_length;
     extern ps_symbol ps_system_function_lowercase;
     extern ps_symbol ps_system_function_uppercase;
+
     // System
     extern ps_symbol ps_system_function_get_tick_count;
 
@@ -61,38 +64,40 @@ extern "C"
     /* clang-format off */
 
     ps_error ps_function_exec_1arg      (ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *value, ps_value *result);
+    ps_error ps_function_exec_1arg_s    (ps_interpreter *interpreter, const ps_symbol *symbol, ps_symbol *type, ps_value *result);
+    ps_error ps_function_exec_2args     (ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *a, const ps_value *b, ps_value *result);
+
     ps_error ps_function_abs            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_arctan         (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_chr            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_cos            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_even           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_exp            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_frac           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_get_tick_count (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_int            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_length         (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_ln             (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_log            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_lowercase      (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_odd            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_ord            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_pred           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_random         (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_round          (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_sin            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_sqr            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_sqrt           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_succ           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_tan            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_trunc          (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-    ps_error ps_function_uppercase      (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+    ps_error ps_function_power          (ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result);
 
-    ps_error ps_function_exec_1arg_s    (ps_interpreter *interpreter, const ps_symbol *symbol, ps_symbol *type, ps_value *result);
+    ps_error ps_function_chr            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
     ps_error ps_function_high           (ps_interpreter *interpreter, ps_symbol *type, ps_value *result);
     ps_error ps_function_low            (ps_interpreter *interpreter, ps_symbol *type, ps_value *result);
+    ps_error ps_function_ord            (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+    ps_error ps_function_pred           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+    ps_error ps_function_succ           (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
-    ps_error ps_function_exec_2args     (ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *a, const ps_value *b, ps_value *result);
-    ps_error ps_function_power          (ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result);
+    ps_error ps_function_length         (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+    ps_error ps_function_lowercase      (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+    ps_error ps_function_uppercase      (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+
+    ps_error ps_function_get_tick_count (ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
     /* clang-format on */
 

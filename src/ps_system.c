@@ -85,9 +85,7 @@ PS_SYSTEM_CONSTANT(unsigned, maxuint, "MAXUINT", u, (ps_unsigned)PS_UNSIGNED_MAX
 PS_SYSTEM_CONSTANT(real    , maxreal, "MAXREAL", r, (ps_real)PS_REAL_MAX                                              );
 PS_SYSTEM_CONSTANT(real    , minreal, "MINREAL", r, (ps_real)PS_REAL_MIN                                              );
 PS_SYSTEM_CONSTANT(real    , epsreal, "EPSREAL", r, (ps_real)PS_REAL_EPSILON                                          );
-// does not work with (ps_real)M_PI...
 PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI                                                     );
-// PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)3.14159265358979323846                                   );
 
 /**********************************************************************************************************************/
 /* VARIABLES                                                                                                          */

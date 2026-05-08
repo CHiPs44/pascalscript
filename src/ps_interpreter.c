@@ -14,6 +14,8 @@
 #include "ps_memory.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
+#include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_value.h"
 #include "ps_visit.h"
@@ -100,15 +102,27 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) 
     return true;
 }
 
-bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name)
+bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name, ps_symbol_table *symbols,
+                                      size_t n_values, ps_value *values)
 {
     assert(NULL != interpreter);
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = interpreter->environments[interpreter->level];
-    ps_environment *environment = ps_environment_alloc(parent, name, 0, 0);
+    ps_environment *environment = ps_environment_alloc(parent, name, symbols == NULL ? 0 : symbols->size, 0);
     if (environment == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+    for (size_t i = 0; i < n_values; i++)
+    {
+        ps_symbol *variable = symbols->symbols[i];
+        if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+            continue;
+        variable->value = &values[i];
+        if (!ps_value_init(variable->value, variable->type->value->data.t))
+        {
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+        }
+    }
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
     if (interpreter->debug >= DEBUG_VERBOSE)

@@ -9,9 +9,13 @@
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
 #include "ps_interpreter.h"
+#include "ps_memory.h"
+#include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_value.h"
 
+/** @brief Check if an AST node belongs to a specific group */
 bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_group)
 {
     if (node->group != expected_group)
@@ -23,6 +27,7 @@ bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_grou
     return true;
 }
 
+/** @brief Check if an AST node has a specific kind */
 bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
 {
     if (node->kind != expected_kind)
@@ -58,11 +63,29 @@ bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_node *function)
     return ps_ast_run_block(interpreter, function->block);
 }
 
-bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node *block)
+bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node *node)
 {
-    // TODO: handle variable allocation and initialization
-    bool result = ps_ast_run_statement_list(interpreter, block->statement_list);
-    // TODO: handle variable release
+    bool result = false;
+
+    // Handle variable and parameters allocation and initialization
+    size_t n_values =
+        node->block->n_vars + (node->block->signature != NULL ? node->block->signature->parameter_count : 0);
+    ps_value *values = ps_memory_calloc(PS_MEMORY_VALUE, n_values, sizeof(ps_value));
+    if (values == NULL)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+
+    if (!ps_interpreter_enter_environment(interpreter, node->block->name, node->block->symbols, n_values, values))
+        goto cleanup;
+
+    result = ps_ast_run_statement_list(interpreter, node->statement_list);
+
+    if (!ps_interpreter_exit_environment(interpreter))
+        goto cleanup;
+
+cleanup:
+    // Handle variable release
+    // ps_symbol_table_free(symbol_table);
+    ps_memory_free(PS_MEMORY_VALUE, values);
     return result;
 }
 
@@ -223,7 +246,7 @@ bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_node_call *fun
     return false; // TODO
 }
 
-bool ps_ast_run_expression(ps_interpreter *interpreter, ps_ast_node_expression *expression, ps_ast_node_value *result)
+bool ps_ast_run_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_node_value *result)
 {
     ps_ast_debug_line("EXPRESSION");
     return false; // TODO
