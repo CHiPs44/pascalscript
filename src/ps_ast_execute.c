@@ -10,12 +10,12 @@
 #include "ps_ast_debug.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
+#include "ps_operator.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_value.h"
 
-/** @brief Check if an AST node belongs to a specific group */
 bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_group)
 {
     if (node->group != expected_group)
@@ -27,7 +27,6 @@ bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_grou
     return true;
 }
 
-/** @brief Check if an AST node has a specific kind */
 bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
 {
     if (node->kind != expected_kind)
@@ -127,7 +126,7 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_node_assignment *
 {
     ps_ast_debug_line("ASSIGNMENT variable: %s", assignment->lvalue->variable_simple->variable->name);
     ps_ast_node_value value = {0};
-    bool result = ps_ast_run_expression(interpreter, assignment->expression, &value);
+    bool result = ps_ast_eval_expression(interpreter, assignment->expression, &value);
     if (!result)
         return false;
     ps_ast_debug_line(" - Expression value: %s", ps_value_to_string(&value));
@@ -139,7 +138,7 @@ bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_node_if *if_statement)
 {
     ps_ast_debug_line("IF statement");
     ps_ast_node_value condition_value = {0};
-    bool result = ps_ast_run_expression(interpreter, if_statement->condition, &condition_value);
+    bool result = ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value);
     if (!result)
         return false;
     ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
@@ -163,7 +162,7 @@ bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_node_while *while_stat
     while (true)
     {
         ps_ast_node_value condition_value = {0};
-        bool result = ps_ast_run_expression(interpreter, while_statement->condition, &condition_value);
+        bool result = ps_ast_eval_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
         ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
@@ -187,7 +186,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_node_repeat *repeat_s
         ps_ast_debug_line(" - Body");
         if (!ps_ast_run_statement_list(interpreter, &repeat_statement->body->statement_list))
             return false;
-        if (!ps_ast_run_expression(interpreter, repeat_statement->condition, &condition_value))
+        if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
         ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
         if (condition_value.value.type != &ps_system_boolean)
@@ -201,12 +200,12 @@ bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_node_for *for_statement)
     ps_ast_debug_line("FOR statement");
     ps_ast_debug_line(" - Variable: %s", for_statement->variable->variable_simple->variable->name);
     ps_ast_node_value start_value = {0};
-    bool result = ps_ast_run_expression(interpreter, for_statement->start, &start_value);
+    bool result = ps_ast_eval_expression(interpreter, for_statement->start, &start_value);
     if (!result)
         return false;
     ps_ast_debug_line(" - Start value: %s", ps_value_to_string(&start_value));
     ps_ast_node_value end_value = {0};
-    result = ps_ast_run_expression(interpreter, for_statement->end, &end_value);
+    result = ps_ast_eval_expression(interpreter, for_statement->end, &end_value);
     if (!result)
         return false;
     ps_ast_debug_line(" - End value: %s", ps_value_to_string(&end_value));
@@ -246,8 +245,59 @@ bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_node_call *fun
     return false; // TODO
 }
 
-bool ps_ast_run_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_node_value *result)
+bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_node_value *result)
 {
-    ps_ast_debug_line("EXPRESSION");
-    return false; // TODO
+    ps_ast_node_value left = {0};
+    ps_ast_node_value right = {0};
+
+    if (!ps_ast_check_group(expression, PS_AST_GROUP_EXPRESSION))
+        return false;
+    ps_ast_debug_line("EXPRESSION @%p", (void *)expression);
+    switch (expression->kind)
+    {
+    case PS_AST_VALUE:
+        ps_ast_debug_line(" - Value: %s", ps_value_to_string(&expression->value->value));
+        if (!ps_value_copy(&expression->value->value, &result->value, interpreter->range_check))
+            return false;
+        break;
+    case PS_AST_VARIABLE_SIMPLE:
+        ps_ast_debug_line(" - Variable: %s", expression->variable_simple->variable->name);
+        if (!ps_value_copy(expression->variable_simple->variable->value, &result->value, interpreter->range_check))
+            return false;
+        break;
+    case PS_AST_VARIABLE_ARRAY:
+        ps_ast_debug_line(" - Array variable: %s", expression->variable_array->variable->name);
+        ps_interpreter_set_message(interpreter, "TODO! Array access not implemented yet");
+        return false;
+    case PS_AST_UNARY_OPERATION:
+        ps_ast_debug_line(" - Unary operation: %s", ps_operator_unary_get_name(expression->unary_operation->operator));
+        // first evaluate operand, then apply operator to it
+        if (!ps_ast_eval_expression(interpreter, expression->unary_operation->operand, result))
+            return false;
+        if (!ps_operator_unary_eval(interpreter, &result->value, &result->value, expression->unary_operation->operator))
+            return false;
+        break;
+    case PS_AST_BINARY_OPERATION:
+        ps_ast_debug_line(" - Binary operation: %s",
+                          ps_operator_binary_get_name(expression->binary_operation->operator));
+        // first evaluate operands, then apply operator to them
+        if (!ps_ast_eval_expression(interpreter, expression->binary_operation->left, &left))
+            return false;
+        if (!ps_ast_eval_expression(interpreter, expression->binary_operation->right, &right))
+            return false;
+        if (!ps_operator_eval_binary(interpreter, &left, &right, &result->value,
+                                     expression->binary_operation->operator))
+            return false;
+        break;
+    case PS_AST_FUNCTION_CALL:
+        ps_ast_debug_line(" - Function call: %s", expression->function_call->executable->name);
+        ps_interpreter_set_message(interpreter, "TODO! Function calls not implemented yet");
+        return false;
+        break;
+    default:
+        ps_ast_debug_line("Error: unexpected expression kind %d\n", expression->kind);
+        return false;
+    }
+
+    return true;
 }

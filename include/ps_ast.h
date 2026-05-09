@@ -7,6 +7,7 @@
 #ifndef _PS_AST_H
 #define _PS_AST_H
 
+#include "ps_operator.h"
 #include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -55,6 +56,8 @@ extern "C"
     {
         ps_ast_node_group group;
         ps_ast_node_kind kind;
+        uint16_t line;   /** @brief Source code line number for error reporting, 0 if unknown */
+        uint16_t column; /** @brief Source code column number for error reporting, 0 if unknown */
         // clang-format off
         /** @brief One member for each node type, some used by several kinds */
         union {
@@ -168,35 +171,17 @@ extern "C"
         ps_ast_node **indexes; /** @brief For array access, NULL if not an array */
     } ps_ast_node_variable_array;
 
-    typedef enum e_ps_ast_node_unary_operator
-    {
-        PS_OP_NEG,
-        PS_OP_NOT,
-    } ps_ast_node_unary_operator;
-
     typedef struct s_ps_ast_node_unary_operation
     {
-        ps_ast_node_unary_operator operator;
+        ps_operator_unary operator;
         ps_ast_node *operand;
     } ps_ast_node_unary_operation;
 
-    // clang-format off
-    typedef enum e_ps_ast_node_binary_operator
-    {
-        // additive / terms
-        PS_OP_ADD, PS_OP_SUB, PS_OP_OR, PS_OP_XOR,
-        // multiply / factors
-        PS_OP_MUL, PS_OP_DIV, PS_OP_DIV_REAL, PS_OP_MOD, PS_OP_AND, PS_OP_SHL, PS_OP_SHR,
-        // comparison
-        PS_OP_EQ, PS_OP_GE, PS_OP_GT, PS_OP_LE, PS_OP_LT, PS_OP_NE,
-    } ps_ast_node_binary_operator;
-    // clang-format on
-
     typedef struct s_ps_ast_node_binary_operation
     {
-        ps_ast_node_binary_operator operator; /** @brief Binary operator */
-        ps_ast_node *left;                    /** @brief Left operand */
-        ps_ast_node *right;                   /** @brief Right operand */
+        ps_operator_binary operator; /** @brief Binary operator */
+        ps_ast_node *left;           /** @brief Left operand */
+        ps_ast_node *right;          /** @brief Right operand */
     } ps_ast_node_binary_operation;
 
     // clang-format off
@@ -218,28 +203,37 @@ extern "C"
     // clang-format on
 
     /** @brief Create a new AST node of the given kind */
-    ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind);
-    ps_ast_node *ps_ast_create_node_block(ps_ast_node_kind kind, char *name);
-    ps_ast_node *ps_ast_create_statement_list(size_t count);
-    ps_ast_node *ps_ast_create_assignment(ps_ast_node *variable, ps_ast_node *expression);
-    ps_ast_node *ps_ast_create_if(ps_ast_node *condition, ps_ast_node *then_branch, ps_ast_node *else_branch);
-    ps_ast_node *ps_ast_create_while(ps_ast_node *condition, ps_ast_node *body);
-    ps_ast_node *ps_ast_create_repeat(ps_ast_node *body, ps_ast_node *condition);
-    ps_ast_node *ps_ast_create_for(ps_ast_node *variable, ps_ast_node *start, ps_ast_node *end, int step,
-                                   ps_ast_node *body);
-    ps_ast_node *ps_ast_create_procedure_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args);
-    ps_ast_node *ps_ast_create_function_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args);
-    ps_ast_node *ps_ast_create_unary_operation(ps_ast_node_unary_operator operator, ps_ast_node * operand);
-    ps_ast_node *ps_ast_create_binary_operation(ps_ast_node_binary_operator operator, ps_ast_node * left,
-                                                ps_ast_node *right);
-    ps_ast_node *ps_ast_create_value(ps_value value);
-    ps_ast_node *ps_ast_create_variable_simple(ps_symbol *variable);
-    ps_ast_node *ps_ast_create_variable_array(ps_symbol *symbol, size_t n_indexes, ps_ast_node *indexes);
-    ps_ast_node *ps_ast_create_lvalue_simple(ps_symbol *variable);
-    ps_ast_node *ps_ast_create_lvalue_array(ps_symbol *symbol, size_t n_indexes, ps_ast_node *indexes);
+    ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column);
+
+    ps_ast_node *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_node_kind kind, char *name);
+    ps_ast_node *ps_ast_create_statement_list(uint16_t line, uint16_t column, size_t count);
+    ps_ast_node *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_node *variable,
+                                          ps_ast_node *expression);
+    ps_ast_node *ps_ast_create_if(uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_node *then_branch,
+                                  ps_ast_node *else_branch);
+    ps_ast_node *ps_ast_create_while(uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_node *body);
+    ps_ast_node *ps_ast_create_repeat(uint16_t line, uint16_t column, ps_ast_node *body, ps_ast_node *condition);
+    ps_ast_node *ps_ast_create_for(uint16_t line, uint16_t column, ps_ast_node *variable, ps_ast_node *start,
+                                   ps_ast_node *end, int step, ps_ast_node *body);
+    ps_ast_node *ps_ast_create_procedure_call(uint16_t line, uint16_t column, ps_symbol *executable, size_t n_args,
+                                              ps_ast_node_argument *args);
+    ps_ast_node *ps_ast_create_function_call(uint16_t line, uint16_t column, ps_symbol *executable, size_t n_args,
+                                             ps_ast_node_argument *args);
+    ps_ast_node *ps_ast_create_unary_operation(uint16_t line, uint16_t column, ps_operator_unary operator,
+                                               ps_ast_node * operand);
+    ps_ast_node *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
+                                                ps_ast_node * left, ps_ast_node *right);
+    ps_ast_node *ps_ast_create_value(uint16_t line, uint16_t column, ps_value value);
+    ps_ast_node *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_symbol *variable);
+    ps_ast_node *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_symbol *symbol, size_t n_indexes,
+                                              ps_ast_node *indexes);
+    ps_ast_node *ps_ast_create_lvalue_simple(uint16_t line, uint16_t column, ps_symbol *variable);
+    ps_ast_node *ps_ast_create_lvalue_array(uint16_t line, uint16_t column, ps_symbol *symbol, size_t n_indexes,
+                                            ps_ast_node *indexes);
 
     /** @brief Free an AST node and all its children */
     ps_ast_node *ps_ast_free_node(ps_ast_node *node);
+
     ps_ast_node *ps_ast_free_block(ps_ast_node *node);
     ps_ast_node *ps_ast_free_statement_list(ps_ast_node *node);
     ps_ast_node *ps_ast_free_assignment(ps_ast_node *node);

@@ -463,7 +463,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         READ_NEXT_TOKEN
         if (!ps_visit_factor(interpreter, mode, &factor))
             TRACE_ERROR("UNARY_MINUS_NOT");
-        if (mode == MODE_EXEC && !ps_function_unary_op(interpreter, &factor, result, unary_operator))
+        if (mode == MODE_EXEC && !ps_operator_unary_eval(interpreter, &factor, result, unary_operator))
             TRACE_ERROR("UNARY");
         break;
     default:

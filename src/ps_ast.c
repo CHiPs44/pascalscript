@@ -17,13 +17,15 @@
 // ps_ast_node: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind)
+ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column)
 {
     ps_ast_node *node = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node));
     if (node == NULL)
         return NULL;
-    node->kind = kind;
     node->group = group;
+    node->kind = kind;
+    node->line = line;
+    node->column = column;
     return node;
 }
 
@@ -73,10 +75,10 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
 // ps_ast_block: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_block(ps_ast_node_kind kind, char *name)
+ps_ast_node *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_node_kind kind, char *name)
 {
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_BLOCK, kind);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_BLOCK, kind, line, column);
     if (node == NULL)
         return NULL;
     node->block = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_block));
@@ -107,9 +109,9 @@ ps_ast_node *ps_ast_free_block(ps_ast_node *node)
 // ps_ast_statement_list: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_statement_list(size_t count)
+ps_ast_node *ps_ast_create_statement_list(uint16_t line, uint16_t column, size_t count)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_STATEMENT_LIST);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_STATEMENT_LIST, line, column);
     if (node == NULL)
         return NULL;
     node->statement_list = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_statement_list));
@@ -139,9 +141,9 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_node *node)
 // ps_ast_assignment: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_assignment(ps_ast_node *variable, ps_ast_node *expression)
+ps_ast_node *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_node *variable, ps_ast_node *expression)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_ASSIGNMENT);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_ASSIGNMENT, line, column);
     if (node == NULL)
         return NULL;
     node->assignment = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_assignment));
@@ -166,9 +168,10 @@ ps_ast_node *ps_ast_free_assignment(ps_ast_node *node)
 // ps_ast_if: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_if(ps_ast_node *condition, ps_ast_node *then_branch, ps_ast_node *else_branch)
+ps_ast_node *ps_ast_create_if(uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_node *then_branch,
+                              ps_ast_node *else_branch)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_IF);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_IF, line, column);
     if (node == NULL)
         return NULL;
     node->if_statement = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_if));
@@ -195,9 +198,9 @@ ps_ast_node *ps_ast_free_if(ps_ast_node *node)
 // ps_ast_while: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_while(ps_ast_node *condition, ps_ast_node *body)
+ps_ast_node *ps_ast_create_while(uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_node *body)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_WHILE);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_WHILE, line, column);
     if (node == NULL)
         return NULL;
     node->while_statement = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_while));
@@ -222,9 +225,9 @@ ps_ast_node *ps_ast_free_while(ps_ast_node *node)
 // ps_ast_repeat: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_repeat(ps_ast_node *body, ps_ast_node *condition)
+ps_ast_node *ps_ast_create_repeat(uint16_t line, uint16_t column, ps_ast_node *body, ps_ast_node *condition)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_REPEAT);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_REPEAT, line, column);
     if (node == NULL)
         return NULL;
     node->repeat_statement = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_repeat));
@@ -249,9 +252,10 @@ ps_ast_node *ps_ast_free_repeat(ps_ast_node *node)
 // ps_ast_for: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_for(ps_ast_node *variable, ps_ast_node *start, ps_ast_node *end, int step, ps_ast_node *body)
+ps_ast_node *ps_ast_create_for(uint16_t line, uint16_t column, ps_ast_node *variable, ps_ast_node *start,
+                               ps_ast_node *end, int step, ps_ast_node *body)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_FOR);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_FOR, line, column);
     if (node == NULL)
         return NULL;
     node->for_statement = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_for));
@@ -281,9 +285,10 @@ ps_ast_node *ps_ast_free_for(ps_ast_node *node)
 // ps_ast_procedure_call: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_procedure_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args)
+ps_ast_node *ps_ast_create_procedure_call(uint16_t line, uint16_t column, ps_symbol *executable, size_t n_args,
+                                          ps_ast_node_argument *args)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_PROCEDURE_CALL);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_STATEMENT, PS_AST_PROCEDURE_CALL, line, column);
     if (node == NULL)
         return NULL;
     node->procedure_call = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_call));
@@ -310,9 +315,10 @@ ps_ast_node *ps_ast_free_procedure_call(ps_ast_node *node)
 // ps_ast_unary_operation: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_unary_operation(ps_ast_node_unary_operator operator, ps_ast_node *operand)
+ps_ast_node *ps_ast_create_unary_operation(uint16_t line, uint16_t column, ps_operator_unary operator,
+                                           ps_ast_node *operand)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_UNARY_OPERATION);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_UNARY_OPERATION, line, column);
     if (node == NULL)
         return NULL;
     node->unary_operation = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_unary_operation));
@@ -336,9 +342,10 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_node *node)
 // ps_ast_binary_operation: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_binary_operation(ps_ast_node_binary_operator operator, ps_ast_node *left, ps_ast_node *right)
+ps_ast_node *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
+                                            ps_ast_node *left, ps_ast_node *right)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_BINARY_OPERATION);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_BINARY_OPERATION, line, column);
     if (node == NULL)
         return NULL;
     node->binary_operation = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_binary_operation));
@@ -364,9 +371,9 @@ ps_ast_node *ps_ast_free_binary_operation(ps_ast_node *node)
 // ps_ast_value: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_value(ps_value value)
+ps_ast_node *ps_ast_create_value(uint16_t line, uint16_t column, ps_value value)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VALUE);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VALUE, line, column);
     if (node == NULL)
         return NULL;
     node->value = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_value));
@@ -388,9 +395,9 @@ ps_ast_node *ps_ast_free_value(ps_ast_node *node)
 // ps_ast_variable_simple: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_variable_simple(ps_symbol *variable)
+ps_ast_node *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_symbol *variable)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_SIMPLE);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_SIMPLE, line, column);
     if (node == NULL)
         return NULL;
     node->variable_simple = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_variable_simple));
@@ -412,9 +419,10 @@ ps_ast_node *ps_ast_free_variable_simple(ps_ast_node *node)
 // ps_ast_variable_array: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_variable_array(ps_symbol *variable, size_t n_indexes, ps_ast_node *indexes)
+ps_ast_node *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_symbol *variable, size_t n_indexes,
+                                          ps_ast_node *indexes)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_ARRAY);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_VARIABLE_ARRAY, line, column);
     if (node == NULL)
         return NULL;
     node->variable_array = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_variable_array));
@@ -444,9 +452,10 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_node *node)
 // ps_ast_function_call: Creation and Freeing
 // ============================================================================
 
-ps_ast_node *ps_ast_create_function_call(ps_symbol *executable, size_t n_args, ps_ast_node_argument *args)
+ps_ast_node *ps_ast_create_function_call(uint16_t line, uint16_t column, ps_symbol *executable, size_t n_args,
+                                         ps_ast_node_argument *args)
 {
-    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_FUNCTION_CALL);
+    ps_ast_node *node = ps_ast_create_node(PS_AST_GROUP_EXPRESSION, PS_AST_FUNCTION_CALL, line, column);
     if (node == NULL)
         return NULL;
     node->function_call = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_call));

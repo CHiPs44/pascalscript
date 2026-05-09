@@ -55,13 +55,6 @@ extern "C"
 
     /** @brief Add base function to system environment */
     bool ps_functions_init(ps_environment *system);
-    /** @brief Execute unary operation */
-    bool ps_function_unary_op(ps_interpreter *interpreter, const ps_value *value, ps_value *result,
-                              ps_token_type token_type);    /** @brief Execute binary operation */
-    bool ps_function_binary_op(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
-                               ps_token_type token_type);
-
-    /* clang-format off */
 
     ps_error ps_function_exec_1arg      (ps_interpreter *interpreter, const ps_symbol *symbol, const ps_value *value, ps_value *result);
     ps_error ps_function_exec_1arg_s    (ps_interpreter *interpreter, const ps_symbol *symbol, ps_symbol *type, ps_value *result);
