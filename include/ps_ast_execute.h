@@ -27,26 +27,26 @@ extern "C"
     /** @brief Run a Pascal block */
     bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node *node);
     /** @brief Run a list of Pascal statements */
-    bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_node_statement_list *statement_list);
+    bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list);
     /** @brief Run a Pascal statement */
     bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement);
     /** @brief Run a Pascal assignment */
-    bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_node_assignment *assignment);
+    bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assignment);
     /** @brief Run a Pascal if statement */
-    bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_node_if *if_statement);
+    bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement);
     /** @brief Run a Pascal while statement */
-    bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_node_while *while_statement);
+    bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement);
     /** @brief Run a Pascal repeat statement */
-    bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_node_repeat *repeat_statement);
+    bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statement);
     /** @brief Run a Pascal for statement */
-    bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_node_for *for_statement);
+    bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement);
     /** @brief Run a Pascal procedure call */
-    bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_node_call *procedure_call);
+    bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedure_call);
     /** @brief Run a Pascal function call */
-    bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_node_call *function_call,
-                                  ps_ast_node_value *result);
+    bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function_call,
+                                  ps_ast_value *result);
     /** @brief Evaluate a Pascal expression */
-    bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_node_value *result);
+    bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_value *result);
 
 #ifdef __cplusplus
 }
