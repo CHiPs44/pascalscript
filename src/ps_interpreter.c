@@ -112,17 +112,17 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier
     ps_environment *environment = ps_environment_alloc(parent, name, symbols == NULL ? 0 : symbols->size, 0);
     if (environment == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    for (size_t i = 0; i < n_values; i++)
-    {
-        ps_symbol *variable = symbols->symbols[i];
-        if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-            continue;
-        variable->value = &values[i];
-        if (!ps_value_init(variable->value, variable->type->value->data.t))
-        {
-            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-        }
-    }
+    // for (size_t i = 0; i < n_values; i++)
+    // {
+    //     ps_symbol *variable = symbols->symbols[i];
+    //     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    //         continue;
+    //     variable->value = &values[i];
+    //     if (!ps_value_init(variable->value, variable->type->value->data.t))
+    //     {
+    //         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+    //     }
+    // }
     interpreter->level += 1;
     interpreter->environments[interpreter->level] = environment;
     if (interpreter->debug >= DEBUG_VERBOSE)

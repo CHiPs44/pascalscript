@@ -282,35 +282,35 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
                                       ps_value *result)
 {
     VISIT_BEGIN("FACTOR", "ARRAY");
+    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    // const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
+    // if (type_def == NULL)
+    //     RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+    // READ_NEXT_TOKEN
+    // if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+    // {
+    //     ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
+    //     READ_NEXT_TOKEN
+    //     if (!ps_visit_expression(interpreter, mode, &index))
+    //     {
+    //         ps_interpreter_set_message(interpreter, "Index is invalid");
+    //         TRACE_ERROR("INDEX")
+    //     }
+    //     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+    //     if (mode == MODE_EXEC)
+    //     {
+    //         ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
+    //         if (error != PS_ERROR_NONE)
+    //         {
+    //             ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
+    //                                        ps_value_get_debug_string(&index));
+    //             RETURN_ERROR(error)
+    //         }
+    //     }
+    //     READ_NEXT_TOKEN
+    // }
 
-    const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
-    if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-    READ_NEXT_TOKEN
-    if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-    {
-        ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
-        READ_NEXT_TOKEN
-        if (!ps_visit_expression(interpreter, mode, &index))
-        {
-            ps_interpreter_set_message(interpreter, "Index is invalid");
-            TRACE_ERROR("INDEX")
-        }
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-        if (mode == MODE_EXEC)
-        {
-            ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
-            if (error != PS_ERROR_NONE)
-            {
-                ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
-                                           ps_value_get_debug_string(&index));
-                RETURN_ERROR(error)
-            }
-        }
-        READ_NEXT_TOKEN
-    }
-
-    VISIT_END("OK")
+    // VISIT_END("OK")
 }
 
 /**

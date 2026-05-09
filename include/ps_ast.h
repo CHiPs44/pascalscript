@@ -30,64 +30,64 @@ extern "C"
     /** @brief Abstract Syntax Tree node kind */
     typedef enum enum_ps_ast_node_kind
     {
-        PS_AST_PROGRAM,          /** @brief Block:      PROGRAM                                      */
-        PS_AST_PROCEDURE,        /** @brief Block:      PROCEDURE                                    */
-        PS_AST_FUNCTION,         /** @brief Block:      FUNCTION                                     */
-        PS_AST_UNIT,             /** @brief Block:      UNIT                                         */
-        PS_AST_STATEMENT_LIST,   /** @brief Statement:  List of statements                           */
-        PS_AST_ASSIGNMENT,       /** @brief Statement:  Assignment                                   */
-        PS_AST_IF,               /** @brief Statement:  IF                                           */
-        PS_AST_WHILE,            /** @brief Statement:  WHILE                                        */
-        PS_AST_REPEAT,           /** @brief Statement:  REPEAT                                       */
-        PS_AST_FOR,              /** @brief Statement:  FOR                                          */
-        PS_AST_PROCEDURE_CALL,   /** @brief Statement:  PROCEDURE call                               */
-        PS_AST_UNARY_OPERATION,  /** @brief Expression: Unary operation                              */
-        PS_AST_BINARY_OPERATION, /** @brief Expression: Binary operation                             */
-        PS_AST_FUNCTION_CALL,    /** @brief Expression: FUNCTION call                                */
-        PS_AST_VALUE,            /** @brief Expression: Value: integer, real, string, boolean, ...   */
-        PS_AST_VARIABLE_SIMPLE,  /** @brief Expression: Simple variable (or constant) being accessed */
-        PS_AST_VARIABLE_ARRAY,   /** @brief Expression: Array element being accessed                 */
-        PS_AST_LVALUE_SIMPLE,    /** @brief Lvalue:     Simple variable being written to             */
-        PS_AST_LVALUE_ARRAY,     /** @brief Lvalue:     Array element being written to               */
+        PS_AST_PROGRAM,          /** @brief BLOCK:      PROGRAM                                      */
+        PS_AST_PROCEDURE,        /** @brief BLOCK:      PROCEDURE                                    */
+        PS_AST_FUNCTION,         /** @brief BLOCK:      FUNCTION                                     */
+        PS_AST_UNIT,             /** @brief BLOCK:      UNIT                                         */
+        PS_AST_STATEMENT_LIST,   /** @brief STATEMENT:  List of statements                           */
+        PS_AST_ASSIGNMENT,       /** @brief STATEMENT:  Assignment                                   */
+        PS_AST_IF,               /** @brief STATEMENT:  IF                                           */
+        PS_AST_WHILE,            /** @brief STATEMENT:  WHILE                                        */
+        PS_AST_REPEAT,           /** @brief STATEMENT:  REPEAT                                       */
+        PS_AST_FOR,              /** @brief STATEMENT:  FOR                                          */
+        PS_AST_PROCEDURE_CALL,   /** @brief STATEMENT:  PROCEDURE call                               */
+        PS_AST_UNARY_OPERATION,  /** @brief EXPRESSION: Unary operation                              */
+        PS_AST_BINARY_OPERATION, /** @brief EXPRESSION: Binary operation                             */
+        PS_AST_FUNCTION_CALL,    /** @brief EXPRESSION: FUNCTION call                                */
+        PS_AST_VALUE,            /** @brief EXPRESSION: Value: integer, real, string, boolean, ...   */
+        PS_AST_VARIABLE_SIMPLE,  /** @brief EXPRESSION: Simple variable (or constant) being accessed */
+        PS_AST_VARIABLE_ARRAY,   /** @brief EXPRESSION: Array element being accessed                 */
+        PS_AST_LVALUE_SIMPLE,    /** @brief LVALUE:     Simple variable being written to             */
+        PS_AST_LVALUE_ARRAY,     /** @brief LVALUE:     Array element being written to               */
     } __attribute__((__packed__)) ps_ast_node_kind;
 
-#define PS_AST_NODE_COMMON_FIELDS                                                                                      \
-    ps_ast_node_group group; /** @brief Node group */                                                                  \
-    ps_ast_node_kind kind;   /** @brief Node kind */                                                                   \
-    uint16_t line;           /** @brief Source code line number for error reporting, 0 if unknown */                   \
+#define PS_AST_NODE_COMMON                                                                                             \
+    ps_ast_node_group group; /** @brief Node group                                                  */                 \
+    ps_ast_node_kind kind;   /** @brief Node kind                                                   */                 \
+    uint16_t line;           /** @brief Source code line number for error reporting, 0 if unknown   */                 \
     uint16_t column;         /** @brief Source code column number for error reporting, 0 if unknown */
 
     /** @brief Abstract Syntax Tree node */
     typedef struct s_ps_ast_node
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
     } ps_ast_node;
 
     /** @brief Block is a program, procedure, function or unit */
     /** @details Units may be separated as they are special cases with interface and implementation */
     typedef struct s_ps_ast_block
     {
-        PS_AST_NODE_COMMON_FIELDS
-        ps_identifier name;             /** @brief Every block has a name                                */
-        size_t n_vars;                  /** @brief Number of variables to allocate at startup            */
-        ps_symbol_table *symbols;       /** @brief Constants, types, variables, procedures and functions */
-        ps_ast_node *statement_list;    /** @brief Statements in this block                              */
-        ps_formal_signature *signature; /** @brief Only for procedures and functions, empty otherwise    */
-        ps_symbol *result_type;         /** @brief Only for functions, NULL otherwise                    */
-        size_t n_executables;           /** @brief 1 for PS_AST_PROCEDURE and PS_AST_FUNCTION            */
-        ps_ast_node **executables;      /** @brief declarations of procedures and functions              */
+        PS_AST_NODE_COMMON
+        ps_identifier name;                    /** @brief Every block has a name                                    */
+        size_t n_vars;                         /** @brief Number of variables to allocate at startup                */
+        ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions     */
+        size_t n_executables;                  /** @brief exactly 1 for procedure and function, 0 or more otherwise */
+        ps_ast_node **executables;             /** @brief declarations of procedures and functions                  */
+        ps_ast_statement_list *statement_list; /** @brief Statements in this block                                  */
+        ps_formal_signature *signature;        /** @brief Only for procedures and functions, empty otherwise        */
+        ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                        */
     } ps_ast_block;
 
     typedef struct s_ps_ast_statement_list
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         size_t count;             /** @brief Number of statements  */
         ps_ast_node **statements; /** @brief NULL if no statements */
     } ps_ast_statement_list;
 
     typedef struct s_ps_ast_if
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_ast_node *condition;             /** @brief If condition, must be a boolean expression                */
         ps_ast_statement_list *then_branch; /** @brief Statements to execute if condition is true, can be empty  */
         ps_ast_statement_list *else_branch; /** @brief Statements to execute if condition is false, can be empty */
@@ -95,21 +95,21 @@ extern "C"
 
     typedef struct s_ps_ast_while
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_ast_node *condition;      /** @brief Loop while condition is true                  */
         ps_ast_statement_list *body; /** @brief Statements to execute while condition is true */
     } ps_ast_while;
 
     typedef struct s_ps_ast_repeat
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_ast_statement_list *body; /** @brief Statements to execute at least once */
         ps_ast_node *condition;      /** @brief Loop until condition is true        */
     } ps_ast_repeat;
 
     typedef struct s_ps_ast_for
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_ast_node *variable;       /** @brief Loop variable                                         */
         ps_ast_node *start;          /** @brief Start value                                           */
         ps_ast_node *end;            /** @brief End value                                             */
@@ -119,7 +119,7 @@ extern "C"
 
     typedef struct s_ps_ast_call
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_symbol *executable;      /** @brief procedure of function being called     */
         size_t n_args;              /** @brief number of arguments, 0 if no arguments */
         ps_ast_node_argument *args; /** @brief arguments, NULL if no arguments        */
@@ -136,7 +136,7 @@ extern "C"
 
     typedef struct s_ps_ast_assignment
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_ast_node *lvalue;     /** @brief variable being assigned to       */
         ps_ast_node *expression; /** @brief expression to assign to variable */
     } ps_ast_assignment;
@@ -144,7 +144,7 @@ extern "C"
     /** @brief Expression: literal value */
     typedef struct s_ps_ast_value
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_value value;
     } ps_ast_value;
 
@@ -152,7 +152,7 @@ extern "C"
     /** @example I, Total, ...  */
     typedef struct s_ps_ast_variable_simple
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_symbol *variable; /** @brief Symbol being referenced */
     } ps_ast_variable_simple;
 
@@ -160,7 +160,7 @@ extern "C"
     /** @example A[I], A[I, J, K], ... */
     typedef struct s_ps_ast_variable_array
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_symbol *variable;   /** @brief Symbol being referenced                */
         size_t n_indexes;      /** @brief For array access, 0 if not an array    */
         ps_ast_node **indexes; /** @brief For array access, NULL if not an array */
@@ -168,14 +168,14 @@ extern "C"
 
     typedef struct s_ps_ast_unary_operation
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_operator_unary operator;
         ps_ast_node *operand;
     } ps_ast_unary_operation;
 
     typedef struct s_ps_ast_binary_operation
     {
-        PS_AST_NODE_COMMON_FIELDS
+        PS_AST_NODE_COMMON
         ps_operator_binary operator; /** @brief Binary operator */
         ps_ast_node *left;           /** @brief Left operand */
         ps_ast_node *right;          /** @brief Right operand */
@@ -200,7 +200,7 @@ extern "C"
     // clang-format on
 
     /** @brief Create a new AST node of the given kind */
-    ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column);
+    ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column, size_t size);
 
     ps_ast_node *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_node_kind kind, char *name);
     ps_ast_node *ps_ast_create_statement_list(uint16_t line, uint16_t column, size_t count);
