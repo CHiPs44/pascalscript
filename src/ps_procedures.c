@@ -10,6 +10,7 @@
 
 #include "ps_environment.h"
 #include "ps_error.h"
+#include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_procedures.h"
 #include "ps_system.h"
@@ -45,50 +46,40 @@ error:
     return false;
 }
 
-bool ps_procedure_inc(ps_interpreter *interpreter, ps_value *value, const ps_value *increment)
+bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_value *value, const ps_value *offset, bool is_inc)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL)
+    if (value == NULL || value->type == NULL || value->type->value == NULL || !ps_value_is_ordinal(value))
         return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    ps_value new_value = {.allocated = false, .type = value->type, .data = {0}};
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_CHAR:
-        value->data.c += increment->data.c; // NOSONAR
-        break;
     case PS_TYPE_INTEGER:
-        value->data.i += increment->data.i; // NOSONAR
-        break;
     case PS_TYPE_UNSIGNED:
-        value->data.u += increment->data.u; // NOSONAR
+        ps_error error = is_inc ? ps_function_succ(interpreter, value, &new_value)
+                                : ps_function_pred(interpreter, value, &new_value);
+        if (error != PS_ERROR_NONE)
+            return ps_interpreter_return_false(interpreter, error);
         break;
     default:
         return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
+    ps_error error = ps_value_copy(&new_value, value, interpreter->range_check);
+    if (error != PS_ERROR_NONE)
+        return ps_interpreter_return_false(interpreter, error);
     if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "INC(%s)\n", ps_value_get_display_string(value, 0, 0));
+        fprintf(stderr, "%s(%s)\n", is_inc ? "INC" : "DEC", ps_value_get_display_string(value, 0, 0));
     return true;
+}
+
+bool ps_procedure_inc(ps_interpreter *interpreter, ps_value *value, const ps_value *increment)
+{
+    return ps_procedure_inc_or_dec(interpreter, value, increment, true);
 }
 
 bool ps_procedure_dec(ps_interpreter *interpreter, ps_value *value, const ps_value *decrement)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
-    switch (value->type->value->data.t->base)
-    {
-    case PS_TYPE_CHAR:
-        value->data.c -= decrement->data.c; // NOSONAR
-        break;
-    case PS_TYPE_INTEGER:
-        value->data.i -= decrement->data.i; // NOSONAR
-        break;
-    case PS_TYPE_UNSIGNED:
-        value->data.u -= decrement->data.u; // NOSONAR
-        break;
-    default:
-        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
-    }
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "DEC(%s)\n", ps_value_get_display_string(value, 0, 0));
-    return true;
+    return ps_procedure_inc_or_dec(interpreter, value, decrement, false);
 }
 
 bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)

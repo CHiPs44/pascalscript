@@ -20,13 +20,13 @@ char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
     switch (group)
     {
-    case PS_AST_GROUP_BLOCK:
+    case PS_AST_BLOCK:
         return "BLOCK";
-    case PS_AST_GROUP_STATEMENT:
+    case PS_AST_STATEMENT:
         return "STATEMENT";
-    case PS_AST_GROUP_EXPRESSION:
+    case PS_AST_EXPRESSION:
         return "EXPRESSION";
-    case PS_AST_GROUP_LVALUE:
+    case PS_AST_LVALUE:
         return "LVALUE";
     default:
         ps_ast_debug_line("Error: unknown AST node group %d\n", group);

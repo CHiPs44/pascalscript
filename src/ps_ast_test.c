@@ -11,8 +11,10 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
+#include "ps_procedures.h"
 #include "ps_string_heap.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -36,7 +38,7 @@ void ps_ast_test_minimal()
     assert(block != NULL);
 
     // Check that the node has the expected group, kind, line, column and name
-    assert(block->group == PS_AST_GROUP_STATEMENT);
+    assert(block->group == PS_AST_STATEMENT);
     assert(block->kind == PS_AST_PROGRAM);
     assert(block->line == 1);
     assert(block->column == 1);
@@ -112,21 +114,21 @@ void ps_ast_test_hello()
     block->statement_list = ps_ast_create_statement_list(3, 5, 1);
     assert(block->statement_list != NULL);
 
-    // Create the argument value
+    // Create the by value argument
     ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
     assert(hello != NULL);
     ps_value argument_value = {.allocated = false, .type = &ps_system_string, .data.s = hello};
-    ps_ast_node *argument = ps_ast_create_value(3, 13, argument_value);
+    ps_ast_value *argument_value_node = ps_ast_create_value(3, 13, argument_value);
+    ps_ast_node *argument = ps_ast_create_argument(3, 13, PS_AST_ARG_EXPR, argument_value_node);
     assert(argument != NULL);
 
     // Create the argument list for the procedure call
-    ps_ast_node_argument *args[] = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node_argument));
+    ps_ast_argument *args[] = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_argument));
     assert(args != NULL);
-    args[0]->is_reference = false;
-    args[0]->expression = argument;
+    args[0]->arg = argument;
 
     // Create the PROCEDURE CALL statement
-    ps_ast_node *statement = ps_ast_create_procedure_call(3, 5, "Writeln", 1, args);
+    ps_ast_call *statement = ps_ast_create_procedure_call(3, 5, ps_system_procedure_writeln.value->data.x, 1, args);
     assert(statement != NULL);
 
     // Add the statement to the statement list

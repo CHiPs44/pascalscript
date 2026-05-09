@@ -167,9 +167,9 @@ ps_error ps_function_return_error_with_message(ps_interpreter *interpreter, ps_e
 /** @brief ODD - true if integer/unsigned value is odd, false if even */
 ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_scalar(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_SCALAR,
-                                                     "Odd: Scalar expected, got %s",
+    if (!ps_value_is_ordinal(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_ORDINAL,
+                                                     "Odd: Ordinal expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_boolean;
     switch (ps_value_get_base(value))
@@ -189,9 +189,9 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief EVEN - true if integer/unsigned value is even, false if odd */
 ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_scalar(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_SCALAR,
-                                                     "Even: Scalar expected, got %s",
+    if (!ps_value_is_ordinal(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_ORDINAL,
+                                                     "Even: Ordinal expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_boolean;
     switch (ps_value_get_base(value))
@@ -239,9 +239,9 @@ ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_
 /** @brief CHR - Get char value of unsigned / integer or subrange value */
 ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_scalar(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_SCALAR,
-                                                     "Chr: Scalar expected, got %s",
+    if (!ps_value_is_ordinal(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_ORDINAL,
+                                                     "Chr: Ordinal expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_char;
     switch (ps_value_get_base(value))
@@ -436,12 +436,12 @@ ps_error ps_function_pred_ordinal(const ps_interpreter *interpreter, const ps_va
 /** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
 ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_is_scalar(value))
-        return ps_function_pred_scalar(interpreter, value, result);
     if (ps_value_is_ordinal(value))
         return ps_function_pred_ordinal(interpreter, value, result);
+    if (ps_value_is_scalar(value) && !ps_value_is_real(value))
+        return ps_function_pred_scalar(interpreter, value, result);
     return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                 "Pred: Scalar or Ordinal expected, got %s",
+                                                 "Pred: Ordinal expected, got %s",
                                                  ps_type_definition_get_name(value->type->value->data.t));
 }
 
@@ -528,12 +528,12 @@ ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_va
 /** @brief SUCC - Get next value (successor) of ordinal value */
 ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_is_scalar(value))
+    if (ps_value_is_scalar(value) && !ps_value_is_real(value))
         return ps_function_succ_scalar(interpreter, value, result);
     if (ps_value_is_ordinal(value))
         return ps_function_succ_ordinal(interpreter, value, result);
     return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                 "Pred: Scalar or Ordinal expected, got %s",
+                                                 "Pred: Ordinal expected, got %s",
                                                  ps_type_definition_get_name(value->type->value->data.t));
 }
 
@@ -551,13 +551,15 @@ ps_error ps_function_abs(ps_interpreter *interpreter, const ps_value *value, ps_
     switch (value->type->value->data.t->base)
     {
     case PS_TYPE_UNSIGNED:
-        // abs(u) => u
+        // |u| => u
         result->data.u = value->data.u;
         break;
     case PS_TYPE_INTEGER:
+        // |i| => abs(i)
         result->data.i = (ps_integer)abs(value->data.i); // NOSONAR
         break;
     case PS_TYPE_REAL:
+        // |r| => fabs(r)
         result->data.r = (ps_real)fabs(value->data.r);
         break;
     default:

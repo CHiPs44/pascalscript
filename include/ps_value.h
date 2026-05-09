@@ -34,11 +34,11 @@ extern "C"
     /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
 
-    /** @brief Scalar is: Integer, Unsigned, Integer or Unsigned subrange */
+    /** @brief Scalar is: Ordinal, Real, *FUTURE* Pointer */
     bool ps_value_is_scalar(const ps_value *value);
-    /** @brief Ordinal is: Boolean, Char or Enum */
+    /** @brief Ordinal is: Integer, Unsigned, Integer or Unsigned subrange, Boolean, Char or Enum */
     bool ps_value_is_ordinal(const ps_value *value);
-    /** @brief Number is: Integer, Unsigned, Real, Integer or Unsigned subrange */
+    /** @brief Number is: Real, Integer, Unsigned, Integer or Unsigned subrange */
     bool ps_value_is_number(const ps_value *value);
     /** @brief is Real? */
     bool ps_value_is_real(const ps_value *value);

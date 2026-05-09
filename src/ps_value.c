@@ -58,16 +58,8 @@ ps_value *ps_value_free(ps_value *value)
 
 bool ps_value_is_scalar(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
-    {
-        ps_value_type type = value->type->value->data.t->type;
-        ps_value_type base = value->type->value->data.t->base;
-        if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER ||
-            (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED) ||
-            (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER))
-            return true;
-    }
-    return false;
+    return value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL &&
+           (ps_value_is_ordinal(value) || ps_value_is_real(value));
 }
 
 bool ps_value_is_ordinal(const ps_value *value)
@@ -75,7 +67,9 @@ bool ps_value_is_ordinal(const ps_value *value)
     if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
     {
         ps_value_type type = value->type->value->data.t->type;
-        if (type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || value->type->value->data.t->type == PS_TYPE_ENUM)
+        ps_value_type base = value->type->value->data.t->base;
+        if ((type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || type == PS_TYPE_ENUM) ||
+            (base == PS_TYPE_INTEGER || base == PS_TYPE_UNSIGNED))
             return true;
     }
     return false;

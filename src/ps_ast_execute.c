@@ -111,7 +111,7 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
     case PS_AST_FOR:
         return ps_ast_run_for(interpreter, (ps_ast_for *)statement);
     case PS_AST_PROCEDURE_CALL:
-        return ps_ast_run_procedure_call(interpreter, (ps_ast_procedure_call *)statement);
+        return ps_ast_run_procedure_call(interpreter, (ps_ast_call *)statement);
     default:
         ps_ast_debug_line("Error: unexpected statement kind %d\n", statement->kind);
         return false;
@@ -208,7 +208,8 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statem
 bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
 {
     ps_ast_debug_line("FOR statement");
-    ps_ast_debug_line(" - Variable: %s", for_statement->variable->variable_simple->variable->name);
+    ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)for_statement->variable;
+    ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
     ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     bool result = ps_ast_eval_expression(interpreter, for_statement->start, &start_value);
     if (!result)
@@ -222,8 +223,8 @@ bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
     bool loop = true;
     while (loop)
     {
-        ps_ast_debug_line(" - Body");
-        if (!ps_ast_run_statement_list(interpreter, &for_statement->body->statement_list))
+        ps_ast_debug_line(" - Body: %d statements", for_statement->body->count);
+        if (!ps_ast_run_statement_list(interpreter, &for_statement->body))
             return false;
         if (for_statement->step > 0)
         {
@@ -261,7 +262,7 @@ bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function
 
 bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_value *result)
 {
-    if (!ps_ast_check_group(expression, PS_AST_GROUP_EXPRESSION))
+    if (!ps_ast_check_group(expression, PS_AST_EXPRESSION))
         return false;
     ps_ast_debug_line("EXPRESSION @%p", (void *)expression);
     switch (expression->kind)
