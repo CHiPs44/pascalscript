@@ -38,6 +38,8 @@ char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
     switch (kind)
     {
+    case PS_AST_KIND_UNKNOWN:
+        return "UNKNOWN";
     case PS_AST_PROGRAM:
         return "PROGRAM";
     case PS_AST_PROCEDURE:
@@ -52,6 +54,8 @@ char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
         return "ASSIGNMENT";
     case PS_AST_IF:
         return "IF";
+    case PS_AST_CASE:
+        return "CASE";
     case PS_AST_WHILE:
         return "WHILE";
     case PS_AST_REPEAT:
@@ -66,16 +70,22 @@ char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
         return "BINARY_OPERATION";
     case PS_AST_FUNCTION_CALL:
         return "FUNCTION_CALL";
-    case PS_AST_VALUE:
+    case PS_AST_RVALUE_CONST:
         return "VALUE";
-    case PS_AST_VARIABLE_SIMPLE:
+    case PS_AST_RVALUE_SIMPLE:
         return "VARIABLE_SIMPLE";
-    case PS_AST_VARIABLE_ARRAY:
+    case PS_AST_RVALUE_ARRAY:
         return "VARIABLE_ARRAY";
     case PS_AST_LVALUE_SIMPLE:
         return "LVALUE_SIMPLE";
     case PS_AST_LVALUE_ARRAY:
         return "LVALUE_ARRAY";
+    case PS_AST_ARG_EXPR:
+        return "ARG_EXPR";
+    case PS_AST_ARG_VAR_BY_VAL:
+        return "ARG_VAR_BY_VAL";
+    case PS_AST_ARG_VAR_BY_REF:
+        return "ARG_VAR_BY_REF";
     default:
         ps_ast_debug_line("Error: unknown AST node kind %d\n", kind);
         return "UNKNOWN";
@@ -94,64 +104,63 @@ void ps_ast_debug_line(const char *format, ...) // NOSONAR
     va_end(args);
 }
 
-void ps_ast_debug_program(ps_ast_node *node)
+void ps_ast_debug_block(ps_ast_node *node)
 {
-    ps_ast_debug_line("PROGRAM name: %s\n", node->block->name);
-    ps_ast_debug_line(" - Number of variables: %zu", node->block->n_vars);
-    ps_ast_debug_line(" - Number of statements: %zu", node->block->statement_list->statement_list->count);
-    ps_ast_debug_line(" - Number of executables: %zu", node->block->n_executables);
-}
-
-void ps_ast_debug_procedure(ps_ast_node *node)
-{
-    ps_ast_debug_line("PROCEDURE name: %s\n", node->block->name);
-    ps_ast_debug_line(" - Number of parameters: %zu", node->block->signature->parameter_count);
-    ps_ast_debug_line(" - Number of variables: %zu", node->block->n_vars);
-    ps_ast_debug_line(" - Number of statements: %zu", node->block->statement_list->statement_list->count);
-}
-
-void ps_ast_debug_function(ps_ast_node *node)
-{
-    ps_ast_debug_line("FUNCTION name: %s\n", node->block->name);
-    ps_ast_debug_line(" - Number of parameters: %zu", node->block->signature->parameter_count);
-    ps_ast_debug_line(" - Number of variables: %zu", node->block->n_vars);
-    ps_ast_debug_line(" - Number of statements: %zu", node->block->statement_list->statement_list->count);
-}
-
-void ps_ast_debug_unit(ps_ast_node *node)
-{
-    ps_ast_debug_line("UNIT name: %s\n", node->block->name);
-    ps_ast_debug_line(" - Number of variables: %zu", node->block->n_vars);
-    ps_ast_debug_line(" - Number of statements: %zu", node->block->statement_list->statement_list->count);
+    ps_ast_block *block = (ps_ast_block *)node;
+    ps_ast_debug_line("BLOCK kind: %s, name: %s\n", ps_ast_node_get_kind_name(node->kind), block->name);
+    ps_ast_debug_line(" - Number of symbols:     %zu", block->symbols ? block->symbols->used : 0);
+    ps_ast_debug_line(" - Number of variables:   %zu", block->n_vars);
+    ps_ast_debug_line(" - Number of executables: %zu", block->n_executables);
+    ps_ast_debug_line(" - Number of statements:  %zu", block->statement_list ? block->statement_list->count : 0);
+    ps_ast_debug_line(" - Number of parameters:  %zu", block->signature ? block->signature->parameter_count : 0);
+    ps_ast_debug_line(" - Result type:           %s", block->result_type ? block->result_type->name : "none");
 }
 
 void ps_ast_debug_statement_list(ps_ast_node *node)
 {
+    ps_ast_statement_list *statement_list = (ps_ast_statement_list *)node;
     ps_ast_debug_line("STATEMENT_LIST");
-    ps_ast_debug_line(" - Count: %zu", node->block->statement_list->statement_list->count);
+    ps_ast_debug_line(" - Count: %zu", statement_list->count);
     ps_ast_debug_line(" - Statements:");
-    for (size_t i = 0; i < node->block->statement_list->statement_list->count; i++)
+    for (size_t i = 0; i < statement_list->count; i++)
     {
-        ps_ast_debug_node(node->block->statement_list->statement_list->statements[i]);
+        ps_ast_debug_node(statement_list->statements[i]);
     }
 }
 
 void ps_ast_debug_assignment(ps_ast_node *node)
 {
-    ps_ast_debug_line("ASSIGNMENT variable: %s\n", node->assignment->lvalue->variable_simple->variable->name);
+    ps_ast_assignment *assignment = (ps_ast_assignment *)node;
+    if (assignment->lvalue->kind == PS_AST_LVALUE_SIMPLE)
+    {
+        ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)assignment->lvalue;
+        ps_ast_debug_line("ASSIGNMENT variable: %s\n", variable_simple->variable->name);
+    }
+    else if (assignment->lvalue->kind == PS_AST_LVALUE_ARRAY)
+    {
+        ps_ast_variable_array *variable_array = (ps_ast_variable_array *)assignment->lvalue;
+        ps_ast_debug_line("ASSIGNMENT variable: %s\n", variable_array->variable->name);
+        ps_ast_debug_line(" - Number of indexes: %zu\n", variable_array->n_indexes);
+    }
+    else
+    {
+        ps_ast_debug_line("ASSIGNMENT with unknown lvalue kind %s (%d)\n",
+                          ps_ast_node_get_kind_name(assignment->lvalue->kind), assignment->lvalue->kind);
+    }
     ps_ast_debug_line(" - Expression:");
-    ps_ast_debug_expression(node->assignment->expression);
+    ps_ast_debug_expression(assignment->expression);
 }
 
 void ps_ast_debug_if(ps_ast_node *node)
 {
+    ps_ast_if *if_statement = (ps_ast_if *)node;
     ps_ast_debug_line("IF statement\n");
     ps_ast_debug_line(" - Condition:\n");
-    ps_ast_debug_expression(node->if_statement->condition);
+    ps_ast_debug_expression(if_statement->condition);
     ps_ast_debug_line(" - Then branch:\n");
-    ps_ast_debug_statement_list(node->if_statement->then_branch);
+    ps_ast_debug_statement_list(if_statement->then_branch);
     ps_ast_debug_line(" - Else branch:\n");
-    ps_ast_debug_statement_list(node->if_statement->else_branch);
+    ps_ast_debug_statement_list(if_statement->else_branch);
 }
 
 void ps_ast_debug_node(ps_ast_node *node)
@@ -164,17 +173,14 @@ void ps_ast_debug_node(ps_ast_node *node)
     ps_ast_debug_line("Node kind: %s\n", ps_ast_node_get_kind_name(node->kind));
     switch (node->kind)
     {
+    case PS_AST_KIND_UNKNOWN:
+        ps_ast_debug_line("Unknown node kind");
+        break;
     case PS_AST_PROGRAM:
-        ps_ast_debug_program(node);
-        break;
     case PS_AST_PROCEDURE:
-        ps_ast_debug_procedure(node);
-        break;
     case PS_AST_FUNCTION:
-        ps_ast_debug_function(node);
-        break;
     case PS_AST_UNIT:
-        ps_ast_debug_unit(node);
+        ps_ast_debug_block(node);
         break;
     case PS_AST_STATEMENT_LIST:
         ps_ast_debug_statement_list(node);
@@ -191,11 +197,14 @@ void ps_ast_debug_node(ps_ast_node *node)
     case PS_AST_FUNCTION_CALL:
         ps_ast_debug_function_call(node);
         break;
-    case PS_AST_VALUE:
+    case PS_AST_RVALUE_CONST:
         ps_ast_debug_value(node);
         break;
     case PS_AST_IF:
         ps_ast_debug_if(node);
+        break;
+    case PS_AST_CASE:
+        ps_ast_debug_line("CASE statement (not implemented yet)\n");
         break;
     case PS_AST_WHILE:
         ps_ast_debug_while(node);
@@ -209,19 +218,15 @@ void ps_ast_debug_node(ps_ast_node *node)
     case PS_AST_PROCEDURE_CALL:
         ps_ast_debug_procedure_call(node);
         break;
-    case PS_AST_VARIABLE_SIMPLE:
+    case PS_AST_RVALUE_SIMPLE:
+    case PS_AST_LVALUE_SIMPLE:
         ps_ast_debug_variable_simple(node);
         break;
-    case PS_AST_VARIABLE_ARRAY:
+    case PS_AST_RVALUE_ARRAY:
+    case PS_AST_LVALUE_ARRAY:
         ps_ast_debug_variable_array(node);
         break;
-    case PS_AST_LVALUE_SIMPLE:
-        ps_ast_debug_lvalue_simple(node);
-        break;
-    case PS_AST_LVALUE_ARRAY:
-        ps_ast_debug_lvalue_array(node);
-        break;
-    default:
-        ps_ast_debug_line("Error: unknown AST node kind %d\n", node->kind);
+        // default:
+        //     ps_ast_debug_line("Error: unknown AST node kind %d\n", node->kind);
     }
 }

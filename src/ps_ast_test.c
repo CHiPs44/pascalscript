@@ -118,7 +118,7 @@ void ps_ast_test_hello()
     ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
     assert(hello != NULL);
     ps_value argument_value = {.allocated = false, .type = &ps_system_string, .data.s = hello};
-    ps_ast_value *argument_value_node = ps_ast_create_value(3, 13, argument_value);
+    ps_ast_value *argument_value_node = ps_ast_create_rvalue_const(3, 13, argument_value);
     ps_ast_node *argument = ps_ast_create_argument(3, 13, PS_AST_ARG_EXPR, argument_value_node);
     assert(argument != NULL);
 

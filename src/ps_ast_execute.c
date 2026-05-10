@@ -128,12 +128,12 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     ps_ast_debug_line(" - Expression value: %s", ps_value_to_string(&value));
     switch (assignment->lvalue->kind)
     {
-    case PS_AST_VARIABLE_SIMPLE:
+    case PS_AST_RVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
         if (!ps_copy_value(&value.value, variable_simple->variable->value, interpreter->range_check))
             return false;
-    case PS_AST_VARIABLE_ARRAY:
+    case PS_AST_RVALUE_ARRAY:
         ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
         ps_ast_debug_line(" - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "Array assignment not implemented yet");
@@ -269,19 +269,19 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
     ps_ast_debug_line("EXPRESSION @%p", (void *)expression);
     switch (expression->kind)
     {
-    case PS_AST_VALUE:
+    case PS_AST_RVALUE_CONST:
         ps_ast_value *value = (ps_ast_value *)expression;
         ps_ast_debug_line(" - Value: %s", ps_value_to_string(&value->value));
         if (!ps_value_copy(&value->value, &result->value, interpreter->range_check))
             return false;
         break;
-    case PS_AST_VARIABLE_SIMPLE:
+    case PS_AST_RVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)expression;
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
         if (!ps_value_copy(variable_simple->variable->value, &result->value, interpreter->range_check))
             return false;
         break;
-    case PS_AST_VARIABLE_ARRAY:
+    case PS_AST_RVALUE_ARRAY:
         ps_ast_variable_array *variable_array = (ps_ast_variable_array *)expression;
         ps_ast_debug_line(" - Array variable: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "TODO! Array access not implemented yet");
