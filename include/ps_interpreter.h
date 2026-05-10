@@ -11,7 +11,6 @@
 
 #include "ps_environment.h"
 #include "ps_error.h"
-#include "ps_parser.h"
 #include "ps_string_heap.h"
 #include "ps_value.h"
 
@@ -26,13 +25,6 @@ extern "C"
 
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0u
 #define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1u
-
-    typedef enum e_ps_interpreter_mode
-    {
-        MODE_EXEC, /** @brief Execute instructions */
-        MODE_SKIP, /** @brief Skip execution but parse declarations */
-        MODE_CODE, /** @brief *FUTURE* Output AST / intermediate language / whatever */
-    } ps_interpreter_mode;
 
     typedef enum e_ps_interpreter_debug
     {

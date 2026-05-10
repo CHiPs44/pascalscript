@@ -29,6 +29,8 @@
  */
 void ps_ast_test_minimal()
 {
+    bool result;
+
     // Create an interpreter first as we may need it very soon
     ps_interpreter *interpreter = ps_interpreter_alloc(true, false, false);
     assert(interpreter != NULL);
@@ -49,7 +51,7 @@ void ps_ast_test_minimal()
     assert(block->symbols != NULL);
 
     // Enter environment for the program block
-    bool result = ps_interpreter_enter_environment(interpreter, block->name, NULL, 0, NULL);
+    result = ps_interpreter_enter_environment(interpreter, block->name, NULL, 0, NULL);
     assert(result);
 
     // Create a PROGRAM symbol and add it to the current environment symbol table and the block symbol table
@@ -60,7 +62,7 @@ void ps_ast_test_minimal()
     assert(error == PS_SYMBOL_TABLE_ERROR_NONE);
 
     // Run the program (which does nothing) and check that it returns true
-    bool result = ps_ast_run_program(interpreter, block);
+    result = ps_ast_run_program(interpreter, block);
     assert(result);
 
     // Exit environment for the program block
@@ -128,7 +130,8 @@ void ps_ast_test_hello()
     args[0]->arg = argument;
 
     // Create the PROCEDURE CALL statement
-    ps_ast_call *statement = ps_ast_create_procedure_call(3, 5, ps_system_procedure_writeln.value->data.x, 1, args);
+    ps_ast_call *statement =
+        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, ps_system_procedure_writeln.value->data.x, 1, args);
     assert(statement != NULL);
 
     // Add the statement to the statement list

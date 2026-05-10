@@ -40,7 +40,7 @@ bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
 
 bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
 {
-    if (!ps_ast_check_kind(program, PS_AST_PROGRAM))
+    if (!ps_ast_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
         return false;
     ps_ast_debug_line("PROGRAM %s;", program->name);
     return ps_ast_run_block(interpreter, program);
@@ -48,7 +48,7 @@ bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
 
 bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
 {
-    if (!ps_ast_check_kind(procedure, PS_AST_PROCEDURE))
+    if (!ps_ast_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return false;
     ps_ast_debug_line("PROCEDURE %s;", procedure->name);
     return ps_ast_run_block(interpreter, procedure);
@@ -56,7 +56,7 @@ bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
 
 bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
 {
-    if (!ps_ast_check_kind(function, PS_AST_FUNCTION))
+    if (!ps_ast_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
         return false;
     ps_ast_debug_line("FUNCTION %s;", function->name);
     return ps_ast_run_block(interpreter, function);
@@ -65,19 +65,22 @@ bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
 bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_block *block)
 {
     bool result = false;
-
+    if (!ps_ast_check_group((ps_ast_node *)block, PS_AST_BLOCK))
+        return false;
+    ps_ast_debug_line("%s %s;", ps_ast_node_get_kind_name(block->kind), block->name);
     // Handle variable and parameters allocation and initialization
     size_t n_values = block->n_vars + (block->signature != NULL ? block->signature->parameter_count : 0);
     ps_value *values = ps_memory_calloc(PS_MEMORY_VALUE, n_values, sizeof(ps_value));
     if (values == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-
+    // Enter environment
     if (!ps_interpreter_enter_environment(interpreter, block->name, block->symbols, n_values, values))
         goto cleanup;
+    // Run block statements
     result = ps_ast_run_statement_list(interpreter, block->statement_list);
+    // Exit environment
     if (!ps_interpreter_exit_environment(interpreter))
         goto cleanup;
-
 cleanup:
     // Handle variable release
     ps_memory_free(PS_MEMORY_VALUE, values);
@@ -98,6 +101,7 @@ bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_lis
 
 bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
 {
+    assert(statement != NULL);
     switch (statement->kind)
     {
     case PS_AST_ASSIGNMENT:
@@ -120,6 +124,8 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
 
 bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assignment)
 {
+    assert(assignment != NULL);
+    assert(assignment->kind == PS_AST_ASSIGNMENT);
     ps_ast_debug_line("ASSIGNMENT:");
     ps_ast_value value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     bool result = ps_ast_eval_expression(interpreter, assignment->expression, &value);
@@ -131,7 +137,8 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     case PS_AST_RVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
-        if (!ps_copy_value(&value.value, variable_simple->variable->value, interpreter->range_check))
+        ps_error error = ps_copy_value(&value.value, variable_simple->variable->value, interpreter->range_check);
+        if (error != PS_ERROR_NONE)
             return false;
     case PS_AST_RVALUE_ARRAY:
         ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
@@ -147,6 +154,8 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
 
 bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement)
 {
+    assert(if_statement != NULL);
+    assert(if_statement->kind == PS_AST_IF);
     ps_ast_debug_line("IF statement");
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value))
@@ -168,6 +177,8 @@ bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement)
 
 bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement)
 {
+    assert(while_statement != NULL);
+    assert(while_statement->kind == PS_AST_WHILE);
     ps_ast_debug_line("WHILE statement: %d statements in body", while_statement->body->count);
     while (true)
     {
@@ -189,6 +200,8 @@ bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement
 
 bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statement)
 {
+    assert(repeat_statement != NULL);
+    assert(repeat_statement->kind == PS_AST_REPEAT);
     ps_ast_debug_line("REPEAT statement");
     ps_ast_value condition_value = {.value.allocated = false, .value.type = NULL, .value.data = {0}};
     do
@@ -207,6 +220,8 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statem
 
 bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
 {
+    assert(for_statement != NULL);
+    assert(for_statement->kind == PS_AST_FOR);
     ps_ast_debug_line("FOR statement");
     ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)for_statement->variable;
     ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
@@ -246,6 +261,8 @@ bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
 
 bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedure_call)
 {
+    assert(procedure_call != NULL);
+    assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
     ps_ast_debug_line("PROCEDURE CALL %s", procedure_call->executable->name);
     ps_interpreter_set_message(interpreter, "Procedure calls not implemented yet");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
@@ -254,6 +271,8 @@ bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedu
 
 bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function_call, ps_ast_value *result)
 {
+    assert(function_call != NULL);
+    assert(function_call->kind == PS_AST_FUNCTION_CALL);
     ps_ast_debug_line("FUNCTION CALL %s", function_call->executable->name);
     result->value.type = &ps_system_none;
     result->value.data = (ps_value_data){0};
@@ -264,6 +283,9 @@ bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function
 
 bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_value *result)
 {
+    assert(expression != NULL);
+    assert(expression->group == PS_AST_EXPRESSION);
+    assert(result != NULL);
     if (!ps_ast_check_group(expression, PS_AST_EXPRESSION))
         return false;
     ps_ast_debug_line("EXPRESSION @%p", (void *)expression);

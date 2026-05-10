@@ -38,10 +38,6 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
     interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
     if (interpreter->string_heap == NULL)
         return ps_interpreter_free(interpreter);
-    // Allocate parser
-    interpreter->parser = ps_parser_alloc();
-    if (interpreter->parser == NULL)
-        return ps_interpreter_free(interpreter);
     // Allocate system environment
     ps_identifier system = "SYSTEM";
     interpreter->environments[0] =
@@ -64,8 +60,6 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
-        if (interpreter->parser != NULL)
-            interpreter->parser = ps_parser_free(interpreter->parser);
         ps_system_done(interpreter->environments[0]);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
