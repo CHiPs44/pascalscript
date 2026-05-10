@@ -34,18 +34,30 @@ extern "C"
     /** @brief Free allocated value */
     ps_value *ps_value_free(ps_value *value);
 
-    /** @brief Scalar is: Ordinal, Real, *FUTURE* Pointer */
-    bool ps_value_is_scalar(const ps_value *value);
+    /** @brief Check if value is valid */
+    bool ps_value_is_valid(const ps_value *value);
     /** @brief Ordinal is: Integer, Unsigned, Integer or Unsigned subrange, Boolean, Char or Enum */
     bool ps_value_is_ordinal(const ps_value *value);
+    /** @brief Scalar is: Ordinal, Real, *FUTURE* Pointer */
+    bool ps_value_is_scalar(const ps_value *value);
     /** @brief Number is: Real, Integer, Unsigned, Integer or Unsigned subrange */
     bool ps_value_is_number(const ps_value *value);
-    /** @brief is Real? */
+    /** @brief Is Integer? */
+    bool ps_value_is_integer(const ps_value *value);
+    /** @brief Is Unsigned? */
+    bool ps_value_is_unsigned(const ps_value *value);
+    /** @brief Is Boolean? */
+    bool ps_value_is_boolean(const ps_value *value);
+    /** @brief Is Real? */
     bool ps_value_is_real(const ps_value *value);
     /** @brief Is String? */
     bool ps_value_is_string(const ps_value *value);
     /** @brief Is Array? */
     bool ps_value_is_array(const ps_value *value);
+    /** @brief Is Enum? */
+    bool ps_value_is_enum(const ps_value *value);
+    /** @brief Is Subrange? */
+    bool ps_value_is_subrange(const ps_value *value);
 
     /** @brief Get type */
     /** @returns PS_TYPE_NONE if value is invalid */

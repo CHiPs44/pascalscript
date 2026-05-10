@@ -354,7 +354,7 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
     return ps_function_low_or_high(interpreter, type, result, false);
 }
 
-ps_error ps_function_pred_scalar(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_pred_IUS(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (ps_value_get_type(value))
     {
@@ -436,16 +436,18 @@ ps_error ps_function_pred_ordinal(const ps_interpreter *interpreter, const ps_va
 /** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
 ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    if (!ps_value_is_valid(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_VALUE, "Pred: Invalid value");
+    if (ps_value_is_integer(value) || ps_value_is_unsigned(value) || ps_value_is_subrange(value))
+        return ps_function_pred_IUS(interpreter, value, result);
     if (ps_value_is_ordinal(value))
         return ps_function_pred_ordinal(interpreter, value, result);
-    if (ps_value_is_scalar(value) && !ps_value_is_real(value))
-        return ps_function_pred_scalar(interpreter, value, result);
     return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                  "Pred: Ordinal expected, got %s",
                                                  ps_type_definition_get_name(value->type->value->data.t));
 }
 
-ps_error ps_function_succ_scalar(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_succ_ius(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (ps_value_get_type(value))
     {
@@ -495,7 +497,7 @@ ps_error ps_function_succ_scalar(const ps_interpreter *interpreter, const ps_val
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+ps_error ps_function_succ_CEB(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     result->type = value->type;
     switch (ps_value_get_type(value))
@@ -528,10 +530,12 @@ ps_error ps_function_succ_ordinal(const ps_interpreter *interpreter, const ps_va
 /** @brief SUCC - Get next value (successor) of ordinal value */
 ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (ps_value_is_scalar(value) && !ps_value_is_real(value))
-        return ps_function_succ_scalar(interpreter, value, result);
+    if (!ps_value_is_valid(value))
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_VALUE, "Succ: Invalid value");
+    if (ps_value_is_integer(value) || ps_value_is_unsigned(value) || ps_value_is_subrange(value))
+        return ps_function_succ_ius(interpreter, value, result);
     if (ps_value_is_ordinal(value))
-        return ps_function_succ_ordinal(interpreter, value, result);
+        return ps_function_succ_CEB(interpreter, value, result);
     return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
                                                  "Pred: Ordinal expected, got %s",
                                                  ps_type_definition_get_name(value->type->value->data.t));
@@ -876,9 +880,9 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
     else
     {
         // one argument, return random integer / unsigned
-        if (!ps_value_is_scalar(value))
+        if (!(ps_value_is_number(value) && !ps_value_is_real(value)))
             return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_SCALAR,
-                                                         "Random: Scalar expected, got %s",
+                                                         "Random: Integer or Unsigned expected, got %s",
                                                          ps_type_definition_get_name(value->type->value->data.t));
         switch (ps_value_get_base(value))
         {

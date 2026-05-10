@@ -37,9 +37,6 @@ ps_value *ps_value_free(ps_value *value)
     ps_value_type type = ps_value_get_type(value);
     switch (type)
     {
-    // case PS_TYPE_STRING:
-    //     ps_string_free(value->data.s);
-    //     break;
     case PS_TYPE_ARRAY:
         ps_array_free_data(value->data.a);
         break;
@@ -56,15 +53,14 @@ ps_value *ps_value_free(ps_value *value)
     return NULL;
 }
 
-bool ps_value_is_scalar(const ps_value *value)
+bool ps_value_is_valid(const ps_value *value)
 {
-    return value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL &&
-           (ps_value_is_ordinal(value) || ps_value_is_real(value));
+    return value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL;
 }
 
 bool ps_value_is_ordinal(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
         ps_value_type base = value->type->value->data.t->base;
@@ -75,9 +71,14 @@ bool ps_value_is_ordinal(const ps_value *value)
     return false;
 }
 
+bool ps_value_is_scalar(const ps_value *value)
+{
+    return ps_value_is_ordinal(value) || ps_value_is_real(value);
+}
+
 bool ps_value_is_number(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
         ps_value_type base = value->type->value->data.t->base;
@@ -88,9 +89,41 @@ bool ps_value_is_number(const ps_value *value)
     return false;
 }
 
+bool ps_value_is_integer(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        ps_value_type base = value->type->value->data.t->base;
+        return (type == PS_TYPE_INTEGER || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER));
+    }
+    return false;
+}
+
+bool ps_value_is_unsigned(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        ps_value_type base = value->type->value->data.t->base;
+        return (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED));
+    }
+    return false;
+}
+
+bool ps_value_is_boolean(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        return type == PS_TYPE_BOOLEAN;
+    }
+    return false;
+}
+
 bool ps_value_is_real(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
         ps_value_type base = value->type->value->data.t->base;
@@ -102,11 +135,10 @@ bool ps_value_is_real(const ps_value *value)
 
 bool ps_value_is_string(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
-        ps_value_type base = value->type->value->data.t->base;
-        if (type == PS_TYPE_STRING || base == PS_TYPE_STRING)
+        if (type == PS_TYPE_STRING)
             return true;
     }
     return false;
@@ -114,11 +146,32 @@ bool ps_value_is_string(const ps_value *value)
 
 bool ps_value_is_array(const ps_value *value)
 {
-    if (value != NULL && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL)
+    if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
-        ps_value_type base = value->type->value->data.t->base;
-        if (type == PS_TYPE_ARRAY && base == PS_TYPE_ARRAY)
+        if (type == PS_TYPE_ARRAY)
+            return true;
+    }
+    return false;
+}
+
+bool ps_value_is_enum(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        if (type == PS_TYPE_ENUM)
+            return true;
+    }
+    return false;
+}
+
+bool ps_value_is_subrange(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        if (type == PS_TYPE_SUBRANGE)
             return true;
     }
     return false;
@@ -126,24 +179,71 @@ bool ps_value_is_array(const ps_value *value)
 
 ps_value_type ps_value_get_type(const ps_value *value)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
+    if (!ps_value_is_valid(value))
         return PS_TYPE_NONE;
     return value->type->value->data.t->type;
 }
 
 ps_value_type ps_value_get_base(const ps_value *value)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL)
+    if (!ps_value_is_valid(value))
         return PS_TYPE_NONE;
     return value->type->value->data.t->base;
 }
 
+ps_error ps_value_copy_char(const ps_value *from, ps_value *to, bool range_check)
+{
+    if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
+        (from->data.c < to->type->value->data.t->def.g.c.min || from->data.c > to->type->value->data.t->def.g.c.max))
+        return PS_ERROR_OUT_OF_RANGE;
+    to->data.c = from->data.c;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_value_copy_integer(const ps_value *from, ps_value *to, bool range_check)
+{
+    if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
+        (from->data.i < to->type->value->data.t->def.g.i.min || from->data.i > to->type->value->data.t->def.g.i.max))
+        return PS_ERROR_OUT_OF_RANGE;
+    to->data.i = from->data.i;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_value_copy_unsigned(const ps_value *from, ps_value *to, bool range_check)
+{
+    if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
+        (from->data.u < to->type->value->data.t->def.g.u.min || from->data.u > to->type->value->data.t->def.g.u.max))
+        return PS_ERROR_OUT_OF_RANGE;
+    to->data.u = from->data.u;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_value_copy_integer_to_unsigned(const ps_value *from, ps_value *to, bool range_check)
+{
+    if (range_check && from->data.i < 0)
+        return PS_ERROR_OUT_OF_RANGE;
+    if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
+        ((ps_unsigned)from->data.i < to->type->value->data.t->def.g.u.min ||
+         (ps_unsigned)from->data.i > to->type->value->data.t->def.g.u.max))
+        return PS_ERROR_OUT_OF_RANGE;
+    to->data.u = (ps_unsigned)from->data.i;
+    return PS_ERROR_NONE;
+}
+
+ps_error ps_value_copy_unsigned_to_integer(const ps_value *from, ps_value *to, bool range_check)
+{
+    if (range_check && from->data.u > PS_INTEGER_MAX)
+        return PS_ERROR_OUT_OF_RANGE;
+    if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
+        ((ps_integer)from->data.u < to->type->value->data.t->def.g.i.min ||
+         (ps_integer)from->data.u > to->type->value->data.t->def.g.i.max))
+        return PS_ERROR_OUT_OF_RANGE;
+    to->data.i = (ps_integer)from->data.u;
+    return PS_ERROR_NONE;
+}
+
 ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
 {
-    assert(NULL != from);
-    assert(NULL != from->type);
-    assert(NULL != to);
-    assert(NULL != to->type);
     ps_value_type from_base = ps_value_get_base(from);
     ps_value_type to_base = ps_value_get_base(to);
     // If destination type is NONE, set it to source type
@@ -158,63 +258,22 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     }
     // Enum can only be copied to exact same enum type
     if (ps_value_get_type(from) == PS_TYPE_ENUM)
-    {
         return PS_ERROR_TYPE_MISMATCH;
-    }
     // Char => Char? (subrange)
     if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_CHAR)
-    {
-        if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
-            (from->data.c < to->type->value->data.t->def.g.c.min ||
-             from->data.c > to->type->value->data.t->def.g.c.max))
-            return PS_ERROR_OUT_OF_RANGE;
-        to->data.c = from->data.c;
-        return PS_ERROR_NONE;
-    }
+        return ps_value_copy_char(from, to, range_check);
     // Integer => Integer? (subrange)
     if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_INTEGER)
-    {
-        if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
-            (from->data.i < to->type->value->data.t->def.g.i.min ||
-             from->data.i > to->type->value->data.t->def.g.i.max))
-            return PS_ERROR_OUT_OF_RANGE;
-        to->data.i = from->data.i;
-        return PS_ERROR_NONE;
-    }
+        return ps_value_copy_integer(from, to, range_check);
     // Unsigned => Unsigned? (subrange)
     if (from_base == PS_TYPE_UNSIGNED && to_base == PS_TYPE_UNSIGNED)
-    {
-        if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
-            (from->data.u < to->type->value->data.t->def.g.u.min ||
-             from->data.u > to->type->value->data.t->def.g.u.max))
-            return PS_ERROR_OUT_OF_RANGE;
-        to->data.u = from->data.u;
-        return PS_ERROR_NONE;
-    }
+        return ps_value_copy_unsigned(from, to, range_check);
     // Integer => Unsigned?
     if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_UNSIGNED)
-    {
-        if (range_check && from->data.i < 0)
-            return PS_ERROR_OUT_OF_RANGE;
-        if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
-            ((ps_unsigned)from->data.i < to->type->value->data.t->def.g.u.min ||
-             (ps_unsigned)from->data.i > to->type->value->data.t->def.g.u.max))
-            return PS_ERROR_OUT_OF_RANGE;
-        to->data.u = (ps_unsigned)from->data.i;
-        return PS_ERROR_NONE;
-    }
+        return ps_value_copy_integer_to_unsigned(from, to, range_check);
     // Unsigned => Integer?
     if (from_base == PS_TYPE_UNSIGNED && to_base == PS_TYPE_INTEGER)
-    {
-        if (range_check && from->data.u > PS_INTEGER_MAX)
-            return PS_ERROR_OUT_OF_RANGE;
-        if (range_check && ps_value_get_type(to) == PS_TYPE_SUBRANGE &&
-            ((ps_integer)from->data.u < to->type->value->data.t->def.g.i.min ||
-             (ps_integer)from->data.u > to->type->value->data.t->def.g.i.max))
-            return PS_ERROR_OUT_OF_RANGE;
-        to->data.i = (ps_integer)from->data.u;
-        return PS_ERROR_NONE;
-    }
+        return ps_value_copy_unsigned_to_integer(from, to, range_check);
     // Integer => Real? (no range check needed, as real can hold all integer values)
     if (from_base == PS_TYPE_INTEGER && to_base == PS_TYPE_REAL)
     {
@@ -271,8 +330,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 
 char *ps_value_get_enum(const ps_value *value)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL || value->type->value->data.t == NULL ||
-        value->type->value->data.t->type != PS_TYPE_ENUM)
+    if (!ps_value_is_valid(value) || !ps_value_is_enum(value))
         return NULL;
     const ps_type_definition *type_def = value->type->value->data.t;
     ps_symbol **values = type_def->def.e.values;
