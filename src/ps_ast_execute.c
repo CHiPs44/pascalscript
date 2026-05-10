@@ -255,6 +255,8 @@ bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedu
 bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function_call, ps_ast_value *result)
 {
     ps_ast_debug_line("FUNCTION CALL %s", function_call->executable->name);
+    result->value.type = &ps_system_none;
+    result->value.data = (ps_value_data){0};
     ps_interpreter_set_message(interpreter, "Function calls not implemented yet");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;

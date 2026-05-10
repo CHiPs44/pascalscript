@@ -22,8 +22,8 @@
 /**********************************************************************************************************************/
 
 /* clang-format off */
-PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , .proc_1arg      , &ps_procedure_inc      );
 PS_SYSTEM_PROCEDURE(procedure, dec      , "DEC"      , .proc_1arg      , &ps_procedure_dec      );
+PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , .proc_1arg      , &ps_procedure_inc      );
 PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", .proc_1arg      , &ps_procedure_randomize);
 PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , .proc_file_read , &ps_procedure_read     );
 PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , .proc_file_read , &ps_procedure_readln   );
@@ -34,8 +34,8 @@ PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , .proc_file_write, &ps_pro
 bool ps_procedures_init(ps_environment *system)
 {
     (void)system;
-    ADD_SYSTEM_SYMBOL(ps_system_procedure_inc)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_dec)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_inc)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_randomize)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_read)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_readln)
@@ -46,12 +46,13 @@ error:
     return false;
 }
 
-bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_value *value, const ps_value *offset, bool is_inc)
+bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_value *value, bool is_inc)
 {
-    if (value == NULL || value->type == NULL || value->type->value == NULL || !ps_value_is_ordinal(value))
+    if (!ps_value_is_ordinal(value))
         return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     ps_value new_value = {.allocated = false, .type = value->type, .data = {0}};
-    switch (value->type->value->data.t->base)
+    ps_value_type base = ps_value_get_base(value);
+    switch (base)
     {
     case PS_TYPE_CHAR:
     case PS_TYPE_INTEGER:
@@ -72,14 +73,14 @@ bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_value *value, const
     return true;
 }
 
-bool ps_procedure_inc(ps_interpreter *interpreter, ps_value *value, const ps_value *increment)
+bool ps_procedure_dec(ps_interpreter *interpreter, ps_value *value)
 {
-    return ps_procedure_inc_or_dec(interpreter, value, increment, true);
+    return ps_procedure_inc_or_dec(interpreter, value, false);
 }
 
-bool ps_procedure_dec(ps_interpreter *interpreter, ps_value *value, const ps_value *decrement)
+bool ps_procedure_inc(ps_interpreter *interpreter, ps_value *value)
 {
-    return ps_procedure_inc_or_dec(interpreter, value, decrement, false);
+    return ps_procedure_inc_or_dec(interpreter, value, true);
 }
 
 bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)

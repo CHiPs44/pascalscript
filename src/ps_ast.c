@@ -36,38 +36,45 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
         return NULL;
     switch (node->kind)
     {
+    case PS_AST_KIND_UNKNOWN:
+        ps_memory_free(PS_MEMORY_AST, node);
+        return NULL;
     case PS_AST_PROGRAM:
     case PS_AST_PROCEDURE:
     case PS_AST_FUNCTION:
     case PS_AST_UNIT:
-        return ps_ast_free_block(node);
+        return ps_ast_free_block((ps_ast_block *)node);
     case PS_AST_STATEMENT_LIST:
-        return ps_ast_free_statement_list(node);
+        return ps_ast_free_statement_list((ps_ast_statement_list *)node);
     case PS_AST_ASSIGNMENT:
-        return ps_ast_free_assignment(node);
+        return ps_ast_free_assignment((ps_ast_assignment *)node);
     case PS_AST_IF:
-        return ps_ast_free_if(node);
+        return ps_ast_free_if((ps_ast_if *)node);
     case PS_AST_WHILE:
-        return ps_ast_free_while(node);
+        return ps_ast_free_while((ps_ast_while *)node);
     case PS_AST_REPEAT:
-        return ps_ast_free_repeat(node);
+        return ps_ast_free_repeat((ps_ast_repeat *)node);
     case PS_AST_FOR:
-        return ps_ast_free_for(node);
+        return ps_ast_free_for((ps_ast_for *)node);
     case PS_AST_UNARY_OPERATION:
-        return ps_ast_free_unary_operation(node);
+        return ps_ast_free_unary_operation((ps_ast_unary_operation *)node);
     case PS_AST_BINARY_OPERATION:
-        return ps_ast_free_binary_operation(node);
+        return ps_ast_free_binary_operation((ps_ast_binary_operation *)node);
     case PS_AST_VALUE:
-        return ps_ast_free_value(node);
+        return ps_ast_free_value((ps_ast_value *)node);
     case PS_AST_PROCEDURE_CALL:
     case PS_AST_FUNCTION_CALL:
-        return ps_ast_free_call(node);
+        return ps_ast_free_call((ps_ast_call *)node);
     case PS_AST_VARIABLE_SIMPLE:
     case PS_AST_LVALUE_SIMPLE:
-        return ps_ast_free_variable_simple(node);
+        return ps_ast_free_variable_simple((ps_ast_variable_simple *)node);
     case PS_AST_VARIABLE_ARRAY:
     case PS_AST_LVALUE_ARRAY:
-        return ps_ast_free_variable_array(node);
+        return ps_ast_free_variable_array((ps_ast_variable_array *)node);
+    case PS_AST_ARG_EXPR:
+    case PS_AST_ARG_VAR_BY_VAL:
+    case PS_AST_ARG_VAR_BY_REF:
+        return ps_ast_free_argument((ps_ast_argument *)node);
     }
 }
 
@@ -92,9 +99,8 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_node_ki
     return block;
 }
 
-ps_ast_node *ps_ast_free_block(ps_ast_node *node)
+ps_ast_block *ps_ast_free_block(ps_ast_block *block)
 {
-    ps_ast_block *block = (ps_ast_block *)node;
     if (block->signature != NULL)
         ps_signature_free(block->signature);
     if (block->symbols != NULL)
@@ -104,7 +110,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_node *node)
     for (size_t i = 0; i < block->n_executables; i++)
         block->executables[i] = ps_ast_free_node(block->executables[i]);
     ps_memory_free(PS_MEMORY_AST, block->executables);
-    ps_memory_free(PS_MEMORY_AST, node);
+    ps_memory_free(PS_MEMORY_AST, block);
     return NULL;
 }
 
