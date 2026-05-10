@@ -226,7 +226,12 @@ void ps_ast_debug_node(ps_ast_node *node)
     case PS_AST_LVALUE_ARRAY:
         ps_ast_debug_variable_array(node);
         break;
-        // default:
-        //     ps_ast_debug_line("Error: unknown AST node kind %d\n", node->kind);
+    case PS_AST_ARG_EXPR:
+    case PS_AST_ARG_VAR_BY_VAL:
+    case PS_AST_ARG_VAR_BY_REF:
+        ps_ast_debug_argument(node);
+        break;
+    default:
+        ps_ast_debug_line("Error: unknown AST node kind %d\n", node->kind);
     }
 }

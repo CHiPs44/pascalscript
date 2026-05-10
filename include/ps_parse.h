@@ -68,7 +68,7 @@ extern "C"
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __PARSE__;                                                                                    \
-    if (compiler->debug >= DEBUG_TRACE)                                                                                \
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                                \
     {                                                                                                                  \
         fprintf(stderr, "%*cBEGIN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', visit, \
                 __PLUS__);                                                                                             \
@@ -77,7 +77,7 @@ extern "C"
 
 #define PARSE_END(__PLUS__)                                                                                            \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cEND\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',      \
                     visit, __PLUS__);                                                                                  \
@@ -90,7 +90,7 @@ extern "C"
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
             return false;                                                                                              \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     "", "");                                                                                           \
@@ -101,7 +101,7 @@ extern "C"
 #define EXPECT_TOKEN(__PS_TOKEN_TYPE__)                                                                                \
     if (!ps_parser_expect_token_type(compiler->parser, __PS_TOKEN_TYPE__))                                             \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, MODE_EXEC ? '*' : ' ',            \
                     "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
@@ -115,7 +115,7 @@ extern "C"
 #define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
     if (!ps_lexer_read_token(lexer))                                                                                   \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     "", "");                                                                                           \
@@ -127,7 +127,7 @@ extern "C"
 #define EXPECT_TOKEN_OR_CLEANUP(__PS_TOKEN_TYPE__)                                                                     \
     if (!ps_parser_expect_token_type(compiler->parser, __PS_TOKEN_TYPE__))                                             \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cTOKEN\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, MODE_EXEC ? '*' : ' ',            \
                     "EXPECTED", ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                               \
@@ -142,7 +142,7 @@ extern "C"
 
 #define RETURN_ERROR(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cRETURN\t%-32s %-8d ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, __PS_ERROR__);                                                                              \
@@ -153,7 +153,7 @@ extern "C"
 
 #define GOTO_CLEANUP(__PS_ERROR__)                                                                                     \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cRETURN\t%-32s %-8d ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, __PS_ERROR__);                                                                              \
@@ -165,7 +165,7 @@ extern "C"
 
 #define TRACE_ERROR(__PLUS__)                                                                                          \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cERROR\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, __PLUS__);                                                                                  \
@@ -179,7 +179,7 @@ extern "C"
         TRACE_ERROR("CURSOR!");
 
 #define SAVE_CURSOR_OR_CLEANUP(__LINE__, __COLUMN__)                                                                   \
-    if (compiler->debug >= DEBUG_TRACE)                                                                                \
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                                \
     {                                                                                                                  \
         fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
                 visit, "SAVE", lexer->buffer->current_line, lexer->buffer->current_column);                            \
@@ -187,7 +187,7 @@ extern "C"
     }                                                                                                                  \
     if (!ps_lexer_get_cursor(lexer, &__LINE__, &__COLUMN__))                                                           \
     {                                                                                                                  \
-        if (compiler->debug >= DEBUG_TRACE)                                                                            \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                            \
         {                                                                                                              \
             fprintf(stderr, "%*cERROR\t%-32s %-32s ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ',    \
                     visit, "");                                                                                        \
@@ -197,7 +197,7 @@ extern "C"
     }
 
 #define RESTORE_CURSOR(__LINE__, __COLUMN__)                                                                           \
-    if (compiler->debug >= DEBUG_TRACE)                                                                                \
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                                \
     {                                                                                                                  \
         fprintf(stderr, "%*cCURSOR\t%-32s %-32s %d %d ", (compiler->level - 1) * 8 - 1, mode == MODE_EXEC ? '*' : ' ', \
                 visit, "RESTORE", __LINE__, __COLUMN__);                                                               \
@@ -207,7 +207,7 @@ extern "C"
         TRACE_ERROR("CURSOR!");
 
 #define TRACE_CURSOR                                                                                                   \
-    if (compiler->debug >= DEBUG_TRACE)                                                                                \
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                                \
     {                                                                                                                  \
         uint16_t line = 0;                                                                                             \
         uint16_t column = 0;                                                                                           \

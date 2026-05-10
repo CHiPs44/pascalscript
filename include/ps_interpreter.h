@@ -43,7 +43,6 @@ extern "C"
 
     typedef struct s_ps_interpreter
     {
-        ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)              */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */

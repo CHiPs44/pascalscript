@@ -71,6 +71,14 @@ extern "C"
         PS_AST_NODE_COMMON
     } ps_ast_node;
 
+    /** @brief List of statements, single instruction or instructions between BEGIN and END */
+    typedef struct s_ps_ast_statement_list
+    {
+        PS_AST_NODE_COMMON
+        size_t count;             /** @brief Number of statements  */
+        ps_ast_node **statements; /** @brief NULL if no statements */
+    } ps_ast_statement_list;
+
     /** @brief Block is a program, procedure, function or unit */
     /** @details Units may be separated as they are special cases with interface and implementation */
     typedef struct s_ps_ast_block
@@ -84,14 +92,6 @@ extern "C"
         ps_formal_signature *signature;        /** @brief Only for procedures and functions, empty otherwise        */
         ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                        */
     } ps_ast_block;
-
-    /** @brief List of statements, single instruction or instructions between BEGIN and END */
-    typedef struct s_ps_ast_statement_list
-    {
-        PS_AST_NODE_COMMON
-        size_t count;             /** @brief Number of statements  */
-        ps_ast_node **statements; /** @brief NULL if no statements */
-    } ps_ast_statement_list;
 
     /** @brief IF statement */
     typedef struct s_ps_ast_if
@@ -129,6 +129,13 @@ extern "C"
         ps_ast_statement_list *body; /** @brief Statements to execute for each value of loop variable */
     } ps_ast_for;
 
+    /** @brief Argument for procedure or function call */
+    typedef struct s_ps_ast_argument
+    {
+        PS_AST_NODE_COMMON
+        ps_ast_node *arg; /** @brief expression (by value) or variable (by value or by reference)*/
+    } ps_ast_argument;
+
     /** @brief Procedure (group STATEMENT) or function (group EXPRESSION) call */
     typedef struct s_ps_ast_call
     {
@@ -137,13 +144,6 @@ extern "C"
         size_t n_args;          /** @brief number of arguments, 0 if no arguments */
         ps_ast_argument **args; /** @brief arguments, NULL if no arguments        */
     } ps_ast_call;
-
-    /** @brief Argument for procedure or function call */
-    typedef struct s_ps_ast_argument
-    {
-        PS_AST_NODE_COMMON
-        ps_ast_node *arg; /** @brief expression (by value) or variable (by value or by reference)*/
-    } ps_ast_argument;
 
     /** @brief Assignment statement: LVALUE := EXPRESSION / RVALUE */
     typedef struct s_ps_ast_assignment
@@ -238,22 +238,23 @@ extern "C"
     ps_ast_node *ps_ast_free_node(ps_ast_node *node);
 
     // clang-format off
-    ps_ast_block            *ps_ast_free_block              (ps_ast_block            *block             );
-    ps_ast_statement_list   *ps_ast_free_statement_list     (ps_ast_statement_list   *list              );
-    ps_ast_assignment       *ps_ast_free_assignment         (ps_ast_assignment       *assignment        );
-    ps_ast_if               *ps_ast_free_if                 (ps_ast_if               *if_statement      );
-    ps_ast_while            *ps_ast_free_while              (ps_ast_while            *while_statement   );
-    ps_ast_repeat           *ps_ast_free_repeat             (ps_ast_repeat           *repeat_statement  );
-    ps_ast_for              *ps_ast_free_for                (ps_ast_for              *for_statement     );
-    ps_ast_call             *ps_ast_free_procedure_call     (ps_ast_call             *call              );
-    ps_ast_unary_operation  *ps_ast_free_unary_operation    (ps_ast_unary_operation  *operation         );
-    ps_ast_binary_operation *ps_ast_free_binary_operation   (ps_ast_binary_operation *operation         );
-    ps_ast_call             *ps_ast_free_function_call      (ps_ast_call             *call              );
-    ps_ast_value            *ps_ast_free_value              (ps_ast_value            *value             );
-    ps_ast_variable_simple  *ps_ast_free_variable_simple    (ps_ast_variable_simple  *variable          );
-    ps_ast_variable_array   *ps_ast_free_variable_array     (ps_ast_variable_array   *variable          );
-    ps_ast_variable_simple  *ps_ast_free_lvalue_simple      (ps_ast_variable_simple  *lvalue            );
-    ps_ast_variable_array   *ps_ast_free_lvalue_array       (ps_ast_variable_array   *lvalue            );
+    ps_ast_node *ps_ast_free_block              (ps_ast_block            *block             );
+    ps_ast_node *ps_ast_free_statement_list     (ps_ast_statement_list   *list              );
+    ps_ast_node *ps_ast_free_assignment         (ps_ast_assignment       *assignment        );
+    ps_ast_node *ps_ast_free_if                 (ps_ast_if               *if_statement      );
+    ps_ast_node *ps_ast_free_while              (ps_ast_while            *while_statement   );
+    ps_ast_node *ps_ast_free_repeat             (ps_ast_repeat           *repeat_statement  );
+    ps_ast_node *ps_ast_free_for                (ps_ast_for              *for_statement     );
+    ps_ast_node *ps_ast_free_call               (ps_ast_call             *call              );
+    ps_ast_node *ps_ast_free_unary_operation    (ps_ast_unary_operation  *operation         );
+    ps_ast_node *ps_ast_free_binary_operation   (ps_ast_binary_operation *operation         );
+    ps_ast_node *ps_ast_free_function_call      (ps_ast_call             *call              );
+    ps_ast_node *ps_ast_free_value              (ps_ast_value            *value             );
+    ps_ast_node *ps_ast_free_variable_simple    (ps_ast_variable_simple  *variable          );
+    ps_ast_node *ps_ast_free_variable_array     (ps_ast_variable_array   *variable          );
+    ps_ast_node *ps_ast_free_lvalue_simple      (ps_ast_variable_simple  *lvalue            );
+    ps_ast_node *ps_ast_free_lvalue_array       (ps_ast_variable_array   *lvalue            );
+    ps_ast_node *ps_ast_free_argument           (ps_ast_argument         *argument          );
     // clang-format on
 
 #ifdef __cplusplus

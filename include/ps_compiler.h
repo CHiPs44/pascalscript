@@ -29,9 +29,9 @@ extern "C"
 
     typedef enum e_ps_compiler_debug
     {
-        DEBUG_NONE,    /** @brief No debug */
-        DEBUG_TRACE,   /** @brief Output messages to stderr */
-        DEBUG_VERBOSE, /** @brief More traces */
+        COMPILER_DEBUG_NONE,    /** @brief No debug */
+        COMPILER_DEBUG_TRACE,   /** @brief Output messages to stderr */
+        COMPILER_DEBUG_VERBOSE, /** @brief More traces */
     } ps_compiler_debug;
 
     typedef struct s_ps_compiler

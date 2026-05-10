@@ -148,7 +148,7 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t dimension
     for (int i = dimensions - 1; i >= 0; i -= 1)
     {
         // Copy given index to a local variable of the same type as subrange definition
-        ps_value index = {.allocated = false, .type = subranges[i]->value->data.t, .data.v = NULL};
+        ps_value index = {.allocated = false, .type = subranges[i], .data.v = NULL};
         ps_error error = ps_value_copy(indexes[i], &index, true);
         if (error != PS_ERROR_NONE)
             return error;

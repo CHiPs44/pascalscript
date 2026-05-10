@@ -105,6 +105,8 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) 
 bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name, ps_symbol_table *symbols,
                                       size_t n_values, ps_value *values)
 {
+    (void)n_values;
+    (void)values;
     assert(NULL != interpreter);
     if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
         return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
