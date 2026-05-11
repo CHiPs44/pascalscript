@@ -109,8 +109,8 @@ extern "C"
     /** @brief Load source code from file */
     bool ps_compiler_load_file(ps_compiler *compiler, const char *filename);
 
-    /** @brief Run the compiler on the loaded source code, with option to execute or just parse */
-    bool ps_compiler_run(ps_compiler *compiler, bool exec);
+    /** @brief Run the compiler on the loaded source code */
+    bool ps_compiler_run(ps_compiler *compiler);
 
 #ifdef __cplusplus
 }
