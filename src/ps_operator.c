@@ -14,6 +14,7 @@
 #include "ps_operator.h"
 #include "ps_string.h"
 #include "ps_system.h"
+#include "ps_token.h"
 #include "ps_value.h"
 
 /**

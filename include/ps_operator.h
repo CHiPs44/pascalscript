@@ -11,6 +11,7 @@
 
 #include "ps_interpreter.h"
 #include "ps_value.h"
+#include "ps_token.h"
 
 #ifdef __cplusplus
 extern "C"

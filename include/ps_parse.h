@@ -34,15 +34,15 @@ extern "C"
     bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
     /* src/ps_parse_expression.c */
-    bool ps_parse_and_expression(ps_compiler *compiler, ps_value *result);
     bool ps_parse_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_factor(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
-    bool ps_parse_or_expression(ps_compiler *compiler, ps_value *result);
     bool ps_parse_relational_expression(ps_compiler *compiler, ps_value *result);
+    bool ps_parse_and_expression(ps_compiler *compiler, ps_value *result);
+    bool ps_parse_or_expression(ps_compiler *compiler, ps_value *result);
     bool ps_parse_simple_expression(ps_compiler *compiler, ps_value *result);
     bool ps_parse_term(ps_compiler *compiler, ps_value *result);
+    bool ps_parse_factor(ps_compiler *compiler, ps_value *result);
     bool ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
+    bool ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
 
     /* src/ps_parse_statement.c */
     bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler);
@@ -129,7 +129,7 @@ extern "C"
                     ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
-        ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                \
+        ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
         goto cleanup;                                                                                                  \
     }
 
@@ -143,7 +143,7 @@ extern "C"
             fprintf(stderr, "RETURN\t%-32s %-8d ", visit, __PS_ERROR__);                                               \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        return ps_compiler_return_false(compiler, __PS_ERROR__);                                                 \
+        return ps_compiler_return_false(compiler, __PS_ERROR__);                                                       \
     }
 
 #define GOTO_CLEANUP(__PS_ERROR__)                                                                                     \

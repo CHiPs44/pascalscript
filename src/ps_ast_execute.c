@@ -4,10 +4,12 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <stdio.h>
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_ast_execute.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
 #include "ps_operator.h"
@@ -38,30 +40,6 @@ bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
     return true;
 }
 
-bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
-{
-    if (!ps_ast_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
-        return false;
-    ps_ast_debug_line("PROGRAM %s;", program->name);
-    return ps_ast_run_block(interpreter, program);
-}
-
-bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
-{
-    if (!ps_ast_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
-        return false;
-    ps_ast_debug_line("PROCEDURE %s;", procedure->name);
-    return ps_ast_run_block(interpreter, procedure);
-}
-
-bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
-{
-    if (!ps_ast_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
-        return false;
-    ps_ast_debug_line("FUNCTION %s;", function->name);
-    return ps_ast_run_block(interpreter, function);
-}
-
 bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_block *block)
 {
     bool result = false;
@@ -85,6 +63,30 @@ cleanup:
     // Handle variable release
     ps_memory_free(PS_MEMORY_VALUE, values);
     return result;
+}
+
+bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
+{
+    if (!ps_ast_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
+        return false;
+    ps_ast_debug_line("PROGRAM %s;", program->name);
+    return ps_ast_run_block(interpreter, program);
+}
+
+bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
+{
+    if (!ps_ast_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
+        return false;
+    ps_ast_debug_line("PROCEDURE %s;", procedure->name);
+    return ps_ast_run_block(interpreter, procedure);
+}
+
+bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
+{
+    if (!ps_ast_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
+        return false;
+    ps_ast_debug_line("FUNCTION %s;", function->name);
+    return ps_ast_run_block(interpreter, function);
 }
 
 bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list)
@@ -127,19 +129,19 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
     ps_ast_debug_line("ASSIGNMENT:");
-    ps_ast_value value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    bool result = ps_ast_eval_expression(interpreter, assignment->expression, &value);
-    if (!result)
+    ps_ast_value value_node = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false;
-    ps_ast_debug_line(" - Expression value: %s", ps_value_to_string(&value));
+    ps_ast_debug_line(" - Expression value: %s", ps_value_get_display_string(&value_node.value, 0, 0));
     switch (assignment->lvalue->kind)
     {
     case PS_AST_RVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
-        ps_error error = ps_copy_value(&value.value, variable_simple->variable->value, interpreter->range_check);
+        ps_error error = ps_value_copy(&value_node.value, variable_simple->variable->value, interpreter->range_check);
         if (error != PS_ERROR_NONE)
             return false;
+        break;
     case PS_AST_RVALUE_ARRAY:
         ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
         ps_ast_debug_line(" - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
@@ -160,7 +162,7 @@ bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement)
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value))
         return false;
-    ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
+    ps_ast_debug_line(" - Condition value: %s", ps_value_get_display_string(&condition_value.value, 0, 0));
     if (condition_value.value.type != &ps_system_boolean)
         return false;
     if (condition_value.value.data.b)
@@ -186,7 +188,7 @@ bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement
         bool result = ps_ast_eval_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
-        ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
+        ps_ast_debug_line(" - Condition value: %s", ps_value_get_display_string(&condition_value.value, 0, 0));
         if (condition_value.value.type != &ps_system_boolean)
             return false;
         if (!condition_value.value.data.b)
@@ -207,11 +209,11 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statem
     do
     {
         ps_ast_debug_line(" - Body");
-        if (!ps_ast_run_statement_list(interpreter, &repeat_statement->body))
+        if (!ps_ast_run_statement_list(interpreter, repeat_statement->body))
             return false;
         if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
-        ps_ast_debug_line(" - Condition value: %s", ps_value_to_string(&condition_value));
+        ps_ast_debug_line(" - Condition value: %s", ps_value_get_display_string(&condition_value.value, 0, 0));
         if (condition_value.value.type != &ps_system_boolean)
             return false;
     } while (!condition_value.value.data.b);
@@ -223,23 +225,23 @@ bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
     assert(for_statement != NULL);
     assert(for_statement->kind == PS_AST_FOR);
     ps_ast_debug_line("FOR statement");
-    ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)for_statement->variable;
+    ps_ast_variable_simple *variable_simple = for_statement->variable;
     ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
     ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     bool result = ps_ast_eval_expression(interpreter, for_statement->start, &start_value);
     if (!result)
         return false;
-    ps_ast_debug_line(" - Start value: %s", ps_value_to_string(&start_value));
+    ps_ast_debug_line(" - Start value: %s", ps_value_get_display_string(&start_value.value, 0, 0));
     ps_ast_value end_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     result = ps_ast_eval_expression(interpreter, for_statement->end, &end_value);
     if (!result)
         return false;
-    ps_ast_debug_line(" - End value: %s", ps_value_to_string(&end_value));
+    ps_ast_debug_line(" - End value: %s", ps_value_get_display_string(&end_value.value, 0, 0));
     bool loop = true;
     while (loop)
     {
         ps_ast_debug_line(" - Body: %d statements", for_statement->body->count);
-        if (!ps_ast_run_statement_list(interpreter, &for_statement->body))
+        if (!ps_ast_run_statement_list(interpreter, for_statement->body))
             return false;
         if (for_statement->step > 0)
         {
@@ -292,9 +294,9 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
     switch (expression->kind)
     {
     case PS_AST_RVALUE_CONST:
-        ps_ast_value *value = (ps_ast_value *)expression;
-        ps_ast_debug_line(" - Value: %s", ps_value_to_string(&value->value));
-        if (!ps_value_copy(&value->value, &result->value, interpreter->range_check))
+        ps_ast_value *rvalue = (ps_ast_value *)expression;
+        ps_ast_debug_line(" - Value: %s", ps_value_get_display_string(&rvalue->value, 0, 0));
+        if (!ps_value_copy(&rvalue->value, &result->value, interpreter->range_check))
             return false;
         break;
     case PS_AST_RVALUE_SIMPLE:
@@ -310,26 +312,35 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         return false;
     case PS_AST_UNARY_OPERATION:
-        ps_ast_value value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+        ps_ast_value operand = {.group = PS_AST_EXPRESSION,
+                                .kind = PS_AST_RVALUE_CONST,
+                                .value.allocated = false,
+                                .value.type = &ps_system_none,
+                                .value.data = {0}};
         ps_ast_unary_operation *unary_operation = (ps_ast_unary_operation *)expression;
         ps_ast_debug_line(" - Unary operation: %s", ps_operator_unary_get_name(unary_operation->operator));
         // first evaluate operand, then apply operator to it
-        if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &value))
+        if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand))
             return false;
-        if (!ps_operator_unary_eval(interpreter, &value, &result->value, unary_operation->operator))
+        if (!ps_operator_unary_eval(interpreter, &operand.value, &result->value, unary_operation->operator))
             return false;
         break;
     case PS_AST_BINARY_OPERATION:
         ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)expression;
         ps_ast_debug_line(" - Binary operation: %s", ps_operator_binary_get_name(binary_operation->operator));
         // first evaluate operands, then apply operator to them
-        ps_ast_value left = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+        ps_ast_value left = {.group = PS_AST_EXPRESSION,
+                             .kind = PS_AST_RVALUE_CONST,
+                             .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->left, &left))
             return false;
-        ps_ast_value right = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+        ps_ast_value right = {.group = PS_AST_EXPRESSION,
+                              .kind = PS_AST_RVALUE_CONST,
+                              .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
             return false;
-        if (!ps_operator_eval_binary(interpreter, &left, &right, &result->value, binary_operation->operator))
+        if (!ps_operator_eval_binary(interpreter, (const ps_value *)&left.value, (const ps_value *)&right.value,
+                                     &result->value, binary_operation->operator))
             return false;
         break;
     case PS_AST_FUNCTION_CALL:
@@ -341,7 +352,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
         break;
     default:
         ps_interpreter_set_message(interpreter, "Unexpected expression kind %s (%d)\n",
-                                   ps_ast_get_kind_name(expression->kind), expression->kind);
+                                   ps_ast_node_get_kind_name(expression->kind), expression->kind);
         return false;
     }
 

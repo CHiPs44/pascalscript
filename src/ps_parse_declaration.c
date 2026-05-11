@@ -4,11 +4,13 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_parse_declaration.h"
+#include "ps_compiler.h"
 #include "ps_executable.h"
 #include "ps_memory.h"
+#include "ps_parse.h"
 #include "ps_system.h"
 #include "ps_token.h"
-#include "ps_parse.h"
 
 static bool ps_parse_program_parameters(ps_compiler *compiler);
 /**
@@ -290,8 +292,7 @@ bool ps_parse_type(ps_compiler *compiler)
 /**
  * Parse variable identifier list with commas
  */
-static bool ps_parse_var_identifier_list(ps_compiler *compiler,
-                                         ps_identifier *identifier, int *var_count)
+static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *identifier, int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
 

@@ -18,7 +18,6 @@
 #include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_value.h"
-#include "ps_visit.h"
 
 ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check)
 {
@@ -243,55 +242,4 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_v
         ps_value_type_get_name(from->type->value->data.t->type), ps_value_type_get_name(ps_value_get_base(from)),
         ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
     return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
-}
-
-bool ps_interpreter_load_string(ps_interpreter *interpreter, char *source, size_t length)
-{
-    assert(NULL != interpreter);
-    assert(NULL != source);
-    interpreter->error = PS_ERROR_NONE;
-    ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-    return ps_buffer_load_string(lexer->buffer, source, length);
-}
-
-bool ps_interpreter_load_file(ps_interpreter *interpreter, const char *filename)
-{
-    assert(NULL != interpreter);
-    interpreter->error = PS_ERROR_NONE;
-    ps_lexer *lexer = ps_parser_get_lexer(interpreter->parser);
-    return ps_buffer_load_file(lexer->buffer, filename);
-}
-
-bool ps_interpreter_run(ps_interpreter *interpreter, bool exec)
-{
-    assert(NULL != interpreter);
-    const ps_parser *parser = interpreter->parser;
-    ps_lexer *lexer = ps_parser_get_lexer(parser);
-    ps_lexer_reset(lexer);
-
-    memset(interpreter->message, 0, sizeof(interpreter->message));
-    if (!ps_buffer_read_next_char(lexer->buffer))
-    {
-        fprintf(stderr, "ERROR: %s\n", ps_lexer_get_debug_value(lexer));
-        return false;
-    }
-    if (!ps_visit_start(interpreter, exec ? MODE_EXEC : MODE_SKIP))
-    {
-        // Display up to 3 lines around the error
-        uint16_t start = lexer->buffer->current_line > 1 ? lexer->buffer->current_line - 2 : 0;
-        int margin = ps_buffer_dump(stderr, lexer->buffer, start, 4);
-        // Try to align the '^' under the right column
-        fprintf(stderr, "%*s\n", margin + lexer->buffer->current_column, "^");
-        // Make line and column 1-based
-        fprintf(stderr, "ERROR line %d column %d: interpreter=%d %s parser=%d %s lexer=%d %s\n",
-                lexer->buffer->current_line + 1, lexer->buffer->current_column + 1, interpreter->error,
-                ps_error_get_message(interpreter->error), parser->error, ps_error_get_message(parser->error),
-                lexer->error, ps_error_get_message(lexer->error));
-        if (interpreter->message[0] != '\0')
-            fprintf(stderr, "ERROR %s\n", interpreter->message);
-        ps_token_debug(stderr, "TOKEN: ", &lexer->current_token);
-        return false;
-    }
-
-    return true;
 }

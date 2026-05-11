@@ -19,13 +19,13 @@ extern "C"
     /** @brief Check if an AST node has a specific kind */
     bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind);
     /** @brief Run a Pascal program */
-    bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_node *program);
+    bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program);
     /** @brief Run a Pascal procedure */
-    bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_node *procedure);
+    bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure);
     /** @brief Run a Pascal function */
-    bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_node *function);
+    bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function);
     /** @brief Run a Pascal block */
-    bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_node *node);
+    bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_block *block);
     /** @brief Run a list of Pascal statements */
     bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list);
     /** @brief Run a Pascal statement */
