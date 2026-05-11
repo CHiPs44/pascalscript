@@ -12,7 +12,6 @@
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
-#include "ps_parser.h"
 #include "ps_procedures.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -29,6 +28,7 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
         interpreter->environments[i] = NULL;
     interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
     interpreter->error = PS_ERROR_NONE;
+    interpreter->message[0] = '\0';
     interpreter->debug = DEBUG_NONE;
     interpreter->range_check = range_check;
     interpreter->bool_eval = bool_eval;
@@ -41,14 +41,14 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
     ps_identifier system = "SYSTEM";
     interpreter->environments[0] =
         ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
-    if (interpreter->environments[0] == NULL)
+    if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] == NULL)
         return ps_interpreter_free(interpreter);
     // Initialize system environment
-    if (!ps_system_init(interpreter->environments[0]))
+    if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
         return ps_interpreter_free(interpreter);
-    if (!ps_procedures_init(interpreter->environments[0]))
+    if (!ps_procedures_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
         return ps_interpreter_free(interpreter);
-    if (!ps_functions_init(interpreter->environments[0]))
+    if (!ps_functions_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
         return ps_interpreter_free(interpreter);
     return interpreter;
 }
@@ -59,7 +59,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
-        ps_system_done(interpreter->environments[0]);
+        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
             if (interpreter->environments[i] != NULL)

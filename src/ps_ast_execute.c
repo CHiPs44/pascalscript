@@ -18,34 +18,12 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_group)
-{
-    if (node->group != expected_group)
-    {
-        ps_ast_debug_line("Error: expected AST node group %s but got %s\n", ps_ast_node_get_group_name(expected_group),
-                          ps_ast_node_get_group_name(node->group));
-        return false;
-    }
-    return true;
-}
-
-bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
-{
-    if (node->kind != expected_kind)
-    {
-        ps_ast_debug_line("Error: expected AST node kind %s but got %s\n", ps_ast_node_get_kind_name(expected_kind),
-                          ps_ast_node_get_kind_name(node->kind));
-        return false;
-    }
-    return true;
-}
-
 bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_block *block)
 {
     bool result = false;
-    if (!ps_ast_check_group((ps_ast_node *)block, PS_AST_BLOCK))
+    if (!ps_ast_node_check_group((ps_ast_node *)block, PS_AST_BLOCK))
         return false;
-    ps_ast_debug_line("%s %s;", ps_ast_node_get_kind_name(block->kind), block->name);
+    ps_ast_debug_line("BLOCK kind=%s name=%s", ps_ast_node_get_kind_name(block->kind), block->name);
     // Handle variable and parameters allocation and initialization
     size_t n_values = block->n_vars + (block->signature != NULL ? block->signature->parameter_count : 0);
     ps_value *values = ps_memory_calloc(PS_MEMORY_VALUE, n_values, sizeof(ps_value));
@@ -67,7 +45,7 @@ cleanup:
 
 bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
 {
-    if (!ps_ast_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
+    if (!ps_ast_node_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
         return false;
     ps_ast_debug_line("PROGRAM %s;", program->name);
     return ps_ast_run_block(interpreter, program);
@@ -75,7 +53,7 @@ bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
 
 bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
 {
-    if (!ps_ast_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
+    if (!ps_ast_node_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return false;
     ps_ast_debug_line("PROCEDURE %s;", procedure->name);
     return ps_ast_run_block(interpreter, procedure);
@@ -83,7 +61,7 @@ bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
 
 bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
 {
-    if (!ps_ast_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
+    if (!ps_ast_node_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
         return false;
     ps_ast_debug_line("FUNCTION %s;", function->name);
     return ps_ast_run_block(interpreter, function);
@@ -135,14 +113,14 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     ps_ast_debug_line(" - Expression value: %s", ps_value_get_display_string(&value_node.value, 0, 0));
     switch (assignment->lvalue->kind)
     {
-    case PS_AST_RVALUE_SIMPLE:
+    case PS_AST_LVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
         ps_error error = ps_value_copy(&value_node.value, variable_simple->variable->value, interpreter->range_check);
         if (error != PS_ERROR_NONE)
             return false;
         break;
-    case PS_AST_RVALUE_ARRAY:
+    case PS_AST_LVALUE_ARRAY:
         ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
         ps_ast_debug_line(" - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "Array assignment not implemented yet");
@@ -288,7 +266,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
     assert(expression != NULL);
     assert(expression->group == PS_AST_EXPRESSION);
     assert(result != NULL);
-    if (!ps_ast_check_group(expression, PS_AST_EXPRESSION))
+    if (!ps_ast_node_check_group(expression, PS_AST_EXPRESSION))
         return false;
     ps_ast_debug_line("EXPRESSION @%p", (void *)expression);
     switch (expression->kind)
@@ -296,13 +274,13 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression
     case PS_AST_RVALUE_CONST:
         ps_ast_value *rvalue = (ps_ast_value *)expression;
         ps_ast_debug_line(" - Value: %s", ps_value_get_display_string(&rvalue->value, 0, 0));
-        if (!ps_value_copy(&rvalue->value, &result->value, interpreter->range_check))
+        if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
             return false;
         break;
     case PS_AST_RVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)expression;
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
-        if (!ps_value_copy(variable_simple->variable->value, &result->value, interpreter->range_check))
+        if (!ps_interpreter_copy_value(interpreter, variable_simple->variable->value, &result->value))
             return false;
         break;
     case PS_AST_RVALUE_ARRAY:

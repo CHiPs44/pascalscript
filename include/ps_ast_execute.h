@@ -14,10 +14,6 @@ extern "C"
 {
 #endif
 
-    /** @brief Check if an AST node belongs to a specific group */
-    bool ps_ast_check_group(const ps_ast_node *node, ps_ast_node_group expected_group);
-    /** @brief Check if an AST node has a specific kind */
-    bool ps_ast_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind);
     /** @brief Run a Pascal program */
     bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program);
     /** @brief Run a Pascal procedure */

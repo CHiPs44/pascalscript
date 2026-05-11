@@ -83,13 +83,13 @@ extern "C"
     /** @details Units may be separated as they are special cases with interface and implementation */
     typedef struct s_ps_ast_block
     {
-        PS_AST_NODE_COMMON ps_identifier name; /** @brief Every block has a name */
+        PS_AST_NODE_COMMON ps_identifier name; /** @brief Every block has a name                                    */
         size_t n_vars;                         /** @brief Number of variables to allocate at startup                */
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions     */
         size_t n_executables;                  /** @brief exactly 1 for procedure and function, 0 or more otherwise */
         ps_ast_node **executables;             /** @brief declarations of procedures and functions                  */
-        ps_ast_statement_list *statement_list; /** @brief Statements in this block */
-        ps_formal_signature *signature;        /** @brief Only for procedures and functions, empty otherwise        */
+        ps_ast_statement_list *statement_list; /** @brief Statements for this block                                 */
+        ps_formal_signature *signature;        /** @brief Only for procedures and functions, NULL otherwise         */
         ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                        */
     } ps_ast_block;
 
@@ -212,12 +212,17 @@ extern "C"
     #define PS_AST_NODE_VARIABLE_ARRAY_SIZE    sizeof(ps_ast_variable_array)
     // clang-format on
 
+    /** @brief Check if an AST node belongs to a specific group */
+    bool ps_ast_node_check_group(const ps_ast_node *node, ps_ast_node_group expected_group);
+    /** @brief Check if an AST node has a specific kind */
+    bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind);
+
     /** @brief Create a new AST node of the given group & kind */
     ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column,
                                     size_t size);
 
     // clang-format off
-    ps_ast_block                *ps_ast_create_block            (uint16_t line, uint16_t column, ps_ast_node_kind kind, char *name                                                                                                                  );
+    ps_ast_block                *ps_ast_create_block            (uint16_t line, uint16_t column, ps_ast_node_kind kind, const char *name                                                                                                            );
     ps_ast_statement_list       *ps_ast_create_statement_list   (uint16_t line, uint16_t column, size_t count                                                                                                                                       );
     ps_ast_assignment           *ps_ast_create_assignment       (uint16_t line, uint16_t column, ps_ast_node *lvalue,ps_ast_node *expression                                                                                                        );
     ps_ast_if                   *ps_ast_create_if               (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *then_branch, ps_ast_statement_list *else_branch                                                     );

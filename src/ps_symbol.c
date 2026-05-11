@@ -106,8 +106,8 @@ char *ps_symbol_dump_value(const ps_symbol *symbol)
         PS_IDENTIFIER_LEN + 1,
         symbol == NULL ? "NULL!" : symbol->name,
         symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
-        symbol == NULL ? "NULL!" : symbol->value->type->name,
-        symbol == NULL ? "NULL!" : value
+        symbol == NULL || symbol->value == NULL || symbol->value->type == NULL ? "NULL!" : symbol->value->type->name,
+        symbol == NULL || symbol->value == NULL ? "NULL!" : value
     );
     // clang-format on
     return buffer;

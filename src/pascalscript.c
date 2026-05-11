@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "ps_ast_debug.h"
 #include "ps_ast_test.h"
 
 int main(int argc, char *argv[])
@@ -13,7 +14,13 @@ int main(int argc, char *argv[])
     (void)argc; // silence unused variable warning
     (void)argv; // silence unused variable warning
 
-    ps_ast_test_minimal();
+    // ps_ast_debug_line("****************************************************************");
+    // ps_ast_test_minimal();
+    ps_ast_debug_line("****************************************************************");
+    ps_ast_test_assignment();
+    ps_ast_debug_line("****************************************************************");
+    // ps_ast_test_hello();
+    // ps_ast_debug_line("****************************************************************");
 
     return 0;
 }
@@ -163,8 +170,8 @@ int main(int argc, char *argv[])
 //     if (!ps_interpreter_load_file(interpreter, source_file))
 //     {
 //         fprintf(stderr, "File %s not loaded!\n", source_file);
-//         fprintf(stderr, "Error %d %s\n", interpreter->error, ps_error_get_message(interpreter->error)); // NOSONAR false positive
-//         return false;
+//         fprintf(stderr, "Error %d %s\n", interpreter->error, ps_error_get_message(interpreter->error)); // NOSONAR
+//         false positive return false;
 //     }
 //     if (verbose)
 //         fprintf(stderr, "Loaded %s!\n", source_file);
@@ -194,69 +201,69 @@ int main(int argc, char *argv[])
 
 // int main(int argc, char *argv[])
 // {
-    // // Paths & file names
-    // char *current_path = NULL;
-    // char *program_file = NULL;
-    // char source_file[256] = {0};
+// // Paths & file names
+// char *current_path = NULL;
+// char *program_file = NULL;
+// char source_file[256] = {0};
 
-    // int arg = get_options(argc, argv);
+// int arg = get_options(argc, argv);
 
-    // // Force when debugging as I didn't find how to pass command line options
-    // // trace = true;
-    // // debug = true;
+// // Force when debugging as I didn't find how to pass command line options
+// // trace = true;
+// // debug = true;
 
-    // current_path = getcwd(NULL, 0);
-    // if (arg + 1 < argc)
-    // {
-    //     program_file = argv[argc - 1];
-    //     snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
-    // }
-    // else
-    // {
-    //     program_file = DEBUGGER_SOURCE;
-    //     if (program_file != NULL)
-    //         snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
-    //     else
-    //         source_file[0] = '\0';
-    // }
-    // if (strlen(source_file) == 0)
-    // {
-    //     fprintf(stderr, "No file to run!\n");
-    //     usage(argv[0]);
-    //     return EXIT_FAILURE;
-    // }
+// current_path = getcwd(NULL, 0);
+// if (arg + 1 < argc)
+// {
+//     program_file = argv[argc - 1];
+//     snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
+// }
+// else
+// {
+//     program_file = DEBUGGER_SOURCE;
+//     if (program_file != NULL)
+//         snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
+//     else
+//         source_file[0] = '\0';
+// }
+// if (strlen(source_file) == 0)
+// {
+//     fprintf(stderr, "No file to run!\n");
+//     usage(argv[0]);
+//     return EXIT_FAILURE;
+// }
 
-    // /* Display banner, intepreter runtime options, current path & source file, ...  */
-    // if (verbose)
-    // {
-    //     banner(stdout);
-    //     fprintf(stdout, "Runtime options:\n");
-    //     fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
-    //     fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
-    //     fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
-    //     fprintf(stdout, "Current working directory: %s\n", current_path);
-    //     fprintf(stdout, "Source file: %s\n", source_file);
-    // }
-    // free(current_path);
-    // current_path = NULL;
+// /* Display banner, intepreter runtime options, current path & source file, ...  */
+// if (verbose)
+// {
+//     banner(stdout);
+//     fprintf(stdout, "Runtime options:\n");
+//     fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+//     fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
+//     fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
+//     fprintf(stdout, "Current working directory: %s\n", current_path);
+//     fprintf(stdout, "Source file: %s\n", source_file);
+// }
+// free(current_path);
+// current_path = NULL;
 
-    // /* Initialize interpreter */
-    // interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
-    // if (interpreter == NULL)
-    // {
-    //     fprintf(stderr, "Could not initialize interpreter!\n");
-    //     return EXIT_FAILURE;
-    // }
+// /* Initialize interpreter */
+// interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
+// if (interpreter == NULL)
+// {
+//     fprintf(stderr, "Could not initialize interpreter!\n");
+//     return EXIT_FAILURE;
+// }
 
-    // bool ok = run(source_file);
+// bool ok = run(source_file);
 
-    // /* Terminate interpreter */
-    // interpreter = ps_interpreter_free(interpreter);
+// /* Terminate interpreter */
+// interpreter = ps_interpreter_free(interpreter);
 
-    // if (memory)
-    //     ps_memory_debug(stderr);
+// if (memory)
+//     ps_memory_debug(stderr);
 
-    // return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+// return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 // }
 
 /* EOF */
