@@ -18,10 +18,10 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_run_block(ps_interpreter *interpreter, ps_ast_block *block)
+bool ps_ast_run_block(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     bool result = false;
-    if (!ps_ast_node_check_group((ps_ast_node *)block, PS_AST_BLOCK))
+    if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
         return false;
     ps_ast_debug_line("BLOCK kind=%s name=%s", ps_ast_node_get_kind_name(block->kind), block->name);
     // Handle variable and parameters allocation and initialization
@@ -43,31 +43,31 @@ cleanup:
     return result;
 }
 
-bool ps_ast_run_program(ps_interpreter *interpreter, ps_ast_block *program)
+bool ps_ast_run_program(ps_interpreter *interpreter, const ps_ast_block *program)
 {
-    if (!ps_ast_node_check_kind((ps_ast_node *)program, PS_AST_PROGRAM))
+    if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
         return false;
     ps_ast_debug_line("PROGRAM %s;", program->name);
     return ps_ast_run_block(interpreter, program);
 }
 
-bool ps_ast_run_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
+bool ps_ast_run_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
 {
-    if (!ps_ast_node_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
+    if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return false;
     ps_ast_debug_line("PROCEDURE %s;", procedure->name);
     return ps_ast_run_block(interpreter, procedure);
 }
 
-bool ps_ast_run_function(ps_interpreter *interpreter, ps_ast_block *function)
+bool ps_ast_run_function(ps_interpreter *interpreter, const ps_ast_block *function)
 {
-    if (!ps_ast_node_check_kind((ps_ast_node *)function, PS_AST_FUNCTION))
+    if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
         return false;
     ps_ast_debug_line("FUNCTION %s;", function->name);
     return ps_ast_run_block(interpreter, function);
 }
 
-bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list)
+bool ps_ast_run_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
 {
     ps_ast_debug_line("STATEMENT_LIST %zu:", statement_list->count);
     for (size_t i = 0; i < statement_list->count; i++)
@@ -79,15 +79,15 @@ bool ps_ast_run_statement_list(ps_interpreter *interpreter, ps_ast_statement_lis
     return true;
 }
 
-bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
+bool ps_ast_run_statement(ps_interpreter *interpreter, const ps_ast_node *statement)
 {
     assert(statement != NULL);
     switch (statement->kind)
     {
     case PS_AST_ASSIGNMENT:
-        return ps_ast_run_assignment(interpreter, (ps_ast_assignment *)statement);
+        return ps_ast_run_assignment(interpreter, (const ps_ast_assignment *)statement);
     case PS_AST_IF:
-        return ps_ast_run_if(interpreter, (ps_ast_if *)statement);
+        return ps_ast_run_if(interpreter, (const ps_ast_if *)statement);
     case PS_AST_WHILE:
         return ps_ast_run_while(interpreter, (ps_ast_while *)statement);
     case PS_AST_REPEAT:
@@ -102,11 +102,24 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, ps_ast_node *statement)
     }
 }
 
-bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assignment)
+bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
     ps_ast_debug_line("ASSIGNMENT:");
+    switch (assignment->lvalue->kind)
+    {
+    case PS_AST_LVALUE_SIMPLE:
+        ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
+        ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
+        break;
+    case PS_AST_LVALUE_ARRAY:
+        ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
+        ps_ast_debug_line(" - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
+        break;
+    default:
+        return false;
+    }
     ps_ast_value value_node = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false;
@@ -115,14 +128,11 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     {
     case PS_AST_LVALUE_SIMPLE:
         ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
-        ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
         ps_error error = ps_value_copy(&value_node.value, variable_simple->variable->value, interpreter->range_check);
         if (error != PS_ERROR_NONE)
             return false;
         break;
     case PS_AST_LVALUE_ARRAY:
-        ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
-        ps_ast_debug_line(" - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "Array assignment not implemented yet");
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         return false;
@@ -132,7 +142,7 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, ps_ast_assignment *assig
     return true;
 }
 
-bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement)
+bool ps_ast_run_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
 {
     assert(if_statement != NULL);
     assert(if_statement->kind == PS_AST_IF);
@@ -155,7 +165,7 @@ bool ps_ast_run_if(ps_interpreter *interpreter, ps_ast_if *if_statement)
     }
 }
 
-bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement)
+bool ps_ast_run_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
 {
     assert(while_statement != NULL);
     assert(while_statement->kind == PS_AST_WHILE);
@@ -178,7 +188,7 @@ bool ps_ast_run_while(ps_interpreter *interpreter, ps_ast_while *while_statement
     return true;
 }
 
-bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statement)
+bool ps_ast_run_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement)
 {
     assert(repeat_statement != NULL);
     assert(repeat_statement->kind == PS_AST_REPEAT);
@@ -198,7 +208,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, ps_ast_repeat *repeat_statem
     return true;
 }
 
-bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
+bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
 {
     assert(for_statement != NULL);
     assert(for_statement->kind == PS_AST_FOR);
@@ -239,7 +249,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, ps_ast_for *for_statement)
     return true;
 }
 
-bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedure_call)
+bool ps_ast_run_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
@@ -249,7 +259,7 @@ bool ps_ast_run_procedure_call(ps_interpreter *interpreter, ps_ast_call *procedu
     return false;
 }
 
-bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function_call, ps_ast_value *result)
+bool ps_ast_run_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
 {
     assert(function_call != NULL);
     assert(function_call->kind == PS_AST_FUNCTION_CALL);
@@ -261,7 +271,7 @@ bool ps_ast_run_function_call(ps_interpreter *interpreter, ps_ast_call *function
     return false;
 }
 
-bool ps_ast_eval_expression(ps_interpreter *interpreter, ps_ast_node *expression, ps_ast_value *result)
+bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result)
 {
     assert(expression != NULL);
     assert(expression->group == PS_AST_EXPRESSION);
