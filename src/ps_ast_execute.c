@@ -89,13 +89,13 @@ bool ps_ast_run_statement(ps_interpreter *interpreter, const ps_ast_node *statem
     case PS_AST_IF:
         return ps_ast_run_if(interpreter, (const ps_ast_if *)statement);
     case PS_AST_WHILE:
-        return ps_ast_run_while(interpreter, (ps_ast_while *)statement);
+        return ps_ast_run_while(interpreter, (const ps_ast_while *)statement);
     case PS_AST_REPEAT:
-        return ps_ast_run_repeat(interpreter, (ps_ast_repeat *)statement);
+        return ps_ast_run_repeat(interpreter, (const ps_ast_repeat *)statement);
     case PS_AST_FOR:
-        return ps_ast_run_for(interpreter, (ps_ast_for *)statement);
+        return ps_ast_run_for(interpreter, (const ps_ast_for *)statement);
     case PS_AST_PROCEDURE_CALL:
-        return ps_ast_run_procedure_call(interpreter, (ps_ast_call *)statement);
+        return ps_ast_run_procedure_call(interpreter, (const ps_ast_call *)statement);
     default:
         ps_ast_debug_line("Error: unexpected statement kind %d\n", statement->kind);
         return false;
@@ -278,23 +278,23 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     assert(result != NULL);
     if (!ps_ast_node_check_group(expression, PS_AST_EXPRESSION))
         return false;
-    ps_ast_debug_line("EXPRESSION @%p", (void *)expression);
+    ps_ast_debug_line("EXPRESSION @%p", (const void *)expression);
     switch (expression->kind)
     {
     case PS_AST_RVALUE_CONST:
-        ps_ast_value *rvalue = (ps_ast_value *)expression;
+        ps_ast_value *rvalue = (const ps_ast_value *)expression;
         ps_ast_debug_line(" - Value: %s", ps_value_get_display_string(&rvalue->value, 0, 0));
         if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
             return false;
         break;
     case PS_AST_RVALUE_SIMPLE:
-        ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)expression;
+        ps_ast_variable_simple *variable_simple = (const ps_ast_variable_simple *)expression;
         ps_ast_debug_line(" - Variable: %s", variable_simple->variable->name);
         if (!ps_interpreter_copy_value(interpreter, variable_simple->variable->value, &result->value))
             return false;
         break;
     case PS_AST_RVALUE_ARRAY:
-        ps_ast_variable_array *variable_array = (ps_ast_variable_array *)expression;
+        ps_ast_variable_array *variable_array = (const ps_ast_variable_array *)expression;
         ps_ast_debug_line(" - Array variable: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "TODO! Array access not implemented yet");
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
@@ -305,7 +305,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
                                 .value.allocated = false,
                                 .value.type = &ps_system_none,
                                 .value.data = {0}};
-        ps_ast_unary_operation *unary_operation = (ps_ast_unary_operation *)expression;
+        const ps_ast_unary_operation *unary_operation = (const ps_ast_unary_operation *)expression;
         ps_ast_debug_line(" - Unary operation: %s", ps_operator_unary_get_name(unary_operation->operator));
         // first evaluate operand, then apply operator to it
         if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand))
@@ -314,7 +314,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
             return false;
         break;
     case PS_AST_BINARY_OPERATION:
-        ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)expression;
+        const ps_ast_binary_operation *binary_operation = (const ps_ast_binary_operation *)expression;
         ps_ast_debug_line(" - Binary operation: %s", ps_operator_binary_get_name(binary_operation->operator));
         // first evaluate operands, then apply operator to them
         ps_ast_value left = {.group = PS_AST_EXPRESSION,
@@ -332,12 +332,11 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
             return false;
         break;
     case PS_AST_FUNCTION_CALL:
-        ps_ast_call *function_call = (ps_ast_call *)expression;
+        const ps_ast_call *function_call = (const ps_ast_call *)expression;
         ps_ast_debug_line(" - Function call: %s", function_call->executable->name);
         ps_interpreter_set_message(interpreter, "TODO! Function calls not implemented yet");
         interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         return false;
-        break;
     default:
         ps_interpreter_set_message(interpreter, "Unexpected expression kind %s (%d)\n",
                                    ps_ast_node_get_kind_name(expression->kind), expression->kind);

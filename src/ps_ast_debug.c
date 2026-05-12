@@ -16,6 +16,7 @@
 
 /** @brief Global flag to enable/disable AST debug output */
 bool ps_ast_debug = true;
+bool ps_ast_debug_prefix = false;
 
 char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
@@ -99,7 +100,8 @@ void ps_ast_debug_line(const char *format, ...) // NOSONAR
         return;
     va_list args;
     va_start(args, format);
-    // fprintf(stderr, "AST_DEBUG\t");
+    if (ps_ast_debug_prefix)
+        fprintf(stderr, "AST_DEBUG\t");
     vfprintf(stderr, format, args); // NOSONAR
     fprintf(stderr, "\n");
     va_end(args);

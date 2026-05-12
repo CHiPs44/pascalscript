@@ -84,6 +84,7 @@ bool ps_ast_test_delete_block_program(ps_ast_block *block_program)
     ps_ast_debug_line("Free the PROGRAM block node");
     block_program = (ps_ast_block *)ps_ast_free_block(block_program);
     ASSERT_RETURN_FALSE(block_program == NULL);
+    return true;
 }
 
 ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
@@ -114,6 +115,7 @@ bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *b
     ps_ast_debug_line("Free interpreter");
     interpreter = ps_interpreter_free(interpreter);
     ASSERT_RETURN_FALSE(interpreter == NULL);
+    return true;
 }
 
 /**
@@ -157,9 +159,10 @@ bool ps_ast_test_minimal()
  * @brief Test Assignment Pascal program
  * L/C 123456789012345678901234567890123456789012345678901234567890
  * 1   Program Assignment;
- * 2   Var I: Integer;
+ * 2   Var I, J: Integer;
  * 3   Begin
- * 4       I := 42 * 2;
+ * 4       I := 21 * 2;
+ * 4       J := I;
  * 5   End.
  */
 bool ps_ast_test_assignment()
@@ -173,37 +176,50 @@ bool ps_ast_test_assignment()
     ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
     ASSERT_RETURN_FALSE(interpreter != NULL);
 
-    ps_ast_debug_line("Create a variable symbol I of type Integer and add it to the symbol tables");
-    ps_value i_value = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
-    const ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &i_value);
-    result = ps_interpreter_add_symbol(interpreter, (ps_symbol *)symbol_i);
+    ps_ast_debug_line("Create variable symbols I ² J of type Integer and add them to the symbol tables");
+    ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
+    result = ps_interpreter_add_symbol(interpreter, symbol_i);
     ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, (ps_symbol *)symbol_i);
+    ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
+    result = ps_interpreter_add_symbol(interpreter, symbol_j);
+    ASSERT_RETURN_FALSE(result);
+    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
-    block_program->n_vars = 1;
+    error = ps_symbol_table_add(block_program->symbols, symbol_j);
+    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    block_program->n_vars = 2;
 
-    ps_ast_debug_line("Create a statement list with one statement");
-    //  a PROCEDURE CALL to Writeln with one argument: a string value "Hello, World!"
-    block_program->statement_list = ps_ast_create_statement_list(3, 5, 1);
+    ps_ast_debug_line("Create a statement list with 2 statements");
+    block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
     ASSERT_RETURN_FALSE(block_program->statement_list != NULL);
 
-    ps_ast_debug_line("Create the assignment statement I := 42 * 2;");
-    ps_ast_variable_simple *variable_simple =
-        ps_ast_create_variable_simple(3, 5, PS_AST_LVALUE_SIMPLE, (ps_symbol *)symbol_i);
-    ASSERT_RETURN_FALSE(variable_simple != NULL);
-    ps_value value_u_42 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 42};
-    ps_ast_value *rvalue_u_42 = ps_ast_create_rvalue_const(3, 10, value_u_42);
-    ASSERT_RETURN_FALSE(rvalue_u_42 != NULL);
+    ps_ast_debug_line("Create the assignment statement I := 21 * 2;");
+    ps_ast_variable_simple *variable_i = ps_ast_create_variable_simple(3, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ASSERT_RETURN_FALSE(variable_i != NULL);
+    ps_value value_u_21 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 21};
+    ps_ast_value *rvalue_u_21 = ps_ast_create_rvalue_const(3, 10, value_u_21);
+    ASSERT_RETURN_FALSE(rvalue_u_21 != NULL);
     ps_value value_u_2 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 2};
     ps_ast_value *rvalue_u_2 = ps_ast_create_rvalue_const(3, 15, value_u_2);
     ASSERT_RETURN_FALSE(rvalue_u_2 != NULL);
     ps_ast_binary_operation *mul_operation =
-        ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_42, (ps_ast_node *)rvalue_u_2);
+        ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
     ASSERT_RETURN_FALSE(mul_operation != NULL);
-    ps_ast_assignment *assignment =
-        ps_ast_create_assignment(3, 5, (ps_ast_node *)variable_simple, (ps_ast_node *)mul_operation);
-    ASSERT_RETURN_FALSE(assignment != NULL);
-    block_program->statement_list->statements[0] = (ps_ast_node *)assignment;
+    ps_ast_assignment *assignment_i =
+        ps_ast_create_assignment(3, 5, (ps_ast_node *)variable_i, (ps_ast_node *)mul_operation);
+    ASSERT_RETURN_FALSE(assignment_i != NULL);
+    block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i;
+
+    ps_ast_debug_line("Create the assignment statement J := I;");
+    ps_ast_variable_simple *variable_j = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_j);
+    ASSERT_RETURN_FALSE(variable_j != NULL);
+    ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(4, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_assignment *assignment_j =
+        ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_j, (ps_ast_node *)rvalue_i);
+    ASSERT_RETURN_FALSE(assignment_i != NULL);
+    block_program->statement_list->statements[1] = (ps_ast_node *)assignment_j;
 
     ps_ast_debug_line("Debug print the program");
     ps_ast_debug = true;
@@ -217,11 +233,19 @@ bool ps_ast_test_assignment()
     ps_ast_debug_line("Interpreter message: %s", interpreter->message);
     ASSERT_RETURN_FALSE(result);
 
-    ps_ast_debug_line("Check that variable I has the expected value 84");
+    ps_ast_debug_line("Check that variable I has the expected value 42");
     ASSERT_RETURN_FALSE(symbol_i->value != NULL);
     ASSERT_RETURN_FALSE(symbol_i->value->type == &ps_system_integer);
     ps_ast_debug_line("Variable I value: %d", symbol_i->value->data.i);
-    ASSERT_RETURN_FALSE(symbol_i->value->data.i == 84);
+    ASSERT_RETURN_FALSE(symbol_i->value->data.i == 42);
+
+    ps_ast_debug_line("Check that variable J has the expected value 42");
+    ASSERT_RETURN_FALSE(symbol_j->value != NULL);
+    ASSERT_RETURN_FALSE(symbol_j->value->type == &ps_system_integer);
+    ps_ast_debug_line("Variable J value: %d", symbol_i->value->data.i);
+    ASSERT_RETURN_FALSE(symbol_j->value->data.i == 42);
+
+    ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
     ps_ast_debug_line("Free symbol table for the program %s", block_program->name);
     ps_memory_free(PS_MEMORY_AST, block_program->symbols);
