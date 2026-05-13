@@ -282,7 +282,7 @@ ps_error ps_function_low_or_high_subrange(const ps_symbol *type, ps_value *resul
         result->data.u = low ? type_def->def.g.u.min : type_def->def.g.u.max;
         break;
     case PS_TYPE_ENUM:
-        result->type = type;
+        result->type = (ps_type_definition *)type;
         result->data.u = low ? type_def->def.g.e.min : type_def->def.g.e.max;
         break;
     default:

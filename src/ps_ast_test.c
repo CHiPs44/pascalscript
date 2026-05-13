@@ -21,8 +21,6 @@
 #include "ps_symbol_table.h"
 #include "ps_system.h"
 
-// exit(EXIT_FAILURE);
-
 #define ASSERT_RETURN_FALSE(expr)                                                                                      \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -34,14 +32,14 @@
         }                                                                                                              \
     } while (0)
 
-#define ASSERT_RETURN_NULL(expr)                                                                                       \
+#define ASSERT_GOTO_CLEANUP(expr)                                                                                      \
     do                                                                                                                 \
     {                                                                                                                  \
         if (!(expr))                                                                                                   \
         {                                                                                                              \
             ps_ast_debug_line("Assertion failed: %s, function %s, file %s, line %d.", #expr, __func__, __FILE__,       \
                               __LINE__);                                                                               \
-            return NULL;                                                                                               \
+            goto cleanup;                                                                                              \
         }                                                                                                              \
     } while (0)
 
@@ -51,28 +49,31 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ps_ast_block *block_program = ps_ast_create_block(1, 1, PS_AST_PROGRAM, name);
     if (block_program == NULL)
         return NULL;
+
+    ps_ast_debug_line("Create symbol table");
     block_program->symbols = ps_symbol_table_alloc(0, 0);
-    if (block_program->symbols == NULL)
-        goto cleanup;
+    ASSERT_GOTO_CLEANUP(block_program->symbols != NULL);
+
     ps_symbol *symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, name, NULL);
-    if (symbol_program == NULL)
-        goto cleanup;
+    ASSERT_GOTO_CLEANUP(symbol_program != NULL);
+
     ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_program);
-    if (error != PS_SYMBOL_TABLE_ERROR_NONE)
-        goto cleanup;
+    ASSERT_GOTO_CLEANUP(error == PS_SYMBOL_TABLE_ERROR_NONE);
+
     ps_ast_debug_line("Check that the PROGRAM node has the expected values");
-    ASSERT_RETURN_NULL(block_program->group == PS_AST_BLOCK);
-    ASSERT_RETURN_NULL(block_program->kind == PS_AST_PROGRAM);
-    ASSERT_RETURN_NULL(block_program->line == 1);
-    ASSERT_RETURN_NULL(block_program->column == 1);
-    ASSERT_RETURN_NULL(strcmp(block_program->name, name) == 0);
-    ASSERT_RETURN_NULL(block_program->n_vars == 0);
-    ASSERT_RETURN_NULL(block_program->symbols != NULL);
-    ASSERT_RETURN_NULL(block_program->n_executables == 0);
-    ASSERT_RETURN_NULL(block_program->executables == NULL);
-    ASSERT_RETURN_NULL(block_program->statement_list == NULL);
-    ASSERT_RETURN_NULL(block_program->signature == NULL);
-    ASSERT_RETURN_NULL(block_program->result_type == NULL);
+    ASSERT_GOTO_CLEANUP(block_program->group == PS_AST_BLOCK);
+    ASSERT_GOTO_CLEANUP(block_program->kind == PS_AST_PROGRAM);
+    ASSERT_GOTO_CLEANUP(block_program->line == 1);
+    ASSERT_GOTO_CLEANUP(block_program->column == 1);
+    ASSERT_GOTO_CLEANUP(strcmp(block_program->name, name) == 0);
+    ASSERT_GOTO_CLEANUP(block_program->n_vars == 0);
+    ASSERT_GOTO_CLEANUP(block_program->symbols != NULL);
+    ASSERT_GOTO_CLEANUP(block_program->n_executables == 0);
+    ASSERT_GOTO_CLEANUP(block_program->executables == NULL);
+    ASSERT_GOTO_CLEANUP(block_program->statement_list == NULL);
+    ASSERT_GOTO_CLEANUP(block_program->signature == NULL);
+    ASSERT_GOTO_CLEANUP(block_program->result_type == NULL);
+
     return block_program;
 cleanup:
     ps_ast_free_block(block_program);
@@ -91,21 +92,23 @@ ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
 {
     ps_ast_debug_line("Create an interpreter");
     ps_interpreter *interpreter = ps_interpreter_alloc(true, false, false);
-    ASSERT_RETURN_NULL(interpreter != NULL);
+    ASSERT_GOTO_CLEANUP(interpreter != NULL);
 
     ps_ast_debug_line("Enter environment for the program %s", block_program->name);
-    ASSERT_RETURN_NULL(ps_interpreter_enter_environment(interpreter, block_program->name, NULL, 0, NULL));
+    ASSERT_GOTO_CLEANUP(ps_interpreter_enter_environment(interpreter, block_program->name, NULL, 0, NULL));
 
     ps_ast_debug_line("Add PROGRAM symbol to the current environment symbol table");
     ps_symbol *symbol_program = ps_symbol_table_get(block_program->symbols, block_program->name);
-    ASSERT_RETURN_NULL(symbol_program != NULL);
-    ASSERT_RETURN_NULL(symbol_program->kind == PS_SYMBOL_KIND_PROGRAM);
-    ASSERT_RETURN_NULL(symbol_program->system == false);
-    ASSERT_RETURN_NULL(symbol_program->allocated == true);
-    ASSERT_RETURN_NULL(symbol_program->value == NULL);
-    ASSERT_RETURN_NULL(ps_interpreter_add_symbol(interpreter, symbol_program));
+    ASSERT_GOTO_CLEANUP(symbol_program != NULL);
+    ASSERT_GOTO_CLEANUP(symbol_program->kind == PS_SYMBOL_KIND_PROGRAM);
+    ASSERT_GOTO_CLEANUP(symbol_program->system == false);
+    ASSERT_GOTO_CLEANUP(symbol_program->allocated == true);
+    ASSERT_GOTO_CLEANUP(symbol_program->value == NULL);
+    ASSERT_GOTO_CLEANUP(ps_interpreter_add_symbol(interpreter, symbol_program));
 
     return interpreter;
+cleanup:
+    return NULL;
 }
 
 bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *block_program)
@@ -168,7 +171,6 @@ bool ps_ast_test_minimal()
 bool ps_ast_test_assignment()
 {
     bool result;
-    (void)result; // silence unused variable warning with asserts
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("ASSIGNMENT");
     ASSERT_RETURN_FALSE(block_program != NULL);
@@ -273,31 +275,14 @@ bool ps_ast_test_assignment()
 bool ps_ast_test_hello()
 {
     bool result;
-    (void)result; // silence unused variable warning with asserts
 
-    ps_ast_debug_line("Create an interpreter first as we may need it very soon");
-    ps_interpreter *interpreter = ps_interpreter_alloc(true, false, false);
-    ASSERT_RETURN_FALSE(interpreter != NULL);
-
-    ps_ast_debug_line("Create a PROGRAM node with name 'HELLO' at line 1, column 1");
     ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
     ASSERT_RETURN_FALSE(block_program != NULL);
 
-    ps_ast_debug_line("Enter environment for the program block_program");
-    result = ps_interpreter_enter_environment(interpreter, block_program->name, NULL, 0, NULL);
-    ASSERT_RETURN_FALSE(result);
-
-    ps_ast_debug_line("Create a PROGRAM symbol and add it to the current environment symbol table and the "
-                      "block_program symbol table");
-    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, "HELLO", NULL);
-    result = ps_interpreter_add_symbol(interpreter, symbol);
-    ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol);
-    (void)error; // silence unused variable warning
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ASSERT_RETURN_FALSE(interpreter != NULL);
 
     ps_ast_debug_line("Create a statement list with one statement");
-    //  a PROCEDURE CALL to Writeln with one argument: a string value "Hello, World!"
     block_program->statement_list = ps_ast_create_statement_list(3, 5, 1);
     ASSERT_RETURN_FALSE(block_program->statement_list != NULL);
 
@@ -332,8 +317,13 @@ bool ps_ast_test_hello()
     result = ps_ast_run_program(interpreter, block_program);
     if (!result)
     {
-        fprintf(stderr, "Error running the program\n");
+        ps_ast_debug_line("Error running the program: %s (%d)", interpreter->error,
+                          ps_error_get_message(interpreter->error));
     }
+
+    ps_ast_debug_line("Free symbol table for the program %s", block_program->name);
+    ps_memory_free(PS_MEMORY_AST, block_program->symbols);
+    block_program->symbols = NULL;
 
     ps_ast_debug_line("Free program %s", block_program->name);
     block_program = (ps_ast_block *)ps_ast_free_block(block_program);

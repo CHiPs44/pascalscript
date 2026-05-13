@@ -95,7 +95,7 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) 
     return true;
 }
 
-bool ps_interpreter_enter_environment(ps_interpreter *interpreter, ps_identifier name, ps_symbol_table *symbols,
+bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
                                       size_t n_values, ps_value *values)
 {
     (void)n_values;
