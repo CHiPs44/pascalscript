@@ -26,10 +26,10 @@ extern "C"
     char *ps_ast_node_get_kind_name(ps_ast_node_kind kind);
 
     /** @brief Print debug message to stderr (printf-style) */
-    void ps_ast_debug_line(const char *format, ...); // NOSONAR
+    void ps_ast_debug_line(size_t margin, const char *format, ...); // NOSONAR
 
     /** @brief Debug print information about any AST node */
-    void ps_ast_debug_node(const ps_ast_node *node);
+    void ps_ast_debug_node(size_t margin, const ps_ast_node *node);
 
 #ifdef __cplusplus
 }

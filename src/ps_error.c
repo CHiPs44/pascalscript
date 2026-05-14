@@ -29,7 +29,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_EOF, "Unexpected end of file"},
     {PS_ERROR_OPENING_FILE, "Opening file"},
     {PS_ERROR_READING_FILE, "Reading file"},
-    /* ====================LEXER  ==================== */
+    /* ==================== LEXER  ==================== */
     {PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected character"},
     {PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file"},
     {PS_ERROR_IDENTIFIER_TOO_LONG, "Identifier too long"},

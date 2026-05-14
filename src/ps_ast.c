@@ -22,7 +22,7 @@ bool ps_ast_node_check_group(const ps_ast_node *node, ps_ast_node_group expected
 {
     if (node->group != expected_group)
     {
-        ps_ast_debug_line("Error: expected AST node group %s but got %s\n", ps_ast_node_get_group_name(expected_group),
+        ps_ast_debug_line(0, "Error: expected AST node group %s but got %s\n", ps_ast_node_get_group_name(expected_group),
                           ps_ast_node_get_group_name(node->group));
         return false;
     }
@@ -33,7 +33,7 @@ bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_k
 {
     if (node->kind != expected_kind)
     {
-        ps_ast_debug_line("Error: expected AST node kind %s but got %s\n", ps_ast_node_get_kind_name(expected_kind),
+        ps_ast_debug_line(0, "Error: expected AST node kind %s but got %s\n", ps_ast_node_get_kind_name(expected_kind),
                           ps_ast_node_get_kind_name(node->kind));
         return false;
     }
@@ -96,10 +96,6 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     case PS_AST_RVALUE_ARRAY:
     case PS_AST_LVALUE_ARRAY:
         return ps_ast_free_variable_array((ps_ast_variable_array *)node);
-    case PS_AST_ARG_EXPR:
-    case PS_AST_ARG_VAR_BY_VAL:
-    case PS_AST_ARG_VAR_BY_REF:
-        return ps_ast_free_argument((ps_ast_argument *)node);
     }
     return NULL;
 }
@@ -332,7 +328,7 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // =============================================================================
 
 ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
-                                size_t n_args, ps_ast_argument *args[])
+                                size_t n_args, ps_ast_node *args[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
@@ -352,35 +348,9 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
     assert(call != NULL);
     assert(call->kind == PS_AST_PROCEDURE_CALL || call->kind == PS_AST_FUNCTION_CALL);
     for (size_t i = 0; i < call->n_args; i++)
-        ps_ast_free_argument(call->args[i]);
+        ps_ast_free_node(call->args[i]);
     ps_memory_free(PS_MEMORY_AST, call->args);
     ps_memory_free(PS_MEMORY_AST, call);
-    return NULL;
-}
-
-// =============================================================================
-// PS_AST_ARGUMENT
-// =============================================================================
-
-ps_ast_argument *ps_ast_create_argument(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_ast_node *arg)
-{
-    assert(kind == PS_AST_ARG_EXPR || kind == PS_AST_ARG_VAR_BY_VAL || kind == PS_AST_ARG_VAR_BY_REF);
-    assert(arg != NULL);
-    ps_ast_argument *argument =
-        (ps_ast_argument *)ps_ast_create_node(PS_AST_ARGUMENT, kind, line, column, sizeof(ps_ast_argument));
-    if (argument == NULL)
-        return NULL;
-    argument->arg = arg;
-    return argument;
-}
-
-ps_ast_node *ps_ast_free_argument(ps_ast_argument *argument)
-{
-    assert(argument != NULL);
-    assert(argument->kind == PS_AST_ARG_EXPR || argument->kind == PS_AST_ARG_VAR_BY_VAL ||
-           argument->kind == PS_AST_ARG_VAR_BY_REF);
-    argument->arg = ps_ast_free_node(argument->arg);
-    ps_memory_free(PS_MEMORY_AST, argument);
     return NULL;
 }
 
