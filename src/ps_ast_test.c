@@ -131,7 +131,7 @@ bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *b
 
 /**
  * @brief Test minimal Pascal program
- *  L/C 12345678901234567890
+ *  L/C 123456789012345678901234567890123456789012345678901234567890
  *  1   Program Minimal;
  *  2   Begin
  *  3   End.
@@ -509,6 +509,112 @@ bool ps_ast_test_while_do()
 }
 
 /**
+ * @brief Test Repeat-Until Pascal program
+ * L/C 123456789012345678901234567890123456789012345678901234567890
+ * 1   Program RepeatUntil;
+ * 2   Var I: Integer;
+ * 3   Begin
+ * 4       I := 5;
+ * 5       Repeat
+ * 6           I := I - 1;
+ * 7       Until I = 0;
+ * 8   End.
+ */
+bool ps_ast_test_repeat_until()
+{
+    bool result;
+
+    ps_ast_block *block_program = ps_ast_test_create_block_program("REPEATUNTIL");
+    ASSERT_RETURN_FALSE(block_program != NULL);
+
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ASSERT_RETURN_FALSE(interpreter != NULL);
+
+    ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
+    ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
+    result = ps_interpreter_add_symbol(interpreter, symbol_i);
+    ASSERT_RETURN_FALSE(result);
+    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    block_program->n_vars = 1;
+
+    ps_ast_debug_line(0, "Create a statement list with 2 statements (I := 5; Repeat loop)");
+    block_program->statement_list = ps_ast_create_statement_list(4, 5, 2);
+    ASSERT_RETURN_FALSE(block_program->statement_list != NULL);
+
+    ps_ast_debug_line(0, "Create the first assignment statement I := 5;");
+    ps_ast_variable_simple *variable_i_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ASSERT_RETURN_FALSE(variable_i_init != NULL);
+    ps_value value_i_5 = {.allocated = false, .type = &ps_system_integer, .data.i = 5};
+    ps_ast_value *rvalue_i_5 = ps_ast_create_rvalue_const(4, 10, value_i_5);
+    ASSERT_RETURN_FALSE(rvalue_i_5 != NULL);
+    ps_ast_assignment *assignment_i_init =
+        ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_i_init, (ps_ast_node *)rvalue_i_5);
+    ASSERT_RETURN_FALSE(assignment_i_init != NULL);
+    block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i_init;
+
+    ps_ast_debug_line(0, "Create the REPEAT loop body: I := I - 1");
+    ps_ast_statement_list *repeat_body = ps_ast_create_statement_list(6, 9, 1);
+    ASSERT_RETURN_FALSE(repeat_body != NULL);
+    ps_ast_variable_simple *variable_i_body = ps_ast_create_variable_simple(6, 9, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ASSERT_RETURN_FALSE(variable_i_body != NULL);
+    ps_ast_variable_simple *rvalue_i_body = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ASSERT_RETURN_FALSE(rvalue_i_body != NULL);
+    ps_value value_i_1 = {.allocated = false, .type = &ps_system_integer, .data.i = 1};
+    ps_ast_value *rvalue_i_1 = ps_ast_create_rvalue_const(6, 23, value_i_1);
+    ASSERT_RETURN_FALSE(rvalue_i_1 != NULL);
+    ps_ast_binary_operation *i_minus_1 =
+        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
+    ASSERT_RETURN_FALSE(i_minus_1 != NULL);
+    ps_ast_assignment *assignment_i_body =
+        ps_ast_create_assignment(6, 9, (ps_ast_node *)variable_i_body, (ps_ast_node *)i_minus_1);
+    ASSERT_RETURN_FALSE(assignment_i_body != NULL);
+    repeat_body->statements[0] = (ps_ast_node *)assignment_i_body;
+
+    ps_ast_debug_line(0, "Create the REPEAT condition I = 0");
+    ps_ast_variable_simple *rvalue_i_cond = ps_ast_create_variable_simple(7, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ASSERT_RETURN_FALSE(rvalue_i_cond != NULL);
+    ps_value value_i_0 = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_ast_value *rvalue_i_0 = ps_ast_create_rvalue_const(7, 14, value_i_0);
+    ASSERT_RETURN_FALSE(rvalue_i_0 != NULL);
+    ps_ast_binary_operation *repeat_condition =
+        ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
+    ASSERT_RETURN_FALSE(repeat_condition != NULL);
+
+    ps_ast_debug_line(0, "Create the REPEAT statement");
+    ps_ast_repeat *repeat_statement = ps_ast_create_repeat(5, 5, repeat_body, (ps_ast_node *)repeat_condition);
+    ASSERT_RETURN_FALSE(repeat_statement != NULL);
+    block_program->statement_list->statements[1] = (ps_ast_node *)repeat_statement;
+
+    ps_ast_debug_line(0, "Debug print the program");
+    ps_ast_debug = true;
+    ps_ast_debug_line(0, "================================================================");
+    ps_ast_debug_node(0, (ps_ast_node *)block_program);
+    ps_ast_debug_line(0, "================================================================");
+
+    ps_ast_debug_line(0, "Run the program and check that it returns true");
+    result = ps_ast_run_program(interpreter, block_program);
+    ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
+    ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
+    ASSERT_RETURN_FALSE(result);
+
+    ps_ast_debug_line(0, "Check that variable I has the expected value 0 (loop condition became true)");
+    ASSERT_RETURN_FALSE(symbol_i->value != NULL);
+    ASSERT_RETURN_FALSE(symbol_i->value->type == &ps_system_integer);
+    ps_ast_debug_line(0, "Variable I value: %d", symbol_i->value->data.i);
+    ASSERT_RETURN_FALSE(symbol_i->value->data.i == 0);
+
+    ps_symbol_table_dump(stderr, NULL, block_program->symbols);
+
+    ps_ast_test_delete_interpreter(interpreter, block_program);
+
+    ps_ast_test_delete_block_program(block_program);
+
+    return true;
+}
+
+/**
  * @brief Test For-Do Pascal program
  * L/C 123456789012345678901234567890123456789012345678901234567890
  * 1   Program ForDo;
@@ -629,7 +735,7 @@ bool ps_ast_test_for_do()
 /**
  * @brief Test Hello Pascal program
  *      0        1         2         3
- *  L/C 123456789012345678901234567890
+ *  L/C 123456789012345678901234567890123456789012345678901234567890
  *  1   Program Hello;
  *  2   Begin
  *  3       WriteLn('Hello, World!');
@@ -717,6 +823,8 @@ bool ps_ast_test()
     result &= ps_ast_test_if_then_else();
     ps_ast_debug_line(0, "****************************************************************");
     result &= ps_ast_test_while_do();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_repeat_until();
     ps_ast_debug_line(0, "****************************************************************");
     result &= ps_ast_test_for_do();
     ps_ast_debug_line(0, "****************************************************************");
