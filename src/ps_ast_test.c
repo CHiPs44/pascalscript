@@ -265,85 +265,6 @@ bool ps_ast_test_assignment()
 }
 
 /**
- * @brief Test Hello Pascal program
- *      0        1         2         3
- *  L/C 123456789012345678901234567890
- *  1   Program Hello;
- *  2   Begin
- *  3       WriteLn('Hello, World!');
- *  4       WriteLn(-42);
- *  5   End.
- */
-bool ps_ast_test_hello()
-{
-    bool result;
-
-    ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
-    ASSERT_RETURN_FALSE(block_program != NULL);
-
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
-    ASSERT_RETURN_FALSE(interpreter != NULL);
-
-    ps_ast_debug_line(0, "Create a statement list with 2 statements");
-    block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
-    ASSERT_RETURN_FALSE(block_program->statement_list != NULL);
-
-    ps_ast_debug_line(0, "Create the first by value argument");
-    ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
-    ASSERT_RETURN_FALSE(hello != NULL);
-    ps_value value_hello = {.allocated = false, .type = &ps_system_string, .data.s = hello};
-    ps_ast_value *argument_hello = ps_ast_create_rvalue_const(3, 13, value_hello);
-    ASSERT_RETURN_FALSE(argument_hello != NULL);
-
-    ps_ast_debug_line(0, "Create the first by value argument");
-    ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
-    ps_ast_value *argument_i_42 = ps_ast_create_rvalue_const(4, 13, value_i_42);
-    ASSERT_RETURN_FALSE(argument_i_42 != NULL);
-
-    ps_ast_debug_line(0, "Create the argument list for the procedure call");
-    ps_ast_node **args1 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
-    ASSERT_RETURN_FALSE(args1 != NULL);
-    args1[0] = (ps_ast_node *)argument_hello;
-
-    ps_ast_debug_line(0, "Create the first PROCEDURE CALL statement");
-    ps_ast_call *statement1 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1);
-    ASSERT_RETURN_FALSE(statement1 != NULL);
-
-    ps_ast_debug_line(0, "Create the argument list for the second procedure call");
-    ps_ast_node **args2 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
-    ASSERT_RETURN_FALSE(args2 != NULL);
-    args2[0] = (ps_ast_node *)argument_i_42;
-
-    ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
-    ps_ast_call *statement2 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2);
-    ASSERT_RETURN_FALSE(statement2 != NULL);
-
-    ps_ast_debug_line(0, "Add the statements to the statement list");
-    block_program->statement_list->statements[0] = (ps_ast_node *)statement1;
-    block_program->statement_list->statements[1] = (ps_ast_node *)statement2;
-
-    ps_ast_debug_line(0, "Debug print the program");
-    ps_ast_debug = true;
-    ps_ast_debug_line(0, "================================================================");
-    ps_ast_debug_node(0, (ps_ast_node *)block_program);
-    ps_ast_debug_line(0, "================================================================");
-
-    ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
-    if (!result)
-    {
-        ps_ast_debug_line(0, "Error running the program: %s (%d)", interpreter->error,
-                          ps_error_get_message(interpreter->error));
-    }
-
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
-}
-
-/**
  * @brief Test If-Then-Else Pascal program
  * L/C 123456789012345678901234567890123456789012345678901234567890
  * 1   Program IfThenElse;
@@ -705,22 +626,101 @@ bool ps_ast_test_for_do()
     return true;
 }
 
+/**
+ * @brief Test Hello Pascal program
+ *      0        1         2         3
+ *  L/C 123456789012345678901234567890
+ *  1   Program Hello;
+ *  2   Begin
+ *  3       WriteLn('Hello, World!');
+ *  4       WriteLn(-42);
+ *  5   End.
+ */
+bool ps_ast_test_hello()
+{
+    bool result;
+
+    ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
+    ASSERT_RETURN_FALSE(block_program != NULL);
+
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ASSERT_RETURN_FALSE(interpreter != NULL);
+
+    ps_ast_debug_line(0, "Create a statement list with 2 statements");
+    block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
+    ASSERT_RETURN_FALSE(block_program->statement_list != NULL);
+
+    ps_ast_debug_line(0, "Create the first by value argument");
+    ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
+    ASSERT_RETURN_FALSE(hello != NULL);
+    ps_value value_hello = {.allocated = false, .type = &ps_system_string, .data.s = hello};
+    ps_ast_value *argument_hello = ps_ast_create_rvalue_const(3, 13, value_hello);
+    ASSERT_RETURN_FALSE(argument_hello != NULL);
+
+    ps_ast_debug_line(0, "Create the first by value argument");
+    ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
+    ps_ast_value *argument_i_42 = ps_ast_create_rvalue_const(4, 13, value_i_42);
+    ASSERT_RETURN_FALSE(argument_i_42 != NULL);
+
+    ps_ast_debug_line(0, "Create the argument list for the procedure call");
+    ps_ast_node **args1 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
+    ASSERT_RETURN_FALSE(args1 != NULL);
+    args1[0] = (ps_ast_node *)argument_hello;
+
+    ps_ast_debug_line(0, "Create the first PROCEDURE CALL statement");
+    ps_ast_call *statement1 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1);
+    ASSERT_RETURN_FALSE(statement1 != NULL);
+
+    ps_ast_debug_line(0, "Create the argument list for the second procedure call");
+    ps_ast_node **args2 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
+    ASSERT_RETURN_FALSE(args2 != NULL);
+    args2[0] = (ps_ast_node *)argument_i_42;
+
+    ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
+    ps_ast_call *statement2 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2);
+    ASSERT_RETURN_FALSE(statement2 != NULL);
+
+    ps_ast_debug_line(0, "Add the statements to the statement list");
+    block_program->statement_list->statements[0] = (ps_ast_node *)statement1;
+    block_program->statement_list->statements[1] = (ps_ast_node *)statement2;
+
+    ps_ast_debug_line(0, "Debug print the program");
+    ps_ast_debug = true;
+    ps_ast_debug_line(0, "================================================================");
+    ps_ast_debug_node(0, (ps_ast_node *)block_program);
+    ps_ast_debug_line(0, "================================================================");
+
+    ps_ast_debug_line(0, "Run the program and check that it returns true");
+    result = ps_ast_run_program(interpreter, block_program);
+    if (!result)
+    {
+        ps_ast_debug_line(0, "Error running the program: %s (%d)", interpreter->error,
+                          ps_error_get_message(interpreter->error));
+    }
+
+    ps_ast_test_delete_interpreter(interpreter, block_program);
+
+    ps_ast_test_delete_block_program(block_program);
+
+    return true;
+}
+
 bool ps_ast_test()
 {
     bool result = true;
 
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_minimal();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_assignment();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_hello();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_if_then_else();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_while_do();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_minimal();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_assignment();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_if_then_else();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_while_do();
     ps_ast_debug_line(0, "****************************************************************");
     result &= ps_ast_test_for_do();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_hello();
     ps_ast_debug_line(0, "****************************************************************");
 
     return result;
