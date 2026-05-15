@@ -257,10 +257,6 @@ bool ps_ast_test_assignment()
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_debug_line(0, "Free symbol table for the program %s", block_program->name);
-    ps_memory_free(PS_MEMORY_AST, block_program->symbols);
-    block_program->symbols = NULL;
-
     ps_ast_test_delete_interpreter(interpreter, block_program);
 
     ps_ast_test_delete_block_program(block_program);
@@ -345,4 +341,19 @@ bool ps_ast_test_hello()
     ps_ast_test_delete_block_program(block_program);
 
     return true;
+}
+
+bool ps_ast_test()
+{
+    bool result = true;
+
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_minimal();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_assignment();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_hello();
+    ps_ast_debug_line(0, "****************************************************************");
+
+    return result;
 }

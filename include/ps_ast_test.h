@@ -12,9 +12,7 @@ extern "C"
 {
 #endif
 
-    bool ps_ast_test_minimal();
-    bool ps_ast_test_assignment();
-    bool ps_ast_test_hello();
+    bool ps_ast_test();
 
 #ifdef __cplusplus
 }

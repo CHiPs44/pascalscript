@@ -14,15 +14,9 @@ int main(int argc, char *argv[])
     (void)argc; // silence unused variable warning
     (void)argv; // silence unused variable warning
 
-    // ps_ast_debug_line(0, "****************************************************************");
-    // ps_ast_test_minimal();
-    ps_ast_debug_line(0, "****************************************************************");
-    ps_ast_test_assignment();
-    ps_ast_debug_line(0, "****************************************************************");
-    // ps_ast_test_hello();
-    // ps_ast_debug_line(0, "****************************************************************");
+    bool result = ps_ast_test();
 
-    return 0;
+    return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 // #include <assert.h>
