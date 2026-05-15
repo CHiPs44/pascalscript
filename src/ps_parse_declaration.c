@@ -162,26 +162,29 @@ bool ps_parse_block(ps_compiler *compiler)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_CONST:
-            if (!ps_parse_const(compiler))
-                TRACE_ERROR("CONST")
-            break;
+            // if (!ps_parse_const(compiler))
+            //     TRACE_ERROR("CONST")
+            // break;
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_TYPE:
-            if (!ps_parse_type(compiler))
-                TRACE_ERROR("TYPE")
-            break;
+            // if (!ps_parse_type(compiler))
+            //     TRACE_ERROR("TYPE")
+            // break;
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_VAR:
             if (!ps_parse_var(compiler))
                 TRACE_ERROR("VAR")
             break;
         case PS_TOKEN_PROCEDURE:
-            if (!ps_parse_procedure_or_function_declaration(compiler, PS_SYMBOL_KIND_PROCEDURE))
-                TRACE_ERROR("PROCEDURE")
-            break;
+            // if (!ps_parse_procedure_or_function_declaration(compiler, PS_SYMBOL_KIND_PROCEDURE))
+            //     TRACE_ERROR("PROCEDURE")
+            // break;
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_FUNCTION:
-            if (!ps_parse_procedure_or_function_declaration(compiler, PS_SYMBOL_KIND_FUNCTION))
-                TRACE_ERROR("FUNCTION")
-            break;
+            // if (!ps_parse_procedure_or_function_declaration(compiler, PS_SYMBOL_KIND_FUNCTION))
+            //     TRACE_ERROR("FUNCTION")
+            // break;
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_BEGIN:
             loop = false;
             break;
