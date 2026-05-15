@@ -67,7 +67,6 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ASSERT_GOTO_CLEANUP(block_program->column == 1);
     ASSERT_GOTO_CLEANUP(strcmp(block_program->name, name) == 0);
     ASSERT_GOTO_CLEANUP(block_program->n_vars == 0);
-    ASSERT_GOTO_CLEANUP(block_program->symbols != NULL);
     ASSERT_GOTO_CLEANUP(block_program->n_executables == 0);
     ASSERT_GOTO_CLEANUP(block_program->executables == NULL);
     ASSERT_GOTO_CLEANUP(block_program->statement_list == NULL);
@@ -82,9 +81,18 @@ cleanup:
 
 bool ps_ast_test_delete_block_program(ps_ast_block *block_program)
 {
+    if (block_program->symbols != NULL)
+    {
+        ps_ast_debug_line(0, "Free symbol table for program %s", block_program->name);
+        ps_memory_free(PS_MEMORY_SYMBOL, block_program->symbols->symbols);
+        ps_memory_free(PS_MEMORY_AST, block_program->symbols);
+        block_program->symbols = NULL;
+    }
+
     ps_ast_debug_line(0, "Free the PROGRAM block node");
     block_program = (ps_ast_block *)ps_ast_free_block(block_program);
     ASSERT_RETURN_FALSE(block_program == NULL);
+
     return true;
 }
 
@@ -253,13 +261,9 @@ bool ps_ast_test_assignment()
     ps_memory_free(PS_MEMORY_AST, block_program->symbols);
     block_program->symbols = NULL;
 
-    ps_ast_debug_line(0, "Free program %s", block_program->name);
-    block_program = (ps_ast_block *)ps_ast_free_block(block_program);
-    ASSERT_RETURN_FALSE(block_program == NULL);
+    ps_ast_test_delete_interpreter(interpreter, block_program);
 
-    ps_ast_debug_line(0, "Free interpreter");
-    interpreter = ps_interpreter_free(interpreter);
-    ASSERT_RETURN_FALSE(interpreter == NULL);
+    ps_ast_test_delete_block_program(block_program);
 
     return true;
 }
@@ -303,7 +307,7 @@ bool ps_ast_test_hello()
     ps_ast_debug_line(0, "Create the argument list for the procedure call");
     ps_ast_node **args1 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
     ASSERT_RETURN_FALSE(args1 != NULL);
-    args1[0] = argument_hello;
+    args1[0] = (ps_ast_node *)argument_hello;
 
     ps_ast_debug_line(0, "Create the first PROCEDURE CALL statement");
     ps_ast_call *statement1 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1);
@@ -312,7 +316,7 @@ bool ps_ast_test_hello()
     ps_ast_debug_line(0, "Create the argument list for the second procedure call");
     ps_ast_node **args2 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
     ASSERT_RETURN_FALSE(args2 != NULL);
-    args2[0] = argument_i_42;
+    args2[0] = (ps_ast_node *)argument_i_42;
 
     ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
     ps_ast_call *statement2 = ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2);
@@ -336,17 +340,9 @@ bool ps_ast_test_hello()
                           ps_error_get_message(interpreter->error));
     }
 
-    ps_ast_debug_line(0, "Free symbol table for the program %s", block_program->name);
-    ps_memory_free(PS_MEMORY_AST, block_program->symbols);
-    block_program->symbols = NULL;
+    ps_ast_test_delete_interpreter(interpreter, block_program);
 
-    ps_ast_debug_line(0, "Free program %s", block_program->name);
-    block_program = (ps_ast_block *)ps_ast_free_block(block_program);
-    ASSERT_RETURN_FALSE(block_program == NULL);
-
-    ps_ast_debug_line(0, "Free interpreter");
-    interpreter = ps_interpreter_free(interpreter);
-    ASSERT_RETURN_FALSE(interpreter == NULL);
+    ps_ast_test_delete_block_program(block_program);
 
     return true;
 }
