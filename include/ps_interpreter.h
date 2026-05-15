@@ -101,7 +101,7 @@ extern "C"
      *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa,
      *         may set error to PS_ERROR_OUT_OF_RANGE or PS_ERROR_TYPE_MISMATCH
      */
-    bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to);
+    bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to);
 
 #ifdef __cplusplus
 }

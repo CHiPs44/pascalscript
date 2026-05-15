@@ -213,7 +213,7 @@ bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifie
     return ps_interpreter_add_symbol(interpreter, variable);
 }
 
-bool ps_interpreter_copy_value(ps_interpreter *interpreter, ps_value *from, ps_value *to) // NOSONAR
+bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
 {
     assert(NULL != interpreter);
     assert(NULL != from);

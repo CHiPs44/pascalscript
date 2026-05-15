@@ -10,6 +10,7 @@
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
 #include "ps_ast_execute.h"
+#include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
 #include "ps_operator.h"
@@ -190,7 +191,7 @@ bool ps_ast_run_while(ps_interpreter *interpreter, const ps_ast_while *while_sta
     ps_ast_debug_line(0, "WHILE statement: %d statements in body", while_statement->body->count);
     while (true)
     {
-        ps_ast_value condition_value = {.value.allocated = false, .value.type = NULL, .value.data = {0}};
+        ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
         bool result = ps_ast_eval_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
@@ -211,7 +212,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_
     assert(repeat_statement != NULL);
     assert(repeat_statement->kind == PS_AST_REPEAT);
     ps_ast_debug_line(0, "REPEAT statement");
-    ps_ast_value condition_value = {.value.allocated = false, .value.type = NULL, .value.data = {0}};
+    ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     do
     {
         ps_ast_debug_line(0, " - Body");
@@ -231,34 +232,55 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
     assert(for_statement != NULL);
     assert(for_statement->kind == PS_AST_FOR);
     ps_ast_debug_line(0, "FOR statement");
+
     ps_ast_variable_simple *variable_simple = for_statement->variable;
     ps_ast_debug_line(0, " - Variable: %s", variable_simple->variable->name);
+
     ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    bool result = ps_ast_eval_expression(interpreter, for_statement->start, &start_value);
-    if (!result)
+    if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
         return false;
     ps_ast_debug_line(0, " - Start value: %s", ps_value_get_display_string(&start_value.value, 0, 0));
+
     ps_ast_value end_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    result = ps_ast_eval_expression(interpreter, for_statement->end, &end_value);
-    if (!result)
+    if (!ps_ast_eval_expression(interpreter, for_statement->end, &end_value))
         return false;
     ps_ast_debug_line(0, " - End value: %s", ps_value_get_display_string(&end_value.value, 0, 0));
-    bool loop = true;
-    while (loop)
+
+    if (!ps_interpreter_copy_value(interpreter, (const ps_value *)&start_value.value, variable_simple->variable->value))
+        return false;
+    ps_ast_debug_line(0, " - Variable value: %s", ps_value_get_display_string(variable_simple->variable->value, 0, 0));
+
+    bool downto = for_statement->step < 0;
+    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+    do
     {
+        // Stop if variable > finish for "TO"
+        //      or variable < finish for "DOWNTO"
+        interpreter->debug = DEBUG_VERBOSE;
+        if (!ps_operator_eval_binary(interpreter, variable_simple->variable->value, &end_value.value, &stop,
+                                     downto ? PS_OP_LT : PS_OP_GT))
+        {
+            ps_ast_debug_line(0, "TEST!");
+            return false;
+        }
+        if (stop.data.b)
+        {
+            ps_ast_debug_line(0, "STOP!");
+            break;
+        }
         ps_ast_debug_line(0, " - Body: %d statements", for_statement->body->count);
         if (!ps_ast_run_statement_list(interpreter, for_statement->body))
             return false;
-        if (for_statement->step > 0)
-            if (start_value.value.data.i >= end_value.value.data.i)
-                loop = false;
-            else
-                start_value.value.data.i += for_statement->step;
-        else if (start_value.value.data.i <= end_value.value.data.i)
-            loop = false;
-        else
-            start_value.value.data.i += for_statement->step;
-    }
+        bool range_check = interpreter->range_check;
+        interpreter->range_check = false;
+        ps_error error =
+            downto ? ps_function_pred(interpreter, variable_simple->variable->value, variable_simple->variable->value)
+                   : ps_function_succ(interpreter, variable_simple->variable->value, variable_simple->variable->value);
+        interpreter->range_check = range_check;
+        if (error != PS_ERROR_NONE)
+            return false;
+    } while (true);
+
     return true;
 }
 
