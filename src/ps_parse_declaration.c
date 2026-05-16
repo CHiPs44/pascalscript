@@ -9,6 +9,7 @@
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_parse.h"
+#include "ps_parse_statement.h"
 #include "ps_system.h"
 #include "ps_token.h"
 
@@ -277,19 +278,20 @@ bool ps_parse_type(ps_compiler *compiler)
 {
     PARSE_BEGIN("TYPE", "");
 
-    EXPECT_TOKEN(PS_TOKEN_TYPE);
-    READ_NEXT_TOKEN
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    do
-    {
-        if (!ps_parse_type_definition(compiler))
-            TRACE_ERROR("TYPE_DEFINITION");
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN
-    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    // EXPECT_TOKEN(PS_TOKEN_TYPE);
+    // READ_NEXT_TOKEN
+    // if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    // do
+    // {
+    //     if (!ps_parse_type_definition(compiler))
+    //         TRACE_ERROR("TYPE_DEFINITION");
+    //     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+    //     READ_NEXT_TOKEN
+    // } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
-    PARSE_END("OK")
+    // PARSE_END("OK")
 }
 
 /**

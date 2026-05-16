@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include "ps_parse_statement.h"
 #include "ps_array.h"
 #include "ps_functions.h"
 #include "ps_parse.h"

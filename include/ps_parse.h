@@ -44,20 +44,6 @@ extern "C"
     bool ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
     bool ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
 
-    /* src/ps_parse_statement.c */
-    bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler);
-    bool ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable);
-    bool ps_parse_compound_statement(ps_compiler *compiler);
-    bool ps_parse_for_do(ps_compiler *compiler);
-    bool ps_parse_if_then_else(ps_compiler *compiler);
-    bool ps_parse_read_or_readln(ps_compiler *compiler, bool newline);
-    bool ps_parse_repeat_until(ps_compiler *compiler);
-    bool ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop);
-    bool ps_parse_statement_or_compound_statement(ps_compiler *compiler);
-    bool ps_parse_statement(ps_compiler *compiler);
-    bool ps_parse_while_do(ps_compiler *compiler);
-    bool ps_parse_write_or_writeln(ps_compiler *compiler, bool newline);
-
     /* src/ps_parse_type.c */
     bool ps_parse_type_definition(ps_compiler *compiler);
     bool ps_parse_type_reference(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);

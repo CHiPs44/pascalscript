@@ -9,13 +9,13 @@
 #include "ps_compiler.h"
 #include "ps_environment.h"
 #include "ps_error.h"
+#include "ps_functions.h"
 #include "ps_memory.h"
 #include "ps_parser.h"
+#include "ps_procedures.h"
 #include "ps_string_heap.h"
 #include "ps_system.h"
 #include "ps_value.h"
-
-#include "ps_compiler.h"
 
 ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check)
 {
@@ -91,12 +91,12 @@ bool ps_compiler_enter_environment(ps_compiler *compiler, ps_identifier name)
     if (compiler->level >= PS_COMPILER_ENVIRONMENTS - 1)
         return ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_OVERFLOW);
     ps_environment *parent = compiler->environments[compiler->level];
-    ps_environment *environment = ps_environment_alloc(parent, name, symbols == NULL ? 0 : symbols->size, 0);
+    ps_environment *environment = ps_environment_alloc(parent, name, 0, 0);
     if (environment == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     compiler->level += 1;
     compiler->environments[compiler->level] = environment;
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
         fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", compiler->level, PS_COMPILER_ENVIRONMENTS, name);
@@ -110,7 +110,7 @@ bool ps_compiler_exit_environment(ps_compiler *compiler)
     ps_environment *environment = compiler->environments[compiler->level];
     if (environment == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
     {
         fprintf(stderr, "--------------------------------------------------------------------------------\n");
         fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d '%s'\n", compiler->level, PS_COMPILER_ENVIRONMENTS,
@@ -141,7 +141,7 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, const char *name, bool
     if (environment == NULL)
         ps_compiler_return_null(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
     ps_symbol *symbol = ps_environment_find_symbol(environment, name, local);
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", environment->name, name,
                 local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     return symbol;
@@ -152,7 +152,7 @@ bool ps_compiler_add_symbol(ps_compiler *compiler, ps_symbol *symbol)
     ps_environment *environment = ps_compiler_get_environment(compiler);
     if (environment == NULL)
         ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    if (compiler->debug >= DEBUG_TRACE)
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)
         fprintf(stderr, "ADD %*s SYMBOL '%*s' TO ENVIRONMENT '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
                 environment->name, (void *)(symbol->value),
@@ -167,9 +167,10 @@ bool ps_compiler_add_variable(ps_compiler *compiler, const ps_identifier identif
     ps_value_data data = {0};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
     {
-        data.a = ps_array_alloc_data(type_symbol);
-        if (data.a == NULL)
-            return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
+        return ps_compiler_return_false(compiler, PS_ERROR_NOT_IMPLEMENTED);
+        // data.a = ps_array_alloc_data(type_symbol);
+        // if (data.a == NULL)
+        //     return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     }
     ps_value *value = ps_value_alloc(type_symbol, data);
     ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
@@ -198,7 +199,7 @@ bool ps_compiler_is_ordinal(ps_compiler *compiler, ps_value *value)
 
 bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
 {
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
     {
         fprintf(stderr, ">");
         ps_value_debug(stderr, "FROM\t", from);
@@ -208,7 +209,7 @@ bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
     ps_error error = ps_value_copy(from, to, compiler->range_check);
     if (error == PS_ERROR_NONE)
     {
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         {
             fprintf(stderr, "*");
             ps_value_debug(stderr, "TO\t", to);
