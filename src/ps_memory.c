@@ -12,9 +12,9 @@
 
 #include "ps_memory.h"
 
-static char *memory_class_names[] = {"SYSTEM", "BUFFER", "ENVIRONMENT", "EXECUTABLE", "INTERPRETER",
-                                     "LEXER",  "PARSER", "SIGNATURE",   "STRING",     "SYMBOL",
-                                     "TYPE",   "VALUE",  "AST"};
+static char *memory_class_names[] = {"SYSTEM",      "BUFFER", "ENVIRONMENT", "EXECUTABLE", "COMPILER",
+                                     "INTERPRETER", "LEXER",  "PARSER",      "SIGNATURE",  "STRING",
+                                     "SYMBOL",      "TYPE",   "VALUE",       "AST"};
 
 size_t mallocations[PS_MEMORY_CLASS_COUNT] = {0};
 size_t callocations[PS_MEMORY_CLASS_COUNT] = {0};
