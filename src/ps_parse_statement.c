@@ -85,74 +85,75 @@ bool ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variable)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
-    ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
-    ps_symbol *item_type = ps_array_get_subrange(variable);
-    u_int8_t dimensions = ps_array_get_dimensions(variable);
-    if (dimensions > 8)
-        RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    ps_value indexes[8] = {0};
-    int dimension = 0;
-    // Initialize index types for each dimension
-    bool loop = true;
-    do
-    {
-        indexes[dimension].allocated = false;
-        indexes[dimension].type = item_type;
-        indexes[dimension].data.v = NULL;
-        if (!loop)
-            break;
-        dimension += 1;
-        item_type = item_type->value->type->value->data.t->def.a.subrange;
-        if (item_type->kind != PS_TYPE_ARRAY)
-            loop = false;
-    } while (true);
-
-    EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
-    READ_NEXT_TOKEN
-    do
-    {
-        // At least one index
-        if (!ps_parse_expression(compiler, &indexes[dimension]))
-            TRACE_ERROR("INDEX")
-        dimension += 1;
-        // ',' begins another index
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
-            // Too many indexes?
-            if (dimension == dimensions)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN
-            continue;
-        }
-        // ']' ends indexes (and loop)
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
-        {
-            // Not enough indexes?
-            if (dimension != dimensions)
-                RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-            READ_NEXT_TOKEN
-            break;
-        }
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    } while (true);
-    // Check for ':='
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-    READ_NEXT_TOKEN
-    // Parse expression for value, expected type is item type
-    result.type = item_type;
-    if (!ps_parse_expression(compiler, &result))
-        TRACE_ERROR("EXPRESSION1")
-    // if (mode == MODE_EXEC)
+    ps_compiler_return_false(compiler, PS_ERROR_NOT_IMPLEMENTED);
+    // ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
+    // ps_symbol *item_type = ps_array_get_subrange(variable);
+    // u_int8_t dimensions = ps_array_get_dimensions(variable);
+    // if (dimensions > 8)
+    //     RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+    // ps_value indexes[8] = {0};
+    // int dimension = 0;
+    // // Initialize index types for each dimension
+    // bool loop = true;
+    // do
     // {
-    //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
-    //     if (error != PS_ERROR_NONE)
-    //     {
-    //         compiler->error = error;
-    //         TRACE_ERROR("ARRAY_ASSIGN")
-    //     }
-    // }
+    //     indexes[dimension].allocated = false;
+    //     indexes[dimension].type = item_type;
+    //     indexes[dimension].data.v = NULL;
+    //     if (!loop)
+    //         break;
+    //     dimension += 1;
+    //     item_type = item_type->value->type->value->data.t->def.a.subrange;
+    //     if (item_type->kind != PS_TYPE_ARRAY)
+    //         loop = false;
+    // } while (true);
 
-    PARSE_END("OK")
+    // EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+    // READ_NEXT_TOKEN
+    // do
+    // {
+    //     // At least one index
+    //     if (!ps_parse_expression(compiler, &indexes[dimension]))
+    //         TRACE_ERROR("INDEX")
+    //     dimension += 1;
+    //     // ',' begins another index
+    //     if (lexer->current_token.type == PS_TOKEN_COMMA)
+    //     {
+    //         // Too many indexes?
+    //         if (dimension == dimensions)
+    //             RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+    //         READ_NEXT_TOKEN
+    //         continue;
+    //     }
+    //     // ']' ends indexes (and loop)
+    //     if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+    //     {
+    //         // Not enough indexes?
+    //         if (dimension != dimensions)
+    //             RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
+    //         READ_NEXT_TOKEN
+    //         break;
+    //     }
+    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    // } while (true);
+    // // Check for ':='
+    // EXPECT_TOKEN(PS_TOKEN_ASSIGN)
+    // READ_NEXT_TOKEN
+    // // Parse expression for value, expected type is item type
+    // result.type = item_type;
+    // if (!ps_parse_expression(compiler, &result))
+    //     TRACE_ERROR("EXPRESSION1")
+    // // if (mode == MODE_EXEC)
+    // // {
+    // //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
+    // //     if (error != PS_ERROR_NONE)
+    // //     {
+    // //         compiler->error = error;
+    // //         TRACE_ERROR("ARRAY_ASSIGN")
+    // //     }
+    // // }
+
+    // PARSE_END("OK")
 }
 
 /**

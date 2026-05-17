@@ -13,7 +13,44 @@
 #include "ps_system.h"
 #include "ps_token.h"
 
-static bool ps_parse_program_parameters(ps_compiler *compiler);
+/**
+ * Parse program parameters (identifiers in parentheses)
+ */
+static bool ps_parse_program_parameters(ps_compiler *compiler)
+{
+    PARSE_BEGIN("PROGRAM", "PARAMETERS")
+
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    {
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        {
+            READ_NEXT_TOKEN
+            PARSE_END("OK")
+        }
+    }
+    bool loop = true;
+    do
+    {
+        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        READ_NEXT_TOKEN
+        switch (lexer->current_token.type)
+        {
+        case PS_TOKEN_COMMA:
+            READ_NEXT_TOKEN
+            break;
+        case PS_TOKEN_RIGHT_PARENTHESIS:
+            READ_NEXT_TOKEN
+            loop = false;
+            break;
+        default:
+            RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
+        }
+    } while (loop);
+
+    PARSE_END("OK")
+}
+
 /**
  * Parse program declaration:
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
@@ -55,44 +92,6 @@ bool ps_parse_program(ps_compiler *compiler)
     // Expect '.' at the end of program declaration
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
-
-    PARSE_END("OK")
-}
-
-/**
- * Parse program parameters (identifiers in parentheses)
- */
-static bool ps_parse_program_parameters(ps_compiler *compiler)
-{
-    PARSE_BEGIN("PROGRAM", "PARAMETERS")
-
-    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-    {
-        READ_NEXT_TOKEN
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-        {
-            READ_NEXT_TOKEN
-            PARSE_END("OK")
-        }
-    }
-    bool loop = true;
-    do
-    {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-        READ_NEXT_TOKEN
-        switch (lexer->current_token.type)
-        {
-        case PS_TOKEN_COMMA:
-            READ_NEXT_TOKEN
-            break;
-        case PS_TOKEN_RIGHT_PARENTHESIS:
-            READ_NEXT_TOKEN
-            loop = false;
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-        }
-    } while (loop);
 
     PARSE_END("OK")
 }

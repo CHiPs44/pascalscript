@@ -9,6 +9,7 @@
 
 #include <string.h>
 
+#include "ps_ast.h"
 #include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_parser.h"
@@ -47,6 +48,7 @@ extern "C"
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
         ps_environment
             *environments[PS_COMPILER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
+        ps_ast_node *ast;                            /** @brief AST */
     } /*__attribute__((__packed__))*/ ps_compiler;
 
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
