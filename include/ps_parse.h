@@ -45,7 +45,6 @@ extern "C"
     ps_ast_node *ps_parse_type_reference_array(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
-    ps_ast_node *ast = NULL;                                                                                           \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __PARSE__;                                                                                    \
     if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
@@ -61,13 +60,33 @@ extern "C"
             fprintf(stderr, "END\t%-32s %-32s ", visit, __PLUS__);                                                     \
             ps_token_debug(stderr, "END", &lexer->current_token);                                                      \
         }                                                                                                              \
-        return ast;                                                                                                    \
+        return true;                                                                                                   \
     }
 
-#define READ_NEXT_TOKEN                                                                                                \
+#define PARSE_BEGIN_AST(__AST__, __PARSE__, __PLUS__)                                                                  \
+    __AST__ *ast = NULL;                                                                                               \
+    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
+    static char *visit = __PARSE__;                                                                                    \
+    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
+    {                                                                                                                  \
+        fprintf(stderr, "BEGIN\t%-32s %-32s ", visit, __PLUS__);                                                       \
+        ps_token_debug(stderr, "BEGIN", &lexer->current_token);                                                        \
+    }
+
+#define PARSE_END_AST(__PLUS__)                                                                                        \
+    {                                                                                                                  \
+        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
+        {                                                                                                              \
+            fprintf(stderr, "END\t%-32s %-32s ", visit, __PLUS__);                                                     \
+            ps_token_debug(stderr, "END", &lexer->current_token);                                                      \
+        }                                                                                                              \
+        return (ps_ast_node *)ast;                                                                                     \
+    }
+
+#define READ_NEXT_TOKEN(__RETURN__)                                                                                                \
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
-            return NULL;                                                                                               \
+            return __RETURN__;                                                                                               \
         if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%-32s %-32s ", "", "");                                                            \

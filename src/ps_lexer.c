@@ -423,6 +423,8 @@ bool ps_lexer_read_token(ps_lexer *lexer)
         return false;
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
+    lexer->token_line = lexer->buffer->current_line;
+    lexer->token_column = lexer->buffer->current_char;
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))

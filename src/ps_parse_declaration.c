@@ -14,19 +14,20 @@
 #include "ps_token.h"
 
 /**
- * Parse program parameters (identifiers in parentheses)
+ * Parse/skip program parameters
+ *      [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')']
  */
-static ps_ast_node *ps_parse_program_parameters(ps_compiler *compiler)
+static bool ps_parse_program_parameters(ps_compiler *compiler)
 {
     PARSE_BEGIN("PROGRAM", "PARAMETERS")
 
     // Empty list?
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN(false)
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN(false)
             PARSE_END("OK")
         }
     }
@@ -34,14 +35,14 @@ static ps_ast_node *ps_parse_program_parameters(ps_compiler *compiler)
     do
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN(false)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_COMMA:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN(false)
             break;
         case PS_TOKEN_RIGHT_PARENTHESIS:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN(false)
             loop = false;
             break;
         default:
@@ -55,11 +56,11 @@ static ps_ast_node *ps_parse_program_parameters(ps_compiler *compiler)
 /**
  * Parse program declaration:
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
- *  identifiers are ignored
+ *      BLOCK '.'
  */
 ps_ast_node *ps_parse_program(ps_compiler *compiler)
 {
-    PARSE_BEGIN("PROGRAM", "")
+    PARSE_BEGIN_AST(ps_ast_block, "PROGRAM", "")
     uint16_t line = lexer->buffer->current_line;
     uint16_t column = lexer->buffer->current_column;
 
@@ -68,21 +69,22 @@ ps_ast_node *ps_parse_program(ps_compiler *compiler)
 
     // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN(NULL)
 
     // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN(NULL)
 
     // Skip optional parameters enclosed in parentheses
-    ps_parse_program_parameters(compiler);
-    if (compiler->error != PS_ERROR_NONE)
+    if (!ps_parse_program_parameters(compiler))
         TRACE_ERROR("PARAMETERS")
-    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
-    READ_NEXT_TOKEN
 
-    // Register program in symbol table and visit its block
+    // ;
+    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
+    READ_NEXT_TOKEN(NULL)
+
+    // Register program in symbol table of new environment
     if (!ps_compiler_enter_environment(compiler, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
     symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
@@ -115,7 +117,7 @@ ps_ast_node *ps_parse_program(ps_compiler *compiler)
 }
 
 /**
- * Parse uses clause (module names after USES)
+ * Parse/skip uses clause (module names after USES)
  */
 static ps_ast_node *ps_parse_uses_clause(ps_compiler *compiler)
 {
@@ -126,14 +128,14 @@ static ps_ast_node *ps_parse_uses_clause(ps_compiler *compiler)
     {
         if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
             RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN(NULL)
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_COMMA:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN(NULL)
             break;
         case PS_TOKEN_SEMI_COLON:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN(NULL)
             loop = false;
             break;
         default:
@@ -146,11 +148,11 @@ static ps_ast_node *ps_parse_uses_clause(ps_compiler *compiler)
 
 ps_ast_node *ps_parse_uses(ps_compiler *compiler)
 {
-    PARSE_BEGIN("USES", "")
+    PARSE_BEGIN_AST(ps_ast_node, "USES", "")
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN(NULL)
         ast = ps_parse_uses_clause(compiler);
         if (NULL == ast)
             TRACE_ERROR("USES CLAUSE")
