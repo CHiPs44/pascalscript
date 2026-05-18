@@ -18,40 +18,34 @@ extern "C"
 #endif
 
     /* src/ps_parse.c */
-    bool ps_parse_start(ps_compiler *compiler);
-
-    /* src/ps_parse_declaration.c */
-    bool ps_parse_program(ps_compiler *compiler);
-    bool ps_parse_uses(ps_compiler *compiler);
-    bool ps_parse_const(ps_compiler *compiler);
-    bool ps_parse_type(ps_compiler *compiler);
-    bool ps_parse_var(ps_compiler *compiler);
-    bool ps_parse_block(ps_compiler *compiler);
+    ps_ast_node *ps_parse_start(ps_compiler *compiler);
 
     /* src/ps_parse_executable.c */
-    bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
-    bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_value *result);
-    bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
+    ps_ast_node *ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
+    ps_ast_node *ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_value *result);
+    ps_ast_node *ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
     /* src/ps_parse_expression.c */
-    bool ps_parse_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_relational_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_and_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_or_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_simple_expression(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_term(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_factor(ps_compiler *compiler, ps_value *result);
-    bool ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
-    bool ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
+    ps_ast_node *ps_parse_expression(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_relational_expression(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_and_expression(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_or_expression(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_simple_expression(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_term(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_factor(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
+    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
 
     /* src/ps_parse_type.c */
-    bool ps_parse_type_definition(ps_compiler *compiler);
-    bool ps_parse_type_reference(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
-    bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
-    bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
-    bool ps_parse_type_reference_array(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
+    ps_ast_node *ps_parse_type_definition(ps_compiler *compiler);
+    ps_ast_node *ps_parse_type_reference(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
+    ps_ast_node *ps_parse_type_reference_enum(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
+    ps_ast_node *ps_parse_type_reference_subrange(ps_compiler *compiler, ps_symbol **type_symbol,
+                                                  const char *type_name);
+    ps_ast_node *ps_parse_type_reference_array(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
+    ps_ast_node *ast = NULL;                                                                                           \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __PARSE__;                                                                                    \
     if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
@@ -67,13 +61,13 @@ extern "C"
             fprintf(stderr, "END\t%-32s %-32s ", visit, __PLUS__);                                                     \
             ps_token_debug(stderr, "END", &lexer->current_token);                                                      \
         }                                                                                                              \
-        return true;                                                                                                   \
+        return ast;                                                                                                    \
     }
 
 #define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
-            return false;                                                                                              \
+            return NULL;                                                                                               \
         if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%-32s %-32s ", "", "");                                                            \
@@ -92,7 +86,7 @@ extern "C"
         }                                                                                                              \
         ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
         compiler->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                   \
-        return false;                                                                                                  \
+        return NULL;                                                                                                   \
     }
 
 #define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
@@ -129,7 +123,7 @@ extern "C"
             fprintf(stderr, "RETURN\t%-32s %-8d ", visit, __PS_ERROR__);                                               \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        return ps_compiler_return_false(compiler, __PS_ERROR__);                                                       \
+        return ps_compiler_return_null(compiler, __PS_ERROR__);                                                        \
     }
 
 #define GOTO_CLEANUP(__PS_ERROR__)                                                                                     \
@@ -150,48 +144,7 @@ extern "C"
             fprintf(stderr, "ERROR\t%-32s %-32s ", visit, __PLUS__);                                                   \
             ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
         }                                                                                                              \
-        return false;                                                                                                  \
-    }
-
-#define SAVE_CURSOR(__LINE__, __COLUMN__)                                                                              \
-    if (!ps_lexer_get_cursor(lexer, &__LINE__, &__COLUMN__))                                                           \
-        TRACE_ERROR("CURSOR!");
-
-#define SAVE_CURSOR_OR_CLEANUP(__LINE__, __COLUMN__)                                                                   \
-    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
-    {                                                                                                                  \
-        fprintf(stderr, "CURSOR\t%-32s %-32s %d %d ", visit, "SAVE", lexer->buffer->current_line,                      \
-                lexer->buffer->current_column);                                                                        \
-        ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
-    }                                                                                                                  \
-    if (!ps_lexer_get_cursor(lexer, &__LINE__, &__COLUMN__))                                                           \
-    {                                                                                                                  \
-        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
-        {                                                                                                              \
-            fprintf(stderr, "ERROR\t%-32s %-32s ", visit, "");                                                         \
-            ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
-        }                                                                                                              \
-        goto cleanup;                                                                                                  \
-    }
-
-#define RESTORE_CURSOR(__LINE__, __COLUMN__)                                                                           \
-    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
-    {                                                                                                                  \
-        fprintf(stderr, "CURSOR\t%-32s %-32s %d %d ", visit, "RESTORE", __LINE__, __COLUMN__);                         \
-        ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
-    }                                                                                                                  \
-    if (!ps_lexer_set_cursor(lexer, __LINE__, __COLUMN__))                                                             \
-        TRACE_ERROR("CURSOR!");
-
-#define TRACE_CURSOR                                                                                                   \
-    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
-    {                                                                                                                  \
-        uint16_t line = 0;                                                                                             \
-        uint16_t column = 0;                                                                                           \
-        if (!ps_lexer_get_cursor(lexer, &line, &column))                                                               \
-            TRACE_ERROR("CURSOR");                                                                                     \
-        fprintf(stderr, "CURSOR\t*** LINE=%d, COLUMN=%d ***\n", line, column);                                         \
-        ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                        \
+        return NULL;                                                                                                   \
     }
 
 #ifdef __cplusplus

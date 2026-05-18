@@ -23,7 +23,7 @@
  *      while_do_statement
  *      for_to_downto_do_statement
  */
-bool ps_parse_statement(ps_compiler *compiler)
+ps_ast_node *ps_parse_statement(ps_compiler *compiler)
 {
     PARSE_BEGIN("STATEMENT", "");
 
@@ -67,7 +67,7 @@ bool ps_parse_statement(ps_compiler *compiler)
  *      'END'
  * NB: ';' or '.' or whatever after END is analyzed in the caller
  */
-bool ps_parse_compound_statement(ps_compiler *compiler)
+ps_ast_node *ps_parse_compound_statement(ps_compiler *compiler)
 {
     PARSE_BEGIN("COMPOUND_STATEMENT", "");
 
@@ -81,7 +81,7 @@ bool ps_parse_compound_statement(ps_compiler *compiler)
     PARSE_END("OK")
 }
 
-bool ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variable)
+ps_ast_node *ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variable)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
@@ -166,7 +166,7 @@ bool ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variable)
  *      IDENTIFIER '^' = EXPRESSION
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
  */
-bool ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
+ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
 {
     PARSE_BEGIN("ASSIGNMENT", "")
 
@@ -210,7 +210,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
     PARSE_END("OK")
 }
 
-bool ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
+ps_ast_node *ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
 {
     (void)newline;
     PARSE_BEGIN("READ_OR_READLN", "")
@@ -235,7 +235,7 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
  *          file_variable ',' expression
  *      ')' ;
  */
-bool ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // NOSONAR
+ps_ast_node *ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // NOSONAR
 {
     PARSE_BEGIN("WRITE_OR_WRITELN", "");
 
@@ -311,7 +311,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // NOSONAR
  *      - variable: assignment
  *      - procedure: procedure call
  */
-bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
+ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
 {
     PARSE_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
     ps_identifier identifier;
@@ -377,7 +377,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
  * Parse
  *      'IF' expression 'THEN' statement [ 'ELSE' statement ]
  */
-bool ps_parse_if_then_else(ps_compiler *compiler)
+ps_ast_node *ps_parse_if_then_else(ps_compiler *compiler)
 {
     PARSE_BEGIN("IF", "")
 
@@ -406,7 +406,7 @@ bool ps_parse_if_then_else(ps_compiler *compiler)
  * Parse
  *      'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
  */
-bool ps_parse_repeat_until(ps_compiler *compiler)
+ps_ast_node *ps_parse_repeat_until(ps_compiler *compiler)
 {
     PARSE_BEGIN("REPEAT_UNTIL", "");
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
@@ -442,7 +442,7 @@ bool ps_parse_repeat_until(ps_compiler *compiler)
  * Parse
  *      'WHILE' expression 'DO' statement
  */
-bool ps_parse_while_do(ps_compiler *compiler)
+ps_ast_node *ps_parse_while_do(ps_compiler *compiler)
 {
     PARSE_BEGIN("WHILE_DO", "");
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
@@ -477,7 +477,7 @@ bool ps_parse_while_do(ps_compiler *compiler)
  * Parse
  *      'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
  */
-bool ps_parse_for_do(ps_compiler *compiler)
+ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
 {
     PARSE_BEGIN("FOR_DO", "");
 
@@ -575,7 +575,7 @@ bool ps_parse_for_do(ps_compiler *compiler)
 /**
  * Parse statement sequence, stopping at "stop" token (e.g. END, ELSE, UNTIL)
  */
-bool ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
+ps_ast_node *ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
 {
     PARSE_BEGIN("STATEMENT_LIST", "");
 
@@ -613,7 +613,7 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
  * Parse statement or compound statement:
  *      statement_or_compound_statement = statement | compound_statement
  */
-bool ps_parse_statement_or_compound_statement(ps_compiler *compiler)
+ps_ast_node *ps_parse_statement_or_compound_statement(ps_compiler *compiler)
 {
     PARSE_BEGIN("STATEMENT_OR_COMPOUND_STATEMENT", "");
 

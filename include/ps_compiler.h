@@ -72,7 +72,7 @@ extern "C"
     void *ps_compiler_return_null(ps_compiler *compiler, ps_error error);
 
     /** @brief Set formatted message */
-    bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...);
+    bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...); // NOSONAR
 
     /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
     bool ps_compiler_enter_environment(ps_compiler *compiler, ps_identifier name);

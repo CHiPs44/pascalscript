@@ -16,10 +16,11 @@
 /**
  * Parse program parameters (identifiers in parentheses)
  */
-static bool ps_parse_program_parameters(ps_compiler *compiler)
+static ps_ast_node *ps_parse_program_parameters(ps_compiler *compiler)
 {
     PARSE_BEGIN("PROGRAM", "PARAMETERS")
 
+    // Empty list?
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
         READ_NEXT_TOKEN
@@ -56,50 +57,67 @@ static bool ps_parse_program_parameters(ps_compiler *compiler)
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
  *  identifiers are ignored
  */
-bool ps_parse_program(ps_compiler *compiler)
+ps_ast_node *ps_parse_program(ps_compiler *compiler)
 {
     PARSE_BEGIN("PROGRAM", "")
+    uint16_t line = lexer->buffer->current_line;
+    uint16_t column = lexer->buffer->current_column;
 
     ps_identifier identifier = {0};
-    ps_symbol *program = NULL;
+    ps_symbol *symbol_program = NULL;
 
     // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
     READ_NEXT_TOKEN
+
     // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
+
     // Skip optional parameters enclosed in parentheses
-    if (!ps_parse_program_parameters(compiler))
+    ps_parse_program_parameters(compiler);
+    if (compiler->error != PS_ERROR_NONE)
         TRACE_ERROR("PARAMETERS")
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
+
     // Register program in symbol table and visit its block
     if (!ps_compiler_enter_environment(compiler, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
-    program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
-    if (!ps_compiler_add_symbol(compiler, program))
+    symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
+    if (!ps_compiler_add_symbol(compiler, symbol_program))
         TRACE_ERROR("ADD PROGRAM SYMBOL")
+
     // One "Uses" clause at most after "Program"
-    if (!ps_parse_uses(compiler))
+    ps_ast_node *uses = ps_parse_uses(compiler);
+    if (compiler->error != PS_ERROR_NONE)
         TRACE_ERROR("USES")
-    // Block with declarations and compound statement
-    if (!ps_parse_block(compiler))
+
+    // Block with declarations (constants, types, procedures & functions) and compound statement
+    ps_ast_node *block = ps_parse_block(compiler);
+    if (NULL == block)
         TRACE_ERROR("BLOCK");
     if (!ps_compiler_exit_environment(compiler))
         TRACE_ERROR("EXIT ENVIRONMENT");
+
     // Expect '.' at the end of program declaration
     EXPECT_TOKEN(PS_TOKEN_DOT)
     // NB: text after '.' is not analyzed and has not to be
 
+    ps_ast_block *program = ps_ast_create_block(line, column, PS_AST_PROGRAM, identifier);
+    if (NULL == program)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    program->statement_list = ((ps_ast_block *)block)->statement_list;
+
+    ast = (ps_ast_node *)program;
     PARSE_END("OK")
 }
 
 /**
  * Parse uses clause (module names after USES)
  */
-static bool ps_parse_uses_clause(ps_compiler *compiler)
+static ps_ast_node *ps_parse_uses_clause(ps_compiler *compiler)
 {
     PARSE_BEGIN("PROGRAM", "USES")
 
@@ -126,14 +144,15 @@ static bool ps_parse_uses_clause(ps_compiler *compiler)
     PARSE_END("OK")
 }
 
-bool ps_parse_uses(ps_compiler *compiler)
+ps_ast_node *ps_parse_uses(ps_compiler *compiler)
 {
     PARSE_BEGIN("USES", "")
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
         READ_NEXT_TOKEN
-        if (!ps_parse_uses_clause(compiler))
+        ast = ps_parse_uses_clause(compiler);
+        if (NULL == ast)
             TRACE_ERROR("USES CLAUSE")
     }
 
@@ -152,7 +171,7 @@ bool ps_parse_uses(ps_compiler *compiler)
  *      COMPOUND_STATEMENT
  * NB: ; or . or whatever after END is analyzed by the caller
  */
-bool ps_parse_block(ps_compiler *compiler)
+ps_ast_node *ps_parse_block(ps_compiler *compiler)
 {
     PARSE_BEGIN("BLOCK", "")
 
@@ -172,7 +191,8 @@ bool ps_parse_block(ps_compiler *compiler)
             // break;
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
         case PS_TOKEN_VAR:
-            if (!ps_parse_var(compiler))
+            ps_ast_node *vars = ps_parse_var(compiler);
+            if (NULL == ast)
                 TRACE_ERROR("VAR")
             break;
         case PS_TOKEN_PROCEDURE:
@@ -193,7 +213,8 @@ bool ps_parse_block(ps_compiler *compiler)
         }
     } while (loop);
 
-    if (!ps_parse_compound_statement(compiler))
+    ps_ast_node *compound = ps_parse_compound_statement(compiler);
+    if (NULL == compound)
         TRACE_ERROR("COMPOUND")
 
     PARSE_END("OK")
@@ -229,7 +250,7 @@ bool ps_parse_block(ps_compiler *compiler)
  * Not implemented yet in lexer:
  *          Lines       = 'First line' #10 'Second line' #10 'Third line';
  */
-bool ps_parse_const(ps_compiler *compiler)
+ps_ast_node *ps_parse_const(ps_compiler *compiler)
 {
     PARSE_BEGIN("CONST", "")
 
@@ -273,7 +294,7 @@ bool ps_parse_const(ps_compiler *compiler)
  *      'TYPE' TYPE_DEFINITION ';'
  *             [ TYPE_DEFINITION ';' ]*
  */
-bool ps_parse_type(ps_compiler *compiler)
+ps_ast_node *ps_parse_type(ps_compiler *compiler)
 {
     PARSE_BEGIN("TYPE", "");
 
@@ -296,7 +317,7 @@ bool ps_parse_type(ps_compiler *compiler)
 /**
  * Parse variable identifier list with commas
  */
-static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *identifier, int *var_count)
+static ps_ast_node *ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *identifier, int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
 
@@ -331,7 +352,7 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *i
  *          x: Real;
  *          Name: String;
  */
-bool ps_parse_var(ps_compiler *compiler)
+ps_ast_node *ps_parse_var(ps_compiler *compiler)
 {
     PARSE_BEGIN("VAR", "")
 

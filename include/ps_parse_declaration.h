@@ -18,12 +18,12 @@ extern "C"
 #endif
 
     /* src/ps_parse_declaration.c */
-    bool ps_parse_program(ps_compiler *compiler);
-    bool ps_parse_uses(ps_compiler *compiler);
-    bool ps_parse_const(ps_compiler *compiler);
-    bool ps_parse_type(ps_compiler *compiler);
-    bool ps_parse_var(ps_compiler *compiler);
-    bool ps_parse_block(ps_compiler *compiler);
+    ps_ast_node *ps_parse_program(ps_compiler *compiler);
+    ps_ast_node *ps_parse_uses(ps_compiler *compiler);
+    ps_ast_node *ps_parse_const(ps_compiler *compiler);
+    ps_ast_node *ps_parse_type(ps_compiler *compiler);
+    ps_ast_node *ps_parse_var(ps_compiler *compiler);
+    ps_ast_node *ps_parse_block(ps_compiler *compiler);
 
 #ifdef __cplusplus
 }
