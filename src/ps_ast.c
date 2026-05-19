@@ -22,8 +22,8 @@ bool ps_ast_node_check_group(const ps_ast_node *node, ps_ast_node_group expected
 {
     if (node->group != expected_group)
     {
-        ps_ast_debug_line(0, "Error: expected AST node group %s but got %s\n", ps_ast_node_get_group_name(expected_group),
-                          ps_ast_node_get_group_name(node->group));
+        ps_ast_debug_line(0, "Error: expected AST node group %s but got %s\n",
+                          ps_ast_node_get_group_name(expected_group), ps_ast_node_get_group_name(node->group));
         return false;
     }
     return true;
@@ -104,13 +104,15 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
 // PS_AST_BLOCK
 // =============================================================================
 
-ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_node_kind kind, const char *name)
+ps_ast_block *ps_ast_create_block(ps_ast_block *parent, uint16_t line, uint16_t column, ps_ast_node_kind kind,
+                                  const char *name)
 {
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(PS_AST_BLOCK, kind, line, column, sizeof(ps_ast_block));
     if (block == NULL)
         return NULL;
     snprintf(block->name, PS_IDENTIFIER_LEN, "%s", name);
+    block->parent = parent;
     block->symbols = NULL;
     block->signature = NULL;
     block->result_type = NULL;

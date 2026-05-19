@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+#include "ps_ast.h"
 #include "ps_compiler.h"
 #include "ps_environment.h"
 #include "ps_error.h"
@@ -135,34 +136,32 @@ ps_environment *ps_compiler_get_environment(ps_compiler *compiler)
     return compiler->environments[compiler->level];
 }
 
-ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, const char *name, bool local)
+ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)
 {
-    ps_environment *environment = ps_compiler_get_environment(compiler);
-    if (environment == NULL)
-        ps_compiler_return_null(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    ps_symbol *symbol = ps_environment_find_symbol(environment, name, local);
+    ps_symbol *symbol = ps_symbol_table_get(block->symbols, name);
+    if (!local && block->parent != NULL && symbol == NULL)
+        return ps_compiler_find_symbol(compiler, block->parent, name, false);
     if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
-        fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", environment->name, name,
+        fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
                 local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     return symbol;
 }
 
-bool ps_compiler_add_symbol(ps_compiler *compiler, ps_symbol *symbol)
+bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol)
 {
-    ps_environment *environment = ps_compiler_get_environment(compiler);
-    if (environment == NULL)
-        ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
     if (compiler->debug >= COMPILER_DEBUG_TRACE)
-        fprintf(stderr, "ADD %*s SYMBOL '%*s' TO ENVIRONMENT '%*s' with value %p: '%s'\n", -10,
+        fprintf(stderr, "ADD %*s SYMBOL '%*s' TO BLOCK '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
-                environment->name, (void *)(symbol->value),
+                block->name, (void *)(symbol->value),
                 symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
-    if (!ps_environment_add_symbol(environment, symbol))
+    ps_symbol_table_error error = ps_symbol_table_add(block->symbols, symbol);
+    if (error != PS_SYMBOL_TABLE_ERROR_NONE)
         return ps_compiler_return_false(compiler, PS_ERROR_SYMBOL_NOT_ADDED);
     return true;
 }
 
-bool ps_compiler_add_variable(ps_compiler *compiler, const ps_identifier identifier, ps_symbol *type_symbol)
+bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const ps_identifier identifier,
+                              ps_symbol *type_symbol)
 {
     ps_value_data data = {0};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
@@ -180,7 +179,7 @@ bool ps_compiler_add_variable(ps_compiler *compiler, const ps_identifier identif
             ps_memory_free(PS_MEMORY_VALUE, data.a);
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     }
-    return ps_compiler_add_symbol(compiler, variable);
+    return ps_compiler_add_symbol(compiler, block, variable);
 }
 
 bool ps_compiler_is_number(ps_compiler *compiler, ps_value *value)

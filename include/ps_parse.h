@@ -63,30 +63,10 @@ extern "C"
         return true;                                                                                                   \
     }
 
-#define PARSE_BEGIN_AST(__AST__, __PARSE__, __PLUS__)                                                                  \
-    __AST__ *ast = NULL;                                                                                               \
-    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
-    static char *visit = __PARSE__;                                                                                    \
-    if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                       \
-    {                                                                                                                  \
-        fprintf(stderr, "BEGIN\t%-32s %-32s ", visit, __PLUS__);                                                       \
-        ps_token_debug(stderr, "BEGIN", &lexer->current_token);                                                        \
-    }
-
-#define PARSE_END_AST(__PLUS__)                                                                                        \
-    {                                                                                                                  \
-        if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
-        {                                                                                                              \
-            fprintf(stderr, "END\t%-32s %-32s ", visit, __PLUS__);                                                     \
-            ps_token_debug(stderr, "END", &lexer->current_token);                                                      \
-        }                                                                                                              \
-        return (ps_ast_node *)ast;                                                                                     \
-    }
-
-#define READ_NEXT_TOKEN(__RETURN__)                                                                                                \
+#define READ_NEXT_TOKEN()                                                                                              \
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
-            return __RETURN__;                                                                                               \
+            return false;                                                                                              \
         if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%-32s %-32s ", "", "");                                                            \
@@ -105,7 +85,7 @@ extern "C"
         }                                                                                                              \
         ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
         compiler->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                   \
-        return NULL;                                                                                                   \
+        return false;                                                                                                  \
     }
 
 #define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
@@ -142,7 +122,8 @@ extern "C"
             fprintf(stderr, "RETURN\t%-32s %-8d ", visit, __PS_ERROR__);                                               \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
-        return ps_compiler_return_null(compiler, __PS_ERROR__);                                                        \
+        compiler->error = __PS_ERROR__;                                                                                \
+        return false;                                                                                                  \
     }
 
 #define GOTO_CLEANUP(__PS_ERROR__)                                                                                     \
@@ -163,7 +144,7 @@ extern "C"
             fprintf(stderr, "ERROR\t%-32s %-32s ", visit, __PLUS__);                                                   \
             ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
         }                                                                                                              \
-        return NULL;                                                                                                   \
+        return false;                                                                                                  \
     }
 
 #ifdef __cplusplus

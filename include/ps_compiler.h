@@ -87,10 +87,11 @@ extern "C"
     ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, const char *name, bool local);
 
     /** @brief Add symbol to current environment */
-    bool ps_compiler_add_symbol(ps_compiler *compiler, ps_symbol *symbol);
+    bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol);
 
     /** @brief Add variable to current environment, allocate values for arrays */
-    bool ps_compiler_add_variable(ps_compiler *compiler, const ps_identifier identifier, ps_symbol *type_symbol);
+    bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const ps_identifier identifier,
+                                  ps_symbol *type_symbol);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_compiler_is_number(ps_compiler *compiler, ps_value *value);

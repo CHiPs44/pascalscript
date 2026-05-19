@@ -15,7 +15,7 @@
 
 /**
  * Parse statement:
- *      'BEGIN' statement_list [ ';' ] 'END'
+ *      compound_statement
  *      assignment_statement
  *      procedure_call_statement
  *      if_then_else_statement
@@ -23,35 +23,35 @@
  *      while_do_statement
  *      for_to_downto_do_statement
  */
-ps_ast_node *ps_parse_statement(ps_compiler *compiler)
+bool ps_parse_statement(ps_compiler *compiler, ps_ast_node *ast)
 {
     PARSE_BEGIN("STATEMENT", "");
 
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_BEGIN:
-        if (!ps_parse_compound_statement(compiler))
-            TRACE_ERROR("COMPOUND")
+        if (!ps_parse_compound_statement(compiler, ast))
+            TRACE_ERROR(NULL, "COMPOUND")
         break;
     case PS_TOKEN_IDENTIFIER:
-        if (!ps_parse_assignment_or_procedure_call(compiler))
-            TRACE_ERROR("ASSIGNMENT/PROCEDURE")
+        if (!ps_parse_assignment_or_procedure_call(compiler, ast))
+            TRACE_ERROR(NULL, "ASSIGNMENT/PROCEDURE")
         break;
     case PS_TOKEN_IF:
-        if (!ps_parse_if_then_else(compiler))
-            TRACE_ERROR("IF")
+        if (!ps_parse_if_then_else(compiler, ast))
+            TRACE_ERROR(NULL, "IF")
         break;
     case PS_TOKEN_REPEAT:
-        if (!ps_parse_repeat_until(compiler))
-            TRACE_ERROR("REPEAT")
+        if (!ps_parse_repeat_until(compiler, ast))
+            TRACE_ERROR(NULL, "REPEAT")
         break;
     case PS_TOKEN_WHILE:
-        if (!ps_parse_while_do(compiler))
-            TRACE_ERROR("WHILE")
+        if (!ps_parse_while_do(compiler, ast))
+            TRACE_ERROR(NULL, "WHILE")
         break;
     case PS_TOKEN_FOR:
-        if (!ps_parse_for_do(compiler))
-            TRACE_ERROR("FOR")
+        if (!ps_parse_for_do(compiler, ast))
+            TRACE_ERROR(NULL, "FOR")
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -67,21 +67,21 @@ ps_ast_node *ps_parse_statement(ps_compiler *compiler)
  *      'END'
  * NB: ';' or '.' or whatever after END is analyzed in the caller
  */
-ps_ast_node *ps_parse_compound_statement(ps_compiler *compiler)
+bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_node *ast)
 {
     PARSE_BEGIN("COMPOUND_STATEMENT", "");
 
     EXPECT_TOKEN(PS_TOKEN_BEGIN);
     READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_END && !ps_parse_statement_list(compiler, PS_TOKEN_END))
-        TRACE_ERROR("STATEMENT_LIST")
+        TRACE_ERROR(NULL, "STATEMENT_LIST")
     EXPECT_TOKEN(PS_TOKEN_END)
     READ_NEXT_TOKEN
 
     PARSE_END("OK")
 }
 
-ps_ast_node *ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variable)
+bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_node *ast, ps_symbol *variable)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
@@ -114,7 +114,7 @@ ps_ast_node *ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variabl
     // {
     //     // At least one index
     //     if (!ps_parse_expression(compiler, &indexes[dimension]))
-    //         TRACE_ERROR("INDEX")
+    //         TRACE_ERROR(NULL, "INDEX")
     //     dimension += 1;
     //     // ',' begins another index
     //     if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -142,14 +142,14 @@ ps_ast_node *ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variabl
     // // Parse expression for value, expected type is item type
     // result.type = item_type;
     // if (!ps_parse_expression(compiler, &result))
-    //     TRACE_ERROR("EXPRESSION1")
+    //     TRACE_ERROR(NULL, "EXPRESSION1")
     // // if (mode == MODE_EXEC)
     // // {
     // //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
     // //     if (error != PS_ERROR_NONE)
     // //     {
     // //         compiler->error = error;
-    // //         TRACE_ERROR("ARRAY_ASSIGN")
+    // //         TRACE_ERROR(NULL, "ARRAY_ASSIGN")
     // //     }
     // // }
 
@@ -166,7 +166,7 @@ ps_ast_node *ps_parse_assignment_array(ps_compiler *compiler, ps_symbol *variabl
  *      IDENTIFIER '^' = EXPRESSION
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
  */
-ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
+bool ps_parse_assignment(ps_compiler *compiler, ps_ast_node *ast, ps_symbol *variable)
 {
     PARSE_BEGIN("ASSIGNMENT", "")
 
@@ -176,13 +176,13 @@ ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
     {
         compiler->error = PS_ERROR_ASSIGN_TO_CONST;
         ps_interpreter_set_message(compiler, "Constant '%s' cannot be assigned", variable->name);
-        TRACE_ERROR("CONSTANT");
+        TRACE_ERROR(NULL, "CONSTANT");
     }
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         compiler->error = PS_ERROR_EXPECTED_VARIABLE;
         ps_interpreter_set_message(compiler, "Symbol '%s' is not a variable", variable->name);
-        TRACE_ERROR("VARIABLE");
+        TRACE_ERROR(NULL, "VARIABLE");
     }
     if (compiler->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "\nINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", variable->name,
@@ -191,7 +191,7 @@ ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
     {
         // => array[index] := expression
         if (!ps_parse_assignment_array(compiler, variable))
-            TRACE_ERROR("ARRAY")
+            TRACE_ERROR(NULL, "ARRAY")
     }
     else
     {
@@ -199,18 +199,18 @@ ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable)
         READ_NEXT_TOKEN
         result.type = variable->value->type;
         if (!ps_parse_expression(compiler, &result))
-            TRACE_ERROR("EXPRESSION1");
+            TRACE_ERROR(NULL, "EXPRESSION1");
         if (compiler->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
         // if (mode == MODE_EXEC && !ps_interpreter_copy_value(compiler, &result, variable->value))
-        //     TRACE_ERROR("COPY");
+        //     TRACE_ERROR(NULL, "COPY");
     }
 
     PARSE_END("OK")
 }
 
-ps_ast_node *ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
+bool ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
 {
     (void)newline;
     PARSE_BEGIN("READ_OR_READLN", "")
@@ -235,7 +235,7 @@ ps_ast_node *ps_parse_read_or_readln(ps_compiler *compiler, bool newline)
  *          file_variable ',' expression
  *      ')' ;
  */
-ps_ast_node *ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // NOSONAR
+bool ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // NOSONAR
 {
     PARSE_BEGIN("WRITE_OR_WRITELN", "");
 
@@ -269,7 +269,7 @@ ps_ast_node *ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // N
         if (compiler->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
         if (!ps_parse_expression(compiler, &result))
-            TRACE_ERROR("EXPRESSION");
+            TRACE_ERROR(NULL, "EXPRESSION");
         // retrieve numeric format
         width = 0;
         precision = 0;
@@ -311,7 +311,7 @@ ps_ast_node *ps_parse_write_or_writeln(ps_compiler *compiler, bool newline) // N
  *      - variable: assignment
  *      - procedure: procedure call
  */
-ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
+bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
 {
     PARSE_BEGIN("ASSIGNMENT_OR_PROCEDURE_CALL", "");
     ps_identifier identifier;
@@ -322,7 +322,7 @@ ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
     READ_NEXT_TOKEN
 
     // Check if identifier is the current function as defined in its parent environment
-    ps_environment *environment = ps_interpreter_get_environment(compiler);
+    ps_environment *environment = ps_interpreter_get_environment(compiler, ast);
     if (environment == NULL)
         RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
     // First, check if this is an assignment to the current function name
@@ -349,14 +349,14 @@ ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
     {
     case PS_SYMBOL_KIND_VARIABLE:
         if (!ps_parse_assignment(compiler, symbol))
-            TRACE_ERROR("ASSIGNMENT")
+            TRACE_ERROR(NULL, "ASSIGNMENT")
         break;
     case PS_SYMBOL_KIND_CONSTANT:
         ps_interpreter_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_parse_procedure_or_function_call(compiler, symbol, NULL))
-            TRACE_ERROR("PROCEDURE_CALL")
+            TRACE_ERROR(NULL, "PROCEDURE_CALL")
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name = assignment to Result
@@ -364,7 +364,7 @@ ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_parse_assignment(compiler, symbol))
-            TRACE_ERROR("ASSIGNMENT")
+            TRACE_ERROR(NULL, "ASSIGNMENT")
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -377,7 +377,7 @@ ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler)
  * Parse
  *      'IF' expression 'THEN' statement [ 'ELSE' statement ]
  */
-ps_ast_node *ps_parse_if_then_else(ps_compiler *compiler)
+bool ps_parse_if_then_else(ps_compiler *compiler)
 {
     PARSE_BEGIN("IF", "")
 
@@ -385,18 +385,18 @@ ps_ast_node *ps_parse_if_then_else(ps_compiler *compiler)
 
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, &result))
-        TRACE_ERROR("CONDITION")
+        TRACE_ERROR(NULL, "CONDITION")
     if (result.type != &ps_system_boolean)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
     EXPECT_TOKEN(PS_TOKEN_THEN)
     READ_NEXT_TOKEN
-    if (!ps_parse_statement(compiler))
-        TRACE_ERROR("THEN")
+    if (!ps_parse_statement(compiler, ast))
+        TRACE_ERROR(NULL, "THEN")
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
         READ_NEXT_TOKEN
-        if (!ps_parse_statement(compiler))
-            TRACE_ERROR("ELSE")
+        if (!ps_parse_statement(compiler, ast))
+            TRACE_ERROR(NULL, "ELSE")
     }
 
     PARSE_END("OK")
@@ -406,7 +406,7 @@ ps_ast_node *ps_parse_if_then_else(ps_compiler *compiler)
  * Parse
  *      'REPEAT' statement_list [ ';' ] 'UNTIL' expression ;
  */
-ps_ast_node *ps_parse_repeat_until(ps_compiler *compiler)
+bool ps_parse_repeat_until(ps_compiler *compiler)
 {
     PARSE_BEGIN("REPEAT_UNTIL", "");
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
@@ -418,14 +418,14 @@ ps_ast_node *ps_parse_repeat_until(ps_compiler *compiler)
     do
     {
         if (!ps_parse_statement_list(compiler, PS_TOKEN_UNTIL))
-            TRACE_ERROR("STATEMENTS");
+            TRACE_ERROR(NULL, "STATEMENTS");
         // Skip optional ';'
         if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             READ_NEXT_TOKEN
         EXPECT_TOKEN(PS_TOKEN_UNTIL);
         READ_NEXT_TOKEN
         if (!ps_parse_expression(compiler, &result))
-            TRACE_ERROR("EXPRESSION");
+            TRACE_ERROR(NULL, "EXPRESSION");
         if (result.type != &ps_system_boolean)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         // if (mode != MODE_EXEC || result.data.b)
@@ -442,7 +442,7 @@ ps_ast_node *ps_parse_repeat_until(ps_compiler *compiler)
  * Parse
  *      'WHILE' expression 'DO' statement
  */
-ps_ast_node *ps_parse_while_do(ps_compiler *compiler)
+bool ps_parse_while_do(ps_compiler *compiler)
 {
     PARSE_BEGIN("WHILE_DO", "");
     ps_value result = {.type = &ps_system_boolean, .data.b = false};
@@ -451,18 +451,18 @@ ps_ast_node *ps_parse_while_do(ps_compiler *compiler)
 
     // Save "cursor" position
     if (!ps_lexer_get_cursor(lexer, &line, &column))
-        TRACE_ERROR("CURSOR!");
+        TRACE_ERROR(NULL, "CURSOR!");
     READ_NEXT_TOKEN
     do
     {
         if (!ps_parse_expression(compiler, &result))
-            TRACE_ERROR("EXPRESSION");
+            TRACE_ERROR(NULL, "EXPRESSION");
         if (result.type != &ps_system_boolean)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
         EXPECT_TOKEN(PS_TOKEN_DO);
         READ_NEXT_TOKEN
-        if (!ps_parse_statement(compiler))
-            TRACE_ERROR("STATEMENT");
+        if (!ps_parse_statement(compiler, ast))
+            TRACE_ERROR(NULL, "STATEMENT");
         // if (mode != MODE_EXEC || !result.data.b)
         //     break;
         // if (!ps_lexer_set_cursor(lexer, line, column))
@@ -477,7 +477,7 @@ ps_ast_node *ps_parse_while_do(ps_compiler *compiler)
  * Parse
  *      'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
  */
-ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
+bool ps_parse_for_do(ps_compiler *compiler)
 {
     PARSE_BEGIN("FOR_DO", "");
 
@@ -510,7 +510,7 @@ ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
     // START VALUE
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, &start))
-        TRACE_ERROR("START");
+        TRACE_ERROR(NULL, "START");
     // TO | DOWNTO
     if (lexer->current_token.type == PS_TOKEN_TO)
         downto = false;
@@ -521,7 +521,7 @@ ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
     READ_NEXT_TOKEN
     // FINISH VALUE
     if (!ps_parse_expression(compiler, &finish))
-        TRACE_ERROR("FINISH");
+        TRACE_ERROR(NULL, "FINISH");
     // DO
     EXPECT_TOKEN(PS_TOKEN_DO);
     // // Save "cursor"
@@ -530,31 +530,31 @@ ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
     // if (mode != MODE_EXEC)
     // {
     //     if (!ps_parse_statement_or_compound_statement(compiler_SKIP))
-    //         TRACE_ERROR("STATEMENT_OR_COMPOUND")
+    //         TRACE_ERROR(NULL, "STATEMENT_OR_COMPOUND")
     // }
     // else
     // {
     // // VARIABLE := START
     // if (!ps_interpreter_copy_value(compiler, &start, variable->value))
-    //     TRACE_ERROR("COPY");
+    //     TRACE_ERROR(NULL, "COPY");
     // do
     // {
     //     // Loop while variable <= finish for "TO"
     //     //         or variable >= finish for "DOWNTO"
     //     if (!ps_function_binary_op(compiler, variable->value, &finish, &result,
     //                                downto ? PS_TOKEN_GE : PS_TOKEN_LE))
-    //         TRACE_ERROR("BINARY")
+    //         TRACE_ERROR(NULL, "BINARY")
     //     if (result.type != &ps_system_boolean)
     //         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
     //     if (!result.data.b)
     //     {
     //         // End of loop => skip statement
     //         if (!ps_parse_statement_or_compound_statement(compiler_SKIP))
-    //             TRACE_ERROR("BODY")
+    //             TRACE_ERROR(NULL, "BODY")
     //         break;
     //     }
-    //     if (!ps_parse_statement_or_compound_statement(compiler))
-    //         TRACE_ERROR("BODY");
+    //     if (!ps_parse_statement_or_compound_statement(compiler,ast))
+    //         TRACE_ERROR(NULL, "BODY");
     //     // Next iteration
     //     if (!ps_lexer_set_cursor(lexer, line, column))
     //         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE); // TODO better error code
@@ -575,7 +575,7 @@ ps_ast_node *ps_parse_for_do(ps_compiler *compiler)
 /**
  * Parse statement sequence, stopping at "stop" token (e.g. END, ELSE, UNTIL)
  */
-ps_ast_node *ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
+bool ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
 {
     PARSE_BEGIN("STATEMENT_LIST", "");
 
@@ -590,8 +590,8 @@ ps_ast_node *ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
         bool loop = true;
         do
         {
-            if (!ps_parse_statement(compiler))
-                TRACE_ERROR("STATEMENT");
+            if (!ps_parse_statement(compiler, ast))
+                TRACE_ERROR(NULL, "STATEMENT");
             // NB: semi-colon at statement list end is optional
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
@@ -613,19 +613,19 @@ ps_ast_node *ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop)
  * Parse statement or compound statement:
  *      statement_or_compound_statement = statement | compound_statement
  */
-ps_ast_node *ps_parse_statement_or_compound_statement(ps_compiler *compiler)
+bool ps_parse_statement_or_compound_statement(ps_compiler *compiler)
 {
     PARSE_BEGIN("STATEMENT_OR_COMPOUND_STATEMENT", "");
 
     if (lexer->current_token.type == PS_TOKEN_BEGIN)
     {
-        if (!ps_parse_compound_statement(compiler))
-            TRACE_ERROR("COMPOUND");
+        if (!ps_parse_compound_statement(compiler, ast))
+            TRACE_ERROR(NULL, "COMPOUND");
     }
     else
     {
-        if (!ps_parse_statement(compiler))
-            TRACE_ERROR("STATEMENT");
+        if (!ps_parse_statement(compiler, ast))
+            TRACE_ERROR(NULL, "STATEMENT");
     }
 
     PARSE_END("OK")

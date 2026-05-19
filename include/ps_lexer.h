@@ -21,8 +21,8 @@ extern "C"
     {
         ps_buffer *buffer;
         ps_error error;
-        uint16_t token_line;
-        uint16_t token_column;
+        uint16_t start_line;
+        uint16_t start_column;
         ps_token current_token;
     } ps_lexer;
 
