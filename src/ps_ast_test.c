@@ -46,7 +46,7 @@
 ps_ast_block *ps_ast_test_create_block_program(const char *name)
 {
     ps_ast_debug_line(0, "Create a PROGRAM node with name '%s' at line 1, column 1", name);
-    ps_ast_block *block_program = ps_ast_create_block(1, 1, PS_AST_PROGRAM, name);
+    ps_ast_block *block_program = ps_ast_create_block(1, 1, NULL, PS_AST_PROGRAM, name);
     if (block_program == NULL)
         return NULL;
 
