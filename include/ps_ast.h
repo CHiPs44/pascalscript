@@ -80,11 +80,11 @@ extern "C"
     typedef struct s_ps_ast_block
     {
         PS_AST_NODE_COMMON ps_identifier name; /** @brief Every block has a name                                    */
-        ps_ast_block *parent;                  /** @brief Parent block, NULL for PROGRAM */
+        struct s_ps_ast_block *parent;         /** @brief Parent block, NULL for PROGRAM */
         size_t n_vars;                         /** @brief Number of variables to allocate at startup                */
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions     */
         size_t n_executables;                  /** @brief exactly 1 for procedure and function, 0 or more otherwise */
-        ps_ast_block **executables;            /** @brief declarations of procedures and functions                  */
+        struct s_ps_ast_block **executables;   /** @brief declarations of procedures and functions                  */
         ps_ast_statement_list *statement_list; /** @brief Statements for this block                                 */
         ps_formal_signature *signature;        /** @brief Only for procedures and functions, NULL otherwise         */
         ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                        */

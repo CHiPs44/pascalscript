@@ -104,7 +104,7 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
 // PS_AST_BLOCK
 // =============================================================================
 
-ps_ast_block *ps_ast_create_block(ps_ast_block *parent, uint16_t line, uint16_t column, ps_ast_node_kind kind,
+ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
                                   const char *name)
 {
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
@@ -135,7 +135,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
     if (block->statement_list != NULL)
         ps_ast_free_statement_list(block->statement_list);
     for (size_t i = 0; i < block->n_executables; i++)
-        block->executables[i] = ps_ast_free_node(block->executables[i]);
+        block->executables[i] = ps_ast_free_block(block->executables[i]);
     ps_memory_free(PS_MEMORY_AST, block->executables);
     ps_memory_free(PS_MEMORY_AST, block);
     return NULL;
