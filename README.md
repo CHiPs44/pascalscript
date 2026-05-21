@@ -4,6 +4,10 @@ NB: this project has no link with [RemObjects Pascal Script](https://github.com/
 
 ## Status
 
+As of 2026-05-21, use of a "compiler" generating an AST then an "interpreter" executing this AST is on its way.
+
+Direct interpretation was really too cumbersome to implement...
+
 As of 2026-02-20, the interpreter itself implements:
 
 - Assignment to variable from an expression with `:=`
