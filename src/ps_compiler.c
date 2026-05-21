@@ -20,31 +20,22 @@
 
 ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check)
 {
+    // Allocate compiler itself
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
     compiler->parser = NULL;
-    compiler->string_heap = NULL;
-    compiler->level = 0;
     compiler->error = PS_ERROR_NONE;
     compiler->debug = COMPILER_DEBUG_NONE;
     compiler->range_check = range_check;
     compiler->bool_eval = bool_eval;
     compiler->io_check = io_check;
+    compiler->system = NULL;
     // Allocate string heap
     compiler->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
     if (compiler->string_heap == NULL)
         return ps_compiler_free(compiler);
-    // Allocate system environment
-    ps_identifier system = "SYSTEM";
-    compiler->environments[0] =
-        ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
-    if (compiler->environments[PS_COMPILER_ENVIRONMENT_SYSTEM] == NULL)
-        return ps_compiler_free(compiler);
-    // Initialize system environment
-    if (!ps_system_init(compiler->environments[PS_COMPILER_ENVIRONMENT_SYSTEM]))
-        return ps_compiler_free(compiler);
-    if (!ps_procedures_init(compiler->environments[PS_COMPILER_ENVIRONMENT_SYSTEM]))
-        return ps_compiler_free(compiler);
-    if (!ps_functions_init(compiler->environments[PS_COMPILER_ENVIRONMENT_SYSTEM]))
+    // Allocate and initialize system environment
+    compiler->system = ps_symbol_table_alloc(256, 0);
+    if (!ps_system_init(compiler->system))
         return ps_compiler_free(compiler);
     return compiler;
 }
@@ -55,11 +46,10 @@ ps_compiler *ps_compiler_free(ps_compiler *compiler)
     {
         if (compiler->string_heap != NULL)
             compiler->string_heap = ps_string_heap_free(compiler->string_heap);
-        ps_system_done(compiler->environments[PS_COMPILER_ENVIRONMENT_SYSTEM]);
-        for (size_t i = 0; i < PS_COMPILER_ENVIRONMENTS; i++)
+        if (compiler->system != NULL)
         {
-            if (compiler->environments[i] != NULL)
-                compiler->environments[i] = ps_environment_free(compiler->environments[i]);
+            ps_system_done(compiler->system);
+            compiler->system = ps_symbol_table_free(compiler->system);
         }
         ps_memory_free(PS_MEMORY_COMPILER, compiler);
     }
@@ -87,63 +77,30 @@ bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONA
     return true;
 }
 
-bool ps_compiler_enter_environment(ps_compiler *compiler, ps_identifier name)
-{
-    if (compiler->level >= PS_COMPILER_ENVIRONMENTS - 1)
-        return ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_OVERFLOW);
-    ps_environment *parent = compiler->environments[compiler->level];
-    ps_environment *environment = ps_environment_alloc(parent, name, 0, 0);
-    if (environment == NULL)
-        return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
-    compiler->level += 1;
-    compiler->environments[compiler->level] = environment;
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
-    {
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", compiler->level, PS_COMPILER_ENVIRONMENTS, name);
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    }
-    return true;
-}
-
-bool ps_compiler_exit_environment(ps_compiler *compiler)
-{
-    ps_environment *environment = compiler->environments[compiler->level];
-    if (environment == NULL)
-        return ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
-    {
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d '%s'\n", compiler->level, PS_COMPILER_ENVIRONMENTS,
-                environment->name);
-        ps_symbol_table_dump(NULL, "EXIT ENVIRONMENT", environment->symbols);
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    }
-    if (compiler->level <= PS_COMPILER_ENVIRONMENT_SYSTEM)
-        return ps_compiler_return_false(compiler, PS_ERROR_ENVIRONMENT_UNDERFLOW);
-    compiler->environments[compiler->level] = ps_environment_free(environment);
-    compiler->level -= 1;
-    return true;
-}
-
-ps_environment *ps_compiler_get_environment(ps_compiler *compiler)
-{
-    if (compiler->level <= PS_COMPILER_ENVIRONMENT_SYSTEM || compiler->level >= PS_COMPILER_ENVIRONMENTS)
-    {
-        ps_compiler_set_message(compiler, "Invalid environment level %d", compiler->level);
-        return NULL;
-    }
-    return compiler->environments[compiler->level];
-}
-
 ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)
 {
-    ps_symbol *symbol = ps_symbol_table_get(block->symbols, name);
-    if (!local && block->parent != NULL && symbol == NULL)
-        return ps_compiler_find_symbol(compiler, block->parent, name, false);
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
-        fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
-                local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    ps_symbol *symbol = NULL;
+
+    // No block => search into SYSTEM
+    if (block == NULL)
+    {
+        symbol = ps_symbol_table_get(compiler->system, name);
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+            fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    }
+    else
+    {
+        // Search in current block
+        symbol = ps_symbol_table_get(block->symbols, name);
+        if (!local && symbol == NULL)
+            // Not found => search in parent
+            return ps_compiler_find_symbol(compiler, block->parent, name, false);
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+            fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    }
+
     return symbol;
 }
 

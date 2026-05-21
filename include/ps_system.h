@@ -43,7 +43,7 @@ extern "C"
                                             .allocated = false}
 
 #define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
-    if (!ps_environment_add_symbol(system, &__SYMBOL__))                                                               \
+    if (!ps_system_add_symbol(system, &__SYMBOL__))                                                                    \
         goto error;
 
     /** @brief Type definition type defintion (!) */
@@ -88,8 +88,9 @@ extern "C"
     extern ps_symbol ps_system_constant_unsigned_ps_version_minor;
     extern ps_symbol ps_system_constant_unsigned_ps_version_patch;
 
-    bool ps_system_init(ps_environment *system);
-    void ps_system_done(const ps_environment *system);
+    bool ps_system_init(ps_symbol_table *system);
+    void ps_system_done(ps_symbol_table *system);
+    bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol);
 
 #ifdef __cplusplus
 }

@@ -6,13 +6,12 @@
 
 #include <math.h>
 
-#include "ps_environment.h"
 #include "ps_functions.h"
-#include "ps_interpreter.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
+#include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_system_types.h"
 #include "ps_type_definition.h"
@@ -120,8 +119,10 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 /* clang-format on */
 
-bool ps_system_init(ps_environment *system)
+ps_symbol_table *ps_system_init(void)
 {
+    ps_symbol_table *system = ps_symbol_table_alloc(256, 0);
+
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/
@@ -174,17 +175,31 @@ bool ps_system_init(ps_environment *system)
     ps_system_constant_string_ps_version.value->data.s->max = strlen(PS_VERSION);
     ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version)
 
+    /**************************************************************************/
+    /* PROCEDURES & FUNCTIONS                                                 */
+    /**************************************************************************/
+
+    if (!ps_procedures_init(system) || !ps_functions_init(system))
+        goto error;
+
 #ifdef DEBUG_INIT
-    ps_symbol_table_dump(NULL, "SYSTEM INIT", system->symbols);
+    ps_symbol_table_dump(NULL, "SYSTEM INIT", system);
 #endif
 
-    return true;
+    return system;
 
 error:
-    return false;
+    ps_system_done(system);
+    return NULL;
 }
 
-void ps_system_done(const ps_environment *system)
+void ps_system_done(ps_symbol_table *system)
 {
-    (void)system;
+    ps_symbol_table_done(system->symbols);
+}
+
+bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol)
+{
+    ps_symbol_table_error error = ps_symbol_table_add(system, symbol);
+    return error == PS_SYMBOL_TABLE_ERROR_NONE;
 }

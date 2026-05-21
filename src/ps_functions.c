@@ -10,11 +10,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_string.h"
+#include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_value.h"
@@ -58,7 +58,7 @@ PS_SYSTEM_FUNCTION (function , uppercase     , "UPPERCASE"   , .func_1arg      ,
 PS_SYSTEM_FUNCTION (function , get_tick_count, "GETTICKCOUNT", .func_1arg      , &ps_function_get_tick_count    );
 /* clang-format on */
 
-bool ps_functions_init(ps_environment *system)
+bool ps_functions_init(ps_symbol_table *system)
 {
     // Math
     ADD_SYSTEM_SYMBOL(ps_system_function_abs)

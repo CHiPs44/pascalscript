@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "ps_ast.h"
-#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_string_heap.h"
@@ -21,13 +20,6 @@ extern "C"
 {
 #endif
 
-#ifndef PS_COMPILER_ENVIRONMENTS
-#define PS_COMPILER_ENVIRONMENTS 1024u
-#endif
-
-#define PS_COMPILER_ENVIRONMENT_SYSTEM 0u
-#define PS_COMPILER_ENVIRONMENT_PROGRAM 1u
-
     typedef enum e_ps_compiler_debug
     {
         COMPILER_DEBUG_NONE,    /** @brief No debug */
@@ -37,15 +29,15 @@ extern "C"
 
     typedef struct s_ps_compiler
     {
-        ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)              */
-        ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
-        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
-        ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
-        char message[128];           /** @brief Additional error message                                     */
-        ps_compiler_debug debug;     /** @brief Debug level: NONE, TRACE, VERBOSE                            */
-        bool range_check;            /** @brief Range checking for integer and real values                   */
-        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                    */
-        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
+        ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)                */
+        ps_string_heap *string_heap; /** @brief String heap to hold string constants                           */
+        ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
+        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
+        char message[128];           /** @brief Additional error message                                       */
+        ps_compiler_debug debug;     /** @brief Debug level: NONE, TRACE, VERBOSE                              */
+        bool range_check;            /** @brief Range checking for integer and real values                     */
+        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
+        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
     } /*__attribute__((__packed__))*/ ps_compiler;
 
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
@@ -71,22 +63,13 @@ extern "C"
     /** @brief Set formatted message */
     bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...); // NOSONAR
 
-    /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
-    bool ps_compiler_enter_environment(ps_compiler *compiler, ps_identifier name);
+    /** @brief Find symbol by name in current block (or its parents if not local) */
+    ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local);
 
-    /** @brief Release current environment */
-    bool ps_compiler_exit_environment(ps_compiler *compiler);
-
-    /** @brief Get current environment */
-    ps_environment *ps_compiler_get_environment(ps_compiler *compiler);
-
-    /** @brief Find symbol by name in current environment (or its parents if not local) */
-    ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, const char *name, bool local);
-
-    /** @brief Add symbol to current environment */
+    /** @brief Add symbol to current block */
     bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol);
 
-    /** @brief Add variable to current environment, allocate values for arrays */
+    /** @brief Add variable to current block */
     bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const ps_identifier identifier,
                                   ps_symbol *type_symbol);
 

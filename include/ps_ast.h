@@ -29,7 +29,7 @@ extern "C"
     } __attribute__((__packed__)) ps_ast_node_group;
 
     /** @brief Abstract Syntax Tree node kind */
-    typedef enum enum_ps_ast_node_kind
+    typedef enum e_ps_ast_node_kind
     {
         PS_AST_KIND_UNKNOWN = 0, /** @brief Unknown node kind                                        */
         PS_AST_PROGRAM,          /** @brief BLOCK:      PROGRAM                                      */

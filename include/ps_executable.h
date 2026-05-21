@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "ps_ast.h"
 #include "ps_signature.h"
 #include "ps_type_definition.h"
 
@@ -32,9 +33,22 @@ extern "C"
     typedef bool (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, const ps_value *v, int16_t w, int16_t p);
     typedef bool (*ps_procedure_file_read)(ps_interpreter *i, FILE *f, ps_value *s);
 
-    /** @brief Executable is a function or procedure, address is NULL for user defined executables */
+    typedef enum e_ps_executable_kind
+    {
+        PS_EXECUTABLE_FUNC_1ARG,
+        PS_EXECUTABLE_FUNC_1ARG_S,
+        PS_EXECUTABLE_FUNC_2ARGS,
+        PS_EXECUTABLE_PROC_1ARG,
+        PS_EXECUTABLE_PROC_FILE_READ,
+        PS_EXECUTABLE_PROC_FILE_WRITE,
+        PS_EXECUTABLE_FUNC_USER,
+        PS_EXECUTABLE_PROC_USER,
+    } __attribute__((__packed__)) ps_executable_kind;
+
+    /** @brief Executable is a function or procedure, from system or user defined */
     typedef struct s_ps_executable
     {
+        ps_executable_kind kind;
         union {
             void *address;                           /** @brief Generic pointer to function/procedure              */
             ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
@@ -42,16 +56,14 @@ extern "C"
             ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments  */
             ps_procedure_1arg proc_1arg;             /** @brief Pointer to system procedure with 1 value argument  */
             ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(file, variable)" system procedure */
-            ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)" system procedure   */
+            ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)"   system procedure */
+            ps_ast_block *block;                     /** @brief AST block of user defined function or procedure    */
         };
-        ps_formal_signature *formal_signature; /** @brief Parameters and return type for user executables */
-        uint16_t line;                         /** @brief Line number in source code                      */
-        uint16_t column;                       /** @brief Column number in source code                    */
     } __attribute__((__packed__)) ps_executable;
 
 #define PS_EXECUTABLE_SIZE sizeof(ps_executable)
 
-    ps_executable *ps_executable_alloc(ps_formal_signature *formal_signature, uint16_t line, uint16_t column);
+    ps_executable *ps_executable_alloc(ps_executable_kind kind, ps_ast_block *block);
     ps_executable *ps_executable_free(ps_executable *executable);
     void ps_executable_debug(FILE *output, char *message, ps_executable *executable);
 

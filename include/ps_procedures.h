@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "ps_interpreter.h"
+#include "ps_symbol_table.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -17,7 +18,7 @@ extern "C"
 {
 #endif
 
-    bool ps_procedures_init(ps_environment *system);
+    bool ps_procedures_init(ps_symbol_table *system);
 
     // extern ps_symbol ps_system_procedure_dec;
     // extern ps_symbol ps_system_procedure_inc;
