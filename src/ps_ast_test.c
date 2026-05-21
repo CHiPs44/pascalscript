@@ -67,8 +67,6 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ASSERT_GOTO_CLEANUP(block_program->column == 1);
     ASSERT_GOTO_CLEANUP(strcmp(block_program->name, name) == 0);
     ASSERT_GOTO_CLEANUP(block_program->n_vars == 0);
-    ASSERT_GOTO_CLEANUP(block_program->n_executables == 0);
-    ASSERT_GOTO_CLEANUP(block_program->executables == NULL);
     ASSERT_GOTO_CLEANUP(block_program->statement_list == NULL);
     ASSERT_GOTO_CLEANUP(block_program->signature == NULL);
     ASSERT_GOTO_CLEANUP(block_program->result_type == NULL);

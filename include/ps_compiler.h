@@ -33,7 +33,7 @@ extern "C"
         COMPILER_DEBUG_NONE,    /** @brief No debug */
         COMPILER_DEBUG_TRACE,   /** @brief Output messages to stderr */
         COMPILER_DEBUG_VERBOSE, /** @brief More traces */
-    } ps_compiler_debug;
+    } __attribute__((__packed__)) ps_compiler_debug;
 
     typedef struct s_ps_compiler
     {
@@ -46,9 +46,6 @@ extern "C"
         bool range_check;            /** @brief Range checking for integer and real values                   */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                    */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
-        ps_environment
-            *environments[PS_COMPILER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
-        ps_ast_node *ast;                            /** @brief AST */
     } /*__attribute__((__packed__))*/ ps_compiler;
 
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)

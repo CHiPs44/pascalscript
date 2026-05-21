@@ -113,7 +113,7 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
         return NULL;
     snprintf(block->name, PS_IDENTIFIER_LEN, "%s", name);
     block->parent = parent;
-    block->symbols = NULL;
+    block->symbols = ps_symbol_table_alloc(0, 0);
     block->signature = NULL;
     block->result_type = NULL;
     block->n_vars = 0;

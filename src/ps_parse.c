@@ -6,14 +6,10 @@
 
 #include <string.h>
 
+#include "ps_ast.h"
 #include "ps_compiler.h"
-#include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_declaration.h"
-#include "ps_parser.h"
-#include "ps_procedures.h"
-#include "ps_string.h"
-#include "ps_system.h"
 
 /**
  * Parse
@@ -21,16 +17,15 @@
  *  BLOCK
  *  '.'
  */
-ps_ast_node *ps_parse_start(ps_compiler *compiler)
+ps_ast_block *ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program)
 {
     PARSE_BEGIN("START", "")
 
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN()
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
-        ast = ps_parse_program(compiler);
-        if (NULL == ast)
+        if (!ps_parse_program(compiler, block_program))
             TRACE_ERROR("PROGRAM")
         break;
     case PS_TOKEN_UNIT:

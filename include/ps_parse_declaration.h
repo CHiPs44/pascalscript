@@ -17,13 +17,14 @@ extern "C"
 {
 #endif
 
-    /* src/ps_parse_declaration.c */
-    ps_ast_node *ps_parse_program(ps_compiler *compiler);
-    ps_ast_node *ps_parse_uses(ps_compiler *compiler);
-    ps_ast_node *ps_parse_const(ps_compiler *compiler);
-    ps_ast_node *ps_parse_type(ps_compiler *compiler);
-    ps_ast_node *ps_parse_var(ps_compiler *compiler);
-    ps_ast_node *ps_parse_block(ps_compiler *compiler);
+    // clang-format off
+    bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_uses   (ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_const  (ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_type   (ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_var    (ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_block  (ps_compiler *compiler, ps_ast_block *block);
+    // clang-format on
 
 #ifdef __cplusplus
 }
