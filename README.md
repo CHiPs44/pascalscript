@@ -4,9 +4,9 @@ NB: this project has no link with [RemObjects Pascal Script](https://github.com/
 
 ## Status
 
-As of 2026-05-21, use of a "compiler" generating an AST then an "interpreter" executing this AST is on its way.
+As of 2026-05-21, use of a compiler generating an AST then an interpreter executing this AST is on its way.
 
-Direct interpretation was really too cumbersome to implement...
+Direct interpretation within the recursive descent parser was really too cumbersome to implement, mostly with array item access...
 
 As of 2026-02-20, the interpreter itself implements:
 
