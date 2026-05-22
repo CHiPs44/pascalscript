@@ -8,8 +8,7 @@
 #include <stdlib.h>
 
 #include "ps_ast.h"
-#include "ps_signature.h"
-#include "ps_type_definition.h"
+#include "ps_value.h"
 
 #ifndef _PS_EXECUTABLE_H
 #define _PS_EXECUTABLE_H
@@ -20,9 +19,6 @@ extern "C"
 #endif
 
     // Forward references
-    typedef struct s_ps_formal_signature ps_formal_signature;
-    typedef struct s_ps_type_definition ps_type_definition;
-    typedef struct s_ps_interpreter ps_interpreter;
     typedef struct s_ps_value ps_value;
     typedef struct s_ps_symbol ps_symbol;
 
@@ -50,9 +46,9 @@ extern "C"
     {
         ps_executable_kind kind;
         union {
-            void *address;                           /** @brief Generic pointer to function/procedure              */
+            void *address;                           /** @brief Generic pointer to system function/procedure       */
             ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
-            ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 symbol argument  */
+            ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 byref argument   */
             ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments  */
             ps_procedure_1arg proc_1arg;             /** @brief Pointer to system procedure with 1 value argument  */
             ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(file, variable)" system procedure */
