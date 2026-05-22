@@ -17,11 +17,11 @@
  *  BLOCK
  *  '.'
  */
-ps_ast_block *ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program)
+bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program)
 {
     PARSE_BEGIN("START", "")
 
-    READ_NEXT_TOKEN()
+    READ_NEXT_TOKEN
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:

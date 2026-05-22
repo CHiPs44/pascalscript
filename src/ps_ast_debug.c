@@ -155,7 +155,6 @@ void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
     // ps_ast_debug_line(margin, " - Number of symbols:     %zu", block->symbols ? block->symbols->used : 0);
     // ps_ast_debug_line(margin, " - Number of variables:   %zu", block->n_vars);
-    // ps_ast_debug_line(margin, " - Number of executables: %zu", block->n_executables);
     // ps_ast_debug_line(margin, " - Number of statements:  %zu",
     //                   block->statement_list ? block->statement_list->count : 0);
     // ps_ast_debug_line(margin, " - Number of parameters:  %zu",

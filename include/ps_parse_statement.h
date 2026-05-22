@@ -9,26 +9,28 @@
 
 #include <stdint.h>
 
+#include "ps_ast.h"
 #include "ps_compiler.h"
-#include "ps_lexer.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    ps_ast_node *ps_parse_statement(ps_compiler *compiler);
-    ps_ast_node *ps_parse_compound_statement(ps_compiler *compiler);
-    ps_ast_node *ps_parse_assignment(ps_compiler *compiler, ps_symbol *variable);
-    ps_ast_node *ps_parse_read_or_readln(ps_compiler *compiler, bool newline);
-    ps_ast_node *ps_parse_write_or_writeln(ps_compiler *compiler, bool newline);
-    ps_ast_node *ps_parse_assignment_or_procedure_call(ps_compiler *compiler);
-    ps_ast_node *ps_parse_if_then_else(ps_compiler *compiler);
-    ps_ast_node *ps_parse_repeat_until(ps_compiler *compiler);
-    ps_ast_node *ps_parse_while_do(ps_compiler *compiler);
-    ps_ast_node *ps_parse_for_do(ps_compiler *compiler);
-    ps_ast_node *ps_parse_statement_list(ps_compiler *compiler, ps_token_type stop);
-    ps_ast_node *ps_parse_statement_or_compound_statement(ps_compiler *compiler);
+    // clang-format off
+    bool ps_parse_statement                      (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_compound_statement             (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_assignment                     (ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable   );
+    bool ps_parse_read_or_readln                 (ps_compiler *compiler, ps_ast_block *block, bool newline          );
+    bool ps_parse_write_or_writeln               (ps_compiler *compiler, ps_ast_block *block, bool newline          );
+    bool ps_parse_assignment_or_procedure_call   (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_if_then_else                   (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_repeat_until                   (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_while_do                       (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_for_do                         (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_statement_list                 (ps_compiler *compiler, ps_ast_block *block, ps_token_type stop    );
+    bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_block *block                        );
+    // clang-format on
 
 #ifdef __cplusplus
 }

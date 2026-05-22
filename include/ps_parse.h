@@ -22,19 +22,21 @@ extern "C"
 
     /* src/ps_parse_executable.c */
     ps_ast_node *ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
-    ps_ast_node *ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_value *result);
+    ps_ast_node *ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_ast_block *block,
+                                                     ps_ast_node *expression);
     ps_ast_node *ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
     /* src/ps_parse_expression.c */
-    ps_ast_node *ps_parse_expression(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_relational_expression(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_and_expression(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_or_expression(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_simple_expression(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_term(ps_compiler *compiler, ps_value *result);
-    ps_ast_node *ps_parse_factor(ps_compiler *compiler, ps_value *result);
+    ps_ast_node *ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
+    ps_ast_node *ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
     ps_ast_node *ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
-    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_value *result);
+    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_ast_block *block,
+                                        ps_ast_node *expression);
 
     /* src/ps_parse_type.c */
     ps_ast_node *ps_parse_type_definition(ps_compiler *compiler);
@@ -63,7 +65,7 @@ extern "C"
         return true;                                                                                                   \
     }
 
-#define READ_NEXT_TOKEN()                                                                                              \
+#define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
             return false;                                                                                              \

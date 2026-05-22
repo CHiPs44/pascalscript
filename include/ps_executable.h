@@ -7,11 +7,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "ps_ast.h"
-#include "ps_value.h"
-
 #ifndef _PS_EXECUTABLE_H
 #define _PS_EXECUTABLE_H
+
+#include "ps_error.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -19,8 +18,10 @@ extern "C"
 #endif
 
     // Forward references
+    typedef struct s_ps_interpreter ps_interpreter;
     typedef struct s_ps_value ps_value;
     typedef struct s_ps_symbol ps_symbol;
+    typedef struct s_ps_ast_block ps_ast_block;
 
     typedef ps_error (*ps_function_1arg)(ps_interpreter *i, const ps_value *v, ps_value *r);
     typedef ps_error (*ps_function_1arg_s)(ps_interpreter *i, ps_symbol *t, ps_value *r);

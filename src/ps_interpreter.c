@@ -44,11 +44,7 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
     if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] == NULL)
         return ps_interpreter_free(interpreter);
     // Initialize system environment
-    if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
-        return ps_interpreter_free(interpreter);
-    if (!ps_procedures_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
-        return ps_interpreter_free(interpreter);
-    if (!ps_functions_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]))
+    if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols))
         return ps_interpreter_free(interpreter);
     return interpreter;
 }
@@ -59,7 +55,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
-        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]);
+        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols<);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
             if (interpreter->environments[i] != NULL)

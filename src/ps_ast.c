@@ -118,8 +118,6 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     block->result_type = NULL;
     block->n_vars = 0;
     block->statement_list = NULL;
-    block->n_executables = 0;
-    block->executables = NULL;
     return block;
 }
 
@@ -134,9 +132,6 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
         ps_symbol_table_free(block->symbols);
     if (block->statement_list != NULL)
         ps_ast_free_statement_list(block->statement_list);
-    for (size_t i = 0; i < block->n_executables; i++)
-        block->executables[i] = ps_ast_free_block(block->executables[i]);
-    ps_memory_free(PS_MEMORY_AST, block->executables);
     ps_memory_free(PS_MEMORY_AST, block);
     return NULL;
 }
@@ -341,7 +336,9 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
         return NULL;
     call->executable = executable;
     call->n_args = n_args;
-    call->args = args;
+    call->args = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_node *));
+    if (call->args == NULL)
+        return ps_ast_free_call(call);
     return call;
 }
 
@@ -349,9 +346,12 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 {
     assert(call != NULL);
     assert(call->kind == PS_AST_PROCEDURE_CALL || call->kind == PS_AST_FUNCTION_CALL);
-    for (size_t i = 0; i < call->n_args; i++)
-        ps_ast_free_node(call->args[i]);
-    ps_memory_free(PS_MEMORY_AST, call->args);
+    if (call->args != NULL)
+    {
+        for (size_t i = 0; i < call->n_args; i++)
+            ps_ast_free_node(call->args[i]);
+        ps_memory_free(PS_MEMORY_AST, call->args);
+    }
     ps_memory_free(PS_MEMORY_AST, call);
     return NULL;
 }
