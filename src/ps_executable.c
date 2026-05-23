@@ -9,6 +9,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "ps_ast.h"
 #include "ps_executable.h"
 #include "ps_memory.h"
 

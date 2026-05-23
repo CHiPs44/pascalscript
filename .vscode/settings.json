@@ -19,5 +19,6 @@
     "editor.fontLigatures": true,
     "terminal.integrated.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
     "terminal.integrated.fontLigatures.enabled": true,
-    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "terminal.integrated.fontSize": 12
 }

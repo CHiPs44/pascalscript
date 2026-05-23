@@ -35,16 +35,19 @@ extern "C"
     ps_ast_node *ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
     ps_ast_node *ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
     ps_ast_node *ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
-    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_symbol *function, ps_ast_block *block,
+    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function,
                                         ps_ast_node *expression);
 
     /* src/ps_parse_type.c */
-    ps_ast_node *ps_parse_type_definition(ps_compiler *compiler);
-    ps_ast_node *ps_parse_type_reference(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
-    ps_ast_node *ps_parse_type_reference_enum(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
-    ps_ast_node *ps_parse_type_reference_subrange(ps_compiler *compiler, ps_symbol **type_symbol,
+    ps_ast_node *ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block);
+    ps_ast_node *ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                         const char *type_name);
+    ps_ast_node *ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                              const char *type_name);
+    ps_ast_node *ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                                   const char *type_name);
-    ps_ast_node *ps_parse_type_reference_array(ps_compiler *compiler, ps_symbol **type_symbol, const char *type_name);
+    ps_ast_node *ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                               const char *type_name);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \

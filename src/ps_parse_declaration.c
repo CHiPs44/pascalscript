@@ -211,8 +211,7 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
         }
     } while (loop);
 
-    ps_ast_node *compound = ps_parse_compound_statement(compiler);
-    if (NULL == compound)
+    if (!ps_parse_compound_statement(compiler, block))
         TRACE_ERROR("COMPOUND")
 
     PARSE_END("OK")

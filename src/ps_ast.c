@@ -338,7 +338,7 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
     call->n_args = n_args;
     call->args = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_node *));
     if (call->args == NULL)
-        return ps_ast_free_call(call);
+        return (ps_ast_call *)ps_ast_free_call(call);
     return call;
 }
 

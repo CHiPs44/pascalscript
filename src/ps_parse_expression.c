@@ -1,5 +1,5 @@
 /*
-    This file is part of the PascalScript Pascal interpreter.
+    This file is part of the PascalScript Pascal compiler.
     SPDX-FileCopyrightText: 2025 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
@@ -9,18 +9,21 @@
 
 #include "ps_array.h"
 #include "ps_functions.h"
+#include "ps_parse.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
 #include "ps_string.h"
 #include "ps_system.h"
-#include "ps_visit.h"
+
+#define MODE_EXEC 0
+static int mode = MODE_EXEC;
 
 /**
  *  This is the entry point for visiting all expressions.
  */
-bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    return ps_visit_or_expression(interpreter, mode, result);
+    return ps_parse_or_expression(compiler, block, result);
 }
 
 /**
@@ -28,47 +31,41 @@ bool ps_visit_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, 
  *      or_expression = and_expression { ( 'OR' | 'XOR' ) and_expression }
  * Goal:
  *      make A < 1 OR A > 10 OR A = 5 OR ... work without parenthesis
+ * AST:
+ *      A               => A
+ *      A or B          => binary(or, A, B)
+ *      A or B or C     => binary(or, A, binary(or, B, C))
  */
-bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("OR_EXPRESSION", "");
+    PARSE_BEGIN("OR_EXPRESSION", "");
 
     static ps_token_type or_operators[] = {PS_TOKEN_OR, PS_TOKEN_XOR};
-    ps_value left = {.type = result->type, .data.v = NULL};
-    ps_value right = {.type = result->type, .data.v = NULL};
+    static size_t or_operator_count = sizeof(or_operators) / sizeof(ps_token_type);
+    ps_ast_node *left = NULL;
+    ps_ast_node *right = NULL;
     ps_token_type or_operator = PS_TOKEN_NONE;
 
-    if (!ps_visit_and_expression(interpreter, mode, &left))
+    if (!ps_parse_and_expression(compiler, block, &left))
         TRACE_ERROR("AND1");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tOR_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                ps_value_type_get_name(left.type->value->data.t->base));
-
     do
     {
-        or_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(or_operators) / sizeof(ps_token_type),
-                                                   or_operators);
+        or_operator = ps_parser_expect_token_types(compiler->parser, or_operator_count, or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
-                TRACE_ERROR("COPY");
-            VISIT_END("LEFT");
+            *result = left;
+            PARSE_END("LEFT");
         }
         READ_NEXT_TOKEN
-        right.type = &ps_system_none;
-        right.data.v = NULL;
-        if (!ps_visit_and_expression(interpreter, mode, &right))
+        if (!ps_parse_and_expression(compiler, block, &right))
             TRACE_ERROR("AND2");
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_function_binary_op(interpreter, &left, &right, result, or_operator))
-                TRACE_ERROR("BINARY_OP");
-            left.type = result->type;
-            left.data = result->data;
-        }
+        ps_operator_binary operator = ps_operator_binary_from_token(or_operator);
+        *result = ps_ast_create_binary_operation(lexer->start_line, lexer->start_column, operator, left, right);
+        if (!ps_function_binary_op(compiler, &left, &right, result, or_operator))
+            TRACE_ERROR("BINARY_OP");
     } while (true);
 
-    VISIT_END("RIGHT");
+    PARSE_END("RIGHT");
 }
 
 /**
@@ -77,136 +74,136 @@ bool ps_visit_or_expression(ps_interpreter *interpreter, ps_interpreter_mode mod
  * Goal:
  *      make A < 1 AND A > 10 AND B = 5 AND ... work without parenthesis
  *      ByteValue AND $0F should work too
+ * AST:
+ *      A               => A
+ *      A and B         => binary(and, A, B)
+ *      A and B and C   => binary(and, A, binary(or, B, C))
  */
-bool ps_visit_and_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("AND_EXPRESSION", "");
+    PARSE_BEGIN("AND_EXPRESSION", "");
 
     static ps_token_type and_operators[] = {PS_TOKEN_AND};
-
-    ps_value left = {.type = result->type, .data.v = NULL};
-    ps_value right = {.type = result->type, .data.v = NULL};
+    static size_t and_operator_count = sizeof(and_operators) / sizeof(ps_token_type);
+    ps_ast_node *left = NULL;
+    ps_ast_node *right = NULL;
     ps_token_type and_operator = PS_TOKEN_NONE;
 
-    if (!ps_visit_relational_expression(interpreter, mode, &left))
-        TRACE_ERROR("RELATIONAL0");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                ps_value_type_get_name(left.type->value->data.t->base));
+    if (!ps_parse_relational_expression(compiler, block, &left))
+        TRACE_ERROR("RELATIONAL1");
     do
     {
-        and_operator = ps_parser_expect_token_types(interpreter->parser, sizeof(and_operators) / sizeof(ps_token_type),
-                                                    and_operators);
+        and_operator = ps_parser_expect_token_types(compiler->parser, and_operator_count, and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
+            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
                 TRACE_ERROR("COPY");
-            VISIT_END("AND1");
+            PARSE_END("AND1");
         }
         READ_NEXT_TOKEN
-        right.type = &ps_system_none;
-        right.data.v = NULL;
-        if (!ps_visit_relational_expression(interpreter, mode, &right))
+        if (!ps_parse_relational_expression(compiler, block, &right))
             TRACE_ERROR("RELATIONAL2");
         if (mode == MODE_EXEC)
         {
-            if (!ps_function_binary_op(interpreter, &left, &right, result, and_operator))
+            if (!ps_function_binary_op(compiler, &left, &right, result, and_operator))
                 TRACE_ERROR("BINARY");
             left.type = result->type;
             left.data = result->data;
         }
     } while (true);
 
-    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n",
                 mode == MODE_EXEC ? '*' : ' ');
 
-    VISIT_END("AND2");
+    PARSE_END("AND2");
 }
 
 /**
  * Visit relational expression:
  *      simple_expression '<' | '<=' | '>' | '>=' | '=' | '<>' simple_expression
+ * AST:
+ *      A           => A
+ *      A >= B      => binary(>=, A, B)
  */
-bool ps_visit_relational_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("RELATIONAL_EXPRESSION", "");
+    PARSE_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
         // <            <=            >           >=           =               <>
-        PS_TOKEN_LT,
-        PS_TOKEN_LE,
-        PS_TOKEN_GT,
-        PS_TOKEN_GE,
-        PS_TOKEN_EQ,
-        PS_TOKEN_NE,
+        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
     };
     ps_value left = {.type = &ps_system_none, .data.v = NULL};
     ps_value right = {.type = &ps_system_none, .data.v = NULL};
     ps_token_type relational_operator = PS_TOKEN_NONE;
 
-    if (!ps_visit_simple_expression(interpreter, mode, &left))
+    if (!ps_parse_simple_expression(compiler, block, &left))
         TRACE_ERROR("RELATIONAL1");
     // No loop, only one relational operator allowed, no a <= b <= c
     relational_operator = ps_parser_expect_token_types(
-        interpreter->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
+        compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
-        if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+        if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
             fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
                     mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-        if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
+        if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
             TRACE_ERROR("COPY");
-        VISIT_END("RELATIONAL1");
+        PARSE_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN
     right.type = &ps_system_none;
     right.data.v = NULL;
-    if (!ps_visit_simple_expression(interpreter, mode, &right))
+    if (!ps_parse_simple_expression(compiler, block, &right))
         TRACE_ERROR("RELATIONAL2");
-    if (interpreter->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n",
                 mode == MODE_EXEC ? '*' : ' ');
     result->type = &ps_system_boolean;
-    if (mode == MODE_EXEC && !ps_function_binary_op(interpreter, &left, &right, result, relational_operator))
+    if (mode == MODE_EXEC && !ps_function_binary_op(compiler, &left, &right, result, relational_operator))
         TRACE_ERROR("BINARY");
 
-    VISIT_END("RELATIONAL2");
+    PARSE_END("RELATIONAL2");
 }
 
 /**
  * Visit simple expression:
  *      term [ '+' | '-' term ]*
- *  NB: 'OR' | 'XOR' are accounted by or_expression
+ * NB: 'OR' | 'XOR' are accounted by or_expression
+ * AST:
+ *      A           => A
+ *      A + B       => binary(+, A, B)
+ *      A + B + C   => binary(+, A, binary(+, B, C)
  */
-bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("SIMPLE_EXPRESSION", "");
+    PARSE_BEGIN("SIMPLE_EXPRESSION", "");
 
     static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS};
     ps_value left = {.type = result->type, .data.v = NULL};
     ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type additive_operator = PS_TOKEN_NONE;
 
-    if (!ps_visit_term(interpreter, mode, &left))
+    if (!ps_parse_term(compiler, block, &left))
         TRACE_ERROR("TERM");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "%cINFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
         additive_operator = ps_parser_expect_token_types(
-            interpreter->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
+            compiler->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
+            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
                 TRACE_ERROR("COPY");
-            VISIT_END("SIMPLE1");
+            PARSE_END("SIMPLE1");
         }
         READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
-        if (!ps_visit_term(interpreter, mode, &right))
+        if (!ps_parse_term(compiler, block, &right))
             TRACE_ERROR("TERM");
         // Promote to real if one operand is real
         if (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL)
@@ -215,23 +212,23 @@ bool ps_visit_simple_expression(ps_interpreter *interpreter, ps_interpreter_mode
         }
         if (mode == MODE_EXEC)
         {
-            if (!ps_function_binary_op(interpreter, &left, &right, result, additive_operator))
+            if (!ps_function_binary_op(compiler, &left, &right, result, additive_operator))
                 TRACE_ERROR("BINARY");
             left.type = result->type;
             left.data = result->data;
         }
     } while (true);
 
-    VISIT_END("SIMPLE2");
+    PARSE_END("SIMPLE2");
 }
 
 /**
  * Visit term:
  *      factor [ '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' factor ]*
  */
-bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("TERM", "");
+    PARSE_BEGIN("TERM", "");
 
     static ps_token_type multiplicative_operators[] = {PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD,
                                                        // PS_TOKEN_AND,
@@ -240,25 +237,25 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
     ps_value right = {.type = result->type, .data.v = NULL};
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
 
-    if (!ps_visit_factor(interpreter, mode, &left))
+    if (!ps_parse_factor(compiler, block, &left))
         TRACE_ERROR("FACTOR");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && interpreter->debug >= DEBUG_VERBOSE)
+    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
         fprintf(stderr, "%cINFO\tTERM: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
         multiplicative_operator = ps_parser_expect_token_types(
-            interpreter->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
+            compiler->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &left, result))
+            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
                 TRACE_ERROR("COPY");
-            VISIT_END("TERM1");
+            PARSE_END("TERM1");
         }
         READ_NEXT_TOKEN
         right.type = &ps_system_none;
         right.data.v = NULL;
-        if (!ps_visit_factor(interpreter, mode, &right))
+        if (!ps_parse_factor(compiler, block, &right))
             TRACE_ERROR("FACTOR");
         // For multiplication/division, promote to real if one operand is real
         if ((multiplicative_operator == PS_TOKEN_STAR || multiplicative_operator == PS_TOKEN_SLASH) &&
@@ -268,20 +265,20 @@ bool ps_visit_term(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_val
         }
         if (mode == MODE_EXEC)
         {
-            if (!ps_function_binary_op(interpreter, &left, &right, result, multiplicative_operator))
+            if (!ps_function_binary_op(compiler, &left, &right, result, multiplicative_operator))
                 TRACE_ERROR("BINARY");
             left.type = result->type;
             left.data = result->data;
         }
     } while (true);
 
-    VISIT_END("TERM2");
+    PARSE_END("TERM2");
 }
 
-bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_symbol *symbol,
+bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *symbol,
                                       ps_value *result)
 {
-    VISIT_BEGIN("FACTOR", "ARRAY");
+    PARSE_BEGIN("FACTOR", "ARRAY");
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     // const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     // if (type_def == NULL)
@@ -291,18 +288,18 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
     // {
     //     ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
     //     READ_NEXT_TOKEN
-    //     if (!ps_visit_expression(interpreter, mode, &index))
+    //     if (!ps_parse_expression(compiler,block, &index))
     //     {
-    //         ps_interpreter_set_message(interpreter, "Index is invalid");
+    //         ps_compiler_set_message(compiler, "Index is invalid");
     //         TRACE_ERROR("INDEX")
     //     }
     //     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
     //     if (mode == MODE_EXEC)
     //     {
-    //         ps_error error = ps_array_get_value(symbol, &index, result, interpreter->range_check);
+    //         ps_error error = ps_array_get_value(symbol, &index, result, compiler->range_check);
     //         if (error != PS_ERROR_NONE)
     //         {
-    //             ps_interpreter_set_message(interpreter, "Can't get array value for index %s",
+    //             ps_compiler_set_message(compiler, "Can't get array value for index %s",
     //                                        ps_value_get_debug_string(&index));
     //             RETURN_ERROR(error)
     //         }
@@ -310,7 +307,7 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
     //     READ_NEXT_TOKEN
     // }
 
-    // VISIT_END("OK")
+    // PARSE_END("OK")
 }
 
 /**
@@ -324,12 +321,12 @@ bool ps_visit_factor_identifier_array(ps_interpreter *interpreter, ps_interprete
  *  multi-dimensional arrays instead of vectors
  *      variable reference = identifier [ '[' expression [ ',' expression ]* ']' ]
  */
-bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *identifier,
-                                ps_value *result)
+bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, const char *identifier,
+                                ps_ast_node **result)
 {
-    VISIT_BEGIN("FACTOR", "IDENTIFIER");
+    PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
-    ps_symbol *symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+    ps_symbol *symbol = ps_compiler_find_symbol(compiler, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
@@ -337,7 +334,7 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
     case PS_SYMBOL_KIND_AUTO:
     case PS_SYMBOL_KIND_CONSTANT:
     case PS_SYMBOL_KIND_VARIABLE:
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= DEBUG_VERBOSE)
         {
             fprintf(stderr, "%cINFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                     symbol->name, ps_symbol_get_kind_name(symbol->kind),
@@ -345,26 +342,26 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
         }
         if (ps_value_is_array(symbol->value))
         {
-            if (!ps_visit_factor_identifier_array(interpreter, mode, symbol, result))
+            if (!ps_parse_factor_identifier_array(compiler, block, symbol, result))
                 TRACE_ERROR("ARRAY")
         }
         else
         {
             result->type = symbol->value->type;
-            if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, symbol->value, result))
+            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, symbol->value, result))
                 TRACE_ERROR("COPY");
             READ_NEXT_TOKEN
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        if (!ps_visit_function_call(interpreter, mode, symbol, result))
+        if (!ps_parse_function_call(compiler, block, symbol, result))
             TRACE_ERROR("FUNCTION")
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
@@ -379,9 +376,9 @@ bool ps_visit_factor_identifier(ps_interpreter *interpreter, ps_interpreter_mode
  * Next steps:
  *          | nil
  */
-bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result)
+bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
-    VISIT_BEGIN("FACTOR", "");
+    PARSE_BEGIN("FACTOR", "");
 
     ps_value factor = {.type = &ps_system_none, .data.v = NULL};
     ps_identifier identifier;
@@ -392,7 +389,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // ***Parenthesized expression ***
     case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN
-        if (!ps_visit_expression(interpreter, mode, result))
+        if (!ps_parse_expression(compiler, block, result))
             TRACE_ERROR("EXPRESSION");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
@@ -400,7 +397,7 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        if (!ps_visit_factor_identifier(interpreter, mode, identifier, result))
+        if (!ps_parse_factor_identifier(compiler, block, identifier, result))
             TRACE_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
@@ -438,45 +435,45 @@ bool ps_visit_factor(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_v
         result->type = &ps_system_string;
         if (mode == MODE_EXEC)
         {
-            result->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+            result->data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
             if (result->data.s == NULL)
             {
-                ps_interpreter_set_message(interpreter, "Failed to create string value: %s", strerror(errno));
-                interpreter->error = ps_error_map_errno();
+                ps_compiler_set_message(compiler, "Failed to create string value: %s", strerror(errno));
+                compiler->error = ps_error_map_errno();
                 TRACE_ERROR("STRING_VALUE")
             }
         }
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_NIL:
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+        compiler->error = PS_ERROR_NOT_IMPLEMENTED;
         TRACE_ERROR("NIL");
     // *** Unary operators ***
     case PS_TOKEN_PLUS:
         READ_NEXT_TOKEN
-        if (!ps_visit_factor(interpreter, mode, result))
+        if (!ps_parse_factor(compiler, block, result))
             TRACE_ERROR("UNARY_PLUS");
         break;
     case PS_TOKEN_MINUS:
     case PS_TOKEN_NOT:
         unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN
-        if (!ps_visit_factor(interpreter, mode, &factor))
+        if (!ps_parse_factor(compiler, block, &factor))
             TRACE_ERROR("UNARY_MINUS_NOT");
-        if (mode == MODE_EXEC && !ps_operator_unary_eval(interpreter, &factor, result, unary_operator))
+        if (mode == MODE_EXEC && !ps_operator_unary_eval(compiler, &factor, result, unary_operator))
             TRACE_ERROR("UNARY");
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *result,
-                                   int *arg_count, ps_value *arg1)
+bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result, int *arg_count,
+                                   ps_value *arg1)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "RANDOM");
+    PARSE_BEGIN("FUNCTION_CALL", "RANDOM");
 
     // Random function can be called with 3 signatures:
     //  1. Random or Random() => Real from 0.0 to 1.0 excluded
@@ -495,7 +492,7 @@ bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_m
         else
         {
             *arg_count = 1;
-            if (!ps_visit_expression(interpreter, mode, arg1))
+            if (!ps_parse_expression(compiler, block, arg1))
                 TRACE_ERROR("PARAMETER");
             if (mode == MODE_EXEC && arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
@@ -510,12 +507,12 @@ bool ps_visit_function_call_random(ps_interpreter *interpreter, ps_interpreter_m
         result->type = &ps_system_real;
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_function_call_low_high(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **symbol)
+bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block, ps_symbol **symbol)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "LOW_HIGH")
+    PARSE_BEGIN("FUNCTION_CALL", "LOW_HIGH")
 
     // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
@@ -525,46 +522,46 @@ bool ps_visit_function_call_low_high(ps_interpreter *interpreter, ps_interpreter
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     ps_identifier identifier = {0};
     COPY_IDENTIFIER(identifier)
-    *symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+    *symbol = ps_compiler_find_symbol(compiler, identifier, false);
     if (*symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
     READ_NEXT_TOKEN
     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_function_call_power(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *arg1, ps_value *arg2)
+bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps_value *arg1, ps_value *arg2)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "POWER");
+    PARSE_BEGIN("FUNCTION_CALL", "POWER");
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN
-    if (!ps_visit_expression(interpreter, mode, arg1))
+    if (!ps_parse_expression(compiler, block, arg1))
         TRACE_ERROR("ARG1")
     if (!ps_value_is_number(arg1) && !ps_value_is_real(arg1))
         RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     EXPECT_TOKEN(PS_TOKEN_COMMA)
     READ_NEXT_TOKEN
-    if (!ps_visit_expression(interpreter, mode, arg2))
+    if (!ps_parse_expression(compiler, block, arg2))
         TRACE_ERROR("ARG2")
     if (!ps_value_is_number(arg2) && !ps_value_is_real(arg2))
         RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
  * Visit system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_mode mode, const ps_symbol *function,
+bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *function,
                                    ps_value *result)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "SYSTEM");
+    PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 
     ps_value arg1 = {.type = &ps_system_none, .data.v = NULL};
     ps_value arg2 = {.type = &ps_system_none, .data.v = NULL};
@@ -574,7 +571,7 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
     // Handle specific function types with dedicated handlers
     if (function == &ps_system_function_random)
     {
-        if (!ps_visit_function_call_random(interpreter, mode, result, &arg_count, &arg1))
+        if (!ps_parse_function_call_random(compiler, block, result, &arg_count, &arg1))
             TRACE_ERROR("RANDOM")
     }
     else if (function == &ps_system_function_get_tick_count)
@@ -592,14 +589,14 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
         arg_count = -1;
-        if (!ps_visit_function_call_low_high(interpreter, mode, &symbol))
+        if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
     }
     else if (function == &ps_system_function_power)
     {
         // Power function has two "by value" numeric arguments
         arg_count = 2;
-        if (!ps_visit_function_call_power(interpreter, mode, &arg1, &arg2))
+        if (!ps_parse_function_call_power(compiler, block, &arg1, &arg2))
             TRACE_ERROR("POWER")
     }
     else
@@ -609,7 +606,7 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
         arg_count = 1;
         EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
         READ_NEXT_TOKEN
-        if (!ps_visit_expression(interpreter, mode, &arg1))
+        if (!ps_parse_expression(compiler, block, &arg1))
             TRACE_ERROR("ARG");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
@@ -622,16 +619,16 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
         switch (arg_count)
         {
         case -1:
-            error = ps_function_exec_1arg_s(interpreter, function, symbol, result);
+            error = ps_function_exec_1arg_s(compiler, function, symbol, result);
             break;
         case 0:
-            error = ps_function_exec_1arg(interpreter, function, NULL, result);
+            error = ps_function_exec_1arg(compiler, function, NULL, result);
             break;
         case 1:
-            error = ps_function_exec_1arg(interpreter, function, &arg1, result);
+            error = ps_function_exec_1arg(compiler, function, &arg1, result);
             break;
         case 2:
-            error = ps_function_exec_2args(interpreter, function, &arg1, &arg2, result);
+            error = ps_function_exec_2args(compiler, function, &arg1, &arg2, result);
             break;
         default:
             error = PS_ERROR_INVALID_PARAMETERS;
@@ -639,37 +636,36 @@ bool ps_visit_function_call_system(ps_interpreter *interpreter, ps_interpreter_m
         }
         if (error != PS_ERROR_NONE)
         {
-            interpreter->error = error;
+            compiler->error = error;
             TRACE_ERROR("SYSTEM_FUNCTION")
         }
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
  * Visit system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol *function,
-                            ps_value *result)
+bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function, ps_ast_node **result)
 {
-    VISIT_BEGIN("FUNCTION_CALL", "");
+    PARSE_BEGIN("FUNCTION_CALL", "");
 
     READ_NEXT_TOKEN
     if (function->system)
     {
-        if (!ps_visit_function_call_system(interpreter, mode, function, result))
+        if (!ps_parse_function_call_system(compiler, block, function, result))
             TRACE_ERROR("SYSTEM")
     }
     else
     {
         // User defined function
-        if (!ps_visit_procedure_or_function_call(interpreter, mode, function, result))
+        if (!ps_parse_procedure_or_function_call(compiler, block, function, result))
             TRACE_ERROR("FUNCTION_CALL");
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
@@ -685,9 +681,9 @@ bool ps_visit_function_call(ps_interpreter *interpreter, ps_interpreter_mode mod
  *      | NIL
  *      | CONSTANT_EXPRESSION
  */
-bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *constant)
+bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps_value *constant)
 {
-    VISIT_BEGIN("CONSTANT_EXPRESSION", "");
+    PARSE_BEGIN("CONSTANT_EXPRESSION", "");
     bool negate = false;
 
     ps_identifier identifier = {0};
@@ -736,16 +732,16 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
         break;
     case PS_TOKEN_STRING_VALUE:
         constant->type = &ps_system_string;
-        constant->data.s = ps_string_heap_create(interpreter->string_heap, lexer->current_token.value.s);
+        constant->data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
         if (constant->data.s == NULL)
         {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
+            compiler->error = PS_ERROR_OUT_OF_MEMORY;
             TRACE_ERROR("STRING_VALUE")
         }
         break;
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_interpreter_find_symbol(interpreter, identifier, false);
+        symbol = ps_compiler_find_symbol(compiler, identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
@@ -779,5 +775,5 @@ bool ps_visit_constant_expression(ps_interpreter *interpreter, ps_interpreter_mo
     }
     READ_NEXT_TOKEN
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
