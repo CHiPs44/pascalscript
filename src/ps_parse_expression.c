@@ -33,8 +33,8 @@ bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node
  *      make A < 1 OR A > 10 OR A = 5 OR ... work without parenthesis
  * AST:
  *      A               => A
- *      A or B          => binary(or, A, B)
- *      A or B or C     => binary(or, A, binary(or, B, C))
+ *      A or B          => binary_op(or, A, B)
+ *      A or B xor C    => binary_op(xor, binary(or, A, B), C)
  */
 bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
@@ -46,6 +46,8 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
     ps_ast_node *right = NULL;
     ps_token_type or_operator = PS_TOKEN_NONE;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     if (!ps_parse_and_expression(compiler, block, &left))
         TRACE_ERROR("AND1");
     do
@@ -60,10 +62,18 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         if (!ps_parse_and_expression(compiler, block, &right))
             TRACE_ERROR("AND2");
         ps_operator_binary operator = ps_operator_binary_from_token(or_operator);
-        *result = ps_ast_create_binary_operation(lexer->start_line, lexer->start_column, operator, left, right);
-        if (!ps_function_binary_op(compiler, &left, &right, result, or_operator))
+        if (operator == PS_OP_BINARY_INVALID)
+        {
+            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                    ps_token_get_keyword(and_operator), and_operator);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        }
+        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        if (left == NULL)
             TRACE_ERROR("BINARY_OP");
     } while (true);
+
+    *result = left;
 
     PARSE_END("RIGHT");
 }
@@ -76,8 +86,8 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
  *      ByteValue AND $0F should work too
  * AST:
  *      A               => A
- *      A and B         => binary(and, A, B)
- *      A and B and C   => binary(and, A, binary(or, B, C))
+ *      A and B         => binary_op(and, A, B)
+ *      A and B and C   => binary_op(and, binary(and, A, B), C)
  */
 bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
@@ -89,6 +99,8 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     ps_ast_node *right = NULL;
     ps_token_type and_operator = PS_TOKEN_NONE;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     if (!ps_parse_relational_expression(compiler, block, &left))
         TRACE_ERROR("RELATIONAL1");
     do
@@ -96,25 +108,25 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
         and_operator = ps_parser_expect_token_types(compiler->parser, and_operator_count, and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
-                TRACE_ERROR("COPY");
+            *result = left;
             PARSE_END("AND1");
         }
         READ_NEXT_TOKEN
         if (!ps_parse_relational_expression(compiler, block, &right))
             TRACE_ERROR("RELATIONAL2");
-        if (mode == MODE_EXEC)
+        ps_operator_binary operator = ps_operator_binary_from_token(and_operator);
+        if (operator == PS_OP_BINARY_INVALID)
         {
-            if (!ps_function_binary_op(compiler, &left, &right, result, and_operator))
-                TRACE_ERROR("BINARY");
-            left.type = result->type;
-            left.data = result->data;
+            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                    ps_token_get_keyword(and_operator), and_operator);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
+        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        if (left == NULL)
+            TRACE_ERROR("BINARY_OP");
     } while (true);
 
-    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tAND_EXPRESSION: expecting result type as 'BOOLEAN', 'INTEGER' or 'UNSIGNED'\n",
-                mode == MODE_EXEC ? '*' : ' ');
+    *result = left;
 
     PARSE_END("AND2");
 }
@@ -124,20 +136,22 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
  *      simple_expression '<' | '<=' | '>' | '>=' | '=' | '<>' simple_expression
  * AST:
  *      A           => A
- *      A >= B      => binary(>=, A, B)
+ *      A >= B      => binary_op(GE, A, B)
  */
 bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
     PARSE_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
-        // <            <=            >           >=           =               <>
+        // <         <=           >            >=           =            <>
         PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
     };
-    ps_value left = {.type = &ps_system_none, .data.v = NULL};
-    ps_value right = {.type = &ps_system_none, .data.v = NULL};
+    ps_ast_node *left = NULL;
+    ps_ast_node *right = NULL;
     ps_token_type relational_operator = PS_TOKEN_NONE;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     if (!ps_parse_simple_expression(compiler, block, &left))
         TRACE_ERROR("RELATIONAL1");
     // No loop, only one relational operator allowed, no a <= b <= c
@@ -145,25 +159,20 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
         compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
-        if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: expecting result type as '%s'\n",
-                    mode == MODE_EXEC ? '*' : ' ', ps_value_type_get_name(left.type->value->data.t->base));
-        if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
-            TRACE_ERROR("COPY");
+        *result = left;
         PARSE_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN
-    right.type = &ps_system_none;
-    right.data.v = NULL;
     if (!ps_parse_simple_expression(compiler, block, &right))
         TRACE_ERROR("RELATIONAL2");
-    if (compiler->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tRELATIONAL_EXPRESSION: setting result type to 'BOOLEAN'\n",
-                mode == MODE_EXEC ? '*' : ' ');
-    result->type = &ps_system_boolean;
-    if (mode == MODE_EXEC && !ps_function_binary_op(compiler, &left, &right, result, relational_operator))
-        TRACE_ERROR("BINARY");
-
+    ps_operator_binary operator = ps_operator_binary_from_token(relational_operator);
+    if (operator == PS_OP_BINARY_INVALID)
+    {
+        ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                ps_token_get_keyword(relational_operator), relational_operator);
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+    *result = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
     PARSE_END("RELATIONAL2");
 }
 
@@ -174,26 +183,25 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
  * AST:
  *      A           => A
  *      A + B       => binary(+, A, B)
- *      A + B + C   => binary(+, A, binary(+, B, C)
+ *      A + B + C   => binary(+, binary(+, A, B), C)
  */
 bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
 {
     PARSE_BEGIN("SIMPLE_EXPRESSION", "");
 
     static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS};
-    ps_value left = {.type = result->type, .data.v = NULL};
-    ps_value right = {.type = result->type, .data.v = NULL};
+    size_t additive_operator_count = sizeof(additive_operators) / sizeif(ps_token_type);
+    ps_ast_node *left = NULL;
+    ps_ast_node *right = NULL;
     ps_token_type additive_operator = PS_TOKEN_NONE;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     if (!ps_parse_term(compiler, block, &left))
         TRACE_ERROR("TERM");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tSIMPLE_EXPRESSION: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
-        additive_operator = ps_parser_expect_token_types(
-            compiler->parser, sizeof(additive_operators) / sizeof(ps_token_type), additive_operators);
+        additive_operator = ps_parser_expect_token_types(compiler->parser, additive_operator_count, additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
             if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
@@ -201,22 +209,23 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
             PARSE_END("SIMPLE1");
         }
         READ_NEXT_TOKEN
-        right.type = &ps_system_none;
-        right.data.v = NULL;
         if (!ps_parse_term(compiler, block, &right))
             TRACE_ERROR("TERM");
-        // Promote to real if one operand is real
-        if (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL)
+        // // Promote to real if one operand is real
+        // if (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL)
+        // {
+        //     factor.type = &ps_system_real;
+        // }
+        ps_operator_binary operator = ps_operator_binary_from_token(additive_operator);
+        if (operator == PS_OP_BINARY_INVALID)
         {
-            result->type = &ps_system_real;
+            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                    ps_token_get_keyword(additive_operator), additive_operator);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_function_binary_op(compiler, &left, &right, result, additive_operator))
-                TRACE_ERROR("BINARY");
-            left.type = result->type;
-            left.data = result->data;
-        }
+        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        if (left == NULL)
+            TRACE_ERROR("BINARY_OP");
     } while (true);
 
     PARSE_END("SIMPLE2");
@@ -230,46 +239,45 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **res
 {
     PARSE_BEGIN("TERM", "");
 
-    static ps_token_type multiplicative_operators[] = {PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV, PS_TOKEN_MOD,
-                                                       // PS_TOKEN_AND,
-                                                       PS_TOKEN_SHL, PS_TOKEN_SHR};
-    ps_value left = {.type = result->type, .data.v = NULL};
-    ps_value right = {.type = result->type, .data.v = NULL};
+    static ps_token_type multiplicative_operators[] = {PS_TOKEN_STAR, PS_TOKEN_SLASH, PS_TOKEN_DIV,
+                                                       PS_TOKEN_MOD,  PS_TOKEN_SHL,   PS_TOKEN_SHR};
+    size_t multiplicative_operator_count = sizeof(multiplicative_operators) / sizeof(ps_token_type);
+    ps_ast_node *left = NULL;
+    ps_ast_node *right = NULL;
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     if (!ps_parse_factor(compiler, block, &left))
         TRACE_ERROR("FACTOR");
-    if (mode == MODE_EXEC && result->type == &ps_system_none && compiler->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, "%cINFO\tTERM: expecting result type as '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                ps_value_type_get_name(left.type->value->data.t->base));
     do
     {
-        multiplicative_operator = ps_parser_expect_token_types(
-            compiler->parser, sizeof(multiplicative_operators) / sizeof(ps_token_type), multiplicative_operators);
+        multiplicative_operator =
+            ps_parser_expect_token_types(compiler->parser, multiplicative_operator_count, multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
-                TRACE_ERROR("COPY");
+            *result = left;
             PARSE_END("TERM1");
         }
         READ_NEXT_TOKEN
-        right.type = &ps_system_none;
-        right.data.v = NULL;
         if (!ps_parse_factor(compiler, block, &right))
             TRACE_ERROR("FACTOR");
-        // For multiplication/division, promote to real if one operand is real
-        if ((multiplicative_operator == PS_TOKEN_STAR || multiplicative_operator == PS_TOKEN_SLASH) &&
-            (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL))
+        // // For multiplication/division, promote to real if one operand is real
+        // if ((multiplicative_operator == PS_TOKEN_STAR || multiplicative_operator == PS_TOKEN_SLASH) &&
+        //     (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL))
+        // {
+        //     factor.type = &ps_system_real;
+        // }
+        ps_operator_binary operator = ps_operator_binary_from_token(multiplicative_operator);
+        if (operator == PS_OP_BINARY_INVALID)
         {
-            result->type = &ps_system_real;
+            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                    ps_token_get_keyword(multiplicative_operator), multiplicative_operator);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        if (mode == MODE_EXEC)
-        {
-            if (!ps_function_binary_op(compiler, &left, &right, result, multiplicative_operator))
-                TRACE_ERROR("BINARY");
-            left.type = result->type;
-            left.data = result->data;
-        }
+        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        if (left == NULL)
+            TRACE_ERROR("BINARY_OP");
     } while (true);
 
     PARSE_END("TERM2");
@@ -326,6 +334,8 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
 {
     PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     ps_symbol *symbol = ps_compiler_find_symbol(compiler, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -347,9 +357,8 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
         }
         else
         {
-            result->type = symbol->value->type;
-            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, symbol->value, result))
-                TRACE_ERROR("COPY");
+            // factor.type = symbol->value->type;
+
             READ_NEXT_TOKEN
         }
         break;
@@ -380,10 +389,12 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
 {
     PARSE_BEGIN("FACTOR", "");
 
-    ps_value factor = {.type = &ps_system_none, .data.v = NULL};
+    ps_value factor_value = {.type = &ps_system_none, .data.v = NULL};
     ps_identifier identifier;
     ps_token_type unary_operator;
 
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
     switch (lexer->current_token.type)
     {
     // ***Parenthesized expression ***
@@ -402,46 +413,38 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
         break;
     // ***Literal values ***
     case PS_TOKEN_CHAR_VALUE:
-        result->type = &ps_system_char;
-        if (mode == MODE_EXEC)
-            result->data.c = lexer->current_token.value.c;
+        factor_value.type = &ps_system_char;
+        factor_value.data.c = lexer->current_token.value.c;
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_INTEGER_VALUE:
-        result->type = &ps_system_integer;
-        if (mode == MODE_EXEC)
-            result->data.i = lexer->current_token.value.i;
+        factor_value.type = &ps_system_integer;
+        factor_value.data.i = lexer->current_token.value.i;
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        result->type = &ps_system_unsigned;
-        if (mode == MODE_EXEC)
-            result->data.u = lexer->current_token.value.u;
+        factor_value.type = &ps_system_unsigned;
+        factor_value.data.u = lexer->current_token.value.u;
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_REAL_VALUE:
-        result->type = &ps_system_real;
-        if (mode == MODE_EXEC)
-            result->data.r = lexer->current_token.value.r;
+        factor_value.type = &ps_system_real;
+        factor_value.data.r = lexer->current_token.value.r;
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        result->type = &ps_system_boolean;
-        if (mode == MODE_EXEC)
-            result->data.b = lexer->current_token.value.b;
+        factor_value.type = &ps_system_boolean;
+        factor_value.data.b = lexer->current_token.value.b;
         READ_NEXT_TOKEN
         break;
     case PS_TOKEN_STRING_VALUE:
-        result->type = &ps_system_string;
-        if (mode == MODE_EXEC)
+        factor_value.type = &ps_system_string;
+        factor_value.data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
+        if (factor_value.data.s == NULL)
         {
-            result->data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
-            if (result->data.s == NULL)
-            {
-                ps_compiler_set_message(compiler, "Failed to create string value: %s", strerror(errno));
-                compiler->error = ps_error_map_errno();
-                TRACE_ERROR("STRING_VALUE")
-            }
+            ps_compiler_set_message(compiler, "Failed to create string value: %s", strerror(errno));
+            compiler->error = ps_error_map_errno();
+            TRACE_ERROR("STRING_VALUE")
         }
         READ_NEXT_TOKEN
         break;
@@ -458,13 +461,21 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
     case PS_TOKEN_NOT:
         unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN
-        if (!ps_parse_factor(compiler, block, &factor))
+        ps_ast_node *operand = NULL;
+        if (!ps_parse_factor(compiler, block, &operand))
             TRACE_ERROR("UNARY_MINUS_NOT");
-        if (mode == MODE_EXEC && !ps_operator_unary_eval(compiler, &factor, result, unary_operator))
-            TRACE_ERROR("UNARY");
+        *result = ps_ast_create_unary_operation(start_line, start_column,
+                                                ps_operator_unary_from_token(lexer->current_token.type), &operand);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+
+    if (factor_value.type != &ps_system_none)
+    {
+        *result = ps_ast_create_rvalue_const(start_line, start_column, factor_value);
+        if (*result == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
 
     PARSE_END("OK")
@@ -486,7 +497,7 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
             *arg_count = 0;
-            result->type = &ps_system_real;
+            factor.type = &ps_system_real;
             READ_NEXT_TOKEN
         }
         else
@@ -497,14 +508,14 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
             if (mode == MODE_EXEC && arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            result->type = arg1->type;
+            factor.type = arg1->type;
             READ_NEXT_TOKEN
         }
     }
     else
     {
         *arg_count = 0;
-        result->type = &ps_system_real;
+        factor.type = &ps_system_real;
     }
 
     PARSE_END("OK")
@@ -555,7 +566,7 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
 }
 
 /**
- * Visit system or user function call:
+ * Visit system function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
 bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *function,
@@ -584,7 +595,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
             READ_NEXT_TOKEN
         }
         arg_count = 0;
-        result->type = &ps_system_unsigned;
+        factor.type = &ps_system_unsigned;
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
