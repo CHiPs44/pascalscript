@@ -200,6 +200,6 @@ void ps_system_done(ps_symbol_table *system)
 
 bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol)
 {
-    ps_symbol_table_error error = ps_symbol_table_add(system, symbol);
-    return error == PS_SYMBOL_TABLE_ERROR_NONE;
+    ps_error error = ps_symbol_table_add(system, symbol);
+    return error == PS_ERROR_NONE;
 }

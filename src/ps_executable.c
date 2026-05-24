@@ -39,7 +39,7 @@ ps_executable *ps_executable_free(ps_executable *executable)
         return NULL;
     if (ps_executable_is_system(executable->kind))
         return NULL;
-    executable->block = ps_ast_free_block(executable->block);
+    ps_ast_free_block(executable->block);
     ps_memory_free(PS_MEMORY_EXECUTABLE, executable);
     return NULL;
 }

@@ -27,15 +27,6 @@ extern "C"
     /** @brief up to 65,534 symbols in a table as 0 means empty and UINT16_MAX is used for "not found" */
     typedef uint16_t ps_symbol_table_size;
 
-    typedef enum e_ps_symbol_table_error
-    {
-        PS_SYMBOL_TABLE_ERROR_NONE,
-        PS_SYMBOL_TABLE_ERROR_EXISTS,
-        PS_SYMBOL_TABLE_ERROR_FULL,
-        PS_SYMBOL_TABLE_ERROR_INVALID,
-        PS_SYMBOL_TABLE_ERROR_NOT_FOUND,
-    } __attribute__((__packed__)) ps_symbol_table_error;
-
     /** @brief Symbol table holding names & their values */
     typedef struct s_ps_symbol_table
     {
@@ -57,7 +48,7 @@ extern "C"
     void *ps_symbol_table_free(ps_symbol_table *table);
 
     /** @brief Grow symbol table */
-    ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table);
+    ps_error ps_symbol_table_grow(ps_symbol_table *table);
 
     /** @brief How many used symbols? */
     ps_symbol_table_size ps_symbol_table_get_used(const ps_symbol_table *table);
@@ -72,10 +63,10 @@ extern "C"
     ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name);
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
-    ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
+    ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);
 
     /** @brief Remove symbol, returning error if symbol does not exist */
-    ps_symbol_table_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol);
+    ps_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol);
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table);

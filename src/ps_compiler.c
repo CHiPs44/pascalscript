@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <string.h>
 
 #include "ps_ast.h"
@@ -58,18 +59,22 @@ ps_compiler *ps_compiler_free(ps_compiler *compiler)
 
 bool ps_compiler_return_false(ps_compiler *compiler, ps_error error)
 {
+    assert(compiler != NULL);
     compiler->error = error;
     return false;
 }
 
 void *ps_compiler_return_null(ps_compiler *compiler, ps_error error)
 {
+    assert(compiler != NULL);
     compiler->error = error;
     return NULL;
 }
 
 bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONAR
 {
+    assert(compiler != NULL);
+    assert(format != NULL);
     va_list args;
     va_start(args, format);
     vsnprintf(compiler->message, sizeof(compiler->message), format, args); // NOSONAR
@@ -79,6 +84,9 @@ bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONA
 
 ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(name != NULL);
     ps_symbol *symbol = NULL;
 
     // No block => search into SYSTEM
@@ -106,13 +114,16 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, c
 
 bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(symbol != NULL);
     if (compiler->debug >= COMPILER_DEBUG_TRACE)
         fprintf(stderr, "ADD %*s SYMBOL '%*s' TO BLOCK '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
                 block->name, (void *)(symbol->value),
                 symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
-    ps_symbol_table_error error = ps_symbol_table_add(block->symbols, symbol);
-    if (error != PS_SYMBOL_TABLE_ERROR_NONE)
+    ps_error error = ps_symbol_table_add(block->symbols, symbol);
+    if (error != PS_ERROR_NONE)
         return ps_compiler_return_false(compiler, PS_ERROR_SYMBOL_NOT_ADDED);
     return true;
 }
@@ -120,6 +131,9 @@ bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbo
 bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const ps_identifier identifier,
                               ps_symbol *type_symbol)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(type_symbol != NULL);
     ps_value_data data = {0};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
     {
@@ -141,16 +155,18 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
 
 bool ps_compiler_is_number(ps_compiler *compiler, ps_value *value)
 {
+    assert(compiler != NULL);
+    assert(value != NULL);
     (void)compiler;
-    (void)value;
-    return false;
+    return ps_value_is_number(value);
 }
 
 bool ps_compiler_is_ordinal(ps_compiler *compiler, ps_value *value)
 {
+    assert(compiler != NULL);
+    assert(value != NULL);
     (void)compiler;
-    (void)value;
-    return false;
+    return ps_value_is_ordinal(value);
 }
 
 bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
@@ -186,6 +202,7 @@ bool ps_compiler_load_string(ps_compiler *compiler, char *source, size_t length)
     (void)compiler;
     (void)source;
     (void)length;
+    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
 
@@ -193,11 +210,13 @@ bool ps_compiler_load_file(ps_compiler *compiler, const char *filename)
 {
     (void)compiler;
     (void)filename;
+    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
 
 bool ps_compiler_run(ps_compiler *compiler)
 {
     (void)compiler;
+    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }

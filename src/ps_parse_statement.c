@@ -81,80 +81,79 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block)
     PARSE_END("OK")
 }
 
-bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable)
-{
-    PARSE_BEGIN("ASSIGNMENT", "ARRAY")
+// bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable)
+// {
+//     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
-    ps_compiler_return_false(compiler, PS_ERROR_NOT_IMPLEMENTED);
-    // ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
-    // ps_symbol *item_type = ps_array_get_subrange(variable);
-    // u_int8_t dimensions = ps_array_get_dimensions(variable);
-    // if (dimensions > 8)
-    //     RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    // ps_value indexes[8] = {0};
-    // int dimension = 0;
-    // // Initialize index types for each dimension
-    // bool loop = true;
-    // do
-    // {
-    //     indexes[dimension].allocated = false;
-    //     indexes[dimension].type = item_type;
-    //     indexes[dimension].data.v = NULL;
-    //     if (!loop)
-    //         break;
-    //     dimension += 1;
-    //     item_type = item_type->value->type->value->data.t->def.a.subrange;
-    //     if (item_type->kind != PS_TYPE_ARRAY)
-    //         loop = false;
-    // } while (true);
+//     ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
+//     ps_symbol *item_type = ps_array_get_subrange(variable);
+//     u_int8_t dimensions = ps_array_get_dimensions(variable);
+//     if (dimensions > 8)
+//         RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+//     ps_value indexes[8] = {0};
+//     int dimension = 0;
+//     // Initialize index types for each dimension
+//     bool loop = true;
+//     do
+//     {
+//         indexes[dimension].allocated = false;
+//         indexes[dimension].type = item_type;
+//         indexes[dimension].data.v = NULL;
+//         if (!loop)
+//             break;
+//         dimension += 1;
+//         item_type = item_type->value->type->value->data.t->def.a.subrange;
+//         if (item_type->kind != PS_TYPE_ARRAY)
+//             loop = false;
+//     } while (true);
 
-    // EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
-    // READ_NEXT_TOKEN
-    // do
-    // {
-    //     // At least one index
-    //     if (!ps_parse_expression(compiler, &indexes[dimension]))
-    //         TRACE_ERROR("INDEX")
-    //     dimension += 1;
-    //     // ',' begins another index
-    //     if (lexer->current_token.type == PS_TOKEN_COMMA)
-    //     {
-    //         // Too many indexes?
-    //         if (dimension == dimensions)
-    //             RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    //         READ_NEXT_TOKEN
-    //         continue;
-    //     }
-    //     // ']' ends indexes (and loop)
-    //     if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
-    //     {
-    //         // Not enough indexes?
-    //         if (dimension != dimensions)
-    //             RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-    //         READ_NEXT_TOKEN
-    //         break;
-    //     }
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    // } while (true);
-    // // Check for ':='
-    // EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-    // READ_NEXT_TOKEN
-    // // Parse expression for value, expected type is item type
-    // result.type = item_type;
-    // if (!ps_parse_expression(compiler, &result))
-    //     TRACE_ERROR("EXPRESSION1")
-    // // if (mode == MODE_EXEC)
-    // // {
-    // //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
-    // //     if (error != PS_ERROR_NONE)
-    // //     {
-    // //         compiler->error = error;
-    // //         TRACE_ERROR("ARRAY_ASSIGN")
-    // //     }
-    // // }
+//     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+//     READ_NEXT_TOKEN
+//     do
+//     {
+//         // At least one index
+//         if (!ps_parse_expression(compiler, &indexes[dimension]))
+//             TRACE_ERROR("INDEX")
+//         dimension += 1;
+//         // ',' begins another index
+//         if (lexer->current_token.type == PS_TOKEN_COMMA)
+//         {
+//             // Too many indexes?
+//             if (dimension == dimensions)
+//                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+//             READ_NEXT_TOKEN
+//             continue;
+//         }
+//         // ']' ends indexes (and loop)
+//         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+//         {
+//             // Not enough indexes?
+//             if (dimension != dimensions)
+//                 RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
+//             READ_NEXT_TOKEN
+//             break;
+//         }
+//         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+//     } while (true);
+//     // Check for ':='
+//     EXPECT_TOKEN(PS_TOKEN_ASSIGN)
+//     READ_NEXT_TOKEN
+//     // Parse expression for value, expected type is item type
+//     result.type = item_type;
+//     if (!ps_parse_expression(compiler, &result))
+//         TRACE_ERROR("EXPRESSION1")
+//     // if (mode == MODE_EXEC)
+//     // {
+//     //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
+//     //     if (error != PS_ERROR_NONE)
+//     //     {
+//     //         compiler->error = error;
+//     //         TRACE_ERROR("ARRAY_ASSIGN")
+//     //     }
+//     // }
 
-    // PARSE_END("OK")
-}
+//     PARSE_END("OK")
+// }
 
 /**
  * Parse assignment:
@@ -172,6 +171,8 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_symbol *
     PARSE_BEGIN("ASSIGNMENT", "")
 
     ps_value result = {.type = &ps_system_none, .data.v = NULL};
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
 
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
@@ -191,21 +192,30 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_symbol *
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
         // => array[index] := expression
-        if (!ps_parse_assignment_array(compiler, variable))
-            TRACE_ERROR("ARRAY")
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+        // if (!ps_parse_assignment_array(compiler, variable))
+        //     TRACE_ERROR("ARRAY")
     }
     else
     {
         EXPECT_TOKEN(PS_TOKEN_ASSIGN);
         READ_NEXT_TOKEN
-        result.type = variable->value->type;
-        if (!ps_parse_expression(compiler, &result))
+        ps_ast_node *expression = NULL;
+        if (!ps_parse_expression(compiler, block, &expression))
             TRACE_ERROR("EXPRESSION1");
         if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
-        // if (mode == MODE_EXEC && !ps_interpreter_copy_value(compiler, &result, variable->value))
-        //     TRACE_ERROR("COPY");
+        ps_ast_variable_simple *lvalue =
+            ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, variable);
+        if (lvalue == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        ps_ast_assignment *assignment =
+            ps_ast_create_assignment(start_line, start_column, (ps_ast_node *)lvalue, expression);
+        if (assignment == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        if (!ps_compiler_add_statement(compiler, block, assignment))
+            TRACE_ERROR("ADD STATEMENT")
     }
 
     PARSE_END("OK")
@@ -241,7 +251,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, bool 
     PARSE_BEGIN("WRITE_OR_WRITELN", "");
 
     size_t n_args = 0;
-    ps_ast_node args[8] = {0};
+    ps_ast_node *args[8] = {0};
     bool loop = true;
     int16_t width = 0;
     int16_t precision = 0;
@@ -291,8 +301,8 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, bool 
         }
         // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
         //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
-        if (n_args > 7)
-            RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES) // PS_ERROR_TOO_MANY_ARGUMENTS
+        if (n_args >= 8)
+            RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
         args[n_args] = expression;
         n_args += 1;
         if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -308,6 +318,8 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, bool 
     call = ps_ast_create_call(lexer->start_line, lexer->start_column, PS_AST_PROCEDURE_CALL,
                               newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
                               n_args > 0 ? args : NULL);
+    if (!ps_compiler_add_statement(compiler, block, (ps_ast_node *)call))
+        TRACE_ERROR("ADD STATEMENT")
 
     PARSE_END("OK")
 }
@@ -328,25 +340,21 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
 
-    // Check if identifier is the current function as defined in its parent environment
-    ps_environment *environment = ps_interpreter_get_environment(compiler, block);
-    if (environment == NULL)
-        RETURN_ERROR(PS_ERROR_ENVIRONMENT_UNDERFLOW);
     // First, check if this is an assignment to the current function name
-    symbol = ps_environment_find_symbol(environment->parent, identifier, true);
-    if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
+    symbol = ps_symbol_table_get(block->parent->symbols, identifier);
+    if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, block->name) == 0)
     {
         if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
-        symbol = ps_interpreter_find_symbol(compiler, result_identifier, false);
+        symbol = ps_compiler_find_symbol(compiler, block, result_identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     }
     else
     {
         // Normal lookup - can be variable, constant, procedure, or function
-        symbol = ps_interpreter_find_symbol(compiler, identifier, false);
+        symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     }
 
     if (symbol == NULL)
@@ -367,7 +375,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name = assignment to Result
-        symbol = ps_interpreter_find_symbol(compiler, result_identifier, false);
+        symbol = ps_interpreter_find_symbol(compiler, result_identifier, true);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_parse_assignment(compiler, symbol))

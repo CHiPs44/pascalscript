@@ -65,10 +65,10 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         if (operator == PS_OP_BINARY_INVALID)
         {
             ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
-                                    ps_token_get_keyword(and_operator), and_operator);
+                                    ps_token_get_keyword(or_operator), or_operator);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
             TRACE_ERROR("BINARY_OP");
     } while (true);
@@ -121,7 +121,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
                                     ps_token_get_keyword(and_operator), and_operator);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
             TRACE_ERROR("BINARY_OP");
     } while (true);
@@ -172,7 +172,7 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
                                 ps_token_get_keyword(relational_operator), relational_operator);
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
-    *result = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+    *result = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
     PARSE_END("RELATIONAL2");
 }
 
@@ -190,7 +190,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
     PARSE_BEGIN("SIMPLE_EXPRESSION", "");
 
     static ps_token_type additive_operators[] = {PS_TOKEN_PLUS, PS_TOKEN_MINUS};
-    size_t additive_operator_count = sizeof(additive_operators) / sizeif(ps_token_type);
+    size_t additive_operator_count = sizeof(additive_operators) / sizeof(ps_token_type);
     ps_ast_node *left = NULL;
     ps_ast_node *right = NULL;
     ps_token_type additive_operator = PS_TOKEN_NONE;
@@ -204,8 +204,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
         additive_operator = ps_parser_expect_token_types(compiler->parser, additive_operator_count, additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            if (mode == MODE_EXEC && !ps_compiler_copy_value(compiler, &left, result))
-                TRACE_ERROR("COPY");
+            *result = left;
             PARSE_END("SIMPLE1");
         }
         READ_NEXT_TOKEN
@@ -223,7 +222,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
                                     ps_token_get_keyword(additive_operator), additive_operator);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
             TRACE_ERROR("BINARY_OP");
     } while (true);
@@ -275,7 +274,7 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **res
                                     ps_token_get_keyword(multiplicative_operator), multiplicative_operator);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         }
-        left = ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+        left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
             TRACE_ERROR("BINARY_OP");
     } while (true);
@@ -336,7 +335,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
 
     uint16_t start_line = lexer->start_line;
     uint16_t start_column = lexer->start_column;
-    ps_symbol *symbol = ps_compiler_find_symbol(compiler, identifier, false);
+    ps_symbol *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
@@ -497,7 +496,7 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
             *arg_count = 0;
-            factor.type = &ps_system_real;
+            // factor.type = &ps_system_real;
             READ_NEXT_TOKEN
         }
         else
@@ -508,14 +507,14 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
             if (mode == MODE_EXEC && arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
                 RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            factor.type = arg1->type;
+            // factor.type = arg1->type;
             READ_NEXT_TOKEN
         }
     }
     else
     {
         *arg_count = 0;
-        factor.type = &ps_system_real;
+        // factor.type = &ps_system_real;
     }
 
     PARSE_END("OK")
@@ -533,7 +532,7 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     ps_identifier identifier = {0};
     COPY_IDENTIFIER(identifier)
-    *symbol = ps_compiler_find_symbol(compiler, identifier, false);
+    *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (*symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
     READ_NEXT_TOKEN
@@ -595,7 +594,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
             READ_NEXT_TOKEN
         }
         arg_count = 0;
-        factor.type = &ps_system_unsigned;
+        // factor.type = &ps_system_unsigned;
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {

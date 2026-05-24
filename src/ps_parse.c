@@ -17,7 +17,7 @@
  *  BLOCK
  *  '.'
  */
-bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program)
+bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("START", "")
 
@@ -25,7 +25,7 @@ bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program)
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
-        if (!ps_parse_program(compiler, block_program))
+        if (!ps_parse_program(compiler, block))
             TRACE_ERROR("PROGRAM")
         break;
     case PS_TOKEN_UNIT:

@@ -75,6 +75,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_OUT_OF_RANGE, "Out of range"},
     {PS_ERROR_INVALID_PARAMETERS, "Invalid parameters"},
     {PS_ERROR_TOO_MANY_VARIABLES, "Too many variables in declaration"},
+    {PS_ERROR_TOO_MANY_ARGUMENTS, "Too many arguments in procedure or function call"},
     {PS_ERROR_TOO_MANY_DIMENSIONS, "Too many dimensions for array"},
     {PS_ERROR_NOT_ENOUGH_DIMENSIONS, "Not enough dimensions for array"},
     {PS_ERROR_PARAMETER_COUNT_MISMATCH, "Parameter count mismatch"},

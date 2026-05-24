@@ -19,7 +19,7 @@ extern "C"
     typedef struct s_ps_environment
     {
         struct s_ps_environment *parent; /** @brief NULL for system environment */
-        ps_symbol_table_error error;     /** @brief error code if any */
+        ps_error error;     /** @brief error code if any */
         ps_identifier name;              /** @brief SYSTEM for system, program name for program, ... */
         ps_symbol_table *symbols;        /** @brief symbol table for this environment */
     } ps_environment;

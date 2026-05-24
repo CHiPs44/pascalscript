@@ -51,7 +51,7 @@ int main(void)
 
     ps_symbol_table *table = environment->symbols;
     int result;
-    ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
+    ps_error error = PS_ERROR_NONE;
 
     ps_value_set_integer(constant1.value, 1234567890);
     ps_value_set_unsigned(variable2.value, 0xDEADBEEF);
@@ -69,13 +69,13 @@ int main(void)
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     // Re-add constant1 => EXISTS
     error = ps_symbol_table_add(table, &constant1);
-    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", error == PS_SYMBOL_TABLE_ERROR_EXISTS ? "OK" : "KO", error);
+    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", error == PS_ERROR_SYMBOL_TABLE_EXISTS ? "OK" : "KO", error);
     // auto_var3 shoulfd fit => 2
     error = ps_symbol_table_add(table, &auto_var3);
-    printf("TEST SYMBOL TABLE: ADD AUTO_VAR3 %s %d\n", error == PS_SYMBOL_TABLE_ERROR_NONE ? "OK" : "KO", error);
+    printf("TEST SYMBOL TABLE: ADD AUTO_VAR3 %s %d\n", error == PS_ERROR_NONE ? "OK" : "KO", error);
     // constant4 should not fit => FULL
     error = ps_symbol_table_add(table, &constant4);
-    printf("TEST SYMBOL TABLE: ADD CONSTANT4 %s %d\n", error == PS_SYMBOL_TABLE_ERROR_FULL ? "OK" : "KO", error);
+    printf("TEST SYMBOL TABLE: ADD CONSTANT4 %s %d\n", error == PS_ERROR_SYMBOL_TABLE_FULL ? "OK" : "KO", error);
     // This is the end
     ps_symbol_table_dump(stdout, "Test", table);
     printf("TEST SYMBOL TABLE: DUMP OK\n");

@@ -73,13 +73,13 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-ps_symbol_table_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
+ps_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->used >= table->size)
-        return PS_SYMBOL_TABLE_ERROR_FULL;
+        return PS_ERROR_SYMBOL_TABLE_FULL;
     // check if symbol already exists
     if (ps_symbol_table_get(table, symbol->name) != NULL)
-        return PS_SYMBOL_TABLE_ERROR_EXISTS;
+        return PS_ERROR_SYMBOL_TABLE_EXISTS;
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;
     ps_symbol_table_size start_index = index;
@@ -92,23 +92,23 @@ ps_symbol_table_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_sy
         if (index == start_index)
         {
             ps_symbol_table_log("DEBUG\tps_symbol_table_add_internal: %s => table is full\n", symbol->name);
-            return PS_SYMBOL_TABLE_ERROR_FULL;
+            return PS_ERROR_SYMBOL_TABLE_FULL;
         }
     }
     table->symbols[index] = symbol;
     table->used += 1;
-    return PS_SYMBOL_TABLE_ERROR_NONE;
+    return PS_ERROR_NONE;
 }
 
-ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
+ps_error ps_symbol_table_grow(ps_symbol_table *table)
 {
-    ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
+    ps_error error = PS_ERROR_NONE;
     ps_symbol_table_size new_size = table->size + table->more;
     ps_symbol_table_size old_size = table->size;
     ps_symbol_table_size old_used = table->used;
     ps_symbol **new_symbols = ps_memory_calloc(PS_MEMORY_SYMBOL, new_size, sizeof(ps_symbol *));
     if (new_symbols == NULL)
-        return PS_SYMBOL_TABLE_ERROR_FULL;
+        return PS_ERROR_SYMBOL_TABLE_FULL;
     ps_symbol **old_symbols = table->symbols;
     table->symbols = new_symbols;
     table->size = new_size;
@@ -119,18 +119,18 @@ ps_symbol_table_error ps_symbol_table_grow(ps_symbol_table *table)
         if (old_symbols[i] != NULL)
         {
             error = ps_symbol_table_add_internal(table, old_symbols[i]);
-            if (error != PS_SYMBOL_TABLE_ERROR_NONE)
+            if (error != PS_ERROR_NONE)
                 goto cleanup;
         }
     }
     if (table->used != old_used)
     {
-        error = PS_SYMBOL_TABLE_ERROR_INVALID;
+        error = PS_ERROR_SYMBOL_TABLE_INVALID;
         goto cleanup;
     }
     ps_memory_free(PS_MEMORY_SYMBOL, old_symbols);
     ps_symbol_table_log("*** GROW from %u to %u ***\n", old_size, new_size);
-    return PS_SYMBOL_TABLE_ERROR_NONE;
+    return PS_ERROR_NONE;
 cleanup:
     if (new_symbols != NULL)
         ps_memory_free(PS_MEMORY_SYMBOL, new_symbols);
@@ -209,34 +209,34 @@ ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name)
     return table->symbols[index];
 }
 
-ps_symbol_table_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
+ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
-    ps_symbol_table_error error = PS_SYMBOL_TABLE_ERROR_NONE;
+    ps_error error = PS_ERROR_NONE;
     // NB: refuse to add symbol if kind is AUTO
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
-        return PS_SYMBOL_TABLE_ERROR_INVALID;
+        return PS_ERROR_SYMBOL_TABLE_INVALID;
     if (table->used >= table->size)
     {
         error = ps_symbol_table_grow(table);
-        if (error != PS_SYMBOL_TABLE_ERROR_NONE)
+        if (error != PS_ERROR_NONE)
             return error;
     }
     error = ps_symbol_table_add_internal(table, symbol);
     return error;
 }
 
-ps_symbol_table_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol)
+ps_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol)
 {
     ps_symbol_table_log("TRACE\tps_symbol_table_remove:\tBEGIN\t%d/%d %d '%s' \n", table->used, table->size, index,
                         symbol->name);
     ps_symbol_table_size index = ps_symbol_table_find(table, symbol->name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
-        return PS_SYMBOL_TABLE_ERROR_NOT_FOUND;
+        return PS_ERROR_SYMBOL_TABLE_NOT_FOUND;
     table->symbols[index] = NULL;
     table->used -= 1;
     ps_symbol_table_log("TRACE\tps_symbol_table_remove:\tEND\t%d/%d %d '%s' \n", table->used, table->size, index,
                         symbol->name);
-    return PS_SYMBOL_TABLE_ERROR_NONE;
+    return PS_ERROR_NONE;
 }
 
 void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table)

@@ -57,8 +57,8 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ps_symbol *symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, name, NULL);
     ASSERT_GOTO_CLEANUP(symbol_program != NULL);
 
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_program);
-    ASSERT_GOTO_CLEANUP(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_program);
+    ASSERT_GOTO_CLEANUP(error == PS_ERROR_NONE);
 
     ps_ast_debug_line(0, "Check that the PROGRAM node has the expected values");
     ASSERT_GOTO_CLEANUP(block_program->group == PS_AST_BLOCK);
@@ -193,10 +193,10 @@ bool ps_ast_test_assignment()
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     result = ps_interpreter_add_symbol(interpreter, symbol_j);
     ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     block_program->n_vars = 2;
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
@@ -295,10 +295,10 @@ bool ps_ast_test_if_then_else()
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     result = ps_interpreter_add_symbol(interpreter, symbol_j);
     ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     block_program->n_vars = 2;
 
     ps_ast_debug_line(0, "Create a statement list with 3 statements (I := 10; J := 0; If...)");
@@ -427,8 +427,8 @@ bool ps_ast_test_while_do()
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
     result = ps_interpreter_add_symbol(interpreter, symbol_i);
     ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     block_program->n_vars = 1;
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements (I := 5; While loop)");
@@ -533,8 +533,8 @@ bool ps_ast_test_repeat_until()
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
     result = ps_interpreter_add_symbol(interpreter, symbol_i);
     ASSERT_RETURN_FALSE(result);
-    ps_symbol_table_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
     block_program->n_vars = 1;
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements (I := 5; Repeat loop)");
@@ -626,7 +626,7 @@ bool ps_ast_test_repeat_until()
 bool ps_ast_test_for_do()
 {
     bool result;
-    ps_symbol_table_error error;
+    ps_error error;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("FORDO");
     ASSERT_RETURN_FALSE(block_program != NULL);
@@ -642,14 +642,14 @@ bool ps_ast_test_for_do()
     result = ps_interpreter_add_symbol(interpreter, symbol_i);
     ASSERT_RETURN_FALSE(result);
     error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
 
     ps_value value_sum = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_sum = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "SUM", &value_sum);
     result = ps_interpreter_add_symbol(interpreter, symbol_sum);
     ASSERT_RETURN_FALSE(result);
     error = ps_symbol_table_add(block_program->symbols, symbol_sum);
-    ASSERT_RETURN_FALSE(error == PS_SYMBOL_TABLE_ERROR_NONE);
+    ASSERT_RETURN_FALSE(error == PS_ERROR_NONE);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements (Sum := 0; For loop)");
     block_program->statement_list = ps_ast_create_statement_list(4, 5, 2);

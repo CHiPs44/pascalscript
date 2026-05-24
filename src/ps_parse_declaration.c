@@ -17,7 +17,7 @@
  * Parse/skip program parameters
  *      [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')']
  */
-static bool ps_parse_program_parameters(ps_compiler *compiler)
+static bool ps_parse_program_parameters(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("PROGRAM", "PARAMETERS")
 
@@ -77,7 +77,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     READ_NEXT_TOKEN
 
     // Skip optional parameters enclosed in parentheses
-    if (!ps_parse_program_parameters(compiler))
+    if (!ps_parse_program_parameters(compiler, block))
         TRACE_ERROR("PARAMETERS")
 
     // ';'
@@ -92,8 +92,8 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     // if (!ps_compiler_enter_environment(compiler, identifier))
     //     TRACE_ERROR("ENTER ENVIRONMENT")
     symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
-    // if (!ps_compiler_add_symbol(compiler, symbol_program))
-    //     TRACE_ERROR("ADD PROGRAM SYMBOL")
+    if (!ps_compiler_add_symbol(compiler, block, symbol_program))
+        TRACE_ERROR("ADD PROGRAM SYMBOL")
 
     // One "USES" clause at most after "PROGRAM"
     if (!ps_parse_uses(compiler, program))
@@ -119,6 +119,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
  */
 bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
 {
+    (void)block;
     PARSE_BEGIN("USES", "")
 
     if (lexer->current_token.type == PS_TOKEN_USES)
@@ -267,7 +268,7 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
         value = ps_value_alloc(&ps_system_none, data);
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_parse_constant_expression(compiler, value))
+        if (!ps_parse_constant_expression(compiler, block, value))
         {
             ps_value_free(value);
             TRACE_ERROR("CONSTANT_EXPRESSION")
@@ -313,7 +314,8 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
 /**
  * Parse variable identifier list with commas
  */
-static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *identifier, int *var_count)
+static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *block, ps_identifier *identifier,
+                                         int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
 
@@ -322,7 +324,7 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_identifier *i
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifier[*var_count])
-        const ps_symbol *variable = ps_compiler_find_symbol(compiler, identifier[*var_count], true);
+        const ps_symbol *variable = ps_compiler_find_symbol(compiler, block, identifier[*var_count], true);
         if (variable != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN
@@ -360,10 +362,10 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
     READ_NEXT_TOKEN
     do
     {
-        if (!ps_parse_var_identifier_list(compiler, identifier, &var_count))
+        if (!ps_parse_var_identifier_list(compiler, block, identifier, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
         READ_NEXT_TOKEN
-        if (!ps_parse_type_reference(compiler, &type_symbol, NULL))
+        if (!ps_parse_type_reference(compiler, block, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         for (int i = 0; i <= var_count; i++)
