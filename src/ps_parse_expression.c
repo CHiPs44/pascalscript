@@ -687,10 +687,7 @@ bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbo
  *      | [ '-' ] REAL_VALUE
  *      | BOOLEAN_VALUE
  *      | [ '-' ] IDENTIFIER
- * Next steps:
  *      | STRING_VALUE
- *      | NIL
- *      | CONSTANT_EXPRESSION
  */
 bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps_value *constant)
 {
@@ -752,7 +749,7 @@ bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps
         break;
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_compiler_find_symbol(compiler, identifier, false);
+        symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)

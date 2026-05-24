@@ -55,7 +55,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
-        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols<);
+        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
         for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
         {
             if (interpreter->environments[i] != NULL)

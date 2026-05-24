@@ -18,36 +18,37 @@ extern "C"
 #endif
 
     /* src/ps_parse.c */
-    ps_ast_node *ps_parse_start(ps_compiler *compiler);
+    bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program);
 
     /* src/ps_parse_executable.c */
-    ps_ast_node *ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
-    ps_ast_node *ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_ast_block *block,
-                                                     ps_ast_node *expression);
-    ps_ast_node *ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
+    bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
+    bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_ast_block *block,
+                                             ps_ast_node *expression);
+    bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
     /* src/ps_parse_expression.c */
-    ps_ast_node *ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression);
-    ps_ast_node *ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
-    ps_ast_node *ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function,
-                                        ps_ast_node *expression);
+    bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+
+    bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
+    bool ps_parse_constant_expression(ps_compiler *compiler, ps_value *constant);
+    bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function,
+                                ps_ast_node *expression);
 
     /* src/ps_parse_type.c */
-    ps_ast_node *ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block);
-    ps_ast_node *ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                         const char *type_name);
-    ps_ast_node *ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                              const char *type_name);
-    ps_ast_node *ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                                  const char *type_name);
-    ps_ast_node *ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                               const char *type_name);
+    bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                 const char *type_name);
+    bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                      const char *type_name);
+    bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                          const char *type_name);
+    bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                       const char *type_name);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \

@@ -58,17 +58,17 @@ static bool ps_parse_program_parameters(ps_compiler *compiler)
  *      PROGRAM IDENTIFIER [ '(' [ IDENTIFIER [ ',' IDENTIFIER ]* ] ')'] ';'
  *      BLOCK '.'
  */
-bool ps_parse_program(ps_compiler *compiler, ps_ast_node *ast)
+bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("PROGRAM", "")
 
     ps_identifier identifier = {0};
     ps_symbol *symbol_program = NULL;
+    uint16_t start_line = lexer->start_line;
+    uint16_t start_column = lexer->start_column;
 
     // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     READ_NEXT_TOKEN
 
     // IDENTIFIER
@@ -111,7 +111,6 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_node *ast)
     // NB: text after '.' is not analyzed and has not to be
     EXPECT_TOKEN(PS_TOKEN_DOT)
 
-    ast = (ps_ast_node *)program;
     PARSE_END("OK")
 }
 

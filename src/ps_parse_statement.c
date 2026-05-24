@@ -73,7 +73,7 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block)
 
     EXPECT_TOKEN(PS_TOKEN_BEGIN);
     READ_NEXT_TOKEN
-    if (lexer->current_token.type != PS_TOKEN_END && !ps_parse_statement_list(compiler, PS_TOKEN_END))
+    if (lexer->current_token.type != PS_TOKEN_END && !ps_parse_statement_list(compiler, block, PS_TOKEN_END))
         TRACE_ERROR("STATEMENT_LIST")
     EXPECT_TOKEN(PS_TOKEN_END)
     READ_NEXT_TOKEN
@@ -158,6 +158,7 @@ bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_sy
 
 /**
  * Parse assignment:
+ *  Simple:
  *      IDENTIFIER := EXPRESSION
  * Next steps:
  *  Array access:
@@ -175,16 +176,16 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_symbol *
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
         compiler->error = PS_ERROR_ASSIGN_TO_CONST;
-        ps_interpreter_set_message(compiler, "Constant '%s' cannot be assigned", variable->name);
+        ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", variable->name);
         TRACE_ERROR("CONSTANT");
     }
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         compiler->error = PS_ERROR_EXPECTED_VARIABLE;
-        ps_interpreter_set_message(compiler, "Symbol '%s' is not a variable", variable->name);
+        ps_compiler_set_message(compiler, "Symbol '%s' is not a variable", variable->name);
         TRACE_ERROR("VARIABLE");
     }
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "\nINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", variable->name,
                 ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
@@ -200,7 +201,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_symbol *
         result.type = variable->value->type;
         if (!ps_parse_expression(compiler, &result))
             TRACE_ERROR("EXPRESSION1");
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
         // if (mode == MODE_EXEC && !ps_interpreter_copy_value(compiler, &result, variable->value))
@@ -244,6 +245,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, bool 
     bool loop = true;
     int16_t width = 0;
     int16_t precision = 0;
+    ps_ast_node *expression = NULL;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is legal but is a no-op)
@@ -266,11 +268,11 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, bool 
 
     while (loop)
     {
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
         if (!ps_parse_expression(compiler, block, expression))
             TRACE_ERROR("EXPRESSION")
-        // retrieve numeric format
+        // retrieve string/numeric format
         width = 0;
         precision = 0;
         if (lexer->current_token.type == PS_TOKEN_COLON)
@@ -334,7 +336,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     symbol = ps_environment_find_symbol(environment->parent, identifier, true);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
     {
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
         symbol = ps_interpreter_find_symbol(compiler, result_identifier, false);
@@ -357,7 +359,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
             TRACE_ERROR("ASSIGNMENT")
         break;
     case PS_SYMBOL_KIND_CONSTANT:
-        ps_interpreter_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
+        ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_parse_procedure_or_function_call(compiler, symbol, NULL))
