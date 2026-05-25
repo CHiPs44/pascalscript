@@ -282,6 +282,7 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
     (void)compiler;
     (void)block;
     (void)symbol;
+    (void)result;
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     // const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     // if (type_def == NULL)
@@ -337,7 +338,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
     {
     case PS_SYMBOL_KIND_CONSTANT:
     case PS_SYMBOL_KIND_VARIABLE:
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         {
             fprintf(stderr, "INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
                     ps_symbol_get_kind_name(symbol->kind),
@@ -345,8 +346,9 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
         }
         if (ps_value_is_array(symbol->value))
         {
-            if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
-                TRACE_ERROR("ARRAY")
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+            // if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
+            //     TRACE_ERROR("ARRAY")
         }
         else
         {

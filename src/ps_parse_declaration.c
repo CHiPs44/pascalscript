@@ -257,6 +257,8 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
     // NB: adds symbols to current block symbol table, does not produce any AST nodes
 
     PARSE_BEGIN("CONST", "")
+    (void)start_line;
+    (void)start_column;
 
     ps_identifier identifier;
     ps_value *value;
@@ -303,6 +305,8 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
     // NB: adds symbols to current block symbol table, does not produce any AST nodes
 
     PARSE_BEGIN("TYPE", "");
+    (void)start_line;
+    (void)start_column;
 
     EXPECT_TOKEN(PS_TOKEN_TYPE);
     READ_NEXT_TOKEN

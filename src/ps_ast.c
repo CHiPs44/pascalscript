@@ -325,7 +325,7 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // =============================================================================
 
 ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
-                                size_t n_args, ps_ast_node *args[])
+                                size_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
@@ -339,6 +339,21 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
     call->args = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_node *));
     if (call->args == NULL)
         return (ps_ast_call *)ps_ast_free_call(call);
+    memcpy(call->args, args, n_args * sizeof(ps_ast_node *));
+    if (widths != NULL)
+    {
+        call->widths = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(int16_t));
+        if (call->widths == NULL)
+            return (ps_ast_call *)ps_ast_free_call(call);
+        memcpy(call->widths, widths, n_args * sizeof(int16_t));
+    }
+    if (precisions != NULL)
+    {
+        call->precisions = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(int16_t));
+        if (call->precisions == NULL)
+            return (ps_ast_call *)ps_ast_free_call(call);
+        memcpy(call->precisions, precisions, n_args * sizeof(int16_t));
+    }
     return call;
 }
 
