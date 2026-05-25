@@ -36,6 +36,8 @@ ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check)
         return ps_compiler_free(compiler);
     // Allocate and initialize system environment
     compiler->system = ps_symbol_table_alloc(256, 0);
+    if (compiler->system == NULL)
+        return ps_compiler_free(compiler);
     if (!ps_system_init(compiler->system))
         return ps_compiler_free(compiler);
     return compiler;
@@ -79,7 +81,7 @@ bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONA
     va_start(args, format);
     vsnprintf(compiler->message, sizeof(compiler->message), format, args); // NOSONAR
     va_end(args);
-    return true;
+    return false;
 }
 
 ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)

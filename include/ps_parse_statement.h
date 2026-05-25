@@ -18,12 +18,12 @@ extern "C"
 #endif
 
     // clang-format off
-    bool ps_parse_statement                      (ps_compiler *compiler, ps_ast_block *block                        );
-    bool ps_parse_compound_statement             (ps_compiler *compiler, ps_ast_block *block                        );
-    bool ps_parse_assignment                     (ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable   );
-    bool ps_parse_read_or_readln                 (ps_compiler *compiler, ps_ast_block *block, bool newline          );
-    bool ps_parse_write_or_writeln               (ps_compiler *compiler, ps_ast_block *block, bool newline          );
-    bool ps_parse_assignment_or_procedure_call   (ps_compiler *compiler, ps_ast_block *block                        );
+    bool ps_parse_statement                      (ps_compiler *compiler, ps_ast_block *block, ps_ast_node *statement                                 );
+    bool ps_parse_compound_statement             (ps_compiler *compiler, ps_ast_block *block, ps_ast_node *statement                                 );
+    bool ps_parse_assignment                     (ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment *assignment , ps_symbol *variable    );
+    bool ps_parse_read_or_readln                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_call *call             , bool newline           );
+    bool ps_parse_write_or_writeln               (ps_compiler *compiler, ps_ast_block *block, ps_ast_call *call             , bool newline           );
+    bool ps_parse_assignment_or_procedure_call   (ps_compiler *compiler, ps_ast_block *block, ps_ast_node *statement                                 );
     bool ps_parse_if_then_else                   (ps_compiler *compiler, ps_ast_block *block                        );
     bool ps_parse_repeat_until                   (ps_compiler *compiler, ps_ast_block *block                        );
     bool ps_parse_while_do                       (ps_compiler *compiler, ps_ast_block *block                        );

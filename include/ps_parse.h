@@ -26,30 +26,6 @@ extern "C"
                                              ps_ast_node *expression);
     bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
-    /* src/ps_parse_expression.c */
-    bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-
-    bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps_value *constant);
-    bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function,
-                                ps_ast_node *expression);
-
-    /* src/ps_parse_type.c */
-    bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block);
-    bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                 const char *type_name);
-    bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                      const char *type_name);
-    bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                          const char *type_name);
-    bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                       const char *type_name);
-
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __PARSE__;                                                                                    \
@@ -57,7 +33,9 @@ extern "C"
     {                                                                                                                  \
         fprintf(stderr, "BEGIN\t%-32s %-32s %-32s ", block->name, visit, __PLUS__);                                    \
         ps_token_debug(stderr, "BEGIN", &lexer->current_token);                                                        \
-    }
+    }                                                                                                                  \
+    uint16_t start_line = lexer->start_line;                                                                           \
+    uint16_t start_column = lexer->start_column;
 
 #define PARSE_END(__PLUS__)                                                                                            \
     {                                                                                                                  \

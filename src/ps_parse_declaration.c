@@ -9,6 +9,7 @@
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_parse.h"
+#include "ps_parse_expression.h"
 #include "ps_parse_statement.h"
 #include "ps_system.h"
 #include "ps_token.h"
@@ -20,6 +21,8 @@
 static bool ps_parse_program_parameters(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("PROGRAM", "PARAMETERS")
+    (void)start_line;
+    (void)start_column;
 
     // Empty list?
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
@@ -64,8 +67,6 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 
     ps_identifier identifier = {0};
     ps_symbol *symbol_program = NULL;
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
 
     // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
@@ -121,6 +122,8 @@ bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
 {
     (void)block;
     PARSE_BEGIN("USES", "")
+    (void)start_line;
+    (void)start_column;
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
@@ -164,6 +167,8 @@ bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
 bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("BLOCK", "")
+    (void)start_line;
+    (void)start_column;
 
     bool loop = true;
     do
@@ -211,8 +216,10 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
         }
     } while (loop);
 
-    if (!ps_parse_compound_statement(compiler, block))
+    ps_ast_statement_list *statement_list = NULL;
+    if (!ps_parse_compound_statement(compiler, block, &statement_list))
         TRACE_ERROR("COMPOUND")
+    block->statement_list = statement_list;
 
     PARSE_END("OK")
 }
@@ -226,7 +233,8 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
  *      Const
  *          Foo          = 42;
  *          Bar          = -3.14;
- *          Baz          = True;
+ *          Baz          = -Bar;
+ *          Flag         = True;
  *          Hello        = 'Hello, World!';
  *          ImageWidth   = 320;
  *          ImageHeight  = 200;
@@ -239,16 +247,15 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
  *      IDENTIFIER '=' IDENTIFIER | CONSTANT_EXPRESSION ';'
  * Examples:
  *      Const
- *          ImageWidth  = 320;
- *          ImageHeight = 200;
- *          ImageDepth  = 8;
  *          ImagePixels = ImageWidth * ImageHeight;
- *          ImageSize   = (ImagePixels * ImageDepth) div 8;
+ *          ImageSize   = (ImagePixels * ImageDepth) div ImageDepth;
  * Not implemented yet in lexer:
  *          Lines       = 'First line' #10 'Second line' #10 'Third line';
  */
 bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
 {
+    // NB: adds symbols to current block symbol table, does not produce any AST nodes
+
     PARSE_BEGIN("CONST", "")
 
     ps_identifier identifier;
@@ -293,11 +300,13 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
  */
 bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
 {
+    // NB: adds symbols to current block symbol table, does not produce any AST nodes
+
     PARSE_BEGIN("TYPE", "");
 
-    // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     EXPECT_TOKEN(PS_TOKEN_TYPE);
     READ_NEXT_TOKEN
+
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     do

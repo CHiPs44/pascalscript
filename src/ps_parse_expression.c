@@ -10,6 +10,7 @@
 #include "ps_array.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
+#include "ps_parse_expression.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
 #include "ps_string.h"
@@ -21,9 +22,9 @@ static int mode = MODE_EXEC;
 /**
  *  This is the entry point for visiting all expressions.
  */
-bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
-    return ps_parse_or_expression(compiler, block, result);
+    return ps_parse_or_expression(compiler, block, expression);
 }
 
 /**
@@ -36,7 +37,7 @@ bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node
  *      A or B          => binary_op(or, A, B)
  *      A or B xor C    => binary_op(xor, binary(or, A, B), C)
  */
-bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("OR_EXPRESSION", "");
 
@@ -46,8 +47,6 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
     ps_ast_node *right = NULL;
     ps_token_type or_operator = PS_TOKEN_NONE;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     if (!ps_parse_and_expression(compiler, block, &left))
         TRACE_ERROR("AND1");
     do
@@ -55,8 +54,8 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         or_operator = ps_parser_expect_token_types(compiler->parser, or_operator_count, or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            *result = left;
-            PARSE_END("LEFT");
+            *expression = left;
+            PARSE_END("LEFT")
         }
         READ_NEXT_TOKEN
         if (!ps_parse_and_expression(compiler, block, &right))
@@ -70,10 +69,10 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         }
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
-            TRACE_ERROR("BINARY_OP");
+            TRACE_ERROR("BINARY_OP")
     } while (true);
 
-    *result = left;
+    *expression = left;
 
     PARSE_END("RIGHT");
 }
@@ -89,7 +88,7 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
  *      A and B         => binary_op(and, A, B)
  *      A and B and C   => binary_op(and, binary(and, A, B), C)
  */
-bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("AND_EXPRESSION", "");
 
@@ -99,8 +98,6 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     ps_ast_node *right = NULL;
     ps_token_type and_operator = PS_TOKEN_NONE;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     if (!ps_parse_relational_expression(compiler, block, &left))
         TRACE_ERROR("RELATIONAL1");
     do
@@ -108,7 +105,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
         and_operator = ps_parser_expect_token_types(compiler->parser, and_operator_count, and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            *result = left;
+            *expression = left;
             PARSE_END("AND1");
         }
         READ_NEXT_TOKEN
@@ -126,7 +123,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
             TRACE_ERROR("BINARY_OP");
     } while (true);
 
-    *result = left;
+    *expression = left;
 
     PARSE_END("AND2");
 }
@@ -138,7 +135,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
  *      A           => A
  *      A >= B      => binary_op(GE, A, B)
  */
-bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("RELATIONAL_EXPRESSION", "");
 
@@ -150,8 +147,6 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
     ps_ast_node *right = NULL;
     ps_token_type relational_operator = PS_TOKEN_NONE;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     if (!ps_parse_simple_expression(compiler, block, &left))
         TRACE_ERROR("RELATIONAL1");
     // No loop, only one relational operator allowed, no a <= b <= c
@@ -159,7 +154,7 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
         compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
-        *result = left;
+        *expression = left;
         PARSE_END("RELATIONAL1");
     }
     READ_NEXT_TOKEN
@@ -172,7 +167,7 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
                                 ps_token_get_keyword(relational_operator), relational_operator);
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
-    *result = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
+    *expression = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
     PARSE_END("RELATIONAL2");
 }
 
@@ -185,7 +180,7 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
  *      A + B       => binary(+, A, B)
  *      A + B + C   => binary(+, binary(+, A, B), C)
  */
-bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("SIMPLE_EXPRESSION", "");
 
@@ -195,8 +190,6 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
     ps_ast_node *right = NULL;
     ps_token_type additive_operator = PS_TOKEN_NONE;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     if (!ps_parse_term(compiler, block, &left))
         TRACE_ERROR("TERM");
     do
@@ -204,7 +197,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
         additive_operator = ps_parser_expect_token_types(compiler->parser, additive_operator_count, additive_operators);
         if (additive_operator == PS_TOKEN_NONE)
         {
-            *result = left;
+            *expression = left;
             PARSE_END("SIMPLE1");
         }
         READ_NEXT_TOKEN
@@ -234,7 +227,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
  * Visit term:
  *      factor [ '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' factor ]*
  */
-bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("TERM", "");
 
@@ -245,8 +238,6 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **res
     ps_ast_node *right = NULL;
     ps_token_type multiplicative_operator = PS_TOKEN_NONE;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     if (!ps_parse_factor(compiler, block, &left))
         TRACE_ERROR("FACTOR");
     do
@@ -255,7 +246,7 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **res
             ps_parser_expect_token_types(compiler->parser, multiplicative_operator_count, multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
-            *result = left;
+            *expression = left;
             PARSE_END("TERM1");
         }
         READ_NEXT_TOKEN
@@ -286,6 +277,11 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
                                       ps_value *result)
 {
     PARSE_BEGIN("FACTOR", "ARRAY");
+    (void)start_line;
+    (void)start_column;
+    (void)compiler;
+    (void)block;
+    (void)symbol;
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     // const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     // if (type_def == NULL)
@@ -303,7 +299,7 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
     //     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
     //     if (mode == MODE_EXEC)
     //     {
-    //         ps_error error = ps_array_get_value(symbol, &index, result, compiler->range_check);
+    //         ps_error error = ps_array_get_value(symbol, &index, expression, compiler->range_check);
     //         if (error != PS_ERROR_NONE)
     //         {
     //             ps_compiler_set_message(compiler, "Can't get array value for index %s",
@@ -322,47 +318,47 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
  * @details
  * Actual:
  *      constant reference = identifier
- *      variable reference = identifier [ '[' expression ']' ]
  *      function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
  * Next step:
+ *  vector access
+ *      variable reference = identifier [ '[' expression ']' ]
  *  multi-dimensional arrays instead of vectors
  *      variable reference = identifier [ '[' expression [ ',' expression ]* ']' ]
  */
 bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, const char *identifier,
-                                ps_ast_node **result)
+                                ps_ast_node **factor)
 {
     PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     ps_symbol *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
     {
-    case PS_SYMBOL_KIND_AUTO:
     case PS_SYMBOL_KIND_CONSTANT:
     case PS_SYMBOL_KIND_VARIABLE:
         if (compiler->debug >= DEBUG_VERBOSE)
         {
-            fprintf(stderr, "%cINFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", mode == MODE_EXEC ? '*' : ' ',
-                    symbol->name, ps_symbol_get_kind_name(symbol->kind),
+            fprintf(stderr, "INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
+                    ps_symbol_get_kind_name(symbol->kind),
                     ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
         if (ps_value_is_array(symbol->value))
         {
-            if (!ps_parse_factor_identifier_array(compiler, block, symbol, result))
+            if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
                 TRACE_ERROR("ARRAY")
         }
         else
         {
             // factor.type = symbol->value->type;
-
+            *factor = ps_ast_create_variable_simple(start_line, start_column, PS_AST_RVALUE_SIMPLE, symbol);
+            if (*factor == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             READ_NEXT_TOKEN
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        if (!ps_parse_function_call(compiler, block, symbol, result))
+        if (!ps_parse_function_call(compiler, block, symbol, factor))
             TRACE_ERROR("FUNCTION")
         break;
     default:
@@ -384,7 +380,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
  * Next steps:
  *          | nil
  */
-bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result)
+bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
     PARSE_BEGIN("FACTOR", "");
 
@@ -392,14 +388,12 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
     ps_identifier identifier;
     ps_token_type unary_operator;
 
-    uint16_t start_line = lexer->start_line;
-    uint16_t start_column = lexer->start_column;
     switch (lexer->current_token.type)
     {
     // ***Parenthesized expression ***
     case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN
-        if (!ps_parse_expression(compiler, block, result))
+        if (!ps_parse_expression(compiler, block, expression))
             TRACE_ERROR("EXPRESSION");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
@@ -407,7 +401,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        if (!ps_parse_factor_identifier(compiler, block, identifier, result))
+        if (!ps_parse_factor_identifier(compiler, block, identifier, expression))
             TRACE_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
@@ -453,7 +447,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
     // *** Unary operators ***
     case PS_TOKEN_PLUS:
         READ_NEXT_TOKEN
-        if (!ps_parse_factor(compiler, block, result))
+        if (!ps_parse_factor(compiler, block, expression))
             TRACE_ERROR("UNARY_PLUS");
         break;
     case PS_TOKEN_MINUS:
@@ -463,8 +457,8 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
         ps_ast_node *operand = NULL;
         if (!ps_parse_factor(compiler, block, &operand))
             TRACE_ERROR("UNARY_MINUS_NOT");
-        *result = ps_ast_create_unary_operation(start_line, start_column,
-                                                ps_operator_unary_from_token(lexer->current_token.type), &operand);
+        *expression = ps_ast_create_unary_operation(start_line, start_column,
+                                                    ps_operator_unary_from_token(lexer->current_token.type), &operand);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -472,7 +466,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
 
     if (factor_value.type != &ps_system_none)
     {
-        *result = ps_ast_create_rvalue_const(start_line, start_column, factor_value);
+        *expression = ps_ast_create_rvalue_const(start_line, start_column, factor_value);
         if (*result == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
@@ -480,7 +474,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **r
     PARSE_END("OK")
 }
 
-bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result, int *arg_count,
+bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, int *arg_count,
                                    ps_value *arg1)
 {
     PARSE_BEGIN("FUNCTION_CALL", "RANDOM");
@@ -581,7 +575,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
     // Handle specific function types with dedicated handlers
     if (function == &ps_system_function_random)
     {
-        if (!ps_parse_function_call_random(compiler, block, result, &arg_count, &arg1))
+        if (!ps_parse_function_call_random(compiler, block, expression, &arg_count, &arg1))
             TRACE_ERROR("RANDOM")
     }
     else if (function == &ps_system_function_get_tick_count)
@@ -629,16 +623,16 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
         switch (arg_count)
         {
         case -1:
-            error = ps_function_exec_1arg_s(compiler, function, symbol, result);
+            error = ps_function_exec_1arg_s(compiler, function, symbol, expression);
             break;
         case 0:
-            error = ps_function_exec_1arg(compiler, function, NULL, result);
+            error = ps_function_exec_1arg(compiler, function, NULL, expression);
             break;
         case 1:
-            error = ps_function_exec_1arg(compiler, function, &arg1, result);
+            error = ps_function_exec_1arg(compiler, function, &arg1, expression);
             break;
         case 2:
-            error = ps_function_exec_2args(compiler, function, &arg1, &arg2, result);
+            error = ps_function_exec_2args(compiler, function, &arg1, &arg2, expression);
             break;
         default:
             error = PS_ERROR_INVALID_PARAMETERS;
@@ -658,20 +652,20 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
  * Visit system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function, ps_ast_node **result)
+bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function, ps_ast_node **expression)
 {
     PARSE_BEGIN("FUNCTION_CALL", "");
 
     READ_NEXT_TOKEN
     if (function->system)
     {
-        if (!ps_parse_function_call_system(compiler, block, function, result))
+        if (!ps_parse_function_call_system(compiler, block, function, expression))
             TRACE_ERROR("SYSTEM")
     }
     else
     {
         // User defined function
-        if (!ps_parse_procedure_or_function_call(compiler, block, function, result))
+        if (!ps_parse_procedure_or_function_call(compiler, block, function, expression))
             TRACE_ERROR("FUNCTION_CALL");
     }
 
