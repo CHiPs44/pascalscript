@@ -6,6 +6,7 @@
 
 #include "ps_parse_statement.h"
 #include "ps_array.h"
+#include "ps_ast.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_expression.h"
@@ -364,7 +365,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         loop = false;
     }
 
-    *call = ps_ast_create_call(lexer->start_line, lexer->start_column, PS_AST_PROCEDURE_CALL,
+    *call = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
                                newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
                                n_args > 0 ? args : NULL, widths, precisions);
     if (*call == NULL)
@@ -394,7 +395,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, block->name) == 0)
     {
         if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
-            fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
+            fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
         symbol = ps_compiler_find_symbol(compiler, block, result_identifier, false);
     }

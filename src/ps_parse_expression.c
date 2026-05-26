@@ -353,7 +353,8 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
         else
         {
             // factor.type = symbol->value->type;
-            *factor = ps_ast_create_variable_simple(start_line, start_column, PS_AST_RVALUE_SIMPLE, symbol);
+            *factor =
+                (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, PS_AST_RVALUE_SIMPLE, symbol);
             if (*factor == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             READ_NEXT_TOKEN

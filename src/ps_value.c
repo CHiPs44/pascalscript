@@ -435,15 +435,8 @@ char *ps_value_get_enum(const ps_value *value)
     const ps_executable *executable = value->data.x;                                                                   \
     if (executable == NULL)                                                                                            \
         snprintf(buffer, sizeof(buffer) - 1, "NULL!");                                                                 \
-    else if (executable->address != NULL)                                                                              \
-        snprintf(buffer, sizeof(buffer) - 1, "SYSTEM@%p", executable->address);                                        \
     else                                                                                                               \
-        snprintf(buffer, sizeof(buffer) - 1, "%s@L:%05d/C:%03d",                                                       \
-                 executable->formal_signature->result_type == NULL ||                                                  \
-                         executable->formal_signature->result_type == &ps_system_none                                  \
-                     ? "PROCEDURE"                                                                                     \
-                     : "FUNCTION",                                                                                     \
-                 executable->line + 1, executable->column + 1);
+        snprintf(buffer, sizeof(buffer) - 1, "%s@%p", ps_executable_get_kind_name(executable), executable->address);
 
 #define ARRAY_VALUE                                                                                                    \
     if (debug)                                                                                                         \

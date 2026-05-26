@@ -24,11 +24,11 @@
 /* clang-format off */
 // PS_SYSTEM_PROCEDURE(procedure, dec      , "DEC"      , .proc_1arg      , &ps_procedure_dec      );
 // PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , .proc_1arg      , &ps_procedure_inc      );
-PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", .proc_1arg      , &ps_procedure_randomize);
-PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , .proc_file_read , &ps_procedure_read     );
-PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , .proc_file_read , &ps_procedure_readln   );
-PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , .proc_file_write, &ps_procedure_write    );
-PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , .proc_file_write, &ps_procedure_writeln  );
+PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG      , .proc_1arg      , &ps_procedure_randomize);
+PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_read     );
+PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_readln   );
+PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_write    );
+PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_writeln  );
 /* clang-format on */
 
 bool ps_procedures_init(ps_environment *system)

@@ -62,6 +62,7 @@ extern "C"
 
     ps_executable *ps_executable_alloc(ps_executable_kind kind, ps_ast_block *block);
     ps_executable *ps_executable_free(ps_executable *executable);
+    char *ps_executable_get_kind_name(ps_executable_kind kind);
     void ps_executable_debug(FILE *output, char *message, ps_executable *executable);
 
 #ifdef __cplusplus
