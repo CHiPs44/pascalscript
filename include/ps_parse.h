@@ -22,8 +22,8 @@ extern "C"
 
     /* src/ps_parse_executable.c */
     bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
-    bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_symbol *executable, ps_ast_block *block,
-                                             ps_ast_node *expression);
+    bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression,
+                                             ps_symbol *executable);
     bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \

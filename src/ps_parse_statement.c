@@ -408,13 +408,15 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     switch (symbol->kind)
     {
-    case PS_SYMBOL_KIND_VARIABLE:
-        if (!ps_parse_assignment(compiler, block, statement, symbol))
-            TRACE_ERROR("ASSIGNMENT")
-        break;
     case PS_SYMBOL_KIND_CONSTANT:
         ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
+    case PS_SYMBOL_KIND_VARIABLE:
+        ps_ast_assignment **assignement = NULL;
+        if (!ps_parse_assignment(compiler, block, assignement, symbol))
+            TRACE_ERROR("ASSIGNMENT")
+        statement = (ps_ast_node **)assignement;
+        break;
     case PS_SYMBOL_KIND_PROCEDURE:
         if (!ps_parse_procedure_or_function_call(compiler, block, statement, symbol))
             TRACE_ERROR("PROCEDURE_CALL")
@@ -423,14 +425,16 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         // Assignment to function name => assignment to Result
         if (strcmp(block->name, identifier) != 0)
         {
-            ps_compiler_set_message(compiler, "", block->name, identifier);
+            ps_compiler_set_message(compiler, "Cannot assign to %s from %s", identifier, block->name);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
         symbol = ps_compiler_find_symbol(compiler, block, result_identifier, true);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-        if (!ps_parse_assignment(compiler, block, symbol))
+        ps_ast_assignment **assignement = NULL;
+        if (!ps_parse_assignment(compiler, block, assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
+        *statement = (ps_ast_node *)(*assignement);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -530,7 +534,7 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     READ_NEXT_TOKEN
 
     // CONDITION
-    if (!ps_parse_expression(compiler, block, condition))
+    if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("EXPRESSION");
     // if (result.type != &ps_system_boolean)
     //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
@@ -539,10 +543,10 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     EXPECT_TOKEN(PS_TOKEN_DO);
     READ_NEXT_TOKEN
 
-    if (!ps_parse_statement(compiler, block))
+    if (!ps_parse_statement(compiler, block, &body))
         TRACE_ERROR("STATEMENT");
 
-    *while_statement = (ps_ast_node *)ps_ast_create_while(start_line, start_column, condition, body);
+    *while_statement = ps_ast_create_while(start_line, start_column, condition, body);
     if (*while_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -693,10 +697,10 @@ bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_bloc
         ps_ast_node *statement = NULL;
         if (!ps_parse_statement(compiler, block, statement))
             TRACE_ERROR("STATEMENT");
-        statement_list = ps_ast_create_statement_list(start_line, start_column, 1);
-        if (statement_list == NULL)
+        *statement_list = ps_ast_create_statement_list(start_line, start_column, 1);
+        if (*statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        statement_list->statements[0] = statement;
+        (*statement_list)->statements[0] = statement;
     }
 
     PARSE_END("OK")

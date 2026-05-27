@@ -436,7 +436,8 @@ char *ps_value_get_enum(const ps_value *value)
     if (executable == NULL)                                                                                            \
         snprintf(buffer, sizeof(buffer) - 1, "NULL!");                                                                 \
     else                                                                                                               \
-        snprintf(buffer, sizeof(buffer) - 1, "%s@%p", ps_executable_get_kind_name(executable), executable->address);
+        snprintf(buffer, sizeof(buffer) - 1, "%s@%p", ps_executable_get_kind_name(executable->kind),                   \
+                 executable->address);
 
 #define ARRAY_VALUE                                                                                                    \
     if (debug)                                                                                                         \

@@ -20,14 +20,14 @@ extern "C"
 #endif
 
     // clang-format off
-    bool ps_parse_expression           (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_and_expression       (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_or_expression        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **result);
-    bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_symbol *function, ps_ast_node *expression);
+    bool ps_parse_expression           (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_and_expression       (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_or_expression        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+    bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, ps_symbol *function);
     bool ps_parse_constant_expression  (ps_compiler *compiler, ps_ast_block *block, ps_value *constant);
     // clang-format on
 

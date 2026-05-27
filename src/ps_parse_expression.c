@@ -16,8 +16,8 @@
 #include "ps_string.h"
 #include "ps_system.h"
 
-#define MODE_EXEC 0
-static int mode = MODE_EXEC;
+// #define MODE_EXEC 0
+// static int mode = MODE_EXEC;
 
 /**
  *  This is the entry point for visiting all expressions.
@@ -361,7 +361,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        if (!ps_parse_function_call(compiler, block, symbol, factor))
+        if (!ps_parse_function_call(compiler, block, factor, symbol))
             TRACE_ERROR("FUNCTION")
         break;
     default:
@@ -470,7 +470,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     if (factor_value.type != &ps_system_none)
     {
         *expression = ps_ast_create_rvalue_const(start_line, start_column, factor_value);
-        if (*result == NULL)
+        if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
 
@@ -478,14 +478,14 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
 }
 
 bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, int *arg_count,
-                                   ps_value *arg1)
+                                   ps_ast_node **arg1)
 {
     PARSE_BEGIN("FUNCTION_CALL", "RANDOM");
 
     // Random function can be called with 3 signatures:
     //  1. Random or Random() => Real from 0.0 to 1.0 excluded
-    //  2. Random(Integer) => Integer
-    //  3. Random(Unsigned) => Unsigned
+    //  2. Random(Integer)    => Integer
+    //  3. Random(Unsigned)   => Unsigned
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
         // Skip '(' and ')' or get parameter enclosed in parentheses
@@ -501,8 +501,8 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
             *arg_count = 1;
             if (!ps_parse_expression(compiler, block, arg1))
                 TRACE_ERROR("PARAMETER");
-            if (mode == MODE_EXEC && arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+            // if (arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
+            //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             // factor.type = arg1->type;
             READ_NEXT_TOKEN
@@ -565,21 +565,23 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
  * Visit system function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *function,
-                                   ps_value *result)
+bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call,
+                                   const ps_symbol *function)
 {
     PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 
-    ps_value arg1 = {.type = &ps_system_none, .data.v = NULL};
-    ps_value arg2 = {.type = &ps_system_none, .data.v = NULL};
+    int n_args = 0;
+    ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
-    int arg_count = 0;
 
     // Handle specific function types with dedicated handlers
     if (function == &ps_system_function_random)
     {
-        if (!ps_parse_function_call_random(compiler, block, expression, &arg_count, &arg1))
+        ps_ast_node *expression = NULL;
+        if (!ps_parse_function_call_random(compiler, block, &expression, &n_args, &expression))
             TRACE_ERROR("RANDOM")
+        if (n_args == 1)
+            args[0] = expression;
     }
     else if (function == &ps_system_function_get_tick_count)
     {
@@ -590,62 +592,58 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN
         }
-        arg_count = 0;
+        n_args = 0;
         // factor.type = &ps_system_unsigned;
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
-        arg_count = -1;
+        ps_symbol *symbol = NULL;
+        n_args = -1;
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
     }
     else if (function == &ps_system_function_power)
     {
         // Power function has two "by value" numeric arguments
-        arg_count = 2;
-        if (!ps_parse_function_call_power(compiler, block, &arg1, &arg2))
+        if (!ps_parse_function_call_power(compiler, block, &args[0], &args[1]))
             TRACE_ERROR("POWER")
+        n_args = 2;
     }
     else
     {
         // all other functions have one "by value" argument for now
         // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
-        arg_count = 1;
         EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
         READ_NEXT_TOKEN
-        if (!ps_parse_expression(compiler, block, &arg1))
+        if (!ps_parse_expression(compiler, block, &args[0]))
             TRACE_ERROR("ARG");
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
+        n_args = 1;
     }
 
-    // Execute the function based on its type
-    if (mode == MODE_EXEC)
+    switch (n_args)
     {
-        ps_error error = PS_ERROR_NONE;
-        switch (arg_count)
-        {
-        case -1:
-            error = ps_function_exec_1arg_s(compiler, function, symbol, expression);
-            break;
-        case 0:
-            error = ps_function_exec_1arg(compiler, function, NULL, expression);
-            break;
-        case 1:
-            error = ps_function_exec_1arg(compiler, function, &arg1, expression);
-            break;
-        case 2:
-            error = ps_function_exec_2args(compiler, function, &arg1, &arg2, expression);
-            break;
-        default:
-            error = PS_ERROR_INVALID_PARAMETERS;
-            break;
-        }
-        if (error != PS_ERROR_NONE)
-        {
-            compiler->error = error;
-            TRACE_ERROR("SYSTEM_FUNCTION")
-        }
+    case -1:
+        // error = ps_function_exec_1arg_s(compiler, function, symbol, expression);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
+        break;
+    case 0:
+        // error = ps_function_exec_1arg(compiler, function, NULL, expression);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL, NULL);
+        break;
+    case 1:
+        // error = ps_function_exec_1arg(compiler, function, &arg1, expression);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
+        break;
+    case 2:
+        // error = ps_function_exec_2args(compiler, function, &arg1, &arg2, expression);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
+        break;
+    default:
+        compiler->error = PS_ERROR_INVALID_PARAMETERS;
+        ps_compiler_set_message(compiler, "System functions must have 0, 1 or 2 arguments");
+        TRACE_ERROR("SYSTEM_FUNCTION")
     }
 
     PARSE_END("OK")
@@ -655,9 +653,11 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, c
  * Visit system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_symbol *function, ps_ast_node **expression)
+bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, ps_symbol *function)
 {
     PARSE_BEGIN("FUNCTION_CALL", "");
+    (void)start_line;
+    (void)start_column;
 
     READ_NEXT_TOKEN
     if (function->system)

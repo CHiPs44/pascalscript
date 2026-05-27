@@ -1,5 +1,5 @@
 /*
-    This file is part of the PascalScript Pascal interpreter.
+    This file is part of the PascalScript Pascal compiler.
     SPDX-FileCopyrightText: 2025 Christophe "CHiPs" Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
@@ -8,42 +8,52 @@
 
 #include "ps_executable.h"
 #include "ps_memory.h"
+#include "ps_parse.h"
+#include "ps_parse_expression.h"
 #include "ps_symbol.h"
 #include "ps_symbol_list.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
-#include "ps_visit.h"
 
 /**
  * @brief Visit type definition
  * @details
  *    IDENTIFIER '=' TYPE_REFERENCE
  */
-bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode mode)
+bool ps_visit_type_definition(ps_compiler *compiler, ps_ast_block *block)
 {
-    VISIT_BEGIN("TYPE_DEFINITION", "");
+    PARSE_BEGIN("TYPE_DEFINITION", "");
 
-    ps_symbol *type_symbol = NULL;
+    ps_symbol *type_reference = NULL;
     ps_identifier type_name = {0};
+    ps_symbol *type_definition = NULL;
+    ps_value *type_value = NULL;
 
     // IDENTIFIER
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     COPY_IDENTIFIER(type_name)
     // Check that type name does not already exist in local symbol table
-    if (ps_interpreter_find_symbol(interpreter, type_name, true) != NULL)
+    if (ps_interpreter_find_symbol(compiler, type_name, true) != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
     READ_NEXT_TOKEN
     // '='
     EXPECT_TOKEN(PS_TOKEN_EQ)
     READ_NEXT_TOKEN
     // TYPE_REFERENCE
-    if (!ps_visit_type_reference(interpreter, mode, &type_symbol, type_name))
+    if (!ps_visit_type_reference(compiler, block, &type_reference, type_name))
         TRACE_ERROR("TYPE REFERENCE")
 
-    VISIT_END("OK")
+    ps_value_data data = {.t = type_reference};
+    type_value = ps_value_alloc(&ps_system_type_def, data);
+    type_definition = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, type_name, type_value);
+
+    if (!ps_compiler_add_symbol(compiler, block, type_definition))
+        TRACE_ERROR("ADD SYMBOL")
+
+    PARSE_END("OK")
 }
 
 /**
@@ -53,10 +63,10 @@ bool ps_visit_type_definition(ps_interpreter *interpreter, ps_interpreter_mode m
  *  - Allocate symbol for type definition
  *  - Register type symbol in symbol table
  */
-static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpreter_mode mode, const char *name,
+static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *block, const char *name,
                                         ps_type_definition *type_def, ps_symbol **symbol)
 {
-    VISIT_BEGIN("REGISTER", "")
+    PARSE_BEGIN("REGISTER", "")
 
     // Allocate value for type definition
     ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
@@ -74,7 +84,7 @@ static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpre
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
     // Register type symbol in symbol table
-    if (!ps_interpreter_add_symbol(interpreter, *symbol))
+    if (!ps_interpreter_add_symbol(compiler, *symbol))
     {
         ps_symbol_free(*symbol);
         ps_value_free(value);
@@ -82,17 +92,17 @@ static bool ps_type_definition_register(ps_interpreter *interpreter, ps_interpre
         TRACE_ERROR("REGISTER")
     }
 
-    VISIT_END("OK");
+    PARSE_END("OK");
 }
 
 /**
  * @brief Visit type reference for string type
  *   'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
  */
-bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+bool ps_visit_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                     const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_STRING", "")
+    PARSE_BEGIN("TYPE_REFERENCE_STRING", "")
     ssize_t len = 0;
 
     if (lexer->current_token.type != PS_TOKEN_STRING)
@@ -103,7 +113,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
         // String[CONSTANT]
         READ_NEXT_TOKEN
         ps_value constant = {.type = &ps_system_none, .data.v = NULL};
-        if (!ps_visit_constant_expression(interpreter, mode, &constant))
+        if (!ps_visit_constant_expression(compiler, block, &constant))
             TRACE_ERROR("CONSTANT_EXPRESSION");
         switch (constant.type->value->data.t->base)
         {
@@ -135,7 +145,7 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
         *type_symbol = &ps_system_string;
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
@@ -199,10 +209,9 @@ bool ps_visit_type_reference_string(ps_interpreter *interpreter, ps_interpreter_
  *      | POINTER     = 'POINTER'
  *      | TPOINTER    = '^' TYPE_REFERENCE
  */
-bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
-                             const char *type_name)
+bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE", "");
+    PARSE_BEGIN("TYPE_REFERENCE", "");
 
     ps_symbol *symbol = NULL;
     // By default, we advance to next token after processing type reference,
@@ -231,7 +240,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         break;
     case PS_TOKEN_STRING:
         advance = false;
-        if (!ps_visit_type_reference_string(interpreter, mode, type_symbol, type_name))
+        if (!ps_visit_type_reference_string(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
         break;
         /* ********** Other types ********** */
@@ -241,13 +250,13 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     case PS_TOKEN_UNSIGNED_VALUE:
         // => SUBRANGE
         advance = false;
-        if (!ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
+        if (!ps_visit_type_reference_subrange(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     case PS_TOKEN_LEFT_PARENTHESIS:
         // => ENUMERATION
         advance = false;
-        if (!ps_visit_type_reference_enum(interpreter, mode, type_symbol, type_name))
+        if (!ps_visit_type_reference_enum(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ENUM")
         break;
     case PS_TOKEN_ARRAY:
@@ -255,7 +264,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         // NB: this can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
         // and may recursively call ps_visit_type_reference()
         advance = false;
-        if (!ps_visit_type_reference_array(interpreter, mode, type_symbol, type_name))
+        if (!ps_visit_type_reference_array(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ARRAY")
         break;
         /* ********** Identifier can be many things ********** */
@@ -265,7 +274,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
         //  - a copy of an existing type
         //  - a subrange definition from an enumeration
         //  - a subrange definition beginning with a constant expression
-        symbol = ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, false);
+        symbol = ps_interpreter_find_symbol(compiler, lexer->current_token.value.identifier, false);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
         if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -273,7 +282,7 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
             // Subrange from enumeration/char/integer/unsigned constant
             ps_value_type type = ps_value_get_type(symbol->value);
             if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
-                !ps_visit_type_reference_subrange(interpreter, mode, type_symbol, type_name))
+                !ps_visit_type_reference_subrange(compiler, block, type_symbol, type_name))
                 TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         }
         else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
@@ -297,13 +306,13 @@ bool ps_visit_type_reference(ps_interpreter *interpreter, ps_interpreter_mode mo
     if (advance)
         READ_NEXT_TOKEN
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+bool ps_visit_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                   const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_ENUM", "");
+    PARSE_BEGIN("TYPE_REFERENCE_ENUM", "");
 
     // Up to 256 values in an enumeration, re-allocate 16 more if exhausted
     ps_symbol_list *list = ps_symbol_list_alloc(16, 16);
@@ -323,8 +332,8 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     if (type_def == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     // Register it
-    if (!ps_type_definition_register(interpreter, mode, type_name, type_def, type_symbol))
-        GOTO_CLEANUP(interpreter->error)
+    if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
+        GOTO_CLEANUP(compiler->error)
     // Parse enumeration values
     do // NOSONAR
     {
@@ -336,12 +345,12 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
         //  - locally in the same enumeration
         //  - or globally in the symbol table
         if (ps_symbol_list_find(list, lexer->current_token.value.identifier) ||
-            (ps_interpreter_find_symbol(interpreter, lexer->current_token.value.identifier, true) != NULL))
+            (ps_interpreter_find_symbol(compiler, lexer->current_token.value.identifier, true) != NULL))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
         ps_symbol *value_symbol = ps_symbol_list_add(list, *type_symbol, lexer->current_token.value.identifier);
         if (value_symbol == NULL)
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_interpreter_add_symbol(interpreter, value_symbol))
+        if (!ps_interpreter_add_symbol(compiler, value_symbol))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
         READ_NEXT_TOKEN_OR_CLEANUP
         if (lexer->current_token.type == PS_TOKEN_COMMA)
@@ -357,19 +366,19 @@ bool ps_visit_type_reference_enum(ps_interpreter *interpreter, ps_interpreter_mo
     if (!ps_enum_set_values(type_def, list->used, list->values))
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     ps_symbol_list_free(list, false);
-    VISIT_END("OK")
+    PARSE_END("OK")
 cleanup:
     // TODO? remove type symbol from table
     ps_symbol_list_free(list, true);
     return false;
 }
 
-bool ps_visit_type_reference_subrange_min(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *min_value,
+bool ps_visit_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
                                           ps_value_type *min_base, ps_type_definition_subrange *subrange)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    if (!ps_visit_constant_expression(interpreter, mode, min_value))
+    if (!ps_visit_constant_expression(compiler, block, min_value))
         TRACE_ERROR("MIN")
     *min_base = ps_value_get_type(min_value);
     switch (*min_base)
@@ -398,15 +407,15 @@ bool ps_visit_type_reference_subrange_min(ps_interpreter *interpreter, ps_interp
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange_max(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_value *max_value,
+bool ps_visit_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
                                           ps_value_type *max_base, ps_type_definition_subrange *subrange)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    if (!ps_visit_constant_expression(interpreter, mode, max_value))
+    if (!ps_visit_constant_expression(compiler, block, max_value))
         TRACE_ERROR("MAX")
     *max_base = ps_value_get_type(max_value);
     switch (*max_base)
@@ -435,14 +444,14 @@ bool ps_visit_type_reference_subrange_max(ps_interpreter *interpreter, ps_interp
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpreter, ps_interpreter_mode mode,
+bool ps_visit_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
                                                         const char *type_name, ps_symbol **type_symbol, ps_symbol *type,
                                                         const ps_type_definition_subrange *subrange)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
@@ -484,16 +493,16 @@ bool ps_visit_type_reference_subrange_register_type_def(ps_interpreter *interpre
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     // Register new type definition in symbol table
-    if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
-        RETURN_ERROR(interpreter->error)
+    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
+        RETURN_ERROR(compiler->error)
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+bool ps_visit_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                       const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
     ps_type_definition_subrange subrange = {0};
     ps_value min_value = {0};
@@ -503,20 +512,20 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     ps_value_type max_base = PS_TYPE_NONE;
 
     // *** Parse min value of subrange as a constant expression
-    if (!ps_visit_type_reference_subrange_min(interpreter, mode, &min_value, &min_base, &subrange))
+    if (!ps_visit_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
         TRACE_ERROR("MIN")
     // *** Parse '..'
     EXPECT_TOKEN(PS_TOKEN_RANGE)
     READ_NEXT_TOKEN
     // *** Parse max value of subrange as a constant expression
-    if (!ps_visit_type_reference_subrange_max(interpreter, mode, &tmp_value, &max_base, &subrange))
+    if (!ps_visit_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
         TRACE_ERROR("MAX")
     // *** Copy value to max with same type as min
     max_value.type = min_value.type;
-    if (!ps_interpreter_copy_value(interpreter, &tmp_value, &max_value))
+    if (!ps_interpreter_copy_value(compiler, &tmp_value, &max_value))
     {
-        ps_interpreter_set_message(interpreter, "Min and max value of subrange type mismatch: %s %s",
-                                   min_value.type->name, max_value.type->name);
+        ps_interpreter_set_message(compiler, "Min and max value of subrange type mismatch: %s %s", min_value.type->name,
+                                   max_value.type->name);
         TRACE_ERROR("COPY_MAX")
     }
     // *** Check that subrange min is less than max
@@ -534,21 +543,21 @@ bool ps_visit_type_reference_subrange(ps_interpreter *interpreter, ps_interprete
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
     // *** Register subrange
-    if (!ps_visit_type_reference_subrange_register_type_def(interpreter, mode, type_name, type_symbol, min_value.type,
+    if (!ps_visit_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
                                                             &subrange))
         TRACE_ERROR("TYPE_DEF_SUBRANGE")
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }
 
 /**
  * Visit
  *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  */
-bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_mode mode, ps_symbol **type_symbol,
+bool ps_visit_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                    const char *type_name)
 {
-    VISIT_BEGIN("TYPE_REFERENCE_ARRAY", "");
+    PARSE_BEGIN("TYPE_REFERENCE_ARRAY", "");
 
     ps_symbol *subranges[8] = {0};
     uint8_t dimensions = 0;
@@ -566,7 +575,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     do
     {
         // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
-        if (!ps_visit_type_reference(interpreter, mode, &subrange, NULL))
+        if (!ps_visit_type_reference(compiler, block, &subrange, NULL))
             TRACE_ERROR("DIMENSION")
         // Dimension *must* be a subrange
         if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
@@ -595,7 +604,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     // written as array[dim1] of array[dim2] of item
     if (dimensions > 1)
     {
-        ps_interpreter_set_message(interpreter, "%d dimensions for an array is TODO/WIP", dimensions);
+        ps_interpreter_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     }
     // Expect 'OF'
@@ -603,7 +612,7 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
     // Item type (may be another array definition)
-    if (!ps_visit_type_reference(interpreter, mode, &item_type, NULL))
+    if (!ps_visit_type_reference(compiler, block, &item_type, NULL))
         TRACE_ERROR("ITEM_TYPE")
     // Item type can be any type, even another array
     if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
@@ -621,8 +630,8 @@ bool ps_visit_type_reference_array(ps_interpreter *interpreter, ps_interpreter_m
     type_def->def.a.item_type = item_type;
     type_def->def.a.dimensions = dimensions;
     // Register new type definition in symbol table
-    if (!ps_type_definition_register(interpreter, mode, name, type_def, type_symbol))
-        RETURN_ERROR(interpreter->error)
+    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
+        RETURN_ERROR(compiler->error)
 
-    VISIT_END("OK")
+    PARSE_END("OK")
 }

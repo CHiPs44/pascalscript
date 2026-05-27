@@ -11,6 +11,7 @@
 #include "ps_parse.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_statement.h"
+#include "ps_parse_type.h"
 #include "ps_system.h"
 #include "ps_token.h"
 
@@ -332,6 +333,8 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
                                          int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
+    (void)start_line;
+    (void)start_column;
 
     *var_count = 0;
     do
@@ -367,6 +370,8 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
 bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("VAR", "")
+    (void)start_line;
+    (void)start_column;
 
     ps_identifier identifier[8];
     int var_count;
@@ -382,10 +387,13 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         if (!ps_parse_type_reference(compiler, block, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
-        for (int i = 0; i <= var_count; i++)
+        for (int i = 0; i < var_count; i++)
         {
             if (!ps_compiler_add_variable(compiler, block, identifier[i], type_symbol))
+            {
+                ps_compiler_set_message(compiler, "Cannot add variable %s", identifier[i]);
                 TRACE_ERROR("ADD VARIABLE")
+            }
         }
         READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);

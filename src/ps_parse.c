@@ -20,6 +20,8 @@
 bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("START", "")
+    (void)start_line;
+    (void)start_column;
 
     READ_NEXT_TOKEN
     switch (lexer->current_token.type)
