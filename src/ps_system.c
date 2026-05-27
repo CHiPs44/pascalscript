@@ -119,7 +119,7 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 /* clang-format on */
 
-ps_symbol_table *ps_system_init(ps_symbol_table *system)
+bool ps_system_init(ps_symbol_table *system)
 {
     ps_symbol_table *system = ps_symbol_table_alloc(256, 0);
 
@@ -186,11 +186,11 @@ ps_symbol_table *ps_system_init(ps_symbol_table *system)
     ps_symbol_table_dump(NULL, "SYSTEM INIT", system);
 #endif
 
-    return system;
+    return true;
 
 error:
     ps_system_done(system);
-    return NULL;
+    return false;
 }
 
 void ps_system_done(ps_symbol_table *system)

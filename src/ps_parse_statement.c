@@ -694,7 +694,7 @@ bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_bloc
     }
     else
     {
-        ps_ast_node *statement = NULL;
+        ps_ast_node **statement = NULL;
         if (!ps_parse_statement(compiler, block, statement))
             TRACE_ERROR("STATEMENT");
         *statement_list = ps_ast_create_statement_list(start_line, start_column, 1);
