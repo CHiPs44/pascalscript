@@ -83,6 +83,9 @@ error:
 //     return ps_procedure_inc_or_dec(interpreter, value, true);
 // }
 
+/**
+ * Execute system procedure Randomize / Randomise(Seed)
+ */
 bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
 {
     unsigned int seed = 0;
@@ -112,6 +115,9 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
     return true;
 }
 
+/**
+ * Execute system procedure Read(F, Value)
+ */
 bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
@@ -120,6 +126,9 @@ bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) //
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
+/**
+ * Execute system procedure ReadLn(F, Value)
+ */
 bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) // NOSONAR
 {
     ((void)f);
@@ -128,6 +137,9 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
+/**
+ * Execute system procedure Write(F, Value)
+ */
 bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
@@ -140,6 +152,9 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *va
     return true;
 }
 
+/**
+ * Execute system procedure WriteLn(F, Value)
+ */
 bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);

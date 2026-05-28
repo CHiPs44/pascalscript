@@ -22,7 +22,7 @@
  * @details
  *    IDENTIFIER '=' TYPE_REFERENCE
  */
-bool ps_visit_type_definition(ps_compiler *compiler, ps_ast_block *block)
+bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
 {
     PARSE_BEGIN("TYPE_DEFINITION", "");
 
@@ -43,7 +43,7 @@ bool ps_visit_type_definition(ps_compiler *compiler, ps_ast_block *block)
     EXPECT_TOKEN(PS_TOKEN_EQ)
     READ_NEXT_TOKEN
     // TYPE_REFERENCE
-    if (!ps_visit_type_reference(compiler, block, &type_reference, type_name))
+    if (!ps_parse_type_reference(compiler, block, &type_reference, type_name))
         TRACE_ERROR("TYPE REFERENCE")
 
     ps_value_data data = {.t = type_reference};
@@ -99,7 +99,7 @@ static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *blo
  * @brief Visit type reference for string type
  *   'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
  */
-bool ps_visit_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                     const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_STRING", "")
@@ -113,7 +113,7 @@ bool ps_visit_type_reference_string(ps_compiler *compiler, ps_ast_block *block, 
         // String[CONSTANT]
         READ_NEXT_TOKEN
         ps_value constant = {.type = &ps_system_none, .data.v = NULL};
-        if (!ps_visit_constant_expression(compiler, block, &constant))
+        if (!ps_parse_constant_expression(compiler, block, &constant))
             TRACE_ERROR("CONSTANT_EXPRESSION");
         switch (constant.type->value->data.t->base)
         {
@@ -209,7 +209,7 @@ bool ps_visit_type_reference_string(ps_compiler *compiler, ps_ast_block *block, 
  *      | POINTER     = 'POINTER'
  *      | TPOINTER    = '^' TYPE_REFERENCE
  */
-bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name)
+bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE", "");
 
@@ -240,7 +240,7 @@ bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         break;
     case PS_TOKEN_STRING:
         advance = false;
-        if (!ps_visit_type_reference_string(compiler, block, type_symbol, type_name))
+        if (!ps_parse_type_reference_string(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
         break;
         /* ********** Other types ********** */
@@ -250,21 +250,21 @@ bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     case PS_TOKEN_UNSIGNED_VALUE:
         // => SUBRANGE
         advance = false;
-        if (!ps_visit_type_reference_subrange(compiler, block, type_symbol, type_name))
+        if (!ps_parse_type_reference_subrange(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     case PS_TOKEN_LEFT_PARENTHESIS:
         // => ENUMERATION
         advance = false;
-        if (!ps_visit_type_reference_enum(compiler, block, type_symbol, type_name))
+        if (!ps_parse_type_reference_enum(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ENUM")
         break;
     case PS_TOKEN_ARRAY:
         // => ARRAY
         // NB: this can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
-        // and may recursively call ps_visit_type_reference()
+        // and may recursively call ps_parse_type_reference()
         advance = false;
-        if (!ps_visit_type_reference_array(compiler, block, type_symbol, type_name))
+        if (!ps_parse_type_reference_array(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ARRAY")
         break;
         /* ********** Identifier can be many things ********** */
@@ -282,7 +282,7 @@ bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
             // Subrange from enumeration/char/integer/unsigned constant
             ps_value_type type = ps_value_get_type(symbol->value);
             if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
-                !ps_visit_type_reference_subrange(compiler, block, type_symbol, type_name))
+                !ps_parse_type_reference_subrange(compiler, block, type_symbol, type_name))
                 TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         }
         else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
@@ -309,7 +309,7 @@ bool ps_visit_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                   const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_ENUM", "");
@@ -373,12 +373,12 @@ cleanup:
     return false;
 }
 
-bool ps_visit_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
+bool ps_parse_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
                                           ps_value_type *min_base, ps_type_definition_subrange *subrange)
 {
     PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    if (!ps_visit_constant_expression(compiler, block, min_value))
+    if (!ps_parse_constant_expression(compiler, block, min_value))
         TRACE_ERROR("MIN")
     *min_base = ps_value_get_type(min_value);
     switch (*min_base)
@@ -410,12 +410,12 @@ bool ps_visit_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *b
     PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
+bool ps_parse_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
                                           ps_value_type *max_base, ps_type_definition_subrange *subrange)
 {
     PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
 
-    if (!ps_visit_constant_expression(compiler, block, max_value))
+    if (!ps_parse_constant_expression(compiler, block, max_value))
         TRACE_ERROR("MAX")
     *max_base = ps_value_get_type(max_value);
     switch (*max_base)
@@ -447,7 +447,7 @@ bool ps_visit_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *b
     PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
+bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
                                                         const char *type_name, ps_symbol **type_symbol, ps_symbol *type,
                                                         const ps_type_definition_subrange *subrange)
 {
@@ -499,7 +499,7 @@ bool ps_visit_type_reference_subrange_register_type_def(ps_compiler *compiler, p
     PARSE_END("OK")
 }
 
-bool ps_visit_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                       const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
@@ -512,13 +512,13 @@ bool ps_visit_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
     ps_value_type max_base = PS_TYPE_NONE;
 
     // *** Parse min value of subrange as a constant expression
-    if (!ps_visit_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
+    if (!ps_parse_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
         TRACE_ERROR("MIN")
     // *** Parse '..'
     EXPECT_TOKEN(PS_TOKEN_RANGE)
     READ_NEXT_TOKEN
     // *** Parse max value of subrange as a constant expression
-    if (!ps_visit_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
+    if (!ps_parse_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
         TRACE_ERROR("MAX")
     // *** Copy value to max with same type as min
     max_value.type = min_value.type;
@@ -543,7 +543,7 @@ bool ps_visit_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
     // *** Register subrange
-    if (!ps_visit_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
+    if (!ps_parse_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
                                                             &subrange))
         TRACE_ERROR("TYPE_DEF_SUBRANGE")
 
@@ -554,7 +554,7 @@ bool ps_visit_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
  * Visit
  *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  */
-bool ps_visit_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
                                    const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_ARRAY", "");
@@ -575,7 +575,7 @@ bool ps_visit_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
     do
     {
         // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
-        if (!ps_visit_type_reference(compiler, block, &subrange, NULL))
+        if (!ps_parse_type_reference(compiler, block, &subrange, NULL))
             TRACE_ERROR("DIMENSION")
         // Dimension *must* be a subrange
         if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
@@ -612,7 +612,7 @@ bool ps_visit_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
     // Item type (may be another array definition)
-    if (!ps_visit_type_reference(compiler, block, &item_type, NULL))
+    if (!ps_parse_type_reference(compiler, block, &item_type, NULL))
         TRACE_ERROR("ITEM_TYPE")
     // Item type can be any type, even another array
     if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)

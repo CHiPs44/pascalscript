@@ -386,6 +386,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     ps_identifier identifier;
     ps_symbol *symbol;
     ps_identifier result_identifier = "RESULT";
+    ps_ast_assignment **assignement = NULL;
 
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
@@ -412,13 +413,13 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
         RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
     case PS_SYMBOL_KIND_VARIABLE:
-        ps_ast_assignment **assignement = NULL;
         if (!ps_parse_assignment(compiler, block, assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
         statement = (ps_ast_node **)assignement;
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
-        if (!ps_parse_procedure_or_function_call(compiler, block, statement, symbol))
+        ps_ast_node **expression = NULL;
+        if (!ps_parse_procedure_or_function_call(compiler, block, expression, symbol))
             TRACE_ERROR("PROCEDURE_CALL")
         break;
     case PS_SYMBOL_KIND_FUNCTION:
@@ -431,7 +432,6 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         symbol = ps_compiler_find_symbol(compiler, block, result_identifier, true);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-        ps_ast_assignment **assignement = NULL;
         if (!ps_parse_assignment(compiler, block, assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
         *statement = (ps_ast_node *)(*assignement);
