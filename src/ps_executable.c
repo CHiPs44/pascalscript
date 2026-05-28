@@ -68,6 +68,7 @@ char *ps_executable_get_kind_name(ps_executable_kind kind)
         return "PROCEDURE";
     default:
         snprintf(name, 15, "???%d???", kind);
+        return name;
     }
 }
 

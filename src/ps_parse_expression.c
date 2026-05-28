@@ -10,17 +10,15 @@
 #include "ps_array.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
+#include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
 #include "ps_string.h"
 #include "ps_system.h"
 
-// #define MODE_EXEC 0
-// static int mode = MODE_EXEC;
-
 /**
- *  This is the entry point for visiting all expressions.
+ *  This is the entry point for parsing all expressions.
  */
 bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
@@ -28,14 +26,14 @@ bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node
 }
 
 /**
- * Visit
+ * Parse
  *      or_expression = and_expression { ( 'OR' | 'XOR' ) and_expression }
  * Goal:
  *      make A < 1 OR A > 10 OR A = 5 OR ... work without parenthesis
  * AST:
  *      A               => A
  *      A or B          => binary_op(or, A, B)
- *      A or B xor C    => binary_op(xor, binary(or, A, B), C)
+ *      A or B xor C    => binary_op(xor, binary_op(or, A, B), C)
  */
 bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
 {
@@ -78,7 +76,7 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
 }
 
 /**
- * Visit and expression:
+ * Parse and expression:
  *      relational_expression { 'AND' relational_expression }
  * Goal:
  *      make A < 1 AND A > 10 AND B = 5 AND ... work without parenthesis
@@ -129,7 +127,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
 }
 
 /**
- * Visit relational expression:
+ * Parse relational expression:
  *      simple_expression '<' | '<=' | '>' | '>=' | '=' | '<>' simple_expression
  * AST:
  *      A           => A
@@ -172,7 +170,7 @@ bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, 
 }
 
 /**
- * Visit simple expression:
+ * Parse simple expression:
  *      term [ '+' | '-' term ]*
  * NB: 'OR' | 'XOR' are accounted by or_expression
  * AST:
@@ -224,7 +222,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
 }
 
 /**
- * Visit term:
+ * Parse term:
  *      factor [ '*' | '/' | 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' | 'AS' factor ]*
  */
 bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
@@ -315,10 +313,11 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
 }
 
 /**
- * @brief Visit constant or variable reference or function call
+ * @brief Parse constant or variable reference or function call
  * @details
  * Actual:
  *      constant reference = identifier
+ *      variable reference = identifier
  *      function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
  * Next step:
  *  vector access
@@ -326,11 +325,12 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
  *  multi-dimensional arrays instead of vectors
  *      variable reference = identifier [ '[' expression [ ',' expression ]* ']' ]
  */
-bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, const char *identifier,
-                                ps_ast_node **factor)
+bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **factor)
 {
     PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
+    ps_identifier identifier;
+    COPY_IDENTIFIER(identifier)
     ps_symbol *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
@@ -344,7 +344,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
                     ps_symbol_get_kind_name(symbol->kind),
                     ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
-        if (ps_value_is_array(symbol->value))
+        isymbol(ps_value_is_array(symbol->value))
         {
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
             // if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
@@ -372,7 +372,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, cons
 }
 
 /**
- * @brief Visit factor
+ * @brief Parse factor
  * @details
  *  factor  = '(' , expression , ')'
  *          | variable_reference
@@ -388,7 +388,6 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     PARSE_BEGIN("FACTOR", "");
 
     ps_value factor_value = {.type = &ps_system_none, .data.v = NULL};
-    ps_identifier identifier;
     ps_token_type unary_operator;
 
     switch (lexer->current_token.type)
@@ -403,8 +402,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         break;
     // *** Identifier: variable, constant, function ***
     case PS_TOKEN_IDENTIFIER:
-        COPY_IDENTIFIER(identifier)
-        if (!ps_parse_factor_identifier(compiler, block, identifier, expression))
+        if (!ps_parse_factor_identifier(compiler, block, expression))
             TRACE_ERROR("IDENTIFIER")
         break;
     // ***Literal values ***
@@ -457,12 +455,12 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     case PS_TOKEN_NOT:
         unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN
-        ps_ast_node *operand = NULL;
-        if (!ps_parse_factor(compiler, block, &operand))
+        ps_ast_node **operand = NULL;
+        if (!ps_parse_factor(compiler, block, operand))
             TRACE_ERROR("UNARY_MINUS_NOT");
-        *expression = ps_ast_create_unary_operation(start_line, start_column,
-                                                    ps_operator_unary_from_token(lexer->current_token.type), &operand);
-        break;
+        ps_operator_unary unary_operator = ps_operator_unary_from_token(lexer->current_token.type);
+        *expression = ps_ast_create_unary_operation(start_line, start_column, unary_operator, operand);
+        PARSE_END("OK UNARY")
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
@@ -562,7 +560,7 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
 }
 
 /**
- * Visit system function call:
+ * Parse system function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
 bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call,
@@ -574,7 +572,6 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
 
-    // Handle specific function types with dedicated handlers
     if (function == &ps_system_function_random)
     {
         ps_ast_node *expression = NULL;
@@ -601,6 +598,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         n_args = -1;
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
+        args[0] = symbol;
     }
     else if (function == &ps_system_function_power)
     {
@@ -650,7 +648,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 }
 
 /**
- * Visit system or user function call:
+ * Parse system or user function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
 bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, ps_symbol *function)
@@ -676,7 +674,7 @@ bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
 }
 
 /**
- * Visit constant expression:
+ * Parse constant expression:
  *      [ '-' ] INTEGER_VALUE
  *      | UNSIGNED_VALUE
  *      | CHAR_VALUE

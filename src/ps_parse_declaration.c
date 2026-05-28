@@ -9,6 +9,7 @@
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_parse.h"
+#include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_statement.h"
 #include "ps_parse_type.h"

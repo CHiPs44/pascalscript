@@ -13,6 +13,7 @@
 #include "ps_lexer.h"
 #include "ps_parse.h"
 #include "ps_parse_declaration.h"
+#include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_type.h"
 #include "ps_procedures.h"
@@ -39,27 +40,28 @@
  */
 bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **variable)
 {
-    PARSE_BEGIN("EXECUTABLE", "VARIABLE_REFERENCE");
+    PARSE_BEGIN("EXECUTABLE", "VARIABLE_REFERENCE")
     (void)start_line;
     (void)start_column;
 
     ps_identifier identifier;
     ps_symbol *symbol;
 
-    *variable = NULL;
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    // Re-check
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
+    READ_NEXT_TOKEN
+
+    // Existing symbol?
     symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (symbol == NULL)
-    {
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-    }
+
+    // Variable?
     if (symbol->kind != PS_SYMBOL_KIND_VARIABLE)
-    {
-        RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE);
-    }
+        RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
+
     *variable = symbol;
-    READ_NEXT_TOKEN
 
     PARSE_END("OK")
 }
@@ -68,20 +70,21 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
  * Visit parameter definition:
  *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
  *
- * Add the parameter(s) to the signature and to the current environment.
+ * Add the parameter(s) to the signature
  * Up to 8 parameters at once.
  */
 bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature *signature)
 {
     PARSE_BEGIN("EXECUTABLE", "PARAMETER_DEFINITION");
+    (void)start_line;
+    (void)start_column;
 
     ps_identifier names[8] = {0};
-    int index = -1;
-    ps_symbol __attribute__((aligned(4))) *type_reference = NULL;
-    bool byref;
+    int index = 0;
+    ps_symbol *type_reference = NULL;
+    bool byref = false;
 
     // Default is "by value"
-    byref = false;
     if (lexer->current_token.type == PS_TOKEN_VAR || lexer->current_token.type == PS_TOKEN_OUT)
     {
         byref = true;
@@ -93,10 +96,10 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
     {
         // Parameter name
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-        index += 1;
         if (index == 8)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
         COPY_IDENTIFIER(names[index])
+        index += 1;
         // Check that the parameter name does not already exist in the other parameters
         // e.g. procedure P(a, b, a: Integer);
         for (int i = 0; i < index; i++)

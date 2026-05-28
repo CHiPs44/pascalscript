@@ -9,6 +9,7 @@
 #include "ps_ast.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
+#include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_procedures.h"
 #include "ps_symbol.h"
@@ -385,7 +386,6 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT OR PROCEDURE CALL");
     ps_identifier identifier;
     ps_symbol *symbol;
-    ps_identifier result_identifier = "RESULT";
     ps_ast_assignment **assignement = NULL;
 
     COPY_IDENTIFIER(identifier)
@@ -418,9 +418,10 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         statement = (ps_ast_node **)assignement;
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
-        ps_ast_node **expression = NULL;
-        if (!ps_parse_procedure_or_function_call(compiler, block, expression, symbol))
+        ps_ast_call **procedure = NULL;
+        if (!ps_parse_procedure_or_function_call(compiler, block, procedure, symbol))
             TRACE_ERROR("PROCEDURE_CALL")
+        *statement = (ps_ast_node *)(*procedure);
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to function name => assignment to Result
@@ -429,7 +430,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
             ps_compiler_set_message(compiler, "Cannot assign to %s from %s", identifier, block->name);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
-        symbol = ps_compiler_find_symbol(compiler, block, result_identifier, true);
+        symbol = ps_compiler_find_symbol(compiler, block, "RESULT", true);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_parse_assignment(compiler, block, assignement, symbol))

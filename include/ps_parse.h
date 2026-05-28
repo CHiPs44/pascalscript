@@ -20,12 +20,6 @@ extern "C"
     /* src/ps_parse.c */
     bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program);
 
-    /* src/ps_parse_executable.c */
-    bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_symbol_kind kind);
-    bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *expression,
-                                             ps_symbol *executable);
-    bool ps_parse_variable_reference(ps_compiler *compiler, ps_symbol **variable);
-
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
     static char *visit = __PARSE__;                                                                                    \
