@@ -157,7 +157,6 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
     ps_symbol *argument = NULL;
     ps_value *value = NULL;
     ps_symbol *variable = NULL;
-    ps_value result;
     uint8_t parameter_count = formal_signature->parameter_count;
     uint8_t i = 0;
     ps_ast_node *args[16] = {0};
@@ -250,20 +249,18 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
 
 /**
  * Visit procedure or functions (with return type) declaration:
- *      PROCEDURE IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] ;
- *      FUNCTION IDENTIFIER [ ( PARAMETER_DEFINITION [ , PARAMETER_DEFINITION ] ) ] : TYPE_REFERENCE ;
+ *      PROCEDURE IDENTIFIER [ '(' PARAMETER_DEFINITION [ ',' PARAMETER_DEFINITION ] ')' ] ';'
+ *      FUNCTION IDENTIFIER [ '(' PARAMETER_DEFINITION [ ',' PARAMETER_DEFINITION ] ')' ] ':' TYPE_REFERENCE ';'
  *      [ CONST ... TYPE ... VAR ... ]*
- *      BEGIN
- *          COMPOUND_STATEMENT [ ; ]
- *      END ;
- *      PARAMETER_DEFINITION = IDENTIFIER [ ':' TYPE_REFERENCE ] [ 'VAR' ] ;
- * Done:
- *  - allow procedure parameters
- *  - allow by reference parameters
+ *      'BEGIN'
+ *          COMPOUND_STATEMENT [ ';' ]
+ *      'END' ';'
+ *      PARAMETER_DEFINITION =  [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
  */
-bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block, ps_symbol_kind kind)
+bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block, ps_ast_block **executable,
+                                                ps_symbol_kind kind)
 {
-    PARSE_BEGIN("PROCEDURE_OR_FUNCTION", "");
+    PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION");
 
     ps_identifier identifier;
     ps_symbol *executable_symbol = NULL;
@@ -290,12 +287,12 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     executable_symbol = ps_compiler_find_symbol(compiler, block, identifier, true);
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-    // Create new environment for the procedure/function
-    if (!ps_compiler_enter_environment(compiler, identifier))
-    {
-        goto cleanup;
-    }
-    has_environment = true;
+    // // Create new environment for the procedure/function
+    // if (!ps_compiler_enter_environment(compiler, identifier))
+    // {
+    //     goto cleanup;
+    // }
+    // has_environment = true;
     READ_NEXT_TOKEN
 
     // Initialize signature

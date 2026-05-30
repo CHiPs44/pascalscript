@@ -218,9 +218,9 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
         }
     } while (loop);
 
-    ps_ast_statement_list *statement_list = NULL;
-    if (!ps_parse_compound_statement(compiler, block, &statement_list))
-        TRACE_ERROR("COMPOUND")
+    ps_ast_statement_list **statement_list = NULL;
+    if (!ps_parse_compound_statement(compiler, block, statement_list))
+        TRACE_ERROR("COMPOUND_STATEMENT")
     block->statement_list = statement_list;
 
     PARSE_END("OK")
