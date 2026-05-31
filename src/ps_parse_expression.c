@@ -344,7 +344,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
                     ps_symbol_get_kind_name(symbol->kind),
                     ps_type_definition_get_name(symbol->value->type->value->data.t));
         }
-        isymbol(ps_value_is_array(symbol->value))
+        if (ps_value_is_array(symbol->value))
         {
             RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
             // if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
@@ -457,9 +457,11 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         READ_NEXT_TOKEN
         ps_ast_node **operand = NULL;
         if (!ps_parse_factor(compiler, block, operand))
-            TRACE_ERROR("UNARY_MINUS_NOT");
+            TRACE_ERROR("UNARY");
         ps_operator_unary unary_operator = ps_operator_unary_from_token(lexer->current_token.type);
-        *expression = ps_ast_create_unary_operation(start_line, start_column, unary_operator, operand);
+        *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, unary_operator, *operand);
+        if (*expression == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         PARSE_END("OK UNARY")
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -467,7 +469,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
 
     if (factor_value.type != &ps_system_none)
     {
-        *expression = ps_ast_create_rvalue_const(start_line, start_column, factor_value);
+        *expression = (ps_ast_node *)ps_ast_create_rvalue_const(start_line, start_column, factor_value);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }

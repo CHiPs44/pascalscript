@@ -257,8 +257,8 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
  *      'END' ';'
  *      PARAMETER_DEFINITION =  [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
  */
-bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block, ps_ast_block **executable,
-                                                ps_symbol_kind kind)
+bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block,
+                                                ps_ast_block **block_executable, ps_symbol_kind kind)
 {
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION");
 
@@ -354,13 +354,17 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     // }
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
 
-    executable = ps_executable_alloc(kind, signature);
-    if (executable == NULL)
-    {
-        compiler->error = PS_ERROR_OUT_OF_MEMORY;
-        goto cleanup;
-    }
-    if (compiler->debug >= DEBUG_VERBOSE)
+    // TODO!
+    // ps_executable_kind executable_kind =
+    //     kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
+    // *executable = ps_executable_alloc(executable_kind, signature);
+    // if (*executable == NULL)
+    // {
+    //     compiler->error = PS_ERROR_OUT_OF_MEMORY;
+    //     goto cleanup;
+    // }
+
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
     {
         fprintf(stderr, "================================================================================\n");
         ps_executable_debug(stderr, "EXECUTABLE", executable);
@@ -409,7 +413,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
             compiler->error = PS_ERROR_OUT_OF_MEMORY;
             goto cleanup;
         }
-        if (!ps_environment_add_symbol(ps_compiler_get_environment(compiler), result_symbol))
+        if (!ps_compiler_add_symbol(compiler, block, result_symbol))
         {
             result_symbol = ps_symbol_free(result_symbol);
             result_value = NULL;
@@ -428,26 +432,26 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     READ_NEXT_TOKEN
 
 cleanup:
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
     if (has_environment)
         ps_compiler_exit_environment(compiler);
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
                 executable_symbol_added ? " (added)" : " (not added)");
     if (executable_symbol != NULL && !executable_symbol_added)
     {
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         ps_symbol_free(executable_symbol);
         value = NULL;
     }
-    if (compiler->debug >= DEBUG_VERBOSE)
+    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
                 result_symbol_added ? " (added)" : " (not added)");
     if (result_symbol != NULL && !result_symbol_added)
     {
-        if (compiler->debug >= DEBUG_VERBOSE)
+        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
         ps_symbol_free(result_symbol);
         result_value = NULL;

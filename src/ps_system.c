@@ -121,8 +121,6 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 bool ps_system_init(ps_symbol_table *system)
 {
-    ps_symbol_table *system = ps_symbol_table_alloc(256, 0);
-
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/

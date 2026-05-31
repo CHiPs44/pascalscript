@@ -82,7 +82,7 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= COMPILER_DEBUG_TRACE)                                                                   \
         {                                                                                                              \
-            fprintf(stderr, "TOKEN\t%%-32s -32s %-32s ", block->name, "EXPECTED",                                      \
+            fprintf(stderr, "TOKEN\t%-32s -%32s %-32s ", block->name, "EXPECTED",                                      \
                     ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
