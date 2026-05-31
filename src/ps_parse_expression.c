@@ -388,7 +388,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     PARSE_BEGIN("FACTOR", "");
 
     ps_value factor_value = {.type = &ps_system_none, .data.v = NULL};
-    ps_token_type unary_operator;
+    ps_token_type unary_operator = PS_TOKEN_NONE;
 
     switch (lexer->current_token.type)
     {
@@ -458,8 +458,8 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         ps_ast_node **operand = NULL;
         if (!ps_parse_factor(compiler, block, operand))
             TRACE_ERROR("UNARY");
-        ps_operator_unary unary_operator = ps_operator_unary_from_token(lexer->current_token.type);
-        *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, unary_operator, *operand);
+        ps_operator_unary operator_unary = ps_operator_unary_from_token(unary_operator);
+        *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, operator_unary, *operand);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         PARSE_END("OK UNARY")
@@ -477,13 +477,14 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     PARSE_END("OK")
 }
 
-bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, int *arg_count,
-                                   ps_ast_node **arg1)
+bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, int *n_args, ps_ast_node **arg)
 {
     PARSE_BEGIN("FUNCTION_CALL", "RANDOM");
+    (void)start_line;
+    (void)start_column;
 
     // Random function can be called with 3 signatures:
-    //  1. Random or Random() => Real from 0.0 to 1.0 excluded
+    //  1. Random or Random() => Real from 0.0 (included) to 1.0 (excluded)
     //  2. Random(Integer)    => Integer
     //  3. Random(Unsigned)   => Unsigned
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
@@ -492,25 +493,25 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
         READ_NEXT_TOKEN
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            *arg_count = 0;
+            *n_args = 0;
             // factor.type = &ps_system_real;
             READ_NEXT_TOKEN
         }
         else
         {
-            *arg_count = 1;
-            if (!ps_parse_expression(compiler, block, arg1))
+            *n_args = 1;
+            if (!ps_parse_expression(compiler, block, arg))
                 TRACE_ERROR("PARAMETER");
-            // if (arg1->type != &ps_system_integer && arg1->type != &ps_system_unsigned)
+            // if (arg->type != &ps_system_integer && arg->type != &ps_system_unsigned)
             //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            // factor.type = arg1->type;
+            // factor.type = arg->type;
             READ_NEXT_TOKEN
         }
     }
     else
     {
-        *arg_count = 0;
+        *n_args = 0;
         // factor.type = &ps_system_real;
     }
 
@@ -520,6 +521,10 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, p
 bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block, ps_symbol **symbol)
 {
     PARSE_BEGIN("FUNCTION_CALL", "LOW_HIGH")
+    (void)start_line;
+    (void)start_column;
+
+    ps_identifier identifier = {0};
 
     // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
@@ -527,7 +532,6 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
         lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    ps_identifier identifier = {0};
     COPY_IDENTIFIER(identifier)
     *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (*symbol == NULL)
@@ -539,22 +543,24 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
     PARSE_END("OK")
 }
 
-bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps_value *arg1, ps_value *arg2)
+bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **arg1, ps_ast_node **arg2)
 {
     PARSE_BEGIN("FUNCTION_CALL", "POWER");
+    (void)start_line;
+    (void)start_column;
 
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, block, arg1))
         TRACE_ERROR("ARG1")
-    if (!ps_value_is_number(arg1) && !ps_value_is_real(arg1))
-        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    // if (!ps_value_is_number(arg1) && !ps_value_is_real(arg1))
+    //     RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     EXPECT_TOKEN(PS_TOKEN_COMMA)
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, block, arg2))
         TRACE_ERROR("ARG2")
-    if (!ps_value_is_number(arg2) && !ps_value_is_real(arg2))
-        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    // if (!ps_value_is_number(arg2) && !ps_value_is_real(arg2))
+    //     RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
 
@@ -576,11 +582,8 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 
     if (function == &ps_system_function_random)
     {
-        ps_ast_node *expression = NULL;
-        if (!ps_parse_function_call_random(compiler, block, &expression, &n_args, &expression))
+        if (!ps_parse_function_call_random(compiler, block, &n_args, &args[0]))
             TRACE_ERROR("RANDOM")
-        if (n_args == 1)
-            args[0] = expression;
     }
     else if (function == &ps_system_function_get_tick_count)
     {

@@ -627,7 +627,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
-    variable = ps_interpreter_find_symbol(compiler, identifier, true);
+    variable = ps_compiler_find_symbol(compiler, block, identifier, true);
     if (variable == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)

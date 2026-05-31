@@ -261,15 +261,14 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
                                                 ps_ast_block **block_executable, ps_symbol_kind kind)
 {
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION");
+    (void)start_line;
+    (void)start_column;
 
     ps_identifier identifier;
     ps_symbol *executable_symbol = NULL;
     ps_value *value = NULL;
     ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
-    uint16_t line = 0;
-    uint16_t column = 0;
-    bool has_environment = false;
     ps_symbol *result_symbol = NULL;
     ps_value *result_value = NULL;
     bool result_symbol_added = false;
@@ -434,8 +433,8 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 cleanup:
     if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
-    if (has_environment)
-        ps_compiler_exit_environment(compiler);
+    // if (has_environment)
+    //     ps_compiler_exit_environment(compiler);
     if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
         fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
                 executable_symbol_added ? " (added)" : " (not added)");
