@@ -66,6 +66,7 @@ extern "C"
     {
         PS_AST_NODE_COMMON
     } ps_ast_node;
+#define PS_AST_NODE_SIZE sizeof(ps_ast_node)
 
     /** @brief List of statements, single instruction or instructions between BEGIN and END */
     typedef struct s_ps_ast_statement_list
@@ -74,6 +75,7 @@ extern "C"
         size_t count;             /** @brief Number of statements  */
         ps_ast_node **statements; /** @brief NULL if no statements */
     } ps_ast_statement_list;
+#define PS_AST_STATEMENT_LIST_SIZE sizeof(ps_ast_statement_list)
 
     /** @brief Block is a program, procedure, function or unit */
     /** @details Units may be separated as they are special cases with interface and implementation */
@@ -88,6 +90,7 @@ extern "C"
         ps_formal_signature *signature;        /** @brief Only for procedures and functions, NULL otherwise     */
         ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                    */
     } ps_ast_block;
+#define PS_AST_BLOCK_SIZE sizeof(ps_ast_block)
 
     /** @brief IF statement */
     typedef struct s_ps_ast_if
@@ -97,6 +100,7 @@ extern "C"
         ps_ast_statement_list *then_branch; /** @brief Statements to execute if condition is true, can be empty  */
         ps_ast_statement_list *else_branch; /** @brief Statements to execute if condition is false, can be empty */
     } ps_ast_if;
+    #define PS_AST_IF_SIZE sizeof(ps_ast_if)
 
     /** @brief WHILE statement */
     typedef struct s_ps_ast_while

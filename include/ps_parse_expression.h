@@ -27,7 +27,7 @@ extern "C"
     bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
     bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
     bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-    bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, ps_symbol *function);
+    bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function);
     bool ps_parse_constant_expression  (ps_compiler *compiler, ps_ast_block *block, ps_value *constant);
     // clang-format on
 

@@ -361,8 +361,10 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        if (!ps_parse_function_call(compiler, block, factor, symbol))
+        ps_ast_call **call = NULL;
+        if (!ps_parse_function_call(compiler, block, call, symbol))
             TRACE_ERROR("FUNCTION")
+        *factor = (ps_ast_node *)(*call);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -654,9 +656,9 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 
 /**
  * Parse system or user function call:
- *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
+ *      identifier [ '(' [ expression | variable_reference [ ',' expression | variable_reference ]* ] ')' ]
  */
-bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression, ps_symbol *function)
+bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function)
 {
     PARSE_BEGIN("FUNCTION_CALL", "");
     (void)start_line;
@@ -665,13 +667,13 @@ bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
     READ_NEXT_TOKEN
     if (function->system)
     {
-        if (!ps_parse_function_call_system(compiler, block, function, expression))
+        if (!ps_parse_function_call_system(compiler, block, call, function))
             TRACE_ERROR("SYSTEM")
     }
     else
     {
         // User defined function
-        if (!ps_parse_procedure_or_function_call(compiler, block, function, expression))
+        if (!ps_parse_procedure_or_function_call(compiler, block, call, function))
             TRACE_ERROR("FUNCTION_CALL");
     }
 

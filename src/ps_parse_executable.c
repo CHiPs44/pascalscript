@@ -261,10 +261,8 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
                                                 ps_ast_block **block_executable, ps_symbol_kind kind)
 {
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION");
-    (void)start_line;
-    (void)start_column;
 
-    ps_identifier identifier;
+    ps_identifier identifier = {0};
     ps_symbol *executable_symbol = NULL;
     ps_value *value = NULL;
     ps_formal_signature *signature = NULL;
@@ -275,32 +273,32 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     bool executable_symbol_added = false;
     ps_identifier result_identifier = "RESULT";
 
+    *block_executable = NULL;
+
+    // 'PROCEDURE' or 'FUNCTION'
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Get procedure or function name
     READ_NEXT_TOKEN_OR_CLEANUP;
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
-    // Does it already exist in the current environment?
+    // Does it already exist in the current block?
     COPY_IDENTIFIER(identifier)
     executable_symbol = ps_compiler_find_symbol(compiler, block, identifier, true);
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
-    // // Create new environment for the procedure/function
-    // if (!ps_compiler_enter_environment(compiler, identifier))
-    // {
-    //     goto cleanup;
-    // }
-    // has_environment = true;
+
+    // Create a new block for the procedure or function, and set its parent to the current block
+    ps_ast_node_kind node_kind = kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
+    *block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier);
+    if (*block_executable == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     READ_NEXT_TOKEN
 
     // Initialize signature
     signature = ps_formal_signature_alloc(0, &ps_system_none);
     if (signature == NULL)
-    {
-        compiler->error = PS_ERROR_OUT_OF_MEMORY;
-        goto cleanup;
-    }
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     // Parameters?
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
@@ -330,38 +328,32 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
                     READ_NEXT_TOKEN_OR_CLEANUP;
                     break;
                 }
-                GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN);
+                GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
             } while (true);
         }
     }
 
+    // ':' TYPE_REFERENCE for functions
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
         // Function must have a return type
         EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_COLON);
         READ_NEXT_TOKEN_OR_CLEANUP;
-        ps_symbol *type_reference = NULL;
-        if (!ps_parse_type_reference(compiler, block, &type_reference, NULL))
+        ps_symbol **type_reference = NULL;
+        if (!ps_parse_type_reference(compiler, block, type_reference, NULL))
             goto cleanup;
-        signature->result_type = type_reference;
+        signature->result_type = *type_reference;
     }
 
-    // if (!ps_lexer_get_cursor(lexer, &line, &column))
-    // {
-    //     compiler->error = PS_ERROR_GENERIC; // TODO better error code
-    //     goto cleanup;
-    // }
+    // ';' after procedure or function declaration
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
 
-    // TODO!
-    // ps_executable_kind executable_kind =
-    //     kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
-    // *executable = ps_executable_alloc(executable_kind, signature);
-    // if (*executable == NULL)
-    // {
-    //     compiler->error = PS_ERROR_OUT_OF_MEMORY;
-    //     goto cleanup;
-    // }
+    // Create executable and symbol for the procedure/function
+    ps_executable_kind executable_kind =
+        kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
+    executable = ps_executable_alloc(executable_kind, *block_executable);
+    if (executable == NULL)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
     {
