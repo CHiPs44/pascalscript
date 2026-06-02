@@ -15,6 +15,7 @@
 #include "ps_parse_declaration.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
+#include "ps_parse_statement.h"
 #include "ps_parse_type.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
@@ -459,20 +460,25 @@ cleanup:
 }
 
 bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call,
-                                              ps_symbol *executable, ps_value *result_value)
+                                              ps_symbol *executable)
 {
     PARSE_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "")
+    (void)start_line;
+    (void)start_column;
 
     uint16_t line = 0;
     uint16_t column = 0;
-    bool has_environment = false;
     ps_symbol *result_symbol = NULL;
     ps_identifier result_identifier = "RESULT";
+    ps_value *result_value = NULL;
+
+    if (executable->kind != PS_SYMBOL_KIND_PROCEDURE && executable->kind != PS_SYMBOL_KIND_FUNCTION)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Enter environment for procedure or function
-    has_environment = ps_compiler_enter_environment(compiler, executable->name);
-    if (!has_environment)
-        TRACE_ERROR("ENTER_ENVIRONMENT")
+    // has_environment = ps_compiler_enter_environment(compiler, executable->name);
+    // if (!has_environment)
+    //     TRACE_ERROR("ENTER_ENVIRONMENT")
     // Parse actual parameters
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
@@ -502,16 +508,14 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
     else if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
     {
         // Function have a return value
-        result_value->type = executable->value->data.x->block->signature->result_type;
-        result_value->data.v = NULL;
-        result_value->allocated = false;
+        result_value =
+            ps_value_alloc(executable->value->data.x->block->signature->result_type, (ps_value_data){.h = 0});
+        if (result_value == NULL)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
         if (result_symbol == NULL)
-        {
-            compiler->error = PS_ERROR_OUT_OF_MEMORY;
-            goto cleanup;
-        }
-        if (!ps_environment_add_symbol(ps_compiler_get_environment(compiler), result_symbol))
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+        if (!ps_compiler_add_symbol(compiler, block, result_symbol))
         {
             ps_symbol_free(result_symbol);
             compiler->error = PS_ERROR_OUT_OF_MEMORY;
@@ -520,6 +524,9 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
     }
 
     // TODO build AST node for CALL
+    *call = ps_ast_create_call(line, column,
+                               executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION,
+                               executable, 0, NULL, NULL, NULL);
 
 cleanup:
     if (compiler->error != PS_ERROR_NONE)
@@ -537,24 +544,26 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
                                          ps_symbol *executable)
 {
     PARSE_BEGIN("PROCEDURE_OR_FUNCTION_CALL", "")
+    (void)start_line;
+    (void)start_column;
 
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
     {
         // Write or WriteLn
-        if (!ps_parse_write_or_writeln(compiler, block, executable == &ps_system_procedure_writeln))
+        if (!ps_parse_write_or_writeln(compiler, block, call, executable == &ps_system_procedure_writeln))
             TRACE_ERROR("WRITE[LN]");
     }
     else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
     {
         compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-        if (!ps_parse_read_or_readln(compiler, block, executable == &ps_system_procedure_readln))
+        if (!ps_parse_read_or_readln(compiler, block, call, executable == &ps_system_procedure_readln))
             TRACE_ERROR("READ[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)
     {
         // Randomize
-        if (!ps_procedure_randomize(compiler, NULL))
-            TRACE_ERROR("RANDOMIZE");
+        ps_compiler_set_message(compiler, "TODO: call RANDOMIZE", executable->name);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     }
     else if (executable->system)
     {
@@ -563,7 +572,7 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
         RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     }
     // User defined procedure or function call
-    else if (!ps_parse_procedure_or_function_call_user(compiler, block, call, executable, result_value))
+    else if (!ps_parse_procedure_or_function_call_user(compiler, block, call, executable))
         TRACE_ERROR("USER");
 
     PARSE_END("OK")

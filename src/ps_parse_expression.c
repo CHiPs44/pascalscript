@@ -538,6 +538,8 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
     *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (*symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
+    if (!ps_value_is_ordinal((*symbol)->value) && !ps_value_is_array((*symbol)->value))
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
     READ_NEXT_TOKEN
     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
@@ -605,7 +607,9 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         n_args = -1;
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
-        args[0] = symbol;
+        ps_ast_variable_simple *symbol_node =
+            ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, symbol);
+        args[0] = (ps_ast_node *)symbol_node;
     }
     else if (function == &ps_system_function_power)
     {
@@ -693,8 +697,10 @@ bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_c
 bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps_value *constant)
 {
     PARSE_BEGIN("CONSTANT_EXPRESSION", "");
-    bool negate = false;
+    (void)start_line;
+    (void)start_column;
 
+    bool negate = false;
     ps_identifier identifier = {0};
     ps_symbol *symbol = NULL;
 

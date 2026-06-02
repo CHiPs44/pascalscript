@@ -100,7 +100,7 @@ extern "C"
         ps_ast_statement_list *then_branch; /** @brief Statements to execute if condition is true, can be empty  */
         ps_ast_statement_list *else_branch; /** @brief Statements to execute if condition is false, can be empty */
     } ps_ast_if;
-    #define PS_AST_IF_SIZE sizeof(ps_ast_if)
+#define PS_AST_IF_SIZE sizeof(ps_ast_if)
 
     /** @brief WHILE statement */
     typedef struct s_ps_ast_while
@@ -123,16 +123,16 @@ extern "C"
     typedef struct s_ps_ast_variable_simple
     {
         PS_AST_NODE_COMMON
-        ps_symbol *variable; /** @brief Symbol being referenced */
+        ps_symbol *variable; /** @brief Variable being referenced */
     } ps_ast_variable_simple;
 
     /** @brief Lvalue: array value, like A[I], A[I, J, K], ... */
     typedef struct s_ps_ast_variable_array
     {
         PS_AST_NODE_COMMON
-        ps_symbol *variable;   /** @brief Array being referenced    */
-        size_t n_indexes;      /** @brief Number of dimensions      */
-        ps_ast_node **indexes; /** @brief Values for each dimension */
+        ps_symbol *variable;   /** @brief Array being referenced         */
+        size_t n_indexes;      /** @brief Number of dimensions           */
+        ps_ast_node **indexes; /** @brief Expressions for each dimension */
     } ps_ast_variable_array;
 
     /** @brief FOR statement */

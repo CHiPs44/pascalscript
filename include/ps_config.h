@@ -22,7 +22,7 @@ extern "C"
 // #define PS_BITNESS 64
 
 /*
-    NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either ARM M0+ or M33 cores
+    NB: 32 bits by default, as our far target is RP2040 and RP2350 which have either 32bit ARM M0+ or M33 cores
         16 bits if someone tries to port PascalScript to an older architecture
         64 bits on actual computers
     cf. <https://en.wiktionary.org/wiki/bitness>
@@ -162,12 +162,8 @@ extern "C"
  */
 #endif
 
-#ifndef PS_STRING_REF_TYPE
-#define PS_STRING_REF_TYPE uint16_t
-#endif
-
-#if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN) || !defined(PS_STRING_REF_TYPE)
-#error PS_STRING_LEN_TYPE / PS_STRING_MAX_LEN / PS_STRING_REF_TYPE must be defined.
+#if !defined(PS_STRING_LEN_TYPE) || !defined(PS_STRING_MAX_LEN)
+#error PS_STRING_LEN_TYPE and PS_STRING_MAX_LEN must be defined.
 #endif
 
 #ifndef PS_IDENTIFIER_LEN
@@ -175,6 +171,24 @@ extern "C"
 #endif
 
 #define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1u))
+
+#if PS_BITNESS == 16
+#define PS_HANDLE uint16_t
+#define PS_HANDLE_FMT_10 PRIu16
+#define PS_HANDLE_FMT_16 PRIx16
+#endif
+
+#if PS_BITNESS == 32
+#define PS_HANDLE uint32_t
+#define PS_HANDLE_FMT_10 PRIu32
+#define PS_HANDLE_FMT_16 PRIx32
+#endif
+
+#if PS_BITNESS == 64
+#define PS_HANDLE uint64_t
+#define PS_HANDLE_FMT_10 PRIu64
+#define PS_HANDLE_FMT_16 PRIx64
+#endif
 
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 

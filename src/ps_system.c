@@ -193,7 +193,7 @@ error:
 
 void ps_system_done(ps_symbol_table *system)
 {
-    ps_symbol_table_done(system->symbols);
+    ps_symbol_table_free(system);
 }
 
 bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol)

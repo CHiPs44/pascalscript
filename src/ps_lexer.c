@@ -593,7 +593,6 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
     static char value[128] = {0};
     static char string[96] = {0};
-    size_t len;
 
     switch (lexer->current_token.type)
     {
@@ -617,17 +616,9 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         break;
     case PS_TOKEN_STRING_VALUE:
         // s t r l c p y(string, lexer->current_token.value.s, sizeof(string));
-        len = strlen(lexer->current_token.value.s);
-        if (len < sizeof(string))
-        {
-            snprintf(value, sizeof(value) - 1, "STRING \"%s\"", lexer->current_token.value.s);
-        }
-        else
-        {
-            strncpy(string, lexer->current_token.value.s, sizeof(string) - 1);
-            string[sizeof(string) - 1] = '\0';
-            snprintf(value, sizeof(value) - 1, "STRING \"%s\"", string);
-        }
+        strncpy(string, lexer->current_token.value.s, sizeof(string) - 1);
+        string[sizeof(string) - 1] = '\0';
+        snprintf(value, sizeof(value) - 1, "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:
         snprintf(value, sizeof(value) - 1, "IDENTIFIER \"%s\"", lexer->current_token.value.identifier);

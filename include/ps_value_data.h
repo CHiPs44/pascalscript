@@ -26,6 +26,7 @@ extern "C"
     /** @brief Value union */
     typedef union u_ps_value_data {
         // clang-format off
+        ps_handle           h; /** @brief "h" is for "_h_andle"     */
         ps_real             r; /** @brief "r" is for "_r_eal"       */
         ps_integer          i; /** @brief "i" is for "_i_nteger"    */
         ps_unsigned         u; /** @brief "u" is for "_u_nsigned"   */

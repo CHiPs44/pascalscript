@@ -616,8 +616,6 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     bool downto = false;
     ps_ast_statement_list *body = NULL;
     ps_identifier identifier = {0};
-    uint16_t line = 0;
-    uint16_t column = 0;
 
     // FOR
     EXPECT_TOKEN(PS_TOKEN_FOR)
@@ -665,7 +663,11 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     if (!ps_parse_statement_or_compound_statement(compiler, block, &body))
         TRACE_ERROR("STATEMENT_OR_COMPOUND")
 
-    *for_statement = ps_ast_create_for(start_line, start_column, variable, start, finish, downto ? -1 : 1, body);
+    ps_ast_variable_simple *variable_node =
+        ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, variable);
+    if (variable_node == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto ? -1 : 1, body);
     if (*for_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -691,7 +693,7 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     else
     {
         // Let's go!
-        ps_ast_node *statement = NULL;
+        ps_ast_node **statement = NULL;
         // Up to 256 statements for now
         size_t count = 0;
         ps_ast_node *statements[256];
@@ -703,7 +705,7 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
             count += 1;
             if (count > 255)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
-            statements[count - 1] = statement;
+            statements[count - 1] = (ps_ast_node *)(*statement);
             // NB: semi-colon at statement list end is optional
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {
@@ -749,7 +751,7 @@ bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_bloc
         *statement_list = ps_ast_create_statement_list(start_line, start_column, 1);
         if (*statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        (*statement_list)->statements[0] = statement;
+        (*statement_list)->statements[0] = *statement;
     }
 
     PARSE_END("OK")

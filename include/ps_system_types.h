@@ -46,7 +46,9 @@ extern "C"
 
     typedef uint32_t ps_set[8]; /** @brief Set of 256 bits */
 
-    /** @brief  */
+    typedef PS_HANDLE ps_handle; /** @brief Handle: variable index in stack */
+
+    /** @brief pointer *FUTURE* */
     typedef void *ps_pointer;
 
     // clang-format off
