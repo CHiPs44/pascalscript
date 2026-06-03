@@ -44,12 +44,13 @@ extern "C"
 
     /**
      * @brief Initialize compiler and children objects
-     * @param range_check enable range checking for values
-     * @param bool_eval *FUTURE* enable short circuit boolean evaluation
-     * @param io_check *FUTURE* enable I/O error checking
+     * @param system        pre-initialized system symbol table
+     * @param range_check   enable range checking for values
+     * @param bool_eval     *FUTURE* enable short circuit boolean evaluation
+     * @param io_check      *FUTURE* enable I/O error checking
      * @return NULL if no free memory (errno = ENOMEM)
      */
-    ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check);
+    ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool bool_eval, bool io_check);
 
     /** @brief Release compiler and children objects */
     ps_compiler *ps_compiler_free(ps_compiler *compiler);

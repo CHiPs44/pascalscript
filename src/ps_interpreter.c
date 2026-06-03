@@ -37,14 +37,16 @@ ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_c
     interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
     if (interpreter->string_heap == NULL)
         return ps_interpreter_free(interpreter);
-    // Allocate system environment
-    ps_identifier system = "SYSTEM";
-    interpreter->environments[0] =
-        ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
-    if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] == NULL)
-        return ps_interpreter_free(interpreter);
-    // Initialize system environment
-    if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols))
+    // // Allocate system environment
+    // ps_identifier system = "SYSTEM";
+    // interpreter->environments[0] =
+    //     ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
+    // if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] == NULL)
+    //     return ps_interpreter_free(interpreter);
+    // // Initialize system environment
+    // if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols))
+    //     return ps_interpreter_free(interpreter);
+    if (!ps_system_init(interpreter->system))
         return ps_interpreter_free(interpreter);
     return interpreter;
 }

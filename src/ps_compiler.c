@@ -19,7 +19,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check)
+ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool bool_eval, bool io_check)
 {
     // Allocate compiler itself
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
@@ -38,8 +38,7 @@ ps_compiler *ps_compiler_alloc(bool range_check, bool bool_eval, bool io_check)
     compiler->system = ps_symbol_table_alloc(256, 0);
     if (compiler->system == NULL)
         return ps_compiler_free(compiler);
-    if (!ps_system_init(compiler->system))
-        return ps_compiler_free(compiler);
+    compiler->system = system;
     return compiler;
 }
 

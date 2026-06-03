@@ -43,8 +43,7 @@ extern "C"
         bool range_check;            /** @brief Range checking for integer and real values                   */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                    */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
-        ps_environment
-            *environments[PS_INTERPRETER_ENVIRONMENTS]; /** @brief Environments with enough levels for some recursion */
+        ps_symbol_table *system; /** @brief Built-in types, constants, variables, procedures and functions */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
