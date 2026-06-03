@@ -361,7 +361,7 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
 
 /**
  * Parse variable declaration:
- *      'VAR' [ IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE ';' ]+
+ *      'VAR' [ IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE ';' ]+
  *      (allow up to 8 identifiers with commas)
  * Examples:
  *     Var  a, b, c: Integer;
@@ -374,25 +374,32 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
     (void)start_line;
     (void)start_column;
 
-    ps_identifier identifier[8];
+    ps_identifier identifiers[8];
     int var_count;
     ps_symbol *type_symbol = NULL;
 
+    // VAR
     EXPECT_TOKEN(PS_TOKEN_VAR)
     READ_NEXT_TOKEN
     do
     {
-        if (!ps_parse_var_identifier_list(compiler, block, identifier, &var_count))
+        // IDENTIFIER [ ',' IDENTIFIER ]*
+        if (!ps_parse_var_identifier_list(compiler, block, identifiers, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
+        // ':'
+        EXPECT_TOKEN(PS_TOKEN_COLON)
         READ_NEXT_TOKEN
+        // TYPE_REFERENCE
         if (!ps_parse_type_reference(compiler, block, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
+        // ';'
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
+        // Add variable(s) to symbol table of current block
         for (int i = 0; i < var_count; i++)
         {
-            if (!ps_compiler_add_variable(compiler, block, identifier[i], type_symbol))
+            if (!ps_compiler_add_variable(compiler, block, identifiers[i], type_symbol))
             {
-                ps_compiler_set_message(compiler, "Cannot add variable %s", identifier[i]);
+                ps_compiler_set_message(compiler, "Cannot add variable %s", identifiers[i]);
                 TRACE_ERROR("ADD VARIABLE")
             }
         }
