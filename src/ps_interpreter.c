@@ -18,36 +18,21 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check)
+ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *string_heap, bool range_check,
+                                     bool bool_eval, bool io_check)
 {
     ps_interpreter *interpreter = ps_memory_malloc(PS_MEMORY_INTERPRETER, sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
-    // Set default state
-    for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
-        interpreter->environments[i] = NULL;
-    interpreter->level = PS_INTERPRETER_ENVIRONMENT_SYSTEM;
+    interpreter->system = system;
+    interpreter->string_heap = string_heap;
+    interpreter->level = 0;
     interpreter->error = PS_ERROR_NONE;
-    interpreter->message[0] = '\0';
+    memset(interpreter->message, 0, sizeof(interpreter->message));
     interpreter->debug = DEBUG_NONE;
     interpreter->range_check = range_check;
     interpreter->bool_eval = bool_eval;
     interpreter->io_check = io_check;
-    // Allocate string heap
-    interpreter->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
-    if (interpreter->string_heap == NULL)
-        return ps_interpreter_free(interpreter);
-    // // Allocate system environment
-    // ps_identifier system = "SYSTEM";
-    // interpreter->environments[0] =
-    //     ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE, PS_SYSTEM_SYMBOL_TABLE_MORE);
-    // if (interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM] == NULL)
-    //     return ps_interpreter_free(interpreter);
-    // // Initialize system environment
-    // if (!ps_system_init(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols))
-    //     return ps_interpreter_free(interpreter);
-    if (!ps_system_init(interpreter->system))
-        return ps_interpreter_free(interpreter);
     return interpreter;
 }
 
@@ -57,12 +42,6 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->string_heap != NULL)
             interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
-        ps_system_done(interpreter->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
-        for (size_t i = 0; i < PS_INTERPRETER_ENVIRONMENTS; i++)
-        {
-            if (interpreter->environments[i] != NULL)
-                interpreter->environments[i] = ps_environment_free(interpreter->environments[i]);
-        }
         ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);
     }
     return NULL;
@@ -82,13 +61,13 @@ void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error)
     return NULL;
 }
 
-bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...) // NOSONAR
+bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...) // NOSONAR
 {
     assert(NULL != interpreter);
     assert(NULL != format);
     va_list args;
     va_start(args, format);
-    vsnprintf(interpreter->message, sizeof(interpreter->message), format, args); // NOSONAR
+    vsnprintf(interpreter->message, sizeof(interpreter->message) - 1, format, args); // NOSONAR
     va_end(args);
     return true;
 }
@@ -99,74 +78,43 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_iden
     (void)n_values;
     (void)values;
     assert(NULL != interpreter);
-    if (interpreter->level >= PS_INTERPRETER_ENVIRONMENTS - 1)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_OVERFLOW);
-    ps_environment *parent = interpreter->environments[interpreter->level];
-    ps_environment *environment = ps_environment_alloc(parent, name, symbols == NULL ? 0 : symbols->size, 0);
-    if (environment == NULL)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    // for (size_t i = 0; i < n_values; i++)
-    // {
-    //     ps_symbol *variable = symbols->symbols[i];
-    //     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-    //         continue;
-    //     variable->value = &values[i];
-    //     if (!ps_value_init(variable->value, variable->type->value->data.t))
-    //     {
-    //         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    //     }
-    // }
     interpreter->level += 1;
-    interpreter->environments[interpreter->level] = environment;
-    if (interpreter->debug >= DEBUG_VERBOSE)
-    {
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> ENTER ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS, name);
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    }
     return true;
 }
 
 bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
-    ps_environment *environment = interpreter->environments[interpreter->level];
-    if (environment == NULL)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    if (interpreter->debug >= DEBUG_VERBOSE)
-    {
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-        fprintf(stderr, "=> EXIT ENVIRONMENT %d/%d '%s'\n", interpreter->level, PS_INTERPRETER_ENVIRONMENTS,
-                environment->name);
-        ps_symbol_table_dump(NULL, "EXIT ENVIRONMENT", environment->symbols);
-        fprintf(stderr, "--------------------------------------------------------------------------------\n");
-    }
-    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_UNDERFLOW);
-    interpreter->environments[interpreter->level] = ps_environment_free(environment);
     interpreter->level -= 1;
     return true;
 }
 
-ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter)
+ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name, bool local)
 {
-    if (interpreter->level <= PS_INTERPRETER_ENVIRONMENT_SYSTEM || interpreter->level >= PS_INTERPRETER_ENVIRONMENTS)
-    {
-        ps_interpreter_set_message(interpreter, "Invalid environment level %d", interpreter->level);
-        return NULL;
-    }
-    return interpreter->environments[interpreter->level];
-}
+    assert(interpreter != NULL);
+    assert(name != NULL);
+    ps_symbol *symbol = NULL;
 
-ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const char *name, bool local)
-{
-    ps_environment *environment = ps_interpreter_get_environment(interpreter);
-    if (environment == NULL)
-        ps_interpreter_return_null(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    ps_symbol *symbol = ps_environment_find_symbol(environment, name, local);
-    if (interpreter->debug >= DEBUG_VERBOSE)
-        fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", environment->name, name,
-                local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    // No block => search into SYSTEM
+    if (block == NULL)
+    {
+        symbol = ps_symbol_table_get(interpreter->system, name);
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    }
+    else
+    {
+        // Search in current block
+        symbol = ps_symbol_table_get(block->symbols, name);
+        if (!local && symbol == NULL)
+            // Not found => search in parent
+            return ps_interpreter_find_symbol(interpreter, block->parent, name, false);
+        if (interpreter->debug >= DEBUG_VERBOSE)
+            fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+    }
+
     return symbol;
 }
 

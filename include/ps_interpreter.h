@@ -9,9 +9,10 @@
 
 #include <string.h>
 
-#include "ps_environment.h"
+#include "ps_ast.h"
 #include "ps_error.h"
 #include "ps_string_heap.h"
+#include "ps_symbol_table.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -26,36 +27,44 @@ extern "C"
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0u
 #define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1u
 
-    typedef enum e_ps_interpreter_debug
+    typedef enum e_ps_debug
     {
-        DEBUG_NONE,    /** @brief No debug */
-        DEBUG_TRACE,   /** @brief Output messages to stderr */
-        DEBUG_VERBOSE, /** @brief More traces */
-    } ps_interpreter_debug;
+        PS_DEBUG_FATAL = 0,
+        PS_DEBUG_CRITICAL,
+        PS_DEBUG_ERROR,
+        PS_DEBUG_WARNING,
+        PS_DEBUG_INFO,
+        PS_DEBUG_DEBUG,
+        PS_DEBUG_TRACE,
+        PS_DEBUG_VERBOSE,
+    } __attribute__((__packed__)) ps_debug;
 
     typedef struct s_ps_interpreter
     {
+        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
+        char message[128];           /** @brief Additional error message                                     */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
-        char message[128];           /** @brief Additional error message                                     */
-        ps_interpreter_debug debug;  /** @brief Debug level: NONE, TRACE, VERBOSE                            */
-        bool range_check;            /** @brief Range checking for integer and real values                   */
-        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                    */
-        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                   */
-        ps_symbol_table *system; /** @brief Built-in types, constants, variables, procedures and functions */
+        ps_debug debug : 3;          /** @brief Debug level: NONE, TRACE, VERBOSE                            */
+        bool range_check : 1;        /** @brief Range checking for integer and real values                   */
+        bool bool_eval : 1;          /** @brief *FUTURE* Short circuit boolean evaluation                    */
+        bool io_check : 1;           /** @brief *FUTURE* stop or set IOResult on I/O error                   */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
     /**
      * @brief Initialize interpreter and children objects
+     * @param system      symbol table for system (built-in types, constants, variables, procedures and functions)
+     * @param string_heap string heap holding string constants (from compiler)
      * @param range_check enable range checking for values
-     * @param bool_eval *FUTURE* enable short circuit boolean evaluation
-     * @param io_check *FUTURE* enable I/O error checking
+     * @param bool_eval   *FUTURE* enable short circuit boolean evaluation
+     * @param io_check    *FUTURE* enable I/O error checking
      * @return NULL if no free memory (errno = ENOMEM)
      */
-    ps_interpreter *ps_interpreter_alloc(bool range_check, bool bool_eval, bool io_check);
+    ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *string_heap, bool range_check,
+                                         bool bool_eval, bool io_check);
 
     /** @brief Release interpreter and children objects */
     ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter);
@@ -66,28 +75,15 @@ extern "C"
     /** @brief Set error & return NULL */
     void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error);
 
-    /** @brief Set formatted message */
-    bool ps_interpreter_set_message(ps_interpreter *interpreter, char *format, ...);
+    /** @brief Set message with format */
+    bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
-    /** @brief Create a new environment for program, procedure, function *FUTURE* or unit */
-    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
-                                          size_t n_values, ps_value *values);
-
-    /** @brief Release current environment */
-    bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
-
-    /** @brief Get current environment */
-    ps_environment *ps_interpreter_get_environment(ps_interpreter *interpreter);
-
-    /** @brief Find symbol by name in current environment (or its parents if not local) */
-    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, const char *name, bool local);
+    /** @brief Find symbol by name in current block (or its parents if not local) */
+    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name,
+                                          bool local);
 
     /** @brief Add symbol to current environment */
     bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
-
-    /** @brief Add variable to current environment, allocate values for arrays */
-    bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier,
-                                     ps_symbol *type_symbol);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);

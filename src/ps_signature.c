@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 
-#include "ps_environment.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"

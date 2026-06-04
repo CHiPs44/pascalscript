@@ -9,7 +9,6 @@
 
 #include "ps_ast.h"
 #include "ps_compiler.h"
-#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_memory.h"
@@ -72,13 +71,25 @@ void *ps_compiler_return_null(ps_compiler *compiler, ps_error error)
     return NULL;
 }
 
-bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONAR
+bool ps_compiler_set_message(ps_compiler *compiler, const char *format, ...) // NOSONAR
 {
     assert(compiler != NULL);
     assert(format != NULL);
     va_list args;
     va_start(args, format);
-    vsnprintf(compiler->message, sizeof(compiler->message), format, args); // NOSONAR
+    vsnprintf(compiler->message, sizeof(compiler->message) - 1, format, args); // NOSONAR
+    va_end(args);
+    return false;
+}
+
+bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const char *format, ...) // NOSONAR
+{
+    assert(compiler != NULL);
+    assert(format != NULL);
+    compiler->error = error;
+    va_list args;
+    va_start(args, format);
+    vsnprintf(compiler->message, sizeof(compiler->message) - 1, format, args); // NOSONAR
     va_end(args);
     return false;
 }
@@ -86,7 +97,6 @@ bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...) // NOSONA
 ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)
 {
     assert(compiler != NULL);
-    assert(block != NULL);
     assert(name != NULL);
     ps_symbol *symbol = NULL;
 

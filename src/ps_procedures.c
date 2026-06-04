@@ -8,7 +8,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "ps_environment.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
