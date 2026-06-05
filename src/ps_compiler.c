@@ -24,7 +24,7 @@ ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool b
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
     compiler->parser = NULL;
     compiler->error = PS_ERROR_NONE;
-    compiler->debug = COMPILER_DEBUG_NONE;
+    compiler->debug = PS_DEBUG_FATAL;
     compiler->range_check = range_check;
     compiler->bool_eval = bool_eval;
     compiler->io_check = io_check;
@@ -104,7 +104,7 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, c
     if (block == NULL)
     {
         symbol = ps_symbol_table_get(compiler->system, name);
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     }
@@ -115,7 +115,7 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, c
         if (!local && symbol == NULL)
             // Not found => search in parent
             return ps_compiler_find_symbol(compiler, block->parent, name, false);
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     }
@@ -128,7 +128,7 @@ bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbo
     assert(compiler != NULL);
     assert(block != NULL);
     assert(symbol != NULL);
-    if (compiler->debug >= COMPILER_DEBUG_TRACE)
+    if (compiler->debug >= PS_DEBUG_TRACE)
         fprintf(stderr, "ADD %*s SYMBOL '%*s' TO BLOCK '%*s' with value %p: '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
                 block->name, (void *)(symbol->value),
@@ -182,7 +182,7 @@ bool ps_compiler_is_ordinal(ps_compiler *compiler, ps_value *value)
 
 bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
 {
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
     {
         fprintf(stderr, ">");
         ps_value_debug(stderr, "FROM\t", from);
@@ -192,7 +192,7 @@ bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
     ps_error error = ps_value_copy(from, to, compiler->range_check);
     if (error == PS_ERROR_NONE)
     {
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
         {
             fprintf(stderr, "*");
             ps_value_debug(stderr, "TO\t", to);

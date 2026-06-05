@@ -256,7 +256,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
     {
         // Stop if variable > finish for "TO"
         //      or variable < finish for "DOWNTO"
-        interpreter->debug = DEBUG_VERBOSE;
+        interpreter->debug = PS_DEBUG_VERBOSE;
         if (!ps_operator_eval_binary(interpreter, variable_simple->variable->value, &end_value.value, &stop,
                                      downto ? PS_OP_LT : PS_OP_GT))
         {

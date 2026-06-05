@@ -338,7 +338,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
     {
     case PS_SYMBOL_KIND_CONSTANT:
     case PS_SYMBOL_KIND_VARIABLE:
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
         {
             fprintf(stderr, "INFO\tFACTOR: identifier '%s' is a '%s' of type '%s'\n", symbol->name,
                     ps_symbol_get_kind_name(symbol->kind),

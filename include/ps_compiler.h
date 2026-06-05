@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
+#include "ps_debug.h"
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_string_heap.h"
@@ -20,13 +21,6 @@ extern "C"
 {
 #endif
 
-    typedef enum e_ps_compiler_debug
-    {
-        COMPILER_DEBUG_NONE,    /** @brief No debug */
-        COMPILER_DEBUG_TRACE,   /** @brief Output messages to stderr */
-        COMPILER_DEBUG_VERBOSE, /** @brief More traces */
-    } __attribute__((__packed__)) ps_compiler_debug;
-
     typedef struct s_ps_compiler
     {
         ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)                */
@@ -34,7 +28,7 @@ extern "C"
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         char message[128];           /** @brief Additional error message                                       */
-        ps_compiler_debug debug;     /** @brief Debug level: NONE, TRACE, VERBOSE                              */
+        ps_debug_level debug;        /** @brief Debug level: NONE, TRACE, VERBOSE                              */
         bool range_check;            /** @brief Range checking for integer and real values                     */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
@@ -62,7 +56,10 @@ extern "C"
     void *ps_compiler_return_null(ps_compiler *compiler, ps_error error);
 
     /** @brief Set formatted message */
-    bool ps_compiler_set_message(ps_compiler *compiler, char *format, ...); // NOSONAR
+    bool ps_compiler_set_message(ps_compiler *compiler, const char *format, ...); // NOSONAR
+
+    /** @brief Set error and formatted message */
+    bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const char *format, ...); // NOSONAR
 
     /** @brief Find symbol by name in current block (or its parents if not local) */
     ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local);

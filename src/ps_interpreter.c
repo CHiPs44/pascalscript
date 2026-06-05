@@ -29,7 +29,7 @@ ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *st
     interpreter->level = 0;
     interpreter->error = PS_ERROR_NONE;
     memset(interpreter->message, 0, sizeof(interpreter->message));
-    interpreter->debug = DEBUG_NONE;
+    interpreter->debug = PS_DEBUG_FATAL;
     interpreter->range_check = range_check;
     interpreter->bool_eval = bool_eval;
     interpreter->io_check = io_check;
@@ -79,6 +79,9 @@ bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_iden
     (void)values;
     assert(NULL != interpreter);
     interpreter->level += 1;
+    if (interpreter->debug >= PS_DEBUG_INFO)
+        fprintf(stderr, "ENTER ENVIRONMENT level=%d '%s' with %zu symbol%s\n", interpreter->level, name,
+                symbols == NULL ? 0 : symbols->used, symbols != NULL && symbols->used > 1 ? "s" : "");
     return true;
 }
 
@@ -86,6 +89,8 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
     interpreter->level -= 1;
+    if (interpreter->debug >= PS_DEBUG_INFO)
+        fprintf(stderr, "EXIT ENVIRONMENT level=%d\n", interpreter->level);
     return true;
 }
 
@@ -99,7 +104,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block 
     if (block == NULL)
     {
         symbol = ps_symbol_table_get(interpreter->system, name);
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     }
@@ -110,7 +115,7 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block 
         if (!local && symbol == NULL)
             // Not found => search in parent
             return ps_interpreter_find_symbol(interpreter, block->parent, name, false);
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
     }
@@ -118,53 +123,12 @@ ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block 
     return symbol;
 }
 
-bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol)
-{
-    assert(NULL != interpreter);
-    assert(NULL != symbol);
-    ps_environment *environment = ps_interpreter_get_environment(interpreter);
-    if (environment == NULL)
-        ps_interpreter_return_false(interpreter, PS_ERROR_ENVIRONMENT_NOT_FOUND);
-    if (interpreter->debug >= DEBUG_TRACE)
-        fprintf(stderr, "ADD %*s SYMBOL '%*s' TO ENVIRONMENT '%*s' with value %p: '%s'\n", -10,
-                ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
-                environment->name, (void *)(symbol->value),
-                symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
-    if (!ps_environment_add_symbol(environment, symbol))
-        return ps_interpreter_return_false(interpreter, PS_ERROR_SYMBOL_NOT_ADDED);
-    return true;
-}
-
-bool ps_interpreter_add_variable(ps_interpreter *interpreter, const ps_identifier identifier, ps_symbol *type_symbol)
-{
-    assert(NULL != interpreter);
-    assert('\0' != identifier[0]);
-    assert(NULL != type_symbol);
-    assert(NULL != type_symbol->value);
-    ps_value_data data = {0};
-    if (ps_type_definition_is_array(type_symbol->value->data.t))
-    {
-        data.a = ps_array_alloc_data(type_symbol);
-        if (data.a == NULL)
-            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    }
-    ps_value *value = ps_value_alloc(type_symbol, data);
-    ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
-    if (variable == NULL)
-    {
-        if (ps_type_definition_is_array(type_symbol->value->data.t))
-            ps_memory_free(PS_MEMORY_VALUE, data.a);
-        return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-    }
-    return ps_interpreter_add_symbol(interpreter, variable);
-}
-
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
 {
     assert(NULL != interpreter);
     assert(NULL != from);
     assert(NULL != to);
-    if (interpreter->debug >= DEBUG_VERBOSE)
+    if (interpreter->debug >= PS_DEBUG_VERBOSE)
     {
         fprintf(stderr, ">");
         ps_value_debug(stderr, "FROM\t", from);
@@ -174,7 +138,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
     {
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
         {
             fprintf(stderr, "*");
             ps_value_debug(stderr, "TO\t", to);

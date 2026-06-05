@@ -182,7 +182,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
         TRACE_ERROR("VARIABLE");
     }
-    if (interpreter->debug >= DEBUG_VERBOSE)
+    if (interpreter->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "\n%cINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                 variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
@@ -198,7 +198,7 @@ bool ps_visit_assignment(ps_interpreter *interpreter, ps_interpreter_mode mode, 
         result.type = variable->value->type;
         if (!ps_visit_expression(interpreter, mode, &result))
             TRACE_ERROR("EXPRESSION1");
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\n%cINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", mode == MODE_EXEC ? '*' : ' ',
                     variable->name, ps_type_definition_get_name(variable->value->type->value->data.t));
         if (mode == MODE_EXEC && !ps_interpreter_copy_value(interpreter, &result, variable->value))
@@ -264,7 +264,7 @@ bool ps_visit_write_or_writeln(ps_interpreter *interpreter, ps_interpreter_mode 
     while (loop)
     {
         result.type = &ps_system_none;
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\n%cINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n",
                     mode == MODE_EXEC ? '*' : ' ');
         if (!ps_visit_expression(interpreter, mode, &result))
@@ -328,7 +328,7 @@ bool ps_visit_assignment_or_procedure_call(ps_interpreter *interpreter, ps_inter
     symbol = ps_environment_find_symbol(environment->parent, identifier, true);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, environment->name) == 0)
     {
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "%cINFO\tAssignment to current function '%s' as Result\n", mode == MODE_EXEC ? '*' : ' ',
                     (char *)identifier);
         // Assign to the not so implicit "Result" local variable

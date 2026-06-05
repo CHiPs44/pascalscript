@@ -85,7 +85,12 @@ cleanup:
 ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Create an interpreter");
-    ps_interpreter *interpreter = ps_interpreter_alloc(true, false, false);
+    ps_symbol_table *system = ps_symbol_table_alloc(0, 0);
+    ASSERT(system != NULL);
+    ASSERT(ps_system_init(system));
+    ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
+    ASSERT(string_heap != NULL);
+    ps_interpreter *interpreter = ps_interpreter_alloc(system, string_heap, true, false, false);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Enter environment for the program %s", block_program->name);
@@ -98,7 +103,6 @@ ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
     ASSERT(symbol_program->system == false);
     ASSERT(symbol_program->allocated == true);
     ASSERT(symbol_program->value == NULL);
-    ASSERT(ps_interpreter_add_symbol(interpreter, symbol_program));
 
     return interpreter;
 cleanup:
@@ -110,6 +114,10 @@ bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *b
     ps_ast_debug_line(0, "Exit environment for the program %s", block_program->name);
     ASSERT(ps_interpreter_exit_environment(interpreter));
     ps_ast_debug_line(0, "Free interpreter");
+    ps_system_done(interpreter->system);
+    interpreter->system = NULL;
+    ps_string_heap_free(interpreter->string_heap);
+    interpreter->string_heap = NULL;
     interpreter = ps_interpreter_free(interpreter);
     ASSERT(interpreter == NULL);
     return true;
@@ -168,7 +176,7 @@ cleanup:
  */
 bool ps_ast_test_assignment()
 {
-    bool result;
+    ps_error error = PS_ERROR_NONE;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("ASSIGNMENT");
     ASSERT(block_program != NULL);
@@ -176,19 +184,15 @@ bool ps_ast_test_assignment()
     ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
     ASSERT(interpreter != NULL);
 
-    ps_ast_debug_line(0, "Create variable symbols I ² J of type Integer and add them to the symbol tables");
+    ps_ast_debug_line(0, "Create variable symbols I & J of type Integer and add them to the symbol table");
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
-    result = ps_interpreter_add_symbol(interpreter, symbol_i);
-    ASSERT(result);
+    error = ps_symbol_table_add(block_program->symbols, symbol_i);
+    ASSERT(error==PS_ERROR_NONE);
     ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
-    result = ps_interpreter_add_symbol(interpreter, symbol_j);
-    ASSERT(result);
-    ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT(error == PS_ERROR_NONE);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
-    ASSERT(error == PS_ERROR_NONE);
+    ASSERT(error==PS_ERROR_NONE);
     block_program->n_vars = 2;
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
@@ -228,7 +232,7 @@ bool ps_ast_test_assignment()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    bool result = ps_ast_run_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -283,14 +287,11 @@ bool ps_ast_test_if_then_else()
     ps_ast_debug_line(0, "Create variable symbols I and J of type Integer and add them to the symbol tables");
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
-    result = ps_interpreter_add_symbol(interpreter, symbol_i);
-    ASSERT(result);
-    ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
-    ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
-    result = ps_interpreter_add_symbol(interpreter, symbol_j);
-    ASSERT(result);
     ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
+
+    ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
     ASSERT(error == PS_ERROR_NONE);
     block_program->n_vars = 2;
@@ -421,8 +422,6 @@ bool ps_ast_test_while_do()
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
-    result = ps_interpreter_add_symbol(interpreter, symbol_i);
-    ASSERT(result);
     ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
     block_program->n_vars = 1;
@@ -529,8 +528,6 @@ bool ps_ast_test_repeat_until()
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
-    result = ps_interpreter_add_symbol(interpreter, symbol_i);
-    ASSERT(result);
     ps_error error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
     block_program->n_vars = 1;
@@ -639,15 +636,11 @@ bool ps_ast_test_for_do()
 
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
-    result = ps_interpreter_add_symbol(interpreter, symbol_i);
-    ASSERT(result);
     error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
 
     ps_value value_sum = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_sum = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "SUM", &value_sum);
-    result = ps_interpreter_add_symbol(interpreter, symbol_sum);
-    ASSERT(result);
     error = ps_symbol_table_add(block_program->symbols, symbol_sum);
     ASSERT(error == PS_ERROR_NONE);
 

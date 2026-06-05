@@ -67,7 +67,7 @@ error:
 //     ps_error error = ps_value_copy(&new_value, value, interpreter->range_check);
 //     if (error != PS_ERROR_NONE)
 //         return ps_interpreter_return_false(interpreter, error);
-//     if (interpreter->debug >= DEBUG_VERBOSE)
+//     if (interpreter->debug >= PS_DEBUG_VERBOSE)
 //         fprintf(stderr, "%s(%s)\n", is_inc ? "INC" : "DEC", ps_value_get_display_string(value, 0, 0));
 //     return true;
 // }
@@ -104,12 +104,12 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
             return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
         }
         srand(seed);
-        if (interpreter->debug >= DEBUG_VERBOSE)
+        if (interpreter->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "RANDOMIZE(%u)\n", seed);
         return true;
     }
     srand((unsigned int)time(NULL));
-    if (interpreter->debug >= DEBUG_VERBOSE)
+    if (interpreter->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "RANDOMIZE\n");
     return true;
 }

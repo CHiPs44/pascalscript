@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
+#include "ps_debug.h"
 #include "ps_error.h"
 #include "ps_string_heap.h"
 #include "ps_symbol_table.h"
@@ -27,29 +28,17 @@ extern "C"
 #define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0u
 #define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1u
 
-    typedef enum e_ps_debug
-    {
-        PS_DEBUG_FATAL = 0,
-        PS_DEBUG_CRITICAL,
-        PS_DEBUG_ERROR,
-        PS_DEBUG_WARNING,
-        PS_DEBUG_INFO,
-        PS_DEBUG_DEBUG,
-        PS_DEBUG_TRACE,
-        PS_DEBUG_VERBOSE,
-    } __attribute__((__packed__)) ps_debug;
-
     typedef struct s_ps_interpreter
     {
         ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
-        ps_string_heap *string_heap; /** @brief String heap to hold string constants                         */
-        char message[128];           /** @brief Additional error message                                     */
-        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ... */
-        ps_error error;              /** @brief Current error PS_ERROR_XXX                                   */
-        ps_debug debug : 3;          /** @brief Debug level: NONE, TRACE, VERBOSE                            */
-        bool range_check : 1;        /** @brief Range checking for integer and real values                   */
-        bool bool_eval : 1;          /** @brief *FUTURE* Short circuit boolean evaluation                    */
-        bool io_check : 1;           /** @brief *FUTURE* stop or set IOResult on I/O error                   */
+        ps_string_heap *string_heap; /** @brief String heap to hold string constants                           */
+        char message[128];           /** @brief Additional error message                                       */
+        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
+        ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
+        ps_debug_level debug : 3;    /** @brief Debug level from FATAL to VERBOSE                              */
+        bool range_check : 1;        /** @brief Range checking for integer and real values                     */
+        bool bool_eval : 1;          /** @brief *FUTURE* Short circuit boolean evaluation                      */
+        bool io_check : 1;           /** @brief *FUTURE* stop or set IOResult on I/O error                     */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
@@ -78,12 +67,13 @@ extern "C"
     /** @brief Set message with format */
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
+    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_identifier name,
+                                          ps_symbol_table *symbols, size_t n_values, ps_value *values);
+    bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
+
     /** @brief Find symbol by name in current block (or its parents if not local) */
     ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name,
                                           bool local);
-
-    /** @brief Add symbol to current environment */
-    bool ps_interpreter_add_symbol(ps_interpreter *interpreter, ps_symbol *symbol);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);

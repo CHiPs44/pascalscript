@@ -356,7 +356,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     if (executable == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
     {
         fprintf(stderr, "================================================================================\n");
         ps_executable_debug(stderr, "EXECUTABLE", executable);
@@ -424,26 +424,26 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     READ_NEXT_TOKEN
 
 cleanup:
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "INFO\tPROCEDURE_OR_FUNCTION: CLEANUP\n");
     // if (has_environment)
     //     ps_compiler_exit_environment(compiler);
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "DEBUG\texecutable_symbol: %p%s\n", (void *)executable_symbol,
                 executable_symbol_added ? " (added)" : " (not added)");
     if (executable_symbol != NULL && !executable_symbol_added)
     {
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         ps_symbol_free(executable_symbol);
         value = NULL;
     }
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
                 result_symbol_added ? " (added)" : " (not added)");
     if (result_symbol != NULL && !result_symbol_added)
     {
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
         ps_symbol_free(result_symbol);
         result_value = NULL;

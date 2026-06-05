@@ -148,13 +148,13 @@ int main(int argc, char *argv[])
 
 //     bool ok = false;
 
-//     interpreter->debug = DEBUG_NONE;
+//     interpreter->debug = PS_DEBUG_FATAL;
 //     if (trace)
-//         interpreter->debug = DEBUG_VERBOSE;
+//         interpreter->debug = PS_DEBUG_VERBOSE;
 //     else if (debug)
-//         interpreter->debug = DEBUG_TRACE;
-//     interpreter->parser->trace = interpreter->debug >= DEBUG_TRACE;
-//     interpreter->parser->debug = interpreter->debug >= DEBUG_VERBOSE;
+//         interpreter->debug = PS_DEBUG_TRACE;
+//     interpreter->parser->trace = interpreter->debug >= PS_DEBUG_TRACE;
+//     interpreter->parser->debug = interpreter->debug >= PS_DEBUG_VERBOSE;
 
 //     /* List symbols */
 //     if (dump_symbols)

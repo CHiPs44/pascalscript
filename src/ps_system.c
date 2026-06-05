@@ -180,7 +180,7 @@ bool ps_system_init(ps_symbol_table *system)
     if (!ps_procedures_init(system) || !ps_functions_init(system))
         goto error;
 
-#ifdef DEBUG_INIT
+#ifdef PS_DEBUG_INIT
     ps_symbol_table_dump(NULL, "SYSTEM INIT", system);
 #endif
 

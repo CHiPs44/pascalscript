@@ -213,7 +213,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
         TRACE_ERROR("VARIABLE");
     }
 
-    if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "\nINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", variable->name,
                 ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
@@ -231,7 +231,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
         // EXPRESSION
         if (!ps_parse_expression(compiler, block, &expression))
             TRACE_ERROR("EXPRESSION1");
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
         // AST NODE => ASSIGNMENT(LVALUE, EXPRESSION)
@@ -327,7 +327,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 
     while (loop)
     {
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
         if (!ps_parse_expression(compiler, block, &expression))
             TRACE_ERROR("EXPRESSION")
@@ -398,7 +398,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     symbol = ps_symbol_table_get(block->parent->symbols, identifier);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, block->name) == 0)
     {
-        if (compiler->debug >= COMPILER_DEBUG_VERBOSE)
+        if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
         symbol = ps_compiler_find_symbol(compiler, block, "RESULT", false);
