@@ -114,7 +114,7 @@ bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *b
     ps_ast_debug_line(0, "Exit environment for the program %s", block_program->name);
     ASSERT(ps_interpreter_exit_environment(interpreter));
     ps_ast_debug_line(0, "Free interpreter");
-    ps_system_done(interpreter->system);
+    ps_system_free(interpreter->system);
     interpreter->system = NULL;
     ps_string_heap_free(interpreter->string_heap);
     interpreter->string_heap = NULL;
@@ -815,18 +815,18 @@ bool ps_ast_test()
     ps_ast_debug_line(0, "****************************************************************");
     result &= ps_ast_test_minimal();
     ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_assignment();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_if_then_else();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_while_do();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_repeat_until();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_for_do();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_hello();
-    // ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_assignment();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_if_then_else();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_while_do();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_repeat_until();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_for_do();
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_hello();
+    ps_ast_debug_line(0, "****************************************************************");
 
     return result;
 }

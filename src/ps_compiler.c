@@ -22,23 +22,24 @@ ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool b
 {
     // Allocate compiler itself
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
+
+    // Initialize compiler
     compiler->parser = NULL;
     compiler->error = PS_ERROR_NONE;
     compiler->debug = PS_DEBUG_FATAL;
+    compiler->system = system;
     compiler->range_check = range_check;
     compiler->bool_eval = bool_eval;
     compiler->io_check = io_check;
-    compiler->system = NULL;
+
     // Allocate string heap
     compiler->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
     if (compiler->string_heap == NULL)
-        return ps_compiler_free(compiler);
-    // Allocate and initialize system environment
-    compiler->system = ps_symbol_table_alloc(256, 0);
-    if (compiler->system == NULL)
-        return ps_compiler_free(compiler);
-    compiler->system = system;
+        goto cleanup;
+
     return compiler;
+cleanup:
+    return ps_compiler_free(compiler);
 }
 
 ps_compiler *ps_compiler_free(ps_compiler *compiler)
@@ -49,7 +50,7 @@ ps_compiler *ps_compiler_free(ps_compiler *compiler)
             compiler->string_heap = ps_string_heap_free(compiler->string_heap);
         if (compiler->system != NULL)
         {
-            ps_system_done(compiler->system);
+            ps_system_free(compiler->system);
             compiler->system = ps_symbol_table_free(compiler->system);
         }
         ps_memory_free(PS_MEMORY_COMPILER, compiler);
@@ -135,7 +136,9 @@ bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbo
                 symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
     ps_error error = ps_symbol_table_add(block->symbols, symbol);
     if (error != PS_ERROR_NONE)
-        return ps_compiler_return_false(compiler, PS_ERROR_SYMBOL_NOT_ADDED);
+        return ps_compiler_set_error_message(compiler, PS_ERROR_SYMBOL_NOT_ADDED,
+                                             "Cannot add symbol '%s' to block '%s': %s", symbol->name, block->name,
+                                             ps_error_get_message(error));
     return true;
 }
 
@@ -145,10 +148,12 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     assert(compiler != NULL);
     assert(block != NULL);
     assert(type_symbol != NULL);
-    ps_value_data data = {0};
+    // Variable handle is its index in block variables
+    ps_value_data data = {.h = block->n_vars++};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
     {
-        return ps_compiler_return_false(compiler, PS_ERROR_NOT_IMPLEMENTED);
+        return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
+                                             "Array variables are not implemented yet");
         // data.a = ps_array_alloc_data(type_symbol);
         // if (data.a == NULL)
         //     return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
@@ -210,24 +215,41 @@ bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
 
 bool ps_compiler_load_string(ps_compiler *compiler, char *source, size_t length)
 {
-    (void)compiler;
-    (void)source;
-    (void)length;
-    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    assert(NULL != source);
+    compiler->error = PS_ERROR_NONE;
+    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);
+    return ps_buffer_load_string(lexer->buffer, source, length);
 }
 
 bool ps_compiler_load_file(ps_compiler *compiler, const char *filename)
 {
-    (void)compiler;
-    (void)filename;
-    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    assert(NULL != compiler);
+    compiler->error = PS_ERROR_NONE;
+    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);
+    return ps_buffer_load_file(lexer->buffer, filename);
 }
 
-bool ps_compiler_run(ps_compiler *compiler)
+bool ps_compiler_compile(ps_compiler *compiler)
 {
-    (void)compiler;
-    compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    // (void)compiler;
+    // compiler->error = PS_ERROR_NOT_IMPLEMENTED;
+    // return false;
+    assert(compiler != NULL);
+    ps_error error = PS_ERROR_NONE;
+    ps_parser *parser = compiler->parser;
+    if (parser == NULL)
+        return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
+    ps_lexer *lexer = ps_parser_get_lexer(parser);
+    if (lexer == NULL)
+        return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
+    if (compiler->debug >= PS_DEBUG_TRACE)
+        fprintf(stderr, "================================ BEGIN PARSING ===============================\n");
+    ps_ast_block *program = ps_parser_parse_program(parser);
+    if (program == NULL)
+    {
+        error = parser->error;
+        if (error == PS_ERROR_NONE) // NOSONAR
+            error = PS_ERROR_GENERIC;
+        return ps_compiler_return_false(compiler, error);
+    }
 }

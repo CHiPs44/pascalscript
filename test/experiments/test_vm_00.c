@@ -88,7 +88,7 @@ failure:
 
 cleanup:
     vm = ps_vm_free(vm);
-    ps_system_done();
+    ps_system_free();
     ps_environment_free(environment);
     return exit_code;
 }

@@ -119,8 +119,13 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 /* clang-format on */
 
-bool ps_system_init(ps_symbol_table *system)
+ps_symbol_table *ps_system_alloc(void)
 {
+    ps_symbol_table *system = ps_symbol_table_alloc(256, 0);
+    if (system == NULL)
+        return NULL;
+    return system;
+
     /**************************************************************************/
     /* TYPES                                                                  */
     /**************************************************************************/
@@ -133,8 +138,6 @@ bool ps_system_init(ps_symbol_table *system)
     ADD_SYSTEM_SYMBOL(ps_system_unsigned)
     ADD_SYSTEM_SYMBOL(ps_system_real)
     ADD_SYSTEM_SYMBOL(ps_system_string)
-    ADD_SYSTEM_SYMBOL(ps_system_procedure)
-    ADD_SYSTEM_SYMBOL(ps_system_function)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_char)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_integer)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_unsigned)
@@ -142,6 +145,8 @@ bool ps_system_init(ps_symbol_table *system)
     ADD_SYSTEM_SYMBOL(ps_system_enum)
     ADD_SYSTEM_SYMBOL(ps_system_array)
     ADD_SYSTEM_SYMBOL(ps_system_record)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure)
+    ADD_SYSTEM_SYMBOL(ps_system_function)
 
     /**************************************************************************/
     /* VARIABLES                                                              */
@@ -180,20 +185,18 @@ bool ps_system_init(ps_symbol_table *system)
     if (!ps_procedures_init(system) || !ps_functions_init(system))
         goto error;
 
-#ifdef PS_DEBUG_INIT
-    ps_symbol_table_dump(NULL, "SYSTEM INIT", system);
-#endif
-
-    return true;
+    return system;
 
 error:
-    ps_system_done(system);
-    return false;
+    ps_system_free(system);
+    return NULL;
 }
 
-void ps_system_done(ps_symbol_table *system)
+ps_symbol_table *ps_system_free(ps_symbol_table *system)
 {
-    ps_symbol_table_free(system);
+    if (system != NULL)
+        ps_symbol_table_free(system);
+    return NULL;
 }
 
 bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol)
