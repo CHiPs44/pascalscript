@@ -15,7 +15,8 @@ extern "C"
     /** @brief Base types: */
     typedef enum e_ps_value_type
     {
-        PS_TYPE_NONE,       /** @brief [N]o type yet or unknown                        */
+        PS_TYPE_UNKNOWN,    /** @brief [_] unknown or no type yet                      */
+        PS_TYPE_NODE,       /** @brief [N]ode (pointer to AST node)                    */
         PS_TYPE_REAL,       /** @brief [R]eal                                *BASE*    */
         PS_TYPE_INTEGER,    /** @brief [I]nteger (Signed)                    *BASE*    */
         PS_TYPE_UNSIGNED,   /** @brief [U]nsigned integer                    *BASE*    */
@@ -25,7 +26,7 @@ extern "C"
         PS_TYPE_DEFINITION, /** @brief [T]ype definition                               */
         PS_TYPE_EXECUTABLE, /** @brief [X] eXecutable: procedure or function           */
         PS_TYPE_SUBRANGE,   /** @brief [G] subranGe                                    */
-        PS_TYPE_ENUM,       /** @brief [E]num                                          */
+        PS_TYPE_ENUM,       /** @brief [E]numerarion                                   */
         PS_TYPE_ARRAY,      /** @brief [A]rray                               *FUTURE*  */
         PS_TYPE_SET,        /** @brief [Z] Set                               *FUTURE*  */
         PS_TYPE_POINTER,    /** @brief [P]ointer                             *FUTURE*  */

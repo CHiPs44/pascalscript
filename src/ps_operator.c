@@ -96,20 +96,20 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
 /* All sensible base types combinations in Pascal */
 
 /* clang-format off */
-#define BB (PS_TYPE_BOOLEAN  << 4 | PS_TYPE_BOOLEAN )
-#define II (PS_TYPE_INTEGER  << 4 | PS_TYPE_INTEGER )
-#define IU (PS_TYPE_INTEGER  << 4 | PS_TYPE_UNSIGNED)
-#define UI (PS_TYPE_UNSIGNED << 4 | PS_TYPE_INTEGER )
-#define UU (PS_TYPE_UNSIGNED << 4 | PS_TYPE_UNSIGNED)
-#define IR (PS_TYPE_INTEGER  << 4 | PS_TYPE_REAL    )
-#define RI (PS_TYPE_REAL     << 4 | PS_TYPE_INTEGER )
-#define RR (PS_TYPE_REAL     << 4 | PS_TYPE_REAL    )
-#define RU (PS_TYPE_REAL     << 4 | PS_TYPE_UNSIGNED)
-#define UR (PS_TYPE_UNSIGNED << 4 | PS_TYPE_REAL    )
-#define CC (PS_TYPE_CHAR     << 4 | PS_TYPE_CHAR    )
-#define CS (PS_TYPE_CHAR     << 4 | PS_TYPE_STRING  )
-#define SC (PS_TYPE_STRING   << 4 | PS_TYPE_CHAR    )
-#define SS (PS_TYPE_STRING   << 4 | PS_TYPE_STRING  )
+#define BB (PS_TYPE_BOOLEAN  << 8 | PS_TYPE_BOOLEAN )
+#define II (PS_TYPE_INTEGER  << 8 | PS_TYPE_INTEGER )
+#define IU (PS_TYPE_INTEGER  << 8 | PS_TYPE_UNSIGNED)
+#define UI (PS_TYPE_UNSIGNED << 8 | PS_TYPE_INTEGER )
+#define UU (PS_TYPE_UNSIGNED << 8 | PS_TYPE_UNSIGNED)
+#define IR (PS_TYPE_INTEGER  << 8 | PS_TYPE_REAL    )
+#define RI (PS_TYPE_REAL     << 8 | PS_TYPE_INTEGER )
+#define RR (PS_TYPE_REAL     << 8 | PS_TYPE_REAL    )
+#define RU (PS_TYPE_REAL     << 8 | PS_TYPE_UNSIGNED)
+#define UR (PS_TYPE_UNSIGNED << 8 | PS_TYPE_REAL    )
+#define CC (PS_TYPE_CHAR     << 8 | PS_TYPE_CHAR    )
+#define CS (PS_TYPE_CHAR     << 8 | PS_TYPE_STRING  )
+#define SC (PS_TYPE_STRING   << 8 | PS_TYPE_CHAR    )
+#define SS (PS_TYPE_STRING   << 8 | PS_TYPE_STRING  )
 /* clang-format on */
 
 #define NUMBER_CASE(__KEY__, __A__, __B__, __OP__, __R__, __TYPE__)                                                    \
@@ -209,42 +209,42 @@ static inline bool ps_string_ge(ps_string *a, ps_string *b)
     return ps_string_compare(a, b) >= 0;
 }
 
-bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, // NOSONAR
+bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // NOSONAR
                              const ps_value *b, ps_value *result, ps_operator_binary operator)
 {
-    //                               OOOOOOOO | AAAA                                | BBBB
+    //                              OOOOOOOO | AAAAAAAA                            | BBBBBBBB
     //                        ----------------+-------------------------------------+-----------------------------
-    uint16_t key = (uint16_t)(operator << 8 | (a->type->value->data.t->base << 4) | b->type->value->data.t->base);
-    ps_value_type r = PS_TYPE_NONE;
+    uint32_t key = (uint16_t)(operator << 16 | (a->type->value->data.t->base << 8) | b->type->value->data.t->base);
+    ps_value_type r = PS_TYPE_UNKNOWN;
     const ps_symbol *expected_type = result->type;
     ps_string *s = NULL;
 
     // AND.U/I/B
-    NUMBER_CASE(PS_OP_AND << 8 | BB, b, b, &&, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_AND << 8 | II, i, i, &, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_AND << 8 | IU, i, u, &, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_AND << 8 | UI, u, i, &, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_AND << 8 | UU, u, u, &, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_AND << 16 | BB, b, b, &&, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_AND << 16 | II, i, i, &, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_AND << 16 | IU, i, u, &, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_AND << 16 | UI, u, i, &, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_AND << 16 | UU, u, u, &, u, PS_TYPE_UNSIGNED)
     // OR.U/I/B
-    NUMBER_CASE(PS_OP_OR << 8 | BB, b, b, ||, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_OR << 8 | II, i, i, |, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_OR << 8 | IU, i, u, |, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_OR << 8 | UI, u, i, |, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_OR << 8 | UU, u, u, |, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_OR << 16 | BB, b, b, ||, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_OR << 16 | II, i, i, |, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_OR << 16 | IU, i, u, |, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_OR << 16 | UI, u, i, |, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_OR << 16 | UU, u, u, |, u, PS_TYPE_UNSIGNED)
     // XOR.U/I/B
-    if (key == (PS_OP_XOR << 8 | BB))
+    if (key == (PS_OP_XOR << 16 | BB))
     {
         // C does not have a logical exclusive or operator, so we use a xor b = !a != !b
         result->data.b = !(a->data.b) != !(b->data.b);
         r = PS_TYPE_BOOLEAN;
     }
     else
-        NUMBER_CASE(PS_OP_XOR << 8 | II, i, i, ^, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_XOR << 8 | IU, i, u, ^, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_XOR << 8 | UI, u, i, ^, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_XOR << 8 | UU, u, u, ^, u, PS_TYPE_UNSIGNED)
+        NUMBER_CASE(PS_OP_XOR << 16 | II, i, i, ^, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_XOR << 16 | IU, i, u, ^, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_XOR << 16 | UI, u, i, ^, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_XOR << 16 | UU, u, u, ^, u, PS_TYPE_UNSIGNED)
     // ADD.I/U/R/C/S
-    if (key == (PS_OP_ADD << 8 | CC)) // char + char => string
+    if (key == (PS_OP_ADD << 16 | CC)) // char + char => string
     {
         s = ps_string_alloc(2);
         if (s == NULL)
@@ -255,7 +255,7 @@ bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, // 
         result->data.s = s;
         r = PS_TYPE_STRING;
     }
-    else if (key == (PS_OP_ADD << 8 | CS)) // char + string => string
+    else if (key == (PS_OP_ADD << 16 | CS)) // char + string => string
     {
         s = ps_string_alloc(1);
         if (s == NULL)
@@ -268,7 +268,7 @@ bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, // 
             return false;
         r = PS_TYPE_STRING;
     }
-    else if (key == (PS_OP_ADD << 8 | SC)) // string + char => string
+    else if (key == (PS_OP_ADD << 16 | SC)) // string + char => string
     {
         s = ps_string_alloc(1);
         if (s == NULL)
@@ -282,7 +282,7 @@ bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, // 
             return false;
         r = PS_TYPE_STRING;
     }
-    else if (key == (PS_OP_ADD << 8 | SS)) // string + string => string
+    else if (key == (PS_OP_ADD << 16 | SS)) // string + string => string
     {
         s = ps_string_concat(a->data.s, b->data.s, PS_STRING_MAX_LEN);
         if (s == NULL)
@@ -291,149 +291,149 @@ bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, // 
         r = PS_TYPE_STRING;
     }
     else
-        NUMBER_CASE(PS_OP_ADD << 8 | II, i, i, +, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_ADD << 8 | IR, i, r, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 8 | IU, i, u, +, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_ADD << 8 | RI, r, i, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 8 | RR, r, r, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 8 | RU, r, u, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 8 | UI, u, i, +, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_ADD << 8 | UR, u, r, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 8 | UU, u, u, +, u, PS_TYPE_UNSIGNED)
+        NUMBER_CASE(PS_OP_ADD << 16 | II, i, i, +, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_ADD << 16 | IR, i, r, +, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_ADD << 16 | IU, i, u, +, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_ADD << 16 | RI, r, i, +, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_ADD << 16 | RR, r, r, +, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_ADD << 16 | RU, r, u, +, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_ADD << 16 | UI, u, i, +, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_ADD << 16 | UR, u, r, +, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_ADD << 16 | UU, u, u, +, u, PS_TYPE_UNSIGNED)
     // SUB.I/U/R
-    NUMBER_CASE(PS_OP_SUB << 8 | II, i, i, -, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SUB << 8 | IR, i, r, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 8 | IU, i, u, -, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SUB << 8 | RI, r, i, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 8 | RR, r, r, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 8 | RU, r, u, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 8 | UI, u, i, -, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_SUB << 8 | UR, u, r, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 8 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SUB << 16 | II, i, i, -, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SUB << 16 | IR, i, r, -, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_SUB << 16 | IU, i, u, -, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SUB << 16 | RI, r, i, -, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_SUB << 16 | RR, r, r, -, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_SUB << 16 | RU, r, u, -, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_SUB << 16 | UI, u, i, -, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SUB << 16 | UR, u, r, -, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_SUB << 16 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
     // MUL.I/U/R
-    NUMBER_CASE(PS_OP_MUL << 8 | II, i, i, *, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_MUL << 8 | IR, i, r, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 8 | IU, i, u, *, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_MUL << 8 | RI, r, i, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 8 | RR, r, r, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 8 | RU, r, u, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 8 | UI, u, i, *, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_MUL << 8 | UR, u, r, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 8 | UU, u, u, *, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_MUL << 16 | II, i, i, *, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_MUL << 16 | IR, i, r, *, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_MUL << 16 | IU, i, u, *, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_MUL << 16 | RI, r, i, *, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_MUL << 16 | RR, r, r, *, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_MUL << 16 | RU, r, u, *, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_MUL << 16 | UI, u, i, *, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_MUL << 16 | UR, u, r, *, r, PS_TYPE_REAL)
+    NUMBER_CASE(PS_OP_MUL << 16 | UU, u, u, *, u, PS_TYPE_UNSIGNED)
     // DIV.I/U
-    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 8 | II, i, i, /, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 8 | IU, i, u, /, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 8 | UI, u, i, /, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 8 | UU, u, u, /, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | II, i, i, /, i, PS_TYPE_INTEGER)
+    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | IU, i, u, /, i, PS_TYPE_INTEGER)
+    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UI, u, i, /, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UU, u, u, /, u, PS_TYPE_UNSIGNED)
     // DIV.R
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | II, i, i)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | IR, i, i)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | IU, i, u)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | RI, r, i)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | RR, r, r)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | RU, r, u)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | UI, u, i)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | UR, u, r)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 8 | UU, u, u)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | II, i, i)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | IR, i, i)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | IU, i, u)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | RI, r, i)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | RR, r, r)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | RU, r, u)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | UI, u, i)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | UR, u, r)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | UU, u, u)
     // MOD.I/U
-    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 8 | II, i, i, %, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 8 | IU, i, u, %, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 8 | UI, u, i, %, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 8 | UU, u, u, %, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | II, i, i, %, i, PS_TYPE_INTEGER)
+    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | IU, i, u, %, i, PS_TYPE_INTEGER)
+    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | UI, u, i, %, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | UU, u, u, %, u, PS_TYPE_UNSIGNED)
     // EQ.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_EQ << 8 | IU, i, u, ==, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_EQ << 8 | UI, u, i, ==, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_EQ << 8 | CC, c, c, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | II, i, i, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | IR, i, r, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | RI, r, i, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | RR, r, r, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | RU, r, u, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | UR, u, r, ==, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_EQ << 8 | UU, u, u, ==, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_EQ << 8 | CS, ps_string_eq)
-    STRING_CASE_SC(PS_OP_EQ << 8 | SC, ps_string_eq)
-    STRING_CASE_SS(PS_OP_EQ << 8 | SS, ps_string_eq)
+    NUMBER_CASE_SIGNED(PS_OP_EQ << 16 | IU, i, u, ==, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_EQ << 16 | UI, u, i, ==, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_EQ << 16 | CC, c, c, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | II, i, i, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | IR, i, r, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | RI, r, i, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | RR, r, r, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | RU, r, u, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | UR, u, r, ==, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_EQ << 16 | UU, u, u, ==, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_EQ << 16 | CS, ps_string_eq)
+    STRING_CASE_SC(PS_OP_EQ << 16 | SC, ps_string_eq)
+    STRING_CASE_SS(PS_OP_EQ << 16 | SS, ps_string_eq)
     // NE.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_NE << 8 | IU, i, u, !=, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_NE << 8 | UI, u, i, !=, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_NE << 8 | CC, c, c, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | II, i, i, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | IR, i, r, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | RI, r, i, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | RR, r, r, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | RU, r, u, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | UR, u, r, !=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_NE << 8 | UU, u, u, !=, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_NE << 8 | CS, ps_string_ne)
-    STRING_CASE_SC(PS_OP_NE << 8 | SC, ps_string_ne)
-    STRING_CASE_SS(PS_OP_NE << 8 | SS, ps_string_ne)
+    NUMBER_CASE_SIGNED(PS_OP_NE << 16 | IU, i, u, !=, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_NE << 16 | UI, u, i, !=, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_NE << 16 | CC, c, c, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | II, i, i, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | IR, i, r, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | RI, r, i, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | RR, r, r, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | RU, r, u, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | UR, u, r, !=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_NE << 16 | UU, u, u, !=, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_NE << 16 | CS, ps_string_ne)
+    STRING_CASE_SC(PS_OP_NE << 16 | SC, ps_string_ne)
+    STRING_CASE_SS(PS_OP_NE << 16 | SS, ps_string_ne)
     // LT.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_LT << 8 | IU, i, u, <, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_LT << 8 | UI, u, i, <, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_LT << 8 | CC, c, c, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | II, i, i, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | IR, i, r, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | RI, r, i, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | RR, r, r, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | RU, r, u, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | UR, u, r, <, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LT << 8 | UU, u, u, <, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_LT << 8 | CS, ps_string_lt)
-    STRING_CASE_SC(PS_OP_LT << 8 | SC, ps_string_lt)
-    STRING_CASE_SS(PS_OP_LT << 8 | SS, ps_string_lt)
+    NUMBER_CASE_SIGNED(PS_OP_LT << 16 | IU, i, u, <, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_LT << 16 | UI, u, i, <, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_LT << 16 | CC, c, c, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | II, i, i, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | IR, i, r, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | RI, r, i, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | RR, r, r, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | RU, r, u, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | UR, u, r, <, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LT << 16 | UU, u, u, <, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_LT << 16 | CS, ps_string_lt)
+    STRING_CASE_SC(PS_OP_LT << 16 | SC, ps_string_lt)
+    STRING_CASE_SS(PS_OP_LT << 16 | SS, ps_string_lt)
     // LE.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_LE << 8 | IU, i, u, <=, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_LE << 8 | UI, u, i, <=, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_LE << 8 | CC, c, c, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | II, i, i, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | IR, i, r, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | RI, r, i, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | RR, r, r, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | RU, r, u, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | UR, u, r, <=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_LE << 8 | UU, u, u, <=, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_LE << 8 | CS, ps_string_le)
-    STRING_CASE_SC(PS_OP_LE << 8 | SC, ps_string_le)
-    STRING_CASE_SS(PS_OP_LE << 8 | SS, ps_string_le)
+    NUMBER_CASE_SIGNED(PS_OP_LE << 16 | IU, i, u, <=, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_LE << 16 | UI, u, i, <=, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_LE << 16 | CC, c, c, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | II, i, i, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | IR, i, r, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | RI, r, i, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | RR, r, r, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | RU, r, u, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | UR, u, r, <=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_LE << 16 | UU, u, u, <=, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_LE << 16 | CS, ps_string_le)
+    STRING_CASE_SC(PS_OP_LE << 16 | SC, ps_string_le)
+    STRING_CASE_SS(PS_OP_LE << 16 | SS, ps_string_le)
     // GT.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_GT << 8 | IU, i, u, >, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_GT << 8 | UI, u, i, >, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_GT << 8 | CC, c, c, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | II, i, i, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | IR, i, r, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | RI, r, i, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | RR, r, r, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | RU, r, u, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | UR, u, r, >, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GT << 8 | UU, u, u, >, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_GT << 8 | CS, ps_string_gt)
-    STRING_CASE_SC(PS_OP_GT << 8 | SC, ps_string_gt)
-    STRING_CASE_SS(PS_OP_GT << 8 | SS, ps_string_gt)
+    NUMBER_CASE_SIGNED(PS_OP_GT << 16 | IU, i, u, >, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_GT << 16 | UI, u, i, >, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_GT << 16 | CC, c, c, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | II, i, i, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | IR, i, r, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | RI, r, i, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | RR, r, r, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | RU, r, u, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | UR, u, r, >, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GT << 16 | UU, u, u, >, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_GT << 16 | CS, ps_string_gt)
+    STRING_CASE_SC(PS_OP_GT << 16 | SC, ps_string_gt)
+    STRING_CASE_SS(PS_OP_GT << 16 | SS, ps_string_gt)
     // GE.I/U/R/C/S
-    NUMBER_CASE_SIGNED(PS_OP_GE << 8 | IU, i, u, >=, b, PS_TYPE_BOOLEAN, ps_integer)
-    NUMBER_CASE_SIGNED(PS_OP_GE << 8 | UI, u, i, >=, b, PS_TYPE_BOOLEAN, ps_unsigned)
-    NUMBER_CASE(PS_OP_GE << 8 | CC, c, c, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | II, i, i, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | IR, i, r, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | RI, r, i, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | RR, r, r, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | RU, r, u, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | UR, u, r, >=, b, PS_TYPE_BOOLEAN)
-    NUMBER_CASE(PS_OP_GE << 8 | UU, u, u, >=, b, PS_TYPE_BOOLEAN)
-    STRING_CASE_CS(PS_OP_GE << 8 | CS, ps_string_ge)
-    STRING_CASE_SC(PS_OP_GE << 8 | SC, ps_string_ge)
-    STRING_CASE_SS(PS_OP_GE << 8 | SS, ps_string_ge)
+    NUMBER_CASE_SIGNED(PS_OP_GE << 16 | IU, i, u, >=, b, PS_TYPE_BOOLEAN, ps_integer)
+    NUMBER_CASE_SIGNED(PS_OP_GE << 16 | UI, u, i, >=, b, PS_TYPE_BOOLEAN, ps_unsigned)
+    NUMBER_CASE(PS_OP_GE << 16 | CC, c, c, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | II, i, i, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | IR, i, r, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | RI, r, i, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | RR, r, r, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | RU, r, u, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | UR, u, r, >=, b, PS_TYPE_BOOLEAN)
+    NUMBER_CASE(PS_OP_GE << 16 | UU, u, u, >=, b, PS_TYPE_BOOLEAN)
+    STRING_CASE_CS(PS_OP_GE << 16 | CS, ps_string_ge)
+    STRING_CASE_SC(PS_OP_GE << 16 | SC, ps_string_ge)
+    STRING_CASE_SS(PS_OP_GE << 16 | SS, ps_string_ge)
     // SHL.I/U
-    NUMBER_CASE(PS_OP_SHL << 8 | II, i, i, <<, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SHL << 8 | IU, i, u, <<, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SHL << 8 | UI, u, i, <<, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_SHL << 8 | UU, u, u, <<, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SHL << 16 | II, i, i, <<, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SHL << 16 | IU, i, u, <<, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SHL << 16 | UI, u, i, <<, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SHL << 16 | UU, u, u, <<, u, PS_TYPE_UNSIGNED)
     // SHR.I/U
-    NUMBER_CASE(PS_OP_SHR << 8 | II, i, i, >>, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SHR << 8 | IU, i, u, >>, i, PS_TYPE_INTEGER)
-    NUMBER_CASE(PS_OP_SHR << 8 | UI, u, i, >>, u, PS_TYPE_UNSIGNED)
-    NUMBER_CASE(PS_OP_SHR << 8 | UU, u, u, >>, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SHR << 16 | II, i, i, >>, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SHR << 16 | IU, i, u, >>, i, PS_TYPE_INTEGER)
+    NUMBER_CASE(PS_OP_SHR << 16 | UI, u, i, >>, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SHR << 16 | UU, u, u, >>, u, PS_TYPE_UNSIGNED)
     {
         ps_interpreter_set_message(interpreter, "Binary operator %s (%d) is not applicable for types %s and %s\n",
                                    ps_operator_binary_get_name(operator), operator,

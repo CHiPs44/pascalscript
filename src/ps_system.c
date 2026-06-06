@@ -43,7 +43,7 @@ ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITIO
 
 /* clang-format off */
 
-PS_SYSTEM_TYPE(none             , "#NONE"             , PS_TYPE_NONE      , PS_TYPE_NONE                              );
+PS_SYSTEM_TYPE(none             , "#NONE"             , PS_TYPE_UNKNOWN      , PS_TYPE_UNKNOWN                              );
 PS_SYSTEM_TYPE(integer          , "INTEGER"           , PS_TYPE_INTEGER   , PS_TYPE_INTEGER                           );
 PS_SYSTEM_TYPE(unsigned         , "UNSIGNED"          , PS_TYPE_UNSIGNED  , PS_TYPE_UNSIGNED                          );
 PS_SYSTEM_TYPE(boolean          , "BOOLEAN"           , PS_TYPE_BOOLEAN   , PS_TYPE_BOOLEAN                           );

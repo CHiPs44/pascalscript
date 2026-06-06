@@ -536,8 +536,8 @@ bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
     ps_value min_value = {0};
     ps_value tmp_value = {0};
     ps_value max_value = {0};
-    ps_value_type min_base = PS_TYPE_NONE;
-    ps_value_type max_base = PS_TYPE_NONE;
+    ps_value_type min_base = PS_TYPE_UNKNOWN;
+    ps_value_type max_base = PS_TYPE_UNKNOWN;
 
     // *** Parse min value of subrange as a constant expression
     if (!ps_parse_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))

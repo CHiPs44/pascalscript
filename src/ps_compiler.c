@@ -24,13 +24,20 @@ ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool b
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
 
     // Initialize compiler
-    compiler->parser = NULL;
     compiler->error = PS_ERROR_NONE;
     compiler->debug = PS_DEBUG_FATAL;
-    compiler->system = system;
+    memset(compiler->message, 0, sizeof(compiler->message));
     compiler->range_check = range_check;
     compiler->bool_eval = bool_eval;
     compiler->io_check = io_check;
+    compiler->parser = NULL;
+    compiler->string_heap = NULL;
+    compiler->system = system;
+
+    // Allocate parser
+    compiler->parser = ps_parser_alloc();
+    if (compiler->parser == NULL)
+        goto cleanup;
 
     // Allocate string heap
     compiler->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
@@ -46,13 +53,10 @@ ps_compiler *ps_compiler_free(ps_compiler *compiler)
 {
     if (compiler != NULL)
     {
+        if (compiler->parser != NULL)
+            compiler->parser = ps_parser_free(compiler->parser);
         if (compiler->string_heap != NULL)
             compiler->string_heap = ps_string_heap_free(compiler->string_heap);
-        if (compiler->system != NULL)
-        {
-            ps_system_free(compiler->system);
-            compiler->system = ps_symbol_table_free(compiler->system);
-        }
         ps_memory_free(PS_MEMORY_COMPILER, compiler);
     }
     return NULL;
@@ -248,7 +252,7 @@ bool ps_compiler_compile(ps_compiler *compiler)
     if (program == NULL)
     {
         error = parser->error;
-        if (error == PS_ERROR_NONE) // NOSONAR
+        if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
         return ps_compiler_return_false(compiler, error);
     }

@@ -257,7 +257,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
         // Stop if variable > finish for "TO"
         //      or variable < finish for "DOWNTO"
         interpreter->debug = PS_DEBUG_VERBOSE;
-        if (!ps_operator_eval_binary(interpreter, variable_simple->variable->value, &end_value.value, &stop,
+        if (!ps_operator_binary_eval(interpreter, variable_simple->variable->value, &end_value.value, &stop,
                                      downto ? PS_OP_LT : PS_OP_GT))
         {
             ps_ast_debug_line(0, "TEST!");
@@ -423,7 +423,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
             return false;
-        if (!ps_operator_eval_binary(interpreter, (const ps_value *)&left.value, (const ps_value *)&right.value,
+        if (!ps_operator_binary_eval(interpreter, (const ps_value *)&left.value, (const ps_value *)&right.value,
                                      &result->value, binary_operation->operator))
             return false;
         break;

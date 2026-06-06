@@ -60,10 +60,10 @@ extern "C"
     bool ps_value_is_subrange(const ps_value *value);
 
     /** @brief Get type */
-    /** @returns PS_TYPE_NONE if value is invalid */
+    /** @returns PS_TYPE_UNKNOWN if value is invalid */
     ps_value_type ps_value_get_type(const ps_value *value);
     /** @brief Get base type */
-    /** @returns PS_TYPE_NONE if value is invalid */
+    /** @returns PS_TYPE_UNKNOWN if value is invalid */
     ps_value_type ps_value_get_base(const ps_value *value);
     /** @brief Copy value from "from" to "to" */
     /** @returns PS_ERROR_NONE if successful */

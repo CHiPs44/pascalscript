@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
     }
 
     /* Initialize interpreter */
-    interpreter = ps_interpreter_alloc(range_check, bool_eval, io_check);
+    interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
     if (interpreter == NULL)
     {
         fprintf(stderr, "Could not initialize interpreter!\n");

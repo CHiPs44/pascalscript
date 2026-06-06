@@ -10,8 +10,8 @@
 #include <stdio.h>
 
 #include "ps_interpreter.h"
-#include "ps_value.h"
 #include "ps_token.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -44,7 +44,7 @@ extern "C"
     bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, ps_value *result,
                                 ps_operator_unary operator);
     /** @brief Execute binary operation */
-    bool ps_operator_eval_binary(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
+    bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
                                  ps_operator_binary operator);
 
     ps_operator_unary ps_operator_unary_from_token(ps_token_type token_type);

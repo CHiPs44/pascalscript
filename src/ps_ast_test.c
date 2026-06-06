@@ -85,9 +85,7 @@ cleanup:
 ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Create an interpreter");
-    ps_symbol_table *system = ps_symbol_table_alloc(0, 0);
-    ASSERT(system != NULL);
-    ASSERT(ps_system_init(system));
+    ps_symbol_table *system = ps_system_alloc();
     ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
     ASSERT(string_heap != NULL);
     ps_interpreter *interpreter = ps_interpreter_alloc(system, string_heap, true, false, false);
@@ -96,7 +94,7 @@ ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
     ps_ast_debug_line(0, "Enter environment for the program %s", block_program->name);
     ASSERT(ps_interpreter_enter_environment(interpreter, block_program->name, NULL, 0, NULL));
 
-    ps_ast_debug_line(0, "Add PROGRAM symbol to the current environment symbol table");
+    ps_ast_debug_line(0, "Check PROGRAM symbol");
     ps_symbol *symbol_program = ps_symbol_table_get(block_program->symbols, block_program->name);
     ASSERT(symbol_program != NULL);
     ASSERT(symbol_program->kind == PS_SYMBOL_KIND_PROGRAM);
@@ -188,11 +186,11 @@ bool ps_ast_test_assignment()
     ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
     error = ps_symbol_table_add(block_program->symbols, symbol_i);
-    ASSERT(error==PS_ERROR_NONE);
+    ASSERT(error == PS_ERROR_NONE);
     ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
-    ASSERT(error==PS_ERROR_NONE);
+    ASSERT(error == PS_ERROR_NONE);
     block_program->n_vars = 2;
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
