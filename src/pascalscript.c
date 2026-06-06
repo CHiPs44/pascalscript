@@ -174,7 +174,7 @@ bool compile(const char *source_file)
     {
         fprintf(stderr, "File %s not loaded!\n", source_file);
         fprintf(stderr, "Error %d %s\n", compiler->error, ps_error_get_message(compiler->error)); // NOSONAR
-        return false;
+        return ok;
     }
     if (verbose)
         fprintf(stderr, "Loaded %s!\n", source_file);
@@ -189,10 +189,10 @@ bool compile(const char *source_file)
     }
 
     /* Compile program */
-    if (verbose)
+    if (compiler->debug >= PS_DEBUG_TRACE)
         printf("=============================== BEGIN COMPILATION ==============================\n");
     ok = ps_compiler_compile(compiler);
-    if (verbose)
+    if (compiler->debug >= PS_DEBUG_TRACE)
         printf("================================ END COMPILATION ===============================\n");
 
     // /* List symbols */

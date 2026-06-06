@@ -234,9 +234,6 @@ bool ps_compiler_load_file(ps_compiler *compiler, const char *filename)
 
 bool ps_compiler_compile(ps_compiler *compiler)
 {
-    // (void)compiler;
-    // compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-    // return false;
     assert(compiler != NULL);
     ps_error error = PS_ERROR_NONE;
     ps_parser *parser = compiler->parser;
@@ -246,7 +243,7 @@ bool ps_compiler_compile(ps_compiler *compiler)
     if (lexer == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
     if (compiler->debug >= PS_DEBUG_TRACE)
-        fprintf(stderr, "================================ BEGIN PARSING ===============================\n");
+        fprintf(stderr, "================================= BEGIN PARSING ================================\n");
     ps_ast_block *program = NULL;
     if (!ps_parse_program(compiler, program))
     {
