@@ -12,13 +12,15 @@
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_memory.h"
+#include "ps_parse.h"
+#include "ps_parse_declaration.h"
 #include "ps_parser.h"
 #include "ps_procedures.h"
 #include "ps_string_heap.h"
 #include "ps_system.h"
 #include "ps_value.h"
 
-ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool bool_eval, bool io_check)
+ps_compiler *ps_compiler_alloc(ps_symbol_table *system)
 {
     // Allocate compiler itself
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
@@ -27,9 +29,6 @@ ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool b
     compiler->error = PS_ERROR_NONE;
     compiler->debug = PS_DEBUG_FATAL;
     memset(compiler->message, 0, sizeof(compiler->message));
-    compiler->range_check = range_check;
-    compiler->bool_eval = bool_eval;
-    compiler->io_check = io_check;
     compiler->parser = NULL;
     compiler->string_heap = NULL;
     compiler->system = system;
@@ -198,7 +197,7 @@ bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
         fprintf(stderr, ">");
         ps_value_debug(stderr, "TO\t", to);
     }
-    ps_error error = ps_value_copy(from, to, compiler->range_check);
+    ps_error error = ps_value_copy(from, to, true);
     if (error == PS_ERROR_NONE)
     {
         if (compiler->debug >= PS_DEBUG_VERBOSE)
@@ -248,12 +247,13 @@ bool ps_compiler_compile(ps_compiler *compiler)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
     if (compiler->debug >= PS_DEBUG_TRACE)
         fprintf(stderr, "================================ BEGIN PARSING ===============================\n");
-    ps_ast_block *program = ps_parser_parse_program(parser);
-    if (program == NULL)
+    ps_ast_block *program = NULL;
+    if (!ps_parse_program(compiler, program))
     {
         error = parser->error;
         if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
         return ps_compiler_return_false(compiler, error);
     }
+    return true;
 }

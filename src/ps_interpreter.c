@@ -8,6 +8,8 @@
 #include <string.h>
 
 #include "ps_array.h"
+#include "ps_ast.h"
+#include "ps_ast_execute.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
@@ -152,4 +154,12 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
         ps_value_type_get_name(from->type->value->data.t->type), ps_value_type_get_name(ps_value_get_base(from)),
         ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
     return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
+}
+
+bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program)
+{
+    assert(NULL != interpreter);
+    assert(NULL != program);
+
+    return ps_ast_run_program(interpreter, program);
 }

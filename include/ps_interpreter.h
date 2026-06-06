@@ -88,6 +88,9 @@ extern "C"
      */
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to);
 
+    /** @brief Run the program */
+    bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program);
+
 #ifdef __cplusplus
 }
 #endif

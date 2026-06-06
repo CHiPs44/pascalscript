@@ -34,6 +34,7 @@
 #include "ps_parser.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_system.h"
 #include "ps_version.h"
 
 #define DEBUGGER_SOURCE "examples/000-minimal.pas"
@@ -54,6 +55,7 @@ bool memory = false;
 bool trace = false;
 bool verbose = false;
 
+ps_symbol_table *system_library = NULL;
 ps_compiler *compiler = NULL;
 ps_interpreter *interpreter = NULL;
 
@@ -188,10 +190,10 @@ bool compile(const char *source_file)
 
     /* Compile program */
     if (verbose)
-        fprintf(stdout, "================================ BEGIN COMPILATION ===============================\n");
+        printf("=============================== BEGIN COMPILATION ==============================\n");
     ok = ps_compiler_compile(compiler);
     if (verbose)
-        fprintf(stdout, "================================= END COMPILATION ================================\n");
+        printf("================================ END COMPILATION ===============================\n");
 
     // /* List symbols */
     // if (dump_symbols)
@@ -220,10 +222,10 @@ bool run(const ps_ast_block *program)
 
     /* Run program */
     if (verbose)
-        fprintf(stdout, "================================ BEGIN EXECUTION ===============================\n");
-    ok = ps_interpreter_(interpreter, program);
+        printf("================================ BEGIN EXECUTION ===============================\n");
+    ok = ps_interpreter_run(interpreter, program);
     if (verbose)
-        fprintf(stdout, "================================= END EXECUTION ================================\n");
+        printf("================================= END EXECUTION ================================\n");
 
     /* List symbols AFTER */
     if (dump_symbols)
@@ -271,21 +273,22 @@ int main(int argc, char *argv[])
     if (verbose)
     {
         banner(stdout);
-        fprintf(stdout, "Runtime options:\n");
-        fprintf(stdout, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
-        fprintf(stdout, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
-        fprintf(stdout, " - Range check       : $R%c\n", range_check ? '+' : '-');
-        fprintf(stdout, "Current working directory: %s\n", current_path);
-        fprintf(stdout, "Source file: %s\n", source_file);
+        printf("Runtime options:\n");
+        printf(" - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+        printf(" - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
+        printf(" - Range check       : $R%c\n", range_check ? '+' : '-');
+        printf("Current working directory: %s\n", current_path);
+        printf("Source file: %s\n", source_file);
     }
     free(current_path);
     current_path = NULL;
 
     /* Initialize compiler */
-    compiler = ps_compiler_alloc(system, range_check, bool_eval, io_check);
-    if (interpreter == NULL)
+    system_library = ps_system_alloc();
+    compiler = ps_compiler_alloc(system_library);
+    if (compiler == NULL)
     {
-        fprintf(stderr, "Could not initialize interpreter!\n");
+        fprintf(stderr, "Could not initialize compiler!\n");
         return EXIT_FAILURE;
     }
 

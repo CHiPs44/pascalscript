@@ -24,27 +24,17 @@ extern "C"
     typedef struct s_ps_compiler
     {
         ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)                */
+        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants                           */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
-        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         char message[128];           /** @brief Additional error message                                       */
         ps_debug_level debug;        /** @brief Debug level: NONE, TRACE, VERBOSE                              */
-        bool range_check;            /** @brief Range checking for integer and real values                     */
-        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
-        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
     } /*__attribute__((__packed__))*/ ps_compiler;
 
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
 
-    /**
-     * @brief Initialize compiler and children objects
-     * @param system        pre-initialized system symbol table
-     * @param range_check   enable range checking for values
-     * @param bool_eval     *FUTURE* enable short circuit boolean evaluation
-     * @param io_check      *FUTURE* enable I/O error checking
-     * @return NULL if no free memory (errno = ENOMEM)
-     */
-    ps_compiler *ps_compiler_alloc(ps_symbol_table *system, bool range_check, bool bool_eval, bool io_check);
+    /** @brief Initialize compiler and children objects */
+    ps_compiler *ps_compiler_alloc(ps_symbol_table *system);
 
     /** @brief Release compiler and children objects */
     ps_compiler *ps_compiler_free(ps_compiler *compiler);
@@ -55,10 +45,10 @@ extern "C"
     /** @brief Set error & return NULL */
     void *ps_compiler_return_null(ps_compiler *compiler, ps_error error);
 
-    /** @brief Set formatted message */
+    /** @brief Set formatted message & return false */
     bool ps_compiler_set_message(ps_compiler *compiler, const char *format, ...); // NOSONAR
 
-    /** @brief Set error and formatted message */
+    /** @brief Set error plus formatted message & return false */
     bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const char *format, ...); // NOSONAR
 
     /** @brief Find symbol by name in current block (or its parents if not local) */

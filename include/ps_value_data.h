@@ -20,6 +20,7 @@ extern "C"
 {
 #endif
 
+    typedef struct s_ps_ast_node ps_ast_node;
     typedef struct s_ps_type_definition ps_type_definition;
     typedef struct s_ps_array_data ps_array_data;
 

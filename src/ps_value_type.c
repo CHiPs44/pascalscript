@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "ps_value_types.h"
@@ -14,11 +15,5 @@ char *ps_type_names[] = {"UNKNOWN", "NODE",   "REAL",     "INTEGER",    "UNSIGNE
 
 char *ps_value_type_get_name(ps_value_type type)
 {
-    static char error[32];
-    if (type < 0 || type > PS_TYPE_FILE)
-    {
-        snprintf(error, sizeof(error), "ERROR(%d)", type);
-        return error;
-    }
     return ps_type_names[type];
 }
