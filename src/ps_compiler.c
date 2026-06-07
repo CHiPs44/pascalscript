@@ -232,7 +232,7 @@ bool ps_compiler_load_file(ps_compiler *compiler, const char *filename)
     return ps_buffer_load_file(lexer->buffer, filename);
 }
 
-bool ps_compiler_compile(ps_compiler *compiler)
+bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
 {
     assert(compiler != NULL);
     ps_error error = PS_ERROR_NONE;
@@ -244,7 +244,9 @@ bool ps_compiler_compile(ps_compiler *compiler)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
     if (compiler->debug >= PS_DEBUG_TRACE)
         fprintf(stderr, "================================= BEGIN PARSING ================================\n");
-    ps_ast_block *program = NULL;
+    *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
+    if (*program == NULL)
+        return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     if (!ps_parse_program(compiler, program))
     {
         error = parser->error;

@@ -65,6 +65,8 @@ static bool ps_parse_program_parameters(ps_compiler *compiler, ps_ast_block *blo
  */
 bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
     PARSE_BEGIN("PROGRAM", "")
 
     ps_identifier identifier = {0};
@@ -87,13 +89,15 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
 
-    ps_ast_block *program = ps_ast_create_block(start_line, start_column, NULL, PS_AST_PROGRAM, identifier);
-    if (NULL == program)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    // block is already an AST_PROGRAM block created by caller, we just need to fill it
+    ps_ast_block *program = block; // ps_ast_create_block(start_line, start_column, NULL, PS_AST_PROGRAM, identifier);
+    // if (NULL == program)
+    //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    program->line = start_line;
+    program->column = start_column;
+    strncpy(program->name, identifier, PS_IDENTIFIER_SIZE);
 
-    // Register program in symbol table of new environment
-    // if (!ps_compiler_enter_environment(compiler, identifier))
-    //     TRACE_ERROR("ENTER ENVIRONMENT")
+    // Register program in symbol table of program block
     symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
     if (!ps_compiler_add_symbol(compiler, block, symbol_program))
         TRACE_ERROR("ADD PROGRAM SYMBOL")
@@ -103,12 +107,10 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
         TRACE_ERROR("USES")
 
     // Block
-    //  - declarations (constants, types, procedures & functions)
-    //  - compound statement
+    //  - declarations: constants, types, procedures & functions, in no particular order
+    //  - compound statement: BEGIN ... END
     if (!ps_parse_block(compiler, program))
         TRACE_ERROR("BLOCK");
-    // if (!ps_compiler_exit_environment(compiler))
-    //     TRACE_ERROR("EXIT ENVIRONMENT");
 
     // Expect '.' at the end of program declaration
     // NB: text after '.' is not analyzed and has not to be
@@ -164,6 +166,7 @@ bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
  *          FUNCTION ...
  *      ]*
  *      COMPOUND_STATEMENT
+ * Compound statement is mandatory, even if empty (BEGIN END), and is stored in current block statement list.
  * NB: ; or . or whatever after END is analyzed by the caller
  */
 bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
@@ -256,7 +259,7 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
  */
 bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
 {
-    // NB: adds symbols to current block symbol table, does not produce any AST nodes
+    // NB: adds symbols to current block symbol table, does not produce any new AST nodes
 
     PARSE_BEGIN("CONST", "")
     (void)start_line;
@@ -304,7 +307,7 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
  */
 bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
 {
-    // NB: adds symbols to current block symbol table, does not produce any AST nodes
+    // NB: adds symbols to current block symbol table, does not produce any new AST nodes
 
     PARSE_BEGIN("TYPE", "");
     (void)start_line;

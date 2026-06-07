@@ -81,7 +81,7 @@ extern "C"
     bool ps_compiler_load_file(ps_compiler *compiler, const char *filename);
 
     /** @brief Run the compiler on the loaded source code */
-    bool ps_compiler_compile(ps_compiler *compiler);
+    bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program);
 
 #ifdef __cplusplus
 }

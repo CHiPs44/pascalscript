@@ -55,8 +55,9 @@ bool memory = false;
 bool trace = false;
 bool verbose = false;
 
-ps_symbol_table *system_library = NULL;
+ps_symbol_table *system_symbols = NULL;
 ps_compiler *compiler = NULL;
+ps_ast_block *program = NULL;
 ps_interpreter *interpreter = NULL;
 
 void banner(FILE *out)
@@ -191,7 +192,7 @@ bool compile(const char *source_file)
     /* Compile program */
     if (compiler->debug >= PS_DEBUG_TRACE)
         printf("=============================== BEGIN COMPILATION ==============================\n");
-    ok = ps_compiler_compile(compiler);
+    ok = ps_compiler_compile(compiler, &program);
     if (compiler->debug >= PS_DEBUG_TRACE)
         printf("================================ END COMPILATION ===============================\n");
 
@@ -284,8 +285,8 @@ int main(int argc, char *argv[])
     current_path = NULL;
 
     /* Initialize compiler */
-    system_library = ps_system_alloc();
-    compiler = ps_compiler_alloc(system_library);
+    system_symbols = ps_system_alloc();
+    compiler = ps_compiler_alloc(system_symbols);
     if (compiler == NULL)
     {
         fprintf(stderr, "Could not initialize compiler!\n");
@@ -298,6 +299,8 @@ int main(int argc, char *argv[])
         if (verbose)
             fprintf(stderr, "Compiled %s!\n", source_file);
     }
+
+    ps_ast_dump(stderr, "AST DUMP", program);
 
     /* Initialize interpreter */
     interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
