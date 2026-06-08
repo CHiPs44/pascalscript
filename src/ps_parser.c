@@ -28,8 +28,6 @@ ps_parser *ps_parser_alloc(void)
     }
     parser->current_lexer = 0;
     parser->error = PS_ERROR_NONE;
-    parser->trace = false;
-    parser->debug = false;
     return parser;
 }
 
@@ -39,8 +37,7 @@ ps_parser *ps_parser_free(ps_parser *parser)
     {
         if (parser->lexers[i] != NULL)
         {
-            ps_lexer_free(parser->lexers[i]);
-            parser->lexers[i] = NULL;
+            parser->lexers[i] = ps_lexer_free(parser->lexers[i]);
         }
     }
     ps_memory_free(PS_MEMORY_PARSER, parser);
@@ -73,14 +70,13 @@ bool ps_parser_expect_token_type(ps_parser *parser, ps_token_type token_type)
     if (ps_parser_get_lexer(parser)->current_token.type != token_type)
     {
         parser->error = PS_ERROR_UNEXPECTED_TOKEN;
-        if (parser->debug)
-            ps_parser_debug(parser, NULL);
         return false;
     }
     return true;
 }
 
-ps_token_type ps_parser_expect_token_types(const ps_parser *parser, size_t token_type_count, const ps_token_type token_types[])
+ps_token_type ps_parser_expect_token_types(const ps_parser *parser, size_t token_type_count,
+                                           const ps_token_type token_types[])
 {
     ps_token_type token_type = ps_parser_get_lexer(parser)->current_token.type;
     for (size_t i = 0; i < token_type_count; i++)

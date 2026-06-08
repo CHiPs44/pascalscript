@@ -471,7 +471,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
 
     if (factor_value.type != &ps_system_none)
     {
-        *expression = (ps_ast_node *)ps_ast_create_rvalue_const(start_line, start_column, factor_value);
+        *expression = (ps_ast_node *)ps_ast_create_literal_value(start_line, start_column, factor_value);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }

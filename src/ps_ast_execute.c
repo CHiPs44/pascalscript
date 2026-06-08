@@ -377,7 +377,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     ps_ast_debug_line(0, "EXPRESSION @%p", (const void *)expression);
     switch (expression->kind)
     {
-    case PS_AST_RVALUE_CONST:
+    case PS_AST_LITERAL_VALUE:
         const ps_ast_value *rvalue = (const ps_ast_value *)expression;
         ps_ast_debug_line(0, " - Value: %s", ps_value_get_display_string(&rvalue->value, 0, 0));
         if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
@@ -397,7 +397,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         return false;
     case PS_AST_UNARY_OPERATION:
         ps_ast_value operand = {.group = PS_AST_EXPRESSION,
-                                .kind = PS_AST_RVALUE_CONST,
+                                .kind = PS_AST_LITERAL_VALUE,
                                 .value.allocated = false,
                                 .value.type = &ps_system_none,
                                 .value.data = {0}};
@@ -414,12 +414,12 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         ps_ast_debug_line(0, " - Binary operation: %s", ps_operator_binary_get_name(binary_operation->operator));
         // first evaluate operands, then apply operator to them
         ps_ast_value left = {.group = PS_AST_EXPRESSION,
-                             .kind = PS_AST_RVALUE_CONST,
+                             .kind = PS_AST_LITERAL_VALUE,
                              .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->left, &left))
             return false;
         ps_ast_value right = {.group = PS_AST_EXPRESSION,
-                              .kind = PS_AST_RVALUE_CONST,
+                              .kind = PS_AST_LITERAL_VALUE,
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
             return false;

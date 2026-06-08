@@ -74,7 +74,7 @@ char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
         return "BINARY_OPERATION";
     case PS_AST_FUNCTION_CALL:
         return "FUNCTION_CALL";
-    case PS_AST_RVALUE_CONST:
+    case PS_AST_LITERAL_VALUE:
         return "VALUE";
     case PS_AST_RVALUE_SIMPLE:
         return "VARIABLE_SIMPLE";
@@ -294,7 +294,7 @@ void ps_ast_debug_node(size_t margin, const ps_ast_node *node)
     case PS_AST_FUNCTION_CALL:
         ps_ast_debug_function_call(margin, (const ps_ast_call *)node);
         break;
-    case PS_AST_RVALUE_CONST:
+    case PS_AST_LITERAL_VALUE:
         ps_ast_debug_value(margin, (const ps_ast_value *)node);
         break;
     case PS_AST_IF:

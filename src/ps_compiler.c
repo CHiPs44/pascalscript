@@ -242,12 +242,12 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     if (lexer == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
-    if (compiler->debug >= PS_DEBUG_TRACE)
-        fprintf(stderr, "================================= BEGIN PARSING ================================\n");
+    if (compiler->debug >= PS_DEBUG_INFO)
+        fprintf(stderr, "*** Compilation of %s\n", lexer->buffer->from_file ? "file" : "string");
     *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
     if (*program == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
-    if (!ps_parse_program(compiler, program))
+    if (!ps_parse_program(compiler, *program))
     {
         error = parser->error;
         if (error == PS_ERROR_NONE)

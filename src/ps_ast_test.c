@@ -201,10 +201,10 @@ bool ps_ast_test_assignment()
     ps_ast_variable_simple *variable_i = ps_ast_create_variable_simple(3, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i != NULL);
     ps_value value_u_21 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 21};
-    ps_ast_value *rvalue_u_21 = ps_ast_create_rvalue_const(3, 10, value_u_21);
+    ps_ast_value *rvalue_u_21 = ps_ast_create_literal_value(3, 10, value_u_21);
     ASSERT(rvalue_u_21 != NULL);
     ps_value value_u_2 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 2};
-    ps_ast_value *rvalue_u_2 = ps_ast_create_rvalue_const(3, 15, value_u_2);
+    ps_ast_value *rvalue_u_2 = ps_ast_create_literal_value(3, 15, value_u_2);
     ASSERT(rvalue_u_2 != NULL);
     ps_ast_binary_operation *mul_operation =
         ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
@@ -302,7 +302,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_variable_simple *variable_i = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i != NULL);
     ps_value value_u_10 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 10};
-    ps_ast_value *rvalue_u_10 = ps_ast_create_rvalue_const(4, 10, value_u_10);
+    ps_ast_value *rvalue_u_10 = ps_ast_create_literal_value(4, 10, value_u_10);
     ASSERT(rvalue_u_10 != NULL);
     ps_ast_assignment *assignment_i =
         ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_i, (ps_ast_node *)rvalue_u_10);
@@ -313,7 +313,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_variable_simple *variable_j_1 = ps_ast_create_variable_simple(5, 5, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_1 != NULL);
     ps_value value_u_0 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 0};
-    ps_ast_value *rvalue_u_0 = ps_ast_create_rvalue_const(5, 10, value_u_0);
+    ps_ast_value *rvalue_u_0 = ps_ast_create_literal_value(5, 10, value_u_0);
     ASSERT(rvalue_u_0 != NULL);
     ps_ast_assignment *assignment_j_init =
         ps_ast_create_assignment(5, 5, (ps_ast_node *)variable_j_1, (ps_ast_node *)rvalue_u_0);
@@ -324,7 +324,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(6, 8, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i != NULL);
     ps_value value_u_10_cond = {.allocated = false, .type = &ps_system_unsigned, .data.u = 10};
-    ps_ast_value *rvalue_u_10_cond = ps_ast_create_rvalue_const(6, 12, value_u_10_cond);
+    ps_ast_value *rvalue_u_10_cond = ps_ast_create_literal_value(6, 12, value_u_10_cond);
     ASSERT(rvalue_u_10_cond != NULL);
     ps_ast_binary_operation *condition =
         ps_ast_create_binary_operation(6, 10, PS_OP_EQ, (ps_ast_node *)rvalue_i, (ps_ast_node *)rvalue_u_10_cond);
@@ -336,7 +336,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_variable_simple *variable_j_then = ps_ast_create_variable_simple(7, 9, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_then != NULL);
     ps_value value_u_42 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 42};
-    ps_ast_value *rvalue_u_42 = ps_ast_create_rvalue_const(7, 14, value_u_42);
+    ps_ast_value *rvalue_u_42 = ps_ast_create_literal_value(7, 14, value_u_42);
     ASSERT(rvalue_u_42 != NULL);
     ps_ast_assignment *assignment_j_then =
         ps_ast_create_assignment(7, 9, (ps_ast_node *)variable_j_then, (ps_ast_node *)rvalue_u_42);
@@ -349,7 +349,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_variable_simple *variable_j_else = ps_ast_create_variable_simple(9, 9, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_else != NULL);
     ps_value value_u_99 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 99};
-    ps_ast_value *rvalue_u_99 = ps_ast_create_rvalue_const(9, 14, value_u_99);
+    ps_ast_value *rvalue_u_99 = ps_ast_create_literal_value(9, 14, value_u_99);
     ASSERT(rvalue_u_99 != NULL);
     ps_ast_assignment *assignment_j_else =
         ps_ast_create_assignment(9, 9, (ps_ast_node *)variable_j_else, (ps_ast_node *)rvalue_u_99);
@@ -432,7 +432,7 @@ bool ps_ast_test_while_do()
     ps_ast_variable_simple *variable_i_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_init != NULL);
     ps_value value_i_5 = {.allocated = false, .type = &ps_system_integer, .data.i = 5};
-    ps_ast_value *rvalue_i_5 = ps_ast_create_rvalue_const(4, 10, value_i_5);
+    ps_ast_value *rvalue_i_5 = ps_ast_create_literal_value(4, 10, value_i_5);
     ASSERT(rvalue_i_5 != NULL);
     ps_ast_assignment *assignment_i_init =
         ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_i_init, (ps_ast_node *)rvalue_i_5);
@@ -443,7 +443,7 @@ bool ps_ast_test_while_do()
     ps_ast_variable_simple *rvalue_i_cond = ps_ast_create_variable_simple(5, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_cond != NULL);
     ps_value value_i_0 = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
-    ps_ast_value *rvalue_i_0 = ps_ast_create_rvalue_const(5, 14, value_i_0);
+    ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(5, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *while_condition =
         ps_ast_create_binary_operation(5, 12, PS_OP_GT, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
@@ -457,7 +457,7 @@ bool ps_ast_test_while_do()
     ps_ast_variable_simple *rvalue_i_body = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_body != NULL);
     ps_value value_i_1 = {.allocated = false, .type = &ps_system_integer, .data.i = 1};
-    ps_ast_value *rvalue_i_1 = ps_ast_create_rvalue_const(6, 23, value_i_1);
+    ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
         ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
@@ -538,7 +538,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_variable_simple *variable_i_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_init != NULL);
     ps_value value_i_5 = {.allocated = false, .type = &ps_system_integer, .data.i = 5};
-    ps_ast_value *rvalue_i_5 = ps_ast_create_rvalue_const(4, 10, value_i_5);
+    ps_ast_value *rvalue_i_5 = ps_ast_create_literal_value(4, 10, value_i_5);
     ASSERT(rvalue_i_5 != NULL);
     ps_ast_assignment *assignment_i_init =
         ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_i_init, (ps_ast_node *)rvalue_i_5);
@@ -553,7 +553,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_variable_simple *rvalue_i_body = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_body != NULL);
     ps_value value_i_1 = {.allocated = false, .type = &ps_system_integer, .data.i = 1};
-    ps_ast_value *rvalue_i_1 = ps_ast_create_rvalue_const(6, 23, value_i_1);
+    ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
         ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
@@ -567,7 +567,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_variable_simple *rvalue_i_cond = ps_ast_create_variable_simple(7, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_cond != NULL);
     ps_value value_i_0 = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
-    ps_ast_value *rvalue_i_0 = ps_ast_create_rvalue_const(7, 14, value_i_0);
+    ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(7, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *repeat_condition =
         ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
@@ -650,7 +650,7 @@ bool ps_ast_test_for_do()
     ps_ast_variable_simple *variable_sum_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_sum);
     ASSERT(variable_sum_init != NULL);
     ps_value value_u_0 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 0};
-    ps_ast_value *rvalue_u_0 = ps_ast_create_rvalue_const(4, 13, value_u_0);
+    ps_ast_value *rvalue_u_0 = ps_ast_create_literal_value(4, 13, value_u_0);
     ASSERT(rvalue_u_0 != NULL);
     ps_ast_assignment *assignment_sum_init =
         ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_sum_init, (ps_ast_node *)rvalue_u_0);
@@ -680,12 +680,12 @@ bool ps_ast_test_for_do()
 
     ps_ast_debug_line(0, "Create the FOR loop start value 1");
     ps_value value_u_1 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 1};
-    ps_ast_value *for_start = ps_ast_create_rvalue_const(5, 13, value_u_1);
+    ps_ast_value *for_start = ps_ast_create_literal_value(5, 13, value_u_1);
     ASSERT(for_start != NULL);
 
     ps_ast_debug_line(0, "Create the FOR loop end value 5");
     ps_value value_u_5 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 5};
-    ps_ast_value *for_end = ps_ast_create_rvalue_const(5, 18, value_u_5);
+    ps_ast_value *for_end = ps_ast_create_literal_value(5, 18, value_u_5);
     ASSERT(for_end != NULL);
 
     ps_ast_debug_line(0, "Create the FOR statement: For I := 1 To 5 Do Sum := Sum + I");
@@ -751,12 +751,12 @@ bool ps_ast_test_hello()
     ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
     ASSERT(hello != NULL);
     ps_value value_hello = {.allocated = false, .type = &ps_system_string, .data.s = hello};
-    ps_ast_value *argument_hello = ps_ast_create_rvalue_const(3, 13, value_hello);
+    ps_ast_value *argument_hello = ps_ast_create_literal_value(3, 13, value_hello);
     ASSERT(argument_hello != NULL);
 
     ps_ast_debug_line(0, "Create the first by value argument");
     ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
-    ps_ast_value *argument_i_42 = ps_ast_create_rvalue_const(4, 13, value_i_42);
+    ps_ast_value *argument_i_42 = ps_ast_create_literal_value(4, 13, value_i_42);
     ASSERT(argument_i_42 != NULL);
 
     ps_ast_debug_line(0, "Create the argument list for the procedure call");

@@ -4,11 +4,14 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include "ps_parse_declaration.h"
+#include <assert.h>
+#include <string.h>
+
 #include "ps_compiler.h"
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_parse.h"
+#include "ps_parse_declaration.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_statement.h"
@@ -73,29 +76,33 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     ps_symbol *symbol_program = NULL;
 
     // 'PROGRAM'
+    fprintf(stderr, "BEFORE 'PROGRAM'\n");
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
     READ_NEXT_TOKEN
+    fprintf(stderr, "AFTER 'PROGRAM'\n");
 
     // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
+    fprintf(stderr, "AFTER 'IDENTIFIER'\n");
 
     // Skip optional parameters enclosed in parentheses
     if (!ps_parse_program_parameters(compiler, block))
         TRACE_ERROR("PARAMETERS")
+    fprintf(stderr, "AFTER 'PARAMETERS'\n");
 
     // ';'
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
+    fprintf(stderr, "AFTER ';'\n");
 
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
-    ps_ast_block *program = block; // ps_ast_create_block(start_line, start_column, NULL, PS_AST_PROGRAM, identifier);
-    // if (NULL == program)
-    //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    program->line = start_line;
-    program->column = start_column;
-    strncpy(program->name, identifier, PS_IDENTIFIER_SIZE);
+    block->line = start_line;
+    block->column = start_column;
+    snprintf(block->name, PS_IDENTIFIER_LEN, "%s", identifier);
+
+    fprintf(stderr, "DEBUG\tPROGRAM '%s' declaration at line %d, column %d\n", block->name, block->line, block->column);
 
     // Register program in symbol table of program block
     symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
@@ -103,13 +110,13 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
         TRACE_ERROR("ADD PROGRAM SYMBOL")
 
     // One "USES" clause at most after "PROGRAM"
-    if (!ps_parse_uses(compiler, program))
+    if (!ps_parse_uses(compiler, block))
         TRACE_ERROR("USES")
 
     // Block
     //  - declarations: constants, types, procedures & functions, in no particular order
     //  - compound statement: BEGIN ... END
-    if (!ps_parse_block(compiler, program))
+    if (!ps_parse_block(compiler, block))
         TRACE_ERROR("BLOCK");
 
     // Expect '.' at the end of program declaration

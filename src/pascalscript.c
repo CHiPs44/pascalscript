@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "ps_ast.h"
 #include "ps_ast_debug.h"
 #include "ps_ast_test.h"
 
@@ -168,8 +169,6 @@ bool compile(const char *source_file)
         compiler->debug = PS_DEBUG_VERBOSE;
     else if (debug)
         compiler->debug = PS_DEBUG_TRACE;
-    compiler->parser->trace = compiler->debug >= PS_DEBUG_TRACE;
-    compiler->parser->debug = compiler->debug >= PS_DEBUG_VERBOSE;
 
     if (!ps_compiler_load_file(compiler, source_file))
     {
@@ -300,7 +299,8 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Compiled %s!\n", source_file);
     }
 
-    ps_ast_dump(stderr, "AST DUMP", program);
+    printf("AST DUMP for %s:\n", source_file);
+    ps_ast_debug_node(0, (ps_ast_node *)program);
 
     /* Initialize interpreter */
     interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
