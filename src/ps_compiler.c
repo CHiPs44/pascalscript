@@ -242,8 +242,23 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     if (lexer == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
+    if (!ps_lexer_read_next_char(lexer))
+    {
+        error = lexer->error;
+        if (error == PS_ERROR_NONE)
+            error = PS_ERROR_GENERIC;
+        return ps_compiler_return_false(compiler, error);
+    }
     if (compiler->debug >= PS_DEBUG_INFO)
         fprintf(stderr, "*** Compilation of %s\n", lexer->buffer->from_file ? "file" : "string");
+    if (!ps_lexer_read_token(lexer))
+    {
+        error = lexer->error;
+        if (error == PS_ERROR_NONE)
+            error = PS_ERROR_GENERIC;
+        return ps_compiler_return_false(compiler, error);
+    }
+    ps_token_debug(stderr, "FIRST TOKEN\t", &lexer->current_token);
     *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
     if (*program == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);

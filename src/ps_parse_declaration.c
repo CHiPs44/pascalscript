@@ -70,6 +70,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 {
     assert(compiler != NULL);
     assert(block != NULL);
+    assert(block->kind == PS_AST_PROGRAM);
     PARSE_BEGIN("PROGRAM", "")
 
     ps_identifier identifier = {0};
@@ -82,17 +83,21 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     fprintf(stderr, "AFTER 'PROGRAM'\n");
 
     // IDENTIFIER
+    fprintf(stderr, "BEFORE IDENTIFIER\n");
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
     fprintf(stderr, "AFTER 'IDENTIFIER'\n");
 
     // Skip optional parameters enclosed in parentheses
-    if (!ps_parse_program_parameters(compiler, block))
-        TRACE_ERROR("PARAMETERS")
+    ps_token_debug(stderr, "BEFORE 'PARAMETERS'", &lexer->current_token);
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+        if (!ps_parse_program_parameters(compiler, block))
+            TRACE_ERROR("PARAMETERS")
     fprintf(stderr, "AFTER 'PARAMETERS'\n");
 
     // ';'
+    fprintf(stderr, "BEFORE ';'\n");
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
     fprintf(stderr, "AFTER ';'\n");
@@ -100,7 +105,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
     block->line = start_line;
     block->column = start_column;
-    snprintf(block->name, PS_IDENTIFIER_LEN, "%s", identifier);
+    snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", identifier);
 
     fprintf(stderr, "DEBUG\tPROGRAM '%s' declaration at line %d, column %d\n", block->name, block->line, block->column);
 

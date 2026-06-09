@@ -415,16 +415,23 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 }
 
 /**
- * Read the next token from the buffer.
+ * Read next token from buffer.
  */
 bool ps_lexer_read_token(ps_lexer *lexer)
 {
+    // fprintf(stderr, "READING TOKEN at Line %d, Column %d\n", lexer->buffer->current_line + 1,
+    //         lexer->buffer->current_column + 1);
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
+    // fprintf(stderr, "AFTER SKIP WHITESPACE AND COMMENTS at Line %d, Column %d\n", lexer->buffer->current_line + 1,
+    //         lexer->buffer->current_column + 1);
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;
     lexer->start_column = lexer->buffer->current_char;
+    // fprintf(stderr, "CURRENT CHAR '%c' (0x%02x), NEXT CHAR '%c' (0x%02x) at Line %d, Colmun %d\n", current_char,
+    //         (unsigned char)current_char, next_char, (unsigned char)next_char, lexer->buffer->current_line + 1,
+    //         lexer->buffer->current_column + 1);
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))

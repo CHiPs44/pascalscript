@@ -176,6 +176,7 @@ bool compile(const char *source_file)
         fprintf(stderr, "Error %d %s\n", compiler->error, ps_error_get_message(compiler->error)); // NOSONAR
         return ok;
     }
+    ps_buffer_dump(stderr, ps_parser_get_lexer(compiler->parser)->buffer, 0, PS_BUFFER_MAX_LINES);
     if (verbose)
         fprintf(stderr, "Loaded %s!\n", source_file);
 
