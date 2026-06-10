@@ -233,6 +233,8 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
         }
     } while (loop);
 
+    ps_symbol_table_dump(stderr, "BLOCK SYMBOL TABLE", block->symbols);
+
     ps_ast_statement_list **statement_list = NULL;
     if (!ps_parse_compound_statement(compiler, block, statement_list))
         TRACE_ERROR("COMPOUND_STATEMENT")
@@ -401,6 +403,7 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         // IDENTIFIER [ ',' IDENTIFIER ]*
         if (!ps_parse_var_identifier_list(compiler, block, identifiers, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
+        fprintf(stderr, "DEBUG\tParsed variable identifier list with %d identifiers\n", var_count + 1);
         // ':'
         EXPECT_TOKEN(PS_TOKEN_COLON)
         READ_NEXT_TOKEN
@@ -410,8 +413,10 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         // ';'
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         // Add variable(s) to symbol table of current block
-        for (int i = 0; i < var_count; i++)
+        for (int i = 0; i <= var_count; i++)
         {
+            fprintf(stderr, "DEBUG\tAdding variable '%s' of type '%s' to block '%s' symbol table\n", identifiers[i],
+                    type_symbol->name, block->name);
             if (!ps_compiler_add_variable(compiler, block, identifiers[i], type_symbol))
             {
                 ps_compiler_set_message(compiler, "Cannot add variable %s", identifiers[i]);
