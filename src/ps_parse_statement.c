@@ -395,8 +395,8 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     READ_NEXT_TOKEN
 
     // First, check if this is an assignment to the current function name
-    symbol = ps_symbol_table_get(block->parent->symbols, identifier);
-    if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp((char *)identifier, block->name) == 0)
+    symbol = block->parent == NULL ? NULL : ps_symbol_table_get(block->parent->symbols, identifier);
+    if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp(symbol->name, block->name) == 0)
     {
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
@@ -410,15 +410,19 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     }
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+    ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_CONSTANT:
-        ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", symbol->name);
-        RETURN_ERROR(PS_ERROR_ASSIGN_TO_CONST)
+        ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
+                                      symbol->name);
+        TRACE_ERROR("ASSIGN_TO_CONST")
     case PS_SYMBOL_KIND_VARIABLE:
+        fprintf(stderr, "DEBUG\tParsing assignment to variable '%s' of type '%s'\n", symbol->name,
+                ps_type_definition_get_name(symbol->value->type->value->data.t));
         if (!ps_parse_assignment(compiler, block, assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
-        statement = (ps_ast_node **)assignement;
+        *statement = (ps_ast_node *)(*assignement);
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
         ps_ast_call **procedure = NULL;
