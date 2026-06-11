@@ -411,7 +411,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
 
     ps_identifier identifier;
     ps_symbol *symbol;
-    ps_ast_assignment **assignement = NULL;
+    ps_ast_assignment *assignement = NULL;
 
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
@@ -436,19 +436,19 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_VARIABLE:
-        fprintf(stderr, "DEBUG\tParsing assignment to variable '%s' of type '%s'\n", symbol->name,
+        fprintf(stderr, "DEBUG\tps_parse_assignment_or_procedure_call\tParsing assignment to variable '%s' of type '%s'\n", symbol->name,
                 ps_type_definition_get_name(symbol->value->type->value->data.t));
-        if (!ps_parse_assignment(compiler, block, assignement, symbol))
+        if (!ps_parse_assignment(compiler, block, &assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
-        fprintf(stderr, "DEBUG\tParsed assignment to variable '%s' of type '%s' as %p\n", symbol->name,
-                ps_type_definition_get_name(symbol->value->type->value->data.t), (void *)(*assignement));
-        *statement = (ps_ast_node *)(*assignement);
+        fprintf(stderr, "DEBUG\tps_parse_assignment_or_procedure_call\tParsed assignment to variable '%s' of type '%s' as %p\n", symbol->name,
+                ps_type_definition_get_name(symbol->value->type->value->data.t), (void *)(assignement));
+        *statement = (ps_ast_node *)(assignement);
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
-        ps_ast_call **procedure = NULL;
-        if (!ps_parse_procedure_or_function_call(compiler, block, procedure, symbol))
+        ps_ast_call *procedure = NULL;
+        if (!ps_parse_procedure_or_function_call(compiler, block, &procedure, symbol))
             TRACE_ERROR("PROCEDURE_CALL")
-        *statement = (ps_ast_node *)(*procedure);
+        *statement = (ps_ast_node *)(procedure);
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to current function name => assignment to Result
@@ -460,9 +460,9 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         symbol = ps_compiler_find_symbol(compiler, block, "RESULT", true);
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-        if (!ps_parse_assignment(compiler, block, assignement, symbol))
+        if (!ps_parse_assignment(compiler, block, &assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
-        *statement = (ps_ast_node *)(*assignement);
+        *statement = (ps_ast_node *)(assignement);
         break;
     case PS_SYMBOL_KIND_CONSTANT:
         ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",

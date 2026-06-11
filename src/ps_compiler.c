@@ -242,7 +242,7 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
     ps_lexer *lexer = ps_parser_get_lexer(parser);
     if (lexer == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
-    if (!ps_lexer_read_next_char(lexer))
+    if (!ps_buffer_read_next_char(lexer->buffer))
     {
         error = lexer->error;
         if (error == PS_ERROR_NONE)

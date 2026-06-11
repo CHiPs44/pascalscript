@@ -38,8 +38,8 @@
 #include "ps_system.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/000-minimal.pas"
-// #define DEBUGGER_SOURCE "examples/033-array3.pas"
+// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
+#define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUGGER_SOURCE "examples/005-first.pas"
 
 // Runtime options
