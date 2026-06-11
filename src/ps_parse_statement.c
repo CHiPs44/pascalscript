@@ -4,13 +4,17 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include "ps_parse_statement.h"
+#include <assert.h>
+#include <stdio.h>
+
 #include "ps_array.h"
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
+#include "ps_parse_statement.h"
 #include "ps_procedures.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
@@ -195,9 +199,13 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
 bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment,
                          ps_symbol *variable)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(assignment != NULL);
+    assert(variable != NULL);
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
-    ps_ast_node *expression = NULL;
     ps_ast_node *lvalue = NULL;
+    ps_ast_node *rvalue = NULL;
 
     // IDENTIFIER
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -225,25 +233,39 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     }
     else
     {
-        // ':='
-        EXPECT_TOKEN(PS_TOKEN_ASSIGN);
-        READ_NEXT_TOKEN
-        // EXPRESSION
-        if (!ps_parse_expression(compiler, block, &expression))
-            TRACE_ERROR("EXPRESSION1");
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
-        // AST NODE => ASSIGNMENT(LVALUE, EXPRESSION)
         lvalue = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, variable);
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
+    fprintf(stderr, "DEBUG\tLValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(lvalue->kind),
+            (void *)lvalue);
+    ps_ast_debug_node(1, (ps_ast_node *)lvalue);
 
-    *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, expression);
-    if (assignment == NULL)
+    // ':='
+    EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+    READ_NEXT_TOKEN
+    ps_ast_debug_line(1, "DEBUG\tParsing assignment to variable '%s' of type '%s'", variable->name,
+                      ps_type_definition_get_name(variable->value->type->value->data.t));
+
+    // RVALUE / EXPRESSION
+    if (!ps_parse_expression(compiler, block, &rvalue))
+        TRACE_ERROR("EXPRESSION1");
+    fprintf(stderr, "DEBUG\tRValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(rvalue->kind),
+            (void *)rvalue);
+    ps_ast_debug_node(1, (ps_ast_node *)rvalue);
+
+    fprintf(stderr, "DEBUG\tParsed assignment to variable '%s' of type '%s' as %p\n", variable->name,
+            ps_type_definition_get_name(variable->value->type->value->data.t), (void *)lvalue);
+    ps_ast_assignment *toto = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
+    if (toto == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-
+    fprintf(stderr, "DEBUG\tCreated assignment node at %p, assignment=%p\n", (void *)(toto), (void *)assignment);
+    *assignment = toto;
+    fprintf(stderr, "DEBUG\tAssignment node is of kind '%s' at %p\n", ps_ast_node_get_kind_name((*assignment)->kind),
+            (void *)(*assignment));
     PARSE_END("OK")
 }
 
@@ -413,15 +435,13 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
     switch (symbol->kind)
     {
-    case PS_SYMBOL_KIND_CONSTANT:
-        ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
-                                      symbol->name);
-        TRACE_ERROR("ASSIGN_TO_CONST")
     case PS_SYMBOL_KIND_VARIABLE:
         fprintf(stderr, "DEBUG\tParsing assignment to variable '%s' of type '%s'\n", symbol->name,
                 ps_type_definition_get_name(symbol->value->type->value->data.t));
         if (!ps_parse_assignment(compiler, block, assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
+        fprintf(stderr, "DEBUG\tParsed assignment to variable '%s' of type '%s' as %p\n", symbol->name,
+                ps_type_definition_get_name(symbol->value->type->value->data.t), (void *)(*assignement));
         *statement = (ps_ast_node *)(*assignement);
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
@@ -431,10 +451,10 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         *statement = (ps_ast_node *)(*procedure);
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        // Assignment to function name => assignment to Result
-        if (strcmp(block->name, identifier) != 0)
+        // Assignment to current function name => assignment to Result
+        if (strcmp(block->name, symbol->name) != 0)
         {
-            ps_compiler_set_message(compiler, "Cannot assign to %s from %s", identifier, block->name);
+            ps_compiler_set_message(compiler, "Cannot assign to %s from %s", symbol->name, block->name);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
         symbol = ps_compiler_find_symbol(compiler, block, "RESULT", true);
@@ -444,6 +464,10 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
             TRACE_ERROR("ASSIGNMENT")
         *statement = (ps_ast_node *)(*assignement);
         break;
+    case PS_SYMBOL_KIND_CONSTANT:
+        ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
+                                      symbol->name);
+        TRACE_ERROR("ASSIGN_TO_CONST")
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }

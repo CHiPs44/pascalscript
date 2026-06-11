@@ -9,5 +9,5 @@ Var
     I: Integer;
 
 Begin
-    I := 1; // + 2 * 3 - 4; // Should evaluate to 3
+    I := 1 + 2; // * 3 - 4; // Should evaluate to 3
 End.

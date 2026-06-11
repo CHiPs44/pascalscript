@@ -178,17 +178,22 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 // PS_AST_ASSIGNMENT
 // =============================================================================
 
-ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_node *lvalue,
-                                            ps_ast_node *expression)
+ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_node *lvalue, ps_ast_node *rvalue)
 {
+    fprintf(stderr, "DEBUG\tPS_AST_ASSIGNMENT\tCreating assignment node at line %u, column %u, lvalue=%p, rvalue=%p\n",
+            line, column, (void *)lvalue, (void *)rvalue);
     assert(lvalue != NULL && ps_ast_node_check_group(lvalue, PS_AST_LVALUE));
-    assert(expression != NULL && ps_ast_node_check_group(expression, PS_AST_EXPRESSION));
+    assert(rvalue != NULL && ps_ast_node_check_group(rvalue, PS_AST_EXPRESSION));
     ps_ast_assignment *assignment = (ps_ast_assignment *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_ASSIGNMENT, line,
                                                                             column, sizeof(ps_ast_assignment));
     if (assignment == NULL)
         return NULL;
     assignment->lvalue = lvalue;
-    assignment->expression = expression;
+    assignment->expression = rvalue;
+    fprintf(stderr,
+            "DEBUG\tPS_AST_ASSIGNMENT\tCreated assignment node at %p (line=%u, column=%u, lvalue=%p, rvalue=%p)\n",
+            (void *)assignment, assignment->line, assignment->column, (void *)assignment->lvalue,
+            (void *)assignment->expression);
     return assignment;
 }
 

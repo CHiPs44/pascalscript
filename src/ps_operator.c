@@ -528,13 +528,13 @@ char *ps_operator_unary_get_name(ps_operator_unary operator)
     switch (operator)
     {
     case PS_OP_UNARY_INVALID:
-        return "INVALID";
+        return "{INVALID}";
     case PS_OP_NEG:
-        return "NEG";
+        return "{NEG} -";
     case PS_OP_NOT:
         return "NOT";
     default:
-        snprintf(unknown, sizeof(unknown), "?UNARY_OPERATOR(%d)?", operator);
+        snprintf(unknown, sizeof(unknown), "{?UNARY_OPERATOR(%d)?}", operator);
         return unknown;
     }
 }
@@ -547,19 +547,19 @@ char *ps_operator_binary_get_name(ps_operator_binary operator)
     case PS_OP_BINARY_INVALID:
         return "INVALID";
     case PS_OP_ADD:
-        return "ADD";
+        return "{ADD} +";
     case PS_OP_SUB:
-        return "SUB";
+        return "{SUB} -";
     case PS_OP_OR:
         return "OR";
     case PS_OP_XOR:
         return "XOR";
     case PS_OP_MUL:
-        return "MUL";
+        return "{MUL} *";
     case PS_OP_DIV:
         return "DIV";
     case PS_OP_DIV_REAL:
-        return "DIV_REAL";
+        return "{DIV_REAL} /";
     case PS_OP_MOD:
         return "MOD";
     case PS_OP_AND:
@@ -569,19 +569,19 @@ char *ps_operator_binary_get_name(ps_operator_binary operator)
     case PS_OP_SHR:
         return "SHR";
     case PS_OP_EQ:
-        return "EQ";
+        return "{EQ} =";
     case PS_OP_GE:
-        return "GE";
+        return "{GE} >=";
     case PS_OP_GT:
-        return "GT";
+        return "{GT} >";
     case PS_OP_LE:
-        return "LE";
+        return "{LE} <=";
     case PS_OP_LT:
-        return "LT";
+        return "{LT} <";
     case PS_OP_NE:
-        return "NE";
+        return "{NE} <>";
     default:
-        snprintf(unknown, sizeof(unknown), "?BINARY_OPERATOR(%d)?", operator);
+        snprintf(unknown, sizeof(unknown), "{?BINARY_OPERATOR(%d)?}", operator);
         return unknown;
     }
 }

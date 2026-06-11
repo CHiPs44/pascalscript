@@ -115,12 +115,13 @@ void ps_ast_debug_word(const char *format, ...) // NOSONAR
 
 void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
 {
-    ps_ast_debug_line(margin, "VALUE: %s", ps_value_get_debug_string(&value_node->value));
+    ps_ast_debug_line(margin, "{VALUE:} %s {%s}", ps_value_get_display_string(&value_node->value, 0, 0),
+                      ps_value_get_debug_string(&value_node->value));
 }
 
 void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable_simple *variable_simple)
 {
-    ps_ast_debug_line(margin, "VARIABLE_SIMPLE: %s\n", variable_simple->variable->name);
+    ps_ast_debug_line(margin, "{VARIABLE_SIMPLE:} %s\n", variable_simple->variable->name);
 }
 
 void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable_array *variable_array)
