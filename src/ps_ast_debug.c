@@ -97,7 +97,7 @@ void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
     va_list args;
     va_start(args, format);
     if (margin > 0)
-        fprintf(stderr, "%*c", margin * 4, ' ');
+        fprintf(stderr, "%*c", margin * 2, ' ');
     vfprintf(stderr, format, args); // NOSONAR
     fprintf(stderr, "\n");
     va_end(args);
@@ -115,7 +115,8 @@ void ps_ast_debug_word(const char *format, ...) // NOSONAR
 
 void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
 {
-    ps_ast_debug_line(margin, "{VALUE:} %s {%s}", ps_value_get_display_string(&value_node->value, 0, 0),
+    ps_ast_debug_line(margin, "{VALUE:} %s {%s: %s}", ps_value_get_display_string(&value_node->value, 0, 0),
+                      ps_type_definition_get_name(value_node->value.type->value->data.t),
                       ps_value_get_debug_string(&value_node->value));
 }
 
@@ -136,15 +137,14 @@ void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable_array *var
 
 void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *statement_list)
 {
-    ps_ast_debug_line(margin, "BEGIN {STATEMENT_LIST}");
-    if (statement_list == NULL || statement_list->count == 0 || statement_list->statements == NULL)
+    size_t count = statement_list == NULL ? 0 : statement_list->count;
+    ps_ast_debug_line(margin, "BEGIN {STATEMENT_LIST: %zu statements}", count);
+    if (count == 0)
     {
-        ps_ast_debug_line(margin + 1, "{Count: %zu, Statements: NULL}",
-                          statement_list == NULL ? 0 : statement_list->count);
+        ps_ast_debug_line(margin + 1, "{NO STATEMENTS}");
     }
     else
     {
-        ps_ast_debug_line(margin + 1, "{Count: %zu}", statement_list->count);
         for (size_t i = 0; i < statement_list->count; i++)
             ps_ast_debug_node(margin + 1, statement_list->statements[i]);
     }
@@ -154,15 +154,15 @@ void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *sta
 void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
 {
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
-    // ps_ast_debug_line(margin, " - Number of symbols:     %zu", block->symbols ? block->symbols->used : 0);
-    // ps_ast_debug_line(margin, " - Number of variables:   %zu", block->n_vars);
-    // ps_ast_debug_line(margin, " - Number of statements:  %zu",
-    //                   block->statement_list ? block->statement_list->count : 0);
-    // ps_ast_debug_line(margin, " - Number of parameters:  %zu",
-    //                   block->signature ? block->signature->parameter_count : 0);
-    // ps_ast_debug_line(margin, " - Result type:           %s", block->result_type ? block->result_type->name :
-    // "none");
+    if (block->signature != NULL)
+    {
+        // ps_ast_debug_line(margin + 1, "{Signature:}");
+        // ps_signature_debug(margin + 2, block->signature);
+    }
+    ps_ast_debug_line(margin, ";");
     ps_ast_debug_statement_list(margin, block->statement_list);
+    if (block->kind == PS_AST_PROGRAM)
+        ps_ast_debug_line(margin, ". {%s}", block->name);
 }
 
 void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)

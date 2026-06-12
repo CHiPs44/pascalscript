@@ -30,7 +30,7 @@
  *      while_do_statement
  *      for_to_downto_do_statement
  */
-bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement)
+bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
     PARSE_BEGIN("STATEMENT", "");
     (void)start_line;
@@ -42,35 +42,35 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
         ps_ast_statement_list *statement_list = NULL;
         if (!ps_parse_compound_statement(compiler, block, &statement_list))
             TRACE_ERROR("COMPOUND")
-        *statement = (ps_ast_node *)statement_list;
+        *statement_ptr = (ps_ast_node *)statement_list;
         break;
     case PS_TOKEN_IDENTIFIER:
-        if (!ps_parse_assignment_or_procedure_call(compiler, block, statement))
+        if (!ps_parse_assignment_or_procedure_call(compiler, block, statement_ptr))
             TRACE_ERROR("ASSIGNMENT/PROCEDURE")
         break;
     case PS_TOKEN_IF:
         ps_ast_if *if_statement = NULL;
         if (!ps_parse_if_then_else(compiler, block, &if_statement))
             TRACE_ERROR("IF")
-        *statement = (ps_ast_node *)if_statement;
+        *statement_ptr = (ps_ast_node *)if_statement;
         break;
     case PS_TOKEN_REPEAT:
         ps_ast_repeat *repeat_statement = NULL;
         if (!ps_parse_repeat_until(compiler, block, &repeat_statement))
             TRACE_ERROR("REPEAT")
-        *statement = (ps_ast_node *)repeat_statement;
+        *statement_ptr = (ps_ast_node *)repeat_statement;
         break;
     case PS_TOKEN_WHILE:
         ps_ast_while *while_statement = NULL;
         if (!ps_parse_while_do(compiler, block, &while_statement))
             TRACE_ERROR("WHILE")
-        *statement = (ps_ast_node *)while_statement;
+        *statement_ptr = (ps_ast_node *)while_statement;
         break;
     case PS_TOKEN_FOR:
         ps_ast_for *for_statement = NULL;
         if (!ps_parse_for_do(compiler, block, &for_statement))
             TRACE_ERROR("FOR")
-        *statement = (ps_ast_node *)for_statement;
+        *statement_ptr = (ps_ast_node *)for_statement;
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -86,7 +86,7 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
  *      'END'
  * NB: ';' or '.' or whatever after END is analyzed in the caller
  */
-bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list)
+bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr)
 {
     PARSE_BEGIN("STATEMENT", "COMPOUND");
 
@@ -95,17 +95,17 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     READ_NEXT_TOKEN
 
     // [ STATEMENT [ ';' STATEMENT ]* ] [ ';' ]
-    if (!ps_parse_statement_list(compiler, block, statement_list, PS_TOKEN_END))
+    ps_ast_statement_list *statement_list = statement_list;
+    if (!ps_parse_statement_list(compiler, block, &statement_list, PS_TOKEN_END))
         TRACE_ERROR("STATEMENT_LIST")
+    // Fix statement list position to BEGIN token, not first statement (if any)
+    statement_list->line = start_line;
+    statement_list->column = start_column;
+    *statement_list_ptr = statement_list;
 
     // 'END'
     EXPECT_TOKEN(PS_TOKEN_END)
     READ_NEXT_TOKEN
-
-    // Fix statement list position to BEGIN token, not first statement (if any)
-    ps_ast_statement_list *statement_list2 = *statement_list;
-    statement_list2->line = start_line;
-    statement_list2->column = start_column;
 
     PARSE_END("OK")
 }
@@ -196,12 +196,12 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
  *      IDENTIFIER '^' = EXPRESSION
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
  */
-bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment,
+bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment_ptr,
                          ps_symbol *variable)
 {
     assert(compiler != NULL);
     assert(block != NULL);
-    assert(assignment != NULL);
+    assert(assignment_ptr != NULL);
     assert(variable != NULL);
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
     ps_ast_node *lvalue = NULL;
@@ -253,19 +253,14 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     // RVALUE / EXPRESSION
     if (!ps_parse_expression(compiler, block, &rvalue))
         TRACE_ERROR("EXPRESSION1");
-    fprintf(stderr, "DEBUG\tRValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(rvalue->kind),
-            (void *)rvalue);
-    ps_ast_debug_node(1, (ps_ast_node *)rvalue);
-
-    fprintf(stderr, "DEBUG\tParsed assignment to variable '%s' of type '%s' as %p\n", variable->name,
-            ps_type_definition_get_name(variable->value->type->value->data.t), (void *)lvalue);
-    ps_ast_assignment *toto = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
-    if (toto == NULL)
+    ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
+    if (assignment == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    fprintf(stderr, "DEBUG\tCreated assignment node at %p, assignment=%p\n", (void *)(toto), (void *)assignment);
-    *assignment = toto;
-    fprintf(stderr, "DEBUG\tAssignment node is of kind '%s' at %p\n", ps_ast_node_get_kind_name((*assignment)->kind),
-            (void *)(*assignment));
+    fprintf(stderr, "DEBUG\tCreated assignment node at %p, assignment=%p\n", (void *)(assignment),
+            (void *)assignment_ptr);
+    *assignment_ptr = assignment;
+    fprintf(stderr, "DEBUG\tAssignment node is of kind '%s' at %p\n",
+            ps_ast_node_get_kind_name((*assignment_ptr)->kind), (void *)(*assignment_ptr));
     PARSE_END("OK")
 }
 
@@ -285,11 +280,11 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
  *          file_variable ',' variable
  *      ')' ;
  */
-bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, bool newline)
+bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
 {
     (void)compiler;
     (void)block;
-    (void)call;
+    (void)call_ptr;
     (void)newline;
     PARSE_BEGIN("STATEMENT", "READ_OR_READLN")
     (void)start_line;
@@ -315,14 +310,16 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_
  *          file_variable ',' expression
  *      ')' ;
  */
-bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, bool newline)
+bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
 {
     PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
 
+#define MAX_WRITE_ARGS 8
+
     size_t n_args = 0;
     ps_ast_node *args[8] = {0};
-    int16_t widths[8] = {0};
-    int16_t precisions[8] = {0};
+    int16_t widths[MAX_WRITE_ARGS] = {0};
+    int16_t precisions[MAX_WRITE_ARGS] = {0};
     bool loop = true;
     int16_t width = 0;
     int16_t precision = 0;
@@ -372,7 +369,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         }
         // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
         //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
-        if (n_args >= 8)
+        if (n_args >= MAX_WRITE_ARGS)
             RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
         args[n_args] = expression;
         widths[n_args] = width;
@@ -388,10 +385,10 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         loop = false;
     }
 
-    *call = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
-                               newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
-                               n_args > 0 ? args : NULL, widths, precisions);
-    if (*call == NULL)
+    *call_ptr = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
+                                   newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
+                                   n_args > 0 ? args : NULL, widths, precisions);
+    if (*call_ptr == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
@@ -403,7 +400,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
  *      - variable: assignment
  *      - procedure: procedure call
  */
-bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement)
+bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT OR PROCEDURE CALL");
     (void)start_line;
@@ -411,7 +408,9 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
 
     ps_identifier identifier;
     ps_symbol *symbol;
+    ps_ast_call *call = NULL;
     ps_ast_assignment *assignement = NULL;
+    bool is_result = false;
 
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
@@ -424,6 +423,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
             fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
         symbol = ps_compiler_find_symbol(compiler, block, "RESULT", false);
+        is_result = true;
     }
     else
     {
@@ -433,36 +433,39 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
+
+    // Determine if this is an assignment or a procedure call based on symbol kind
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_VARIABLE:
-        fprintf(stderr, "DEBUG\tps_parse_assignment_or_procedure_call\tParsing assignment to variable '%s' of type '%s'\n", symbol->name,
-                ps_type_definition_get_name(symbol->value->type->value->data.t));
+        // fprintf(stderr,
+        //         "DEBUG\tps_parse_assignment_or_procedure_call\tParsing assignment to variable '%s' of type '%s'\n",
+        //         symbol->name, ps_type_definition_get_name(symbol->value->type->value->data.t));
         if (!ps_parse_assignment(compiler, block, &assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
-        fprintf(stderr, "DEBUG\tps_parse_assignment_or_procedure_call\tParsed assignment to variable '%s' of type '%s' as %p\n", symbol->name,
-                ps_type_definition_get_name(symbol->value->type->value->data.t), (void *)(assignement));
-        *statement = (ps_ast_node *)(assignement);
+        // fprintf(stderr,
+        //         "DEBUG\tps_parse_assignment_or_procedure_call\tParsed assignment to variable '%s' of type '%s' as
+        //         %p\n", symbol->name, ps_type_definition_get_name(symbol->value->type->value->data.t), (void
+        //         *)(assignement));
+        // ps_ast_debug_node(1, (ps_ast_node *)assignement);
+        *statement_ptr = (ps_ast_node *)(assignement);
         break;
     case PS_SYMBOL_KIND_PROCEDURE:
-        ps_ast_call *procedure = NULL;
-        if (!ps_parse_procedure_or_function_call(compiler, block, &procedure, symbol))
+        // Procedure call: parse arguments and create call node
+        if (!ps_parse_procedure_or_function_call(compiler, block, &call, symbol))
             TRACE_ERROR("PROCEDURE_CALL")
-        *statement = (ps_ast_node *)(procedure);
+        *statement_ptr = (ps_ast_node *)(call);
         break;
     case PS_SYMBOL_KIND_FUNCTION:
         // Assignment to current function name => assignment to Result
-        if (strcmp(block->name, symbol->name) != 0)
+        if (!is_result)
         {
             ps_compiler_set_message(compiler, "Cannot assign to %s from %s", symbol->name, block->name);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
-        symbol = ps_compiler_find_symbol(compiler, block, "RESULT", true);
-        if (symbol == NULL)
-            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         if (!ps_parse_assignment(compiler, block, &assignement, symbol))
             TRACE_ERROR("ASSIGNMENT")
-        *statement = (ps_ast_node *)(assignement);
+        *statement_ptr = (ps_ast_node *)(assignement);
         break;
     case PS_SYMBOL_KIND_CONSTANT:
         ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
@@ -721,19 +724,19 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     else
     {
         // Let's go!
-        ps_ast_node **statement = NULL;
+        ps_ast_node *statement = NULL;
         // Up to 256 statements for now
         size_t count = 0;
         ps_ast_node *statements[256];
         bool loop = true;
         do
         {
-            if (!ps_parse_statement(compiler, block, statement))
+            if (!ps_parse_statement(compiler, block, &statement))
                 TRACE_ERROR("STATEMENT");
             count += 1;
             if (count > 255)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
-            statements[count - 1] = (ps_ast_node *)(*statement);
+            statements[count - 1] = (ps_ast_node *)(statement);
             // NB: semi-colon at statement list end is optional
             if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
             {

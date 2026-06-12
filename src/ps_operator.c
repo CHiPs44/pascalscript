@@ -503,8 +503,10 @@ ps_operator_binary ps_operator_binary_from_token(ps_token_type token)
         return PS_OP_SUB;
     case PS_TOKEN_STAR:
         return PS_OP_MUL;
-    case PS_TOKEN_SLASH:
+    case PS_TOKEN_DIV:
         return PS_OP_DIV;
+    case PS_TOKEN_SLASH:
+        return PS_OP_DIV_REAL;
     case PS_TOKEN_EQ:
         return PS_OP_EQ;
     case PS_TOKEN_NE:

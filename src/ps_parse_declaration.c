@@ -235,10 +235,10 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
 
     ps_symbol_table_dump(stderr, "BLOCK SYMBOL TABLE", block->symbols);
 
-    ps_ast_statement_list **statement_list = NULL;
-    if (!ps_parse_compound_statement(compiler, block, statement_list))
+    ps_ast_statement_list *statement_list = NULL;
+    if (!ps_parse_compound_statement(compiler, block, &statement_list))
         TRACE_ERROR("COMPOUND_STATEMENT")
-    block->statement_list = *statement_list;
+    block->statement_list = statement_list;
 
     PARSE_END("OK")
 }
