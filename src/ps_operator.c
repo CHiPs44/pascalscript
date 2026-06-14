@@ -212,9 +212,9 @@ static inline bool ps_string_ge(ps_string *a, ps_string *b)
 bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // NOSONAR
                              const ps_value *b, ps_value *result, ps_operator_binary operator)
 {
-    //                              OOOOOOOO | AAAAAAAA                            | BBBBBBBB
-    //                        ----------------+-------------------------------------+-----------------------------
-    uint32_t key = (uint16_t)(operator << 16 | (a->type->value->data.t->base << 8) | b->type->value->data.t->base);
+    //                      OOOOOOOOOOOOOOOO | AAAAAAAA                            | BBBBBBBB
+    // --------------------------------------+-------------------------------------+-------------------------------
+    uint32_t key = (uint32_t)(operator << 16 | (a->type->value->data.t->base << 8) | b->type->value->data.t->base);
     ps_value_type r = PS_TYPE_UNKNOWN;
     const ps_symbol *expected_type = result->type;
     ps_string *s = NULL;

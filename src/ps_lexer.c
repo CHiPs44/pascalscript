@@ -547,6 +547,12 @@ bool ps_lexer_read_token(ps_lexer *lexer)
                 lexer->current_token.type = PS_TOKEN_LE;
                 ADVANCE
             }
+            else if (next_char == '<')
+            {
+                sprintf(lexer->current_token.value.identifier, "<<");
+                lexer->current_token.type = PS_TOKEN_SHL;
+                ADVANCE
+            }
             else
                 lexer->current_token.type = PS_TOKEN_LT;
             ADVANCE
@@ -556,6 +562,12 @@ bool ps_lexer_read_token(ps_lexer *lexer)
             {
                 sprintf(lexer->current_token.value.identifier, ">=");
                 lexer->current_token.type = PS_TOKEN_GE;
+                ADVANCE
+            }
+            else if (next_char == '>')
+            {
+                sprintf(lexer->current_token.value.identifier, ">>");
+                lexer->current_token.type = PS_TOKEN_SHR;
                 ADVANCE
             }
             else
