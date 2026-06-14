@@ -449,6 +449,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         TRACE_ERROR("NIL");
     // *** Unary operators ***
     case PS_TOKEN_PLUS:
+        // does nothing => skip it (?)
         READ_NEXT_TOKEN
         if (!ps_parse_factor(compiler, block, expression))
             TRACE_ERROR("UNARY_PLUS");
@@ -457,11 +458,11 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
     case PS_TOKEN_NOT:
         unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN
-        ps_ast_node **operand = NULL;
-        if (!ps_parse_factor(compiler, block, operand))
+        ps_ast_node *operand = NULL;
+        if (!ps_parse_factor(compiler, block, &operand))
             TRACE_ERROR("UNARY");
         ps_operator_unary operator_unary = ps_operator_unary_from_token(unary_operator);
-        *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, operator_unary, *operand);
+        *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, operator_unary, operand);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         PARSE_END("OK UNARY")
@@ -471,9 +472,10 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
 
     if (factor_value.type != &ps_system_none)
     {
-        *expression = (ps_ast_node *)ps_ast_create_literal_value(start_line, start_column, factor_value);
-        if (*expression == NULL)
+        ps_ast_value *literal_value = ps_ast_create_literal_value(start_line, start_column, factor_value);
+        if (literal_value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        *expression = (ps_ast_node *)literal_value;
     }
 
     PARSE_END("OK")
