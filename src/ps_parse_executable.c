@@ -8,6 +8,7 @@
 
 #include "ps_ast.h"
 #include "ps_compiler.h"
+#include "ps_config.h"
 #include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_lexer.h"
@@ -72,7 +73,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
  *      [ 'VAR' ] IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE
  *
  * Add the parameter(s) to the signature
- * Up to 8 parameters at once.
+ * Up to PS_PARAMETERS_MAX parameters at once.
  */
 bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature *signature)
 {
@@ -80,7 +81,7 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
     (void)start_line;
     (void)start_column;
 
-    ps_identifier names[8] = {0};
+    ps_identifier names[PS_PARAMETERS_MAX] = {0};
     int index = 0;
     ps_symbol *type_reference = NULL;
     bool byref = false;
@@ -97,7 +98,7 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
     {
         // Parameter name
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
-        if (index == 8)
+        if (index == PS_PARAMETERS_MAX)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES);
         COPY_IDENTIFIER(names[index])
         index += 1;

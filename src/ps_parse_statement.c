@@ -486,17 +486,19 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
 {
     PARSE_BEGIN("STATEMENT", "IF_THEN_ELSE")
 
-    ps_ast_node **condition = NULL;
+    ps_ast_node *condition = NULL;
     ps_ast_statement_list *then_branch = NULL;
+    ps_ast_node *then_node = NULL;
     ps_ast_statement_list *else_branch = NULL;
     ps_ast_statement_list *statement_list = NULL;
+    ps_ast_node *else_node = NULL;
 
     // IF
     EXPECT_TOKEN(PS_TOKEN_IF)
     READ_NEXT_TOKEN
 
     // Condition
-    if (!ps_parse_expression(compiler, block, condition))
+    if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("CONDITION")
     // if (result.type != &ps_system_boolean)
     //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
@@ -506,17 +508,16 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     READ_NEXT_TOKEN
 
     // Statement
-    ps_ast_node **then_node = NULL;
-    if (!ps_parse_statement(compiler, block, then_node))
+    if (!ps_parse_statement(compiler, block, &then_node))
         TRACE_ERROR("THEN")
-    if ((*then_node)->kind == PS_AST_STATEMENT_LIST)
-        then_branch = (ps_ast_statement_list *)(*then_node);
+    if ((then_node)->kind == PS_AST_STATEMENT_LIST)
+        then_branch = (ps_ast_statement_list *)(then_node);
     else
     {
-        statement_list = ps_ast_create_statement_list((*then_node)->line, (*then_node)->column, 1);
+        statement_list = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
         if (statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        statement_list->statements[0] = *then_node;
+        statement_list->statements[0] = then_node;
         then_branch = statement_list;
     }
 
@@ -525,23 +526,22 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     {
         READ_NEXT_TOKEN
         // Statement
-        ps_ast_node **else_node = NULL;
-        if (!ps_parse_statement(compiler, block, else_node))
+        if (!ps_parse_statement(compiler, block, &else_node))
             TRACE_ERROR("ELSE")
-        if ((*else_node)->kind == PS_AST_STATEMENT_LIST)
-            else_branch = (ps_ast_statement_list *)(*else_node);
+        if (else_node->kind == PS_AST_STATEMENT_LIST)
+            else_branch = (ps_ast_statement_list *)else_node;
         else
         {
             ps_ast_statement_list *statement_list = NULL;
-            statement_list = ps_ast_create_statement_list((*else_node)->line, (*else_node)->column, 1);
+            statement_list = ps_ast_create_statement_list(else_node->line, else_node->column, 1);
             if (statement_list == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            statement_list->statements[0] = *else_node;
+            statement_list->statements[0] = else_node;
             then_branch = statement_list;
         }
     }
 
-    *if_statement = ps_ast_create_if(start_line, start_column, *condition, then_branch, else_branch);
+    *if_statement = ps_ast_create_if(start_line, start_column, condition, then_branch, else_branch);
     if (*if_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -556,15 +556,15 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
 {
     PARSE_BEGIN("STATEMENT", "REPEAT_UNTIL");
 
-    ps_ast_statement_list **body = NULL;
-    ps_ast_node **condition = NULL;
+    ps_ast_statement_list *body = NULL;
+    ps_ast_node *condition = NULL;
 
     // REPEAT
     EXPECT_TOKEN(PS_TOKEN_REPEAT)
     READ_NEXT_TOKEN
 
     // STATEMENT LIST
-    if (!ps_parse_statement_list(compiler, block, body, PS_TOKEN_UNTIL))
+    if (!ps_parse_statement_list(compiler, block, &body, PS_TOKEN_UNTIL))
         TRACE_ERROR("STATEMENTS");
 
     // UNTIL
@@ -572,14 +572,14 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
     READ_NEXT_TOKEN
 
     // CONDITION
-    if (!ps_parse_expression(compiler, block, condition))
+    if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("EXPRESSION");
     // if (result.type != &ps_system_boolean)
     //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
     READ_NEXT_TOKEN
 
     // AST NODE => REPEAT(BODY, CONDITION)
-    *repeat_statement = ps_ast_create_repeat(start_line, start_column, *body, *condition);
+    *repeat_statement = ps_ast_create_repeat(start_line, start_column, body, condition);
     if (*repeat_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -594,15 +594,16 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
 {
     PARSE_BEGIN("STATEMENT", "WHILE_DO");
 
-    ps_ast_node **condition = NULL;
+    ps_ast_node *condition = NULL;
     ps_ast_statement_list *body = NULL;
+    ps_ast_node *body_node = NULL;
 
     // WHILE
     EXPECT_TOKEN(PS_TOKEN_WHILE)
     READ_NEXT_TOKEN
 
     // CONDITION
-    if (!ps_parse_expression(compiler, block, condition))
+    if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("EXPRESSION");
     // if (result.type != &ps_system_boolean)
     //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
@@ -611,22 +612,20 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     EXPECT_TOKEN(PS_TOKEN_DO);
     READ_NEXT_TOKEN
 
-    ps_ast_node **body_node = NULL;
-    if (!ps_parse_statement(compiler, block, body_node))
+    if (!ps_parse_statement(compiler, block, &body_node))
         TRACE_ERROR("STATEMENT");
-    if ((*body_node)->kind == PS_AST_STATEMENT_LIST)
+    if (body_node->kind == PS_AST_STATEMENT_LIST)
         body = (ps_ast_statement_list *)body_node;
     else
     {
-        ps_ast_statement_list *statement_list =
-            ps_ast_create_statement_list((*body_node)->line, (*body_node)->column, 1);
+        ps_ast_statement_list *statement_list = ps_ast_create_statement_list(body_node->line, body_node->column, 1);
         if (statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        statement_list->statements[0] = *body_node;
+        statement_list->statements[0] = body_node;
         body = statement_list;
     }
 
-    *while_statement = ps_ast_create_while(start_line, start_column, *condition, body);
+    *while_statement = ps_ast_create_while(start_line, start_column, condition, body);
     if (*while_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -642,6 +641,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     PARSE_BEGIN("STATEMENT", "FOR_DO");
 
     ps_symbol *variable = NULL;
+    ps_ast_variable_simple *variable_node = NULL;
     ps_ast_node *start = NULL;
     ps_ast_node *finish = NULL;
     bool downto = false;
@@ -694,11 +694,10 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     if (!ps_parse_statement_or_compound_statement(compiler, block, &body))
         TRACE_ERROR("STATEMENT_OR_COMPOUND")
 
-    ps_ast_variable_simple *variable_node =
-        ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, variable);
+    variable_node = ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, variable);
     if (variable_node == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto ? -1 : 1, body);
+    *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto, body);
     if (*for_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 

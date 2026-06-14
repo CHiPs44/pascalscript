@@ -198,4 +198,14 @@ extern "C"
 }
 #endif
 
+#ifndef PS_IDENTIFIERS_MAX
+/** @brief Maximum number of multi-identifier declaration */
+#define PS_IDENTIFIERS_MAX 8
+#endif
+
+#ifndef PS_PARAMETERS_MAX
+/** @brief Maximum number of parameters for procedures and functions */
+#define PS_PARAMETERS_MAX 8
+#endif
+
 #endif /* _PS_CONFIG_H */

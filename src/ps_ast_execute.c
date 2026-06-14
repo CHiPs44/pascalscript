@@ -250,7 +250,6 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
         return false;
     ps_ast_debug_line(0, " - Variable value: %s", ps_value_get_display_string(variable_simple->variable->value, 0, 0));
 
-    bool downto = for_statement->step < 0;
     ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
     do
     {
@@ -258,7 +257,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
         //      or variable < finish for "DOWNTO"
         interpreter->debug = PS_DEBUG_VERBOSE;
         if (!ps_operator_binary_eval(interpreter, variable_simple->variable->value, &end_value.value, &stop,
-                                     downto ? PS_OP_LT : PS_OP_GT))
+                                     for_statement->downto ? PS_OP_LT : PS_OP_GT))
         {
             ps_ast_debug_line(0, "TEST!");
             return false;
@@ -274,8 +273,9 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
         bool range_check = interpreter->range_check;
         interpreter->range_check = false;
         ps_error error =
-            downto ? ps_function_pred(interpreter, variable_simple->variable->value, variable_simple->variable->value)
-                   : ps_function_succ(interpreter, variable_simple->variable->value, variable_simple->variable->value);
+            for_statement->downto
+                ? ps_function_pred(interpreter, variable_simple->variable->value, variable_simple->variable->value)
+                : ps_function_succ(interpreter, variable_simple->variable->value, variable_simple->variable->value);
         interpreter->range_check = range_check;
         if (error != PS_ERROR_NONE)
             return false;

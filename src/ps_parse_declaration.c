@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "ps_compiler.h"
+#include "ps_config.h"
 #include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_parse.h"
@@ -77,37 +78,27 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     ps_symbol *symbol_program = NULL;
 
     // 'PROGRAM'
-    fprintf(stderr, "BEFORE 'PROGRAM'\n");
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
     READ_NEXT_TOKEN
-    fprintf(stderr, "AFTER 'PROGRAM'\n");
 
     // IDENTIFIER
-    fprintf(stderr, "BEFORE IDENTIFIER\n");
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
-    fprintf(stderr, "AFTER 'IDENTIFIER'\n");
 
     // Skip optional parameters enclosed in parentheses
-    ps_token_debug(stderr, "BEFORE 'PARAMETERS'", &lexer->current_token);
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
         if (!ps_parse_program_parameters(compiler, block))
             TRACE_ERROR("PARAMETERS")
-    fprintf(stderr, "AFTER 'PARAMETERS'\n");
 
     // ';'
-    fprintf(stderr, "BEFORE ';'\n");
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
-    fprintf(stderr, "AFTER ';'\n");
 
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
     block->line = start_line;
     block->column = start_column;
     snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", identifier);
-
-    fprintf(stderr, "DEBUG\tPROGRAM '%s' declaration at line %d, column %d\n", block->name, block->line, block->column);
 
     // Register program in symbol table of program block
     symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
@@ -347,7 +338,7 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
 /**
  * Parse variable identifier list with commas
  */
-static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *block, ps_identifier *identifier,
+static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *block, ps_identifier *identifiers,
                                          int *var_count)
 {
     PARSE_BEGIN("VAR", "IDENTIFIER_LIST")
@@ -358,8 +349,8 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
     do
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-        COPY_IDENTIFIER(identifier[*var_count])
-        const ps_symbol *variable = ps_compiler_find_symbol(compiler, block, identifier[*var_count], true);
+        COPY_IDENTIFIER(identifiers[*var_count])
+        const ps_symbol *variable = ps_compiler_find_symbol(compiler, block, identifiers[*var_count], true);
         if (variable != NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN
@@ -369,7 +360,7 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         READ_NEXT_TOKEN
         *var_count += 1;
-        if (*var_count == 8)
+        if (*var_count == PS_IDENTIFIERS_MAX)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
     } while (true);
 
@@ -379,7 +370,7 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
 /**
  * Parse variable declaration:
  *      'VAR' [ IDENTIFIER [ ',' IDENTIFIER ]* ':' TYPE_REFERENCE ';' ]+
- *      (allow up to 8 identifiers with commas)
+ *      (allow up to PS_IDENTIFIERS_MAX identifiers with commas)
  * Examples:
  *     Var  a, b, c: Integer;
  *          x: Real;
@@ -391,7 +382,7 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
     (void)start_line;
     (void)start_column;
 
-    ps_identifier identifiers[8];
+    ps_identifier identifiers[PS_IDENTIFIERS_MAX];
     int var_count;
     ps_symbol *type_symbol = NULL;
 
@@ -403,7 +394,6 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         // IDENTIFIER [ ',' IDENTIFIER ]*
         if (!ps_parse_var_identifier_list(compiler, block, identifiers, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
-        fprintf(stderr, "DEBUG\tParsed variable identifier list with %d identifiers\n", var_count + 1);
         // ':'
         EXPECT_TOKEN(PS_TOKEN_COLON)
         READ_NEXT_TOKEN
@@ -415,11 +405,8 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         // Add variable(s) to symbol table of current block
         for (int i = 0; i <= var_count; i++)
         {
-            fprintf(stderr, "DEBUG\tAdding variable '%s' of type '%s' to block '%s' symbol table\n", identifiers[i],
-                    type_symbol->name, block->name);
             if (!ps_compiler_add_variable(compiler, block, identifiers[i], type_symbol))
             {
-                ps_compiler_set_message(compiler, "Cannot add variable %s", identifiers[i]);
                 TRACE_ERROR("ADD VARIABLE")
             }
         }

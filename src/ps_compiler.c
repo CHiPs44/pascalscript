@@ -133,15 +133,13 @@ bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbo
     assert(block != NULL);
     assert(symbol != NULL);
     if (compiler->debug >= PS_DEBUG_TRACE)
-        fprintf(stderr, "ADD %*s SYMBOL '%*s' TO BLOCK '%*s' with value %p: '%s'\n", -10,
+        fprintf(stderr, "ADD %*s SYMBOL '%*s' TO BLOCK '%*s' with value '%s'\n", -10,
                 ps_symbol_get_kind_name(symbol->kind), -(int)PS_IDENTIFIER_LEN, symbol->name, -(int)PS_IDENTIFIER_LEN,
-                block->name, (void *)(symbol->value),
-                symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
+                block->name, symbol->value == NULL ? "NULL" : ps_value_get_debug_string(symbol->value));
     ps_error error = ps_symbol_table_add(block->symbols, symbol);
     if (error != PS_ERROR_NONE)
-        return ps_compiler_set_error_message(compiler, PS_ERROR_SYMBOL_NOT_ADDED,
-                                             "Cannot add symbol '%s' to block '%s': %s", symbol->name, block->name,
-                                             ps_error_get_message(error));
+        return ps_compiler_set_error_message(compiler, error, "Cannot add symbol '%s' to block '%s': %s", symbol->name,
+                                             block->name, ps_error_get_message(error));
     return true;
 }
 
@@ -157,17 +155,14 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     {
         return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
                                              "Array variables are not implemented yet");
-        // data.a = ps_array_alloc_data(type_symbol);
-        // if (data.a == NULL)
-        //     return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     }
     ps_value *value = ps_value_alloc(type_symbol, data);
     ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
     if (variable == NULL)
     {
-        if (ps_type_definition_is_array(type_symbol->value->data.t))
-            ps_memory_free(PS_MEMORY_VALUE, data.a);
-        return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
+        // if (ps_type_definition_is_array(type_symbol->value->data.t))
+        //     ps_memory_free(PS_MEMORY_VALUE, data.a);
+        return ps_compiler_set_error_message(compiler, PS_ERROR_OUT_OF_MEMORY, "Cannot add variable %s", identifier);
     }
     return ps_compiler_add_symbol(compiler, block, variable);
 }

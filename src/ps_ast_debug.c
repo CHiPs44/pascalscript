@@ -18,76 +18,52 @@
 bool ps_ast_debug = true;
 bool ps_ast_debug_prefix = false;
 
+static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOWN",
+                                                [PS_AST_BLOCK] = "BLOCK",
+                                                [PS_AST_STATEMENT] = "STATEMENT",
+                                                [PS_AST_EXPRESSION] = "EXPRESSION",
+                                                [PS_AST_LVALUE] = "LVALUE"};
+
 char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
-    switch (group)
+    if (group >= PS_AST_GROUP_UNKNOWN && group <= PS_AST_LVALUE)
     {
-    case PS_AST_GROUP_UNKNOWN:
-        return "UNKNOWN";
-    case PS_AST_BLOCK:
-        return "BLOCK";
-    case PS_AST_STATEMENT:
-        return "STATEMENT";
-    case PS_AST_EXPRESSION:
-        return "EXPRESSION";
-    case PS_AST_LVALUE:
-        return "LVALUE";
-    default:
-        ps_ast_debug_line(0, "Error: unknown AST node group %d\n", group);
-        return "ERROR";
+        return (char *)ps_ast_node_group_names[group];
     }
+    ps_ast_debug_line(0, "Error: unknown AST node group %d\n", group);
+    return "ERROR";
 }
+
+static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN",
+                                               [PS_AST_PROGRAM] = "PROGRAM",
+                                               [PS_AST_PROCEDURE] = "PROCEDURE",
+                                               [PS_AST_FUNCTION] = "FUNCTION",
+                                               [PS_AST_UNIT] = "UNIT",
+                                               [PS_AST_STATEMENT_LIST] = "STATEMENT_LIST",
+                                               [PS_AST_ASSIGNMENT] = "ASSIGNMENT",
+                                               [PS_AST_IF] = "IF",
+                                               [PS_AST_CASE] = "CASE",
+                                               [PS_AST_WHILE] = "WHILE",
+                                               [PS_AST_REPEAT] = "REPEAT",
+                                               [PS_AST_FOR] = "FOR",
+                                               [PS_AST_PROCEDURE_CALL] = "PROCEDURE_CALL",
+                                               [PS_AST_UNARY_OPERATION] = "UNARY_OPERATION",
+                                               [PS_AST_BINARY_OPERATION] = "BINARY_OPERATION",
+                                               [PS_AST_FUNCTION_CALL] = "FUNCTION_CALL",
+                                               [PS_AST_LITERAL_VALUE] = "VALUE",
+                                               [PS_AST_RVALUE_SIMPLE] = "VARIABLE_SIMPLE",
+                                               [PS_AST_RVALUE_ARRAY] = "VARIABLE_ARRAY",
+                                               [PS_AST_LVALUE_SIMPLE] = "LVALUE_SIMPLE",
+                                               [PS_AST_LVALUE_ARRAY] = "LVALUE_ARRAY"};
 
 char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
-    switch (kind)
+    if (kind >= PS_AST_KIND_UNKNOWN && kind <= PS_AST_LVALUE_ARRAY)
     {
-    case PS_AST_KIND_UNKNOWN:
-        return "UNKNOWN";
-    case PS_AST_PROGRAM:
-        return "PROGRAM";
-    case PS_AST_PROCEDURE:
-        return "PROCEDURE";
-    case PS_AST_FUNCTION:
-        return "FUNCTION";
-    case PS_AST_UNIT:
-        return "UNIT";
-    case PS_AST_STATEMENT_LIST:
-        return "STATEMENT_LIST";
-    case PS_AST_ASSIGNMENT:
-        return "ASSIGNMENT";
-    case PS_AST_IF:
-        return "IF";
-    case PS_AST_CASE:
-        return "CASE";
-    case PS_AST_WHILE:
-        return "WHILE";
-    case PS_AST_REPEAT:
-        return "REPEAT";
-    case PS_AST_FOR:
-        return "FOR";
-    case PS_AST_PROCEDURE_CALL:
-        return "PROCEDURE_CALL";
-    case PS_AST_UNARY_OPERATION:
-        return "UNARY_OPERATION";
-    case PS_AST_BINARY_OPERATION:
-        return "BINARY_OPERATION";
-    case PS_AST_FUNCTION_CALL:
-        return "FUNCTION_CALL";
-    case PS_AST_LITERAL_VALUE:
-        return "VALUE";
-    case PS_AST_RVALUE_SIMPLE:
-        return "VARIABLE_SIMPLE";
-    case PS_AST_RVALUE_ARRAY:
-        return "VARIABLE_ARRAY";
-    case PS_AST_LVALUE_SIMPLE:
-        return "LVALUE_SIMPLE";
-    case PS_AST_LVALUE_ARRAY:
-        return "LVALUE_ARRAY";
-    default:
-        ps_ast_debug_line(0, "Error: unknown AST node kind %d\n", kind);
-        return "UNKNOWN";
+        return (char *)ps_ast_node_kind_names[kind];
     }
+    ps_ast_debug_line(0, "Error: unknown AST node kind %d\n", kind);
+    return "ERROR";
 }
 
 void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
@@ -103,12 +79,14 @@ void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
     va_end(args);
 }
 
-void ps_ast_debug_word(const char *format, ...) // NOSONAR
+void ps_ast_debug_word(size_t margin, const char *format, ...) // NOSONAR
 {
     if (!ps_ast_debug)
         return;
     va_list args;
     va_start(args, format);
+    if (margin > 0)
+        fprintf(stderr, "%*c", margin * 2, ' ');
     vfprintf(stderr, format, args); // NOSONAR
     va_end(args);
 }
@@ -156,7 +134,7 @@ void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
     if (block->signature != NULL)
     {
-        // ps_ast_debug_line(margin + 1, "{Signature:}");
+        ps_ast_debug_line(margin + 1, "{Signature:}");
         // ps_signature_debug(margin + 2, block->signature);
     }
     ps_ast_debug_line(margin, ";");
@@ -236,7 +214,7 @@ void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
     ps_ast_debug_variable_simple(margin + 1, for_statement->variable);
     ps_ast_debug_line(margin, ":=");
     ps_ast_debug_node(margin + 1, for_statement->start);
-    ps_ast_debug_line(margin, "%s", for_statement->step > 0 ? "TO" : "DOWNTO");
+    ps_ast_debug_line(margin, "%s", for_statement->downto ? "DOWNTO" : "TO");
     ps_ast_debug_node(margin + 1, for_statement->end);
     ps_ast_debug_statement_list(margin, for_statement->body);
 }

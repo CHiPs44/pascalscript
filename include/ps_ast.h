@@ -140,9 +140,9 @@ extern "C"
     {
         PS_AST_NODE_COMMON
         ps_ast_variable_simple *variable; /** @brief Loop variable *must* be a simple variable             */
-        ps_ast_node *start;               /** @brief Start value                                           */
-        ps_ast_node *end;                 /** @brief End value                                             */
-        int step;                         /** @brief Step value: 1 for "TO", -1 for "DOWNTO"               */
+        ps_ast_node *start;               /** @brief Start expression                                      */
+        ps_ast_node *end;                 /** @brief End expression                                        */
+        bool downto;                      /** @brief Direction: false for "TO", true for "DOWNTO"          */
         ps_ast_statement_list *body;      /** @brief Statements to execute for each value of loop variable */
     } ps_ast_for;
 
@@ -222,7 +222,7 @@ extern "C"
     ps_ast_if               *ps_ast_create_if              (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *then_branch, ps_ast_statement_list *else_branch                          );
     ps_ast_while            *ps_ast_create_while           (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *body                                                                     );
     ps_ast_repeat           *ps_ast_create_repeat          (uint16_t line, uint16_t column, ps_ast_statement_list *body, ps_ast_node *condition                                                                     );
-    ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start, ps_ast_node *end, int step, ps_ast_statement_list *body           );
+    ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start, ps_ast_node *end, bool downto, ps_ast_statement_list *body        );
     ps_ast_call             *ps_ast_create_call            (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable, size_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[]);
     ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node * operand                                                                       );
     ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node * left, ps_ast_node *right                                                     );

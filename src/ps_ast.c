@@ -297,14 +297,13 @@ ps_ast_node *ps_ast_free_repeat(ps_ast_repeat *repeat_statement)
 // =============================================================================
 
 ps_ast_for *ps_ast_create_for(uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start,
-                              ps_ast_node *end, int step, ps_ast_statement_list *body)
+                              ps_ast_node *end, bool downto, ps_ast_statement_list *body)
 {
     assert(variable != NULL);
     assert(ps_ast_node_check_kind((ps_ast_node *)variable, PS_AST_LVALUE_SIMPLE));
     assert(start != NULL && ps_ast_node_check_group((ps_ast_node *)start, PS_AST_EXPRESSION));
     assert(end != NULL && ps_ast_node_check_group((ps_ast_node *)end, PS_AST_EXPRESSION));
     assert(body != NULL && ps_ast_node_check_group((ps_ast_node *)body, PS_AST_STATEMENT));
-    assert(step == 1 || step == -1);
     ps_ast_for *for_statement =
         (ps_ast_for *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_FOR, line, column, sizeof(ps_ast_for));
     if (for_statement == NULL)
@@ -312,7 +311,7 @@ ps_ast_for *ps_ast_create_for(uint16_t line, uint16_t column, ps_ast_variable_si
     for_statement->variable = variable;
     for_statement->start = start;
     for_statement->end = end;
-    for_statement->step = step;
+    for_statement->downto = downto;
     for_statement->body = body;
     return for_statement;
 }
