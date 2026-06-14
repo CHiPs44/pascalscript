@@ -59,6 +59,7 @@ ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size, ps_symbol_tabl
         return NULL; // errno = ENOMEM
     }
     ps_symbol_table_reset(table, false);
+    ps_symbol_table_dump(stderr, "ALLOC", table);
     return table;
 }
 
@@ -73,7 +74,7 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-ps_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
+static ps_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
 {
     if (table->used >= table->size)
         return PS_ERROR_SYMBOL_TABLE_FULL;
@@ -222,6 +223,8 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
             return error;
     }
     error = ps_symbol_table_add_internal(table, symbol);
+    fprintf(stderr, "Added symbol %s to table %p, size=%zu, used=%zu, more=%zu\n", symbol->name, (void *)table,
+            table->size, table->used, table->more);
     return error;
 }
 

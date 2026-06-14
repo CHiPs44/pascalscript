@@ -121,10 +121,9 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 ps_symbol_table *ps_system_alloc(void)
 {
-    ps_symbol_table *system = ps_symbol_table_alloc(256, 0);
+    ps_symbol_table *system = ps_symbol_table_alloc(128, 0);
     if (system == NULL)
         return NULL;
-    return system;
 
     /**************************************************************************/
     /* TYPES                                                                  */
@@ -182,12 +181,18 @@ ps_symbol_table *ps_system_alloc(void)
     /* PROCEDURES & FUNCTIONS                                                 */
     /**************************************************************************/
 
-    if (!ps_procedures_init(system) || !ps_functions_init(system))
+    if (!ps_procedures_init(system))
         goto error;
+
+    if (!ps_functions_init(system))
+        goto error;
+
+    ps_symbol_table_dump(stderr, "SYSTEM AFTER PROCEDURES & FUNCTIONS", system);
 
     return system;
 
 error:
+    fprintf(stderr, "SYSTEM INIT FAILED\n");
     ps_system_free(system);
     return NULL;
 }

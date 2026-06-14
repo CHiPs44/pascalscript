@@ -286,12 +286,18 @@ int main(int argc, char *argv[])
 
     /* Initialize compiler */
     system_symbols = ps_system_alloc();
+    ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
+
     compiler = ps_compiler_alloc(system_symbols);
     if (compiler == NULL)
     {
         fprintf(stderr, "Could not initialize compiler!\n");
         return EXIT_FAILURE;
     }
+
+    ps_symbol *cos_func = ps_compiler_find_symbol(compiler, NULL, "COS", false);
+    ps_symbol_debug(stderr, "COS", cos_func);
+    // return EXIT_FAILURE;
 
     if (compile(source_file))
     {

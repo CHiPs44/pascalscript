@@ -8,6 +8,8 @@
 #include <string.h>
 
 #include "ps_array.h"
+#include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_executable.h"
@@ -313,13 +315,14 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
 }
 
 /**
- * @brief Parse constant or variable reference or function call
+ * @brief Parse constant, variable reference or function call
  * @details
  * Actual:
- *      constant reference = identifier
- *      variable reference = identifier
- *      function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
- * Next step:
+ *  constant reference = identifier
+ *  variable reference = identifier
+ *  function call      = identifier [ '(' [ expression [ ',' expression ]* ]')' ]
+ * Next steps:
+ *  enum     reference = identifier
  *  vector access
  *      variable reference = identifier [ '[' expression ']' ]
  *  multi-dimensional arrays instead of vectors
@@ -361,10 +364,10 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        ps_ast_call **call = NULL;
-        if (!ps_parse_function_call(compiler, block, call, symbol))
+        ps_ast_call *call = NULL;
+        if (!ps_parse_function_call(compiler, block, &call, symbol))
             TRACE_ERROR("FUNCTION")
-        *factor = (ps_ast_node *)(*call);
+        *factor = (ps_ast_node *)(call);
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -378,11 +381,12 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
  * @details
  *  factor  = '(' , expression , ')'
  *          | [ '+' | '-' | 'NOT' ] factor
- *          | string_value | char_value | integer_value | unsigned_value | real_value | boolean_value | enum_value
+ *          | string_value | char_value | integer_value | unsigned_value | real_value | boolean_value
  *          | constant_reference
  *          | variable_reference
  *          | function_call
  * Next steps:
+ *          | enum_value
  *          | nil
  */
 bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression)
@@ -394,7 +398,7 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
 
     switch (lexer->current_token.type)
     {
-    // ***Parenthesized expression ***
+    // *** Parenthesized expression ***
     case PS_TOKEN_LEFT_PARENTHESIS:
         READ_NEXT_TOKEN
         if (!ps_parse_expression(compiler, block, expression))
@@ -475,6 +479,8 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         ps_ast_value *literal_value = ps_ast_create_literal_value(start_line, start_column, factor_value);
         if (literal_value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        fprintf(stderr, "FACTOR: value=");
+        ps_ast_debug_node(0, (ps_ast_node *)literal_value);
         *expression = (ps_ast_node *)literal_value;
     }
 
@@ -582,9 +588,11 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 {
     PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 
-    int n_args = 0;
+    int n_args = -2;
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
+    ps_ast_variable_simple *symbol_node = NULL;
+    ps_ast_node *arg = NULL;
 
     if (function == &ps_system_function_random)
     {
@@ -605,12 +613,11 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
-        ps_symbol *symbol = NULL;
+        // Low and High have one "symbolic" argument
         n_args = -1;
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
-        ps_ast_variable_simple *symbol_node =
-            ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, symbol);
+        symbol_node = ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, symbol);
         args[0] = (ps_ast_node *)symbol_node;
     }
     else if (function == &ps_system_function_power)
@@ -626,25 +633,32 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
         EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
         READ_NEXT_TOKEN
-        if (!ps_parse_expression(compiler, block, &args[0]))
+        if (!ps_parse_expression(compiler, block, &arg))
             TRACE_ERROR("ARG");
+        ps_ast_debug_node(0, arg);
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
+        args[0] = arg;
+        // ps_ast_debug_node(0, &args[0]);
         n_args = 1;
     }
 
+    fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
+    exit(EXIT_FAILURE);
+
+    // if (n_args >= 1)
+    //     ps_ast_debug_node(stderr, args[0]);
+    // if (n_args >= 2)
+    //     ps_ast_debug_node(stderr, args[1]);
     switch (n_args)
     {
     case -1:
-        // error = ps_function_exec_1arg_s(compiler, function, symbol, expression);
         *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
         break;
     case 0:
-        // error = ps_function_exec_1arg(compiler, function, NULL, expression);
         *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL, NULL);
         break;
     case 1:
-        // error = ps_function_exec_1arg(compiler, function, &arg1, expression);
         *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
         break;
     case 2:

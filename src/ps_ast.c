@@ -446,12 +446,12 @@ ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_val
     assert(literal.type == &ps_system_integer || literal.type == &ps_system_unsigned ||
            literal.type == &ps_system_char || literal.type == &ps_system_boolean || literal.type == &ps_system_real ||
            literal.type == &ps_system_string);
-    ps_ast_value *value =
+    ps_ast_value *literal_node =
         (ps_ast_value *)ps_ast_create_node(PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, line, column, sizeof(ps_ast_value));
-    if (value == NULL)
+    if (literal_node == NULL)
         return NULL;
-    value->value = literal;
-    return value;
+    literal_node->value = literal;
+    return literal_node;
 }
 
 ps_ast_node *ps_ast_free_value(ps_ast_value *value)

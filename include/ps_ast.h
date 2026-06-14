@@ -47,7 +47,7 @@ extern "C"
         PS_AST_UNARY_OPERATION,  /** @brief EXPRESSION: Unary operation                              */
         PS_AST_BINARY_OPERATION, /** @brief EXPRESSION: Binary operation                             */
         PS_AST_FUNCTION_CALL,    /** @brief EXPRESSION: FUNCTION call                                */
-        PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Value: integer, real, string, boolean, ...   */
+        PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Literal value: integer, real, string, ...    */
         PS_AST_RVALUE_SIMPLE,    /** @brief EXPRESSION: Simple variable (or constant) being accessed */
         PS_AST_RVALUE_ARRAY,     /** @brief EXPRESSION: Array element being accessed                 */
         PS_AST_LVALUE_SIMPLE,    /** @brief LVALUE:     Simple variable being written to             */
@@ -165,7 +165,7 @@ extern "C"
         ps_ast_node *expression; /** @brief expression to assign to variable */
     } ps_ast_assignment;
 
-    /** @brief Expression: literal value, can be char, string, integer, real, ... */
+    /** @brief Expression: literal value, can be char, string, integer, unsigned, real, ... */
     typedef struct s_ps_ast_value
     {
         PS_AST_NODE_COMMON
