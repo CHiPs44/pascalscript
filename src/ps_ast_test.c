@@ -55,7 +55,7 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ASSERT(block_program->n_vars == 0);
     ASSERT(block_program->statement_list == NULL);
     ASSERT(block_program->signature == NULL);
-    ASSERT(block_program->result_type == NULL);
+    ASSERT(block_program->type == NULL);
 
     return block_program;
 cleanup:

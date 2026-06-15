@@ -126,37 +126,32 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
     ps_ast_debug_line(0, "ASSIGNMENT:");
+
+    ps_ast_variable_simple *variable_simple = NULL;
+    ps_ast_variable_array *variable_array = NULL;
+    ps_ast_value value_node = {.type = NULL, .data = {0}};
+    ps_value value = {.allocated = false, .type = NULL, .data = {0}};
+
     switch (assignment->lvalue->kind)
     {
     case PS_AST_LVALUE_SIMPLE:
-        ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
+        variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
         ps_ast_debug_line(0, " - Variable: %s", variable_simple->variable->name);
-        break;
-    case PS_AST_LVALUE_ARRAY:
-        ps_ast_variable_array *variable_array = ((ps_ast_variable_array *)assignment->lvalue);
-        ps_ast_debug_line(0, " - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
-        break;
-    default:
-        return false;
-    }
-    ps_ast_value value_node = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
-        return false;
-    ps_ast_debug_line(0, " - Expression value: %s", ps_value_get_display_string(&value_node.value, 0, 0));
-    switch (assignment->lvalue->kind)
-    {
-    case PS_AST_LVALUE_SIMPLE:
-        ps_ast_variable_simple *variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
-        ps_error error = ps_value_copy(&value_node.value, variable_simple->variable->value, interpreter->range_check);
-        if (error != PS_ERROR_NONE)
+        if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
+            return false;
+        value.type = value_node.type;
+        value.data = value_node.data;
+        ps_ast_debug_line(0, "{Expression value: %s}", ps_value_get_display_string(&value, 0, 0));
+        if (!ps_interpreter_copy_value(interpreter, &value, variable_simple->variable->value))
             return false;
         break;
     case PS_AST_LVALUE_ARRAY:
+        // variable_array = ((ps_ast_variable_array *)assignment->lvalue);
+        // ps_ast_debug_line(0, " - Array: %s[%d]", variable_array->variable->name, variable_array->n_indexes);
         ps_interpreter_set_message(interpreter, "Array assignment not implemented yet");
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
+        return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
     default:
-        return false;
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TOKEN);
     }
     return true;
 }

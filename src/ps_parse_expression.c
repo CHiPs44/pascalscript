@@ -505,6 +505,7 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, i
         {
             *n_args = 0;
             // factor.type = &ps_system_real;
+            *arg = NULL;
             READ_NEXT_TOKEN
         }
         else
@@ -523,6 +524,7 @@ bool ps_parse_function_call_random(ps_compiler *compiler, ps_ast_block *block, i
     {
         *n_args = 0;
         // factor.type = &ps_system_real;
+        *arg = NULL;
     }
 
     PARSE_END("OK")
@@ -592,7 +594,8 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
     ps_ast_variable_simple *symbol_node = NULL;
-    ps_ast_node *arg = NULL;
+    ps_ast_node *arg1 = NULL;
+    ps_ast_node *arg2 = NULL;
 
     if (function == &ps_system_function_random)
     {
@@ -608,24 +611,26 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN
         }
-        n_args = 0;
         // factor.type = &ps_system_unsigned;
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL, NULL);
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
         // Low and High have one "symbolic" argument
-        n_args = -1;
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
         symbol_node = ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, symbol);
         args[0] = (ps_ast_node *)symbol_node;
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 1, args, NULL, NULL);
     }
     else if (function == &ps_system_function_power)
     {
         // Power function has two "by value" numeric arguments
-        if (!ps_parse_function_call_power(compiler, block, &args[0], &args[1]))
+        if (!ps_parse_function_call_power(compiler, block, &arg1, &arg2))
             TRACE_ERROR("POWER")
         n_args = 2;
+        args[0] = arg1;
+        args[1] = arg2;
     }
     else
     {
@@ -633,30 +638,28 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         // examples: Ord, Chr, Pred, Succ, Sin, Cos, ...
         EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
         READ_NEXT_TOKEN
-        if (!ps_parse_expression(compiler, block, &arg))
+        if (!ps_parse_expression(compiler, block, &arg1))
             TRACE_ERROR("ARG");
-        ps_ast_debug_node(0, arg);
+        ps_ast_debug_node(0, arg1);
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
-        args[0] = arg;
-        // ps_ast_debug_node(0, &args[0]);
+        args[0] = arg1;
+        ps_ast_debug_node(0, args[0]);
         n_args = 1;
     }
 
     fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
+    if (n_args >= 1)
+        ps_ast_debug_node(stderr, args[0]);
+    if (n_args >= 2)
+        ps_ast_debug_node(stderr, args[1]);
     exit(EXIT_FAILURE);
 
-    // if (n_args >= 1)
-    //     ps_ast_debug_node(stderr, args[0]);
-    // if (n_args >= 2)
-    //     ps_ast_debug_node(stderr, args[1]);
     switch (n_args)
     {
     case -1:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
         break;
     case 0:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL, NULL);
         break;
     case 1:
         *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);

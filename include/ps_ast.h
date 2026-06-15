@@ -59,14 +59,14 @@ extern "C"
     ps_ast_node_kind kind;   /** @brief Node kind                                                         */           \
     uint16_t line;           /** @brief Source code start line number for error reporting, 0 if unknown   */           \
     uint16_t column;         /** @brief Source code start column number for error reporting, 0 if unknown */           \
-    uint16_t flags;          /** @brief Node flags, reserved for future use                               */
+    uint16_t flags;          /** @brief Node flags, reserved for future use                               */           \
+    ps_symbol *type;         /** @brief Result / return type for expressions, functions, calls, ...       */
 
     /** @brief Abstract Syntax Tree node */
     typedef struct s_ps_ast_node
     {
         PS_AST_NODE_COMMON
     } ps_ast_node;
-#define PS_AST_NODE_SIZE sizeof(ps_ast_node)
 
     /** @brief List of statements, single instruction or instructions between BEGIN and END */
     typedef struct s_ps_ast_statement_list
@@ -75,7 +75,6 @@ extern "C"
         size_t count;             /** @brief Number of statements  */
         ps_ast_node **statements; /** @brief NULL if no statements */
     } ps_ast_statement_list;
-#define PS_AST_STATEMENT_LIST_SIZE sizeof(ps_ast_statement_list)
 
     /** @brief Block is a program, procedure, function or unit */
     /** @details Units may be separated as they are special cases with interface and implementation */
@@ -88,9 +87,11 @@ extern "C"
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions */
         ps_ast_statement_list *statement_list; /** @brief Statements for this block                             */
         ps_formal_signature *signature;        /** @brief Only for procedures and functions, NULL otherwise     */
-        ps_symbol *result_type;                /** @brief Only for functions, NULL otherwise                    */
     } ps_ast_block;
-#define PS_AST_BLOCK_SIZE sizeof(ps_ast_block)
+
+    /******************************************************************************************************************/
+    /* STATEMENTS                                                                                                     */
+    /******************************************************************************************************************/
 
     /** @brief IF statement */
     typedef struct s_ps_ast_if
@@ -100,7 +101,6 @@ extern "C"
         ps_ast_statement_list *then_branch; /** @brief Statements to execute if condition is true, can be empty  */
         ps_ast_statement_list *else_branch; /** @brief Statements to execute if condition is false, can be empty */
     } ps_ast_if;
-#define PS_AST_IF_SIZE sizeof(ps_ast_if)
 
     /** @brief WHILE statement */
     typedef struct s_ps_ast_while
@@ -165,11 +165,17 @@ extern "C"
         ps_ast_node *expression; /** @brief expression to assign to variable */
     } ps_ast_assignment;
 
+    /** @brief Abstract Syntax Tree expression */
+    typedef struct s_ps_ast_expression
+    {
+        PS_AST_NODE_COMMON
+    } ps_ast_expression;
+
     /** @brief Expression: literal value, can be char, string, integer, unsigned, real, ... */
     typedef struct s_ps_ast_value
     {
         PS_AST_NODE_COMMON
-        ps_value value;
+        ps_value_data data;
     } ps_ast_value;
 
     /** @brief Unary operation: operator and operand */
@@ -190,20 +196,22 @@ extern "C"
     } ps_ast_binary_operation;
 
     // clang-format off
-    #define PS_AST_NODE_SIZE                   sizeof(ps_ast_node)
-    #define PS_AST_NODE_BLOCK_SIZE             sizeof(ps_ast_block)
-    #define PS_AST_NODE_STATEMENT_LIST_SIZE    sizeof(ps_ast_statement_list)
-    #define PS_AST_NODE_IF_SIZE                sizeof(ps_ast_if)
-    #define PS_AST_NODE_WHILE_SIZE             sizeof(ps_ast_while);
-    #define PS_AST_NODE_REPEAT_SIZE            sizeof(ps_ast_repeat)
-    #define PS_AST_NODE_FOR_SIZE               sizeof(ps_ast_for)
-    #define PS_AST_NODE_CALL_SIZE              sizeof(ps_ast_call)
-    #define PS_AST_NODE_ASSIGNMENT_SIZE        sizeof(ps_ast_assignment)
-    #define PS_AST_NODE_VALUE_SIZE             sizeof(ps_ast_value)
-    #define PS_AST_NODE_UNARY_OPERATION_SIZE   sizeof(ps_ast_unary_operation)
-    #define PS_AST_NODE_BINARY_OPERATION_SIZE  sizeof(ps_ast_binary_operation)
-    #define PS_AST_NODE_VARIABLE_SIMPLE_SIZE   sizeof(ps_ast_variable_simple)
-    #define PS_AST_NODE_VARIABLE_ARRAY_SIZE    sizeof(ps_ast_variable_array)
+    #define PS_AST_NODE_GROUP_SIZE            sizeof(ps_ast_node_group)
+    #define PS_AST_NODE_KIND_SIZE             sizeof(ps_ast_node_kind)
+    #define PS_AST_NODE_SIZE                  sizeof(ps_ast_node)
+    #define PS_AST_NODE_BLOCK_SIZE            sizeof(ps_ast_block)
+    #define PS_AST_NODE_STATEMENT_LIST_SIZE   sizeof(ps_ast_statement_list)
+    #define PS_AST_NODE_IF_SIZE               sizeof(ps_ast_if)
+    #define PS_AST_NODE_WHILE_SIZE            sizeof(ps_ast_while);
+    #define PS_AST_NODE_REPEAT_SIZE           sizeof(ps_ast_repeat)
+    #define PS_AST_NODE_FOR_SIZE              sizeof(ps_ast_for)
+    #define PS_AST_NODE_CALL_SIZE             sizeof(ps_ast_call)
+    #define PS_AST_NODE_ASSIGNMENT_SIZE       sizeof(ps_ast_assignment)
+    #define PS_AST_NODE_VALUE_SIZE            sizeof(ps_ast_value)
+    #define PS_AST_NODE_UNARY_OPERATION_SIZE  sizeof(ps_ast_unary_operation)
+    #define PS_AST_NODE_BINARY_OPERATION_SIZE sizeof(ps_ast_binary_operation)
+    #define PS_AST_NODE_VARIABLE_SIMPLE_SIZE  sizeof(ps_ast_variable_simple)
+    #define PS_AST_NODE_VARIABLE_ARRAY_SIZE   sizeof(ps_ast_variable_array)
     // clang-format on
 
     /** @brief Check if an AST node belongs to a specific group */
@@ -213,10 +221,10 @@ extern "C"
 
     /** @brief Create a new AST node of the given group & kind */
     ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column,
-                                    size_t size);
+                                    size_t size, ps_symbol *type);
 
     // clang-format off
-    ps_ast_block            *ps_ast_create_block           (uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind, const char *name                                                           );
+    ps_ast_block            *ps_ast_create_block           (uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind, const char *name, ps_symbol *type                                          );
     ps_ast_statement_list   *ps_ast_create_statement_list  (uint16_t line, uint16_t column, size_t count                                                                                                            );
     ps_ast_assignment       *ps_ast_create_assignment      (uint16_t line, uint16_t column, ps_ast_node *lvalue,ps_ast_node *rvalue                                                                                 );
     ps_ast_if               *ps_ast_create_if              (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *then_branch, ps_ast_statement_list *else_branch                          );
@@ -224,12 +232,11 @@ extern "C"
     ps_ast_repeat           *ps_ast_create_repeat          (uint16_t line, uint16_t column, ps_ast_statement_list *body, ps_ast_node *condition                                                                     );
     ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start, ps_ast_node *end, bool downto, ps_ast_statement_list *body        );
     ps_ast_call             *ps_ast_create_call            (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable, size_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[]);
-    ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node * operand                                                                       );
-    ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node * left, ps_ast_node *right                                                     );
+    ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node *operand                                                                        );
+    ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right                                                      );
     ps_ast_value            *ps_ast_create_literal_value   (uint16_t line, uint16_t column, ps_value value                                                                                                          );
     ps_ast_variable_simple  *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *variable                                                                              );
     ps_ast_variable_array   *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *symbol, size_t n_indexes, ps_ast_node **indexes                                       );
-    // clang-format on
 
     /** @brief Free an AST node and all its children */
     ps_ast_node *ps_ast_free_node(ps_ast_node *node);

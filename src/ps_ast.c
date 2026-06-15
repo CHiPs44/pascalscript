@@ -42,7 +42,7 @@ bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_k
 }
 
 ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column,
-                                size_t size)
+                                size_t size, ps_symbol *type)
 {
     ps_ast_node *node = ps_memory_calloc(PS_MEMORY_AST, 1, size);
     if (node == NULL)
@@ -51,6 +51,7 @@ ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, 
     node->kind = kind;
     node->line = line;
     node->column = column;
+    node->type = type;
     return node;
 }
 
@@ -106,10 +107,11 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
 // =============================================================================
 
 ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
-                                  const char *name)
+                                  const char *name, ps_symbol *type)
 {
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
-    ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(PS_AST_BLOCK, kind, line, column, sizeof(ps_ast_block));
+    ps_ast_block *block =
+        (ps_ast_block *)ps_ast_create_node(PS_AST_BLOCK, kind, line, column, sizeof(ps_ast_block), NULL);
     if (block == NULL)
         return NULL;
     if (name == NULL)
@@ -119,7 +121,7 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     block->parent = parent;
     block->symbols = ps_symbol_table_alloc(0, 0);
     block->signature = NULL;
-    block->result_type = NULL;
+    block->type = NULL;
     block->n_vars = 0;
     block->statement_list = NULL;
     return block;
@@ -147,7 +149,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
 ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t column, size_t count)
 {
     ps_ast_statement_list *statement_list = (ps_ast_statement_list *)ps_ast_create_node(
-        PS_AST_STATEMENT, PS_AST_STATEMENT_LIST, line, column, sizeof(ps_ast_statement_list));
+        PS_AST_STATEMENT, PS_AST_STATEMENT_LIST, line, column, sizeof(ps_ast_statement_list), NULL);
     if (statement_list == NULL)
         return NULL;
     statement_list->count = count;
@@ -185,7 +187,7 @@ ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_a
     assert(lvalue != NULL && ps_ast_node_check_group(lvalue, PS_AST_LVALUE));
     assert(rvalue != NULL && ps_ast_node_check_group(rvalue, PS_AST_EXPRESSION));
     ps_ast_assignment *assignment = (ps_ast_assignment *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_ASSIGNMENT, line,
-                                                                            column, sizeof(ps_ast_assignment));
+                                                                            column, sizeof(ps_ast_assignment), NULL);
     if (assignment == NULL)
         return NULL;
     assignment->lvalue = lvalue;
@@ -218,7 +220,7 @@ ps_ast_if *ps_ast_create_if(uint16_t line, uint16_t column, ps_ast_node *conditi
     assert(then_branch != NULL && ps_ast_node_check_group((ps_ast_node *)then_branch, PS_AST_STATEMENT));
     assert(else_branch == NULL || ps_ast_node_check_group((ps_ast_node *)else_branch, PS_AST_STATEMENT));
     ps_ast_if *if_statement =
-        (ps_ast_if *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_IF, line, column, sizeof(ps_ast_if));
+        (ps_ast_if *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_IF, line, column, sizeof(ps_ast_if), NULL);
     if (if_statement == NULL)
         return NULL;
     if_statement->condition = condition;
@@ -247,7 +249,7 @@ ps_ast_while *ps_ast_create_while(uint16_t line, uint16_t column, ps_ast_node *c
     assert(condition != NULL && ps_ast_node_check_group(condition, PS_AST_EXPRESSION));
     assert(body != NULL && ps_ast_node_check_group((ps_ast_node *)body, PS_AST_STATEMENT));
     ps_ast_while *while_statement =
-        (ps_ast_while *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_WHILE, line, column, sizeof(ps_ast_while));
+        (ps_ast_while *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_WHILE, line, column, sizeof(ps_ast_while), NULL);
     if (while_statement == NULL)
         return NULL;
     while_statement->condition = condition;
@@ -274,7 +276,7 @@ ps_ast_repeat *ps_ast_create_repeat(uint16_t line, uint16_t column, ps_ast_state
     assert(body != NULL && ps_ast_node_check_group((ps_ast_node *)body, PS_AST_STATEMENT));
     assert(condition != NULL && ps_ast_node_check_group(condition, PS_AST_EXPRESSION));
     ps_ast_repeat *repeat_statement =
-        (ps_ast_repeat *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_REPEAT, line, column, sizeof(ps_ast_repeat));
+        (ps_ast_repeat *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_REPEAT, line, column, sizeof(ps_ast_repeat), NULL);
     if (repeat_statement == NULL)
         return NULL;
     repeat_statement->body = body;
@@ -305,7 +307,7 @@ ps_ast_for *ps_ast_create_for(uint16_t line, uint16_t column, ps_ast_variable_si
     assert(end != NULL && ps_ast_node_check_group((ps_ast_node *)end, PS_AST_EXPRESSION));
     assert(body != NULL && ps_ast_node_check_group((ps_ast_node *)body, PS_AST_STATEMENT));
     ps_ast_for *for_statement =
-        (ps_ast_for *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_FOR, line, column, sizeof(ps_ast_for));
+        (ps_ast_for *)ps_ast_create_node(PS_AST_STATEMENT, PS_AST_FOR, line, column, sizeof(ps_ast_for), NULL);
     if (for_statement == NULL)
         return NULL;
     for_statement->variable = variable;
@@ -332,14 +334,15 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // PS_AST_CALL: PROCEDURE or FUNCTION CALL
 // =============================================================================
 
-ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
-                                size_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[])
+ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *type,
+                                ps_symbol *executable, size_t n_args, ps_ast_node *args[], int16_t widths[],
+                                int16_t precisions[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
     assert(n_args == 0 || args != NULL);
     ps_ast_node_group group = kind == PS_AST_PROCEDURE_CALL ? PS_AST_STATEMENT : PS_AST_EXPRESSION;
-    ps_ast_call *call = (ps_ast_call *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_call));
+    ps_ast_call *call = (ps_ast_call *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_call), NULL);
     if (call == NULL)
         return NULL;
     call->executable = executable;
@@ -389,7 +392,7 @@ ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t co
     assert(operator == PS_OP_NEG || operator == PS_OP_NOT);
     assert(operand != NULL && ps_ast_node_check_group(operand, PS_AST_EXPRESSION));
     ps_ast_unary_operation *unary_operation = (ps_ast_unary_operation *)ps_ast_create_node(
-        PS_AST_EXPRESSION, PS_AST_UNARY_OPERATION, line, column, sizeof(ps_ast_unary_operation));
+        PS_AST_EXPRESSION, PS_AST_UNARY_OPERATION, line, column, sizeof(ps_ast_unary_operation), operand->type);
     if (unary_operation == NULL)
         return NULL;
     unary_operation->operator = operator;
@@ -409,7 +412,7 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation
 // =============================================================================
 
 ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
-                                                        ps_ast_node *left, ps_ast_node *right)
+                                                        ps_ast_node *left, ps_ast_node *right, ps_symbol *result_type)
 {
     assert(operator == PS_OP_ADD || operator == PS_OP_SUB || operator == PS_OP_OR || operator == PS_OP_XOR ||
            operator == PS_OP_MUL || operator == PS_OP_DIV || operator == PS_OP_DIV_REAL || operator == PS_OP_MOD ||
@@ -418,8 +421,9 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
            operator == PS_OP_NE);
     assert(left != NULL && ps_ast_node_check_group((ps_ast_node *)left, PS_AST_EXPRESSION));
     assert(right != NULL && ps_ast_node_check_group((ps_ast_node *)right, PS_AST_EXPRESSION));
+    assert(result_type != NULL);
     ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)ps_ast_create_node(
-        PS_AST_EXPRESSION, PS_AST_BINARY_OPERATION, line, column, sizeof(ps_ast_binary_operation));
+        PS_AST_EXPRESSION, PS_AST_BINARY_OPERATION, line, column, sizeof(ps_ast_binary_operation), result_type);
     if (binary_operation == NULL)
         return NULL;
     binary_operation->operator = operator;
@@ -446,17 +450,17 @@ ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_val
     assert(literal.type == &ps_system_integer || literal.type == &ps_system_unsigned ||
            literal.type == &ps_system_char || literal.type == &ps_system_boolean || literal.type == &ps_system_real ||
            literal.type == &ps_system_string);
-    ps_ast_value *literal_node =
-        (ps_ast_value *)ps_ast_create_node(PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, line, column, sizeof(ps_ast_value));
+    ps_ast_value *literal_node = (ps_ast_value *)ps_ast_create_node(PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, line,
+                                                                    column, sizeof(ps_ast_value), literal.type);
     if (literal_node == NULL)
         return NULL;
-    literal_node->value = literal;
+    literal_node->data = literal.data;
     return literal_node;
 }
 
 ps_ast_node *ps_ast_free_value(ps_ast_value *value)
 {
-    ps_value_free(&value->value);
+    // TODO ps_value_free(&value->value);
     ps_memory_free(PS_MEMORY_AST, value);
     return NULL;
 }
@@ -471,8 +475,8 @@ ps_ast_variable_simple *ps_ast_create_variable_simple(uint16_t line, uint16_t co
     assert(kind == PS_AST_RVALUE_SIMPLE || kind == PS_AST_LVALUE_SIMPLE);
     assert(variable != NULL);
     ps_ast_node_group group = kind == PS_AST_RVALUE_SIMPLE ? PS_AST_EXPRESSION : PS_AST_LVALUE;
-    ps_ast_variable_simple *variable_simple =
-        (ps_ast_variable_simple *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_simple));
+    ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)ps_ast_create_node(
+        group, kind, line, column, sizeof(ps_ast_variable_simple), variable->value->type);
     if (variable_simple == NULL)
         return NULL;
     variable_simple->variable = variable;
@@ -499,8 +503,8 @@ ps_ast_variable_array *ps_ast_create_variable_array(uint16_t line, uint16_t colu
     assert(n_indexes >= 1);
     assert(indexes != NULL);
     ps_ast_node_group group = kind == PS_AST_RVALUE_ARRAY ? PS_AST_EXPRESSION : PS_AST_LVALUE;
-    ps_ast_variable_array *variable_array =
-        (ps_ast_variable_array *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_array));
+    ps_ast_variable_array *variable_array = (ps_ast_variable_array *)ps_ast_create_node(
+        group, kind, line, column, sizeof(ps_ast_variable_array), variable->value->type);
     if (variable_array == NULL)
         return NULL;
     variable_array->variable = variable;
