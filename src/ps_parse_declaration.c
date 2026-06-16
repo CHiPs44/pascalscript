@@ -169,8 +169,9 @@ bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
  *          FUNCTION ...
  *      ]*
  *      COMPOUND_STATEMENT
- * Compound statement is mandatory, even if empty (BEGIN END), and is stored in current block statement list.
- * NB: ; or . or whatever after END is analyzed by the caller
+ * NB:
+ *  - Compound statement is mandatory, even if empty (BEGIN END), and is stored in current block statement list.
+ *  - ';' or '.' after END is analyzed by the caller
  */
 bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
 {

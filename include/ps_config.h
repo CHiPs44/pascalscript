@@ -166,12 +166,6 @@ extern "C"
 #error PS_STRING_LEN_TYPE and PS_STRING_MAX_LEN must be defined.
 #endif
 
-#ifndef PS_IDENTIFIER_LEN
-#define PS_IDENTIFIER_LEN 31u
-#endif
-
-#define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1u))
-
 #if PS_BITNESS == 16
 #define PS_HANDLE uint16_t
 #define PS_HANDLE_FMT_10 PRIu16
@@ -189,6 +183,12 @@ extern "C"
 #define PS_HANDLE_FMT_10 PRIu64
 #define PS_HANDLE_FMT_16 PRIx64
 #endif
+
+#ifndef PS_IDENTIFIER_LEN
+#define PS_IDENTIFIER_LEN 31u
+#endif
+
+#define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1u))
 
     typedef char ps_identifier[PS_IDENTIFIER_SIZE];
 

@@ -24,32 +24,59 @@ extern "C"
         PS_OP_UNARY_INVALID = 0,
         PS_OP_NEG,
         PS_OP_NOT,
-    } ps_operator_unary;
+        // force 16 bits size
+        PS_OP_UNARY_MAX = 0xffff
+    } __attribute__((__packed__)) ps_operator_unary;
 
-    // clang-format off
     /** @brief Binary operators */
     typedef enum e_ps_operator_binary
     {
         PS_OP_BINARY_INVALID = 0,
         // additive / terms
-        PS_OP_ADD, PS_OP_SUB, PS_OP_OR, PS_OP_XOR,
+        PS_OP_ADD,
+        PS_OP_SUB,
+        PS_OP_OR,
+        PS_OP_XOR,
         // multiply / factors
-        PS_OP_MUL, PS_OP_DIV, PS_OP_DIV_REAL, PS_OP_MOD, PS_OP_AND, PS_OP_SHL, PS_OP_SHR,
+        PS_OP_MUL,
+        PS_OP_DIV,
+        PS_OP_DIV_REAL,
+        PS_OP_MOD,
+        PS_OP_AND,
+        PS_OP_SHL,
+        PS_OP_SHR,
         // comparison
-        PS_OP_EQ, PS_OP_GE, PS_OP_GT, PS_OP_LE, PS_OP_LT, PS_OP_NE,
-    } ps_operator_binary;
-    // clang-format on
+        PS_OP_EQ,
+        PS_OP_GE,
+        PS_OP_GT,
+        PS_OP_LE,
+        PS_OP_LT,
+        PS_OP_NE,
+        // force 16 bits size
+        PS_OP_BINARY_MAX = 0xffff
+    } __attribute__((__packed__)) ps_operator_binary;
 
-    /** @brief Execute unary operation */
+#define PS_OP_UNARY_SIZE sizeof(ps_operator_unary)
+#define PS_OP_BINARY_SIZE sizeof(ps_operator_binary)
+
+    /** @brief Evaluate unary operation */
     bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, ps_value *result,
                                 ps_operator_unary operator);
-    /** @brief Execute binary operation */
+
+    /** @brief Evaluate binary operation */
     bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result,
                                  ps_operator_binary operator);
 
+    /** @brief Convert token to unary operator */
     ps_operator_unary ps_operator_unary_from_token(ps_token_type token_type);
+
+    /** @brief Convert token to binary operator */
     ps_operator_binary ps_operator_binary_from_token(ps_token_type token_type);
+
+    /** @brief Get name of unary operator */
     char *ps_operator_unary_get_name(ps_operator_unary operator);
+
+    /** @brief Get name of binary operator */
     char *ps_operator_binary_get_name(ps_operator_binary operator);
 
 #ifdef __cplusplus
