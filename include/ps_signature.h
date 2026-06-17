@@ -31,9 +31,9 @@ extern "C"
 
     typedef struct s_ps_formal_signature
     {
-        ps_symbol *result_type; /** @brief NULL or ps_system_none for procedures */
-        uint8_t parameter_count;
-        uint8_t size; /** @brief size can be bigger than count */
+        ps_symbol *result_type;  /** @brief NULL or ps_system_none for procedures */
+        uint8_t parameter_count; /** @brief Parameter count */
+        uint8_t size;            /** @brief size can be bigger than count */
         ps_formal_parameter *parameters;
     } __attribute__((__packed__)) ps_formal_signature;
 
@@ -50,7 +50,8 @@ extern "C"
     ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, const char *name);
 
     /** @brief Add parameter to formal signature */
-    bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, const char *name, ps_symbol *type);
+    bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, const char *name,
+                                           ps_symbol *type);
 
     /** @brief Dump formal signature */
     void ps_formal_signature_dump(FILE *output, char *message, ps_formal_signature *signature);

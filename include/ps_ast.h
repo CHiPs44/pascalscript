@@ -55,12 +55,11 @@ extern "C"
     } __attribute__((__packed__)) ps_ast_node_kind;
 
 #define PS_AST_NODE_COMMON                                                                                             \
-    ps_ast_node_group group; /** @brief Node group                                                        */           \
-    ps_ast_node_kind kind;   /** @brief Node kind                                                         */           \
-    uint16_t line;           /** @brief Source code start line number for error reporting, 0 if unknown   */           \
-    uint16_t column;         /** @brief Source code start column number for error reporting, 0 if unknown */           \
-    uint16_t flags;          /** @brief Node flags, reserved for future use                               */           \
-    ps_symbol *type;         /** @brief Result / return type for expressions, functions, calls, ...       */
+    ps_ast_node_group group; /** @brief 1 Node group                                                        */         \
+    ps_ast_node_kind kind;   /** @brief 1 Node kind                                                         */         \
+    uint16_t line;           /** @brief 2 Source code start line number for error reporting, 0 if unknown   */         \
+    uint16_t column;         /** @brief 2 Source code start column number for error reporting, 0 if unknown */         \
+    uint16_t flags;          /** @brief 2 Node flags, reserved for future use                               */
 
     /** @brief Abstract Syntax Tree node */
     typedef struct s_ps_ast_node
@@ -87,6 +86,7 @@ extern "C"
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions */
         ps_ast_statement_list *statement_list; /** @brief Statements for this block                             */
         ps_formal_signature *signature;        /** @brief Only for procedures and functions, NULL otherwise     */
+        ps_symboszl *return_type;                /** @brief Return type for functions                             */
     } __attribute__((__packed__)) ps_ast_block;
 
     /******************************************************************************************************************/
@@ -151,11 +151,11 @@ extern "C"
     typedef struct s_ps_ast_call
     {
         PS_AST_NODE_COMMON
-        ps_symbol *executable; /** @brief procedure of function being called              */
-        ps_ast_node **args;    /** @brief arguments, NULL if no arguments                 */
-        uint16_t n_args;       /** @brief number of arguments, 0 if no arguments          */
-        int16_t *widths;       /** @brief format width     of each argument for Write[Ln] */
-        int16_t *precisions;   /** @brief format precision of each argument for Write[Ln] */
+        ps_symbol *executable; /** @brief procedure of function being called, user or system */
+        ps_ast_node **args;    /** @brief arguments, NULL if no arguments                    */
+        uint16_t n_args;       /** @brief number of arguments, 0 if no arguments             */
+        int16_t *widths;       /** @brief format width     of each argument for Write[Ln]    */
+        int16_t *precisions;   /** @brief format precision of each argument for Write[Ln]    */
     } __attribute__((__packed__)) ps_ast_call;
 
     /** @brief Assignment statement: LVALUE := EXPRESSION / RVALUE */
@@ -176,7 +176,7 @@ extern "C"
     typedef struct s_ps_ast_value
     {
         PS_AST_NODE_COMMON
-        ps_value_data data;
+        ps_value value;
     } __attribute__((__packed__)) ps_ast_value;
 
     /** @brief Unary operation: operator and operand */
@@ -192,8 +192,9 @@ extern "C"
     {
         PS_AST_NODE_COMMON
         ps_operator_binary operator; /** @brief Binary operator */
-        ps_ast_node *left;           /** @brief Left operand */
-        ps_ast_node *right;          /** @brief Right operand */
+        ps_ast_node *left;           /** @brief Left operand    */
+        ps_ast_node *right;          /** @brief Right operand   */
+        ps_symbol *result_type;      /** @brief Result type     */
     } __attribute__((__packed__)) ps_ast_binary_operation;
 
     // clang-format off
@@ -220,9 +221,9 @@ extern "C"
     /** @brief Check if an AST node has a specific kind */
     bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind);
 
-    /** @brief Create a new AST node of the given group & kind */
+    /** @brief Create a new AST node of the given group & kind at given position*/
     ps_ast_node *ps_ast_create_node(ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column,
-                                    size_t size, ps_symbol *type);
+                                    size_t size);
 
     // clang-format off
     ps_ast_block            *ps_ast_create_block           (uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind, const char *name, ps_symbol *type                                          );

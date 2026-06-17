@@ -26,12 +26,12 @@ static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOW
 
 char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
-    if (group >= PS_AST_GROUP_UNKNOWN && group <= PS_AST_LVALUE)
-    {
-        return (char *)ps_ast_node_group_names[group];
-    }
-    ps_ast_debug_line(0, "Error: unknown AST node group %d\n", group);
-    return "ERROR";
+    // if (group < PS_AST_GROUP_UNKNOWN || group > PS_AST_LVALUE)
+    // {
+    //     ps_ast_debug_line(0, "Error: unknown AST node group %d\n", group);
+    //     return "ERROR";
+    // }
+    return ps_ast_node_group_names[group];
 }
 
 static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN",
@@ -58,12 +58,12 @@ static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN"
 
 char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
-    if (kind >= PS_AST_KIND_UNKNOWN && kind <= PS_AST_LVALUE_ARRAY)
-    {
-        return (char *)ps_ast_node_kind_names[kind];
-    }
-    ps_ast_debug_line(0, "Error: unknown AST node kind %d\n", kind);
-    return "ERROR";
+    // if (kind < PS_AST_KIND_UNKNOWN || kind > PS_AST_LVALUE_ARRAY)
+    // {
+    //     ps_ast_debug_line(0, "Error: unknown AST node kind %d\n", kind);
+    //     return "ERROR";
+    // }
+    return (char *)ps_ast_node_kind_names[kind];
 }
 
 void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
