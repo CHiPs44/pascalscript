@@ -101,12 +101,47 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     return NULL;
 }
 
+/**
+ * @brief Extract type from an AST node
+ * @param node The AST node to extract type from
+ * @return The symbol representing the type, or NULL if type cannot be determined
+ */
+static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
+{
+    if (node == NULL)
+        return NULL;
+
+    switch (node->kind)
+    {
+    case PS_AST_LITERAL_VALUE:
+        return ((ps_ast_value *)node)->value.type;
+    case PS_AST_RVALUE_SIMPLE:
+    case PS_AST_LVALUE_SIMPLE:
+        ps_symbol *var = ((ps_ast_variable_simple *)node)->variable;
+        if (var != NULL && var->value != NULL)
+            return var->value->type;
+        return NULL;
+    case PS_AST_BINARY_OPERATION:
+        return ((ps_ast_binary_operation *)node)->result_type;
+    case PS_AST_UNARY_OPERATION:
+        ps_ast_unary_operation *unary = (ps_ast_unary_operation *)node;
+        return ps_ast_node_get_type(unary->operand);
+    case PS_AST_FUNCTION_CALL:
+        ps_symbol *func = ((ps_ast_call *)node)->executable;
+        if (func != NULL && func->value != NULL)
+            return func->value->type;
+        return NULL;
+    default:
+        return NULL;
+    }
+}
+
 // =============================================================================
 // PS_AST_BLOCK: PROGRAM, PROCEDURE, FUNCTION, UNIT
 // =============================================================================
 
 ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
-                                  const char *name, ps_symbol *type)
+                                  const char *name)
 {
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(PS_AST_BLOCK, kind, line, column, sizeof(ps_ast_block));
@@ -119,7 +154,6 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     block->parent = parent;
     block->symbols = ps_symbol_table_alloc(0, 0);
     block->signature = NULL;
-    block->type = NULL;
     block->n_vars = 0;
     block->statement_list = NULL;
     return block;
@@ -332,9 +366,8 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // PS_AST_CALL: PROCEDURE or FUNCTION CALL
 // =============================================================================
 
-ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *type,
-                                ps_symbol *executable, uint16_t n_args, ps_ast_node *args[], int16_t widths[],
-                                int16_t precisions[])
+ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
+                                uint16_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
@@ -409,6 +442,81 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation
 // PS_AST_BINARY_OPERATION: +, -, *, /, DIV, MOD, AND, OR, XOR, SHL, SHR, =, <>, <, <=, >, >=
 // =============================================================================
 
+ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right)
+{
+    // Extract operand types first
+    ps_symbol *left_type = ps_ast_node_get_type(left);
+    ps_symbol *right_type = ps_ast_node_get_type(right);
+
+    if (left_type == NULL || right_type == NULL)
+        return NULL;
+
+    ps_value_type left_base = ps_value_get_base(left_type->value);
+    ps_value_type right_base = ps_value_get_base(right_type->value);
+
+    // Comparison operators always return BOOLEAN
+    if (operator == PS_OP_EQ || operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE ||
+        operator == PS_OP_LT || operator == PS_OP_NE)
+        return &ps_system_boolean;
+
+    // Real division always returns REAL
+    if (operator == PS_OP_DIV_REAL)
+        return &ps_system_real;
+
+    // String concatenation: ADD with CHAR/STRING operands
+    // CC, CS, SC, SS all produce STRING
+    if (operator == PS_OP_ADD)
+    {
+        if ((left_base == PS_TYPE_CHAR && right_base == PS_TYPE_CHAR) ||
+            (left_base == PS_TYPE_CHAR && right_base == PS_TYPE_STRING) ||
+            (left_base == PS_TYPE_STRING && right_base == PS_TYPE_CHAR) ||
+            (left_base == PS_TYPE_STRING && right_base == PS_TYPE_STRING))
+            return &ps_system_string;
+    }
+
+    // Boolean operations: AND, OR, XOR with boolean operands
+    if (operator == PS_OP_AND || operator == PS_OP_OR || operator == PS_OP_XOR)
+    {
+        if (left_base == PS_TYPE_BOOLEAN && right_base == PS_TYPE_BOOLEAN)
+            return &ps_system_boolean;
+    }
+
+    // For arithmetic and bitwise operations, determine result type based on operand types
+    // Rules from ps_operator.c behavior:
+    // - REAL + any number => REAL (except DIV, MOD, SHL, SHR)
+    // - UNSIGNED + UNSIGNED => UNSIGNED
+    // - INTEGER + UNSIGNED => INTEGER (for most ops, except special cases)
+    // - UNSIGNED + INTEGER => depends on operator
+
+    // If either is REAL, result is REAL (except for bitwise and MOD/DIV)
+    if ((operator != PS_OP_AND && operator != PS_OP_OR && operator != PS_OP_XOR && operator != PS_OP_SHL &&
+         operator != PS_OP_SHR && operator != PS_OP_MOD && operator != PS_OP_DIV) &&
+        (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL))
+        return &ps_system_real;
+
+    // Both unsigned
+    if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
+        return &ps_system_unsigned;
+
+    // Mixed INTEGER and UNSIGNED
+    if ((left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER) ||
+        (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED))
+    {
+        // For OR operator with mixed I/U: result is INTEGER (?)
+        if (operator == PS_OP_OR)
+            return &ps_system_integer;
+        // For UI combinations with certain operators, result is UNSIGNED
+        if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER &&
+            (operator == PS_OP_AND || operator == PS_OP_XOR || operator == PS_OP_SUB))
+            return &ps_system_unsigned;
+        // Default mixed I/U result is INTEGER
+        return &ps_system_integer;
+    }
+
+    // Both integer (or neither is unsigned/real)
+    return &ps_system_integer;
+}
+
 ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
                                                         ps_ast_node *left, ps_ast_node *right, ps_symbol *result_type)
 {
@@ -427,7 +535,8 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
     binary_operation->operator = operator;
     binary_operation->left = left;
     binary_operation->right = right;
-    binary_operation->result_type = result_type;
+    binary_operation->result_type =
+        result_type == NULL ? ps_ast_binary_operation_get_result_type(operator, left, right) : result_type;
     return binary_operation;
 }
 
@@ -473,9 +582,10 @@ ps_ast_variable_simple *ps_ast_create_variable_simple(uint16_t line, uint16_t co
 {
     assert(kind == PS_AST_RVALUE_SIMPLE || kind == PS_AST_LVALUE_SIMPLE);
     assert(variable != NULL);
+    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
     ps_ast_node_group group = kind == PS_AST_RVALUE_SIMPLE ? PS_AST_EXPRESSION : PS_AST_LVALUE;
-    ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)ps_ast_create_node(
-        group, kind, line, column, sizeof(ps_ast_variable_simple), variable->value->type);
+    ps_ast_variable_simple *variable_simple =
+        (ps_ast_variable_simple *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_simple));
     if (variable_simple == NULL)
         return NULL;
     variable_simple->variable = variable;
@@ -502,8 +612,8 @@ ps_ast_variable_array *ps_ast_create_variable_array(uint16_t line, uint16_t colu
     assert(n_indexes >= 1);
     assert(indexes != NULL);
     ps_ast_node_group group = kind == PS_AST_RVALUE_ARRAY ? PS_AST_EXPRESSION : PS_AST_LVALUE;
-    ps_ast_variable_array *variable_array = (ps_ast_variable_array *)ps_ast_create_node(
-        group, kind, line, column, sizeof(ps_ast_variable_array), variable->value->type);
+    ps_ast_variable_array *variable_array =
+        (ps_ast_variable_array *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_array));
     if (variable_array == NULL)
         return NULL;
     variable_array->variable = variable;

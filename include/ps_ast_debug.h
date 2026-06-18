@@ -21,10 +21,10 @@ extern "C"
     extern bool ps_ast_debug;
 
     /** @brief Get the string representation of an AST node group */
-    char *ps_ast_node_get_group_name(ps_ast_node_group group);
+    const char *ps_ast_node_get_group_name(ps_ast_node_group group);
 
     /** @brief Get the string representation of an AST node kind */
-    char *ps_ast_node_get_kind_name(ps_ast_node_kind kind);
+    const char *ps_ast_node_get_kind_name(ps_ast_node_kind kind);
 
     /**
      * @brief Print a debug line with optional margin

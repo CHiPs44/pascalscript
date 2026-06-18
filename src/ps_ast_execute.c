@@ -125,11 +125,12 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
+    assert(assignment->lvalue->kind==PS_AST_LVALUE_SIMPLE||assignment->lvalue->kind==PS_AST_LVALUE_ARRAY);
     ps_ast_debug_line(0, "ASSIGNMENT:");
 
     ps_ast_variable_simple *variable_simple = NULL;
-    ps_ast_variable_array *variable_array = NULL;
-    ps_ast_value value_node = {.type = NULL, .data = {0}};
+    // ps_ast_variable_array *variable_array = NULL;
+    ps_ast_value value_node = {0};
     ps_value value = {.allocated = false, .type = NULL, .data = {0}};
 
     switch (assignment->lvalue->kind)
@@ -139,8 +140,8 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
         ps_ast_debug_line(0, " - Variable: %s", variable_simple->variable->name);
         if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
             return false;
-        value.type = value_node.type;
-        value.data = value_node.data;
+        value.type = value_node.value.type;
+        value.data = value_node.value.data;
         ps_ast_debug_line(0, "{Expression value: %s}", ps_value_get_display_string(&value, 0, 0));
         if (!ps_interpreter_copy_value(interpreter, &value, variable_simple->variable->value))
             return false;

@@ -24,7 +24,7 @@ static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOW
                                                 [PS_AST_EXPRESSION] = "EXPRESSION",
                                                 [PS_AST_LVALUE] = "LVALUE"};
 
-char *ps_ast_node_get_group_name(ps_ast_node_group group)
+const char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
     // if (group < PS_AST_GROUP_UNKNOWN || group > PS_AST_LVALUE)
     // {
@@ -56,7 +56,7 @@ static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN"
                                                [PS_AST_LVALUE_SIMPLE] = "LVALUE_SIMPLE",
                                                [PS_AST_LVALUE_ARRAY] = "LVALUE_ARRAY"};
 
-char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
+const char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
     // if (kind < PS_AST_KIND_UNKNOWN || kind > PS_AST_LVALUE_ARRAY)
     // {
