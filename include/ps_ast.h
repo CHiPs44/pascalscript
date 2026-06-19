@@ -21,11 +21,11 @@ extern "C"
     /** @brief Abstract Syntax Tree node group */
     typedef enum e_ps_ast_node_group
     {
-        PS_AST_GROUP_UNKNOWN = 0,
-        PS_AST_BLOCK,
-        PS_AST_STATEMENT,
-        PS_AST_EXPRESSION,
-        PS_AST_LVALUE,
+        PS_AST_GROUP_UNKNOWN = 0, /** @brief Unknown node group                                                 */
+        PS_AST_BLOCK,             /** @brief PROGRAM, PROCEDURE, FUNCTION, UNIT                                 */
+        PS_AST_STATEMENT,         /** @brief List, IF, CASE, WHILE, REPEAT, FOR, Procedure call                 */
+        PS_AST_EXPRESSION,        /** @brief Unary or binary operation, literal value, simple or array variable */
+        PS_AST_LVALUE,            /** @brief Simple or array variable                                           */
     } __attribute__((__packed__)) ps_ast_node_group;
 
     /** @brief Abstract Syntax Tree node kind */
@@ -171,7 +171,7 @@ extern "C"
         PS_AST_NODE_COMMON
     } __attribute__((__packed__)) ps_ast_expression;
 
-    /** @brief Expression: literal value, can be char, string, integer, unsigned, real, ... */
+    /** @brief Expression: literal value, can be integer, unsigned, real, char, string, ... */
     typedef struct s_ps_ast_value
     {
         PS_AST_NODE_COMMON
@@ -182,8 +182,9 @@ extern "C"
     typedef struct s_ps_ast_unary_operation
     {
         PS_AST_NODE_COMMON
-        ps_operator_unary operator;
-        ps_ast_node *operand;
+        ps_operator_unary operator; /** @brief Unary operator */
+        ps_ast_node *operand;       /** @brief Operand        */
+        ps_symbol *result_type;     /** @brief Result type    */
     } __attribute__((__packed__)) ps_ast_unary_operation;
 
     /** @brief Binary operation: operator and operands */

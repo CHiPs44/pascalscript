@@ -117,19 +117,22 @@ static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
         return ((ps_ast_value *)node)->value.type;
     case PS_AST_RVALUE_SIMPLE:
     case PS_AST_LVALUE_SIMPLE:
-        ps_symbol *var = ((ps_ast_variable_simple *)node)->variable;
-        if (var != NULL && var->value != NULL)
-            return var->value->type;
+        ps_symbol *variable = ((ps_ast_variable_simple *)node)->variable;
+        if (variable != NULL && variable->value != NULL)
+            return variable->value->type;
         return NULL;
+    case PS_AST_LVALUE_ARRAY:
+    case PS_AST_RVALUE_ARRAY:
+        ps_ast_debug_line(0, "Cannot get type of array %s items yet", ((ps_ast_variable_array *)node)->variable->name);
+        return NULL;
+    case PS_AST_UNARY_OPERATION:
+        return ((ps_ast_unary_operation *)node)->result_type;
     case PS_AST_BINARY_OPERATION:
         return ((ps_ast_binary_operation *)node)->result_type;
-    case PS_AST_UNARY_OPERATION:
-        ps_ast_unary_operation *unary = (ps_ast_unary_operation *)node;
-        return ps_ast_node_get_type(unary->operand);
     case PS_AST_FUNCTION_CALL:
-        ps_symbol *func = ((ps_ast_call *)node)->executable;
-        if (func != NULL && func->value != NULL)
-            return func->value->type;
+        ps_symbol *function = ((ps_ast_call *)node)->executable;
+        if (function != NULL && function->value != NULL)
+            return function->value->type;
         return NULL;
     default:
         return NULL;
@@ -417,6 +420,26 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 // PS_AST_UNARY_OPERATION: - ... or NOT ...
 // =============================================================================
 
+/**
+ * Get result type of unary operation
+ */
+ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_binary operator, ps_ast_node *operand)
+{
+    ps_symbol *operand_type = ps_ast_node_get_type(operand);
+    if (operand_type == NULL)
+        return NULL;
+    ps_value_type type = ps_value_get_type(operand_type->value);
+    ps_value_type base = ps_value_get_base(operand_type->value);
+    // - U => I
+    if (operator = PS_OP_NEG && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
+        return &ps_system_integer;
+    // cf. ps_value_is_number()
+    if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER || type == PS_TYPE_REAL ||
+        (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED) || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER))
+        return operand_type;
+    return NULL;
+}
+
 ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t column, ps_operator_unary operator,
                                                       ps_ast_node *operand)
 {
@@ -428,6 +451,7 @@ ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t co
         return NULL;
     unary_operation->operator = operator;
     unary_operation->operand = operand;
+    unary_operation->result_type = ps_ast_unary_operation_get_result_type(operator, operand);
     return unary_operation;
 }
 
@@ -442,6 +466,9 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation
 // PS_AST_BINARY_OPERATION: +, -, *, /, DIV, MOD, AND, OR, XOR, SHL, SHR, =, <>, <, <=, >, >=
 // =============================================================================
 
+/**
+ * Get result type of binary operation
+ */
 ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right)
 {
     // Extract operand types first
@@ -518,7 +545,7 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
 }
 
 ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
-                                                        ps_ast_node *left, ps_ast_node *right, ps_symbol *result_type)
+                                                        ps_ast_node *left, ps_ast_node *right)
 {
     assert(operator == PS_OP_ADD || operator == PS_OP_SUB || operator == PS_OP_OR || operator == PS_OP_XOR ||
            operator == PS_OP_MUL || operator == PS_OP_DIV || operator == PS_OP_DIV_REAL || operator == PS_OP_MOD ||
@@ -527,7 +554,6 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
            operator == PS_OP_NE);
     assert(left != NULL && ps_ast_node_check_group((ps_ast_node *)left, PS_AST_EXPRESSION));
     assert(right != NULL && ps_ast_node_check_group((ps_ast_node *)right, PS_AST_EXPRESSION));
-    assert(result_type != NULL);
     ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)ps_ast_create_node(
         PS_AST_EXPRESSION, PS_AST_BINARY_OPERATION, line, column, sizeof(ps_ast_binary_operation));
     if (binary_operation == NULL)
@@ -535,8 +561,7 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
     binary_operation->operator = operator;
     binary_operation->left = left;
     binary_operation->right = right;
-    binary_operation->result_type =
-        result_type == NULL ? ps_ast_binary_operation_get_result_type(operator, left, right) : result_type;
+    binary_operation->result_type = ps_ast_binary_operation_get_result_type(operator, left, right);
     return binary_operation;
 }
 

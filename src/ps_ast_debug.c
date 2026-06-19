@@ -166,7 +166,11 @@ void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
 
 void ps_ast_debug_unary_operation(size_t margin, const ps_ast_unary_operation *unary_operation)
 {
-    ps_ast_debug_line(margin, "%s(", ps_operator_unary_get_name(unary_operation->operator));
+    ps_ast_debug_line(margin, "{%s, %s}(%s", ps_operator_unary_get_name(unary_operation->operator),
+                      unary_operation->result_type->name,
+                      unary_operation->operator == PS_OP_NEG   ? "-"
+                      : unary_operation->operator == PS_OP_NOT ? "NOT"
+                                                               : "???");
     ps_ast_debug_node(margin + 1, unary_operation->operand);
     ps_ast_debug_line(margin, ")");
 }
