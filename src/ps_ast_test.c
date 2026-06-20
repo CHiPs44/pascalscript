@@ -206,7 +206,7 @@ bool ps_ast_test_assignment()
     ps_ast_value *rvalue_u_2 = ps_ast_create_literal_value(3, 15, value_u_2);
     ASSERT(rvalue_u_2 != NULL);
     ps_ast_binary_operation *mul_operation =
-        ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2, NULL);
+        ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
     ASSERT(mul_operation != NULL);
     ps_ast_assignment *assignment_i =
         ps_ast_create_assignment(3, 5, (ps_ast_node *)variable_i, (ps_ast_node *)mul_operation);
@@ -326,7 +326,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_value *rvalue_u_10_cond = ps_ast_create_literal_value(6, 12, value_u_10_cond);
     ASSERT(rvalue_u_10_cond != NULL);
     ps_ast_binary_operation *condition =
-        ps_ast_create_binary_operation(6, 10, PS_OP_EQ, (ps_ast_node *)rvalue_i, (ps_ast_node *)rvalue_u_10_cond, NULL);
+        ps_ast_create_binary_operation(6, 10, PS_OP_EQ, (ps_ast_node *)rvalue_i, (ps_ast_node *)rvalue_u_10_cond);
     ASSERT(condition != NULL);
 
     ps_ast_debug_line(0, "Create the THEN branch with J := 42");
@@ -445,7 +445,7 @@ bool ps_ast_test_while_do()
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(5, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *while_condition =
-        ps_ast_create_binary_operation(5, 12, PS_OP_GT, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0, NULL);
+        ps_ast_create_binary_operation(5, 12, PS_OP_GT, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
     ASSERT(while_condition != NULL);
 
     ps_ast_debug_line(0, "Create the WHILE loop body: I := I - 1");
@@ -459,7 +459,7 @@ bool ps_ast_test_while_do()
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
-        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1, NULL);
+        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
     ASSERT(i_minus_1 != NULL);
     ps_ast_assignment *assignment_i_body =
         ps_ast_create_assignment(6, 9, (ps_ast_node *)variable_i_body, (ps_ast_node *)i_minus_1);
@@ -555,7 +555,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
-        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1, NULL);
+        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
     ASSERT(i_minus_1 != NULL);
     ps_ast_assignment *assignment_i_body =
         ps_ast_create_assignment(6, 9, (ps_ast_node *)variable_i_body, (ps_ast_node *)i_minus_1);
@@ -569,7 +569,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(7, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *repeat_condition =
-        ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0, NULL);
+        ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
     ASSERT(repeat_condition != NULL);
 
     ps_ast_debug_line(0, "Create the REPEAT statement");
@@ -666,7 +666,7 @@ bool ps_ast_test_for_do()
     ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(6, 26, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i != NULL);
     ps_ast_binary_operation *add_sum_i =
-        ps_ast_create_binary_operation(6, 24, PS_OP_ADD, (ps_ast_node *)rvalue_sum, (ps_ast_node *)rvalue_i, NULL);
+        ps_ast_create_binary_operation(6, 24, PS_OP_ADD, (ps_ast_node *)rvalue_sum, (ps_ast_node *)rvalue_i);
     ASSERT(add_sum_i != NULL);
     ps_ast_assignment *assignment_sum_body =
         ps_ast_create_assignment(6, 9, (ps_ast_node *)variable_sum_body, (ps_ast_node *)add_sum_i);

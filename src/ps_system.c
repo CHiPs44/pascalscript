@@ -187,8 +187,6 @@ ps_symbol_table *ps_system_alloc(void)
     if (!ps_functions_init(system))
         goto error;
 
-    ps_symbol_table_dump(stderr, "SYSTEM AFTER PROCEDURES & FUNCTIONS", system);
-
     return system;
 
 error:

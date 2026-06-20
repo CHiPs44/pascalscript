@@ -422,8 +422,11 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 
 /**
  * Get result type of unary operation
+ *  NOT X => X
+ *  NEG U => I
+ *  NEG X => X
  */
-ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_binary operator, ps_ast_node *operand)
+ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, ps_ast_node *operand)
 {
     ps_symbol *operand_type = ps_ast_node_get_type(operand);
     if (operand_type == NULL)
@@ -431,7 +434,7 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_binary operator, p
     ps_value_type type = ps_value_get_type(operand_type->value);
     ps_value_type base = ps_value_get_base(operand_type->value);
     // - U => I
-    if (operator = PS_OP_NEG && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
+    if ((operator = PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
         return &ps_system_integer;
     // cf. ps_value_is_number()
     if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER || type == PS_TYPE_REAL ||
@@ -540,8 +543,12 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
         return &ps_system_integer;
     }
 
-    // Both integer (or neither is unsigned/real)
-    return &ps_system_integer;
+    // Both integer
+    if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
+        return &ps_system_integer;
+
+    // Failed
+    return NULL;
 }
 
 ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,

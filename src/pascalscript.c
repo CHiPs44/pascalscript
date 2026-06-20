@@ -48,6 +48,7 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
+bool run = false;
 bool debug = false;
 bool dump_buffer = false;
 bool dump_symbols = false;
@@ -79,7 +80,7 @@ void usage(char *program_name)
     fprintf(stderr, "  -c : display configuration and exit\n");
     fprintf(stderr, "  -d : debug (more verbose trace)\n");
     fprintf(stderr, "  -h : display this help message and exit\n");
-    fprintf(stderr, "  -m : display memory usage at the end\n");
+    fprintf(stderr, "  -m : display memory usage at end\n");
     fprintf(stderr, "  -n : do not execute program, just parse source code\n");
     fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
     fprintf(stderr, "  -t : trace execution\n");
@@ -92,7 +93,7 @@ int get_options(int argc, char *argv[])
 {
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "bircdhmnstuv")) != -1)
+    while ((opt = getopt(argc, argv, "bircadhmnstuv")) != -1)
     {
         switch (opt)
         {
@@ -204,7 +205,7 @@ bool compile(const char *source_file)
     return ok;
 }
 
-bool run(const ps_ast_block *program)
+bool execute(const ps_ast_block *program)
 {
     assert(NULL != interpreter);
     assert(NULL != program);
@@ -286,7 +287,11 @@ int main(int argc, char *argv[])
 
     /* Initialize compiler */
     system_symbols = ps_system_alloc();
-    ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
+    // ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
+
+    trace = false;
+    debug = false;
+    verbose = false;
 
     compiler = ps_compiler_alloc(system_symbols);
     if (compiler == NULL)
@@ -295,8 +300,8 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    ps_symbol *cos_func = ps_compiler_find_symbol(compiler, NULL, "COS", false);
-    ps_symbol_debug(stderr, "COS", cos_func);
+    // ps_symbol *cos_func = ps_compiler_find_symbol(compiler, NULL, "COS", false);
+    // ps_symbol_debug(stderr, "COS", cos_func);
     // return EXIT_FAILURE;
 
     if (compile(source_file))
@@ -309,20 +314,25 @@ int main(int argc, char *argv[])
     printf("AST DUMP for %s:\n", source_file);
     ps_ast_debug_node(0, (ps_ast_node *)program);
 
-    /* Initialize interpreter */
-    interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
-    if (interpreter == NULL)
+    if (run)
     {
-        fprintf(stderr, "Could not initialize interpreter!\n");
-        return EXIT_FAILURE;
+        /* Initialize interpreter */
+        interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
+        if (interpreter == NULL)
+        {
+            fprintf(stderr, "Could not initialize interpreter!\n");
+            return EXIT_FAILURE;
+        }
+        /* Run program */
+        execute(program);
+        /* Terminate interpreter */
+        interpreter = ps_interpreter_free(interpreter);
     }
-
-    /* Terminate interpreter */
-    interpreter = ps_interpreter_free(interpreter);
 
     if (memory)
         ps_memory_debug(stderr);
 
+    fprintf(stderr, "%s\n", ok ? "SUCCESS!" : "FAILURE!");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

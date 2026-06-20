@@ -292,8 +292,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 
     // Create a new block for the procedure or function, and set its parent to the current block
     ps_ast_node_kind node_kind = kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
-    ps_symbol *type = kind == PS_SYMBOL_KIND_PROCEDURE ? NULL : NULL; // TODO
-    *block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier, type);
+    *block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier);
     if (*block_executable == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     READ_NEXT_TOKEN

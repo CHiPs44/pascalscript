@@ -650,9 +650,9 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 
     fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
     if (n_args >= 1)
-        ps_ast_debug_node(stderr, args[0]);
+        ps_ast_debug_node(0, args[0]);
     if (n_args >= 2)
-        ps_ast_debug_node(stderr, args[1]);
+        ps_ast_debug_node(0, args[1]);
     exit(EXIT_FAILURE);
 
     switch (n_args)
