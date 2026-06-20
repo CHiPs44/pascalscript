@@ -233,7 +233,7 @@ extern "C"
     ps_ast_while            *ps_ast_create_while           (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *body                                                                       );
     ps_ast_repeat           *ps_ast_create_repeat          (uint16_t line, uint16_t column, ps_ast_statement_list *body, ps_ast_node *condition                                                                       );
     ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start, ps_ast_node *end, bool downto, ps_ast_statement_list *body          );
-    ps_ast_call             *ps_ast_create_call            (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable, uint16_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[]);
+    ps_ast_call             *ps_ast_create_call            (uint16_t line, uint16_t column, ps_ast_node_kind kind, const ps_symbol *executable, uint16_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[]);
     ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node *operand                                                                          );
     ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right                                                        );
     ps_ast_value            *ps_ast_create_literal_value   (uint16_t line, uint16_t column, ps_value value                                                                                                            );

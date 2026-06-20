@@ -333,10 +333,14 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
     PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
     ps_identifier identifier;
+    ps_symbol *symbol = NULL;
+    ps_value value = {0};
+
     COPY_IDENTIFIER(identifier)
-    ps_symbol *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
+    symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
+
     switch (symbol->kind)
     {
     case PS_SYMBOL_KIND_CONSTANT:
@@ -356,8 +360,16 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         else
         {
             // factor.type = symbol->value->type;
-            *factor =
-                (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, PS_AST_RVALUE_SIMPLE, symbol);
+            if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+                *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, PS_AST_RVALUE_SIMPLE,
+                                                                       symbol);
+            else
+            {
+                value.allocated = false;
+                value.type = symbol->value->type;
+                value.data = symbol->value->data;
+                *factor = (ps_ast_node *)ps_ast_create_literal_value(start_line, start_column, value);
+            }
             if (*factor == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             READ_NEXT_TOKEN
@@ -653,7 +665,6 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         ps_ast_debug_node(0, args[0]);
     if (n_args >= 2)
         ps_ast_debug_node(0, args[1]);
-    exit(EXIT_FAILURE);
 
     switch (n_args)
     {
@@ -662,11 +673,10 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     case 0:
         break;
     case 1:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL, NULL);
         break;
     case 2:
-        // error = ps_function_exec_2args(compiler, function, &arg1, &arg2, expression);
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, n_args, args, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL, NULL);
         break;
     default:
         compiler->error = PS_ERROR_INVALID_PARAMETERS;

@@ -39,8 +39,10 @@
 #include "ps_version.h"
 
 // #define DEBUGGER_SOURCE "examples/000-minimal.pas"
-#define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
+// #define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUGGER_SOURCE "examples/005-first.pas"
+// #define DEBUGGER_SOURCE "examples/003-hello2.pas"
+#define DEBUGGER_SOURCE "examples/006-second.pas"
 
 // Runtime options
 bool bool_eval = false;
@@ -289,9 +291,9 @@ int main(int argc, char *argv[])
     system_symbols = ps_system_alloc();
     // ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
 
-    trace = false;
-    debug = false;
-    verbose = false;
+    // trace = false;
+    // debug = false;
+    // verbose = false;
 
     compiler = ps_compiler_alloc(system_symbols);
     if (compiler == NULL)
@@ -300,10 +302,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // ps_symbol *cos_func = ps_compiler_find_symbol(compiler, NULL, "COS", false);
-    // ps_symbol_debug(stderr, "COS", cos_func);
-    // return EXIT_FAILURE;
-
     if (compile(source_file))
     {
         ok = true;
@@ -311,6 +309,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Compiled %s!\n", source_file);
     }
 
+    ps_symbol_table_dump(stderr, "SYMBOL TABLE FOR PROGRAM", program->symbols);
     printf("AST DUMP for %s:\n", source_file);
     ps_ast_debug_node(0, (ps_ast_node *)program);
 

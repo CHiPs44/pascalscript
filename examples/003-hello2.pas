@@ -5,8 +5,8 @@
 *)
 (* Won't work with first versions as they lack strings *)
 Program Example003Hello;
-Const 
-    HelloWorld = '''Hello, ''world''!''';
+Const
+    HelloWorld = '''Hello'', ''world''!';
     H = 'H';
     Hello = 'Hello';
     World = 'world';
