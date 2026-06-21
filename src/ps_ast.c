@@ -369,7 +369,7 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // PS_AST_CALL: PROCEDURE or FUNCTION CALL
 // =============================================================================
 
-ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, const ps_symbol *executable,
+ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
                                 uint16_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);

@@ -488,6 +488,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         CHAR_VALUE
         break;
     case PS_TYPE_STRING:
+        // TODO use handle for variables at upper level
         STRING_VALUE
         break;
     case PS_TYPE_EXECUTABLE:

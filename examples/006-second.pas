@@ -8,7 +8,7 @@ Program Second;
 Const
     FOO = 11;
     BAR = 22;
-    BAZ = 76.54321;
+    BAZ = 65.4321;
 
 Var
     A, B, C, D: Integer;
@@ -27,5 +27,5 @@ Begin
     R3 := FOO * BAR + BAZ;
     R4 := FOO + BAR * BAZ;
     WriteLn('R=', R, ', R1=', R1, ', R2=', R2, ', R3=', R3, ', R4=', R4);
-    // FOO := 12;
+    // // FOO := 12;
 End.

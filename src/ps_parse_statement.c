@@ -314,12 +314,10 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 {
     PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
 
-#define MAX_WRITE_ARGS 8
-
     size_t n_args = 0;
     ps_ast_node *args[8] = {0};
-    int16_t widths[MAX_WRITE_ARGS] = {0};
-    int16_t precisions[MAX_WRITE_ARGS] = {0};
+    int16_t widths[PS_PARAMETERS_MAX] = {0};
+    int16_t precisions[PS_PARAMETERS_MAX] = {0};
     bool loop = true;
     int16_t width = 0;
     int16_t precision = 0;
@@ -369,7 +367,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         }
         // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
         //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
-        if (n_args >= MAX_WRITE_ARGS)
+        if (n_args >= PS_PARAMETERS_MAX)
             RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
         args[n_args] = expression;
         widths[n_args] = width;

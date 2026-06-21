@@ -597,8 +597,7 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
  * Parse system function call:
  *      identifier [ '(' , expression | variable_reference [ ',' , expression | variable_reference ]* ')' ]
  */
-bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call,
-                                   const ps_symbol *function)
+bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function)
 {
     PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 

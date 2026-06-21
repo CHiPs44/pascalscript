@@ -39,10 +39,11 @@
 #include "ps_version.h"
 
 // #define DEBUGGER_SOURCE "examples/000-minimal.pas"
-// #define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
+#define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUGGER_SOURCE "examples/005-first.pas"
-// #define DEBUGGER_SOURCE "examples/003-hello2.pas"
-#define DEBUGGER_SOURCE "examples/006-second.pas"
+// TODO needs variable handle management
+// #define DEBUGGER_SOURCE "examples/007-strings2.pas"
+// #define DEBUGGER_SOURCE "examples/010-operators.pas"
 
 // Runtime options
 bool bool_eval = false;

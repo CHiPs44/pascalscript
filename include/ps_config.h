@@ -205,7 +205,7 @@ extern "C"
 
 #ifndef PS_PARAMETERS_MAX
 /** @brief Maximum number of parameters for procedures and functions */
-#define PS_PARAMETERS_MAX 8
+#define PS_PARAMETERS_MAX 16
 #endif
 
 #endif /* _PS_CONFIG_H */
