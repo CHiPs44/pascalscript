@@ -125,7 +125,7 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
-    assert(assignment->lvalue->kind==PS_AST_LVALUE_SIMPLE||assignment->lvalue->kind==PS_AST_LVALUE_ARRAY);
+    assert(assignment->lvalue->kind == PS_AST_LVALUE_SIMPLE || assignment->lvalue->kind == PS_AST_LVALUE_ARRAY);
     ps_ast_debug_line(0, "ASSIGNMENT:");
 
     ps_ast_variable_simple *variable_simple = NULL;
@@ -137,7 +137,9 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
     {
     case PS_AST_LVALUE_SIMPLE:
         variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
-        ps_ast_debug_line(0, " - Variable: %s", variable_simple->variable->name);
+        ps_ast_debug_line(0, " - Variable: %s of type %s", variable_simple->variable->name,
+                          ps_value_get_type(variable_simple->variable->value->type));
+        value_node.value.type = variable_simple->variable->value->type;
         if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
             return false;
         value.type = value_node.value.type;

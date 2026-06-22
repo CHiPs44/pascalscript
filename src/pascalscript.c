@@ -38,8 +38,8 @@
 #include "ps_system.h"
 #include "ps_version.h"
 
-// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
-#define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
+#define DEBUGGER_SOURCE "examples/000-minimal.pas"
+// #define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUGGER_SOURCE "examples/005-first.pas"
 // TODO needs variable handle management
 // #define DEBUGGER_SOURCE "examples/007-strings2.pas"
@@ -51,6 +51,7 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
+bool ast_test = false;
 bool run = false;
 bool debug = false;
 bool dump_buffer = false;
@@ -96,18 +97,13 @@ int get_options(int argc, char *argv[])
 {
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "bircadhmnstuv")) != -1)
+    while ((opt = getopt(argc, argv, "abircdhmnstuv")) != -1)
     {
         switch (opt)
         {
         case 'a':
-            if (!ps_ast_test())
-            {
-                fprintf(stderr, "AST tests failed!\n");
-                exit(EXIT_FAILURE);
-            }
-            fprintf(stderr, "AST tests passed!\n");
-            exit(EXIT_SUCCESS);
+            ast_test = true;
+            break;
         case 'c':
             ps_config_report(stdout);
             exit(EXIT_SUCCESS);
@@ -252,6 +248,15 @@ int main(int argc, char *argv[])
     // Force when debugging as I didn't find how to pass command line options
     // trace = true;
     // debug = true;
+
+    ast_test = true;
+    if (ast_test && !ps_ast_test())
+    {
+        fprintf(stderr, "AST tests failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(stderr, "AST tests passed!\n");
+    exit(EXIT_SUCCESS);
 
     current_path = getcwd(NULL, 0);
     if (arg + 1 < argc)
