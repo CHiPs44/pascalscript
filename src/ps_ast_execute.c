@@ -137,8 +137,9 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
     {
     case PS_AST_LVALUE_SIMPLE:
         variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
-        ps_ast_debug_line(0, " - Variable: %s of type %s", variable_simple->variable->name,
-                          ps_value_get_type(variable_simple->variable->value->type));
+        char *variable_name = variable_simple->variable->name;
+        ps_value_type variable_type = ps_value_get_type(variable_simple->variable->value);
+        ps_ast_debug_line(0, " - Variable: %s of type %s", variable_name, ps_value_type_get_name(variable_type));
         value_node.value.type = variable_simple->variable->value->type;
         if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
             return false;
