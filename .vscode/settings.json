@@ -20,5 +20,7 @@
     "terminal.integrated.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
     "terminal.integrated.fontLigatures.enabled": true,
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
-    "terminal.integrated.fontSize": 12
+    "terminal.integrated.fontSize": 12,
+    "kilo-code.new.autocomplete.model": "codestral-2508",
+    "kilo-code.new.autocomplete.provider": "mistral"
 }

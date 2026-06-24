@@ -20,7 +20,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_run_block(ps_interpreter *interpreter, const ps_ast_block *block)
+bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     bool result = false;
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
@@ -41,7 +41,7 @@ bool ps_ast_run_block(ps_interpreter *interpreter, const ps_ast_block *block)
     if (!ps_interpreter_enter_environment(interpreter, block->name, block->symbols, n_values, values))
         goto cleanup;
     // Run block statements
-    result = ps_ast_run_statement_list(interpreter, block->statement_list);
+    result = ps_ast_execute_statement_list(interpreter, block->statement_list);
     // Exit environment
     if (!ps_interpreter_exit_environment(interpreter))
         goto cleanup;
@@ -51,44 +51,41 @@ cleanup:
     return result;
 }
 
-bool ps_ast_run_program(ps_interpreter *interpreter, const ps_ast_block *program)
+bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
-        return false;
+        return ps_interpreter_set_message(interpreter, "Expected PROGRAM AST node");
     ps_ast_debug_line(0, "PROGRAM %s;", program->name);
-    return ps_ast_run_block(interpreter, program);
+    return ps_ast_execute_block(interpreter, program);
 }
 
-bool ps_ast_run_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
+bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
-        return false;
+        return ps_interpreter_set_message(interpreter, "Expected PROCEDURE AST node");
     ps_ast_debug_line(0, "PROCEDURE %s;", procedure->name);
-    return ps_ast_run_block(interpreter, procedure);
+    return ps_ast_execute_block(interpreter, procedure);
 }
 
-bool ps_ast_run_function(ps_interpreter *interpreter, const ps_ast_block *function)
+bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
-        return false;
+        return ps_interpreter_set_message(interpreter, "Expected FUNCTION AST node");
     ps_ast_debug_line(0, "FUNCTION %s;", function->name);
-    return ps_ast_run_block(interpreter, function);
+    return ps_ast_execute_block(interpreter, function);
 }
 
-bool ps_ast_run_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
+bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
 {
-    if (statement_list == NULL)
-    {
-        ps_ast_debug_line(0, "STATEMENT_LIST: NULL");
-        return true;
-    }
+    if (!ps_ast_node_check_kind((const ps_ast_node *)statement_list, PS_AST_STATEMENT_LIST))
+        return ps_interpreter_set_message(interpreter, "Expected STATEMENT_LIST AST node");
     ps_ast_debug_line(0, "STATEMENT_LIST %zu:", statement_list->count);
     for (size_t i = 0; i < statement_list->count; i++)
     {
-        ps_ast_debug_line(0, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
+        ps_ast_debug_line(1, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
         assert(statement_list->statements != NULL);
         assert(statement_list->statements[i] != NULL);
-        if (!ps_ast_run_statement(interpreter, statement_list->statements[i]))
+        if (!ps_ast_execute_statement(interpreter, statement_list->statements[i]))
         {
             ps_ast_debug_line(0, "STATEMENT %zu failed", i + 1);
             return false;
@@ -98,30 +95,29 @@ bool ps_ast_run_statement_list(ps_interpreter *interpreter, const ps_ast_stateme
     return true;
 }
 
-bool ps_ast_run_statement(ps_interpreter *interpreter, const ps_ast_node *statement)
+bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement)
 {
     assert(statement != NULL);
     switch (statement->kind)
     {
     case PS_AST_ASSIGNMENT:
-        return ps_ast_run_assignment(interpreter, (const ps_ast_assignment *)statement);
+        return ps_ast_execute_assignment(interpreter, (const ps_ast_assignment *)statement);
     case PS_AST_IF:
-        return ps_ast_run_if(interpreter, (const ps_ast_if *)statement);
+        return ps_ast_execute_if(interpreter, (const ps_ast_if *)statement);
     case PS_AST_WHILE:
-        return ps_ast_run_while(interpreter, (const ps_ast_while *)statement);
+        return ps_ast_execute_while(interpreter, (const ps_ast_while *)statement);
     case PS_AST_REPEAT:
-        return ps_ast_run_repeat(interpreter, (const ps_ast_repeat *)statement);
+        return ps_ast_execute_repeat(interpreter, (const ps_ast_repeat *)statement);
     case PS_AST_FOR:
-        return ps_ast_run_for(interpreter, (const ps_ast_for *)statement);
+        return ps_ast_execute_for(interpreter, (const ps_ast_for *)statement);
     case PS_AST_PROCEDURE_CALL:
-        return ps_ast_run_procedure_call(interpreter, (const ps_ast_call *)statement);
+        return ps_ast_execute_procedure_call(interpreter, (const ps_ast_call *)statement);
     default:
-        ps_ast_debug_line(0, "Error: unexpected statement kind %d\n", statement->kind);
-        return false;
+        return ps_interpreter_set_message(interpreter, "Unexpected statement kind %d\n", statement->kind);
     }
 }
 
-bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
+bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
@@ -160,7 +156,7 @@ bool ps_ast_run_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
     return true;
 }
 
-bool ps_ast_run_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
+bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
 {
     assert(if_statement != NULL);
     assert(if_statement->kind == PS_AST_IF);
@@ -174,16 +170,16 @@ bool ps_ast_run_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
     if (condition_value.value.data.b)
     {
         ps_ast_debug_line(0, " - Then branch: %zu statements", if_statement->then_branch->count);
-        return ps_ast_run_statement_list(interpreter, if_statement->then_branch);
+        return ps_ast_execute_statement_list(interpreter, if_statement->then_branch);
     }
     else
     {
         ps_ast_debug_line(0, " - Else branch: %zu statements", if_statement->else_branch->count);
-        return ps_ast_run_statement_list(interpreter, if_statement->else_branch);
+        return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
     }
 }
 
-bool ps_ast_run_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
+bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
 {
     assert(while_statement != NULL);
     assert(while_statement->kind == PS_AST_WHILE);
@@ -200,13 +196,13 @@ bool ps_ast_run_while(ps_interpreter *interpreter, const ps_ast_while *while_sta
         if (!condition_value.value.data.b)
             break;
         ps_ast_debug_line(0, " - Body");
-        if (!ps_ast_run_statement_list(interpreter, while_statement->body))
+        if (!ps_ast_execute_statement_list(interpreter, while_statement->body))
             return false;
     }
     return true;
 }
 
-bool ps_ast_run_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement)
+bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement)
 {
     assert(repeat_statement != NULL);
     assert(repeat_statement->kind == PS_AST_REPEAT);
@@ -215,7 +211,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_
     do
     {
         ps_ast_debug_line(0, " - Body");
-        if (!ps_ast_run_statement_list(interpreter, repeat_statement->body))
+        if (!ps_ast_execute_statement_list(interpreter, repeat_statement->body))
             return false;
         if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
@@ -226,7 +222,7 @@ bool ps_ast_run_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_
     return true;
 }
 
-bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
+bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
 {
     assert(for_statement != NULL);
     assert(for_statement->kind == PS_AST_FOR);
@@ -267,7 +263,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
             break;
         }
         ps_ast_debug_line(0, " - Body: %d statements", for_statement->body->count);
-        if (!ps_ast_run_statement_list(interpreter, for_statement->body))
+        if (!ps_ast_execute_statement_list(interpreter, for_statement->body))
             return false;
         bool range_check = interpreter->range_check;
         interpreter->range_check = false;
@@ -283,7 +279,7 @@ bool ps_ast_run_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
     return true;
 }
 
-bool ps_ast_run_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
+bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
 {
     ps_ast_debug_line(0, " - System procedure: %s with %zu argument%s", procedure_call->executable->name,
                       procedure_call->n_args, procedure_call->n_args > 1 ? "s" : "");
@@ -340,21 +336,21 @@ bool ps_ast_run_procedure_call_system(ps_interpreter *interpreter, const ps_ast_
     }
 }
 
-bool ps_ast_run_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
+bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
     ps_ast_debug_line(0, "PROCEDURE CALL %s", procedure_call->executable->name);
     if (procedure_call->executable->system)
     {
-        return ps_ast_run_procedure_call_system(interpreter, procedure_call);
+        return ps_ast_execute_procedure_call_system(interpreter, procedure_call);
     }
     ps_interpreter_set_message(interpreter, "User procedure calls not implemented yet");
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
     return false;
 }
 
-bool ps_ast_run_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
+bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
 {
     assert(function_call != NULL);
     assert(function_call->kind == PS_AST_FUNCTION_CALL);

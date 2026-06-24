@@ -161,5 +161,5 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
     assert(NULL != interpreter);
     assert(NULL != program);
 
-    return ps_ast_run_program(interpreter, program);
+    return ps_ast_execute_program(interpreter, program);
 }

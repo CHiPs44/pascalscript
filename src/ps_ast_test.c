@@ -146,7 +146,7 @@ bool ps_ast_test_minimal()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     if (!result)
     {
         fprintf(stderr, "Error running the program: %s\n", interpreter->message);
@@ -229,7 +229,7 @@ bool ps_ast_test_assignment()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    bool result = ps_ast_run_program(interpreter, block_program);
+    bool result = ps_ast_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -367,7 +367,7 @@ bool ps_ast_test_if_then_else()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -478,7 +478,7 @@ bool ps_ast_test_while_do()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -584,7 +584,7 @@ bool ps_ast_test_repeat_until()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -700,7 +700,7 @@ bool ps_ast_test_for_do()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -789,7 +789,7 @@ bool ps_ast_test_hello()
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_run_program(interpreter, block_program);
+    result = ps_ast_execute_program(interpreter, block_program);
     if (!result)
     {
         ps_ast_debug_line(0, "Error running the program: %s (%d)", interpreter->error,

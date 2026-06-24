@@ -64,6 +64,9 @@ GRTAGS
 GTAGS
 .vscode/GTEMP.pas
 
+# Kilo
+.kilo/**
+
 # Project
 pascalscript
 include/ps_version.h
