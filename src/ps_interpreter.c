@@ -96,6 +96,17 @@ bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
     return true;
 }
 
+ps_value *ps_interpreter_get_value(ps_interpreter *interpreter, ps_symbol *symbol)
+{
+    assert(NULL != interpreter);
+    assert(NULL != symbol);
+    if (symbol->kind != PS_SYMBOL_VARIABLE)
+        return NULL;
+    if (symbol->index >= interpreter->n_values)
+        return NULL;
+    return &interpreter->values[symbol->index];
+}
+
 ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name, bool local)
 {
     assert(interpreter != NULL);

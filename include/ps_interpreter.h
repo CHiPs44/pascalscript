@@ -31,8 +31,8 @@ extern "C"
     typedef struct s_ps_interpreter
     {
         ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
-        ps_string_heap *string_heap; /** @brief String heap to hold string constants                           */
-        char message[128];           /** @brief Additional error message                                       */
+        ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
+        char message[128];           /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         ps_debug_level debug : 3;    /** @brief Debug level from FATAL to VERBOSE                              */
