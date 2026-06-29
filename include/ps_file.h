@@ -16,19 +16,21 @@ extern "C"
 {
 #endif
 
+    extern ps_value *ps_ioresult;
+
     /** @brief  */
     typedef struct s_ps_file
     {
-        FILE *f;                  /** @brief "C" file pointer */
-        ps_string *filename;      /** @brief File name */
-        ps_type_definition *type; /** @brief Type definition of the file : File (binary), Text, File Of Type (structured) */
-        ps_unsigned record_size;  /** @brief Record size for binary files */
-        bool is_text;             /** @brief true if text file, false if binary or structured */
-        bool is_open;             /** @brief true if file is open */
-
+        FILE *f;                  /** @brief "C" file pointer                                 */
+        ps_string *filename;      /** @brief File name                                        */
+        ps_type_definition *type; /** @brief Type definition: Binary, Text, Structured        */
+        ps_unsigned record_size;  /** @brief Record size for binary files                     */
+        bool is_read : 1;         /** @brief File opened for reading                          */
+        bool is_write : 1;        /** @brief File opened for writing                          */
+        bool is_append : 1;       /** @brief File opened for append                           */
+        bool is_text : 1;         /** @brief true if text file, false if binary or structured */
+        bool is_open : 1;         /** @brief true if file is open                             */
     } __attribute__((__packed__)) ps_file;
-
-    extern ps_value *ps_ioresult;
 
 #define PS_FILE_SIZE sizeof(ps_file)
 

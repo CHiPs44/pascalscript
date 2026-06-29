@@ -28,7 +28,6 @@ extern "C"
     ps_array_data *ps_array_alloc_data(const ps_symbol *type_symbol);
     /** @brief Free array and values */
     ps_array_data *ps_array_free_data(ps_array_data *data);
-
     /** @brief Get array type definition */
     ps_type_definition *ps_array_get_type_def(const ps_symbol *var_or_type);
     /** @brief Get array dimensions count */
