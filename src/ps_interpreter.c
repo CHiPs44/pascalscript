@@ -15,6 +15,7 @@
 #include "ps_interpreter.h"
 #include "ps_memory.h"
 #include "ps_procedures.h"
+#include "ps_stack.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
@@ -28,6 +29,9 @@ ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *st
         return NULL;
     interpreter->system = system;
     interpreter->string_heap = string_heap;
+    interpreter->stack = ps_stack_alloc(PS_INTERPRETER_STACK_SIZE);
+    if (interpreter->stack == NULL)
+        return ps_interpreter_free(interpreter);
     interpreter->level = 0;
     interpreter->error = PS_ERROR_NONE;
     memset(interpreter->message, 0, sizeof(interpreter->message));
@@ -42,11 +46,36 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
 {
     if (interpreter != NULL)
     {
-        if (interpreter->string_heap != NULL)
-            interpreter->string_heap = ps_string_heap_free(interpreter->string_heap);
+        if (interpreter->stack != NULL)
+            interpreter->stack = ps_stack_free(interpreter->stack);
         ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);
     }
     return NULL;
+}
+
+bool ps_interpreter_init_system_variables(ps_interpreter *interpreter)
+{
+    assert(NULL != interpreter);
+    assert(NULL != interpreter->system);
+    assert(ps_stack_is_empty(interpreter->stack));
+
+    size_t n_vars = 0;
+
+    for (size_t i = 0; i < interpreter->system->size; i++)
+    {
+        ps_symbol *symbol = interpreter->system->symbols[i];
+        if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+            n_vars += 1;
+    }
+    ps_frame *frame = ps_frame_alloc(n_vars);
+    if (frame == NULL)
+        return false;
+    if (NULL == ps_stack_push(interpreter->stack, frame))
+    {
+        frame = ps_frame_free(frame);
+        return false;
+    }
+    return true;
 }
 
 bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error)
@@ -74,38 +103,62 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
     return true;
 }
 
-bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
-                                      size_t n_values, ps_value *values)
+bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
+                                size_t n_vars)
 {
-    (void)n_values;
-    (void)values;
     assert(NULL != interpreter);
+
     interpreter->level += 1;
     if (interpreter->debug >= PS_DEBUG_INFO)
-        fprintf(stderr, "ENTER ENVIRONMENT level=%d '%s' with %zu symbol%s\n", interpreter->level, name,
+        fprintf(stderr, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level, name,
                 symbols == NULL ? 0 : symbols->used, symbols != NULL && symbols->used > 1 ? "s" : "");
+    ps_frame *frame = ps_frame_alloc(n_vars);
+    if (frame == NULL)
+        return false;
+    if (ps_stack_is_full(interpreter->stack))
+    {
+        frame = ps_frame_free(frame);
+        interpreter->error = PS_ERROR_STACK_OVERFLOW;
+        return ps_interpreter_set_message(interpreter, "Stack overflow at level %d for '%s'", name);
+    }
+    if (NULL == ps_stack_push(interpreter->stack, frame))
+    {
+        frame = ps_frame_free(frame);
+        interpreter->error = PS_ERROR_STACK_OVERFLOW;
+        return ps_interpreter_set_message(interpreter, "Stack error at level %d for '%s'", name);
+    }
     return true;
 }
 
-bool ps_interpreter_exit_environment(ps_interpreter *interpreter)
+bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
     interpreter->level -= 1;
     if (interpreter->debug >= PS_DEBUG_INFO)
-        fprintf(stderr, "EXIT ENVIRONMENT level=%d\n", interpreter->level);
+        fprintf(stderr, "EXIT FRAME level=%d\n", interpreter->level);
+    if (ps_stack_is_empty(interpreter->stack))
+    {
+        interpreter->error = PS_ERROR_STACK_UNDERFLOW;
+        return ps_interpreter_set_message(interpreter, "Stack underflow at level %d", interpreter->level);
+    }
+    ps_frame *frame = ps_stack_pop(interpreter->stack);
+    if (frame == NULL)
+    {
+        interpreter->error = PS_ERROR_STACK_UNDERFLOW;
+        return ps_interpreter_set_message(interpreter, "Stack error at level %d", interpreter->level);
+    }
+    frame = ps_frame_free(frame);
     return true;
 }
 
-ps_value *ps_interpreter_get_value(ps_interpreter *interpreter, ps_symbol *symbol)
-{
-    assert(NULL != interpreter);
-    assert(NULL != symbol);
-    if (symbol->kind != PS_SYMBOL_VARIABLE)
-        return NULL;
-    if (symbol->index >= interpreter->n_values)
-        return NULL;
-    return &interpreter->values[symbol->index];
-}
+// ps_value *ps_interpreter_get_value(ps_interpreter *interpreter, ps_symbol *symbol)
+// {
+//     assert(NULL != interpreter);
+//     assert(NULL != symbol);
+//     if (symbol->kind != PS_SYMBOL_KIND_VARIABLE)
+//         return NULL;
+//     ps_handle handle = symbol->value->data.h;
+// }
 
 ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name, bool local)
 {

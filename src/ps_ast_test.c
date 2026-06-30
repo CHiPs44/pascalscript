@@ -91,7 +91,7 @@ ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Enter environment for the program %s", block_program->name);
-    ASSERT(ps_interpreter_enter_environment(interpreter, block_program->name, NULL, 0, NULL));
+    ASSERT(ps_interpreter_enter_frame(interpreter, block_program->name, NULL, 0, NULL));
 
     ps_ast_debug_line(0, "Check PROGRAM symbol");
     ps_symbol *symbol_program = ps_symbol_table_get(block_program->symbols, block_program->name);
@@ -109,7 +109,7 @@ cleanup:
 bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Exit environment for the program %s", block_program->name);
-    ASSERT(ps_interpreter_exit_environment(interpreter));
+    ASSERT(ps_interpreter_exit_frame(interpreter));
     ps_ast_debug_line(0, "Free interpreter");
     ps_system_free(interpreter->system);
     interpreter->system = NULL;

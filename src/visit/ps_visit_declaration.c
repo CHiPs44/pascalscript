@@ -36,7 +36,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN
     // Register program in symbol table and visit its block
-    if (!ps_interpreter_enter_environment(interpreter, identifier))
+    if (!ps_interpreter_enter_frame(interpreter, identifier))
         TRACE_ERROR("ENTER ENVIRONMENT")
     program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
     if (!ps_interpreter_add_symbol(interpreter, program))
@@ -47,7 +47,7 @@ bool ps_visit_program(ps_interpreter *interpreter, ps_interpreter_mode mode)
     // Block with declarations and compound statement
     if (!ps_visit_block(interpreter, mode))
         TRACE_ERROR("BLOCK");
-    if (!ps_interpreter_exit_environment(interpreter))
+    if (!ps_interpreter_exit_frame(interpreter))
         TRACE_ERROR("EXIT ENVIRONMENT");
     // Expect '.' at the end of program declaration
     EXPECT_TOKEN(PS_TOKEN_DOT)

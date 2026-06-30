@@ -12,6 +12,7 @@
 #include "ps_ast.h"
 #include "ps_debug.h"
 #include "ps_error.h"
+#include "ps_stack.h"
 #include "ps_string_heap.h"
 #include "ps_symbol_table.h"
 #include "ps_value.h"
@@ -21,17 +22,15 @@ extern "C"
 {
 #endif
 
-#ifndef PS_INTERPRETER_ENVIRONMENTS
-#define PS_INTERPRETER_ENVIRONMENTS 1024u
+#ifndef PS_INTERPRETER_STACK_SIZE
+#define PS_INTERPRETER_STACK_SIZE 1024u
 #endif
-
-#define PS_INTERPRETER_ENVIRONMENT_SYSTEM 0u
-#define PS_INTERPRETER_ENVIRONMENT_PROGRAM 1u
 
     typedef struct s_ps_interpreter
     {
         ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
+        ps_stack *stack;             /** @brief Stack to hold variable values                                  */
         char message[128];           /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
@@ -67,9 +66,9 @@ extern "C"
     /** @brief Set message with format */
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
-    bool ps_interpreter_enter_environment(ps_interpreter *interpreter, const ps_identifier name,
-                                          ps_symbol_table *symbols, size_t n_values, ps_value *values);
-    bool ps_interpreter_exit_environment(ps_interpreter *interpreter);
+    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
+                                    size_t n_vars);
+    bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
 
     /** @brief Find symbol by name in current block (or its parents if not local) */
     ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name,

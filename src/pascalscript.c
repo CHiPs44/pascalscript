@@ -196,11 +196,6 @@ bool compile(const char *source_file)
     if (compiler->debug >= PS_DEBUG_TRACE)
         printf("================================ END COMPILATION ===============================\n");
 
-    // /* List symbols */
-    // if (dump_symbols)
-    //     ps_symbol_table_dump(NULL, "End of compilation",
-    //                          compiler->environments[PS_INTERPRETER_ENVIRONMENT_SYSTEM]->symbols);
-
     return ok;
 }
 
@@ -293,13 +288,13 @@ int main(int argc, char *argv[])
     free(current_path);
     current_path = NULL;
 
-    /* Initialize compiler */
-    system_symbols = ps_system_alloc();
-    // ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
-
     // trace = false;
     // debug = false;
     // verbose = false;
+
+    /* Initialize compiler */
+    system_symbols = ps_system_alloc();
+    // ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
 
     compiler = ps_compiler_alloc(system_symbols);
     if (compiler == NULL)
@@ -333,6 +328,9 @@ int main(int argc, char *argv[])
         /* Terminate interpreter */
         interpreter = ps_interpreter_free(interpreter);
     }
+
+    compiler = ps_compiler_free(compiler);
+    system_symbols = ps_symbol_table_free(system_symbols);
 
     if (memory)
         ps_memory_debug(stderr);

@@ -102,8 +102,8 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)M_PI               
 
 /* clang-format off */
 
-PS_SYSTEM_VARIABLE(integer, ioresult, "IORESULT", i, (ps_integer)0                                                    );
-PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", i, (ps_integer)0                                                    );
+PS_SYSTEM_VARIABLE(integer, ioresult, "IORESULT", h, (ps_handle)0                                                     );
+PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", h, (ps_handle)1                                                     );
 
 /**********************************************************************************************************************/
 /* BITNESS & VERSION                                                                                                  */

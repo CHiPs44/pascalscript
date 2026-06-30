@@ -38,12 +38,12 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
     else
         values = NULL;
     // Enter environment
-    if (!ps_interpreter_enter_environment(interpreter, block->name, block->symbols, n_values, values))
+    if (!ps_interpreter_enter_frame(interpreter, block->name, block->symbols, n_values, values))
         goto cleanup;
     // Run block statements
     result = ps_ast_execute_statement_list(interpreter, block->statement_list);
     // Exit environment
-    if (!ps_interpreter_exit_environment(interpreter))
+    if (!ps_interpreter_exit_frame(interpreter))
         goto cleanup;
 cleanup:
     // Handle variable release
