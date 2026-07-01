@@ -165,12 +165,6 @@ extern "C"
         ps_ast_node *expression; /** @brief expression to assign to variable */
     } __attribute__((__packed__)) ps_ast_assignment;
 
-    /** @brief Abstract Syntax Tree expression */
-    typedef struct s_ps_ast_expression
-    {
-        PS_AST_NODE_COMMON
-    } __attribute__((__packed__)) ps_ast_expression;
-
     /** @brief Expression: literal value, can be integer, unsigned, real, char, string, ... */
     typedef struct s_ps_ast_value
     {

@@ -33,6 +33,7 @@ extern "C"
         ps_symbol_table_size size; /** @brief max count of symbols */
         ps_symbol_table_size more; /** @brief count of symbols to grow with */
         ps_symbol_table_size used; /** @brief current count of symbols */
+        ps_symbol_table_size vars; /** @brief count of variable symbols */
         ps_symbol **symbols;       /** @brief symbols array */
     } __attribute__((__packed__)) ps_symbol_table;
 
