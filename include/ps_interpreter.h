@@ -66,8 +66,10 @@ extern "C"
     /** @brief Set message with format */
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
-    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols,
-                                    size_t n_vars);
+    /** @brief Enter a new frame (block) with given name and symbol table */
+    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols);
+
+    /** @brief Exit current frame (block) */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
 
     /** @brief Find symbol by name in current block (or its parents if not local) */

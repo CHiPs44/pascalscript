@@ -21,6 +21,7 @@ ps_frame *ps_frame_alloc(size_t size)
 ps_frame *ps_frame_free(ps_frame *frame)
 {
     ps_memory_free(PS_MEMORY_ENVIRONMENT, frame);
+    return NULL;
 }
 
 ps_stack *ps_stack_alloc(size_t size)
@@ -38,6 +39,7 @@ ps_stack *ps_stack_free(ps_stack *stack)
     for (size_t i = 0; i < stack->sp; i++)
         stack->frames[i] = ps_frame_free(stack->frames[i]);
     ps_memory_free(PS_MEMORY_ENVIRONMENT, stack);
+    return NULL;
 }
 
 ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame)

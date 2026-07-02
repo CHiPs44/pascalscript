@@ -47,6 +47,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_ENVIRONMENT_OVERFLOW, "Environment overflow"},
     {PS_ERROR_STACK_UNDERFLOW, "Stack empty"},
     {PS_ERROR_STACK_OVERFLOW, "Stack overflow"},
+    {PS_ERROR_STACK_ERROR, "Stack error"},
     {PS_ERROR_SYMBOL_NOT_ADDED, "Symbol not added"},
     {PS_ERROR_SYMBOL_NOT_FOUND, "Symbol not found"},
     {PS_ERROR_SYMBOL_EXISTS, "Symbol already exists"},

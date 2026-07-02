@@ -17,6 +17,7 @@
 #include "ps_lexer.h"
 #include "ps_memory.h"
 #include "ps_token.h"
+#include "ps_tools.h"
 
 bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
 bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
@@ -351,7 +352,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
 
 #define CHECK_STRING_OVERFLOW                                                                                          \
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
-        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many characters in string value");
+        return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
 /**
  * Read a single character or a string value.
@@ -374,6 +375,8 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         if (c == '\0')
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
                                          "Unexpected end of file in char or string value");
+        if (c == '\n')
+            return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
         if (c == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
@@ -408,8 +411,7 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     else
     {
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
-        strncpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN);
-        lexer->current_token.value.s[PS_STRING_MAX_LEN] = '\0';
+        ps_strscpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN + 1);
     }
     return true;
 }
@@ -634,9 +636,7 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         snprintf(value, sizeof(value) - 1, "CHAR '%c'", lexer->current_token.value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
-        // s t r l c p y(string, lexer->current_token.value.s, sizeof(string));
-        strncpy(string, lexer->current_token.value.s, sizeof(string) - 1);
-        string[sizeof(string) - 1] = '\0';
+        ps_strscpy(string, lexer->current_token.value.s, sizeof(string) - 1);
         snprintf(value, sizeof(value) - 1, "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:

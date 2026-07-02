@@ -7,6 +7,7 @@
 #ifndef _PS_SYMBOL_TABLE_H
 #define _PS_SYMBOL_TABLE_H
 
+#include "ps_debug.h"
 #include "ps_symbol.h"
 
 #ifdef __cplusplus
@@ -40,9 +41,9 @@ extern "C"
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
 
     /** @brief Enable/disable trace logging */
-    extern bool ps_symbol_table_trace;
+    extern ps_debug_level ps_symbol_table_debug_level;
 
-    /** @brief Allocate and initialize symbol table, use 0 for default size (PS_SYMBOL_TABLE_DEFAULT_SIZE) */
+    /** @brief Allocate and initialize symbol table, use 0 for default size and/or more */
     ps_symbol_table *ps_symbol_table_alloc(ps_symbol_table_size size, ps_symbol_table_size more);
 
     /** @brief Free symbol table */
