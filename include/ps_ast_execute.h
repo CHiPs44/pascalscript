@@ -14,33 +14,34 @@ extern "C"
 {
 #endif
 
-    /** @brief Run a Pascal program */
+    /** @brief Execute program */
     bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program);
-    /** @brief Run a Pascal procedure */
+    /** @brief Execute procedure */
     bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure);
-    /** @brief Run a Pascal function */
+    /** @brief Execute function */
     bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
-    /** @brief Run a Pascal block */
+    /** @brief Execute block */
     bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block);
-    /** @brief Run a list of Pascal statements */
+    /** @brief Execute a list of Pascal statements */
     bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
-    /** @brief Run a Pascal statement */
+    /** @brief Execute statement */
     bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement);
-    /** @brief Run a Pascal assignment */
+    /** @brief Execute assignment */
     bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment);
-    /** @brief Run a Pascal if statement */
+    /** @brief Execute if statement */
     bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement);
-    /** @brief Run a Pascal while statement */
+    /** @brief Execute while statement */
     bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement);
-    /** @brief Run a Pascal repeat statement */
+    /** @brief Execute repeat statement */
     bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement);
-    /** @brief Run a Pascal for statement */
+    /** @brief Execute for statement */
     bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement);
-    /** @brief Run a Pascal procedure call */
+    /** @brief Execute procedure call */
     bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
-    /** @brief Run a Pascal function call */
-    bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result);
-    /** @brief Evaluate a Pascal expression */
+    /** @brief Execute function call */
+    bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                      ps_ast_value *result);
+    /** @brief Evaluate an expression */
     bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
 
 #ifdef __cplusplus

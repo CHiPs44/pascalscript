@@ -10,13 +10,16 @@
 
 ssize_t ps_strscpy(char *dest, const char *src, ssize_t size)
 {
+    ssize_t i;
+
     if (size == 0)
         return -EINVAL;
-    ssize_t i;
+
     for (i = 0; i < size - 1 && src[i] != '\0'; i++)
     {
         dest[i] = src[i];
     }
     dest[i] = '\0';
+
     return (src[i] != '\0') ? -E2BIG : i;
 }
