@@ -4,29 +4,33 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include "ps_stack.h"
+#include <string.h>
+
 #include "ps_memory.h"
+#include "ps_stack.h"
 #include "ps_value_data.h"
 
 ps_frame *ps_frame_alloc(size_t size)
 {
     // NB: works even if size is 0
-    ps_frame *frame = ps_memory_malloc(PS_MEMORY_ENVIRONMENT, sizeof(ps_frame) + size * sizeof(ps_value_data));
+    size_t bytes = sizeof(ps_frame) + size * sizeof(ps_value_data);
+    ps_frame *frame = ps_memory_malloc(PS_MEMORY_STACK, bytes);
     if (frame == NULL)
         return NULL;
+    memset(frame, 0, bytes);
     frame->size = size;
     return frame;
 }
 
 ps_frame *ps_frame_free(ps_frame *frame)
 {
-    ps_memory_free(PS_MEMORY_ENVIRONMENT, frame);
+    ps_memory_free(PS_MEMORY_STACK, frame);
     return NULL;
 }
 
 ps_stack *ps_stack_alloc(size_t size)
 {
-    ps_stack *stack = ps_memory_malloc(PS_MEMORY_ENVIRONMENT, sizeof(ps_stack) + size * sizeof(ps_frame *));
+    ps_stack *stack = ps_memory_malloc(PS_MEMORY_STACK, sizeof(ps_stack) + size * sizeof(ps_frame *));
     if (stack == NULL)
         return NULL;
     stack->size = size;
@@ -38,7 +42,7 @@ ps_stack *ps_stack_free(ps_stack *stack)
 {
     for (size_t i = 0; i < stack->sp; i++)
         stack->frames[i] = ps_frame_free(stack->frames[i]);
-    ps_memory_free(PS_MEMORY_ENVIRONMENT, stack);
+    ps_memory_free(PS_MEMORY_STACK, stack);
     return NULL;
 }
 
@@ -60,19 +64,19 @@ ps_frame *ps_stack_pop(ps_stack *stack)
     return frame;
 }
 
-ps_frame *ps_stack_top(ps_stack *stack)
+ps_frame *ps_stack_top(const ps_stack *stack)
 {
     if (stack->sp == 0)
         return NULL;
     return stack->frames[stack->sp - 1];
 }
 
-bool ps_stack_is_empty(ps_stack *stack)
+bool ps_stack_is_empty(const ps_stack *stack)
 {
     return stack->sp == 0;
 }
 
-bool ps_stack_is_full(ps_stack *stack)
+bool ps_stack_is_full(const ps_stack *stack)
 {
     return stack->sp == stack->size;
 }

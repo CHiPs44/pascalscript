@@ -59,13 +59,13 @@ extern "C"
 
     /** @brief Get the top frame */
     /** @return NULL if stack is empty */
-    ps_frame *ps_stack_top(ps_stack *stack);
+    ps_frame *ps_stack_top(const ps_stack *stack);
 
     /** @brief Check if stack is empty */
-    bool ps_stack_is_empty(ps_stack *stack);
+    bool ps_stack_is_empty(const ps_stack *stack);
 
     /** @brief Check if stack is full */
-    bool ps_stack_is_full(ps_stack *stack);
+    bool ps_stack_is_full(const ps_stack *stack);
 
 #ifdef __cplusplus
 }

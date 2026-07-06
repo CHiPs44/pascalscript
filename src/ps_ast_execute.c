@@ -370,21 +370,38 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         return ps_interpreter_set_message(interpreter, "Expected procedure, got %s",
                                           ps_ast_node_get_kind_name(node->kind));
     ps_ast_block *procedure = (ps_ast_block *)node;
-    // Allocate frame for procedure
-    bool ok = ps_interpreter_enter_frame(interpreter, procedure_call->executable->name, procedure->symbols);
-    if (ok)
+    // Check if argument count is same as procedure declaration
+    if (procedure_call->n_args != procedure->signature->parameter_count)
     {
-        // TODO evaluate arguments and store them in frame
-        if (procedure_call->n_args != procedure->signature->parameter_count)
-            return ps_interpreter_set_message(interpreter, "Expected %zu arguments, got %zu",
-                                              procedure->signature->parameter_count, procedure_call->n_args);
-        // TODO evaluate arguments / pass
-        // ...
-        // Execute procedure with arguments on top frame of stack
-        ok = ps_ast_execute_block(interpreter, procedure);
-        if (!ps_interpreter_exit_frame(interpreter))
+        return ps_interpreter_set_message(interpreter, "Expected %zu arguments, got %zu",
+                                          procedure->signature->parameter_count, procedure_call->n_args);
+    }
+    // Evaluate arguments
+    ps_value parameters[procedure_call->n_args];
+    ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    for (size_t i = 0; i < procedure_call->n_args; i++)
+    {
+        if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
+            return false;
+        ps_ast_debug_line(interpreter->level, "Argument: %s", ps_value_get_display_string(&arg_value.value, 0, 0));
+        parameters[i] = arg_value.value;
+    }
+    // Allocate frame for procedure
+    if (!ps_interpreter_enter_frame(interpreter, procedure))
+        return false;
+    // Store arguments in frame
+    for (size_t i = 0; i < procedure_call->n_args; i++)
+    {
+        ps_symbol *symbol = ps_symbol_table_get(procedure->symbols, procedure->signature->parameters[i].name);
+        if (symbol == NULL)
+            return ps_interpreter_set_message(interpreter, "Parameter %s not found",
+                                              procedure->signature->parameters[i]->name);
+        if (!ps_interpreter_copy_value(interpreter, &parameters[i], &symbol->value))
             return false;
     }
+    // Execute procedure with arguments on top frame of stack
+    bool ok = ps_ast_execute_block(interpreter, procedure);
+    ps_interpreter_exit_frame(interpreter);
     return ok;
 }
 

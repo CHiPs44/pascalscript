@@ -28,7 +28,7 @@ void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level,
     {
         va_list args;
         va_start(args, format);
-        vfprintf(stderr, format, args);
+        vfprintf(stderr, format, args); // NOSONAR
         va_end(args);
     }
 }
@@ -59,10 +59,14 @@ ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *st
     ps_frame *frame = ps_frame_alloc(system->vars);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
+    for (size_t i = 0; i < system->vars; i++)
+    {
+        frame->data[i].v = 0;
+    }
     // Push system frame on stack
     if (NULL == ps_stack_push(interpreter->stack, frame))
     {
-        frame = ps_frame_free(frame);
+        ps_frame_free(frame);
         return ps_interpreter_free(interpreter);
     }
     return interpreter;
@@ -104,25 +108,26 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
     return true;
 }
 
-bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_identifier name, ps_symbol_table *symbols)
+bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block, const ps_ast_block *parent)
 {
     assert(NULL != interpreter);
 
     interpreter->level += 1;
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
-                       name, symbols == NULL ? 0 : symbols->used, symbols != NULL && symbols->used > 1 ? "s" : "");
-    ps_frame *frame = ps_frame_alloc(symbols->vars);
+                       block->name, block->symbols == NULL ? 0 : block->symbols->used,
+                       block->symbols != NULL && block->symbols->used > 1 ? "s" : "");
+    ps_frame *frame = ps_frame_alloc(block->symbols->vars);
     if (frame == NULL)
         return false;
     if (ps_stack_is_full(interpreter->stack))
     {
-        frame = ps_frame_free(frame);
+        ps_frame_free(frame);
         interpreter->error = PS_ERROR_STACK_OVERFLOW;
         return ps_interpreter_set_message(interpreter, "Stack overflow at level %d for '%s'", name);
     }
     if (NULL == ps_stack_push(interpreter->stack, frame))
     {
-        frame = ps_frame_free(frame);
+        ps_frame_free(frame);
         interpreter->error = PS_ERROR_STACK_ERROR;
         return ps_interpreter_set_message(interpreter, "Stack error at level %d for '%s': push failed", name);
     }
@@ -145,7 +150,7 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
         interpreter->error = PS_ERROR_STACK_ERROR;
         return ps_interpreter_set_message(interpreter, "Stack error at level %d: pop failed", interpreter->level);
     }
-    frame = ps_frame_free(frame);
+    ps_frame_free(frame);
     return true;
 }
 
