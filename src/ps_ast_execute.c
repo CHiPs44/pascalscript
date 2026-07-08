@@ -436,7 +436,12 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     case PS_AST_RVALUE_SIMPLE:
         const ps_ast_variable_simple *variable_simple = (const ps_ast_variable_simple *)expression;
         ps_ast_debug_line(interpreter->level, "Variable: %s", variable_simple->variable->name);
-        if (!ps_interpreter_copy_value(interpreter, variable_simple->variable->value, &result->value))
+        ps_handle handle = variable_simple->variable->value->data.h;
+        ps_ast_debug_line(interpreter->level, "Handle: %d", handle);
+        const ps_frame *frame = ps_stack_top(interpreter->stack);
+        ps_value_data data = frame->data[handle];
+        ps_value value = {.allocated = false, .type = variable_simple->variable->value->type, .data = data};
+        if (!ps_interpreter_copy_value(interpreter, &value, &result->value))
             return false;
         break;
     case PS_AST_RVALUE_ARRAY:
@@ -455,9 +460,10 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         const ps_ast_unary_operation *unary_operation = (const ps_ast_unary_operation *)expression;
         ps_ast_debug_line(interpreter->level, "Unary operation: %s",
                           ps_operator_unary_get_name(unary_operation->operator));
-        // first evaluate operand, then apply operator to it
+        // first evaluate operand
         if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand))
             return false;
+        // then apply operator to it
         if (!ps_operator_unary_eval(interpreter, &operand.value, &result->value, unary_operation->operator))
             return false;
         break;

@@ -154,34 +154,25 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     return true;
 }
 
-// ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name, bool local)
-// {
-//     assert(interpreter != NULL);
-//     assert(name != NULL);
-//     ps_symbol *symbol = NULL;
+bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)
+{
+    assert(NULL != interpreter);
+    assert(NULL != variable);
+    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
 
-//     // No block => search into SYSTEM
-//     if (block == NULL)
-//     {
-//         symbol = ps_symbol_table_get(interpreter->system, name);
-//         if (interpreter->debug >= PS_DEBUG_VERBOSE)
-//             fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
-//                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
-//     }
-//     else
-//     {
-//         // Search in current block
-//         symbol = ps_symbol_table_get(block->symbols, name);
-//         if (!local && symbol == NULL)
-//             // Not found => search in parent
-//             return ps_interpreter_find_symbol(interpreter, block->parent, name, false);
-//         if (interpreter->debug >= PS_DEBUG_VERBOSE)
-//             fprintf(stderr, " DEBUG\tps_interpreter_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
-//                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
-//     }
+    if (ps_value_is_array(variable->value))
+    {
+        ps_interpreter_set_message(interpreter, "Variable '%s' is an array", variable->name);
+        return false;
+    }
 
-//     return symbol;
-// }
+    ps_handle handle = variable->value->data.h;
+    const ps_frame *frame = ps_stack_top(interpreter->stack);
+    ps_value_data data = frame->data[handle];
+    value->type = variable->value->type;
+    value->data = data;
+    return false;
+}
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
 {
