@@ -6,25 +6,26 @@
 
 #include <string.h>
 
+#include "ps_ast.h"
 #include "ps_memory.h"
 #include "ps_stack.h"
 #include "ps_value_data.h"
 
-ps_frame *ps_frame_alloc(size_t size, const ps_frame *parent)
+ps_frame *ps_frame_alloc(const ps_ast_block *block)
 {
     // NB: works even if size is 0
-    size_t bytes = sizeof(ps_frame) + size * sizeof(ps_value_data);
-    ps_frame *frame = ps_memory_malloc(PS_MEMORY_STACK, bytes);
+    size_t size = sizeof(ps_frame) + block->n_vars * sizeof(ps_value_data);
+    ps_frame *frame = ps_memory_malloc(PS_MEMORY_STACK, size);
     if (frame == NULL)
         return NULL;
-    memset(frame, 0, bytes);
-    frame->size = size;
-    frame->parent = parent;
+    memset(frame, 0, size);
+    frame->block = block;
     return frame;
 }
 
 ps_frame *ps_frame_free(ps_frame *frame)
 {
+    // NB: block is not freed here, it is owned by the AST
     ps_memory_free(PS_MEMORY_STACK, frame);
     return NULL;
 }
@@ -35,6 +36,7 @@ ps_stack *ps_stack_alloc(size_t size)
     if (stack == NULL)
         return NULL;
     stack->size = size;
+    stack->used = 0;
     stack->sp = 0;
     return stack;
 }
@@ -42,42 +44,45 @@ ps_stack *ps_stack_alloc(size_t size)
 ps_stack *ps_stack_free(ps_stack *stack)
 {
     for (size_t i = 0; i < stack->sp; i++)
-        stack->frames[i] = ps_frame_free(stack->frames[i]);
+        if (stack->frames[i] != NULL)
+            stack->frames[i] = ps_frame_free(stack->frames[i]);
     ps_memory_free(PS_MEMORY_STACK, stack);
     return NULL;
 }
 
+bool ps_stack_is_empty(const ps_stack *stack)
+{
+    return stack->used == 0;
+}
+
+bool ps_stack_is_full(const ps_stack *stack)
+{
+    return stack->used == stack->size;
+}
+
 ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame)
 {
-    if (stack->sp >= stack->size)
+    if (ps_stack_is_full(stack))
         return NULL;
+    stack->used += 1;
     stack->frames[stack->sp++] = frame;
     return frame;
 }
 
 ps_frame *ps_stack_pop(ps_stack *stack)
 {
-    if (stack->sp == 0)
+    if (ps_stack_is_empty(stack))
         return NULL;
     stack->sp -= 1;
     ps_frame *frame = stack->frames[stack->sp];
     stack->frames[stack->sp] = NULL;
+    stack->used -= 1;
     return frame;
 }
 
 ps_frame *ps_stack_top(const ps_stack *stack)
 {
-    if (stack->sp == 0)
+    if (ps_stack_is_empty(stack))
         return NULL;
     return stack->frames[stack->sp - 1];
-}
-
-bool ps_stack_is_empty(const ps_stack *stack)
-{
-    return stack->sp == 0;
-}
-
-bool ps_stack_is_full(const ps_stack *stack)
-{
-    return stack->sp == stack->size;
 }

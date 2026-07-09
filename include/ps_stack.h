@@ -14,28 +14,28 @@ extern "C"
 {
 #endif
 
-    /** @brief Frame of the stack */
+    /** @brief Stack frame */
     typedef struct s_ps_frame
     {
-        struct s_ps_frame *parent; /** @brief Parent frame */
-        size_t size;               /** @brief Variable count */
-        ps_value_data data[];      /** @brief Variable type is in symbol, index is handle from symbol, too */
+        ps_ast_block *block;  /** @brief Block with symbols & parent                                  */
+        ps_value_data data[]; /** @brief Variable type is in symbol, index is handle from symbol, too */
     } ps_frame;
 
     /** @brief Stack itself */
     typedef struct s_ps_stack
     {
-        size_t size;
-        size_t sp;
-        ps_frame *frames[];
+        size_t size;        /** @brief Count of frames in stack */
+        size_t used;        /** @brief Count of frames used     */
+        size_t sp;          /** @brief Stack pointer            */
+        ps_frame *frames[]; /** @brief Frames                   */
     } ps_stack;
 
 #define PS_FRAME_SIZE sizeof(ps_frame)
 #define PS_STACK_SIZE sizeof(ps_stack)
 
-    /** @brief Allocate a new frame for size variables */
+    /** @brief Allocate a new frame for block variables */
     /** @return NULL if allocation failed */
-    ps_frame *ps_frame_alloc(size_t size, const ps_frame *parent);
+    ps_frame *ps_frame_alloc(const ps_ast_block *block);
 
     /** @brief Free a frame */
     /** @return NULL */

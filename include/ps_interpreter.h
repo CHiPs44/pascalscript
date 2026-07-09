@@ -51,7 +51,7 @@ extern "C"
      * @param io_check    *FUTURE* enable I/O error checking
      * @return NULL if no free memory (errno = ENOMEM)
      */
-    ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *string_heap, bool range_check,
+    ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *string_heap, bool range_check,
                                          bool bool_eval, bool io_check);
 
     /** @brief Release interpreter and children objects */

@@ -87,11 +87,11 @@ extern "C"
     extern ps_symbol ps_system_constant_unsigned_ps_version_patch;
 
     /** @brief Allocate & initialize system symbol table */
-    ps_symbol_table *ps_system_alloc(void);
+    ps_ast_block *ps_system_alloc(void);
 
     /** @brief Free system symbol table */
-    ps_symbol_table *ps_system_free(ps_symbol_table *system);
-    bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol);
+    ps_ast_block *ps_system_free(ps_ast_block *system);
+    bool ps_system_add_symbol(ps_ast_block *system, ps_symbol *symbol);
 
 #ifdef __cplusplus
 }

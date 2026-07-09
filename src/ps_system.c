@@ -6,6 +6,7 @@
 
 #include <math.h>
 
+#include "ps_ast.h"
 #include "ps_functions.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
@@ -119,11 +120,15 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 /* clang-format on */
 
-ps_symbol_table *ps_system_alloc(void)
+ps_ast_block *ps_system_alloc(void)
 {
-    ps_symbol_table *system = ps_symbol_table_alloc(128, 0);
+    ps_ast_block *system = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "#SYSTEM");
     if (system == NULL)
         return NULL;
+    ps_symbol_table_free(system->symbols);
+    system->symbols = ps_symbol_table_alloc(128, 0);
+    if (system->symbols == NULL)
+        return ps_ast_free_block(system);
 
     /**************************************************************************/
     /* TYPES                                                                  */
@@ -198,12 +203,12 @@ error:
 ps_symbol_table *ps_system_free(ps_symbol_table *system)
 {
     if (system != NULL)
-        ps_symbol_table_free(system);
+        ps_ast_free_block(system);
     return NULL;
 }
 
-bool ps_system_add_symbol(ps_symbol_table *system, ps_symbol *symbol)
+bool ps_system_add_symbol(ps_ast_block *system, ps_symbol *symbol)
 {
-    ps_error error = ps_symbol_table_add(system, symbol);
+    ps_error error = ps_symbol_table_add(system->symbols, symbol);
     return error == PS_ERROR_NONE;
 }

@@ -150,9 +150,8 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(PS_AST_BLOCK, kind, line, column, sizeof(ps_ast_block));
     if (block == NULL)
         return NULL;
-    if (name == NULL)
-        memset(block->name, 0, PS_IDENTIFIER_SIZE);
-    else
+    memset(block->name, 0, PS_IDENTIFIER_SIZE);
+    if (name != NULL)
         snprintf(block->name, PS_IDENTIFIER_LEN, "%s", name);
     block->parent = parent;
     block->symbols = ps_symbol_table_alloc(0, 0);

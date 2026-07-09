@@ -33,7 +33,7 @@ void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level,
     }
 }
 
-ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *string_heap, bool range_check,
+ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *string_heap, bool range_check,
                                      bool bool_eval, bool io_check)
 {
     assert(NULL != system);
@@ -56,10 +56,10 @@ ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *st
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate system variables
-    ps_frame *frame = ps_frame_alloc(system->vars, NULL);
+    ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
-    for (size_t i = 0; i < system->vars; i++)
+    for (size_t i = 0; i < system->n_vars; i++)
     {
         frame->data[i].v = 0;
     }
@@ -108,7 +108,7 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
     return true;
 }
 
-bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block, const ps_ast_block *parent)
+bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     assert(NULL != interpreter);
 
@@ -116,7 +116,7 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
                        block->name, block->symbols == NULL ? 0 : block->symbols->used,
                        block->symbols != NULL && block->symbols->used > 1 ? "s" : "");
-    ps_frame *frame = ps_frame_alloc(block->symbols->vars, parent);
+    ps_frame *frame = ps_frame_alloc(block);
     if (frame == NULL)
         return false;
     if (ps_stack_is_full(interpreter->stack))
@@ -189,19 +189,18 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_sym
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_get_variable_value: %s (handle=%d)\n",
                        variable->name, handle);
     // For now we only support local variables (which can be global at program level)
-    // TODO search in parent frames
+    // TODO search in parent frames like compiler
     const ps_frame *frame = ps_stack_top(interpreter->stack);
-    if (handle >= frame->size)
+    if (handle >= frame->block->n_vars)
     {
         interpreter->error = PS_ERROR_OVERFLOW;
         ps_interpreter_set_message(interpreter, "Invalid handle %d for variable '%s' for frame of size %d", handle,
-                                   variable->name, frame->size);
+                                   variable->name, frame->block->n_vars);
         return false;
     }
-    ps_value_data data = frame->data[handle];
     value->type = variable->value->type;
-    value->data = data;
-    return false;
+    value->data = frame->data[handle];
+    return true;
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
