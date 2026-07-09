@@ -387,15 +387,17 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         parameters[i] = arg_value.value;
     }
     // Allocate frame for procedure
-    if (!ps_interpreter_enter_frame(interpreter, procedure))
+    if (!ps_interpreter_enter_frame(interpreter, procedure, procedure->parent))
         return false;
     // Store arguments in frame
     for (size_t i = 0; i < procedure_call->n_args; i++)
     {
         ps_symbol *symbol = ps_symbol_table_get(procedure->symbols, procedure->signature->parameters[i].name);
         if (symbol == NULL)
-            return ps_interpreter_set_message(interpreter, "Parameter %s not found",
-                                              procedure->signature->parameters[i]->name);
+        {
+            ps_formal_parameter parameter = procedure->signature->parameters[i];
+            return ps_interpreter_set_message(interpreter, "Parameter %s not found", parameter.name);
+        }
         if (!ps_interpreter_copy_value(interpreter, &parameters[i], &symbol->value))
             return false;
     }
@@ -436,11 +438,9 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     case PS_AST_RVALUE_SIMPLE:
         const ps_ast_variable_simple *variable_simple = (const ps_ast_variable_simple *)expression;
         ps_ast_debug_line(interpreter->level, "Variable: %s", variable_simple->variable->name);
-        ps_handle handle = variable_simple->variable->value->data.h;
-        ps_ast_debug_line(interpreter->level, "Handle: %d", handle);
-        const ps_frame *frame = ps_stack_top(interpreter->stack);
-        ps_value_data data = frame->data[handle];
-        ps_value value = {.allocated = false, .type = variable_simple->variable->value->type, .data = data};
+        ps_value value = {.allocated = false, .type = NULL, .data = {0}};
+        if (!ps_interpreter_get_value(interpreter, variable_simple->variable, &value))
+            return false;
         if (!ps_interpreter_copy_value(interpreter, &value, &result->value))
             return false;
         break;

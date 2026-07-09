@@ -35,7 +35,7 @@ extern "C"
 
     /** @brief Allocate a new frame for size variables */
     /** @return NULL if allocation failed */
-    ps_frame *ps_frame_alloc(size_t size);
+    ps_frame *ps_frame_alloc(size_t size, const ps_frame *parent);
 
     /** @brief Free a frame */
     /** @return NULL */

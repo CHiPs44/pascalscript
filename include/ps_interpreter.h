@@ -31,13 +31,13 @@ extern "C"
         ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
         ps_stack *stack;             /** @brief Stack to hold variable values                                  */
-        char message[128];           /** @brief Explanatory error message                                      */
+        char message[128 - 16];      /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
-        ps_debug_level debug : 3;    /** @brief Debug level from FATAL to VERBOSE                              */
-        bool range_check : 1;        /** @brief Range checking for integer and real values                     */
-        bool bool_eval : 1;          /** @brief *FUTURE* Short circuit boolean evaluation                      */
-        bool io_check : 1;           /** @brief *FUTURE* stop or set IOResult on I/O error                     */
+        ps_debug_level debug;        /** @brief Debug level from FATAL to VERBOSE                              */
+        bool range_check;            /** @brief Range checking for integer and real values                     */
+        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
+        bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
     } /*__attribute__((__packed__))*/ ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
@@ -72,9 +72,11 @@ extern "C"
     /** @brief Exit current frame (block) */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
 
-    /** @brief Find symbol by name in current block (or its parents if not local) */
-    ps_symbol *ps_interpreter_find_symbol(ps_interpreter *interpreter, ps_ast_block *block, const char *name,
-                                          bool local);
+    /** @brief Get variable value */
+    bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value);
+
+    /** @brief Set variable value */
+    bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);

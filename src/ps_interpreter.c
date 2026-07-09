@@ -56,7 +56,7 @@ ps_interpreter *ps_interpreter_alloc(ps_symbol_table *system, ps_string_heap *st
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate system variables
-    ps_frame *frame = ps_frame_alloc(system->vars);
+    ps_frame *frame = ps_frame_alloc(system->vars, NULL);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
     for (size_t i = 0; i < system->vars; i++)
@@ -116,20 +116,22 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
                        block->name, block->symbols == NULL ? 0 : block->symbols->used,
                        block->symbols != NULL && block->symbols->used > 1 ? "s" : "");
-    ps_frame *frame = ps_frame_alloc(block->symbols->vars);
+    ps_frame *frame = ps_frame_alloc(block->symbols->vars, parent);
     if (frame == NULL)
         return false;
     if (ps_stack_is_full(interpreter->stack))
     {
         ps_frame_free(frame);
         interpreter->error = PS_ERROR_STACK_OVERFLOW;
-        return ps_interpreter_set_message(interpreter, "Stack overflow at level %d for '%s'", name);
+        return ps_interpreter_set_message(interpreter, "Stack overflow at level %d for '%s'", interpreter->level,
+                                          block->name);
     }
     if (NULL == ps_stack_push(interpreter->stack, frame))
     {
         ps_frame_free(frame);
         interpreter->error = PS_ERROR_STACK_ERROR;
-        return ps_interpreter_set_message(interpreter, "Stack error at level %d for '%s': push failed", name);
+        return ps_interpreter_set_message(interpreter, "Stack error at level %d for '%s'", interpreter->level,
+                                          block->name);
     }
     return true;
 }
@@ -154,20 +156,48 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     return true;
 }
 
+bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, const ps_value *value)
+{
+    assert(NULL != interpreter);
+    assert(NULL != variable);
+    assert(NULL != value);
+    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
+    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+    return false;
+}
+
 bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)
 {
     assert(NULL != interpreter);
     assert(NULL != variable);
-    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
+    assert(NULL != value);
 
+    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    {
+        interpreter->error = PS_ERROR_EXPECTED_VARIABLE;
+        ps_interpreter_set_message(interpreter, "Symbol '%s' is not a variable", variable->name);
+        return false;
+    }
     if (ps_value_is_array(variable->value))
     {
+        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
         ps_interpreter_set_message(interpreter, "Variable '%s' is an array", variable->name);
         return false;
     }
 
     ps_handle handle = variable->value->data.h;
+    ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_get_variable_value: %s (handle=%d)\n",
+                       variable->name, handle);
+    // For now we only support local variables (which can be global at program level)
+    // TODO search in parent frames
     const ps_frame *frame = ps_stack_top(interpreter->stack);
+    if (handle >= frame->size)
+    {
+        interpreter->error = PS_ERROR_OVERFLOW;
+        ps_interpreter_set_message(interpreter, "Invalid handle %d for variable '%s' for frame of size %d", handle,
+                                   variable->name, frame->size);
+        return false;
+    }
     ps_value_data data = frame->data[handle];
     value->type = variable->value->type;
     value->data = data;

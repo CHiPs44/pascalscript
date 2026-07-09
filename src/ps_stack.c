@@ -10,7 +10,7 @@
 #include "ps_stack.h"
 #include "ps_value_data.h"
 
-ps_frame *ps_frame_alloc(size_t size)
+ps_frame *ps_frame_alloc(size_t size, const ps_frame *parent)
 {
     // NB: works even if size is 0
     size_t bytes = sizeof(ps_frame) + size * sizeof(ps_value_data);
@@ -19,6 +19,7 @@ ps_frame *ps_frame_alloc(size_t size)
         return NULL;
     memset(frame, 0, bytes);
     frame->size = size;
+    frame->parent = parent;
     return frame;
 }
 
