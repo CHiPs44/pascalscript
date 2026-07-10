@@ -114,23 +114,24 @@ static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
     switch (node->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        return ((ps_ast_value *)node)->value.type;
+        return ((const ps_ast_value *)node)->value.type;
     case PS_AST_RVALUE_SIMPLE:
     case PS_AST_LVALUE_SIMPLE:
-        ps_symbol *variable = ((ps_ast_variable_simple *)node)->variable;
+        ps_symbol *variable = ((const ps_ast_variable_simple *)node)->variable;
         if (variable != NULL && variable->value != NULL)
             return variable->value->type;
         return NULL;
     case PS_AST_LVALUE_ARRAY:
     case PS_AST_RVALUE_ARRAY:
-        ps_ast_debug_line(0, "Cannot get type of array %s items yet", ((ps_ast_variable_array *)node)->variable->name);
+        ps_ast_debug_line(0, "Cannot get type of array %s items yet",
+                          ((const ps_ast_variable_array *)node)->variable->name);
         return NULL;
     case PS_AST_UNARY_OPERATION:
-        return ((ps_ast_unary_operation *)node)->result_type;
+        return ((const ps_ast_unary_operation *)node)->result_type;
     case PS_AST_BINARY_OPERATION:
-        return ((ps_ast_binary_operation *)node)->result_type;
+        return ((const ps_ast_binary_operation *)node)->result_type;
     case PS_AST_FUNCTION_CALL:
-        ps_symbol *function = ((ps_ast_call *)node)->executable;
+        ps_symbol *function = ((const ps_ast_call *)node)->executable;
         if (function != NULL && function->value != NULL)
             return function->value->type;
         return NULL;
@@ -369,7 +370,7 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 // =============================================================================
 
 ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable,
-                                uint16_t n_args, ps_ast_node *args[], int16_t widths[], int16_t precisions[])
+                                uint16_t n_args, ps_ast_node *args[], const ps_ast_format formats[])
 {
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
@@ -384,19 +385,12 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
     if (call->args == NULL)
         return (ps_ast_call *)ps_ast_free_call(call);
     memcpy(call->args, args, n_args * sizeof(ps_ast_node *));
-    if (widths != NULL)
+    if (formats != NULL)
     {
-        call->widths = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(int16_t));
-        if (call->widths == NULL)
+        call->formats = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_format));
+        if (call->formats == NULL)
             return (ps_ast_call *)ps_ast_free_call(call);
-        memcpy(call->widths, widths, n_args * sizeof(int16_t));
-    }
-    if (precisions != NULL)
-    {
-        call->precisions = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(int16_t));
-        if (call->precisions == NULL)
-            return (ps_ast_call *)ps_ast_free_call(call);
-        memcpy(call->precisions, precisions, n_args * sizeof(int16_t));
+        memcpy(call->formats, formats, n_args * sizeof(ps_ast_format));
     }
     return call;
 }
@@ -425,7 +419,7 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
  *  NEG U => I
  *  NEG X => X
  */
-ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, ps_ast_node *operand)
+ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, const ps_ast_node *operand)
 {
     ps_symbol *operand_type = ps_ast_node_get_type(operand);
     if (operand_type == NULL)
@@ -433,7 +427,7 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, ps
     ps_value_type type = ps_value_get_type(operand_type->value);
     ps_value_type base = ps_value_get_base(operand_type->value);
     // - U => I
-    if ((operator = PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
+    if ((operator == PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
         return &ps_system_integer;
     // cf. ps_value_is_number()
     if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER || type == PS_TYPE_REAL ||
@@ -468,14 +462,60 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation
 // PS_AST_BINARY_OPERATION: +, -, *, /, DIV, MOD, AND, OR, XOR, SHL, SHR, =, <>, <, <=, >, >=
 // =============================================================================
 
+static bool ps_ast_binary_operation_is_comparison(ps_operator_binary operator)
+{
+    return operator == PS_OP_EQ || operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE ||
+           operator == PS_OP_LT || operator == PS_OP_NE;
+}
+
+static bool ps_ast_binary_operation_is_string_concat(ps_operator_binary operator, ps_value_type left_base,
+                                                     ps_value_type right_base)
+{
+    if (operator != PS_OP_ADD)
+        return false;
+    return (left_base == PS_TYPE_CHAR || left_base == PS_TYPE_STRING) &&
+           (right_base == PS_TYPE_CHAR || right_base == PS_TYPE_STRING);
+}
+
+static bool ps_ast_binary_operation_is_boolean_operation(ps_operator_binary operator, ps_value_type left_base,
+                                                         ps_value_type right_base)
+{
+    return (operator == PS_OP_AND || operator == PS_OP_OR || operator == PS_OP_XOR) && left_base == PS_TYPE_BOOLEAN &&
+           right_base == PS_TYPE_BOOLEAN;
+}
+
+static bool ps_ast_binary_operation_is_real_operation(ps_operator_binary operator)
+{
+    return operator != PS_OP_AND && operator != PS_OP_OR && operator != PS_OP_XOR && operator != PS_OP_SHL &&
+           operator != PS_OP_SHR && operator != PS_OP_MOD && operator != PS_OP_DIV;
+}
+
+static bool ps_ast_binary_operation_is_mixed_integer_unsigned(ps_value_type left_base, ps_value_type right_base)
+{
+    return (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER) ||
+           (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED);
+}
+
+static ps_symbol *ps_ast_binary_operation_get_mixed_integer_unsigned_result_type(ps_operator_binary operator,
+                                                                                 ps_value_type left_base,
+                                                                                 ps_value_type right_base)
+{
+    if (operator == PS_OP_OR)
+        return &ps_system_integer;
+    if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER &&
+        (operator == PS_OP_AND || operator == PS_OP_XOR || operator == PS_OP_SUB))
+        return &ps_system_unsigned;
+    return &ps_system_integer;
+}
+
 /**
  * Get result type of binary operation
  */
-ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right)
+ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, const ps_ast_node *left,
+                                                   const ps_ast_node *right)
 {
-    // Extract operand types first
-    ps_symbol *left_type = ps_ast_node_get_type(left);
-    ps_symbol *right_type = ps_ast_node_get_type(right);
+    const ps_symbol *left_type = ps_ast_node_get_type(left);
+    const ps_symbol *right_type = ps_ast_node_get_type(right);
 
     if (left_type == NULL || right_type == NULL)
         return NULL;
@@ -483,83 +523,51 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
     ps_value_type left_base = ps_value_get_base(left_type->value);
     ps_value_type right_base = ps_value_get_base(right_type->value);
 
-    // Comparison operators always return BOOLEAN
-    if (operator == PS_OP_EQ || operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE ||
-        operator == PS_OP_LT || operator == PS_OP_NE)
+    if (ps_ast_binary_operation_is_comparison(operator))
         return &ps_system_boolean;
 
-    // Real division always returns REAL
     if (operator == PS_OP_DIV_REAL)
         return &ps_system_real;
 
-    // String concatenation: ADD with CHAR/STRING operands
-    // CC, CS, SC, SS all produce STRING
-    if (operator == PS_OP_ADD)
-    {
-        if ((left_base == PS_TYPE_CHAR && right_base == PS_TYPE_CHAR) ||
-            (left_base == PS_TYPE_CHAR && right_base == PS_TYPE_STRING) ||
-            (left_base == PS_TYPE_STRING && right_base == PS_TYPE_CHAR) ||
-            (left_base == PS_TYPE_STRING && right_base == PS_TYPE_STRING))
-            return &ps_system_string;
-    }
+    if (ps_ast_binary_operation_is_string_concat(operator, left_base, right_base))
+        return &ps_system_string;
 
-    // Boolean operations: AND, OR, XOR with boolean operands
-    if (operator == PS_OP_AND || operator == PS_OP_OR || operator == PS_OP_XOR)
-    {
-        if (left_base == PS_TYPE_BOOLEAN && right_base == PS_TYPE_BOOLEAN)
-            return &ps_system_boolean;
-    }
+    if (ps_ast_binary_operation_is_boolean_operation(operator, left_base, right_base))
+        return &ps_system_boolean;
 
-    // For arithmetic and bitwise operations, determine result type based on operand types
-    // Rules from ps_operator.c behavior:
-    // - REAL + any number => REAL (except DIV, MOD, SHL, SHR)
-    // - UNSIGNED + UNSIGNED => UNSIGNED
-    // - INTEGER + UNSIGNED => INTEGER (for most ops, except special cases)
-    // - UNSIGNED + INTEGER => depends on operator
-
-    // If either is REAL, result is REAL (except for bitwise and MOD/DIV)
-    if ((operator != PS_OP_AND && operator != PS_OP_OR && operator != PS_OP_XOR && operator != PS_OP_SHL &&
-         operator != PS_OP_SHR && operator != PS_OP_MOD && operator != PS_OP_DIV) &&
+    if (ps_ast_binary_operation_is_real_operation(operator) &&
         (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL))
         return &ps_system_real;
 
-    // Both unsigned
     if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
         return &ps_system_unsigned;
 
-    // Mixed INTEGER and UNSIGNED
-    if ((left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER) ||
-        (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED))
-    {
-        // For OR operator with mixed I/U: result is INTEGER (?)
-        if (operator == PS_OP_OR)
-            return &ps_system_integer;
-        // For UI combinations with certain operators, result is UNSIGNED
-        if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER &&
-            (operator == PS_OP_AND || operator == PS_OP_XOR || operator == PS_OP_SUB))
-            return &ps_system_unsigned;
-        // Default mixed I/U result is INTEGER
-        return &ps_system_integer;
-    }
+    if (ps_ast_binary_operation_is_mixed_integer_unsigned(left_base, right_base))
+        return ps_ast_binary_operation_get_mixed_integer_unsigned_result_type(operator, left_base, right_base);
 
-    // Both integer
     if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
         return &ps_system_integer;
 
-    // Failed
     return NULL;
 }
 
 ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator,
                                                         ps_ast_node *left, ps_ast_node *right)
 {
-    assert(operator == PS_OP_ADD || operator == PS_OP_SUB || operator == PS_OP_OR || operator == PS_OP_XOR ||
-           operator == PS_OP_MUL || operator == PS_OP_DIV || operator == PS_OP_DIV_REAL || operator == PS_OP_MOD ||
-           operator == PS_OP_AND || operator == PS_OP_SHL || operator == PS_OP_SHR || operator == PS_OP_EQ ||
-           operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE || operator == PS_OP_LT ||
-           operator == PS_OP_NE);
+    assert(
+        // arithmetical
+        operator == PS_OP_ADD || operator == PS_OP_SUB || operator == PS_OP_MUL || operator == PS_OP_DIV ||
+        operator == PS_OP_DIV_REAL || operator == PS_OP_MOD ||
+        // logical
+        operator == PS_OP_AND || operator == PS_OP_OR || operator == PS_OP_XOR ||
+        // bitwise
+        operator == PS_OP_SHL || operator == PS_OP_SHR ||
+        // comparison
+        operator == PS_OP_EQ || operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE ||
+        operator == PS_OP_LT || operator == PS_OP_NE);
     assert(left != NULL && ps_ast_node_check_group((ps_ast_node *)left, PS_AST_EXPRESSION));
     assert(right != NULL && ps_ast_node_check_group((ps_ast_node *)right, PS_AST_EXPRESSION));
+
     ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)ps_ast_create_node(
         PS_AST_EXPRESSION, PS_AST_BINARY_OPERATION, line, column, sizeof(ps_ast_binary_operation));
     if (binary_operation == NULL)
@@ -568,6 +576,11 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
     binary_operation->left = left;
     binary_operation->right = right;
     binary_operation->result_type = ps_ast_binary_operation_get_result_type(operator, left, right);
+    if (binary_operation->result_type == NULL)
+    {
+        ps_memory_free(PS_MEMORY_AST, binary_operation);
+        return NULL;
+    }
     return binary_operation;
 }
 
@@ -586,13 +599,14 @@ ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *binary_operat
 ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_value literal)
 {
     assert(literal.type != NULL);
-    assert(literal.type == &ps_system_integer || literal.type == &ps_system_unsigned ||
-           literal.type == &ps_system_char || literal.type == &ps_system_boolean || literal.type == &ps_system_real ||
-           literal.type == &ps_system_string);
+    assert(literal.type == &ps_system_boolean || literal.type == &ps_system_char ||
+           literal.type == &ps_system_integer || literal.type == &ps_system_real || literal.type == &ps_system_string ||
+           literal.type == &ps_system_unsigned);
     ps_ast_value *literal_node =
         (ps_ast_value *)ps_ast_create_node(PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, line, column, sizeof(ps_ast_value));
     if (literal_node == NULL)
         return NULL;
+    literal_node->value = literal;
     literal_node->value = literal;
     return literal_node;
 }

@@ -28,7 +28,7 @@ extern "C"
 
     typedef struct s_ps_interpreter
     {
-        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
+        ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
         ps_stack *stack;             /** @brief Stack to hold variable values                                  */
         char message[128 - 16];      /** @brief Explanatory error message                                      */
@@ -67,7 +67,7 @@ extern "C"
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
     /** @brief Enter a new frame / block */
-    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block, const ps_ast_block *parent);
+    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block);
 
     /** @brief Exit current frame (block) */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);

@@ -150,7 +150,7 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     assert(block != NULL);
     assert(type_symbol != NULL);
     // Variable handle is its index in block variables
-    ps_value_data data = {.h = block->n_vars++};
+    ps_value_data data = {.h = (ps_handle)(block->n_vars++)};
     if (ps_type_definition_is_array(type_symbol->value->data.t))
     {
         return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
@@ -167,23 +167,7 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     return ps_compiler_add_symbol(compiler, block, variable);
 }
 
-bool ps_compiler_is_number(ps_compiler *compiler, ps_value *value)
-{
-    assert(compiler != NULL);
-    assert(value != NULL);
-    (void)compiler;
-    return ps_value_is_number(value);
-}
-
-bool ps_compiler_is_ordinal(ps_compiler *compiler, ps_value *value)
-{
-    assert(compiler != NULL);
-    assert(value != NULL);
-    (void)compiler;
-    return ps_value_is_ordinal(value);
-}
-
-bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to)
+bool ps_compiler_copy_value(ps_compiler *compiler, const ps_value *from, ps_value *to)
 {
     if (compiler->debug >= PS_DEBUG_VERBOSE)
     {
@@ -231,10 +215,9 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
 {
     assert(compiler != NULL);
     ps_error error = PS_ERROR_NONE;
-    ps_parser *parser = compiler->parser;
-    if (parser == NULL)
+    if (compiler->parser == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
-    ps_lexer *lexer = ps_parser_get_lexer(parser);
+    ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);
     if (lexer == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
     if (!ps_buffer_read_next_char(lexer->buffer))
@@ -259,7 +242,7 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     if (!ps_parse_program(compiler, *program))
     {
-        error = parser->error;
+        error = compiler->parser->error;
         if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
         return ps_compiler_return_false(compiler, error);

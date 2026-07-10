@@ -61,18 +61,11 @@ extern "C"
     bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const ps_identifier identifier,
                                   ps_symbol *type_symbol);
 
-    /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
-    bool ps_compiler_is_number(ps_compiler *compiler, ps_value *value);
-
-    /** @brief Check if current token or value is an ordinal (integer, unsigned, char or integer / unsigned / char
-     * subrange) */
-    bool ps_compiler_is_ordinal(ps_compiler *compiler, ps_value *value);
-
     /**
      *  @brief Copy value of "from" into "to", converting unsigned to integer and vice versa,
      *         may set error to PS_ERROR_OUT_OF_RANGE or PS_ERROR_TYPE_MISMATCH
      */
-    bool ps_compiler_copy_value(ps_compiler *compiler, ps_value *from, ps_value *to);
+    bool ps_compiler_copy_value(ps_compiler *compiler, const ps_value *from, ps_value *to);
 
     /** @brief Load source code from string */
     bool ps_compiler_load_string(ps_compiler *compiler, char *source, size_t length);

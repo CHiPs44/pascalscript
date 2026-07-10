@@ -26,7 +26,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
         return false;
     ps_ast_debug_line(interpreter->level, "BLOCK kind=%s name=%s", ps_ast_node_get_kind_name(block->kind), block->name);
-    if (!ps_interpreter_enter_frame(interpreter, block->name, block->symbols))
+    if (!ps_interpreter_enter_frame(interpreter, block))
         return false;
     result = ps_ast_execute_statement_list(interpreter, block->statement_list);
     if (!ps_interpreter_exit_frame(interpreter))
@@ -387,7 +387,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         parameters[i] = arg_value.value;
     }
     // Allocate frame for procedure
-    if (!ps_interpreter_enter_frame(interpreter, procedure, procedure->parent))
+    if (!ps_interpreter_enter_frame(interpreter, procedure))
         return false;
     // Store arguments in frame
     for (size_t i = 0; i < procedure_call->n_args; i++)

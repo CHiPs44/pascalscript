@@ -84,14 +84,14 @@ cleanup:
 ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Create an interpreter");
-    ps_symbol_table *system = ps_system_alloc();
+    ps_ast_block *system = ps_system_alloc();
     ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
     ASSERT(string_heap != NULL);
     ps_interpreter *interpreter = ps_interpreter_alloc(system, string_heap, true, false, false);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Enter environment for the program %s", block_program->name);
-    ASSERT(ps_interpreter_enter_frame(interpreter, block_program, NULL));
+    ASSERT(ps_interpreter_enter_frame(interpreter, block_program));
 
     ps_ast_debug_line(0, "Check PROGRAM symbol");
     const ps_symbol *symbol_program = ps_symbol_table_get(block_program->symbols, block_program->name);

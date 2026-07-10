@@ -19,6 +19,8 @@
 #include "ps_value.h"
 #include "ps_version.h"
 
+ps_error system_error = PS_ERROR_NONE;
+
 /**********************************************************************************************************************/
 /* SYSTEM TYPE DEFINITIONS AND CONSTANTS                                                                              */
 /**********************************************************************************************************************/
@@ -200,7 +202,7 @@ error:
     return NULL;
 }
 
-ps_symbol_table *ps_system_free(ps_symbol_table *system)
+ps_ast_block *ps_system_free(ps_ast_block *system)
 {
     if (system != NULL)
         ps_ast_free_block(system);
@@ -209,6 +211,8 @@ ps_symbol_table *ps_system_free(ps_symbol_table *system)
 
 bool ps_system_add_symbol(ps_ast_block *system, ps_symbol *symbol)
 {
-    ps_error error = ps_symbol_table_add(system->symbols, symbol);
-    return error == PS_ERROR_NONE;
+    if (system_error != PS_ERROR_NONE)
+        return false;
+    system_error = ps_symbol_table_add(system->symbols, symbol);
+    return system_error == PS_ERROR_NONE;
 }

@@ -146,15 +146,20 @@ extern "C"
         uint16_t padding : 15;            /** @brief Padding to 16 bits                                    */
     } __attribute__((__packed__)) ps_ast_for;
 
+    typedef struct s_ps_ast_format
+    {
+        int16_t width;
+        int16_t precision;
+    } ps_ast_format;
+
     /** @brief Procedure (group STATEMENT) or function (group EXPRESSION) call */
     typedef struct s_ps_ast_call
     {
         PS_AST_NODE_COMMON
-        ps_symbol *executable; /** @brief procedure of function being called, user or system */
-        ps_ast_node **args;    /** @brief arguments, NULL if no arguments                    */
-        uint16_t n_args;       /** @brief number of arguments, 0 if no arguments             */
-        int16_t *widths;       /** @brief format width     of each argument for Write[Ln]    */
-        int16_t *precisions;   /** @brief format precision of each argument for Write[Ln]    */
+        ps_symbol *executable;  /** @brief procedure of function being called, user or system        */
+        ps_ast_node **args;     /** @brief arguments, NULL if no arguments                           */
+        ps_ast_format *formats; /** @brief format width and precision of each argument for Write[Ln] */
+        uint16_t n_args;        /** @brief number of arguments, 0 if no arguments                    */
     } __attribute__((__packed__)) ps_ast_call;
 
     /** @brief Assignment statement: LVALUE := EXPRESSION / RVALUE */
