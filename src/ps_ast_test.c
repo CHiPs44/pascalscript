@@ -765,7 +765,7 @@ bool ps_ast_test_hello()
 
     ps_ast_debug_line(0, "Create the first PROCEDURE CALL statement");
     ps_ast_call *statement1 =
-        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL, NULL);
+        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL);
     ASSERT(statement1 != NULL);
 
     ps_ast_debug_line(0, "Create the argument list for the second procedure call");
@@ -775,7 +775,7 @@ bool ps_ast_test_hello()
 
     ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
     ps_ast_call *statement2 =
-        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2, NULL, NULL);
+        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2, NULL);
     ASSERT(statement2 != NULL);
 
     ps_ast_debug_line(0, "Add the statements to the statement list");

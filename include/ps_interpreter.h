@@ -67,7 +67,7 @@ extern "C"
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
     /** @brief Enter a new frame / block */
-    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block);
+    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block);
 
     /** @brief Exit current frame (block) */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
@@ -76,7 +76,8 @@ extern "C"
     bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value);
 
     /** @brief Set variable value */
-    bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value);
+    bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable,
+                                           const ps_value *value);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */
     bool ps_interpreter_is_number(ps_interpreter *interpreter, ps_value *value);

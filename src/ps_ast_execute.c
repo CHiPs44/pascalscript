@@ -398,7 +398,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
             ps_formal_parameter parameter = procedure->signature->parameters[i];
             return ps_interpreter_set_message(interpreter, "Parameter %s not found", parameter.name);
         }
-        if (!ps_interpreter_copy_value(interpreter, &parameters[i], &symbol->value))
+        if (!ps_interpreter_copy_value(interpreter, &parameters[i], symbol->value))
             return false;
     }
     // Execute procedure with arguments on top frame of stack

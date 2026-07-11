@@ -77,7 +77,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
  */
 bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature *signature)
 {
-    PARSE_BEGIN("EXECUTABLE", "PARAMETER_DEFINITION");
+    PARSE_BEGIN("EXECUTABLE", "PARAMETER_DEFINITION")
     (void)start_line;
     (void)start_column;
 
@@ -152,10 +152,10 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
  */
 bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *executable)
 {
-    PARSE_BEGIN("EXECUTABLE", "ACTUAL_SIGNATURE");
+    PARSE_BEGIN("EXECUTABLE", "ACTUAL_SIGNATURE")
 
-    ps_formal_signature *formal_signature = executable->value->data.x->block->signature;
-    ps_formal_parameter *parameter = NULL;
+    const ps_formal_signature *formal_signature = executable->value->data.x->block->signature;
+    const ps_formal_parameter *parameter = NULL;
     ps_symbol *argument = NULL;
     ps_value *value = NULL;
     ps_symbol *variable = NULL;
@@ -242,7 +242,7 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
     } while (true);
 
     ps_ast_node_kind node_kind = executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
-    *call = ps_ast_create_call(start_line, start_column, node_kind, executable, parameter_count, args, NULL, NULL);
+    *call = ps_ast_create_call(start_line, start_column, node_kind, executable, parameter_count, args, NULL);
     if (*call == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -262,7 +262,7 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
 bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block,
                                                 ps_ast_block **block_executable, ps_symbol_kind kind)
 {
-    PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION");
+    PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION")
 
     ps_identifier identifier = {0};
     ps_symbol *executable_symbol = NULL;
@@ -506,11 +506,11 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
     // Build AST node for CALL
     *call = ps_ast_create_call(line, column,
                                executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION,
-                               executable, 0, NULL, NULL, NULL);
+                               executable, 0, NULL, NULL);
 
 cleanup:
     if (compiler->error != PS_ERROR_NONE)
-        TRACE_ERROR("CLEANUP");
+        TRACE_ERROR("CLEANUP")
     PARSE_END("OK")
 }
 

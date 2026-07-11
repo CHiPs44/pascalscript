@@ -61,7 +61,7 @@ bool memory = false;
 bool trace = false;
 bool verbose = false;
 
-ps_symbol_table *system_symbols = NULL;
+ps_ast_block *system_block = NULL;
 ps_compiler *compiler = NULL;
 ps_ast_block *program = NULL;
 ps_interpreter *interpreter = NULL;
@@ -293,10 +293,10 @@ int main(int argc, char *argv[])
     // verbose = false;
 
     /* Initialize compiler */
-    system_symbols = ps_system_alloc();
-    // ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_symbols);
+    system_block = ps_system_alloc();
+    ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_block->symbols);
 
-    compiler = ps_compiler_alloc(system_symbols);
+    compiler = ps_compiler_alloc(system_block);
     if (compiler == NULL)
     {
         fprintf(stderr, "Could not initialize compiler!\n");
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
     }
 
     compiler = ps_compiler_free(compiler);
-    system_symbols = ps_symbol_table_free(system_symbols);
+    system_block = (ps_ast_block *)ps_ast_free_block(system_block);
 
     if (memory)
         ps_memory_debug(stderr);

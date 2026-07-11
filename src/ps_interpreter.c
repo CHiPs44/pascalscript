@@ -108,7 +108,7 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
     return true;
 }
 
-bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block)
+bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block)
 {
     assert(NULL != interpreter);
 
@@ -163,7 +163,7 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_sym
     assert(NULL != value);
     assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
     interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    return ps_interpreter_set_message(interpreter, "ps_interpreter_set_variable_value not implemented");
 }
 
 bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)

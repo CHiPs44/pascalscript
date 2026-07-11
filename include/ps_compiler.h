@@ -24,7 +24,7 @@ extern "C"
     typedef struct s_ps_compiler
     {
         ps_parser *parser;           /** @brief Parser with lexer(s) with source code buffer(s)                */
-        ps_symbol_table *system;     /** @brief Built-in types, constants, variables, procedures and functions */
+        ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants                           */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         char message[128];           /** @brief Additional error message                                       */
@@ -34,7 +34,7 @@ extern "C"
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
 
     /** @brief Initialize compiler and children objects */
-    ps_compiler *ps_compiler_alloc(ps_symbol_table *system);
+    ps_compiler *ps_compiler_alloc(ps_ast_block *system);
 
     /** @brief Release compiler and children objects */
     ps_compiler *ps_compiler_free(ps_compiler *compiler);

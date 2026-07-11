@@ -11,7 +11,7 @@
 #include "ps_stack.h"
 #include "ps_value_data.h"
 
-ps_frame *ps_frame_alloc(const ps_ast_block *block)
+ps_frame *ps_frame_alloc(ps_ast_block *block)
 {
     // NB: works even if size is 0
     size_t size = sizeof(ps_frame) + block->n_vars * sizeof(ps_value_data);
