@@ -8,6 +8,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "ps_ast.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
@@ -30,7 +31,7 @@ PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_W
 PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_writeln  );
 /* clang-format on */
 
-bool ps_procedures_init(ps_symbol_table *system)
+bool ps_procedures_init(ps_ast_block *system)
 {
     (void)system;
     // ADD_SYSTEM_SYMBOL(ps_system_procedure_dec)

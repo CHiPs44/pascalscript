@@ -316,8 +316,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 
     size_t n_args = 0;
     ps_ast_node *args[8] = {0};
-    int16_t widths[PS_PARAMETERS_MAX] = {0};
-    int16_t precisions[PS_PARAMETERS_MAX] = {0};
+    ps_ast_format formats[PS_PARAMETERS_MAX] = {0};
     bool loop = true;
     int16_t width = 0;
     int16_t precision = 0;
@@ -370,8 +369,8 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         if (n_args >= PS_PARAMETERS_MAX)
             RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
         args[n_args] = expression;
-        widths[n_args] = width;
-        precisions[n_args] = precision;
+        formats[n_args].width = width;
+        formats[n_args].precision = precision;
         n_args += 1;
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
@@ -385,7 +384,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 
     *call_ptr = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
                                    newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
-                                   n_args > 0 ? args : NULL, widths, precisions);
+                                   n_args > 0 ? args : NULL, formats);
     if (*call_ptr == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 

@@ -623,7 +623,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
             READ_NEXT_TOKEN
         }
         // factor.type = &ps_system_unsigned;
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL);
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {
@@ -632,7 +632,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
             TRACE_ERROR("LOW_HIGH")
         symbol_node = ps_ast_create_variable_simple(start_line, start_column, PS_AST_LVALUE_SIMPLE, symbol);
         args[0] = (ps_ast_node *)symbol_node;
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 1, args, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 1, args, NULL);
     }
     else if (function == &ps_system_function_power)
     {
@@ -672,10 +672,10 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     case 0:
         break;
     case 1:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL);
         break;
     case 2:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL);
         break;
     default:
         compiler->error = PS_ERROR_INVALID_PARAMETERS;

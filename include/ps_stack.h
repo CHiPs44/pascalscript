@@ -35,7 +35,7 @@ extern "C"
 
     /** @brief Allocate a new frame for block variables */
     /** @return NULL if allocation failed */
-    ps_frame *ps_frame_alloc(ps_ast_block *block);
+    ps_frame *ps_frame_alloc(const ps_ast_block *block);
 
     /** @brief Free a frame */
     /** @return NULL */

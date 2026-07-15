@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "ps_ast.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
@@ -58,7 +59,7 @@ PS_SYSTEM_FUNCTION (function, uppercase     , "UPPERCASE"   , PS_EXECUTABLE_FUNC
 PS_SYSTEM_FUNCTION (function, get_tick_count, "GETTICKCOUNT", PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_get_tick_count);
 /* clang-format on */
 
-bool ps_functions_init(ps_symbol_table *system)
+bool ps_functions_init(ps_ast_block *system)
 {
     // Math
     ADD_SYSTEM_SYMBOL(ps_system_function_abs)
@@ -164,7 +165,6 @@ ps_error ps_function_return_error_with_message(ps_interpreter *interpreter, ps_e
 /* ORDINAL                                                                    */
 /******************************************************************************/
 
-/** @brief ODD - true if integer/unsigned value is odd, false if even */
 ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_ordinal(value))
@@ -186,7 +186,6 @@ ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief EVEN - true if integer/unsigned value is even, false if odd */
 ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_ordinal(value))
@@ -208,7 +207,6 @@ ps_error ps_function_even(ps_interpreter *interpreter, const ps_value *value, ps
     return PS_ERROR_NONE;
 }
 
-/** @brief ORD - Get ordinal value of boolean / char / enum */
 ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_ordinal(value))
@@ -236,7 +234,6 @@ ps_error ps_function_ord(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief CHR - Get char value of unsigned / integer or subrange value */
 ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_ordinal(value))
@@ -433,7 +430,6 @@ ps_error ps_function_pred_ordinal(const ps_interpreter *interpreter, const ps_va
     return PS_ERROR_NONE;
 }
 
-/** @brief PRED - Get previous value (predecessor) of scalar or ordinal value */
 ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_valid(value))
@@ -527,7 +523,6 @@ ps_error ps_function_succ_CEB(const ps_interpreter *interpreter, const ps_value 
     return PS_ERROR_NONE;
 }
 
-/** @brief SUCC - Get next value (successor) of ordinal value */
 ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_valid(value))
@@ -545,7 +540,6 @@ ps_error ps_function_succ(ps_interpreter *interpreter, const ps_value *value, ps
 /* MATH                                                                       */
 /******************************************************************************/
 
-/** @brief ABS(INTEGER|UNSIGNED|REAL): INTEGER|UNSIGNED|REAL - Get absolute value of integer, unsigned or real */
 ps_error ps_function_abs(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_number(value))
@@ -573,7 +567,6 @@ ps_error ps_function_abs(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief TRUNC(REAL): INTEGER - Truncate real as integer */
 ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -588,7 +581,6 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, p
     return PS_ERROR_NONE;
 }
 
-/** @brief ROUND(REAL): INTEGER - Round real as integer */
 ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -603,7 +595,6 @@ ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, p
     return PS_ERROR_NONE;
 }
 
-/** @brief INT(REAL): REAL - Get integer part of floating point value */
 ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -619,7 +610,6 @@ ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief FRAC(REAL): REAL - Get fractional part of floating point value */
 ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -632,7 +622,6 @@ ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps
     return PS_ERROR_NONE;
 }
 
-/** @brief SIN(REAL): REAL - Get sinus of floating point value */
 ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -644,7 +633,6 @@ ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief COS(REAL): REAL - Get cosinus of floating point value */
 ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -656,7 +644,6 @@ ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief TAN(REAL): REAL - Get tangent of floating point value */
 ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -675,7 +662,6 @@ ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief ARCTAN(REAL): REAL - Get arc tangent of floating point value */
 ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -692,7 +678,6 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, 
     return PS_ERROR_NONE;
 }
 
-/** @brief SQR(REAL): REAL - Get square (x²) of floating point value */
 ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -707,7 +692,6 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief SQRT(REAL): REAL - Get square root (√x) of floating point value */
 ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -721,7 +705,6 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps
     return PS_ERROR_NONE;
 }
 
-/** @brief EXP(REAL): REAL - Get exponential of floating point value */
 ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -736,7 +719,6 @@ ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief LN(REAL): REAL - Get logarithm of floating point value */
 ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -749,7 +731,6 @@ ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_v
     return PS_ERROR_NONE;
 }
 
-/** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
 ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
@@ -763,7 +744,6 @@ ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-/** @brief POWER(REAL, REAL): REAL - Get power of floating point value */
 ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
 {
     if (!ps_value_is_real(a) || !ps_value_is_real(b))
@@ -782,7 +762,6 @@ ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const
 /* STRINGS                                                                    */
 /******************************************************************************/
 
-/** @brief LENGTH(): UNSIGNED - Get string length */
 ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_string(value))
@@ -825,7 +804,6 @@ ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *valu
 /* OTHER                                                                      */
 /******************************************************************************/
 
-/** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
 ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value *value, ps_value *result) // NOSONAR
 {
     // NB: interprter & value parameters are not used
@@ -862,9 +840,6 @@ unsigned int rand_range_unsigned(unsigned int n)
     return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX);
 }
 
-/** @brief RANDOM([INTEGER|UNSIGNED]): REAL|INTEGER|UNSIGNED - Get random value,
- *         either real between 0 and 1 (excluded) or between 0 and N - 1
- */
 ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (value == NULL)

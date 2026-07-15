@@ -439,7 +439,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         const ps_ast_variable_simple *variable_simple = (const ps_ast_variable_simple *)expression;
         ps_ast_debug_line(interpreter->level, "Variable: %s", variable_simple->variable->name);
         ps_value value = {.allocated = false, .type = NULL, .data = {0}};
-        if (!ps_interpreter_get_value(interpreter, variable_simple->variable, &value))
+        if (!ps_interpreter_get_variable_value(interpreter, variable_simple->variable, &value))
             return false;
         if (!ps_interpreter_copy_value(interpreter, &value, &result->value))
             return false;

@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 
+#include "ps_ast.h"
 #include "ps_interpreter.h"
 #include "ps_symbol_table.h"
 #include "ps_value.h"
@@ -18,7 +19,7 @@ extern "C"
 {
 #endif
 
-    bool ps_procedures_init(ps_symbol_table *system);
+    bool ps_procedures_init(ps_ast_block *system);
 
     // extern ps_symbol ps_system_procedure_dec;
     // extern ps_symbol ps_system_procedure_inc;
@@ -34,7 +35,11 @@ extern "C"
     bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value                                           );
     bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
     bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
+
+    /** @brief Execute system procedure Write(F, Value [: Width [: Precision]]]) */
     bool ps_procedure_write    (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
+
+    /** @brief Execute system procedure WriteLn(F, Value [: Width [: Precision]]]) */
     bool ps_procedure_writeln  (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
     /* clang-format on */
 

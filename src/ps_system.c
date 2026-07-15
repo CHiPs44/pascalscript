@@ -130,7 +130,7 @@ ps_ast_block *ps_system_alloc(void)
     ps_symbol_table_free(system->symbols);
     system->symbols = ps_symbol_table_alloc(128, 0);
     if (system->symbols == NULL)
-        return ps_ast_free_block(system);
+        return (ps_ast_block *)ps_ast_free_block(system);
 
     /**************************************************************************/
     /* TYPES                                                                  */
