@@ -27,6 +27,7 @@ extern "C"
     typedef ps_error (*ps_function_1arg_s)(ps_interpreter *i, ps_symbol *t, ps_value *r);
     typedef ps_error (*ps_function_2args)(ps_interpreter *i, const ps_value *a, const ps_value *b, ps_value *r);
     typedef bool (*ps_procedure_1arg)(ps_interpreter *i, const ps_value *v);
+    typedef bool (*ps_procedure_1arg_s)(ps_interpreter *i, const ps_symbol *v);
     typedef bool (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, const ps_value *v, int16_t w, int16_t p);
     typedef bool (*ps_procedure_file_read)(ps_interpreter *i, FILE *f, ps_value *s);
 
@@ -36,6 +37,7 @@ extern "C"
         PS_EXECUTABLE_FUNC_1ARG_S,
         PS_EXECUTABLE_FUNC_2ARGS,
         PS_EXECUTABLE_PROC_1ARG,
+        PS_EXECUTABLE_PROC_1ARG_S,
         PS_EXECUTABLE_PROC_FILE_READ,
         PS_EXECUTABLE_PROC_FILE_WRITE,
         PS_EXECUTABLE_FUNC_USER = 8,
@@ -54,6 +56,7 @@ extern "C"
             ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 byref argument   */
             ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments  */
             ps_procedure_1arg proc_1arg;             /** @brief Pointer to system procedure with 1 value argument  */
+            ps_procedure_1arg_s proc_1arg_s;         /** @brief Pointer to system procedure with 1 byref argument  */
             ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(file, variable)" system procedure */
             ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)"   system procedure */
             ps_ast_block *block;                     /** @brief AST block of user defined function or procedure    */

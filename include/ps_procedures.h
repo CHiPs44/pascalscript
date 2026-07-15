@@ -21,8 +21,8 @@ extern "C"
 
     bool ps_procedures_init(ps_ast_block *system);
 
-    // extern ps_symbol ps_system_procedure_dec;
-    // extern ps_symbol ps_system_procedure_inc;
+    extern ps_symbol ps_system_procedure_dec;
+    extern ps_symbol ps_system_procedure_inc;
     extern ps_symbol ps_system_procedure_randomize;
     extern ps_symbol ps_system_procedure_read;
     extern ps_symbol ps_system_procedure_readln;
@@ -30,8 +30,8 @@ extern "C"
     extern ps_symbol ps_system_procedure_writeln;
 
     /* clang-format off */
-    // bool ps_procedure_dec      (ps_interpreter *interpreter, ps_value *value                                                 );
-    // bool ps_procedure_inc      (ps_interpreter *interpreter, ps_value *value                                                 );
+    bool ps_procedure_dec      (ps_interpreter *interpreter, ps_symbol *variable                                             );
+    bool ps_procedure_inc      (ps_interpreter *interpreter, ps_symbol *variable                                             );
     bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value                                           );
     bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
     bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
