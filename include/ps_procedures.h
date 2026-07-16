@@ -30,17 +30,22 @@ extern "C"
     extern ps_symbol ps_system_procedure_writeln;
 
     /* clang-format off */
-    bool ps_procedure_dec      (ps_interpreter *interpreter, ps_symbol *variable                                             );
-    bool ps_procedure_inc      (ps_interpreter *interpreter, ps_symbol *variable                                             );
-    bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value                                           );
-    bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
-    bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
 
+    /** @brief Execute system procedure Dec(Variable) */
+    bool ps_procedure_dec      (ps_interpreter *interpreter, ps_symbol *variable                                             );
+    /** @brief Execute system procedure Inc(Variable) */
+    bool ps_procedure_inc      (ps_interpreter *interpreter, ps_symbol *variable                                             );
+    /** @brief Execute system procedure Randomize */
+    bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value                                           );
+    /** @brief Execute system procedure Read(F, Value) */
+    bool ps_procedure_read     (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
+    /** @brief Execute system procedure ReadLn(F, Value) */
+    bool ps_procedure_readln   (ps_interpreter *interpreter, FILE *f, ps_value *value                                        );
     /** @brief Execute system procedure Write(F, Value [: Width [: Precision]]]) */
     bool ps_procedure_write    (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
-
     /** @brief Execute system procedure WriteLn(F, Value [: Width [: Precision]]]) */
     bool ps_procedure_writeln  (ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision);
+
     /* clang-format on */
 
 #ifdef __cplusplus

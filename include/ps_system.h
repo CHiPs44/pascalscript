@@ -30,7 +30,7 @@ extern "C"
                                             .name = NAME,                                                              \
                                             .value = &ps_value_##TYPE##_##VALUE,                                       \
                                             .system = true,                                                            \
-                                            .allocated = false}
+                                            .allocated = false};
 #define PS_SYSTEM_PROCEDURE(TYPE, VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE)                                         \
     ps_executable ps_executable_##TYPE##_##VALUE = {.kind = KIND, CALLABLE_FIELD = CALLABLE};                          \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
@@ -38,7 +38,7 @@ extern "C"
                                             .name = NAME,                                                              \
                                             .value = &ps_value_##TYPE##_##VALUE,                                       \
                                             .system = true,                                                            \
-                                            .allocated = false}
+                                            .allocated = false};
 
 #define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
     if (!ps_system_add_symbol(system, &__SYMBOL__))                                                                    \
