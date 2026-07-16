@@ -46,41 +46,44 @@ error:
     return false;
 }
 
-bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_value *value, bool is_inc)
+bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_symbol *variable, bool is_inc)
 {
-    if (!ps_value_is_ordinal(value))
+    ps_value value = {0};
+    if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
+        return false;
+    if (!ps_value_is_ordinal(&value))
         return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
-    ps_value new_value = {.allocated = false, .type = value->type, .data = {0}};
-    ps_value_type base = ps_value_get_base(value);
+    ps_value new_value = {.allocated = false, .type = value.type, .data = {0}};
+    ps_value_type base = ps_value_get_base(&value);
     switch (base)
     {
     case PS_TYPE_CHAR:
     case PS_TYPE_INTEGER:
     case PS_TYPE_UNSIGNED:
-        ps_error error = is_inc ? ps_function_succ(interpreter, value, &new_value)
-                                : ps_function_pred(interpreter, value, &new_value);
+        ps_error error = is_inc ? ps_function_succ(interpreter, &value, &new_value)
+                                : ps_function_pred(interpreter, &value, &new_value);
         if (error != PS_ERROR_NONE)
             return ps_interpreter_return_false(interpreter, error);
         break;
     default:
         return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
     }
-    ps_error error = ps_value_copy(&new_value, value, interpreter->range_check);
+    ps_error error = ps_value_copy(&new_value, &value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
         return ps_interpreter_return_false(interpreter, error);
-    if (interpreter->debug >= PS_DEBUG_VERBOSE)
-        fprintf(stderr, "%s(%s)\n", is_inc ? "INC" : "DEC", ps_value_get_display_string(value, 0, 0));
+    if (!ps_interpreter_set_variable_value(interpreter, variable, &value))
+        return false;
     return true;
 }
 
 bool ps_procedure_dec(ps_interpreter *interpreter, ps_symbol *variable)
 {
-    return ps_procedure_inc_or_dec(interpreter, variable->value, false);
+    return ps_procedure_inc_or_dec(interpreter, variable, false);
 }
 
 bool ps_procedure_inc(ps_interpreter *interpreter, ps_symbol *variable)
 {
-    return ps_procedure_inc_or_dec(interpreter, variable->value, true);
+    return ps_procedure_inc_or_dec(interpreter, variable, true);
 }
 
 /**

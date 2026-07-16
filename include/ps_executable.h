@@ -44,12 +44,14 @@ extern "C"
         PS_EXECUTABLE_PROC_USER,
     } __attribute__((__packed__)) ps_executable_kind;
 
+#define PS_EXECUTABLE_KIND_SIZE sizeof(ps_executable_kind)
+
     /** @brief Executable is a function or procedure, from system or user defined */
     typedef struct s_ps_executable
     {
-        ps_executable_kind kind : 4; /** @brief Kind of executable (system function/procedure or user defined) */
-        bool system : 1; /** @brief True if the executable is a system function/procedure, false if user defined */
-        int filler : 11; /** @brief Unused bits to fill 16 bits */
+        ps_executable_kind kind; /** @brief Kind of executable (system function/procedure or user defined) */
+        bool system : 1;         /** @brief True if executable is a system function/procedure, false if user defined */
+        int filler : 23;         /** @brief Unused bits to fill 32 bits */
         union {
             void *address;                           /** @brief Generic pointer to system function/procedure       */
             ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
