@@ -4,8 +4,10 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_DEBUG_H
-#define _PS_DEBUG_H
+#ifndef _PS_LOGGER_H
+#define _PS_LOGGER_H
+
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -24,8 +26,18 @@ extern "C"
         PS_DEBUG_VERBOSE,
     } __attribute__((__packed__)) ps_debug_level;
 
+    typedef struct s_ps_logger
+    {
+        FILE *file;
+        ps_debug_level debug_level;
+    } ps_logger;
+
+    ps_logger *ps_logger_alloc(FILE *file, ps_debug_level debug_level);
+    ps_logger *ps_logger_free(ps_logger *logger);
+    void ps_log(ps_logger *logger, ps_debug_level debug_level, const char *message);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _PS_DEBUG_H */
+#endif /* _PS_LOGGER_H */

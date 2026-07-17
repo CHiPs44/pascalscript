@@ -10,8 +10,8 @@
 #include <string.h>
 
 #include "ps_ast.h"
-#include "ps_debug.h"
 #include "ps_error.h"
+#include "ps_logger.h"
 #include "ps_stack.h"
 #include "ps_string_heap.h"
 #include "ps_symbol_table.h"
@@ -34,7 +34,7 @@ extern "C"
         char message[128 - 16];      /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
-        ps_debug_level debug;        /** @brief Debug level from FATAL to VERBOSE                              */
+        ps_logger *logger;           /** @brief Logger for error and debug messages                            */
         bool range_check;            /** @brief Range checking for integer and real values                     */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
@@ -57,11 +57,15 @@ extern "C"
     /** @brief Release interpreter and children objects */
     ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter);
 
+    /** @brief Log message if debug level is high enough */
+    void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level, const char *format,
+                            ...); // NOSONAR
+
     /** @brief Set error & return false */
     bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error);
 
-    /** @brief Set error & return NULL */
-    void *ps_interpreter_return_null(ps_interpreter *interpreter, ps_error error);
+    /** @brief Set error message with format */
+    bool ps_interpreter_set_error_message(ps_interpreter *interpreter, ps_error error, const char *format, ...);
 
     /** @brief Set message with format */
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);

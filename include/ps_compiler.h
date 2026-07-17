@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
-#include "ps_debug.h"
+#include "ps_logger.h"
 #include "ps_error.h"
 #include "ps_parser.h"
 #include "ps_string_heap.h"

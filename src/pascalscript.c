@@ -206,11 +206,11 @@ bool execute(const ps_ast_block *program)
 
     bool ok = false;
 
-    interpreter->debug = PS_DEBUG_FATAL;
+    interpreter->logger->debug_level = PS_DEBUG_FATAL;
     if (trace)
-        interpreter->debug = PS_DEBUG_VERBOSE;
+        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
     else if (debug)
-        interpreter->debug = PS_DEBUG_TRACE;
+        interpreter->logger->debug_level = PS_DEBUG_TRACE;
 
     /* List symbols BEFORE */
     if (dump_symbols)

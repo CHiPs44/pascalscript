@@ -7,7 +7,7 @@
 #ifndef _PS_SYMBOL_TABLE_H
 #define _PS_SYMBOL_TABLE_H
 
-#include "ps_debug.h"
+#include "ps_logger.h"
 #include "ps_symbol.h"
 
 #ifdef __cplusplus
