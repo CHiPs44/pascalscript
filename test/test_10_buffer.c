@@ -12,11 +12,14 @@
 #include "../include/ps_error.h"
 #include "../include/ps_memory.h"
 #include "../include/ps_readall.h"
+#include "../include/ps_tools.h"
+#include <stdlib.h>
 
-#include "../src/ps_buffer.c"
-#include "../src/ps_error.c"
-#include "../src/ps_memory.c"
-#include "../src/ps_readall.c"
+// #include "../src/ps_buffer.c"
+// #include "../src/ps_error.c"
+// #include "../src/ps_memory.c"
+// #include "../src/ps_readall.c"
+// #include "../src/ps_tools.c"
 
 char *minimal_source = "PROGRAM MINIMAL;\n"
                        "    (* This program does nothing. *)\n"
@@ -52,6 +55,7 @@ int main(void)
 
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT EMPTY\n");
@@ -61,6 +65,7 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
+    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
@@ -72,6 +77,7 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
+    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     int count = 0;
     while (ps_buffer_read_next_char(buffer))
@@ -93,17 +99,19 @@ int main(void)
     }
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: LOAD FILE\n");
     ps_buffer_reset(buffer);
-    static char *filename = "./test/test_10_buffer.pas";
+    static char *filename = "./test_10_buffer.pas";
     if (!ps_buffer_load_file(buffer, filename))
     {
         printf("%s => error=%d, file_errno=%d\n", filename, buffer->error, buffer->file_errno);
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
+    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 

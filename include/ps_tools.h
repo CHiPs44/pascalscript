@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /* @brief Our own implementation of strscpy */
-    size_t ps_strscpy(char *dest, const char *src, size_t size);
+    ssize_t ps_strscpy(char *dest, const char *src, ssize_t size);
 
 #ifdef __cplusplus
 }

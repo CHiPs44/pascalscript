@@ -9,9 +9,11 @@
 
 #include "../include/ps_memory.h"
 #include "../include/ps_string.h"
+#include "../include/ps_tools.h"
 
-#include "../src/ps_memory.c"
-#include "../src/ps_string.c"
+// #include "../src/ps_memory.c"
+// #include "../src/ps_string.c"
+// #include "../src/ps_tools.c"
 
 int main(void)
 {

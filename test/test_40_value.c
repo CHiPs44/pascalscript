@@ -8,32 +8,40 @@
 #include <string.h>
 #include <sys/resource.h>
 
+#include "../include/ps_array.h"
+#include "../include/ps_ast.h"
 #include "../include/ps_config.h"
-#include "../include/ps_environment.h"
 #include "../include/ps_memory.h"
+#include "../include/ps_stack.h"
 #include "../include/ps_system.h"
+#include "../include/ps_tools.h"
 #include "../include/ps_value.h"
 
-#include "../src/ps_memory.c"
-#include "../src/ps_executable.c"
-#include "../src/ps_signature.c"
-#include "../src/ps_string.c"
-#include "../src/ps_symbol.c"
-#include "../src/ps_symbol_table.c"
-#include "../src/ps_environment.c"
-#include "../src/ps_system.c"
-#include "../src/ps_type_definition.c"
-#include "../src/ps_value.c"
-#include "../src/ps_value_type.c"
+// #include "../src/ps_array.c"
+// #include "../src/ps_ast.c"
+// #include "../src/ps_ast_debug.c"
+// #include "../src/ps_executable.c"
+// #include "../src/ps_functions.c"
+// #include "../src/ps_memory.c"
+// #include "../src/ps_procedures.c"
+// #include "../src/ps_signature.c"
+// #include "../src/ps_stack.c"
+// #include "../src/ps_string.c"
+// #include "../src/ps_symbol.c"
+// #include "../src/ps_symbol_table.c"
+// #include "../src/ps_system.c"
+// #include "../src/ps_tools.c"
+// #include "../src/ps_type_definition.c"
+// #include "../src/ps_value.c"
+// #include "../src/ps_subrange.c"
+// #include "../src/ps_value_type.c"
 
 int main(void)
 {
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
-    ps_identifier system = "SYSTEM";
-    ps_environment *environment = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
-    ps_system_init(environment);
+    ps_ast_block *system = ps_system_alloc();
 
     printf("TEST VALUE: BEGIN\n");
     ps_value *dummy = ps_value_alloc(ps_system_integer.value->type, (ps_value_data){.i = 0});
@@ -70,6 +78,6 @@ int main(void)
 
     printf("TEST VALUE: END\n");
 
-    ps_environment_free(environment);
+    ps_system_free(system);
     return 0;
 }

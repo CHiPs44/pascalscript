@@ -15,18 +15,18 @@
 #include "../include/ps_system.h"
 #include "../include/ps_value.h"
 
-#include "../src/ps_ast.c"
-#include "../src/ps_executable.c"
-#include "../src/ps_memory.c"
-#include "../src/ps_signature.c"
-#include "../src/ps_stack.c"
-#include "../src/ps_string.c"
-#include "../src/ps_symbol.c"
-#include "../src/ps_symbol_table.c"
-#include "../src/ps_system.c"
-#include "../src/ps_type_definition.c"
-#include "../src/ps_value.c"
-#include "../src/ps_value_type.c"
+// #include "../src/ps_ast.c"
+// #include "../src/ps_executable.c"
+// #include "../src/ps_memory.c"
+// #include "../src/ps_signature.c"
+// #include "../src/ps_stack.c"
+// #include "../src/ps_string.c"
+// #include "../src/ps_symbol.c"
+// #include "../src/ps_symbol_table.c"
+// #include "../src/ps_system.c"
+// #include "../src/ps_type_definition.c"
+// #include "../src/ps_value.c"
+// #include "../src/ps_value_type.c"
 
 ps_symbol constant1 = {.name = "CONSTANT1", .kind = PS_SYMBOL_KIND_CONSTANT, .allocated = false, .system = false};
 ps_symbol variable2 = {.name = "VARIABLE2", .kind = PS_SYMBOL_KIND_VARIABLE, .allocated = false, .system = false};
@@ -38,7 +38,7 @@ int main(void)
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
-    ps_ast_block *system_block = ps_system_init();
+    ps_ast_block *system = ps_system_init();
 
     ps_value value1 = {.type = ps_system_integer.value->type, .allocated = false, .data.i = 0x55aa55aa};
     constant1.value = &value1;
@@ -49,7 +49,7 @@ int main(void)
     ps_value value4 = {.type = ps_system_integer.value->type, .allocated = false, .data.i = 0x55aa55aa};
     constant4.value = &value4;
 
-    ps_symbol_table *table = system_block->symbols;
+    ps_symbol_table *table = system->symbols;
     int result;
     ps_error error = PS_ERROR_NONE;
 
@@ -81,7 +81,7 @@ int main(void)
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     printf("TEST SYMBOL TABLE: END\n");
 
-    ps_system_free(system_block);
+    ps_system_free(system);
 
     return 0;
 }

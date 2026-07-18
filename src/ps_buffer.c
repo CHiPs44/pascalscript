@@ -167,7 +167,7 @@ static bool ps_buffer_index_lines(ps_buffer *buffer)
         // At EOL?
         if (current_char == '\r' || current_char == '\n')
         {
-            line_length = text - start;
+            line_length = text - start + 1;
             if (line_length > PS_BUFFER_MAX_COLUMNS)
             {
                 ps_buffer_free_lines(buffer);
@@ -188,7 +188,7 @@ static bool ps_buffer_index_lines(ps_buffer *buffer)
          * End of text: if there is a remaining partial line (no trailing
          * newline), record it here.
          */
-        if (current_char == '\0' && start < text)
+        if (current_char == '\0' && start <= text)
         {
             line_length = text - start;
             if (line_length > PS_BUFFER_MAX_COLUMNS)

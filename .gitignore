@@ -83,3 +83,13 @@ test/*.err
 test/report.txt
 .obj/
 .deps/
+test/CMakeFiles/
+test/CMakeCache.txt
+test/cmake_install.cmake
+test/Makefile
+test/CTestTestfile.cmake
+test/test_10_buffer
+test/test_20_lexer
+test/test_30_string
+test/test_40_value
+test/test_60_symbol_table
