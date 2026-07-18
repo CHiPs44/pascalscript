@@ -108,12 +108,12 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
             return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
         }
         srand(seed);
-        if (interpreter->debug >= PS_DEBUG_VERBOSE)
+        if (interpreter->logger->debug_level >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "RANDOMIZE(%u)\n", seed);
         return true;
     }
     srand((unsigned int)time(NULL));
-    if (interpreter->debug >= PS_DEBUG_VERBOSE)
+    if (interpreter->logger->debug_level >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "RANDOMIZE\n");
     return true;
 }
@@ -148,7 +148,7 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *va
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
-    if (interpreter->debug)
+    if (interpreter->logger->debug_level)
         fprintf(f, "WRITE('%s')\n", display_value);
     else
         fprintf(f, "%s", display_value);
@@ -163,7 +163,7 @@ bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
-    if (interpreter->debug)
+    if (interpreter->logger->debug_level)
         fprintf(f, "WRITELN('%s')\n", display_value);
     else
         fprintf(f, "%s", display_value);

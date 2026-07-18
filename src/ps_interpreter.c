@@ -84,7 +84,7 @@ void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level,
         static char buffer[256];
         va_list args;
         va_start(args, format);
-        vsnprintf(buffer, format, 255, args); // NOSONAR
+        vsnprintf(buffer, 255, format, args); // NOSONAR
         va_end(args);
         ps_log(interpreter->logger, debug_level, buffer);
     }
