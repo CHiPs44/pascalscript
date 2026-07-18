@@ -110,7 +110,7 @@ char *ps_buffer_debug_char(char c)
         // ascii printable characters (DEL excluded)
         snprintf(tmp, sizeof(tmp) - 1, "%c/%02x", c, c);
     else
-        // extended characters
+        // DEL + extended characters
         snprintf(tmp, sizeof(tmp) - 1, "%02x", c);
     return tmp;
 }
