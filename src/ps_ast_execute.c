@@ -37,7 +37,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
 bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
-        return ps_interpreter_set_message(interpreter, "Expected PROGRAM AST node");
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected PROGRAM AST node");
     ps_ast_debug_line(interpreter->level, "PROGRAM %s;", program->name);
     return ps_ast_execute_block(interpreter, program);
 }
@@ -45,7 +45,8 @@ bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *pro
 bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
-        return ps_interpreter_set_message(interpreter, "Expected PROCEDURE AST node");
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
+                                                "Expected PROCEDURE AST node");
     ps_ast_debug_line(interpreter->level, "PROCEDURE %s;", procedure->name);
     return ps_ast_execute_block(interpreter, procedure);
 }
@@ -53,17 +54,21 @@ bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *p
 bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
-        return ps_interpreter_set_message(interpreter, "Expected FUNCTION AST node");
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
+                                                "Expected FUNCTION AST node");
     ps_ast_debug_line(interpreter->level, "FUNCTION %s;", function->name);
     return ps_ast_execute_block(interpreter, function);
 }
 
 bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
 {
-    if (statement_list == NULL || statement_list->count == 0)
+    if (statement_list == NULL)
         return true; // Empty statement list is valid (no-op)
     if (!ps_ast_node_check_kind((const ps_ast_node *)statement_list, PS_AST_STATEMENT_LIST))
-        return ps_interpreter_set_message(interpreter, "Expected STATEMENT_LIST AST node");
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
+                                                "Expected STATEMENT_LIST AST node");
+    if (statement_list->count == 0)
+        return true; // Empty statement list is valid (no-op)
     ps_ast_debug_line(interpreter->level, "STATEMENT_LIST %zu:", statement_list->count);
     for (size_t i = 0; i < statement_list->count; i++)
     {

@@ -79,7 +79,7 @@ static ps_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *
         return PS_ERROR_SYMBOL_TABLE_FULL;
     // check if symbol already exists
     if (ps_symbol_table_get(table, symbol->name) != NULL)
-        return PS_ERROR_SYMBOL_TABLE_EXISTS;
+        return PS_ERROR_SYMBOL_EXISTS;
     ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
     ps_symbol_table_size index = hash % table->size;
     ps_symbol_table_size start_index = index;
@@ -233,7 +233,7 @@ ps_error ps_symbol_table_remove(ps_symbol_table *table, ps_symbol *symbol)
                         symbol->name);
     ps_symbol_table_size index = ps_symbol_table_find(table, symbol->name);
     if (index == PS_SYMBOL_TABLE_NOT_FOUND)
-        return PS_ERROR_SYMBOL_TABLE_NOT_FOUND;
+        return PS_ERROR_SYMBOL_NOT_FOUND;
     table->symbols[index] = NULL;
     table->used -= 1;
     ps_symbol_table_log("TRACE\tps_symbol_table_remove:\tEND\t%d/%d %d '%s' \n", table->used, table->size, index,

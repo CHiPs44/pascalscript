@@ -8,16 +8,18 @@
 #include <string.h>
 #include <sys/resource.h>
 
+#include "../include/ps_ast.h"
 #include "../include/ps_config.h"
-#include "../include/ps_environment.h"
 #include "../include/ps_memory.h"
+#include "../include/ps_stack.h"
 #include "../include/ps_system.h"
 #include "../include/ps_value.h"
 
-#include "../src/ps_environment.c"
+#include "../src/ps_ast.c"
 #include "../src/ps_executable.c"
 #include "../src/ps_memory.c"
 #include "../src/ps_signature.c"
+#include "../src/ps_stack.c"
 #include "../src/ps_string.c"
 #include "../src/ps_symbol.c"
 #include "../src/ps_symbol_table.c"
@@ -36,9 +38,7 @@ int main(void)
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
     setrlimit(RLIMIT_AS, &rl);
 
-    ps_identifier system = "SYSTEM";
-    ps_environment *environment = ps_environment_alloc(NULL, system, PS_SYSTEM_SYMBOL_TABLE_SIZE);
-    ps_system_init(environment);
+    ps_ast_block *system_block = ps_system_init();
 
     ps_value value1 = {.type = ps_system_integer.value->type, .allocated = false, .data.i = 0x55aa55aa};
     constant1.value = &value1;
@@ -49,7 +49,7 @@ int main(void)
     ps_value value4 = {.type = ps_system_integer.value->type, .allocated = false, .data.i = 0x55aa55aa};
     constant4.value = &value4;
 
-    ps_symbol_table *table = environment->symbols;
+    ps_symbol_table *table = system_block->symbols;
     int result;
     ps_error error = PS_ERROR_NONE;
 
@@ -69,7 +69,7 @@ int main(void)
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     // Re-add constant1 => EXISTS
     error = ps_symbol_table_add(table, &constant1);
-    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", error == PS_ERROR_SYMBOL_TABLE_EXISTS ? "OK" : "KO", error);
+    printf("TEST SYMBOL TABLE: RE-ADD CONSTANT1 %s %d\n", error == PS_ERROR_SYMBOL_EXISTS ? "OK" : "KO", error);
     // auto_var3 shoulfd fit => 2
     error = ps_symbol_table_add(table, &auto_var3);
     printf("TEST SYMBOL TABLE: ADD AUTO_VAR3 %s %d\n", error == PS_ERROR_NONE ? "OK" : "KO", error);
@@ -81,7 +81,7 @@ int main(void)
     printf("TEST SYMBOL TABLE: DUMP OK\n");
     printf("TEST SYMBOL TABLE: END\n");
 
-    ps_environment_free(environment);
+    ps_system_free(system_block);
 
     return 0;
 }

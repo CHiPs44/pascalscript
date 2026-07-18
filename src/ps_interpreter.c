@@ -81,12 +81,12 @@ void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level,
 {
     if (interpreter->logger->debug_level >= debug_level)
     {
-        static char buffer[256];
+        static char message[256];
         va_list args;
         va_start(args, format);
-        vsnprintf(buffer, 255, format, args); // NOSONAR
+        vsnprintf(message, sizeof(message), format, args); // NOSONAR
         va_end(args);
-        ps_log(interpreter->logger, debug_level, buffer);
+        ps_log(interpreter->logger, debug_level, message);
     }
 }
 
