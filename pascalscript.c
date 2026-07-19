@@ -244,14 +244,17 @@ int main(int argc, char *argv[])
     // trace = true;
     // debug = true;
 
-    ast_test = true;
-    if (ast_test && !ps_ast_test())
+    // ast_test = true;
+    if (ast_test)
     {
-        fprintf(stderr, "AST tests failed!\n");
-        exit(EXIT_FAILURE);
+        if (!ps_ast_test())
+        {
+            fprintf(stderr, "AST tests failed!\n");
+            exit(EXIT_FAILURE);
+        }
+        fprintf(stderr, "AST tests passed!\n");
+        exit(EXIT_SUCCESS);
     }
-    fprintf(stderr, "AST tests passed!\n");
-    exit(EXIT_SUCCESS);
 
     current_path = getcwd(NULL, 0);
     if (arg + 1 < argc)

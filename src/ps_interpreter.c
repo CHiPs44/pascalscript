@@ -204,8 +204,8 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_sym
     if (handle >= frame->block->n_vars)
     {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_OVERFLOW,
-                                                "Invalid handle %d for variable '%s' for frame of size %d", handle,
-                                                variable->name, frame->block->n_vars);
+                                                "Invalid handle %d for variable '%s' for frame of size %d of block %s",
+                                                handle, variable->name, frame->block->n_vars, frame->block->name);
     }
     value->type = variable->value->type;
     value->data = frame->data[handle];

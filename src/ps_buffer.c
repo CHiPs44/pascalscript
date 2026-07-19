@@ -107,7 +107,7 @@ char *ps_buffer_debug_char(char c)
         // control characters
         snprintf(tmp, sizeof(tmp) - 1, "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
     else if (c < 0x7f)
-        // ascii printable characters (DEL excluded)
+        // ASCII printable characters (DEL excluded)
         snprintf(tmp, sizeof(tmp) - 1, "%c/%02x", c, c);
     else
         // DEL + extended characters
