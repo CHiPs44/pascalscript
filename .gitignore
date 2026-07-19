@@ -93,3 +93,4 @@ test/test_20_lexer
 test/test_30_string
 test/test_40_value
 test/test_60_symbol_table
+test/Testing/

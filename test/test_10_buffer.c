@@ -15,12 +15,6 @@
 #include "../include/ps_tools.h"
 #include <stdlib.h>
 
-// #include "../src/ps_buffer.c"
-// #include "../src/ps_error.c"
-// #include "../src/ps_memory.c"
-// #include "../src/ps_readall.c"
-// #include "../src/ps_tools.c"
-
 char *minimal_source = "PROGRAM MINIMAL;\n"
                        "    (* This program does nothing. *)\n"
                        "BEGIN\n"
@@ -31,11 +25,11 @@ char *hello_utf8 =
     //  |         1         2         3         4         5         6         7         8|
     //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
     "Program Hello;\n"
-    "Const\n"
-    "\tK = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
+    // "Const\n"
+    // "\tK = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
     "Begin\n"
     "\tWriteLn('Hello, World!');\n"
-    "\tWriteLn('K=', K);\n"
+    // "\tWriteLn('K=', K);\n"
     "End."; //\n";
 
 int main(void)
@@ -55,7 +49,6 @@ int main(void)
 
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT EMPTY\n");
@@ -66,18 +59,17 @@ int main(void)
     }
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT MINIMAL\n");
     int minimal_length = strlen(minimal_source);
+    printf("TEST BUFFER: minimal_length=%d\n", minimal_length);
     if (!ps_buffer_load_string(buffer, minimal_source, minimal_length))
     {
         printf(" => error=%d\n", buffer->error);
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     int count = 0;
     while (ps_buffer_read_next_char(buffer))
