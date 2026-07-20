@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_logger.h"
 #include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
@@ -16,11 +17,11 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_symbol_table_trace = false;
+ps_debug_level ps_symbol_table_debug_level = false;
 
-void ps_symbol_table_log(const char *format, ...) // NOSONAR
+void ps_symbol_table_log(ps_debug_level debug_level, const char *format, ...) // NOSONAR
 {
-    if (!ps_symbol_table_trace)
+    if (debug_level < ps_symbol_table_debug_level)
         return;
     va_list args;
     va_start(args, format);
@@ -119,18 +120,19 @@ ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
     ps_bucket *bucket = table->buckets[index];
     if (bucket == NULL || bucket->used == 0)
     {
-        ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
+        ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' not found\n", name);
         return NULL;
     }
     for (ssize_t i = 0; i < bucket->used; i++)
     {
         if (strcmp(bucket->symbols[i]->name, name) == 0)
         {
-            ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d position %d\n", name, index, i);
+            ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' found at index %d position %d\n",
+                                name, index, i);
             return bucket->symbols[i];
         }
     }
-    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
+    ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' not found\n", name);
     return NULL;
 }
 

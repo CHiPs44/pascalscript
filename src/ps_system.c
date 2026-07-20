@@ -8,6 +8,7 @@
 
 #include "ps_ast.h"
 #include "ps_functions.h"
+#include "ps_logger.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
 #include "ps_string.h"
@@ -128,9 +129,10 @@ ps_ast_block *ps_system_alloc(void)
     if (system == NULL)
         return NULL;
     ps_symbol_table_free(system->symbols);
-    system->symbols = ps_symbol_table_alloc(128, 0);
+    system->symbols = ps_symbol_table_alloc(0, 0);
     if (system->symbols == NULL)
         return (ps_ast_block *)ps_ast_free_block(system);
+    ps_symbol_table_debug_level = PS_DEBUG_VERBOSE;
 
     /**************************************************************************/
     /* TYPES                                                                  */
@@ -194,11 +196,13 @@ ps_ast_block *ps_system_alloc(void)
     if (!ps_functions_init(system))
         goto error;
 
+    ps_symbol_table_debug_level = PS_DEBUG_FATAL;
     return system;
 
 error:
     fprintf(stderr, "SYSTEM INIT FAILED\n");
     ps_system_free(system);
+    ps_symbol_table_debug_level = PS_DEBUG_FATAL;
     return NULL;
 }
 
