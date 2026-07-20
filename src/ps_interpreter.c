@@ -126,8 +126,8 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
 
     interpreter->level += 1;
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
-                       block->name, block->symbols == NULL ? 0 : block->symbols->used,
-                       block->symbols != NULL && block->symbols->used > 1 ? "s" : "");
+                       block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
+                       block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
     ps_frame *frame = ps_frame_alloc(block);
     if (frame == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);

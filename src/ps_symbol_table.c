@@ -61,7 +61,7 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
         if (table->buckets[i] != NULL)
             table->buckets[i] = ps_symbol_table_bucket_free(table->buckets[i], free_symbols);
     }
-    table->used = 0;
+    table->used_buckets = 0;
 }
 
 ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size)
@@ -87,41 +87,14 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-static ps_error ps_symbol_table_add_internal(ps_symbol_table *table, ps_symbol *symbol)
+ssize_t ps_symbol_table_find_used_buckets(const ps_symbol_table *table)
 {
-    if (table->used >= table->size)
-        return PS_ERROR_SYMBOL_TABLE_FULL;
-    // check if symbol already exists
-    if (ps_symbol_table_get(table, symbol->name) != NULL)
-        return PS_ERROR_SYMBOL_EXISTS;
-    ps_symbol_hash_key hash = ps_symbol_get_hash_key((char *)symbol->name);
-    ssize_t index = hash % table->size;
-    ssize_t start_index = index;
-    // Find an empty slot in the table
-    while (table->symbols[index] != NULL)
-    {
-        index += 1;
-        if (index >= table->size)
-            index = 0; // wrap around
-        if (index == start_index)
-        {
-            ps_symbol_table_log("DEBUG\tps_symbol_table_add_internal: %s => table is full\n", symbol->name);
-            return PS_ERROR_SYMBOL_TABLE_FULL;
-        }
-    }
-    table->symbols[index] = symbol;
-    table->used += 1;
-    return PS_ERROR_NONE;
+    return table == NULL ? -1 : table->used_buckets;
 }
 
-ssize_t ps_symbol_table_get_used(const ps_symbol_table *table)
+ssize_t ps_symbol_table_find_free(const ps_symbol_table *table)
 {
-    return table == NULL ? -1 : table->used;
-}
-
-ssize_t ps_symbol_table_get_free(const ps_symbol_table *table)
-{
-    return table == NULL ? -1 : table->table_size - table->used;
+    return table == NULL ? -1 : table->table_size - table->used_buckets;
 }
 
 ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
@@ -139,71 +112,65 @@ ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
     return hash;
 }
 
-ssize_t ps_symbol_table_find(const ps_symbol_table *table, const char *name)
+ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
-    ssize_t index = hash % table->size;
-    if (table->symbols[index] == NULL)
+    ssize_t index = hash % table->table_size;
+    ps_bucket *bucket = table->buckets[index];
+    if (bucket == NULL || bucket->used == 0)
     {
         ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
-        return PS_SYMBOL_TABLE_NOT_FOUND;
-    }
-    if (strcmp(table->symbols[index]->name, name) != 0)
-    {
-        // Key collision: search for the symbol in the table
-        ssize_t start_index = index;
-        do
-        {
-            index += 1;
-            if (index >= table->size)
-                index = 0; // wrap around
-            if (index == start_index)
-            {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
-                return PS_SYMBOL_TABLE_NOT_FOUND;
-            }
-            if (table->symbols[index] == NULL)
-                continue;
-            if (strcmp((char *)(table->symbols[index]->name), name) == 0)
-            {
-                ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", name, index);
-                return index;
-            }
-        } while (true);
-    }
-    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d\n", name, index);
-    return index;
-}
-
-ps_symbol *ps_symbol_table_get(const ps_symbol_table *table, const char *name)
-{
-    ssize_t index = ps_symbol_table_find(table, name);
-    if (index == PS_SYMBOL_TABLE_NOT_FOUND)
         return NULL;
-    return table->symbols[index];
+    }
+    for (ssize_t i = 0; i < bucket->used; i++)
+    {
+        if (strcmp(bucket->symbols[i]->name, name) == 0)
+        {
+            ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' found at index %d position %d\n", name, index, i);
+            return bucket->symbols[i];
+        }
+    }
+    ps_symbol_table_log("TRACE\tps_symbol_table_find: '%s' not found\n", name);
+    return NULL;
 }
 
 ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
-    ps_error error = PS_ERROR_NONE;
     // NB: refuse to add symbol if kind is AUTO
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         return PS_ERROR_SYMBOL_TABLE_INVALID;
-    if (table->used >= table->size)
+    ps_symbol_hash_key hash = ps_symbol_get_hash_key(symbol->name);
+    ssize_t index = hash % table->table_size;
+    ps_bucket *bucket = table->buckets[index];
+    // no bucket yet, allocate one
+    if (bucket == NULL)
     {
-        error = ps_symbol_table_grow(table);
-        if (error != PS_ERROR_NONE)
-            return error;
+        bucket = ps_symbol_table_bucket_alloc(table->bucket_size, table->bucket_more);
+        if (bucket == NULL)
+            return PS_ERROR_OUT_OF_MEMORY;
+        table->buckets[index] = bucket;
+        table->used_buckets++;
     }
-    error = ps_symbol_table_add_internal(table, symbol);
-    // fprintf(stderr, "Added symbol %s to table %p, size=%zu, used=%zu, more=%zu\n", symbol->name, (void *)table,
-    //         table->size, table->used, table->more);
-    return error;
+    // bucket is full, grow it
+    else if (bucket->used == bucket->size)
+    {
+        bucket->size += bucket->more;
+        ps_bucket *bigger_bucket =
+            ps_memory_realloc(PS_MEMORY_SYMBOL, bucket, sizeof(ps_bucket) + bucket->size * sizeof(ps_symbol *));
+        if (bigger_bucket == NULL)
+            return PS_ERROR_OUT_OF_MEMORY;
+        table->buckets[index] = bigger_bucket;
+    }
+    // add symbol to bucket
+    table->buckets[index]->symbols[bucket->used] = symbol;
+    table->buckets[index]->used++;
+    return PS_ERROR_NONE;
 }
 
 void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table)
 {
     ps_symbol *symbol;
+    ssize_t size = 0;
     ssize_t free = 0;
     ssize_t used = 0;
     ps_symbol_hash_key hash;
@@ -213,7 +180,7 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
 
     if (output == NULL)
         output = stderr;
-    fprintf(output, "*** Symbol table %s (%d/%d) ***\n", title, table->used, table->size);
+    fprintf(output, "*** Symbol table %s (%d/%d) ***\n", title, table->used_buckets, table->table_size);
     //                        1         2         3         4         5         6         7         8         9
     //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
@@ -229,37 +196,39 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
         output,
         "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┫\n");
-    for (unsigned int i = 0; i < table->size; i++)
+    for (unsigned int i = 0; i < table->table_size; i++)
     {
-        if (table->symbols[i] == NULL)
-            free += 1;
-        else
+        if (table->buckets[i] != NULL)
         {
-            used += 1;
-            symbol = table->symbols[i];
-            hash = ps_symbol_get_hash_key((char *)symbol->name);
-            kind_name = ps_symbol_get_kind_name(symbol->kind);
-            type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
-            value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
-            // clang-format off
-            fprintf(output,
-                    "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n",
-                    symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i,
-                    hash, hash % table->size == i ? '=' : '!', hash % table->size,
-                    PS_IDENTIFIER_LEN, symbol->name,
-                    kind_name,
-                    type_name,
-                    PS_IDENTIFIER_LEN, value
-            );
-            // clang-format on
+            size += table->buckets[i]->size;
+            free += table->buckets[i]->size - table->buckets[i]->used;
+            used += table->buckets[i]->used;
+            for (ssize_t j = 0; j < table->buckets[i]->used; j++)
+            {
+                symbol = table->buckets[i]->symbols[j];
+                hash = ps_symbol_get_hash_key((char *)symbol->name);
+                kind_name = ps_symbol_get_kind_name(symbol->kind);
+                type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
+                value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
+                // clang-format off
+                fprintf(output,
+                        "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n",
+                        symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i,
+                        hash, hash % table->table_size == i ? '=' : '!', hash % table->table_size,
+                        PS_IDENTIFIER_LEN, symbol->name,
+                        kind_name,
+                        type_name,
+                        PS_IDENTIFIER_LEN, value
+                );
+                // clang-format on
+            }
         }
     }
     fprintf(
         output,
         "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┛\n");
-    fprintf(output, "(free=%d/used=%u/size=%u => %s)\n", free, used, free + used,
-            free + used == table->size ? "OK" : "KO");
+    fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, free + used);
 }
 
 /* EOF */

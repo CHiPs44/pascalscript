@@ -397,7 +397,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     // Store arguments in frame
     for (size_t i = 0; i < procedure_call->n_args; i++)
     {
-        ps_symbol *symbol = ps_symbol_table_get(procedure->symbols, procedure->signature->parameters[i].name);
+        ps_symbol *symbol = ps_symbol_table_find(procedure->symbols, procedure->signature->parameters[i].name);
         if (symbol == NULL)
         {
             ps_formal_parameter parameter = procedure->signature->parameters[i];

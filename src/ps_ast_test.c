@@ -64,18 +64,9 @@ cleanup:
 
 bool ps_ast_test_delete_block_program(ps_ast_block *block_program)
 {
-    if (block_program->symbols != NULL)
-    {
-        ps_ast_debug_line(0, "Free symbol table for program %s", block_program->name);
-        ps_memory_free(PS_MEMORY_SYMBOL, block_program->symbols->symbols);
-        ps_memory_free(PS_MEMORY_AST, block_program->symbols);
-        block_program->symbols = NULL;
-    }
-
     ps_ast_debug_line(0, "Free the PROGRAM block node");
     block_program = (ps_ast_block *)ps_ast_free_block(block_program);
     ASSERT(block_program == NULL);
-
     return true;
 cleanup:
     return false;
@@ -94,7 +85,7 @@ ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
     ASSERT(ps_interpreter_enter_frame(interpreter, block_program));
 
     ps_ast_debug_line(0, "Check PROGRAM symbol");
-    const ps_symbol *symbol_program = ps_symbol_table_get(block_program->symbols, block_program->name);
+    const ps_symbol *symbol_program = ps_symbol_table_find(block_program->symbols, block_program->name);
     ASSERT(symbol_program != NULL);
     ASSERT(symbol_program->kind == PS_SYMBOL_KIND_PROGRAM);
     ASSERT(symbol_program->system == false);

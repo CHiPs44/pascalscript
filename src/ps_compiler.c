@@ -107,7 +107,7 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, c
     // No block => search into SYSTEM
     if (block == NULL)
     {
-        symbol = ps_symbol_table_get(compiler->system->symbols, name);
+        symbol = ps_symbol_table_find(compiler->system->symbols, name);
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
                     local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
@@ -115,7 +115,7 @@ ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, c
     else
     {
         // Search in current block
-        symbol = ps_symbol_table_get(block->symbols, name);
+        symbol = ps_symbol_table_find(block->symbols, name);
         if (!local && symbol == NULL)
             // Not found => search in parent
             return ps_compiler_find_symbol(compiler, block->parent, name, false);

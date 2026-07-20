@@ -413,7 +413,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     READ_NEXT_TOKEN
 
     // First, check if this is an assignment to the current function name
-    symbol = block->parent == NULL ? NULL : ps_symbol_table_get(block->parent->symbols, identifier);
+    symbol = block->parent == NULL ? NULL : ps_symbol_table_find(block->parent->symbols, identifier);
     if (symbol != NULL && symbol->kind == PS_SYMBOL_KIND_FUNCTION && strcmp(symbol->name, block->name) == 0)
     {
         if (compiler->debug >= PS_DEBUG_VERBOSE)
