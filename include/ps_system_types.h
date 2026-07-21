@@ -44,9 +44,14 @@ extern "C"
         ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
     } __attribute__((__packed__)) ps_string;
 
-    typedef uint32_t ps_set[8]; /** @brief Set of 256 bits */
+    typedef uint32_t ps_set[8]; /** @brief Set of 32 * 8 = 256 bits */
 
-    typedef PS_HANDLE ps_handle; /** @brief Handle: variable index in stack */
+    // typedef struct s_ps_handle
+    // {
+    //     PS_FRAME frame;                      /** @brief Frame: stack index */
+    //     PS_HANDLE index;                     /** @brief Handle: variable index in frame */
+    // } __attribute__((__packed__)) ps_handle; /** @brief Handle to a variable */
+    typedef PS_HANDLE ps_handle;
 
     /** @brief pointer *FUTURE* */
     typedef void *ps_pointer;
@@ -60,6 +65,7 @@ extern "C"
     #define PS_CHAR_SIZE     sizeof(ps_char    )
     #define PS_STRING_SIZE   sizeof(ps_string  )
     #define PS_POINTER_SIZE  sizeof(ps_pointer )
+    #define PS_HANDLE_SIZE   sizeof(ps_handle  )
 
     // clang-format on
 

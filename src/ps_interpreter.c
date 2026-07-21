@@ -48,7 +48,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate system variables
-    ps_frame *frame = ps_frame_alloc(system);
+    ps_frame *frame = ps_frame_alloc(system, NULL);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
     for (size_t i = 0; i < system->n_vars; i++)
@@ -128,7 +128,8 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
                        block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
                        block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
-    ps_frame *frame = ps_frame_alloc(block);
+    ps_frame *parent = ps_stack_top(interpreter->stack);
+    ps_frame *frame = ps_frame_alloc(block, parent);
     if (frame == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
     if (ps_stack_is_full(interpreter->stack))
@@ -172,8 +173,38 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_sym
     assert(NULL != variable);
     assert(NULL != value);
     assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return ps_interpreter_set_message(interpreter, "ps_interpreter_set_variable_value not implemented");
+    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    {
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE,
+                                                "Symbol '%s' is a %s, not a variable", variable->name,
+                                                ps_symbol_get_kind_name(variable->kind));
+    }
+    if (ps_value_is_array(variable->value))
+    {
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
+                                                "Variable '%s' is an array, which is not implemnted yet",
+                                                variable->name);
+    }
+    // Search in current frame and parent frames
+    ps_frame *frame = ps_stack_top(interpreter->stack);
+    while (frame != NULL)
+    {
+        if (frame->block->symbols != NULL)
+        {
+            const ps_symbol *symbol = ps_symbol_table_find(frame->block->symbols, variable->name);
+            if (symbol != NULL)
+            {
+                ps_value variable_value = {.allocated = false, .type = variable->value->type, .data = {0}};
+                if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
+                    return false;
+                frame->data[symbol->value->data.h.index] = variable_value.data;
+                return true;
+            }
+        }
+        frame = frame->parent;
+    }
+    // interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
+    // return ps_interpreter_set_message(interpreter, "ps_interpreter_set_variable_value not implemented");
 }
 
 bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)

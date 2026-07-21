@@ -167,21 +167,25 @@ extern "C"
 #endif
 
 #if PS_BITNESS == 16
+#define PS_FRAME uint8_t
+#define PS_HANDLE uint8_t
+#define PS_HANDLE uint16_t
+#define PS_HANDLE_FMT_10 PRIu8
+#define PS_HANDLE_FMT_16 PRIx8
+#endif
+
+#if PS_BITNESS == 32
+#define PS_FRAME uint16_t
 #define PS_HANDLE uint16_t
 #define PS_HANDLE_FMT_10 PRIu16
 #define PS_HANDLE_FMT_16 PRIx16
 #endif
 
-#if PS_BITNESS == 32
+#if PS_BITNESS == 64
+#define PS_FRAME uint32_t
 #define PS_HANDLE uint32_t
 #define PS_HANDLE_FMT_10 PRIu32
 #define PS_HANDLE_FMT_16 PRIx32
-#endif
-
-#if PS_BITNESS == 64
-#define PS_HANDLE uint64_t
-#define PS_HANDLE_FMT_10 PRIu64
-#define PS_HANDLE_FMT_16 PRIx64
 #endif
 
 #ifndef PS_IDENTIFIER_LEN

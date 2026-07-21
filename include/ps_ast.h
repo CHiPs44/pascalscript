@@ -122,16 +122,18 @@ extern "C"
     typedef struct s_ps_ast_variable_simple
     {
         PS_AST_NODE_COMMON
-        ps_symbol *variable; /** @brief Variable being referenced */
+        ps_ast_block *owner; /** @brief Block where variable is defined */
+        ps_symbol *variable; /** @brief Variable being referenced       */
     } __attribute__((__packed__)) ps_ast_variable_simple;
 
-    /** @brief Lvalue: array value, like A[I], A[I, J, K], ... */
+    /** @brief Lvalue: array value, like A1[42], A2[212 + Z *4, T], A3[I, J, K], ... */
     typedef struct s_ps_ast_variable_array
     {
         PS_AST_NODE_COMMON
-        ps_symbol *variable;   /** @brief Array being referenced         */
-        size_t n_indexes;      /** @brief Number of dimensions           */
-        ps_ast_node **indexes; /** @brief Expressions for each dimension */
+        ps_ast_block *owner;    /** @brief Block where variable is defined */
+        ps_symbol *variable;    /** @brief Array being referenced          */
+        size_t n_indexes;       /** @brief Number of dimensions            */
+        ps_ast_node *indexes[]; /** @brief Expressions for each dimension  */
     } __attribute__((__packed__)) ps_ast_variable_array;
 
     /** @brief FOR statement */

@@ -17,8 +17,9 @@ extern "C"
     /** @brief Stack frame */
     typedef struct s_ps_frame
     {
-        ps_ast_block *block;  /** @brief Block with symbols & parent                                  */
-        ps_value_data data[]; /** @brief Variable type is in symbol, index is handle from symbol, too */
+        ps_ast_block *block;       /** @brief Block with symbols, vars, params & lexical parent (static)   */
+        struct s_ps_frame *parent; /** @brief Parent frame (dynamic), NULL if no parent                    */
+        ps_value_data data[];      /** @brief Variable type is in symbol, index is handle from symbol, too */
     } ps_frame;
 
     /** @brief Stack itself */
@@ -33,9 +34,9 @@ extern "C"
 #define PS_FRAME_SIZE sizeof(ps_frame)
 #define PS_STACK_SIZE sizeof(ps_stack)
 
-    /** @brief Allocate a new frame for block variables */
+    /** @brief Allocate a new frame for block variables & parameters with parent frame */
     /** @return NULL if allocation failed */
-    ps_frame *ps_frame_alloc(const ps_ast_block *block);
+    ps_frame *ps_frame_alloc(ps_ast_block *block, ps_frame *parent);
 
     /** @brief Free a frame */
     /** @return NULL */
