@@ -120,7 +120,7 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
     return false;
 }
 
-bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block)
+bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block)
 {
     assert(NULL != interpreter);
 

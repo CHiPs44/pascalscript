@@ -188,7 +188,8 @@ bool ps_ast_test_assignment()
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the assignment statement I := 21 * 2;");
-    ps_ast_variable_simple *variable_i = ps_ast_create_variable_simple(3, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i =
+        ps_ast_create_variable_simple(3, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i != NULL);
     ps_value value_u_21 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 21};
     ps_ast_value *rvalue_u_21 = ps_ast_create_literal_value(3, 10, value_u_21);
@@ -205,9 +206,11 @@ bool ps_ast_test_assignment()
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i;
 
     ps_ast_debug_line(0, "Create the assignment statement J := I;");
-    ps_ast_variable_simple *variable_j = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_j);
+    ps_ast_variable_simple *variable_j =
+        ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j != NULL);
-    ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(4, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i =
+        ps_ast_create_variable_simple(4, 10, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ps_ast_assignment *assignment_j =
         ps_ast_create_assignment(4, 5, (ps_ast_node *)variable_j, (ps_ast_node *)rvalue_i);
     ASSERT(assignment_i != NULL);
@@ -289,7 +292,8 @@ bool ps_ast_test_if_then_else()
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the first assignment statement I := 10;");
-    ps_ast_variable_simple *variable_i = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i =
+        ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i != NULL);
     ps_value value_u_10 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 10};
     ps_ast_value *rvalue_u_10 = ps_ast_create_literal_value(4, 10, value_u_10);
@@ -300,7 +304,8 @@ bool ps_ast_test_if_then_else()
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i;
 
     ps_ast_debug_line(0, "Create the second assignment statement J := 0;");
-    ps_ast_variable_simple *variable_j_1 = ps_ast_create_variable_simple(5, 5, PS_AST_LVALUE_SIMPLE, symbol_j);
+    ps_ast_variable_simple *variable_j_1 =
+        ps_ast_create_variable_simple(5, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_1 != NULL);
     ps_value value_u_0 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 0};
     ps_ast_value *rvalue_u_0 = ps_ast_create_literal_value(5, 10, value_u_0);
@@ -311,7 +316,8 @@ bool ps_ast_test_if_then_else()
     block_program->statement_list->statements[1] = (ps_ast_node *)assignment_j_init;
 
     ps_ast_debug_line(0, "Create the condition I = 10");
-    ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(6, 8, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i =
+        ps_ast_create_variable_simple(6, 8, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i != NULL);
     ps_value value_u_10_cond = {.allocated = false, .type = &ps_system_unsigned, .data.u = 10};
     ps_ast_value *rvalue_u_10_cond = ps_ast_create_literal_value(6, 12, value_u_10_cond);
@@ -323,7 +329,8 @@ bool ps_ast_test_if_then_else()
     ps_ast_debug_line(0, "Create the THEN branch with J := 42");
     ps_ast_statement_list *then_branch = ps_ast_create_statement_list(7, 9, 1);
     ASSERT(then_branch != NULL);
-    ps_ast_variable_simple *variable_j_then = ps_ast_create_variable_simple(7, 9, PS_AST_LVALUE_SIMPLE, symbol_j);
+    ps_ast_variable_simple *variable_j_then =
+        ps_ast_create_variable_simple(7, 9, block_program, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_then != NULL);
     ps_value value_u_42 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 42};
     ps_ast_value *rvalue_u_42 = ps_ast_create_literal_value(7, 14, value_u_42);
@@ -336,7 +343,8 @@ bool ps_ast_test_if_then_else()
     ps_ast_debug_line(0, "Create the ELSE branch with J := 99");
     ps_ast_statement_list *else_branch = ps_ast_create_statement_list(9, 9, 1);
     ASSERT(else_branch != NULL);
-    ps_ast_variable_simple *variable_j_else = ps_ast_create_variable_simple(9, 9, PS_AST_LVALUE_SIMPLE, symbol_j);
+    ps_ast_variable_simple *variable_j_else =
+        ps_ast_create_variable_simple(9, 9, block_program, PS_AST_LVALUE_SIMPLE, symbol_j);
     ASSERT(variable_j_else != NULL);
     ps_value value_u_99 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 99};
     ps_ast_value *rvalue_u_99 = ps_ast_create_literal_value(9, 14, value_u_99);
@@ -419,7 +427,8 @@ bool ps_ast_test_while_do()
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the first assignment statement I := 5;");
-    ps_ast_variable_simple *variable_i_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i_init =
+        ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_init != NULL);
     ps_value value_i_5 = {.allocated = false, .type = &ps_system_integer, .data.i = 5};
     ps_ast_value *rvalue_i_5 = ps_ast_create_literal_value(4, 10, value_i_5);
@@ -430,7 +439,8 @@ bool ps_ast_test_while_do()
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i_init;
 
     ps_ast_debug_line(0, "Create the WHILE condition I > 0");
-    ps_ast_variable_simple *rvalue_i_cond = ps_ast_create_variable_simple(5, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i_cond =
+        ps_ast_create_variable_simple(5, 10, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_cond != NULL);
     ps_value value_i_0 = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(5, 14, value_i_0);
@@ -442,9 +452,11 @@ bool ps_ast_test_while_do()
     ps_ast_debug_line(0, "Create the WHILE loop body: I := I - 1");
     ps_ast_statement_list *while_body = ps_ast_create_statement_list(6, 9, 1);
     ASSERT(while_body != NULL);
-    ps_ast_variable_simple *variable_i_body = ps_ast_create_variable_simple(6, 9, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i_body =
+        ps_ast_create_variable_simple(6, 9, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_body != NULL);
-    ps_ast_variable_simple *rvalue_i_body = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i_body =
+        ps_ast_create_variable_simple(6, 19, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_body != NULL);
     ps_value value_i_1 = {.allocated = false, .type = &ps_system_integer, .data.i = 1};
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
@@ -525,7 +537,8 @@ bool ps_ast_test_repeat_until()
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the first assignment statement I := 5;");
-    ps_ast_variable_simple *variable_i_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i_init =
+        ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_init != NULL);
     ps_value value_i_5 = {.allocated = false, .type = &ps_system_integer, .data.i = 5};
     ps_ast_value *rvalue_i_5 = ps_ast_create_literal_value(4, 10, value_i_5);
@@ -538,9 +551,11 @@ bool ps_ast_test_repeat_until()
     ps_ast_debug_line(0, "Create the REPEAT loop body: I := I - 1");
     ps_ast_statement_list *repeat_body = ps_ast_create_statement_list(6, 9, 1);
     ASSERT(repeat_body != NULL);
-    ps_ast_variable_simple *variable_i_body = ps_ast_create_variable_simple(6, 9, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *variable_i_body =
+        ps_ast_create_variable_simple(6, 9, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(variable_i_body != NULL);
-    ps_ast_variable_simple *rvalue_i_body = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i_body =
+        ps_ast_create_variable_simple(6, 19, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_body != NULL);
     ps_value value_i_1 = {.allocated = false, .type = &ps_system_integer, .data.i = 1};
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
@@ -554,7 +569,8 @@ bool ps_ast_test_repeat_until()
     repeat_body->statements[0] = (ps_ast_node *)assignment_i_body;
 
     ps_ast_debug_line(0, "Create the REPEAT condition I = 0");
-    ps_ast_variable_simple *rvalue_i_cond = ps_ast_create_variable_simple(7, 10, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i_cond =
+        ps_ast_create_variable_simple(7, 10, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i_cond != NULL);
     ps_value value_i_0 = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(7, 14, value_i_0);
@@ -637,7 +653,8 @@ bool ps_ast_test_for_do()
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the first assignment statement Sum := 0;");
-    ps_ast_variable_simple *variable_sum_init = ps_ast_create_variable_simple(4, 5, PS_AST_LVALUE_SIMPLE, symbol_sum);
+    ps_ast_variable_simple *variable_sum_init =
+        ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE_SIMPLE, symbol_sum);
     ASSERT(variable_sum_init != NULL);
     ps_value value_u_0 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 0};
     ps_ast_value *rvalue_u_0 = ps_ast_create_literal_value(4, 13, value_u_0);
@@ -650,11 +667,14 @@ bool ps_ast_test_for_do()
     ps_ast_debug_line(0, "Create the FOR loop body: Sum := Sum + I");
     ps_ast_statement_list *for_body = ps_ast_create_statement_list(6, 9, 1);
     ASSERT(for_body != NULL);
-    ps_ast_variable_simple *variable_sum_body = ps_ast_create_variable_simple(6, 9, PS_AST_LVALUE_SIMPLE, symbol_sum);
+    ps_ast_variable_simple *variable_sum_body =
+        ps_ast_create_variable_simple(6, 9, block_program, PS_AST_LVALUE_SIMPLE, symbol_sum);
     ASSERT(variable_sum_body != NULL);
-    ps_ast_variable_simple *rvalue_sum = ps_ast_create_variable_simple(6, 19, PS_AST_RVALUE_SIMPLE, symbol_sum);
+    ps_ast_variable_simple *rvalue_sum =
+        ps_ast_create_variable_simple(6, 19, block_program, PS_AST_RVALUE_SIMPLE, symbol_sum);
     ASSERT(rvalue_sum != NULL);
-    ps_ast_variable_simple *rvalue_i = ps_ast_create_variable_simple(6, 26, PS_AST_RVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *rvalue_i =
+        ps_ast_create_variable_simple(6, 26, block_program, PS_AST_RVALUE_SIMPLE, symbol_i);
     ASSERT(rvalue_i != NULL);
     ps_ast_binary_operation *add_sum_i =
         ps_ast_create_binary_operation(6, 24, PS_OP_ADD, (ps_ast_node *)rvalue_sum, (ps_ast_node *)rvalue_i);
@@ -665,7 +685,8 @@ bool ps_ast_test_for_do()
     for_body->statements[0] = (ps_ast_node *)assignment_sum_body;
 
     ps_ast_debug_line(0, "Create the FOR loop variable I");
-    ps_ast_variable_simple *for_variable = ps_ast_create_variable_simple(5, 8, PS_AST_LVALUE_SIMPLE, symbol_i);
+    ps_ast_variable_simple *for_variable =
+        ps_ast_create_variable_simple(5, 8, block_program, PS_AST_LVALUE_SIMPLE, symbol_i);
     ASSERT(for_variable != NULL);
 
     ps_ast_debug_line(0, "Create the FOR loop start value 1");

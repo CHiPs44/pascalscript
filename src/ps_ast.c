@@ -622,8 +622,8 @@ ps_ast_node *ps_ast_free_value(ps_ast_value *value)
 // PS_AST_RVALUE_SIMPLE
 // =============================================================================
 
-ps_ast_variable_simple *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_ast_node_kind kind,
-                                                      ps_symbol *variable)
+ps_ast_variable_simple *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_ast_block *owner,
+                                                      ps_ast_node_kind kind, ps_symbol *variable)
 {
     assert(kind == PS_AST_RVALUE_SIMPLE || kind == PS_AST_LVALUE_SIMPLE);
     assert(variable != NULL);
@@ -633,6 +633,7 @@ ps_ast_variable_simple *ps_ast_create_variable_simple(uint16_t line, uint16_t co
         (ps_ast_variable_simple *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_simple));
     if (variable_simple == NULL)
         return NULL;
+    variable_simple->owner = owner;
     variable_simple->variable = variable;
     return variable_simple;
 }
@@ -649,21 +650,27 @@ ps_ast_node *ps_ast_free_variable_simple(ps_ast_variable_simple *variable_simple
 // PS_AST_VARIABLE_ARRAY
 // =============================================================================
 
-ps_ast_variable_array *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_ast_node_kind kind,
-                                                    ps_symbol *variable, size_t n_indexes, ps_ast_node **indexes)
+ps_ast_variable_array *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_ast_block *owner,
+                                                    ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes,
+                                                    ps_ast_node **indexes)
 {
     assert(kind == PS_AST_RVALUE_ARRAY || kind == PS_AST_LVALUE_ARRAY);
     assert(variable != NULL);
     assert(n_indexes >= 1);
     assert(indexes != NULL);
     ps_ast_node_group group = kind == PS_AST_RVALUE_ARRAY ? PS_AST_EXPRESSION : PS_AST_LVALUE;
+    size_t size = sizeof(ps_ast_variable_array) + n_indexes * sizeof(ps_ast_node *);
     ps_ast_variable_array *variable_array =
-        (ps_ast_variable_array *)ps_ast_create_node(group, kind, line, column, sizeof(ps_ast_variable_array));
+        (ps_ast_variable_array *)ps_ast_create_node(group, kind, line, column, size);
     if (variable_array == NULL)
         return NULL;
+    variable_array->owner = owner;
     variable_array->variable = variable;
     variable_array->n_indexes = n_indexes;
-    variable_array->indexes = indexes;
+    for (size_t i = 0; i < variable_array->n_indexes; i++)
+    {
+        variable_array->indexes[i] = indexes[i];
+    }
     return variable_array;
 }
 
