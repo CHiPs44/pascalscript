@@ -13,8 +13,15 @@
 
 ps_frame *ps_frame_alloc(ps_ast_block *block, ps_frame *parent)
 {
-    // NB: works even if size is 0
-    size_t size = sizeof(ps_frame) + block->n_vars * sizeof(ps_value_data);
+    // NB: works even if procedure hasn't any variables or parameters
+    size_t count = block->n_vars;
+    if (block->signature != NULL)
+    {
+        count += block->signature->parameter_count;
+        if (block->signature->result_type != NULL)
+            count += 1;
+    }
+    size_t size = sizeof(ps_frame) + count * sizeof(ps_value_data);
     ps_frame *frame = ps_memory_malloc(PS_MEMORY_STACK, size);
     if (frame == NULL)
         return NULL;
@@ -64,7 +71,7 @@ bool ps_stack_is_full(const ps_stack *stack)
 ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame)
 {
     if (ps_stack_is_full(stack))
-        return NULL;
+        return NULL; // stack overflow
     stack->used += 1;
     stack->frames[stack->sp++] = frame;
     return frame;
@@ -73,7 +80,7 @@ ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame)
 ps_frame *ps_stack_pop(ps_stack *stack)
 {
     if (ps_stack_is_empty(stack))
-        return NULL;
+        return NULL; // stack underflow
     stack->sp -= 1;
     ps_frame *frame = stack->frames[stack->sp];
     stack->frames[stack->sp] = NULL;

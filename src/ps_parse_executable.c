@@ -282,7 +282,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
     // Get procedure or function name
-    READ_NEXT_TOKEN_OR_CLEANUP;
+    READ_NEXT_TOKEN_OR_CLEANUP
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
     // Does it already exist in the current block?
     COPY_IDENTIFIER(identifier)
@@ -298,18 +298,18 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     READ_NEXT_TOKEN
 
     // Initialize signature
-    signature = ps_formal_signature_alloc(0, &ps_system_none);
+    signature = ps_formal_signature_alloc(0, NULL);
     if (signature == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     // Parameters?
     if (PS_TOKEN_LEFT_PARENTHESIS == lexer->current_token.type)
     {
-        READ_NEXT_TOKEN_OR_CLEANUP;
+        READ_NEXT_TOKEN_OR_CLEANUP
         // Empty parameter list?
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            READ_NEXT_TOKEN_OR_CLEANUP;
+            READ_NEXT_TOKEN_OR_CLEANUP
         }
         else
         {
@@ -320,13 +320,13 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
                 // `,` introduces another parameter
                 if (lexer->current_token.type == PS_TOKEN_COMMA)
                 {
-                    READ_NEXT_TOKEN_OR_CLEANUP;
+                    READ_NEXT_TOKEN_OR_CLEANUP
                     continue;
                 }
                 // `)` ends the parameter list
                 if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
                 {
-                    READ_NEXT_TOKEN_OR_CLEANUP;
+                    READ_NEXT_TOKEN_OR_CLEANUP
                     break;
                 }
                 GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
@@ -338,7 +338,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
         EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_COLON);
-        READ_NEXT_TOKEN_OR_CLEANUP;
+        READ_NEXT_TOKEN_OR_CLEANUP
         ps_symbol *type_reference = NULL;
         if (!ps_parse_type_reference(compiler, block, &type_reference, NULL))
             goto cleanup;

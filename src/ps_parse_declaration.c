@@ -319,12 +319,12 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
     (void)start_line;
     (void)start_column;
 
-    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    // EXPECT_TOKEN(PS_TOKEN_TYPE);
-    // READ_NEXT_TOKEN
+    EXPECT_TOKEN(PS_TOKEN_TYPE);
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
-    // if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     // do
     // {
     //     if (!ps_parse_type_definition(compiler, block))
@@ -407,9 +407,7 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         for (int i = 0; i <= var_count; i++)
         {
             if (!ps_compiler_add_variable(compiler, block, identifiers[i], type_symbol))
-            {
                 TRACE_ERROR("ADD VARIABLE")
-            }
         }
         READ_NEXT_TOKEN
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);

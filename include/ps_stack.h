@@ -51,11 +51,11 @@ extern "C"
     ps_stack *ps_stack_free(ps_stack *stack);
 
     /** @brief Push a frame on the stack */
-    /** @return NULL if stack is full */
+    /** @return NULL if stack is full else frame */
     ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame);
 
     /** @brief Pop a frame */
-    /** @return NULL if stack is empty */
+    /** @return NULL if stack is empty else frame */
     ps_frame *ps_stack_pop(ps_stack *stack);
 
     /** @brief Get the top frame */

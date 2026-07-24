@@ -24,14 +24,14 @@ extern "C"
     /** @brief Formal parameter definition */
     typedef struct s_ps_formal_parameter
     {
-        bool byref;         /** @brief true if parameter has to be passed by reference */
         ps_identifier name; /** @brief parameter name */
         ps_symbol *type;    /** @brief parameter type */
-    } ps_formal_parameter;
+        bool byref;         /** @brief true if parameter has to be passed by reference */
+    } __attribute__((__packed__)) ps_formal_parameter;
 
     typedef struct s_ps_formal_signature
     {
-        ps_symbol *result_type;  /** @brief NULL or ps_system_none for procedures */
+        ps_symbol *result_type;  /** @brief NULL for procedures */
         uint8_t parameter_count; /** @brief Parameter count */
         uint8_t size;            /** @brief size can be bigger than count */
         ps_formal_parameter *parameters;

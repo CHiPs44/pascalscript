@@ -246,7 +246,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
 {
     ps_value_type from_base = ps_value_get_base(from);
     ps_value_type to_base = ps_value_get_base(to);
-    // If destination type is NONE, set it to source type
+    // If destination type is not set, set it to source type
     if (to->type == &ps_system_none || to_base == PS_TYPE_UNKNOWN)
         to->type = from->type;
     // Same value type, just copy value
