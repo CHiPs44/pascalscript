@@ -48,7 +48,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
     // Allocate system variables
-    ps_frame *frame = ps_frame_alloc(system, NULL);
+    ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
     for (size_t i = 0; i < system->n_vars; i++)
@@ -172,21 +172,23 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_sym
     assert(NULL != interpreter);
     assert(NULL != variable);
     assert(NULL != value);
-    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
+
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE,
                                                 "Symbol '%s' is a %s, not a variable", variable->name,
                                                 ps_symbol_get_kind_name(variable->kind));
     }
+
     if (ps_value_is_array(variable->value))
     {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
                                                 "Variable '%s' is an array, which is not implemnted yet",
                                                 variable->name);
     }
+
     // Search in current frame and parent frames
-    ps_frame *frame = ps_stack_top(interpreter->stack);
+    ps_frame *frame = ps_stack_find_block(interpreter->stack, variable->block);
     while (frame != NULL)
     {
         if (frame->block->symbols != NULL)
@@ -197,14 +199,14 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_sym
                 ps_value variable_value = {.allocated = false, .type = variable->value->type, .data = {0}};
                 if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
                     return false;
-                frame->data[symbol->value->data.h.index] = variable_value.data;
+                frame->data[symbol->value->data.h] = variable_value.data;
                 return true;
             }
         }
-        frame = frame->parent;
     }
-    // interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    // return ps_interpreter_set_message(interpreter, "ps_interpreter_set_variable_value not implemented");
+
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found",
+                                            variable->name);
 }
 
 bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)

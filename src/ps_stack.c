@@ -11,7 +11,7 @@
 #include "ps_stack.h"
 #include "ps_value_data.h"
 
-ps_frame *ps_frame_alloc(ps_ast_block *block, ps_frame *parent)
+ps_frame *ps_frame_alloc(ps_ast_block *block)
 {
     // NB: works even if procedure hasn't any variables or parameters
     size_t count = block->n_vars;
@@ -27,7 +27,6 @@ ps_frame *ps_frame_alloc(ps_ast_block *block, ps_frame *parent)
         return NULL;
     memset(frame, 0, size);
     frame->block = block;
-    frame->parent = parent;
     return frame;
 }
 
@@ -93,4 +92,14 @@ ps_frame *ps_stack_top(const ps_stack *stack)
     if (ps_stack_is_empty(stack))
         return NULL;
     return stack->frames[stack->sp - 1];
+}
+
+ps_frame *ps_stack_find_block(ps_stack *stack, ps_ast_block *block)
+{
+    if (ps_stack_is_empty(stack))
+        return NULL;
+    for (size_t i = stack->sp - 1; i > 0; --i)
+        if (stack->frames[i]->block == block)
+            return stack->frames[i];
+    return NULL;
 }
