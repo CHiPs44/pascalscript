@@ -18,9 +18,6 @@ extern "C"
 {
 #endif
 
-    // Forward reference
-    typedef struct s_ps_interpreter ps_interpreter;
-
     /** @brief Formal parameter definition */
     typedef struct s_ps_formal_parameter
     {
