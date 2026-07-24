@@ -71,7 +71,7 @@ extern "C"
     bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format, ...);
 
     /** @brief Enter a new frame / block */
-    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block);
+    bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block);
 
     /** @brief Exit current frame (block) */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);

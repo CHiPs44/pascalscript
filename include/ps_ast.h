@@ -228,7 +228,7 @@ extern "C"
     // clang-format off
 
     /** @brief Create a new AST node of the given group & kind at given position in source code */
-    ps_ast_node             *ps_ast_create_node            (ps_ast_node_group group, ps_ast_node_kind kind, uint16_t line, uint16_t column, size_t size);
+    ps_ast_node             *ps_ast_create_node            (uint16_t line, uint16_t column, ps_ast_node_group group, ps_ast_node_kind kind, size_t size);
     ps_ast_block            *ps_ast_create_block           (uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind, const char *name                                                    );
     ps_ast_statement_list   *ps_ast_create_statement_list  (uint16_t line, uint16_t column, size_t count                                                                                                     );
     ps_ast_assignment       *ps_ast_create_assignment      (uint16_t line, uint16_t column, ps_ast_node *lvalue,ps_ast_node *rvalue                                                                          );
