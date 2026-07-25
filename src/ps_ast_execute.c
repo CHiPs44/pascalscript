@@ -34,7 +34,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block)
     return result;
 }
 
-bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
+bool ps_ast_execute_program(ps_interpreter *interpreter, ps_ast_block *program)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected PROGRAM AST node");
@@ -42,7 +42,7 @@ bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *pro
     return ps_ast_execute_block(interpreter, program);
 }
 
-bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
+bool ps_ast_execute_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
@@ -51,7 +51,7 @@ bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *p
     return ps_ast_execute_block(interpreter, procedure);
 }
 
-bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
+bool ps_ast_execute_function(ps_interpreter *interpreter, ps_ast_block *function)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
@@ -60,7 +60,7 @@ bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *fu
     return ps_ast_execute_block(interpreter, function);
 }
 
-bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
+bool ps_ast_execute_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list)
 {
     if (statement_list == NULL)
         return true; // Empty statement list is valid (no-op)

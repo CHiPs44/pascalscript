@@ -76,6 +76,7 @@ extern "C"
     ps_value *ps_value_set_char(ps_value *value, ps_char c);
     ps_value *ps_value_set_string(ps_value *value, ps_string *s);
 
+    char *ps_value_get_type_name(const ps_value *value);
     char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision);
     char *ps_value_get_debug_string(const ps_value *value);
     void ps_value_debug(FILE *output, const char *message, const ps_value *value);

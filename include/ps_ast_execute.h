@@ -15,15 +15,15 @@ extern "C"
 #endif
 
     /** @brief Execute program */
-    bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program);
+    bool ps_ast_execute_program(ps_interpreter *interpreter, ps_ast_block *program);
     /** @brief Execute procedure */
-    bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure);
+    bool ps_ast_execute_procedure(ps_interpreter *interpreter, ps_ast_block *procedure);
     /** @brief Execute function */
-    bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
+    bool ps_ast_execute_function(ps_interpreter *interpreter, ps_ast_block *function);
     /** @brief Execute block */
     bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block);
     /** @brief Execute a list of Pascal statements */
-    bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
+    bool ps_ast_execute_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list);
     /** @brief Execute statement */
     bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement);
     /** @brief Execute assignment */

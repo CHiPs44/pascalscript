@@ -198,7 +198,7 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
         output,
         "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┫\n");
-    for (unsigned int i = 0; i < table->table_size; i++)
+    for (ssize_t i = 0; i < table->table_size; i++)
     {
         if (table->buckets[i] != NULL)
         {
@@ -214,9 +214,9 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
                 value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
                 // clang-format off
                 fprintf(output,
-                        "┃%c%c%05d┃%08x%c%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n",
+                        "┃%c%c%05d┃%08x:%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n",
                         symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i,
-                        hash, hash % table->table_size == i ? '=' : '!', hash % table->table_size,
+                        hash, hash % table->table_size,
                         PS_IDENTIFIER_LEN, symbol->name,
                         kind_name,
                         type_name,

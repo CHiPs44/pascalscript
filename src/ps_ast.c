@@ -41,8 +41,8 @@ bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_k
     return true;
 }
 
-ps_ast_node *ps_ast_create_node(uint16_t line, uint16_t column, ps_ast_node_group group,
-                                ps_ast_node_kind kind, size_t size)
+ps_ast_node *ps_ast_create_node(uint16_t line, uint16_t column, ps_ast_node_group group, ps_ast_node_kind kind,
+                                size_t size)
 {
     ps_ast_node *node = ps_memory_calloc(PS_MEMORY_AST, 1, size);
     if (node == NULL)
@@ -207,14 +207,15 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 // PS_AST_ASSIGNMENT
 // =============================================================================
 
-ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_node *lvalue, ps_ast_node *rvalue)
+ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_variable *lvalue,
+                                            ps_ast_node *rvalue)
 {
     fprintf(stderr, "DEBUG\tPS_AST_ASSIGNMENT\tCreating assignment node at line %u, column %u, lvalue=%p, rvalue=%p\n",
             line, column, (void *)lvalue, (void *)rvalue);
     assert(lvalue != NULL && ps_ast_node_check_group(lvalue, PS_AST_LVALUE));
     assert(rvalue != NULL && ps_ast_node_check_group(rvalue, PS_AST_EXPRESSION));
-    ps_ast_assignment *assignment = (ps_ast_assignment *)ps_ast_create_node(line, column, PS_AST_STATEMENT,
-                                                                            PS_AST_ASSIGNMENT, sizeof(ps_ast_assignment));
+    ps_ast_assignment *assignment = (ps_ast_assignment *)ps_ast_create_node(
+        line, column, PS_AST_STATEMENT, PS_AST_ASSIGNMENT, sizeof(ps_ast_assignment));
     if (assignment == NULL)
         return NULL;
     assignment->lvalue = lvalue;
@@ -230,7 +231,7 @@ ps_ast_node *ps_ast_free_assignment(ps_ast_assignment *assignment)
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
-    assignment->lvalue = ps_ast_free_node(assignment->lvalue);
+    assignment->lvalue = (ps_ast_variable *)ps_ast_free_variable(assignment->lvalue);
     assignment->expression = ps_ast_free_node(assignment->expression);
     ps_memory_free(PS_MEMORY_AST, assignment);
     return NULL;
@@ -557,8 +558,8 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
         // comparison
         operator == PS_OP_EQ || operator == PS_OP_GE || operator == PS_OP_GT || operator == PS_OP_LE ||
         operator == PS_OP_LT || operator == PS_OP_NE);
-    assert(left != NULL && ps_ast_node_check_group((ps_ast_node *)left, PS_AST_EXPRESSION));
-    assert(right != NULL && ps_ast_node_check_group((ps_ast_node *)right, PS_AST_EXPRESSION));
+    assert(left != NULL && left->group == PS_AST_EXPRESSION);
+    assert(right != NULL && right->group == PS_AST_EXPRESSION);
 
     ps_ast_binary_operation *binary_operation = (ps_ast_binary_operation *)ps_ast_create_node(
         line, column, PS_AST_EXPRESSION, PS_AST_BINARY_OPERATION, sizeof(ps_ast_binary_operation));
@@ -570,6 +571,8 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
     binary_operation->result_type = ps_ast_binary_operation_get_result_type(operator, left, right);
     if (binary_operation->result_type == NULL)
     {
+        fprintf(stderr, "Error: incompatible types for binary operation %s with %s and %s\n",
+                ps_operator_binary_get_name(operator), ps_value_get_type_name(left), ps_value_get_type_name(right));
         ps_memory_free(PS_MEMORY_AST, binary_operation);
         return NULL;
     }
@@ -615,7 +618,7 @@ ps_ast_node *ps_ast_free_value(ps_ast_value *value)
 // =============================================================================
 
 ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_ast_block *owner,
-                                                      ps_ast_node_kind kind, ps_symbol *variable)
+                                               ps_ast_node_kind kind, ps_symbol *variable)
 {
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
     assert(variable != NULL);
@@ -643,8 +646,8 @@ ps_ast_node *ps_ast_free_variable(ps_ast_variable *variable_simple)
 // =============================================================================
 
 ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_ast_block *owner,
-                                                    ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes,
-                                                    ps_ast_node **indexes)
+                                              ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes,
+                                              ps_ast_node **indexes)
 {
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
     assert(variable != NULL);
@@ -652,8 +655,7 @@ ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps
     assert(indexes != NULL);
     ps_ast_node_group group = kind == PS_AST_RVALUE ? PS_AST_EXPRESSION : PS_AST_GROUP_LVALUE;
     size_t size = sizeof(ps_ast_variable) + n_indexes * sizeof(ps_ast_node *);
-    ps_ast_variable *variable_array =
-        (ps_ast_variable *)ps_ast_create_node(line, column, group, kind, size);
+    ps_ast_variable *variable_array = (ps_ast_variable *)ps_ast_create_node(line, column, group, kind, size);
     if (variable_array == NULL)
         return NULL;
     variable_array->owner = owner;

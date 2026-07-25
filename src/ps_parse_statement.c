@@ -204,7 +204,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     assert(assignment_ptr != NULL);
     assert(variable != NULL);
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
-    ps_ast_node *lvalue = NULL;
+    ps_ast_variable *lvalue = NULL;
     ps_ast_node *rvalue = NULL;
 
     // IDENTIFIER
@@ -236,8 +236,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
-        lvalue = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE,
-                                                              variable);
+        lvalue = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }

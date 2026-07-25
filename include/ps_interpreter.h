@@ -26,6 +26,8 @@ extern "C"
 #define PS_INTERPRETER_STACK_SIZE 1024u
 #endif
 
+    typedef struct s_ps_ast_variable ps_ast_variable;
+
     typedef struct s_ps_interpreter
     {
         ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions */
@@ -73,14 +75,15 @@ extern "C"
     /** @brief Enter a new frame / block */
     bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block);
 
-    /** @brief Exit current frame (block) */
+    /** @brief Exit current frame / block */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
 
     /** @brief Get variable value */
-    bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value);
+    bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+                                           ps_value *value);
 
     /** @brief Set variable value */
-    bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable,
+    bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
                                            const ps_value *value);
 
     /** @brief Check if current token or value is a number (integer, unsigned, real or integer / unsigned subrange) */

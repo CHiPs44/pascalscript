@@ -178,61 +178,62 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     return true;
 }
 
-ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *variable)
+ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *variable_node)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable);
-    assert(NULL != variable->owner);
-    assert(NULL != variable->variable);
+    assert(NULL != variable_node);
+    assert(NULL != variable_node->owner);
+    assert(NULL != variable_node->variable);
 
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    if (variable_node->variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE, "Symbol '%s' is a %s, not a variable",
-                                         variable->variable->name, ps_symbol_get_kind_name(variable->variable->kind));
+                                         variable_node->variable->name,
+                                         ps_symbol_get_kind_name(variable_node->variable->kind));
         return NULL;
     }
-    ps_frame *frame = ps_stack_find_frame_by_block(interpreter->stack, variable->owner);
+    ps_frame *frame = ps_stack_find_frame_by_block(interpreter->stack, variable_node->owner);
     if (frame == NULL)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found in any frame",
-                                         variable->variable->name);
+                                         variable_node->variable->name);
         return NULL;
     }
 
     return frame;
 }
 
-bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable,
+bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
                                        const ps_value *value)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable);
+    assert(NULL != variable_node);
     assert(NULL != value);
 
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable->owner);
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable_node->owner);
     if (frame == NULL)
         return false;
-    ps_symbol *variable_symbol = variable->variable;
-    ps_value variable_value = {.allocated = false, .type = variable_symbol->value->type, .data = {0}};
+    ps_value variable_value = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
     if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
         return false;
-    frame->data[variable_symbol->value->data.h] = variable_value.data;
+    frame->data[variable_node->variable->value->data.h] = variable_value.data;
 
     return true;
 }
 
-bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable, ps_value *value)
+bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+                                       ps_value *value)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable);
+    assert(NULL != variable_node);
     assert(NULL != value);
 
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable->owner);
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable_node->owner);
     if (frame == NULL)
         return false;
-    ps_symbol *variable_symbol = variable->variable;
-    ps_value variable_value = {
-        .allocated = false, .type = variable_symbol->value->type, .data = frame->data[variable_symbol->value->data.h]};
+    ps_value variable_value = {.allocated = false,
+                               .type = variable_node->variable->value->type,
+                               .data = frame->data[variable_node->variable->value->data.h]};
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
