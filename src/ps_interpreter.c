@@ -123,15 +123,20 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
 bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block)
 {
     assert(NULL != interpreter);
+    assert(NULL != block);
 
+    // Increase interpreter's level
     interpreter->level += 1;
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
                        block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
                        block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
-    ps_frame *parent = ps_stack_top(interpreter->stack);
-    ps_frame *frame = ps_frame_alloc(block, parent);
+
+    // Allocate a new frame
+    ps_frame *frame = ps_frame_alloc(block);
     if (frame == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+
+    // Push the frame onto the stack
     if (ps_stack_is_full(interpreter->stack))
     {
         ps_frame_free(frame);
@@ -144,14 +149,19 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR, "Stack error at level %d for '%s'",
                                                 interpreter->level, block->name);
     }
+
     return true;
 }
 
 bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
+
+    // Decrease interpreter's level
     interpreter->level -= 1;
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "EXIT FRAME level=%d\n", interpreter->level);
+
+    // Pop the frame from the stack
     if (ps_stack_is_empty(interpreter->stack))
     {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_UNDERFLOW, "Stack underflow at level %d",
@@ -164,85 +174,67 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
                                                 "Stack error at level %d: pop failed", interpreter->level);
     }
     ps_frame_free(frame);
+
     return true;
 }
 
-bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, const ps_value *value)
+ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *variable)
+{
+    assert(NULL != interpreter);
+    assert(NULL != variable);
+    assert(NULL != variable->owner);
+    assert(NULL != variable->variable);
+
+    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    {
+        ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE, "Symbol '%s' is a %s, not a variable",
+                                         variable->variable->name, ps_symbol_get_kind_name(variable->variable->kind));
+        return NULL;
+    }
+    ps_frame *frame = ps_stack_find_frame_by_block(interpreter->stack, variable->owner);
+    if (frame == NULL)
+    {
+        ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found in any frame",
+                                         variable->variable->name);
+        return NULL;
+    }
+
+    return frame;
+}
+
+bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable,
+                                       const ps_value *value)
 {
     assert(NULL != interpreter);
     assert(NULL != variable);
     assert(NULL != value);
 
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-    {
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE,
-                                                "Symbol '%s' is a %s, not a variable", variable->name,
-                                                ps_symbol_get_kind_name(variable->kind));
-    }
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable->owner);
+    if (frame == NULL)
+        return false;
+    ps_symbol *variable_symbol = variable->variable;
+    ps_value variable_value = {.allocated = false, .type = variable_symbol->value->type, .data = {0}};
+    if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
+        return false;
+    frame->data[variable_symbol->value->data.h] = variable_value.data;
 
-    if (ps_value_is_array(variable->value))
-    {
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
-                                                "Variable '%s' is an array, which is not implemnted yet",
-                                                variable->name);
-    }
-
-    // Search in current frame and parent frames
-    ps_frame *frame = ps_stack_find_block(interpreter->stack, variable->block);
-    while (frame != NULL)
-    {
-        if (frame->block->symbols != NULL)
-        {
-            const ps_symbol *symbol = ps_symbol_table_find(frame->block->symbols, variable->name);
-            if (symbol != NULL)
-            {
-                ps_value variable_value = {.allocated = false, .type = variable->value->type, .data = {0}};
-                if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
-                    return false;
-                frame->data[symbol->value->data.h] = variable_value.data;
-                return true;
-            }
-        }
-    }
-
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found",
-                                            variable->name);
+    return true;
 }
 
-bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_symbol *variable, ps_value *value)
+bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable, ps_value *value)
 {
     assert(NULL != interpreter);
     assert(NULL != variable);
     assert(NULL != value);
 
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-    {
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE,
-                                                "Symbol '%s' is a %s, not a variable", variable->name,
-                                                ps_symbol_get_kind_name(variable->kind));
-    }
-    if (ps_value_is_array(variable->value))
-    {
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
-                                                "Variable '%s' is an array, which is not implemnted yet",
-                                                variable->name);
-    }
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable->owner);
+    if (frame == NULL)
+        return false;
+    ps_symbol *variable_symbol = variable->variable;
+    ps_value variable_value = {
+        .allocated = false, .type = variable_symbol->value->type, .data = frame->data[variable_symbol->value->data.h]};
 
-    ps_handle handle = variable->value->data.h;
-    ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_get_variable_value: %s has handle %d\n",
-                       variable->name, handle);
-    // For now we only support local variables (which can be global at program level)
-    // TODO search in parent frames like compiler does
-    const ps_frame *frame = ps_stack_top(interpreter->stack);
-    if (handle >= frame->block->n_vars)
-    {
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_OVERFLOW,
-                                                "Invalid handle %d for variable '%s' for frame of size %d of block %s",
-                                                handle, variable->name, frame->block->n_vars, frame->block->name);
-    }
-    value->type = variable->value->type;
-    value->data = frame->data[handle];
-    return true;
+    return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
@@ -250,6 +242,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     assert(NULL != interpreter);
     assert(NULL != from);
     assert(NULL != to);
+
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
                        ps_value_get_debug_string(from), ps_value_type_get_name(from->type->value->data.t->type),
                        ps_value_get_debug_string(to), ps_value_type_get_name(to->type->value->data.t->type));
@@ -258,6 +251,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
         return true;
     if (error != PS_ERROR_TYPE_MISMATCH)
         return ps_interpreter_return_false(interpreter, error);
+
     return ps_interpreter_set_error_message(
         interpreter, PS_ERROR_TYPE_MISMATCH,
         "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
@@ -269,10 +263,12 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
 {
     assert(NULL != interpreter);
     assert(NULL != program);
+    assert(PS_AST_BLOCK == program->group && PS_AST_PROGRAM == program->kind);
 
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s\n", program->name);
     bool result = ps_ast_execute_program(interpreter, program);
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s => %s\n", program->name,
                        result ? "OK" : "KO");
+
     return result;
 }

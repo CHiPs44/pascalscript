@@ -20,7 +20,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block)
+bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block)
 {
     bool result = false;
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
@@ -113,37 +113,29 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     assert(assignment != NULL);
     assert(assignment->group == PS_AST_STATEMENT);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
-    assert(assignment->lvalue->kind == PS_AST_LVALUE_SIMPLE || assignment->lvalue->kind == PS_AST_LVALUE_ARRAY);
+    assert(assignment->lvalue != NULL);
+    assert(assignment->lvalue->group == PS_AST_EXPRESSION);
+    assert(assignment->lvalue->kind == PS_AST_LVALUE);
+    assert(assignment->expression != NULL);
+    assert(assignment->expression->group == PS_AST_EXPRESSION);
     ps_ast_debug_line(interpreter->level, "ASSIGNMENT:");
 
-    ps_ast_variable_simple *variable_simple = NULL;
-    ps_ast_value value_node = {0};
-    ps_value value = {.allocated = false, .type = NULL, .data = {0}};
+    ps_ast_variable *variable = variable = ((ps_ast_variable *)assignment->lvalue);
+    ps_value_type variable_type = ps_value_get_type(variable->variable->value);
+    ps_ast_debug_line(interpreter->level, "Variable: %s of type %s", variable->variable->name,
+                      ps_value_type_get_name(variable_type));
 
-    switch (assignment->lvalue->kind)
-    {
-    case PS_AST_LVALUE_SIMPLE:
-        variable_simple = ((ps_ast_variable_simple *)assignment->lvalue);
-        char *variable_name = variable_simple->variable->name;
-        ps_value_type variable_type = ps_value_get_type(variable_simple->variable->value);
-        ps_ast_debug_line(interpreter->level, "Variable: %s of type %s", variable_name,
-                          ps_value_type_get_name(variable_type));
-        value_node.value.type = variable_simple->variable->value->type;
-        if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
-            return false;
-        value.type = value_node.value.type;
-        value.data = value_node.value.data;
-        ps_ast_debug_line(interpreter->level, "{Expression value: %s}", ps_value_get_display_string(&value, 0, 0));
-        if (!ps_interpreter_copy_value(interpreter, &value, variable_simple->variable->value))
-            return false;
-        break;
-    case PS_AST_LVALUE_ARRAY:
-        ps_interpreter_set_message(interpreter, "Array assignment not implemented yet");
-        return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
-    default:
-        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TOKEN);
-    }
-    return true;
+    ps_ast_value value_node = {0};
+    value_node.value.type = variable->variable->value->type;
+    if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
+        return false;
+
+    ps_value value = {.allocated = false, .type = NULL, .data = {0}};
+    value.type = value_node.value.type;
+    value.data = value_node.value.data;
+    ps_ast_debug_line(interpreter->level, "{Expression value: %s}", ps_value_get_display_string(&value, 0, 0));
+
+    return ps_interpreter_copy_value(interpreter, &value, variable->variable->value);
 }
 
 bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
@@ -152,6 +144,8 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
     assert(if_statement->group == PS_AST_STATEMENT);
     assert(if_statement->kind == PS_AST_IF);
     ps_ast_debug_line(interpreter->level, "IF statement");
+
+    // Evaluate condition
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value))
         return false;
@@ -159,16 +153,16 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
                       ps_value_get_display_string(&condition_value.value, 0, 0));
     if (condition_value.value.type != &ps_system_boolean)
         return false;
+
+    // Execute then or else branch
     if (condition_value.value.data.b)
     {
         ps_ast_debug_line(interpreter->level, "Then branch: %zu statements", if_statement->then_branch->count);
         return ps_ast_execute_statement_list(interpreter, if_statement->then_branch);
     }
-    else
-    {
-        ps_ast_debug_line(interpreter->level, "Else branch: %zu statements", if_statement->else_branch->count);
-        return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
-    }
+    ps_ast_debug_line(interpreter->level, "Else branch: %zu statements", if_statement->else_branch->count);
+
+    return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
 }
 
 bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
@@ -177,6 +171,7 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
     assert(while_statement->group == PS_AST_STATEMENT);
     assert(while_statement->kind == PS_AST_WHILE);
     ps_ast_debug_line(interpreter->level, "WHILE statement: %d statements in body", while_statement->body->count);
+
     while (true)
     {
         ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
@@ -193,6 +188,7 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
         if (!ps_ast_execute_statement_list(interpreter, while_statement->body))
             return false;
     }
+
     return true;
 }
 
@@ -202,10 +198,13 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
     assert(repeat_statement->group == PS_AST_STATEMENT);
     assert(repeat_statement->kind == PS_AST_REPEAT);
     ps_ast_debug_line(interpreter->level, "REPEAT statement");
+
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+
+    int iteration = 0;
     do
     {
-        ps_ast_debug_line(interpreter->level, "Body");
+        ps_ast_debug_line(interpreter->level, "Body %d", ++iteration);
         if (!ps_ast_execute_statement_list(interpreter, repeat_statement->body))
             return false;
         if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
@@ -215,6 +214,7 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
         if (condition_value.value.type != &ps_system_boolean)
             return false;
     } while (!condition_value.value.data.b);
+
     return true;
 }
 
@@ -225,7 +225,7 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     assert(for_statement->kind == PS_AST_FOR);
     ps_ast_debug_line(interpreter->level, "FOR statement");
 
-    ps_ast_variable_simple *variable_simple = for_statement->variable;
+    ps_ast_variable *variable_simple = for_statement->variable;
     ps_ast_debug_line(interpreter->level, "Variable: %s", variable_simple->variable->name);
 
     ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
@@ -440,36 +440,29 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
             return false;
         break;
-    case PS_AST_RVALUE_SIMPLE:
-        const ps_ast_variable_simple *variable_simple = (const ps_ast_variable_simple *)expression;
-        ps_ast_debug_line(interpreter->level, "Variable: %s", variable_simple->variable->name);
+    case PS_AST_RVALUE:
+        const ps_ast_variable *variable = (const ps_ast_variable *)expression;
+        ps_ast_debug_line(interpreter->level, "Variable: %s", variable->variable->name);
         ps_value value = {.allocated = false, .type = NULL, .data = {0}};
-        if (!ps_interpreter_get_variable_value(interpreter, variable_simple->variable, &value))
+        if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
             return false;
         if (!ps_interpreter_copy_value(interpreter, &value, &result->value))
             return false;
         break;
-    case PS_AST_RVALUE_ARRAY:
-        const ps_ast_variable_array *variable_array = (const ps_ast_variable_array *)expression;
-        ps_ast_debug_line(interpreter->level, "Array variable: %s[%d]", variable_array->variable->name,
-                          variable_array->n_indexes);
-        ps_interpreter_set_message(interpreter, "Array access not implemented yet");
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
     case PS_AST_UNARY_OPERATION:
-        ps_ast_value operand = {.group = PS_AST_EXPRESSION,
-                                .kind = PS_AST_LITERAL_VALUE,
-                                .value.allocated = false,
-                                .value.type = &ps_system_none,
-                                .value.data = {0}};
+        ps_ast_value operand_value = {.group = PS_AST_EXPRESSION,
+                                      .kind = PS_AST_LITERAL_VALUE,
+                                      .value.allocated = false,
+                                      .value.type = &ps_system_none,
+                                      .value.data = {0}};
         const ps_ast_unary_operation *unary_operation = (const ps_ast_unary_operation *)expression;
         ps_ast_debug_line(interpreter->level, "Unary operation: %s",
                           ps_operator_unary_get_name(unary_operation->operator));
         // first evaluate operand
-        if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand))
+        if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand_value))
             return false;
         // then apply operator to it
-        if (!ps_operator_unary_eval(interpreter, &operand.value, &result->value, unary_operation->operator))
+        if (!ps_operator_unary_eval(interpreter, &operand_value.value, &result->value, unary_operation->operator))
             return false;
         break;
     case PS_AST_BINARY_OPERATION:

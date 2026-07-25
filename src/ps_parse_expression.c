@@ -362,7 +362,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
             // factor.type = symbol->value->type;
             if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
                 *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block,
-                                                                       PS_AST_RVALUE_SIMPLE, symbol);
+                                                                       PS_AST_RVALUE, symbol);
             else
             {
                 value.allocated = false;
@@ -604,7 +604,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
     int n_args = -2;
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
-    ps_ast_variable_simple *symbol_node = NULL;
+    ps_ast_variable *symbol_node = NULL;
     ps_ast_node *arg1 = NULL;
     ps_ast_node *arg2 = NULL;
 
@@ -630,7 +630,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         // Low and High have one "symbolic" argument
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
-        symbol_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE_SIMPLE, symbol);
+        symbol_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, symbol);
         args[0] = (ps_ast_node *)symbol_node;
         *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 1, args, NULL);
     }

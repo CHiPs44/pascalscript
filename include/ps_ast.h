@@ -27,7 +27,7 @@ extern "C"
         PS_AST_BLOCK,             /** @brief PROGRAM, PROCEDURE, FUNCTION, UNIT                                 */
         PS_AST_STATEMENT,         /** @brief List, IF, CASE, WHILE, REPEAT, FOR, Procedure call                 */
         PS_AST_EXPRESSION,        /** @brief Unary or binary operation, literal value, simple or array variable */
-        PS_AST_LVALUE,            /** @brief Simple or array variable assignment                                */
+        PS_AST_GROUP_LVALUE,      /** @brief Variable assignment                                                */
     } PS_AST_PACKED ps_ast_node_group;
 
     /** @brief Abstract Syntax Tree node kind */
@@ -50,10 +50,8 @@ extern "C"
         PS_AST_BINARY_OPERATION, /** @brief EXPRESSION: Binary operation                             */
         PS_AST_FUNCTION_CALL,    /** @brief EXPRESSION: FUNCTION call                                */
         PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Literal value: integer, real, string, ...    */
-        PS_AST_RVALUE_SIMPLE,    /** @brief EXPRESSION: Simple variable (or constant) being accessed */
-        PS_AST_RVALUE_ARRAY,     /** @brief EXPRESSION: Array element being accessed                 */
-        PS_AST_LVALUE_SIMPLE,    /** @brief LVALUE:     Simple variable being written to             */
-        PS_AST_LVALUE_ARRAY,     /** @brief LVALUE:     Array element being written to               */
+        PS_AST_RVALUE,           /** @brief EXPRESSION: Simple variable (or constant) being accessed */
+        PS_AST_LVALUE,           /** @brief LVALUE:     Simple variable being written to             */
     } PS_AST_PACKED ps_ast_node_kind;
 
 #define PS_AST_NODE_COMMON                                                                                             \
@@ -119,36 +117,27 @@ extern "C"
         ps_ast_node *condition;      /** @brief Loop until condition is true        */
     } PS_AST_PACKED ps_ast_repeat;
 
-    /** @brief Lvalue: simple variable */
-    /** @example I, Total, ...  */
-    typedef struct s_ps_ast_variable_simple
-    {
-        PS_AST_NODE_COMMON
-        ps_ast_block *owner; /** @brief Block where variable is defined */
-        ps_symbol *variable; /** @brief Variable being referenced       */
-    } PS_AST_PACKED ps_ast_variable_simple;
-
-    /** @brief Lvalue: array value */
-    /** @example A1[42], A2[212 + Z *4, T], A3[I, J, K], ... */
-    typedef struct s_ps_ast_variable_array
+    /** @brief Lvalue: variable */
+    /** @example I, Total, ...  or  A1[42], A2[212 + Z *4, T], A3[I, J, K], ... */
+    typedef struct s_ps_ast_variable
     {
         PS_AST_NODE_COMMON
         ps_ast_block *owner;    /** @brief Block where variable is defined */
-        ps_symbol *variable;    /** @brief Array being referenced          */
+        ps_symbol *variable;    /** @brief Variable being referenced       */
         size_t n_indexes;       /** @brief Number of dimensions            */
         ps_ast_node *indexes[]; /** @brief Expressions for each dimension  */
-    } PS_AST_PACKED ps_ast_variable_array;
+    } PS_AST_PACKED ps_ast_variable;
 
     /** @brief FOR statement */
     typedef struct s_ps_ast_for
     {
         PS_AST_NODE_COMMON
-        ps_ast_variable_simple *variable; /** @brief Loop variable *must* be a simple variable             */
-        ps_ast_node *start;               /** @brief Start expression                                      */
-        ps_ast_node *end;                 /** @brief End expression                                        */
-        ps_ast_statement_list *body;      /** @brief Statements to execute for each value of loop variable */
-        bool downto : 1;                  /** @brief Direction: false for "TO", true for "DOWNTO"          */
-        uint16_t padding : 15;            /** @brief Padding to 16 bits                                    */
+        ps_ast_variable *variable;   /** @brief Loop variable *must* be a simple variable             */
+        ps_ast_node *start;          /** @brief Start expression                                      */
+        ps_ast_node *end;            /** @brief End expression                                        */
+        ps_ast_statement_list *body; /** @brief Statements to execute for each value of loop variable */
+        bool downto : 1;             /** @brief Direction: false for "TO", true for "DOWNTO"          */
+        uint16_t padding : 15;       /** @brief Padding to 16 bits                                    */
     } PS_AST_PACKED ps_ast_for;
 
     typedef struct s_ps_ast_format
@@ -216,8 +205,7 @@ extern "C"
     #define PS_AST_NODE_VALUE_SIZE            sizeof(ps_ast_value)
     #define PS_AST_NODE_UNARY_OPERATION_SIZE  sizeof(ps_ast_unary_operation)
     #define PS_AST_NODE_BINARY_OPERATION_SIZE sizeof(ps_ast_binary_operation)
-    #define PS_AST_NODE_VARIABLE_SIMPLE_SIZE  sizeof(ps_ast_variable_simple)
-    #define PS_AST_NODE_VARIABLE_ARRAY_SIZE   sizeof(ps_ast_variable_array)
+    #define PS_AST_NODE_VARIABLE_SIZE         sizeof(ps_ast_variable)
     // clang-format on
 
     /** @brief Check if an AST node belongs to a specific group */
@@ -235,13 +223,13 @@ extern "C"
     ps_ast_if               *ps_ast_create_if              (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *then_branch, ps_ast_statement_list *else_branch                   );
     ps_ast_while            *ps_ast_create_while           (uint16_t line, uint16_t column, ps_ast_node *condition, ps_ast_statement_list *body                                                              );
     ps_ast_repeat           *ps_ast_create_repeat          (uint16_t line, uint16_t column, ps_ast_statement_list *body, ps_ast_node *condition                                                              );
-    ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable_simple *variable, ps_ast_node *start, ps_ast_node *end, bool downto, ps_ast_statement_list *body );
+    ps_ast_for              *ps_ast_create_for             (uint16_t line, uint16_t column, ps_ast_variable *variable, ps_ast_node *start, ps_ast_node *end, bool downto, ps_ast_statement_list *body );
     ps_ast_call             *ps_ast_create_call            (uint16_t line, uint16_t column, ps_ast_node_kind kind, ps_symbol *executable, uint16_t n_args, ps_ast_node *args[], const ps_ast_format formats[]);
     ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node *operand                                                                 );
     ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right                                               );
     ps_ast_value            *ps_ast_create_literal_value   (uint16_t line, uint16_t column, ps_value value                                                                                                   );
-    ps_ast_variable_simple  *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable                                                  );
-    ps_ast_variable_array   *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes, ps_ast_node **indexes         );
+    ps_ast_variable         *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable                                                  );
+    ps_ast_variable         *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes, ps_ast_node **indexes         );
 
     // clang-format on
 
@@ -261,10 +249,8 @@ extern "C"
     ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *operation         );
     ps_ast_node *ps_ast_free_function_call   (ps_ast_call             *call              );
     ps_ast_node *ps_ast_free_value           (ps_ast_value            *value             );
-    ps_ast_node *ps_ast_free_variable_simple (ps_ast_variable_simple  *variable          );
-    ps_ast_node *ps_ast_free_variable_array  (ps_ast_variable_array   *variable          );
-    ps_ast_node *ps_ast_free_lvalue_simple   (ps_ast_variable_simple  *lvalue            );
-    ps_ast_node *ps_ast_free_lvalue_array    (ps_ast_variable_array   *lvalue            );
+    ps_ast_node *ps_ast_free_variable (ps_ast_variable  *variable          );
+    ps_ast_node *ps_ast_free_lvalue_simple   (ps_ast_variable  *lvalue            );
     // clang-format on
 
 #ifdef __cplusplus

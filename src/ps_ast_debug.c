@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <stdio.h>
 
 #include "ps_ast.h"
@@ -22,15 +23,10 @@ static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOW
                                                 [PS_AST_BLOCK] = "BLOCK",
                                                 [PS_AST_STATEMENT] = "STATEMENT",
                                                 [PS_AST_EXPRESSION] = "EXPRESSION",
-                                                [PS_AST_LVALUE] = "LVALUE"};
+                                                [PS_AST_GROUP_LVALUE] = "LVALUE"};
 
 const char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
-    // if (group < PS_AST_GROUP_UNKNOWN || group > PS_AST_LVALUE)
-    // {
-    //     ps_ast_debug_line(0, "Error: unknown AST node group %d\n", group);
-    //     return "ERROR";
-    // }
     return ps_ast_node_group_names[group];
 }
 
@@ -51,19 +47,12 @@ static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN"
                                                [PS_AST_BINARY_OPERATION] = "BINARY_OPERATION",
                                                [PS_AST_FUNCTION_CALL] = "FUNCTION_CALL",
                                                [PS_AST_LITERAL_VALUE] = "VALUE",
-                                               [PS_AST_RVALUE_SIMPLE] = "VARIABLE_SIMPLE",
-                                               [PS_AST_RVALUE_ARRAY] = "VARIABLE_ARRAY",
-                                               [PS_AST_LVALUE_SIMPLE] = "LVALUE_SIMPLE",
-                                               [PS_AST_LVALUE_ARRAY] = "LVALUE_ARRAY"};
+                                               [PS_AST_RVALUE] = "RVALUE",
+                                               [PS_AST_LVALUE] = "LVALUE"};
 
 const char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
-    // if (kind < PS_AST_KIND_UNKNOWN || kind > PS_AST_LVALUE_ARRAY)
-    // {
-    //     ps_ast_debug_line(0, "Error: unknown AST node kind %d\n", kind);
-    //     return "ERROR";
-    // }
-    return (char *)ps_ast_node_kind_names[kind];
+    return ps_ast_node_kind_names[kind];
 }
 
 void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
@@ -98,12 +87,12 @@ void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
                       ps_value_get_debug_string(&value_node->value));
 }
 
-void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable_simple *variable_simple)
+void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable_simple)
 {
     ps_ast_debug_line(margin, "{VARIABLE_SIMPLE: %s}\n", variable_simple->variable->name);
 }
 
-void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable_array *variable_array)
+void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
 {
     ps_ast_debug_line(margin, "%s[", variable_array->variable->name);
     for (size_t i = 0; i < variable_array->n_indexes; i++)
@@ -145,20 +134,19 @@ void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
 
 void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
 {
-    if (assignment->lvalue->kind == PS_AST_LVALUE_SIMPLE)
+    assert(assignment != NULL);
+    assert(assignment->kind == PS_AST_ASSIGNMENT);
+    assert(assignment->lvalue != NULL);
+    assert(assignment->lvalue->kind == PS_AST_LVALUE);
+
+    ps_ast_variable *variable = assignment->lvalue;
+    if (variable->n_indexes == 0)
     {
-        ps_ast_variable_simple *variable_simple = (ps_ast_variable_simple *)assignment->lvalue;
-        ps_ast_debug_line(margin, "%s", variable_simple->variable->name);
-    }
-    else if (assignment->lvalue->kind == PS_AST_LVALUE_ARRAY)
-    {
-        ps_ast_variable_array *variable_array = (ps_ast_variable_array *)assignment->lvalue;
-        ps_ast_debug_line(margin, "%s[...%zu]", variable_array->variable->name, variable_array->n_indexes);
+        ps_ast_debug_line(margin, "%s", variable->variable->name);
     }
     else
     {
-        ps_ast_debug_line(margin, "ASSIGNMENT with unknown lvalue kind %s (%d)\n",
-                          ps_ast_node_get_kind_name(assignment->lvalue->kind), assignment->lvalue->kind);
+        ps_ast_debug_line(margin, "%s[...%zu]", variable->variable->name, variable->n_indexes);
     }
     ps_ast_debug_line(margin, ":=");
     ps_ast_debug_node(margin + 1, assignment->expression);
@@ -298,13 +286,9 @@ void ps_ast_debug_node(size_t margin, const ps_ast_node *node)
     case PS_AST_PROCEDURE_CALL:
         ps_ast_debug_procedure_call(margin, (const ps_ast_call *)node);
         break;
-    case PS_AST_RVALUE_SIMPLE:
-    case PS_AST_LVALUE_SIMPLE:
-        ps_ast_debug_variable_simple(margin, (const ps_ast_variable_simple *)node);
-        break;
-    case PS_AST_RVALUE_ARRAY:
-    case PS_AST_LVALUE_ARRAY:
-        ps_ast_debug_variable_array(margin, (const ps_ast_variable_array *)node);
+    case PS_AST_RVALUE:
+    case PS_AST_LVALUE:
+        ps_ast_debug_variable_simple(margin, (const ps_ast_variable *)node);
         break;
     default:
         ps_ast_debug_line(margin, "Error: unknown AST node kind %d", node->kind);

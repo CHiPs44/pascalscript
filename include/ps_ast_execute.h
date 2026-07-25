@@ -21,7 +21,7 @@ extern "C"
     /** @brief Execute function */
     bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
     /** @brief Execute block */
-    bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block);
+    bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block);
     /** @brief Execute a list of Pascal statements */
     bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
     /** @brief Execute statement */

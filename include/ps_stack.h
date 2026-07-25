@@ -67,7 +67,8 @@ extern "C"
     /** @brief Check if stack is full */
     bool ps_stack_is_full(const ps_stack *stack);
 
-    ps_frame *ps_stack_find_block(ps_stack *stack, ps_ast_block *block);
+    /** @brief Find frame for a block */
+    ps_frame *ps_stack_find_frame_by_block(ps_stack *stack, ps_ast_block *block);
 
 #ifdef __cplusplus
 }

@@ -94,7 +94,7 @@ ps_frame *ps_stack_top(const ps_stack *stack)
     return stack->frames[stack->sp - 1];
 }
 
-ps_frame *ps_stack_find_block(ps_stack *stack, ps_ast_block *block)
+ps_frame *ps_stack_find_frame_by_block(ps_stack *stack, ps_ast_block *block)
 {
     if (ps_stack_is_empty(stack))
         return NULL;

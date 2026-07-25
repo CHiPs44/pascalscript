@@ -236,7 +236,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
                     ps_type_definition_get_name(variable->value->type->value->data.t));
-        lvalue = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE_SIMPLE,
+        lvalue = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE,
                                                               variable);
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -639,7 +639,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     PARSE_BEGIN("STATEMENT", "FOR_DO");
 
     ps_symbol *variable = NULL;
-    ps_ast_variable_simple *variable_node = NULL;
+    ps_ast_variable *variable_node = NULL;
     ps_ast_node *start = NULL;
     ps_ast_node *finish = NULL;
     bool downto = false;
@@ -692,7 +692,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     if (!ps_parse_statement_or_compound_statement(compiler, block, &body))
         TRACE_ERROR("STATEMENT_OR_COMPOUND")
 
-    variable_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE_SIMPLE, variable);
+    variable_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
     if (variable_node == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto, body);
