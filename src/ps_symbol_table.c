@@ -67,14 +67,15 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 
 ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size)
 {
-    ps_symbol_table *table;
     table_size = table_size > 0 ? table_size : PS_SYMBOL_TABLE_SIZE;
-    table = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
+    ps_symbol_table *table = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
     if (table == NULL)
         return NULL;
     table->table_size = table_size;
     table->bucket_size = bucket_size > 0 ? bucket_size : PS_SYMBOL_BUCKET_SIZE;
-    ps_symbol_table_reset(table, false);
+    table->used_buckets = 0;
+    for (ssize_t i = 0; i < table_size; i++)
+        table->buckets[i] = NULL;
     return table;
 }
 

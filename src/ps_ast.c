@@ -139,12 +139,15 @@ static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
                                   const char *name)
 {
+    static uint32_t block_id = 0;
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(line, column, PS_AST_BLOCK, kind, sizeof(ps_ast_block));
     if (block == NULL)
         return NULL;
     memset(block->name, 0, PS_IDENTIFIER_SIZE);
-    if (name != NULL)
+    if (name == NULL)
+        snprintf(block->name, PS_IDENTIFIER_LEN, "BLOCK#%8x", ++block_id);
+    else
         snprintf(block->name, PS_IDENTIFIER_LEN, "%s", name);
     block->parent = parent;
     block->symbols = ps_symbol_table_alloc(0, 0);
@@ -451,9 +454,9 @@ ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation
     return NULL;
 }
 
-// =============================================================================
+// ==========================================================================================
 // PS_AST_BINARY_OPERATION: +, -, *, /, DIV, MOD, AND, OR, XOR, SHL, SHR, =, <>, <, <=, >, >=
-// =============================================================================
+// ==========================================================================================
 
 static bool ps_ast_binary_operation_is_comparison(ps_operator_binary operator)
 {
@@ -479,26 +482,13 @@ static bool ps_ast_binary_operation_is_boolean_operation(ps_operator_binary oper
 
 static bool ps_ast_binary_operation_is_real_operation(ps_operator_binary operator)
 {
-    return operator != PS_OP_AND && operator != PS_OP_OR && operator != PS_OP_XOR && operator != PS_OP_SHL &&
-           operator != PS_OP_SHR && operator != PS_OP_MOD && operator != PS_OP_DIV;
+    return operator == PS_OP_ADD || operator == PS_OP_SUB || operator == PS_OP_MUL || operator == PS_OP_DIV_REAL;
 }
 
 static bool ps_ast_binary_operation_is_mixed_integer_unsigned(ps_value_type left_base, ps_value_type right_base)
 {
     return (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER) ||
            (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED);
-}
-
-static ps_symbol *ps_ast_binary_operation_get_mixed_integer_unsigned_result_type(ps_operator_binary operator,
-                                                                                 ps_value_type left_base,
-                                                                                 ps_value_type right_base)
-{
-    if (operator == PS_OP_OR)
-        return &ps_system_integer;
-    if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER &&
-        (operator == PS_OP_AND || operator == PS_OP_XOR || operator == PS_OP_SUB))
-        return &ps_system_unsigned;
-    return &ps_system_integer;
 }
 
 /**
@@ -513,8 +503,8 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
     if (left_type == NULL || right_type == NULL)
         return NULL;
 
-    ps_value_type left_base = ps_value_get_base(left_type->value);
-    ps_value_type right_base = ps_value_get_base(right_type->value);
+    ps_value_type left_base = left_type->value->data.t->base;
+    ps_value_type right_base = right_type->value->data.t->base;
 
     if (ps_ast_binary_operation_is_comparison(operator))
         return &ps_system_boolean;
@@ -536,11 +526,12 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
         return &ps_system_unsigned;
 
     if (ps_ast_binary_operation_is_mixed_integer_unsigned(left_base, right_base))
-        return ps_ast_binary_operation_get_mixed_integer_unsigned_result_type(operator, left_base, right_base);
+        return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
 
     if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
         return &ps_system_integer;
 
+    fprintf(stderr, "Error: incompatible types for binary operation '%s'\n", ps_operator_binary_get_name(operator));
     return NULL;
 }
 
@@ -571,8 +562,6 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
     binary_operation->result_type = ps_ast_binary_operation_get_result_type(operator, left, right);
     if (binary_operation->result_type == NULL)
     {
-        fprintf(stderr, "Error: incompatible types for binary operation %s with %s and %s\n",
-                ps_operator_binary_get_name(operator), ps_value_get_type_name(left), ps_value_get_type_name(right));
         ps_memory_free(PS_MEMORY_AST, binary_operation);
         return NULL;
     }
