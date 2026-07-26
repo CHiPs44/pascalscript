@@ -20,13 +20,13 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block)
+bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     bool result = false;
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
         return false;
     ps_ast_debug_line(interpreter->level, "BLOCK kind=%s name=%s", ps_ast_node_get_kind_name(block->kind), block->name);
-    if (!ps_interpreter_enter_frame(interpreter, block))
+    if (!ps_interpreter_enter_frame(interpreter, (ps_ast_block *)block))
         return false;
     result = ps_ast_execute_statement_list(interpreter, block->statement_list);
     if (!ps_interpreter_exit_frame(interpreter))
@@ -34,7 +34,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, ps_ast_block *block)
     return result;
 }
 
-bool ps_ast_execute_program(ps_interpreter *interpreter, ps_ast_block *program)
+bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected PROGRAM AST node");
@@ -42,7 +42,7 @@ bool ps_ast_execute_program(ps_interpreter *interpreter, ps_ast_block *program)
     return ps_ast_execute_block(interpreter, program);
 }
 
-bool ps_ast_execute_procedure(ps_interpreter *interpreter, ps_ast_block *procedure)
+bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
@@ -51,7 +51,7 @@ bool ps_ast_execute_procedure(ps_interpreter *interpreter, ps_ast_block *procedu
     return ps_ast_execute_block(interpreter, procedure);
 }
 
-bool ps_ast_execute_function(ps_interpreter *interpreter, ps_ast_block *function)
+bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
@@ -60,7 +60,7 @@ bool ps_ast_execute_function(ps_interpreter *interpreter, ps_ast_block *function
     return ps_ast_execute_block(interpreter, function);
 }
 
-bool ps_ast_execute_statement_list(ps_interpreter *interpreter, ps_ast_statement_list *statement_list)
+bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
 {
     if (statement_list == NULL)
         return true; // Empty statement list is valid (no-op)
@@ -120,9 +120,9 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     assert(assignment->expression->group == PS_AST_EXPRESSION);
     ps_ast_debug_line(interpreter->level, "ASSIGNMENT:");
 
-    ps_ast_variable *variable = variable = ((ps_ast_variable *)assignment->lvalue);
+    ps_ast_variable *variable = assignment->lvalue;
     ps_value_type variable_type = ps_value_get_type(variable->variable->value);
-    ps_ast_debug_line(interpreter->level, "Variable: %s of type %s", variable->variable->name,
+    ps_ast_debug_line(interpreter->level + 1, "Variable: %s of type %s", variable->variable->name,
                       ps_value_type_get_name(variable_type));
 
     ps_ast_value value_node = {0};
@@ -135,7 +135,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     value.data = value_node.value.data;
     ps_ast_debug_line(interpreter->level, "{Expression value: %s}", ps_value_get_display_string(&value, 0, 0));
 
-    return ps_interpreter_copy_value(interpreter, &value, variable->variable->value);
+    return ps_interpreter_set_variable_value(interpreter, variable, &value);
 }
 
 bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)

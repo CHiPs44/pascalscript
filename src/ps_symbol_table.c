@@ -171,7 +171,7 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     // count variables
     if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
         table->vars++;
-    ps_symbol_table_log(PS_DEBUG_CRITICAL, "TRACE\tps_symbol_table_add: '%s' added at index %d position %d (%s)\n",
+    ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_add: '%s' added at index %d position %d (%s)\n",
                         symbol->name, index, bucket->used - 1,
                         symbol->kind == PS_SYMBOL_KIND_VARIABLE ? "VAR" : "CONST");
     return PS_ERROR_NONE;

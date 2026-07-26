@@ -27,6 +27,8 @@ ps_frame *ps_frame_alloc(ps_ast_block *block)
         return NULL;
     memset(frame, 0, size);
     frame->block = block;
+    for (size_t i = 0; i < count; i++)
+        frame->data[i].u = i % 2 == 0 ? 0xDEADDEAD : 0xBEEFBEEF;
     return frame;
 }
 

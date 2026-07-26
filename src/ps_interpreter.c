@@ -9,6 +9,7 @@
 
 #include "ps_array.h"
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_ast_execute.h"
 #include "ps_error.h"
 #include "ps_functions.h"
@@ -210,13 +211,22 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != variable_node);
     assert(NULL != value);
 
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable_node->owner);
+    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "SET VARIABLE VALUE: %s <= %s\n", variable_node->variable->name,
+                       ps_value_get_debug_string(value));
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
     if (frame == NULL)
         return false;
+    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Found block %s of type %s\n", frame->block->name,
+                       ps_ast_node_get_kind_name(frame->block->kind));
     ps_value variable_value = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
     if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
         return false;
+    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
     frame->data[variable_node->variable->value->data.h] = variable_value.data;
+    ps_value debug_value = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
+    debug_value.data = frame->data[variable_node->variable->value->data.h];
+    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s set to %s\n", variable_node->variable->name,
+                       ps_value_get_debug_string(&debug_value));
 
     return true;
 }
@@ -228,7 +238,7 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != variable_node);
     assert(NULL != value);
 
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter->stack, variable_node->owner);
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
     if (frame == NULL)
         return false;
     ps_value variable_value = {.allocated = false,
