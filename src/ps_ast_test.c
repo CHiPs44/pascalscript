@@ -156,7 +156,7 @@ cleanup:
  * @brief Test Assignment Pascal program
  * L/C 123456789012345678901234567890123456789012345678901234567890
  * 1   Program Assignment;
- * 2   Var I, J: Integer;
+ * 2   Var I, J: Unsigned;
  * 3   Begin
  * 4       I := 21 * 2;
  * 4       J := I;
@@ -172,16 +172,19 @@ bool ps_ast_test_assignment()
     ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
     ASSERT(interpreter != NULL);
 
-    ps_ast_debug_line(0, "Create variable symbols I & J of type Integer and add them to the symbol table");
-    ps_value value_i = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+    ps_ast_debug_line(0, "Create variable symbols I & J of type Unsigned and add them to the symbol table");
+    ps_value value_i = {.allocated = false, .type = &ps_system_unsigned, .data.i = 0};
     ps_symbol *symbol_i = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "I", &value_i);
     error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
-    ps_value value_j = {.allocated = false, .type = &ps_system_integer, .data.i = 0};
+
+    ps_value value_j = {.allocated = false, .type = &ps_system_unsigned, .data.i = 0};
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
     ASSERT(error == PS_ERROR_NONE);
+
     block_program->n_vars = 2;
+    ASSERT(block_program->symbols->vars == 2);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
     block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
@@ -190,22 +193,28 @@ bool ps_ast_test_assignment()
     ps_ast_debug_line(0, "Create the assignment statement I := 21 * 2;");
     ps_ast_variable *variable_i = ps_ast_create_variable_simple(3, 5, block_program, PS_AST_LVALUE, symbol_i);
     ASSERT(variable_i != NULL);
+
     ps_value value_u_21 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 21};
     ps_ast_value *rvalue_u_21 = ps_ast_create_literal_value(3, 10, value_u_21);
     ASSERT(rvalue_u_21 != NULL);
+
     ps_value value_u_2 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 2};
     ps_ast_value *rvalue_u_2 = ps_ast_create_literal_value(3, 15, value_u_2);
     ASSERT(rvalue_u_2 != NULL);
+
     ps_ast_binary_operation *mul_operation =
         ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
     ASSERT(mul_operation != NULL);
+
     ps_ast_assignment *assignment_i = ps_ast_create_assignment(3, 5, variable_i, (ps_ast_node *)mul_operation);
     ASSERT(assignment_i != NULL);
+
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i;
 
     ps_ast_debug_line(0, "Create the assignment statement J := I;");
     ps_ast_variable *variable_j = ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE, symbol_j);
     ASSERT(variable_j != NULL);
+
     ps_ast_variable *rvalue_i = ps_ast_create_variable_simple(4, 10, block_program, PS_AST_RVALUE, symbol_i);
     ps_ast_assignment *assignment_j = ps_ast_create_assignment(4, 5, variable_j, (ps_ast_node *)rvalue_i);
     ASSERT(assignment_i != NULL);

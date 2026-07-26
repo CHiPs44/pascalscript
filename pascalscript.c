@@ -51,7 +51,7 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
-bool ast_test = false;
+bool ast_test = true;//false;
 bool run = false;
 bool debug = false;
 bool dump_buffer = false;

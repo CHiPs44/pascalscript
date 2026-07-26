@@ -68,7 +68,8 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size)
 {
     table_size = table_size > 0 ? table_size : PS_SYMBOL_TABLE_SIZE;
-    ps_symbol_table *table = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
+    ps_symbol_table *table =
+        ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
     if (table == NULL)
         return NULL;
     table->table_size = table_size;
@@ -167,6 +168,12 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     // add symbol to bucket
     table->buckets[index]->symbols[bucket->used] = symbol;
     table->buckets[index]->used++;
+    // count variables
+    if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+        table->vars++;
+    ps_symbol_table_log(PS_DEBUG_CRITICAL, "TRACE\tps_symbol_table_add: '%s' added at index %d position %d (%s)\n",
+                        symbol->name, index, bucket->used - 1,
+                        symbol->kind == PS_SYMBOL_KIND_VARIABLE ? "VAR" : "CONST");
     return PS_ERROR_NONE;
 }
 
