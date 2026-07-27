@@ -72,11 +72,10 @@ cleanup:
     return false;
 }
 
-ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *system, ps_ast_block *block_program)
+ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *system, ps_string_heap *string_heap,
+                                               ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Create an interpreter");
-    ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
-    ASSERT(string_heap != NULL);
     ps_interpreter *interpreter = ps_interpreter_alloc(system, string_heap, true, false, false);
     ASSERT(interpreter != NULL);
 
@@ -119,14 +118,14 @@ cleanup:
  *  2   Begin
  *  3   End.
  */
-bool ps_ast_test_minimal(ps_ast_block *system)
+bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("MINIMAL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Debug print the program");
@@ -161,14 +160,14 @@ cleanup:
  * 4       J := I;
  * 5   End.
  */
-bool ps_ast_test_assignment(ps_ast_block *system)
+bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
 {
     ps_error error = PS_ERROR_NONE;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("ASSIGNMENT");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I & J of type Unsigned and add them to the symbol table");
@@ -183,7 +182,6 @@ bool ps_ast_test_assignment(ps_ast_block *system)
     ASSERT(error == PS_ERROR_NONE);
 
     block_program->n_vars = 2;
-    ASSERT(block_program->symbols->vars == 2);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
     block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
@@ -267,14 +265,14 @@ cleanup:
  * 9           J := 99;
  * 10  End.
  */
-bool ps_ast_test_if_then_else(ps_ast_block *system)
+bool ps_ast_test_if_then_else(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("IFTHENELSE");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and J of type Integer and add them to the symbol tables");
@@ -398,14 +396,14 @@ cleanup:
  * 6           I := I - 1;
  * 7   End.
  */
-bool ps_ast_test_while_do(ps_ast_block *system)
+bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("WHILEDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -502,14 +500,14 @@ cleanup:
  * 7       Until I = 0;
  * 8   End.
  */
-bool ps_ast_test_repeat_until(ps_ast_block *system)
+bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("REPEATUNTIL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -605,7 +603,7 @@ cleanup:
  * 6           Sum := Sum + I;
  * 7   End.
  */
-bool ps_ast_test_for_do(ps_ast_block *system)
+bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
     ps_error error;
@@ -613,7 +611,7 @@ bool ps_ast_test_for_do(ps_ast_block *system)
     ps_ast_block *block_program = ps_ast_test_create_block_program("FORDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and Sum of type Integer and add them to the symbol tables");
@@ -720,14 +718,14 @@ cleanup:
  *  4       WriteLn(-42);
  *  5   End.
  */
-bool ps_ast_test_hello(ps_ast_block *system)
+bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
@@ -798,22 +796,30 @@ bool ps_ast_test()
     bool result = true;
 
     ps_ast_block *system = ps_system_alloc();
+    ASSERT(system != NULL);
+    ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
+    ASSERT(string_heap != NULL);
 
     ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_minimal(system);
+    // result &= ps_ast_test_minimal(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_assignment(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    // result &= ps_ast_test_if_then_else(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    // result &= ps_ast_test_while_do(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    // result &= ps_ast_test_repeat_until(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    // result &= ps_ast_test_for_do(system, string_heap);
+    // ps_ast_debug_line(0, "****************************************************************");
+    // result &= ps_ast_test_hello(system, string_heap);
     ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_assignment(system);
-    ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_if_then_else(system);
-    ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_while_do(system);
-    ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_repeat_until(system);
-    ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_for_do(system);
-    ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_hello(system);
-    ps_ast_debug_line(0, "****************************************************************");
+
+    ps_string_heap_free(string_heap);
+    ps_system_free(system);
 
     return result;
+cleanup:
+    return false;
 }

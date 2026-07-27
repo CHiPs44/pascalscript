@@ -40,7 +40,6 @@ extern "C"
         ssize_t bucket_size;  /** @brief count of symbols in each bucket */
         ssize_t bucket_more;  /** @brief bucket realloc increment        */
         ssize_t used_buckets; /** @brief count of used buckets           */
-        ssize_t vars;         /** @brief count of variable symbols       */
         ps_bucket *buckets[]; /** @brief symbol buckets array            */
     } __attribute__((__packed__)) ps_symbol_table;
 

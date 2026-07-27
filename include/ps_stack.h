@@ -17,8 +17,8 @@ extern "C"
     /** @brief Stack frame */
     typedef struct s_ps_frame
     {
-        ps_ast_block *block;       /** @brief Block with symbols, vars, params & lexical parent (static) */
-        ps_value_data data[];      /** @brief Variable type is in symbol, index is handle from symbol    */
+        ps_ast_block *block;  /** @brief Block with symbols, variabless, parameters & lexical parent */
+        ps_value_data data[]; /** @brief Variable type is in symbol, index is handle from symbol     */
     } ps_frame;
 
     /** @brief Stack itself */

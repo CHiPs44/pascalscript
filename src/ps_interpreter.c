@@ -52,7 +52,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
         return ps_interpreter_free(interpreter);
-    for (size_t i = 0; i < system->n_vars; i++)
+    for (ps_handle i = 0; i < system->n_vars; i++)
     {
         frame->data[i].v = 0;
     }
