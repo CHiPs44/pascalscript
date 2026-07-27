@@ -10,8 +10,8 @@
 #include <string.h>
 
 #include "ps_ast.h"
-#include "ps_logger.h"
 #include "ps_error.h"
+#include "ps_logger.h"
 #include "ps_parser.h"
 #include "ps_string_heap.h"
 #include "ps_value.h"
@@ -34,7 +34,7 @@ extern "C"
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
 
     /** @brief Initialize compiler and children objects */
-    ps_compiler *ps_compiler_alloc(ps_ast_block *system);
+    ps_compiler *ps_compiler_alloc(ps_ast_block *system, ps_string_heap *string_heap);
 
     /** @brief Release compiler and children objects */
     ps_compiler *ps_compiler_free(ps_compiler *compiler);

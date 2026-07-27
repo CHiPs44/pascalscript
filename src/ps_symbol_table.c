@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-ps_debug_level ps_symbol_table_debug_level = false;
+ps_debug_level ps_symbol_table_debug_level = PS_DEBUG_FATAL;
 
 void ps_symbol_table_log(ps_debug_level debug_level, const char *format, ...) // NOSONAR
 {
@@ -140,6 +141,9 @@ ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
 
 ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 {
+    assert(table != NULL);
+    assert(symbol != NULL);
+
     // NB: refuse to add symbol if kind is AUTO
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         return PS_ERROR_SYMBOL_TABLE_INVALID;
@@ -168,10 +172,9 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     // add symbol to bucket
     table->buckets[index]->symbols[bucket->used] = symbol;
     table->buckets[index]->used++;
-    // count variables
-    ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_add: '%s' added at index %d position %d (%s)\n",
-                        symbol->name, index, bucket->used - 1,
-                        symbol->kind == PS_SYMBOL_KIND_VARIABLE ? "VAR" : "CONST");
+
+    // ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_add: %s '%s' added at index %d position %d (%s)\n",
+    //                     ps_symbol_get_kind_name(symbol->kind), symbol->name, index, bucket->used - 1);
     return PS_ERROR_NONE;
 }
 
@@ -185,6 +188,7 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
     char *kind_name;
     char *type_name;
     char *value;
+    // static char buffer[128] = {0};
 
     if (output == NULL)
         output = stderr;
@@ -217,18 +221,16 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
                 hash = ps_symbol_get_hash_key((char *)symbol->name);
                 kind_name = ps_symbol_get_kind_name(symbol->kind);
                 type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
+                // if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+                // {
+                //     snprintf(buffer, sizeof(buffer), "handle#%" PS_HANDLE_FMT_10, symbol->value->data.h);
+                //     value = (char *)&buffer;
+                // }
+                // else
                 value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
-                // clang-format off
-                fprintf(output,
-                        "┃%c%c%05d┃%08x:%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n",
-                        symbol->system ? 'S' : 's', symbol->allocated ? 'A' : 'a', i,
-                        hash, hash % table->table_size,
-                        PS_IDENTIFIER_LEN, symbol->name,
-                        kind_name,
-                        type_name,
-                        PS_IDENTIFIER_LEN, value
-                );
-                // clang-format on
+                fprintf(output, "┃%c%c%05d┃%08x:%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : 's',
+                        symbol->allocated ? 'A' : 'a', i, hash, hash % table->table_size, PS_IDENTIFIER_LEN,
+                        symbol->name, kind_name, type_name, PS_IDENTIFIER_LEN, value);
             }
         }
     }

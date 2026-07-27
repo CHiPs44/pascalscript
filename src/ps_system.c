@@ -131,7 +131,6 @@ ps_ast_block *ps_system_alloc(void)
     system->symbols = ps_symbol_table_alloc(64, 4);
     if (system->symbols == NULL)
         return (ps_ast_block *)ps_ast_free_block(system);
-    // ps_symbol_table_debug_level = PS_DEBUG_VERBOSE;
 
     /**************************************************************************/
     /* TYPES                                                                  */

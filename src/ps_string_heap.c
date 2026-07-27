@@ -103,10 +103,6 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
     size_t index = hash % heap->size;
     size_t start = index;
     // Loop until we find an empty slot or looped back to the start
-    if (strcmp("√2       = ", z) == 0)
-    {
-        fprintf(stderr, "BREAK!\n");
-    }
     do
     {
         if (heap->data[index] == NULL)

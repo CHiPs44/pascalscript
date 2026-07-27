@@ -20,7 +20,7 @@
 #include "ps_system.h"
 #include "ps_value.h"
 
-ps_compiler *ps_compiler_alloc(ps_ast_block *system)
+ps_compiler *ps_compiler_alloc(ps_ast_block *system, ps_string_heap *string_heap)
 {
     // Allocate compiler itself
     ps_compiler *compiler = ps_memory_malloc(PS_MEMORY_COMPILER, sizeof(ps_compiler));
@@ -39,9 +39,7 @@ ps_compiler *ps_compiler_alloc(ps_ast_block *system)
         goto cleanup;
 
     // Allocate string heap
-    compiler->string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
-    if (compiler->string_heap == NULL)
-        goto cleanup;
+    compiler->string_heap = string_heap;
 
     return compiler;
 cleanup:
@@ -54,8 +52,6 @@ ps_compiler *ps_compiler_free(ps_compiler *compiler)
     {
         if (compiler->parser != NULL)
             compiler->parser = ps_parser_free(compiler->parser);
-        if (compiler->string_heap != NULL)
-            compiler->string_heap = ps_string_heap_free(compiler->string_heap);
         ps_memory_free(PS_MEMORY_COMPILER, compiler);
     }
     return NULL;

@@ -51,7 +51,7 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
-bool ast_test = true;//false;
+bool ast_test = true; // false;
 bool run = false;
 bool debug = false;
 bool dump_buffer = false;
@@ -62,6 +62,7 @@ bool trace = false;
 bool verbose = false;
 
 ps_ast_block *system_block = NULL;
+ps_string_heap *string_heap = NULL;
 ps_compiler *compiler = NULL;
 ps_ast_block *program = NULL;
 ps_interpreter *interpreter = NULL;
@@ -199,7 +200,7 @@ bool compile(const char *source_file)
     return ok;
 }
 
-bool execute(const ps_ast_block *program)
+bool execute()
 {
     assert(NULL != interpreter);
     assert(NULL != program);
@@ -298,8 +299,9 @@ int main(int argc, char *argv[])
     /* Initialize compiler */
     system_block = ps_system_alloc();
     ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_block->symbols);
+    string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
 
-    compiler = ps_compiler_alloc(system_block);
+    compiler = ps_compiler_alloc(system_block, string_heap);
     if (compiler == NULL)
     {
         fprintf(stderr, "Could not initialize compiler!\n");
@@ -327,11 +329,12 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         /* Run program */
-        execute(program);
+        execute();
         /* Terminate interpreter */
         interpreter = ps_interpreter_free(interpreter);
     }
 
+    /* Terminate compiler & system */
     compiler = ps_compiler_free(compiler);
     system_block = (ps_ast_block *)ps_ast_free_block(system_block);
 
