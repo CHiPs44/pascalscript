@@ -188,7 +188,7 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
     char *kind_name;
     char *type_name;
     char *value;
-    // static char buffer[128] = {0};
+    static char buffer[128] = {0};
 
     if (output == NULL)
         output = stderr;
@@ -221,13 +221,13 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
                 hash = ps_symbol_get_hash_key((char *)symbol->name);
                 kind_name = ps_symbol_get_kind_name(symbol->kind);
                 type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
-                // if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
-                // {
-                //     snprintf(buffer, sizeof(buffer), "handle#%" PS_HANDLE_FMT_10, symbol->value->data.h);
-                //     value = (char *)&buffer;
-                // }
-                // else
-                value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
+                if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+                {
+                    snprintf(buffer, sizeof(buffer), "handle#%" PS_HANDLE_FMT_10, symbol->value->data.h);
+                    value = (char *)&buffer;
+                }
+                else
+                    value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
                 fprintf(output, "┃%c%c%05d┃%08x:%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : 's',
                         symbol->allocated ? 'A' : 'a', i, hash, hash % table->table_size, PS_IDENTIFIER_LEN,
                         symbol->name, kind_name, type_name, PS_IDENTIFIER_LEN, value);

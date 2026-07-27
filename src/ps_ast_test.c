@@ -713,7 +713,7 @@ cleanup:
  *  1   Program Hello;
  *  2   Begin
  *  3       WriteLn('Hello, World!');
- *  4       WriteLn(-42);
+ *  4       WriteLn(-42, 777);
  *  5   End.
  */
 bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
@@ -731,16 +731,11 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the first by value argument");
-    ps_string *hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
-    ASSERT(hello != NULL);
-    ps_value value_hello = {.allocated = false, .type = &ps_system_string, .data.s = hello};
+    ps_string *string_hello = ps_string_heap_create(interpreter->string_heap, "Hello, World!");
+    ASSERT(string_hello != NULL);
+    ps_value value_hello = {.allocated = false, .type = &ps_system_string, .data.s = string_hello};
     ps_ast_value *argument_hello = ps_ast_create_literal_value(3, 13, value_hello);
     ASSERT(argument_hello != NULL);
-
-    ps_ast_debug_line(0, "Create the first by value argument");
-    ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
-    ps_ast_value *argument_i_42 = ps_ast_create_literal_value(4, 13, value_i_42);
-    ASSERT(argument_i_42 != NULL);
 
     ps_ast_debug_line(0, "Create the argument list for the procedure call");
     ps_ast_node **args1 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
@@ -752,14 +747,25 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
         ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL);
     ASSERT(statement1 != NULL);
 
+    ps_ast_debug_line(0, "Create the first by value argument of second statement");
+    ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
+    ps_ast_value *argument_i_42 = ps_ast_create_literal_value(4, 13, value_i_42);
+    ASSERT(argument_i_42 != NULL);
+
+    ps_ast_debug_line(0, "Create the second by value argument of second statement");
+    ps_value value_u_777 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 777};
+    ps_ast_value *argument_u_777 = ps_ast_create_literal_value(4, 18, value_u_777);
+    ASSERT(argument_u_777 != NULL);
+
     ps_ast_debug_line(0, "Create the argument list for the second procedure call");
-    ps_ast_node **args2 = ps_memory_calloc(PS_MEMORY_AST, 1, sizeof(ps_ast_node *));
+    ps_ast_node **args2 = ps_memory_calloc(PS_MEMORY_AST, 2, sizeof(ps_ast_node *));
     ASSERT(args2 != NULL);
     args2[0] = (ps_ast_node *)argument_i_42;
+    args2[1] = (ps_ast_node *)argument_u_777;
 
     ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
     ps_ast_call *statement2 =
-        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args2, NULL);
+        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 2, args2, NULL);
     ASSERT(statement2 != NULL);
 
     ps_ast_debug_line(0, "Add the statements to the statement list");
