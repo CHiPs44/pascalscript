@@ -255,8 +255,8 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     assert(NULL != to);
 
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
-                       ps_value_get_debug_string(from), ps_value_type_get_name(from->type->value->data.t->type),
-                       ps_value_get_debug_string(to), ps_value_type_get_name(to->type->value->data.t->type));
+                       ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
+                       ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
         return true;

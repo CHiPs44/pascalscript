@@ -46,11 +46,6 @@ extern "C"
 
     typedef uint32_t ps_set[8]; /** @brief Set of 32 * 8 = 256 bits */
 
-    // typedef struct s_ps_handle
-    // {
-    //     PS_FRAME frame;                      /** @brief Frame: stack index */
-    //     PS_HANDLE index;                     /** @brief Handle: variable index in frame */
-    // } __attribute__((__packed__)) ps_handle; /** @brief Handle to a variable */
     typedef PS_HANDLE ps_handle;
 
     /** @brief pointer *FUTURE* */

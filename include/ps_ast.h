@@ -82,7 +82,7 @@ extern "C"
         PS_AST_NODE_COMMON
         ps_identifier name;                    /** @brief Every block has a name                                 */
         struct s_ps_ast_block *parent;         /** @brief Parent block, NULL for SYSTEM, SYSTEM for PROGRAM, ... */
-        size_t n_vars;                         /** @brief Number of variables to allocate at startup             */
+        ps_handle n_vars;                      /** @brief Number of variables to allocate at startup             */
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions  */
         ps_ast_statement_list *statement_list; /** @brief Statements for this block                              */
         ps_formal_signature *signature;        /** @brief For procedures and functions, including return type    */

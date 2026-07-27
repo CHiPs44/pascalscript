@@ -72,10 +72,9 @@ cleanup:
     return false;
 }
 
-ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *block_program)
+ps_interpreter *ps_ast_test_create_interpreter(ps_ast_block *system, ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Create an interpreter");
-    ps_ast_block *system = ps_system_alloc();
     ps_string_heap *string_heap = ps_string_heap_alloc(0, 0);
     ASSERT(string_heap != NULL);
     ps_interpreter *interpreter = ps_interpreter_alloc(system, string_heap, true, false, false);
@@ -120,14 +119,14 @@ cleanup:
  *  2   Begin
  *  3   End.
  */
-bool ps_ast_test_minimal()
+bool ps_ast_test_minimal(ps_ast_block *system)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("MINIMAL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Debug print the program");
@@ -162,14 +161,14 @@ cleanup:
  * 4       J := I;
  * 5   End.
  */
-bool ps_ast_test_assignment()
+bool ps_ast_test_assignment(ps_ast_block *system)
 {
     ps_error error = PS_ERROR_NONE;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("ASSIGNMENT");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I & J of type Unsigned and add them to the symbol table");
@@ -178,7 +177,7 @@ bool ps_ast_test_assignment()
     error = ps_symbol_table_add(block_program->symbols, symbol_i);
     ASSERT(error == PS_ERROR_NONE);
 
-    ps_value value_j = {.allocated = false, .type = &ps_system_unsigned, .data.i = 0};
+    ps_value value_j = {.allocated = false, .type = &ps_system_unsigned, .data.h = 1};
     ps_symbol *symbol_j = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "J", &value_j);
     error = ps_symbol_table_add(block_program->symbols, symbol_j);
     ASSERT(error == PS_ERROR_NONE);
@@ -186,39 +185,33 @@ bool ps_ast_test_assignment()
     block_program->n_vars = 2;
     ASSERT(block_program->symbols->vars == 2);
 
-    ps_ast_debug_line(0, "Create a statement list with 1 statement");      // 2 statements");
-    block_program->statement_list = ps_ast_create_statement_list(3, 5, 1); // 2);
+    ps_ast_debug_line(0, "Create a statement list with 2 statements");
+    block_program->statement_list = ps_ast_create_statement_list(3, 5, 2);
     ASSERT(block_program->statement_list != NULL);
 
     ps_ast_debug_line(0, "Create the assignment statement I := 21 * 2;");
     ps_ast_variable *variable_i = ps_ast_create_variable_simple(3, 5, block_program, PS_AST_LVALUE, symbol_i);
     ASSERT(variable_i != NULL);
-
     ps_value value_u_21 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 21};
     ps_ast_value *rvalue_u_21 = ps_ast_create_literal_value(3, 10, value_u_21);
     ASSERT(rvalue_u_21 != NULL);
-
     ps_value value_u_2 = {.allocated = false, .type = &ps_system_unsigned, .data.u = 2};
     ps_ast_value *rvalue_u_2 = ps_ast_create_literal_value(3, 15, value_u_2);
     ASSERT(rvalue_u_2 != NULL);
-
     ps_ast_binary_operation *mul_operation =
         ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
     ASSERT(mul_operation != NULL);
-
     ps_ast_assignment *assignment_i = ps_ast_create_assignment(3, 5, variable_i, (ps_ast_node *)mul_operation);
     ASSERT(assignment_i != NULL);
-
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_i;
 
-    // ps_ast_debug_line(0, "Create the assignment statement J := I;");
-    // ps_ast_variable *variable_j = ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE, symbol_j);
-    // ASSERT(variable_j != NULL);
-
-    // ps_ast_variable *rvalue_i = ps_ast_create_variable_simple(4, 10, block_program, PS_AST_RVALUE, symbol_i);
-    // ps_ast_assignment *assignment_j = ps_ast_create_assignment(4, 5, variable_j, (ps_ast_node *)rvalue_i);
-    // ASSERT(assignment_j != NULL);
-    // block_program->statement_list->statements[1] = (ps_ast_node *)assignment_j;
+    ps_ast_debug_line(0, "Create the assignment statement J := I;");
+    ps_ast_variable *variable_j = ps_ast_create_variable_simple(4, 5, block_program, PS_AST_LVALUE, symbol_j);
+    ASSERT(variable_j != NULL);
+    ps_ast_variable *rvalue_i = ps_ast_create_variable_simple(4, 10, block_program, PS_AST_RVALUE, symbol_i);
+    ps_ast_assignment *assignment_j = ps_ast_create_assignment(4, 5, variable_j, (ps_ast_node *)rvalue_i);
+    ASSERT(assignment_j != NULL);
+    block_program->statement_list->statements[1] = (ps_ast_node *)assignment_j;
 
     // ps_ast_debug_line(0, "Debug print the program");
     // ps_ast_debug = true;
@@ -274,14 +267,14 @@ cleanup:
  * 9           J := 99;
  * 10  End.
  */
-bool ps_ast_test_if_then_else()
+bool ps_ast_test_if_then_else(ps_ast_block *system)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("IFTHENELSE");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and J of type Integer and add them to the symbol tables");
@@ -405,14 +398,14 @@ cleanup:
  * 6           I := I - 1;
  * 7   End.
  */
-bool ps_ast_test_while_do()
+bool ps_ast_test_while_do(ps_ast_block *system)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("WHILEDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -509,14 +502,14 @@ cleanup:
  * 7       Until I = 0;
  * 8   End.
  */
-bool ps_ast_test_repeat_until()
+bool ps_ast_test_repeat_until(ps_ast_block *system)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("REPEATUNTIL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -612,7 +605,7 @@ cleanup:
  * 6           Sum := Sum + I;
  * 7   End.
  */
-bool ps_ast_test_for_do()
+bool ps_ast_test_for_do(ps_ast_block *system)
 {
     bool result;
     ps_error error;
@@ -620,7 +613,7 @@ bool ps_ast_test_for_do()
     ps_ast_block *block_program = ps_ast_test_create_block_program("FORDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and Sum of type Integer and add them to the symbol tables");
@@ -727,14 +720,14 @@ cleanup:
  *  4       WriteLn(-42);
  *  5   End.
  */
-bool ps_ast_test_hello()
+bool ps_ast_test_hello(ps_ast_block *system)
 {
     bool result;
 
     ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(block_program);
+    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
@@ -804,20 +797,22 @@ bool ps_ast_test()
 {
     bool result = true;
 
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_minimal();
+    ps_ast_block *system = ps_system_alloc();
+
     ps_ast_debug_line(0, "****************************************************************");
-    result &= ps_ast_test_assignment();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_if_then_else();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_while_do();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_repeat_until();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_for_do();
-    // ps_ast_debug_line(0, "****************************************************************");
-    // result &= ps_ast_test_hello();
+    result &= ps_ast_test_minimal(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_assignment(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_if_then_else(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_while_do(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_repeat_until(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_for_do(system);
+    ps_ast_debug_line(0, "****************************************************************");
+    result &= ps_ast_test_hello(system);
     ps_ast_debug_line(0, "****************************************************************");
 
     return result;

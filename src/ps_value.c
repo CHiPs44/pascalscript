@@ -452,7 +452,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
     static char buffer[PS_STRING_MAX_LEN + 1];
     if (value == NULL)
         NULL_VALUE
-    if (value->type->value == NULL)
+    if (value->type == NULL || value->type->value == NULL)
         NULL_TYPE
     if (value->type->value->data.t->type == PS_TYPE_ENUM)
     {
