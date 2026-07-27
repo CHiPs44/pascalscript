@@ -38,7 +38,8 @@
 #include "ps_system.h"
 #include "ps_version.h"
 
-#define DEBUGGER_SOURCE "examples/000-minimal.pas"
+// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
+#define DEBUGGER_SOURCE "examples/001-hello.pas"
 // #define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUGGER_SOURCE "examples/005-first.pas"
 // TODO needs variable handle management
@@ -51,7 +52,7 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
-bool ast_test = true; // false;
+bool ast_test = false;
 bool run = false;
 bool debug = false;
 bool dump_buffer = false;

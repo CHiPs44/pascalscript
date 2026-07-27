@@ -146,7 +146,7 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
         return NULL;
     memset(block->name, 0, PS_IDENTIFIER_SIZE);
     if (name == NULL)
-        snprintf(block->name, PS_IDENTIFIER_LEN, "BLOCK#%8x", ++block_id);
+        snprintf(block->name, PS_IDENTIFIER_LEN, "BLOCK#%08x", ++block_id);
     else
         snprintf(block->name, PS_IDENTIFIER_LEN, "%s", name);
     block->parent = parent;
