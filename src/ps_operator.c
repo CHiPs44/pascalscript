@@ -469,12 +469,12 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
             ps_value_type_get_name(a->type->value->data.t->base), ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
-    if (expected_type != &ps_system_none && result->type != expected_type)
+    if (expected_type != NULL && expected_type != &ps_system_none && result->type != expected_type)
     {
         ps_interpreter_set_message(
             interpreter, "Binary operator %s (%d) result type %s does not match expected type %s\n",
             ps_operator_binary_get_name(operator), operator, ps_value_type_get_name(result->type->value->data.t->base),
-            ps_value_type_get_name(expected_type->value->data.t->base));
+            expected_type == NULL, 'NULL!', ps_value_type_get_name(expected_type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
     }
     return true;

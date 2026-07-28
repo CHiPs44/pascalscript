@@ -58,6 +58,8 @@ char *ps_executable_get_kind_name(ps_executable_kind kind)
         return "FUNC_2ARGS";
     case PS_EXECUTABLE_PROC_1ARG:
         return "PROC_1ARG";
+    case PS_EXECUTABLE_PROC_1ARG_S:
+        return "PROC_1ARG_S";
     case PS_EXECUTABLE_PROC_FILE_WRITE:
         return "FILE_WRITE";
     case PS_EXECUTABLE_PROC_FILE_READ:

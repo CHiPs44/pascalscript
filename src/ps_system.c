@@ -195,13 +195,11 @@ ps_ast_block *ps_system_alloc(void)
     if (!ps_functions_init(system))
         goto error;
 
-    ps_symbol_table_debug_level = PS_DEBUG_FATAL;
     return system;
 
 error:
     fprintf(stderr, "SYSTEM INIT FAILED\n");
     ps_system_free(system);
-    ps_symbol_table_debug_level = PS_DEBUG_FATAL;
     return NULL;
 }
 

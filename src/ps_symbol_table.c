@@ -22,7 +22,9 @@ ps_debug_level ps_symbol_table_debug_level = PS_DEBUG_FATAL;
 
 void ps_symbol_table_log(ps_debug_level debug_level, const char *format, ...) // NOSONAR
 {
-    if (debug_level < ps_symbol_table_debug_level)
+    // fprintf(stderr, "ps_symbol_table_debug_level %d debug_level %d %s ", ps_symbol_table_debug_level, debug_level,
+    //         ps_symbol_table_debug_level < debug_level ? "YES" : "NO");
+    if (ps_symbol_table_debug_level < debug_level)
         return;
     va_list args;
     va_start(args, format);
@@ -173,8 +175,8 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     table->buckets[index]->symbols[bucket->used] = symbol;
     table->buckets[index]->used++;
 
-    // ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_add: %s '%s' added at index %d position %d (%s)\n",
-    //                     ps_symbol_get_kind_name(symbol->kind), symbol->name, index, bucket->used - 1);
+    ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_add: %s '%s' added at index %d position %d (%s)\n",
+                        ps_symbol_get_kind_name(symbol->kind), symbol->name, index, bucket->used - 1);
     return PS_ERROR_NONE;
 }
 

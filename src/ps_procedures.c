@@ -143,10 +143,8 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
-/**
- * Execute system procedure Write(F, Value)
- */
-bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
+bool ps_procedure_write_or_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
+                                   int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
@@ -158,17 +156,12 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *va
     return true;
 }
 
-/**
- * Execute system procedure WriteLn(F, Value)
- */
+bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
+{
+    return ps_procedure_write_or_writeln(interpreter, f, value, width, precision);
+}
+
 bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
-    char *display_value = ps_value_get_display_string(value, width, precision);
-    if (display_value == NULL)
-        return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
-    if (interpreter->logger->debug_level)
-        fprintf(f, "WRITELN('%s')\n", display_value);
-    else
-        fprintf(f, "%s", display_value);
-    return true;
+    return ps_procedure_write_or_writeln(interpreter, f, value, width, precision);
 }

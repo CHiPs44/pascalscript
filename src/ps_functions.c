@@ -584,7 +584,7 @@ ps_error ps_function_trunc(ps_interpreter *interpreter, const ps_value *value, p
 ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
                                                      "Round: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double r = round(value->data.r);
@@ -598,11 +598,8 @@ ps_error ps_function_round(ps_interpreter *interpreter, const ps_value *value, p
 ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Int: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Int: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
-    if (ps_value_get_base(value) != PS_TYPE_REAL)
-        return PS_ERROR_EXPECTED_REAL;
     result->type = &ps_system_real;
     double r;
     modf(value->data.r, &r);
@@ -613,8 +610,7 @@ ps_error ps_function_int(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Frac: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Frac: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double i;
     result->data.r = (ps_real)modf(value->data.r, &i);
@@ -625,8 +621,7 @@ ps_error ps_function_frac(ps_interpreter *interpreter, const ps_value *value, ps
 ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Sin: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Sin: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_real;
     result->data.r = (ps_real)sin(value->data.r);
@@ -636,8 +631,7 @@ ps_error ps_function_sin(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Cos: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Cos: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_real;
     result->data.r = (ps_real)cos(value->data.r);
@@ -647,8 +641,7 @@ ps_error ps_function_cos(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Tan: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Tan: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double c = cos(value->data.r);
     if (c == 0.0)
@@ -665,7 +658,7 @@ ps_error ps_function_tan(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
                                                      "ArcTan: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double r = atan(value->data.r);
@@ -681,8 +674,7 @@ ps_error ps_function_arctan(ps_interpreter *interpreter, const ps_value *value, 
 ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Sqr: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Sqr: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double r = value->data.r * value->data.r;
     if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
@@ -695,8 +687,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Sqrt: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Sqrt: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     if (value->data.r < 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -708,8 +699,7 @@ ps_error ps_function_sqrt(ps_interpreter *interpreter, const ps_value *value, ps
 ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
-                                                     "Exp: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Exp: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_real;
     double r = exp(value->data.r);
@@ -722,7 +712,7 @@ ps_error ps_function_exp(ps_interpreter *interpreter, const ps_value *value, ps_
 ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE, "Ln: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Ln: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     if (value->data.r <= 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -734,7 +724,7 @@ ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_v
 ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
                                                      "Log: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     if (value->data.r <= 0.0)

@@ -429,7 +429,8 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     }
     if (symbol == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-    ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
+        ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
 
     // Determine if this is an assignment or a procedure call based on symbol kind
     switch (symbol->kind)

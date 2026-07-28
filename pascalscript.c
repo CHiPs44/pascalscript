@@ -6,26 +6,15 @@
 
 #include <stdio.h>
 
-#include "ps_ast.h"
-#include "ps_ast_debug.h"
-#include "ps_ast_test.h"
-
-// int main(int argc, char *argv[])
-// {
-//     (void)argc; // silence unused variable warning
-//     (void)argv; // silence unused variable warning
-
-//     bool result = ps_ast_test();
-
-//     return result ? EXIT_SUCCESS : EXIT_FAILURE;
-// }
-
 #include <assert.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "ps_ast.h"
+#include "ps_ast_debug.h"
+#include "ps_ast_test.h"
 #include "ps_buffer.h"
 #include "ps_compiler.h"
 #include "ps_config.h"
@@ -38,13 +27,13 @@
 #include "ps_system.h"
 #include "ps_version.h"
 
-// #define DEBUGGER_SOURCE "examples/000-minimal.pas"
-#define DEBUGGER_SOURCE "examples/001-hello.pas"
-// #define DEBUGGER_SOURCE "examples/002-test-expr1.pas"
-// #define DEBUGGER_SOURCE "examples/005-first.pas"
+// #define DEBUG_SOURCE "examples/000-minimal.pas"
+// #define DEBUG_SOURCE "examples/001-hello.pas"
+#define DEBUG_SOURCE "examples/002-test-expr1.pas"
+// #define DEBUG_SOURCE "examples/005-first.pas"
 // TODO needs variable handle management
-// #define DEBUGGER_SOURCE "examples/007-strings2.pas"
-// #define DEBUGGER_SOURCE "examples/010-operators.pas"
+// #define DEBUG_SOURCE "examples/007-strings2.pas"
+// #define DEBUG_SOURCE "examples/010-operators.pas"
 
 // Runtime options
 bool bool_eval = false;
@@ -53,7 +42,6 @@ bool range_check = true;
 
 // Others options
 bool ast_test = false;
-bool run = false;
 bool debug = false;
 bool dump_buffer = false;
 bool dump_symbols = false;
@@ -62,37 +50,39 @@ bool memory = false;
 bool trace = false;
 bool verbose = false;
 
-ps_ast_block *system_block = NULL;
-ps_string_heap *string_heap = NULL;
-ps_compiler *compiler = NULL;
-ps_ast_block *program = NULL;
-ps_interpreter *interpreter = NULL;
+// clang-format off
+ps_ast_block   *system_block = NULL;
+ps_string_heap *string_heap  = NULL;
+ps_compiler    *compiler     = NULL;
+ps_ast_block   *program      = NULL;
+ps_interpreter *interpreter  = NULL;
+// clang-format on
 
-void banner(FILE *out)
+void banner(FILE *output)
 {
-    fprintf(out, "PascalScript v%s (%d bits) - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION, PS_BITNESS);
+    fprintf(output, "PascalScript v%s (%d bits) - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION, PS_BITNESS);
 }
 
-void usage(char *program_name)
+void usage(FILE *output, char *program_name)
 {
-    banner(stderr);
-    fprintf(stderr, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
-    fprintf(stderr, "Runtime options:\n");
-    fprintf(stderr, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
-    fprintf(stderr, "  -i : flips I/O error checking (default: true, ${I})\n");
-    fprintf(stderr, "  -r : flips range checking (default: true, {$R})\n");
-    fprintf(stderr, "Other options:\n");
-    fprintf(stderr, "  -a : launch AST tests\n");
-    fprintf(stderr, "  -c : display configuration and exit\n");
-    fprintf(stderr, "  -d : debug (more verbose trace)\n");
-    fprintf(stderr, "  -h : display this help message and exit\n");
-    fprintf(stderr, "  -m : display memory usage at end\n");
-    fprintf(stderr, "  -n : do not execute program, just parse source code\n");
-    fprintf(stderr, "  -s : dump symbols at initialization and termination\n");
-    fprintf(stderr, "  -t : trace execution\n");
-    fprintf(stderr, "  -u : dump source buffer after loading\n");
-    fprintf(stderr, "  -v : verbose (display banner and other infos)\n");
-    fprintf(stderr, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUGGER_SOURCE);
+    banner(output);
+    fprintf(output, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
+    fprintf(output, "Runtime options:\n");
+    fprintf(output, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
+    fprintf(output, "  -i : flips I/O error checking (default: true, ${I})\n");
+    fprintf(output, "  -r : flips range checking (default: true, {$R})\n");
+    fprintf(output, "Other options:\n");
+    fprintf(output, "  -a : launch AST tests\n");
+    fprintf(output, "  -c : display configuration and exit\n");
+    fprintf(output, "  -d : debug (more verbose trace)\n");
+    fprintf(output, "  -h : display this help message and exit\n");
+    fprintf(output, "  -m : display memory usage at end\n");
+    fprintf(output, "  -n : do not execute program, just parse source code\n");
+    fprintf(output, "  -s : dump symbols at initialization and termination\n");
+    fprintf(output, "  -t : trace execution\n");
+    fprintf(output, "  -u : dump source buffer after loading\n");
+    fprintf(output, "  -v : verbose (display banner and other infos)\n");
+    fprintf(output, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUG_SOURCE);
 }
 
 int get_options(int argc, char *argv[])
@@ -110,7 +100,7 @@ int get_options(int argc, char *argv[])
             ps_config_report(stdout);
             exit(EXIT_SUCCESS);
         case 'h':
-            usage(argv[0]);
+            usage(stdout, argv[0]);
             exit(EXIT_SUCCESS);
         case 'b':
             bool_eval = !bool_eval;
@@ -153,7 +143,7 @@ int get_options(int argc, char *argv[])
             arg++;
             break;
         default:
-            usage(argv[0]);
+            usage(stderr, argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -209,9 +199,9 @@ bool execute()
     bool ok = false;
 
     interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    if (trace)
+    if (verbose)
         interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    else if (debug)
+    else if (trace)
         interpreter->logger->debug_level = PS_DEBUG_TRACE;
 
     /* List symbols BEFORE */
@@ -266,16 +256,30 @@ int main(int argc, char *argv[])
     }
     else
     {
-        program_file = DEBUGGER_SOURCE;
+        program_file = DEBUG_SOURCE;
         if (program_file != NULL)
-            snprintf(source_file, sizeof(source_file) - 1, "%s/../%s", current_path, program_file);
+        {
+            // char *executable_path = realpath(argv[0], NULL);
+            char self[128] = {0};
+            int nchar = readlink("/proc/self/exe", self, sizeof(self));
+            if (nchar < 0 || nchar >= (int)sizeof(self))
+            {
+                fprintf(stderr, "/proc/self/exe readlink : %s\n", self);
+                exit(EXIT_FAILURE);
+            }
+            char *separator = strrchr(self, '/');
+            if (separator != NULL)
+                *separator = '\0';
+            snprintf(source_file, sizeof(source_file), "%s/../%s", /*executable_path*/ self, program_file);
+            // free(executable_path);
+        }
         else
             source_file[0] = '\0';
     }
     if (strlen(source_file) == 0)
     {
         fprintf(stderr, "No file to run!\n");
-        usage(argv[0]);
+        usage(stderr, argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -299,7 +303,8 @@ int main(int argc, char *argv[])
 
     /* Initialize compiler */
     system_block = ps_system_alloc();
-    ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_block->symbols);
+    if (verbose)
+        ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_block->symbols);
     string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
 
     compiler = ps_compiler_alloc(system_block, string_heap);
@@ -316,11 +321,16 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Compiled %s!\n", source_file);
     }
 
-    ps_symbol_table_dump(stderr, "SYMBOL TABLE FOR PROGRAM", program->symbols);
-    printf("AST DUMP for %s:\n", source_file);
-    ps_ast_debug_node(0, (ps_ast_node *)program);
+    if (program != NULL && program->symbols != NULL)
+        ps_symbol_table_dump(stderr, "SYMBOL TABLE FOR PROGRAM", program->symbols);
 
-    if (run)
+    if (verbose)
+    {
+        printf("AST DUMP for %s:\n", source_file);
+        ps_ast_debug_node(0, (ps_ast_node *)program);
+    }
+
+    if (exec)
     {
         /* Initialize interpreter */
         interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
@@ -330,7 +340,7 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         /* Run program */
-        execute();
+        ok = execute();
         /* Terminate interpreter */
         interpreter = ps_interpreter_free(interpreter);
     }
@@ -338,6 +348,7 @@ int main(int argc, char *argv[])
     /* Terminate compiler & system */
     compiler = ps_compiler_free(compiler);
     system_block = (ps_ast_block *)ps_ast_free_block(system_block);
+    string_heap = ps_string_heap_free(string_heap);
 
     if (memory)
         ps_memory_debug(stderr);

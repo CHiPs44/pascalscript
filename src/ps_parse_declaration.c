@@ -225,7 +225,8 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
         }
     } while (loop);
 
-    ps_symbol_table_dump(stderr, "BLOCK SYMBOL TABLE", block->symbols);
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
+        ps_symbol_table_dump(stderr, "BLOCK SYMBOL TABLE", block->symbols);
 
     ps_ast_statement_list *statement_list = NULL;
     if (!ps_parse_compound_statement(compiler, block, &statement_list))

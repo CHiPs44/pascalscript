@@ -18,6 +18,8 @@
 #include "ps_readall.h"
 #include "ps_tools.h"
 
+bool ps_buffer_debug_flag = false;
+
 bool ps_buffer_alloc_lines(ps_buffer *buffer)
 {
     buffer->line_starts = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count, sizeof(char *));
@@ -156,8 +158,8 @@ static int ps_buffer_count_lines(const char *text)
 static bool ps_buffer_index_lines(ps_buffer *buffer)
 {
     int line = 0;
-    char *text = buffer->text;
-    char *start = text;
+    char *start = buffer->text;
+    char *text = start;
     char current_char;
     ptrdiff_t line_length;
 
@@ -167,7 +169,7 @@ static bool ps_buffer_index_lines(ps_buffer *buffer)
         // At EOL?
         if (current_char == '\r' || current_char == '\n')
         {
-            line_length = text - start + 1;
+            line_length = text - start; // + 1;
             if (line_length > PS_BUFFER_MAX_COLUMNS)
             {
                 ps_buffer_free_lines(buffer);
@@ -329,7 +331,6 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
             "              |         1         2         3         4         5         6         7         8|\n");
     fprintf(output,
             "Line   (Len)  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
-    //               1234567890123456 => 16 chars
     for (int line_number = from_line; line_number < from_line + line_count - 1; line_number += 1)
     {
         if (line_number >= buffer->line_count)
@@ -337,11 +338,11 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
         if (buffer->line_lengths[line_number] > 80)
             length = 80;
         else
-            length = buffer->line_lengths[line_number];
+            length = 1 + buffer->line_lengths[line_number];
         ps_strscpy(line, buffer->line_starts[line_number], length);
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
-    return 16;
+    return 15;
 }
 
 char ps_buffer_peek_char(const ps_buffer *buffer)
@@ -370,6 +371,9 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     }
     // we point to current char already
     buffer->current_char = buffer->line_starts[buffer->current_line][buffer->current_column];
+    if (ps_buffer_debug_flag)
+        fprintf(stderr, "BUFFER: CURRENT line=%5d, column=%5d, current_char = '%-5s'\n", buffer->current_line,
+                buffer->current_column, ps_buffer_debug_char(buffer->current_char));
     // advance to next char
     buffer->current_column += 1;
     // at end of line?
@@ -381,6 +385,7 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     }
     if (buffer->current_line >= buffer->line_count)
     {
+        // at EOF
         buffer->next_char = '\0';
     }
     else
@@ -388,7 +393,13 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
         if (buffer->line_lengths[buffer->current_line] == 0)
             buffer->next_char = '\0';
         else if (buffer->current_line < buffer->line_count)
+        {
             buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
+            if (ps_buffer_debug_flag)
+                fprintf(stderr, "BUFFER: NEXT    line=%5d, column=%5d, current_char = '%-5s', next_char = '%-5s'\n",
+                        buffer->current_line, buffer->current_column, ps_buffer_debug_char(buffer->current_char),
+                        ps_buffer_debug_char(buffer->next_char));
+        }
         else
             buffer->next_char = '\0';
     }

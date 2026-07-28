@@ -215,8 +215,8 @@ ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_a
 {
     fprintf(stderr, "DEBUG\tPS_AST_ASSIGNMENT\tCreating assignment node at line %u, column %u, lvalue=%p, rvalue=%p\n",
             line, column, (void *)lvalue, (void *)rvalue);
-    assert(lvalue != NULL && ps_ast_node_check_group(lvalue, PS_AST_LVALUE));
-    assert(rvalue != NULL && ps_ast_node_check_group(rvalue, PS_AST_EXPRESSION));
+    assert(lvalue != NULL && ps_ast_node_check_group((ps_ast_node *)lvalue, PS_AST_GROUP_LVALUE));
+    assert(rvalue != NULL && ps_ast_node_check_group((ps_ast_node *)rvalue, PS_AST_EXPRESSION));
     ps_ast_assignment *assignment = (ps_ast_assignment *)ps_ast_create_node(
         line, column, PS_AST_STATEMENT, PS_AST_ASSIGNMENT, sizeof(ps_ast_assignment));
     if (assignment == NULL)

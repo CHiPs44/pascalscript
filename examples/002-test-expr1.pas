@@ -8,12 +8,14 @@ Var
     I, J: Integer;
     R: Real;
 Begin
+    // WriteLn('Example 002 - Test expression #1');
+    // WriteLn('--------------------------------');
     // I := -1;
     // I := 1 + 2 * 3 - 4; // Should evaluate to 3
     // J := (1 + 2) div (3 - 4); // Should evaluate to -3
     // R := 10.0 / 4.0; // Should evaluate to 2.5
     R := Cos(0.0); // Should evaluate to 1.0
-    // WriteLn(I);
-    // WriteLn(J);
-    // WriteLn(R);
+    // WriteLn('I=', I);
+    // WriteLn('J=', J);
+    WriteLn('R=', R);
 End.
