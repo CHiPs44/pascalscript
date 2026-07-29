@@ -1,4 +1,4 @@
-(* 
+(*
     Free Pascal EBNF, written from http://downloads.freepascal.org/fpc/docs-pdf/ref.pdf
     EBNF syntax from ???
     Other attempt: https://github.com/rochus-keller/FreePascal/blob/master/syntax/FreePascal.ebnf
@@ -23,10 +23,10 @@ bin_digit_sequence  =   bin_digit , { bin_digit } ;
 oct_digit_sequence  =   oct_digit , { oct_digit } ;
 dec_digit_sequence  =   dec_digit , { dec_digit } ;
 hex_digit_sequence  =   hex_digit , { hex_digit } ;
-unsigned_integer    =   dec_digit_sequence 
-                    |   '%' , bin_digit_sequence 
-                    |   '&' , oct_digit_sequence 
-                    |   '$' , hex_digit_sequence 
+unsigned_integer    =   dec_digit_sequence
+                    |   '%' , bin_digit_sequence
+                    |   '&' , oct_digit_sequence
+                    |   '$' , hex_digit_sequence
                     ;
 unsigned_real       =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
 sign                =   '+' | '-' ;
@@ -62,20 +62,20 @@ real_constant           =   [ sign ] , unsigned_real;
 
 type_declaration        =   identifier , '=' , type ;
 type                    =   simple_type
-                        |   string_type 
+                        |   string_type
                         |   structured_type
                         |   pointer_type
                         |   procedural_type
                         ;
 simple_type             =   ordinal_type | real_type | boolean_type ;
 real_type               =   real_type_identifier ;
-real_type_identifier    =   'REAL' ;   
+real_type_identifier    =   'REAL' ;
 ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR' ;
 boolean_type            =   'BOOLEAN' ;
 string_type             =   'STRING' , [ '[' , unsigned_integer | constant_expression , ']' ] ;
 enumerated_type         =   '(' , identifier_list , ')'
                         ;
-structured_type         =   array_type | record_type | set_type | file_type | pointer_type
+structured_type         =   enumerated_type | array_type | record_type | set_type | file_type | pointer_type
                         ;   (* class_type | object_type | interface_type | variant_type *)
 array_type              =   'ARRAY' , '[' , [ index_list ] , ']' , 'OF' , type
                         ;
@@ -90,7 +90,14 @@ index_list              =   subrange_type , { ',' , subrange_type }
                         ;
 subrange_type           =   constant , '..' , constant
                         ;
-identifier_list         =   identifier , { ',' , identifier } 
+identifier_list         =   identifier , { ',' , identifier }
+                        ;
+
+record_type             =   'RECORD' , [ field_list ] , [ ';' ] , 'END'
+                        ;
+field_list              =   record_section , { ';' , record_section }
+                        ;
+record_section          =   [ identifier_list , ':' ] , type
                         ;
 
 (* omitted: assigned_enum_list, hint_directives, ansi strings, ... *)
@@ -111,10 +118,8 @@ factor                  =   '(' , expression , ')'
                         |   unsigned_constant
                         |   'NOT' , factor
                         |   sign , factor
-                        |   set_constructor
-                        |   value_typecast
-                        |   address_factor
                         ;
+(* omitted: set_constructor, value_typecast, address_factor*)
 
 variable_reference      =   identifier ;
 
@@ -136,6 +141,7 @@ simple_statement        =   assignment_statement
                         |   procedure_statement
                         |   'GOTO' , label
                         ;
+
 (* omitted: += -= *= /= *)
 assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) , ':=' , expression
                         ;
@@ -144,7 +150,7 @@ procedure_statement     =   ( procedure_identifier | variable_reference ) , [ ac
 ;
 procedure_identifier    =   identifier ;
 
-(* omitted: WITH, EXCEPTION *)
+(* omitted: with, exception *)
 structured_statement    =   compound_statement
                         |   conditional_statement
                         |   repetitive_statement
@@ -160,7 +166,7 @@ conditional_statement   =   if_statement
 if_statement            =   'IF' , expression , 'THEN' , statement , [ 'ELSE' , statement ]
                         ;
 case_statement          =   'CASE' , expression , 'OF' ,
-                        |       constant , [ '..' , constant ] , { ',' , constant , [ '..' , constant ] } , ':' , statement , 
+                        |       constant , [ '..' , constant ] , { ',' , constant , [ '..' , constant ] } , ':' , statement ,
                                 [ ( 'ELSE' | 'OTHERWISE' ) , statement_list , [ ';' ] ] ,
                             'END'
                         ;
@@ -189,8 +195,8 @@ unit                    =   'UNIT' , identifier , ';' ,
                             implementation_part ,
                             '.'
                         ;
-interface_part          =   'INTERFACE' , 
-                            [ uses_clause ] , 
+interface_part          =   'INTERFACE' ,
+                            [ uses_clause ] ,
                             declaration_part
                         ;
 implementation_part     =   'IMPLEMENTATION' , ';' ,

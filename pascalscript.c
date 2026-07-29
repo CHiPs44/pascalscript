@@ -332,6 +332,8 @@ int main(int argc, char *argv[])
 
     if (exec)
     {
+        if (verbose)
+            fprintf(stderr, "Executing %s...\n", source_file);
         /* Initialize interpreter */
         interpreter = ps_interpreter_alloc(compiler->system, compiler->string_heap, range_check, bool_eval, io_check);
         if (interpreter == NULL)

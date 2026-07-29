@@ -22,13 +22,13 @@ bool ps_buffer_debug_flag = false;
 
 bool ps_buffer_alloc_lines(ps_buffer *buffer)
 {
-    buffer->line_starts = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count, sizeof(char *));
+    buffer->line_starts = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count + 1, sizeof(char *));
     if (buffer->line_starts == NULL)
     {
         buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     }
-    buffer->line_lengths = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count, sizeof(uint16_t));
+    buffer->line_lengths = ps_memory_calloc(PS_MEMORY_BUFFER, buffer->line_count + 1, sizeof(uint16_t));
     if (buffer->line_lengths == NULL)
     {
         ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
