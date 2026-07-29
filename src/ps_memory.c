@@ -26,10 +26,6 @@ size_t freed[PS_MEMORY_CLASS_COUNT] = {0};
 
 bool ps_memory_debug_enabled = false;
 
-/**
- * @brief Allocate and count size allocated
- * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
- */
 void *ps_memory_malloc(ps_memory_class memory_class, size_t size)
 {
     mallocations[memory_class] += 1;
@@ -51,10 +47,6 @@ void *ps_memory_malloc(ps_memory_class memory_class, size_t size)
     return ptr;
 }
 
-/**
- * @brief Allocate count elements of size bytes each, all initialized to 0.
- * @return pointer to allocated memory or NULL on failure (errno=ENOMEM)
- */
 void *ps_memory_calloc(ps_memory_class memory_class, size_t count, size_t size)
 {
     callocations[memory_class] += 1;
@@ -75,10 +67,6 @@ void *ps_memory_calloc(ps_memory_class memory_class, size_t count, size_t size)
     return ptr;
 }
 
-/**
- * @brief Change the size of the memory block pointed to by ptr to size bytes.
- * @return pointer to reallocated memory or NULL on failure (errno=ENOMEM)
- */
 void *ps_memory_realloc(ps_memory_class memory_class, void *ptr, size_t size)
 {
     void *new = NULL;
@@ -104,9 +92,6 @@ void *ps_memory_realloc(ps_memory_class memory_class, void *ptr, size_t size)
     return new;
 }
 
-/**
- * @brief Deallocate memory previously allocated by malloc, calloc or realloc.
- */
 void ps_memory_free(ps_memory_class memory_class, void *ptr)
 {
     frees[memory_class] += 1;
@@ -120,28 +105,34 @@ void ps_memory_free(ps_memory_class memory_class, void *ptr)
     free(ptr);
 }
 
-/**
- * @brief Print memory allocation statistics to the specified output stream.
- * If output is NULL, it defaults to stderr.
- */
 void ps_memory_debug(FILE *output)
 {
     if (output == NULL)
         output = stderr;
+    // clang-format off
+    fprintf(output, "┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(output, "┃                  ┃        MALLOC       ┃        CALLOC       ┃       REALLOC       ┃        TOTAL       ┃         FREE         ┃\n");
+    fprintf(output, "┃ CLASS            ┃ CALLS    ┃ BYTES    ┃ CALLS    ┃ BYTES    ┃ CALLS    ┃ BYTES    ┃ CALLS    ┃ BYTES   ┃ CALLS     ┃ BYTES    ┃\n");
+    fprintf(output, "┣━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    //                 1234567890123456   12345678   12345678   12345678   12345678   12345678   12345678   12345678   12345678   12345678   12345678
+    // clang-format on
     for (int memory_class = 0; memory_class < PS_MEMORY_CLASS_COUNT; memory_class += 1)
     {
-        fprintf(output, "========== %s ==========\n", memory_class_names[memory_class]);
         size_t total_allocations =
             mallocations[memory_class] + callocations[memory_class] + reallocations[memory_class];
         size_t total_allocated = mallocated[memory_class] + callocated[memory_class] + reallocated[memory_class];
-        fprintf(output, "        | calls    | bytes    |\n");
-        fprintf(output, "        |----------|----------|\n");
-        fprintf(output, "malloc  | %8zu | %8zu |\n", mallocations[memory_class], mallocated[memory_class]);
-        fprintf(output, "calloc  | %8zu | %8zu |\n", callocations[memory_class], callocated[memory_class]);
-        fprintf(output, "realloc | %8zu | %8zu |\n", reallocations[memory_class], reallocated[memory_class]);
-        fprintf(output, "        |----------|----------|\n");
-        fprintf(output, "totals  | %8zu | %8zu |\n", total_allocations, total_allocated);
-        fprintf(output, "        |----------|----------|\n");
-        fprintf(output, "free    | %8zu |        - |\n", frees[memory_class]);
+        // clang-format off
+        fprintf(output, "┃ %-16s ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃\n",
+                memory_class_names[memory_class],
+                mallocations[memory_class]  , mallocated[memory_class],
+                callocations[memory_class]  , callocated[memory_class],
+                reallocations[memory_class] , reallocated[memory_class],
+                total_allocations           , total_allocated,
+                frees[memory_class]         , freed[memory_class]
+        );
+        // clang-format on
     }
+    // clang-format off
+    fprintf(output, "┗━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━┛\n");
+    // clang-format on
 }

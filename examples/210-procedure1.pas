@@ -3,19 +3,19 @@
     SPDX-FileCopyrightText: 2025 Christophe 'CHiPs' Petit <chips44@gmail.com>
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
-Program Example21Procedure1;
+Program Example210Procedure1;
 
 Var
     Variable1, I: Integer;
     Variable2: Integer;
 
-{ 2 parameters ot the same type }
+{ 2 parameters of the same type }
 Procedure Procedure1(Parameter1, Parameter2: Integer);
 Var
-    Variable1: Integer; { local variable with the same name as a global variable }
+    Variable1: Integer; { local variable with the name of a global variable }
 Begin
     Variable1 := Parameter1 * 2 + Parameter2;
-    WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ' Variable1=', Variable1);
+    WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ', Parameter2=', Parameter2, ' Variable1=', Variable1);
 End;
 
 { 1 parameter with the same name as a global variable, another to test if all this works fine }

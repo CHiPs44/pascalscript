@@ -44,9 +44,10 @@ bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_k
 ps_ast_node *ps_ast_create_node(uint16_t line, uint16_t column, ps_ast_node_group group, ps_ast_node_kind kind,
                                 size_t size)
 {
-    ps_ast_node *node = ps_memory_calloc(PS_MEMORY_AST, 1, size);
+    ps_ast_node *node = ps_memory_malloc(PS_MEMORY_AST, size);
     if (node == NULL)
         return NULL;
+    memset(node, 0, size);
     node->line = line;
     node->column = column;
     node->group = group;
