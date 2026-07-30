@@ -316,15 +316,17 @@ bool ps_ast_execute_procedure_write_or_writeln(ps_interpreter *interpreter, cons
         if (procedure_call->args[i] == NULL)
             continue;
         ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+        int16_t width = procedure_call->formats[i].width;
+        int16_t precision = procedure_call->formats[i].precision;
         if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
         ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Argument %zu: %s", i,
-                             ps_value_get_display_string(&arg_value.value, 0, 0));
+                             ps_value_get_display_string(&arg_value.value, width, precision));
         if (procedure_call->executable == &ps_system_procedure_write &&
-            !ps_procedure_write(interpreter, stdout, &arg_value.value, 0, 0))
+            !ps_procedure_write(interpreter, stdout, &arg_value.value, width, precision))
             return false;
         if (procedure_call->executable == &ps_system_procedure_writeln &&
-            !ps_procedure_write(interpreter, stdout, &arg_value.value, 0, 0))
+            !ps_procedure_write(interpreter, stdout, &arg_value.value, width, precision))
             return false;
     }
     if (procedure_call->executable == &ps_system_procedure_writeln)
@@ -461,8 +463,18 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
                                                 "RANDOM function expects 0 or 1 argument");
     }
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
-                                            "System function call %s not implemented", function_call->executable->name);
+    // all other functions have 1 argument
+    if (function_call->n_args != 1)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
+                                                "Function %s expects 1 argument", function_call->executable->name);
+    ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
+                              .kind = PS_AST_LITERAL_VALUE,
+                              .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+    if (!ps_ast_eval_expression(interpreter, function_call->args[0], &ast_value))
+        return false;
+    ps_function_1arg function = function_call->executable->value->data.x->func_1arg;
+    ps_error error = function(interpreter, &ast_value.value, &result->value);
+    return PS_ERROR_NONE == error;
 }
 
 bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
