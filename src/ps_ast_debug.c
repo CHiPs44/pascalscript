@@ -16,7 +16,7 @@
 #include "ps_value.h"
 
 /** @brief Global flag to enable/disable AST debug output */
-bool ps_ast_debug = true;
+bool ps_ast_debug = false;
 bool ps_ast_debug_prefix = false;
 
 static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOWN",

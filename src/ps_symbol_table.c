@@ -200,15 +200,15 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
     //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
     fprintf(
         output,
-        "┏━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
+        "┏━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┓\n");
     fprintf(
         output,
-        "┃      #┃Hash  /  index┃Name                           ┃Kind      ┃Type                ┃Value               "
+        "┃      #┃Hash    ┃Index┃Name                           ┃Kind      ┃Type                ┃Value               "
         "           ┃\n");
     fprintf(
         output,
-        "┣━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
+        "┣━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┫\n");
     for (ssize_t i = 0; i < table->table_size; i++)
     {
@@ -230,15 +230,15 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
                 }
                 else
                     value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
-                fprintf(output, "┃%c%c%05d┃%08x:%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : 's',
-                        symbol->allocated ? 'A' : 'a', i, hash, hash % table->table_size, PS_IDENTIFIER_LEN,
+                fprintf(output, "┃%c%c%05d┃%08x┃%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : ' ',
+                        symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN,
                         symbol->name, kind_name, type_name, PS_IDENTIFIER_LEN, value);
             }
         }
     }
     fprintf(
         output,
-        "┗━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
+        "┗━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, free + used);
 }

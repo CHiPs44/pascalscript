@@ -240,8 +240,9 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
-    fprintf(stderr, "DEBUG\tLValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(lvalue->kind),
-            (void *)lvalue);
+    if (compiler->debug >= PS_DEBUG_VERBOSE)
+        fprintf(stderr, "DEBUG\tLValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(lvalue->kind),
+                (void *)lvalue);
     ps_ast_debug_node(1, (ps_ast_node *)lvalue);
 
     // ':='
@@ -256,11 +257,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
     if (assignment == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    fprintf(stderr, "DEBUG\tCreated assignment node at %p, assignment=%p\n", (void *)(assignment),
-            (void *)assignment_ptr);
     *assignment_ptr = assignment;
-    fprintf(stderr, "DEBUG\tAssignment node is of kind '%s' at %p\n",
-            ps_ast_node_get_kind_name((*assignment_ptr)->kind), (void *)(*assignment_ptr));
     PARSE_END("OK")
 }
 

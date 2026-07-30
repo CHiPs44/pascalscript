@@ -438,13 +438,16 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
 bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
 {
     assert(function_call != NULL);
+    assert(function_call->group == PS_AST_EXPRESSION);
     assert(function_call->kind == PS_AST_FUNCTION_CALL);
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "FUNCTION CALL %s", function_call->executable->name);
     result->value.type = &ps_system_none;
     result->value.data = (ps_value_data){0};
-    ps_interpreter_set_message(interpreter, "Function calls not implemented yet");
-    interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-    return false;
+    // if (function_call->executable->system)
+    // {
+    //     return ps_ast_execute_function_call_system(interpreter, function_call, result);
+    // }
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "Function call not implemented");
 }
 
 bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result)
@@ -511,9 +514,9 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     case PS_AST_FUNCTION_CALL:
         const ps_ast_call *function_call = (const ps_ast_call *)expression;
         ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Function call: %s", function_call->executable->name);
-        ps_interpreter_set_message(interpreter, "Function calls not implemented yet");
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
+        if (!ps_ast_execute_function_call(interpreter, function_call, result))
+            return false;
+        break;
     default:
         ps_interpreter_set_message(interpreter, "Unexpected expression kind %s (%d)\n",
                                    ps_ast_node_get_kind_name(expression->kind), expression->kind);

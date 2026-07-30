@@ -491,8 +491,6 @@ bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **e
         ps_ast_value *literal_value = ps_ast_create_literal_value(start_line, start_column, factor_value);
         if (literal_value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        fprintf(stderr, "FACTOR: value=");
-        ps_ast_debug_node(0, (ps_ast_node *)literal_value);
         *expression = (ps_ast_node *)literal_value;
     }
 
