@@ -514,6 +514,32 @@ cleanup:
     PARSE_END("OK")
 }
 
+bool ps_parse_randomize(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call)
+{
+    PARSE_BEGIN("EXECUTABLE", "RANDOMIZE")
+
+    ps_ast_node *args[1] = {0};
+    uint16_t n_args = 0;
+
+    // Even whenb Randomize is called without argument, if can be called with parenthesis
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
+    {
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
+        {
+            if (!ps_parse_expression(compiler, block, &args[0]))
+                TRACE_ERROR("EXPRESSION")
+            n_args = 1;
+        }
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
+    }
+
+    *call = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL, &ps_system_procedure_randomize, n_args,
+                               n_args == 0 ? NULL : args, NULL);
+
+    PARSE_END("OK")
+}
+
 /**
  * Parse procedure or function call, be it system or user defined:
  *    IDENTIFIER [ '(' actual_parameter [ ',' actual_parameter ]* ')' ]
@@ -542,9 +568,9 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
     }
     else if (executable == &ps_system_procedure_randomize)
     {
-        // Randomize
-        ps_compiler_set_message(compiler, "TODO: call RANDOMIZE", executable->name);
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+        // Randomize has 0 or 1 argument
+        if (!ps_parse_randomize(compiler, block, call))
+            TRACE_ERROR("RANDOMIZE");
     }
     else if (executable->system)
     {

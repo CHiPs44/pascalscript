@@ -214,7 +214,8 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 ps_ast_assignment *ps_ast_create_assignment(uint16_t line, uint16_t column, ps_ast_variable *lvalue,
                                             ps_ast_node *rvalue)
 {
-    // fprintf(stderr, "DEBUG\tPS_AST_ASSIGNMENT\tCreating assignment node at line %u, column %u, lvalue=%p, rvalue=%p\n",
+    // fprintf(stderr, "DEBUG\tPS_AST_ASSIGNMENT\tCreating assignment node at line %u, column %u, lvalue=%p,
+    // rvalue=%p\n",
     //         line, column, (void *)lvalue, (void *)rvalue);
     assert(lvalue != NULL && ps_ast_node_check_group((ps_ast_node *)lvalue, PS_AST_GROUP_LVALUE));
     assert(rvalue != NULL && ps_ast_node_check_group((ps_ast_node *)rvalue, PS_AST_EXPRESSION));
@@ -378,16 +379,21 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
         return NULL;
     call->executable = executable;
     call->n_args = n_args;
-    call->args = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_node *));
-    if (call->args == NULL)
-        return (ps_ast_call *)ps_ast_free_call(call);
-    memcpy(call->args, args, n_args * sizeof(ps_ast_node *));
-    if (formats != NULL)
+    call->args = NULL;
+    call->formats = NULL;
+    if (n_args > 0)
     {
-        call->formats = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_format));
-        if (call->formats == NULL)
+        call->args = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_node *));
+        if (call->args == NULL)
             return (ps_ast_call *)ps_ast_free_call(call);
-        memcpy(call->formats, formats, n_args * sizeof(ps_ast_format));
+        memcpy(call->args, args, n_args * sizeof(ps_ast_node *));
+        if (formats != NULL)
+        {
+            call->formats = ps_memory_calloc(PS_MEMORY_AST, n_args, sizeof(ps_ast_format));
+            if (call->formats == NULL)
+                return (ps_ast_call *)ps_ast_free_call(call);
+            memcpy(call->formats, formats, n_args * sizeof(ps_ast_format));
+        }
     }
     return call;
 }

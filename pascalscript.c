@@ -48,7 +48,7 @@ bool dump_symbols = false;
 bool exec = true;
 bool memory = false;
 bool trace = false;
-bool verbose = false;
+bool verbose = true; // false;
 
 // clang-format off
 ps_ast_block   *system_block = NULL;

@@ -5,14 +5,13 @@
 *)
 Program Example002TestExpr1;
 Var
-    // I: Unsigned;
+    I: Unsigned;
     // J: Integer;
     // R: Real;
 Begin
     Randomize;
-    // I := Random(6);
-    // WriteLn(I);
-
+    I := Random(6);
+    WriteLn('I=', I);
     // WriteLn('Example 002 - Test expression #1');
     // WriteLn('--------------------------------');
     // I := -1;

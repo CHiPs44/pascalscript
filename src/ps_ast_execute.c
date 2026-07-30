@@ -364,12 +364,9 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
             return ps_procedure_randomize(interpreter, &arg_value.value);
         }
         else
-        {
-            ps_interpreter_set_message(interpreter, "RANDOMIZE expects 0 or 1 argument, got %zu",
-                                       procedure_call->n_args);
-            interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-            return false;
-        }
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_PARAMETER_COUNT_MISMATCH,
+                                                    "RANDOMIZE expects 0 or 1 argument, got %zu",
+                                                    procedure_call->n_args);
     }
     else
     {
@@ -435,6 +432,39 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     return ok;
 }
 
+bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                         ps_ast_value *result)
+{
+    assert(function_call != NULL);
+    assert(function_call->group == PS_AST_EXPRESSION);
+    assert(function_call->kind == PS_AST_FUNCTION_CALL);
+    ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "SYSTEM FUNCTION CALL %s", function_call->executable->name);
+    if (function_call->executable == &ps_system_function_random)
+    {
+        if (function_call->n_args == 0)
+        {
+            if (!ps_function_random(interpreter, NULL, &result->value))
+                return false;
+        }
+        else if (function_call->n_args == 1)
+        {
+            ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
+                                      .kind = PS_AST_LITERAL_VALUE,
+                                      .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+            if (!ps_ast_eval_expression(interpreter, function_call->args[0], &ast_value))
+                return false;
+            ps_error error = ps_function_random(interpreter, &ast_value.value, &result->value);
+            if (error != PS_ERROR_NONE)
+                return false;
+            return true;
+        }
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
+                                                "RANDOM function expects 0 or 1 argument");
+    }
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
+                                            "System function call %s not implemented", function_call->executable->name);
+}
+
 bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
 {
     assert(function_call != NULL);
@@ -443,11 +473,12 @@ bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "FUNCTION CALL %s", function_call->executable->name);
     result->value.type = &ps_system_none;
     result->value.data = (ps_value_data){0};
-    // if (function_call->executable->system)
-    // {
-    //     return ps_ast_execute_function_call_system(interpreter, function_call, result);
-    // }
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "Function call not implemented");
+    if (function_call->executable->system)
+    {
+        return ps_ast_execute_function_call_system(interpreter, function_call, result);
+    }
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
+                                            "User Function call not implemented");
 }
 
 bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result)
