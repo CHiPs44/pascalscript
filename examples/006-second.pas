@@ -27,5 +27,5 @@ Begin
     R3 := FOO * BAR + BAZ;
     R4 := FOO + BAR * BAZ;
     WriteLn('R=', R, ', R1=', R1, ', R2=', R2, ', R3=', R3, ', R4=', R4);
-    FOO := 12;
+    // FOO := 12;
 End.
