@@ -89,7 +89,7 @@ void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
 
 void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable_simple)
 {
-    ps_ast_debug_line(margin, "{VARIABLE_SIMPLE: %s}\n", variable_simple->variable->name);
+    ps_ast_debug_line(margin, "{VARIABLE_SIMPLE: %s}", variable_simple->variable->name);
 }
 
 void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
@@ -208,6 +208,7 @@ void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
     ps_ast_debug_node(margin + 1, for_statement->start);
     ps_ast_debug_line(margin, "%s", for_statement->downto ? "DOWNTO" : "TO");
     ps_ast_debug_node(margin + 1, for_statement->end);
+    ps_ast_debug_line(margin, "DO");
     ps_ast_debug_statement_list(margin, for_statement->body);
 }
 

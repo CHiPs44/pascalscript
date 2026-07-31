@@ -10,6 +10,7 @@
 #include "ps_array.h"
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_compiler.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_executable.h"
@@ -22,13 +23,14 @@
 
 /**
  * Parse statement:
- *      compound_statement
- *      assignment_statement
- *      procedure_call_statement
- *      if_then_else_statement
- *      repeat_until_statement
- *      while_do_statement
- *      for_to_downto_do_statement
+ *  - compound: begin ... end
+ *  - assignment: variable := expression
+ *  - procedure call: procedure(arguments)
+ *  - conditional: if ... then ... else ...
+ *  - loops:
+ *     - repeat ... until ...
+ *     - while ... do ...
+ *     - for variable := start to/downto finish do ...
  */
 bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
@@ -640,6 +642,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     ps_ast_node *start = NULL;
     ps_ast_node *finish = NULL;
     bool downto = false;
+    ps_ast_node *statement = NULL;
     ps_ast_statement_list *body = NULL;
     ps_identifier identifier = {0};
 
@@ -648,26 +651,26 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     READ_NEXT_TOKEN
 
     // CONTROL_VARIABLE
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER);
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
     variable = ps_compiler_find_symbol(compiler, block, identifier, true);
     if (variable == NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-        RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE);
+        RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
     if (!ps_value_is_ordinal(variable->value))
         RETURN_ERROR(PS_ERROR_EXPECTED_ORDINAL)
     // start.type = variable->value->type;
     // finish.type = variable->value->type;
 
     // :=
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN);
+    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
     READ_NEXT_TOKEN
 
     // START VALUE
     if (!ps_parse_expression(compiler, block, &start))
-        TRACE_ERROR("START");
+        TRACE_ERROR("START")
 
     // TO | DOWNTO
     if (lexer->current_token.type == PS_TOKEN_TO)
@@ -683,15 +686,23 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
         TRACE_ERROR("FINISH");
 
     // DO
-    EXPECT_TOKEN(PS_TOKEN_DO);
+    EXPECT_TOKEN(PS_TOKEN_DO)
     READ_NEXT_TOKEN
 
-    if (!ps_parse_statement_or_compound_statement(compiler, block, &body))
-        TRACE_ERROR("STATEMENT_OR_COMPOUND")
+    if (!ps_parse_statement(compiler, block, &statement))
+        TRACE_ERROR("BODY")
+    if (PS_AST_STATEMENT_LIST==statement->kind)
+    {
+        body = (ps_ast_statement_list *)statement;
+    } else {
+        body = ps_ast_create_statement_list(statement->line, statement->column, 1);
+        body->statements[0] = statement;
+    }
 
     variable_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
     if (variable_node == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+
     *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto, body);
     if (*for_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -749,34 +760,6 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         for (size_t i = 0; i < count; i += 1)
             (*statement_list)->statements[i] = statements[i];
-    }
-
-    PARSE_END("OK")
-}
-
-/**
- * Parse statement or compound statement:
- *      statement_or_compound_statement = statement | compound_statement
- */
-bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_block *block,
-                                              ps_ast_statement_list **statement_list)
-{
-    PARSE_BEGIN("STATEMENT", "STATEMENT_OR_COMPOUND_STATEMENT");
-
-    if (lexer->current_token.type == PS_TOKEN_BEGIN)
-    {
-        if (!ps_parse_compound_statement(compiler, block, statement_list))
-            TRACE_ERROR("COMPOUND");
-    }
-    else
-    {
-        ps_ast_node **statement = NULL;
-        if (!ps_parse_statement(compiler, block, statement))
-            TRACE_ERROR("STATEMENT");
-        *statement_list = ps_ast_create_statement_list(start_line, start_column, 1);
-        if (*statement_list == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        (*statement_list)->statements[0] = *statement;
     }
 
     PARSE_END("OK")

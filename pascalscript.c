@@ -31,8 +31,9 @@
 // #define DEBUG_SOURCE "examples/001-hello.pas"
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
-#define DEBUG_SOURCE "examples/008-strings2.pas"
+// #define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/010-operators.pas"
+#define DEBUG_SOURCE "examples/024-for-do.pas"
 
 // Runtime options
 bool bool_eval = false;
@@ -298,7 +299,7 @@ int main(int argc, char *argv[])
 
     // trace = false;
     // debug = false;
-    // verbose = false;
+    verbose = true;
 
     /* Initialize compiler */
     system_block = ps_system_alloc();
@@ -326,7 +327,10 @@ int main(int argc, char *argv[])
     if (verbose)
     {
         printf("AST DUMP for %s:\n", source_file);
+        bool save = ps_ast_debug;
+        ps_ast_debug = true;
         ps_ast_debug_node(0, (ps_ast_node *)program);
+        ps_ast_debug = save;
     }
 
     if (exec)

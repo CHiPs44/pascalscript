@@ -29,6 +29,7 @@ void ps_ast_debug_execute(ps_interpreter *interpreter, ps_debug_level level, con
         va_start(args, format);
         fprintf(interpreter->logger->file, "%*s", interpreter->level * 2, " ");
         vfprintf(interpreter->logger->file, format, args); // NOSONAR
+        fprintf(interpreter->logger->file, "\n");
         va_end(args);
     }
 }
@@ -258,7 +259,7 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "End value: %s",
                          ps_value_get_display_string(&end_value.value, 0, 0));
 
-    if (!ps_interpreter_copy_value(interpreter, (const ps_value *)&start_value.value, variable_simple->variable->value))
+    if (!ps_interpreter_set_variable_value(interpreter, variable_simple, (const ps_value *)&start_value.value))
         return false;
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
                          ps_value_get_display_string(variable_simple->variable->value, 0, 0));
@@ -285,13 +286,18 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
             return false;
         bool range_check = interpreter->range_check;
         interpreter->range_check = false;
-        ps_error error =
-            for_statement->downto
-                ? ps_function_pred(interpreter, variable_simple->variable->value, variable_simple->variable->value)
-                : ps_function_succ(interpreter, variable_simple->variable->value, variable_simple->variable->value);
+        ps_value variable_value = {.allocated = false, .type = variable_simple->variable->value->type, .data = {0}};
+        if (!ps_interpreter_get_variable_value(interpreter, variable_simple, &variable_value))
+            return false;
+        ps_error error = for_statement->downto ? ps_function_pred(interpreter, &variable_value, &variable_value)
+                                               : ps_function_succ(interpreter, &variable_value, &variable_value);
         interpreter->range_check = range_check;
         if (error != PS_ERROR_NONE)
             return false;
+        if (!ps_interpreter_set_variable_value(interpreter, variable_simple, &variable_value))
+            return false;
+        ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
+                             ps_value_get_display_string(variable_simple->variable->value, 0, 0));
     } while (true);
 
     return true;

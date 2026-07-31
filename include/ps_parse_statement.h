@@ -29,7 +29,6 @@ extern "C"
     bool ps_parse_while_do                       (ps_compiler *compiler, ps_ast_block *block, ps_ast_while          **while_statement_ptr                    );
     bool ps_parse_for_do                         (ps_compiler *compiler, ps_ast_block *block, ps_ast_for            **for_statement_ptr                      );
     bool ps_parse_statement_list                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr, ps_token_type stop );
-    bool ps_parse_statement_or_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr                     );
     // clang-format on
 
 #ifdef __cplusplus
