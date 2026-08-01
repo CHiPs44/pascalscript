@@ -182,10 +182,14 @@ bool compile(const char *source_file)
 
     /* Compile program */
     if (verbose)
-        printf("=============================== BEGIN COMPILATION ==============================\n");
+        fprintf(stderr,"=============================== BEGIN COMPILATION ==============================\n");
     ok = ps_compiler_compile(compiler, &program);
+    if (ok)
+        fprintf(stderr,"Compilation OK\n");
+    fprintf(stderr,"Compiler error:   %d %s", compiler->error, ps_error_get_message(compiler->error));
+    fprintf(stderr,"         message: %s\n", compiler->message);
     if (verbose)
-        printf("================================ END COMPILATION ===============================\n");
+        fprintf(stderr,"================================ END COMPILATION ===============================\n");
 
     return ok;
 }
@@ -209,10 +213,10 @@ bool execute()
 
     /* Run program */
     if (verbose)
-        printf("================================ BEGIN EXECUTION ===============================\n");
+        fprintf(stderr,"================================ BEGIN EXECUTION ===============================\n");
     ok = ps_interpreter_run(interpreter, program);
     if (verbose)
-        printf("================================= END EXECUTION ================================\n");
+        fprintf(stderr,"================================= END EXECUTION ================================\n");
 
     /* List symbols AFTER */
     if (dump_symbols)
@@ -286,19 +290,19 @@ int main(int argc, char *argv[])
     if (verbose)
     {
         banner(stdout);
-        printf("Runtime options:\n");
-        printf(" - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
-        printf(" - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
-        printf(" - Range check       : $R%c\n", range_check ? '+' : '-');
-        printf("Current working directory: %s\n", current_path);
-        printf("Source file: %s\n", source_file);
+        fprintf(stderr,"Runtime options:\n");
+        fprintf(stderr," - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+        fprintf(stderr," - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
+        fprintf(stderr," - Range check       : $R%c\n", range_check ? '+' : '-');
+        fprintf(stderr,"Current working directory: %s\n", current_path);
+        fprintf(stderr,"Source file: %s\n", source_file);
     }
     free(current_path);
     current_path = NULL;
 
     // trace = false;
     // debug = false;
-    verbose = true;
+    // verbose = true;
 
     /* Initialize compiler */
     system_block = ps_system_alloc();
@@ -325,7 +329,7 @@ int main(int argc, char *argv[])
 
     if (verbose)
     {
-        printf("AST DUMP for %s:\n", source_file);
+        fprintf(stderr,"AST DUMP for %s:\n", source_file);
         bool save = ps_ast_debug;
         ps_ast_debug = true;
         ps_ast_debug_node(0, (ps_ast_node *)program);
