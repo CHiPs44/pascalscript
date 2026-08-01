@@ -314,7 +314,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
     PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
 
     size_t n_args = 0;
-    ps_ast_node *args[8] = {0};
+    ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
     ps_ast_format formats[PS_PARAMETERS_MAX] = {0};
     bool loop = true;
     int16_t width = 0;
@@ -323,62 +323,59 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is legal but is a no-op)
-    if (PS_TOKEN_NONE != ps_parser_expect_statement_end_token(compiler->parser))
+    if (PS_TOKEN_NONE == ps_parser_expect_statement_end_token(compiler->parser))
     {
-        if (newline)
-            fprintf(stdout, "\n");
-        PARSE_END("EMPTY1");
-    }
-    EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-    READ_NEXT_TOKEN
-    // "Write[Ln]()"?
-    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-    {
-        // if (mode == MODE_EXEC && newline)
-        //     fprintf(stdout, "\n");
+        EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
         READ_NEXT_TOKEN
-        loop = false;
-    }
-
-    while (loop)
-    {
-        if (compiler->debug >= PS_DEBUG_VERBOSE)
-            fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
-        if (!ps_parse_expression(compiler, block, &expression))
-            TRACE_ERROR("EXPRESSION")
-        // retrieve string/numeric format
-        width = 0;
-        precision = 0;
-        if (lexer->current_token.type == PS_TOKEN_COLON)
+        // "Write[Ln]()"?
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
+            // if (mode == MODE_EXEC && newline)
+            //     fprintf(stdout, "\n");
             READ_NEXT_TOKEN
-            EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
-            width = (int16_t)(lexer->current_token.value.u);
-            READ_NEXT_TOKEN
+            loop = false;
+        }
+
+        while (loop)
+        {
+            if (compiler->debug >= PS_DEBUG_VERBOSE)
+                fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
+            if (!ps_parse_expression(compiler, block, &expression))
+                TRACE_ERROR("EXPRESSION")
+            // retrieve string/numeric format
+            width = 0;
+            precision = 0;
             if (lexer->current_token.type == PS_TOKEN_COLON)
             {
                 READ_NEXT_TOKEN
                 EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
-                precision = (int16_t)(lexer->current_token.value.u);
+                width = (int16_t)(lexer->current_token.value.u);
                 READ_NEXT_TOKEN
+                if (lexer->current_token.type == PS_TOKEN_COLON)
+                {
+                    READ_NEXT_TOKEN
+                    EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+                    precision = (int16_t)(lexer->current_token.value.u);
+                    READ_NEXT_TOKEN
+                }
             }
-        }
-        // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
-        //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
-        if (n_args >= PS_PARAMETERS_MAX)
-            RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
-        args[n_args] = expression;
-        formats[n_args].width = width;
-        formats[n_args].precision = precision;
-        n_args += 1;
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
+            // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
+            //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
+            if (n_args >= PS_PARAMETERS_MAX)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
+            args[n_args] = expression;
+            formats[n_args].width = width;
+            formats[n_args].precision = precision;
+            n_args += 1;
+            if (lexer->current_token.type == PS_TOKEN_COMMA)
+            {
+                READ_NEXT_TOKEN
+                continue;
+            }
+            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN
-            continue;
+            loop = false;
         }
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-        READ_NEXT_TOKEN
-        loop = false;
     }
 
     *call_ptr = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
@@ -691,10 +688,12 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
 
     if (!ps_parse_statement(compiler, block, &statement))
         TRACE_ERROR("BODY")
-    if (PS_AST_STATEMENT_LIST==statement->kind)
+    if (PS_AST_STATEMENT_LIST == statement->kind)
     {
         body = (ps_ast_statement_list *)statement;
-    } else {
+    }
+    else
+    {
         body = ps_ast_create_statement_list(statement->line, statement->column, 1);
         body->statements[0] = statement;
     }

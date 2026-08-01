@@ -505,6 +505,8 @@ ps_operator_binary ps_operator_binary_from_token(ps_token_type token)
         return PS_OP_MUL;
     case PS_TOKEN_DIV:
         return PS_OP_DIV;
+    case PS_TOKEN_MOD:
+        return PS_OP_MOD;
     case PS_TOKEN_SLASH:
         return PS_OP_DIV_REAL;
     case PS_TOKEN_EQ:
@@ -519,6 +521,16 @@ ps_operator_binary ps_operator_binary_from_token(ps_token_type token)
         return PS_OP_GT;
     case PS_TOKEN_GE:
         return PS_OP_GE;
+    case PS_TOKEN_AND:
+        return PS_OP_AND;
+    case PS_TOKEN_OR:
+        return PS_OP_OR;
+    case PS_TOKEN_XOR:
+        return PS_OP_XOR;
+    case PS_TOKEN_SHL:
+        return PS_OP_SHL;
+    case PS_TOKEN_SHR:
+        return PS_OP_SHR;
     default:
         return PS_OP_BINARY_INVALID;
     }

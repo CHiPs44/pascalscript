@@ -177,8 +177,9 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
                              if_statement->then_branch->count);
         return ps_ast_execute_statement_list(interpreter, if_statement->then_branch);
     }
-    ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Else branch: %zu statements",
-                         if_statement->else_branch->count);
+    if (if_statement->else_branch != NULL)
+        ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Else branch: %zu statements",
+                             if_statement->else_branch->count);
 
     return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
 }
