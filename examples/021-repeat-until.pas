@@ -14,21 +14,21 @@ Var
     Value: Integer;
 
 Begin
-    WriteLn('Example 040: Repeat-Until Loop with Integer numbers');
-    WriteLn('--------------------------------------------------------------------------------');
+    // WriteLn('Example 040: Repeat-Until Loop with Integer numbers');
+    // WriteLn('--------------------------------------------------------------------------------');
     Value := -Limit;
     Column := 1;
     Repeat
-        Write(Value:10);
-        Column := Column + 10;
-        If Column > 80 Then
-        Begin
-            Column := 1;
-            WriteLn;
-        End;
+        // Write(Value);//:10);
+        // Column := Column + 10;
+        // If Column > 80 Then
+        // Begin
+        //     Column := 1;
+        //     WriteLn;
+        // End;
         Value := Value + Delta;
     Until Value > Limit;
     WriteLn;
-    WriteLn('--------------------------------------------------------------------------------');
-    WriteLn('OK!');
+    // WriteLn('--------------------------------------------------------------------------------');
+    // WriteLn('OK!');
 End.
