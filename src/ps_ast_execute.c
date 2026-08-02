@@ -466,6 +466,13 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
                                                 "RANDOM function expects 0 or 1 argument");
     }
+    else if (function_call->executable == &ps_system_function_get_tick_count)
+    {
+        ps_error error = ps_function_get_tick_count(interpreter, NULL, &result->value);
+        if (error != PS_ERROR_NONE)
+            return false;
+        return true;
+    }
     // all other functions have 1 argument
     if (function_call->n_args != 1)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,

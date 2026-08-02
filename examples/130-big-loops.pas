@@ -40,9 +40,9 @@ Begin
   Finish := GetTickCount();
 
   WriteLn('PascalScript - Comparison of execution times for ', MaxLoops,' iterations:');
-  WriteLn(' - for         : ', T2For - T1For, ' ms');
-  WriteLn(' - while       : ', T2While - T1While, ' ms');
-  WriteLn(' - repeat until: ', T2Repeat - T1Repeat, ' ms');
+  WriteLn(' - for    : ', T2For    - T1For   , ' ms');
+  WriteLn(' - repeat : ', T2Repeat - T1Repeat, ' ms');
+  WriteLn(' - while  : ', T2While  - T1While , ' ms');
 
   WriteLn('Finished big loops.');
   WriteLn('Overall time: ', Finish - Start, ' ms');

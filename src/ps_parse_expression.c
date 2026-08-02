@@ -620,7 +620,9 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
             READ_NEXT_TOKEN
         }
         // factor.type = &ps_system_unsigned;
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 0, NULL, NULL);
+        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, &ps_system_function_get_tick_count,
+                                   0, NULL, NULL);
+        n_args = 0;
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
     {

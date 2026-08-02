@@ -7,10 +7,10 @@ Var
     I : Integer;
 
 Begin
-    WriteLn('Example 040: Repeat-Until Loop with Integer numbers');
+    WriteLn('Example 040: While-Do Loop with Integer number');
     WriteLn('--------------------------------------------------------------------------------');
     I := Loops;
-    While I >= 0 Do
+    While I > 0 Do
     Begin
         Write(I, ' ');
         I := I - 1;

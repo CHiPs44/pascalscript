@@ -33,7 +33,8 @@
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/010-operators.pas"
-#define DEBUG_SOURCE "examples/024-for-do.pas"
+// #define DEBUG_SOURCE "examples/024-for-do.pas"
+#define DEBUG_SOURCE "examples/130-big-loops.pas"
 
 // Runtime options
 bool bool_eval = false;
