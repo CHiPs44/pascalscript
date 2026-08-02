@@ -72,7 +72,7 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "TOKEN\t%-32s %-32s %-32s ", block->name, "", "");                                         \
+            fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "", "");        \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
         goto cleanup;                                                                                                  \
@@ -83,7 +83,7 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "TOKEN\t%-32s -%32s %-32s ", block->name, "EXPECTED",                                      \
+            fprintf(stderr, "TOKEN\t%d/%d\t%-32s -%32s %-32s ", start_line, start_column, block->name, "EXPECTED",     \
                     ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
@@ -98,7 +98,8 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "RETURN\t%-32s %-32s %-8d ", block->name, parse, __PS_ERROR__);                            \
+            fprintf(stderr, "RETURN\t%d/%d\t%-32s %-32s %-8d ", start_line, start_column, block->name, parse,          \
+                    __PS_ERROR__);                                                                                     \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
         compiler->error = __PS_ERROR__;                                                                                \
@@ -109,7 +110,8 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "RETURN\t%-32s %-32s %-8d ", block->name, parse, __PS_ERROR__);                            \
+            fprintf(stderr, "RETURN\t%d/%d\t%-32s %-32s %-8d ", start_line, start_column, block->name, parse,          \
+                    __PS_ERROR__);                                                                                     \
             ps_token_debug(stderr, "RETURN", &lexer->current_token);                                                   \
         }                                                                                                              \
         compiler->error = __PS_ERROR__;                                                                                \
@@ -120,7 +122,8 @@ extern "C"
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
-            fprintf(stderr, "ERROR\t%-32s %-32s %-32s ", block->name, parse, __PLUS__);                                \
+            fprintf(stderr, "ERROR\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, parse,          \
+                    __PLUS__);                                                                                         \
             ps_token_debug(stderr, "TRACE", &lexer->current_token);                                                    \
         }                                                                                                              \
         return false;                                                                                                  \

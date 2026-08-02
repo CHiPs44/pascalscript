@@ -570,7 +570,6 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
         TRACE_ERROR("EXPRESSION");
     // if (result.type != &ps_system_boolean)
     //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
-    READ_NEXT_TOKEN
 
     // AST NODE => REPEAT(BODY, CONDITION)
     *repeat_statement = ps_ast_create_repeat(start_line, start_column, body, condition);

@@ -211,6 +211,7 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
 {
     assert(compiler != NULL);
     ps_error error = PS_ERROR_NONE;
+
     if (compiler->parser == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_GENERIC);
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);
@@ -221,7 +222,8 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         error = lexer->error;
         if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
-        return ps_compiler_return_false(compiler, error);
+        return ps_compiler_set_error_message(compiler, error, "Could not read next char at %d/%d", lexer->start_line,
+                                             lexer->start_column);
     }
     if (compiler->debug >= PS_DEBUG_INFO)
         fprintf(stderr, "*** Compilation of %s\n", lexer->buffer->from_file ? "file" : "string");
@@ -230,7 +232,8 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         error = lexer->error;
         if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
-        return ps_compiler_return_false(compiler, error);
+        return ps_compiler_set_error_message(compiler, error, "Could not read next token at %d/%d", lexer->start_line,
+                                             lexer->start_column);
     }
     ps_token_debug(stderr, "FIRST TOKEN\t", &lexer->current_token);
     *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
@@ -241,7 +244,8 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         error = compiler->parser->error;
         if (error == PS_ERROR_NONE)
             error = PS_ERROR_GENERIC;
-        return ps_compiler_return_false(compiler, error);
+        return ps_compiler_set_error_message(compiler, error, "Could not parse program at %d/%d", lexer->start_line,
+                                             lexer->start_column);
     }
     return true;
 }

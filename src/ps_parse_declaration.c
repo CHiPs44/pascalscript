@@ -74,8 +74,8 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     assert(block->kind == PS_AST_PROGRAM);
     PARSE_BEGIN("PROGRAM", "")
 
-    ps_identifier identifier = {0};
-    ps_symbol *symbol_program = NULL;
+    ps_identifier program_identifier = {0};
+    ps_symbol *program_symbol = NULL;
 
     // 'PROGRAM'
     EXPECT_TOKEN(PS_TOKEN_PROGRAM)
@@ -83,7 +83,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 
     // IDENTIFIER
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-    COPY_IDENTIFIER(identifier)
+    COPY_IDENTIFIER(program_identifier)
     READ_NEXT_TOKEN
 
     // Skip optional parameters enclosed in parentheses
@@ -98,11 +98,11 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
     block->line = start_line;
     block->column = start_column;
-    snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", identifier);
+    snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", program_identifier);
 
     // Register program in symbol table of program block
-    symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, identifier, NULL);
-    if (!ps_compiler_add_symbol(compiler, block, symbol_program))
+    program_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, program_identifier, NULL);
+    if (!ps_compiler_add_symbol(compiler, block, program_symbol))
         TRACE_ERROR("ADD PROGRAM SYMBOL")
 
     // One "USES" clause at most after "PROGRAM"
@@ -124,6 +124,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 
 /**
  * Parse/skip uses clause (module names after USES)
+ *      Uses Unit1, Unit2, ... ;
  */
 bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
 {

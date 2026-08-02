@@ -430,7 +430,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;
-    lexer->start_column = lexer->buffer->current_char;
+    lexer->start_column = lexer->buffer->current_column;
     // fprintf(stderr, "CURRENT CHAR '%c' (0x%02x), NEXT CHAR '%c' (0x%02x) at Line %d, Colmun %d\n", current_char,
     //         (unsigned char)current_char, next_char, (unsigned char)next_char, lexer->buffer->current_line + 1,
     //         lexer->buffer->current_column + 1);
