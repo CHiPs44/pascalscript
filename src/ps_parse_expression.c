@@ -10,6 +10,7 @@
 #include "ps_array.h"
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_compiler.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_executable.h"
@@ -62,11 +63,9 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
             TRACE_ERROR("AND2");
         ps_operator_binary operator = ps_operator_binary_from_token(or_operator);
         if (operator == PS_OP_BINARY_INVALID)
-        {
-            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
-                                    ps_token_get_keyword(or_operator), or_operator);
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        }
+            return ps_compiler_set_error_message(compiler, PS_ERROR_UNEXPECTED_TOKEN,
+                                                 "Token %s (%d) has no matching AST binary operator",
+                                                 ps_token_get_keyword(or_operator), or_operator);
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
             TRACE_ERROR("BINARY_OP")
@@ -252,7 +251,7 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **exp
         READ_NEXT_TOKEN
         if (!ps_parse_factor(compiler, block, &right))
             TRACE_ERROR("FACTOR");
-        // // For multiplication/division, promote to real if one operand is real
+        // For multiplication/division, promote to real if one operand is real
         // if ((multiplicative_operator == PS_TOKEN_STAR || multiplicative_operator == PS_TOKEN_SLASH) &&
         //     (left.type->value->data.t->base == PS_TYPE_REAL || right.type->value->data.t->base == PS_TYPE_REAL))
         // {
@@ -361,8 +360,8 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         {
             // factor.type = symbol->value->type;
             if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
-                *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block,
-                                                                       PS_AST_RVALUE, symbol);
+                *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_RVALUE,
+                                                                       symbol);
             else
             {
                 value.allocated = false;
@@ -657,7 +656,7 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         n_args = 1;
     }
 
-    fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
+    // fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
     if (n_args >= 1)
         ps_ast_debug_node(0, args[0]);
     if (n_args >= 2)

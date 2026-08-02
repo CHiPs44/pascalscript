@@ -16,7 +16,7 @@ Begin
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('1. From 0 to ', Limit, ' with leading zeroes, ', PerLine, ' per line:');
     WriteLn('--------------------------------------------------------------------------------');
-    BOL := False;
+    BOL := True;
     For I := 0 To Limit Do
     Begin
         If I < 10 Then
@@ -40,21 +40,16 @@ Begin
     WriteLn('2. From ''Z'' to ''A'' with ordinal values:');
     WriteLn('--------------------------------------------------------------------------------');
     I := 0;
-    BOL := False;
+    BOL := True;
     For C := 'Z' Downto 'A' Do
     Begin
         Write('''', C, '''=#', Ord(C));
         I := I + 1;
-        If I Mod 10 = 0 Then
-        Begin
-            WriteLn;
-            BOL := True;
-        End
+        BOL := I Mod 10 = 0;
+        If BOL Then
+            WriteLn
         Else
-        Begin
             Write(' ');
-            BOL := False;
-        End;
     End;
     If Not BOL Then
         WriteLn;

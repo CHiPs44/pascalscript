@@ -531,7 +531,7 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
             if (statement_list == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             statement_list->statements[0] = else_node;
-            then_branch = statement_list;
+            else_branch = statement_list;
         }
     }
 
