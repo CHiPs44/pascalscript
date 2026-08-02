@@ -4,9 +4,87 @@ NB: this project has no link with [RemObjects Pascal Script](https://github.com/
 
 ## Status
 
+As of 2026-08-02, the AST based interpreter is able to run Pascal programs with:
+
+- **Data types**: `Integer`, `Unsigned`, `Real`, `Boolean`, `Char`, `String`
+- **Assignment** to variable from an expression with `:=`
+- **Expressions** with full operator support
+- **Writing** values to standard output with `Write` / `WriteLn`, formatting with `:width:precision`
+- **Conditional** execution with `If` / `Then` / `Else`
+- **Loops**:
+  - `Repeat` / `Until`
+  - `While` / `Do`
+  - `For` / `To` / `Downto` / `Do`
+- **System Procedure & functions**: scalar, ordinal, math, misc.
+- **Strings** with fixed-size buffers (max 255 chars, no garbage collection)
+
+## Abstract Syntax Tree vs. "direct" interpretation
+
 As of 2026-05-21, use of a compiler generating an AST then an interpreter executing this AST is on its way.
 
 Direct interpretation within the recursive descent parser was really too cumbersome to implement, mostly with array item access...
+
+Running a program now has 2 phases:
+
+1. **Compilation** - Parsing the source file and building the AST
+2. **Interpretation** - Executing the AST
+
+NB:
+
+- The AST is built in memory, no file is generated
+- The AST is not optimized, it is interpreted as-is
+- Many features of previous design were kept, hence the `ps_value` / `ps_ast_value` existence
+
+### Implementation of AST nodes
+
+As C has no classes, the AST nodes are implemented as structs with common fields at the beginning.
+
+These common fields are:
+
+- Group: Block, Statement, Expression, LValue
+- Kind:
+  - Block: Program, Procedure, Function, Unit
+  - Statement: Statement list (compound), Assignment, If, Repeat, While, For, Procedure call
+  - Expression: Constant, Variable, Function Call, Unary, Binary
+  - LValue: Variable
+- Line & column in source file
+
+This means we have to cast the AST node to the proper type to access its specific fields and vice-versa.
+
+### Stack & frames
+
+Interpreter uses a stack of frames to manage variables values and function calls.
+
+When a procedure or function is called, a new frame is pushed on the stack for the parameters and local variables.
+
+Variables are kept in the local symbol table they are defined in, their values are stored in a frame and accessed through an handle corresponding to their order of declaration.
+
+Functions automagically reserve a `Result` variable.
+
+## TODO
+
+Next steps should be implementing:
+
+- Check if **Recursivity** works
+- **Procedure** declaration and calls
+- **Function** declaration and calls, with return value
+- **Type** definitions
+- Check if **Enums** & **Subranges** still work within the AST context
+- **Arrays** - Full "static" array support, with several dimensions (up to 8?)
+
+More advanced features:
+
+- **Statement** - `Case` ... `Of` ... `Else` (switch-case logic)
+- **Records** - Record/struct type definitions
+- **Sets** - Set type and operations
+- **Files** - File I/O operations (`File`, `Text`, `Assign`, `Rewrite`, `Reset`, `Close`, `Read`, `Write`, `Seek`, `Eof`, `Eoln`)
+- **Units** - Module/unit system
+- **Pointers** - Pointer type and operations (`Pointer`, `New`, `Dispose`, `^`)
+- **String memory management** - Better string handling with garbage collection
+- Additional system procedures: `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
+- Memory access arrays: `Mem`, `MemW`
+
+## History
 
 As of 2026-02-20, the interpreter itself implements:
 
@@ -26,23 +104,9 @@ As of 2026-02-20, the interpreter itself implements:
   - recursion supported
 - **Type** definitions including:
   - **Enumerations**: (e.g., `TGender = (Male, Female, Other)`)
-  - **Subranges**: (e.g., `Score = 1..20`, `LettersAZ = 'A'..'Z'`)
+  - **Subranges**: (e.g., `Score = 1..20`, `Letters = 'A'..'Z'`)
 - Many functions (scalar / ordinal / math) in the `System` library
 - Strings with fixed-size buffers (max 255 chars)
-
-## TODO
-
-Next steps should be implementing:
-
-- `Case` ... `Of` ... `Else` statement (switch-case logic)
-- **Arrays** - Full array support
-- **Records** - Record/struct type definitions
-- **Sets** - Set type operations
-- **Files** - File I/O operations
-- **Units** - Module/unit system
-- **String memory management** - Better string handling with garbage collection
-- Additional system procedures: `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
-- Memory access arrays: `Mem`, `MemW`
 
 ## Performance
 
@@ -50,12 +114,15 @@ As of 2025-09-19, using GCC without optimizations, it is not too bad but far les
 
 On 2025-10-19, using GCC optimization `-O3`, execution times reduced considerably.
 
+On 2026-08-02, using GCC optimization `-O3` and AST based interpreter, execution times are back to previous values.
+
 For 100,000 iterations, see `examples/13-big-loops.[pas|lua|py]`¹:
 
 | Interpreter               |     For |    While |  Repeat² |
 | ------------------------- | ------: | -------: | -------: |
 | PascalScript (2025-09-19) |  121 ms |   407 ms |   344 ms |
 | PascalScript (2025-10-19) |   66 ms |   266 ms |   232 ms |
+| PascalScript (2026-08-02) |  134 ms |   263 ms |   239 ms |
 | Lua 5.4.6                 | 0.37 ms |  0.85 ms |  0.92 ms |
 | Python 3.12.3             | 4.87 ms | 15.27 ms | 12.27 ms |
 
@@ -464,7 +531,7 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (even with 8M
 
 - Compatible:
   - `Write` / `WriteLn` for all base types, with variable number of arguments
-  - formatting with `:X` and `:X:Y`
+  - formatting with `:W` and `:W:P`
 - File I/O with more POSIX like calls instead of standard Pascal?
   - `fopen` / `fclose` / `fread` / `fwrite` / `lseek` / ...
 - Format function with `{}` placeholders?
@@ -472,7 +539,7 @@ Things one can say against Unicode on our 256KB / 512KB RAM target (even with 8M
 
 #### Mathematical functions and constant(s)
 
-- `sqrt` `sqr` `power` (not) `**` operator)
+- `sqrt` `sqr` `power` (not `**` operator)
 - `sin` `cos` `tan` `asin` `acos` `atan` `pi`
 - `ln` `log` `exp`
 - ...
