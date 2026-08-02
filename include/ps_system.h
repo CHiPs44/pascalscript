@@ -19,12 +19,9 @@ extern "C"
 #define PS_SYSTEM_SYMBOL_TABLE_SIZE 32
 #endif
 
-#ifndef PS_SYSTEM_SYMBOL_TABLE_MORE
-#define PS_SYSTEM_SYMBOL_TABLE_MORE 16
-#endif
-
-#define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE)                                          \
-    ps_executable ps_executable_##TYPE##_##VALUE = {.kind = KIND, CALLABLE_FIELD = CALLABLE};                          \
+#define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE, RETURN_TYPE)                             \
+    ps_executable ps_executable_##TYPE##_##VALUE = {                                                                   \
+        .kind = KIND, CALLABLE_FIELD = CALLABLE, .return_type = RETURN_TYPE};                                          \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
     ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
                                             .name = NAME,                                                              \

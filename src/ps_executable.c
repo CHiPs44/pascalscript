@@ -30,6 +30,8 @@ ps_executable *ps_executable_alloc(ps_executable_kind kind, ps_ast_block *block)
         return NULL;
     executable->kind = kind;
     executable->block = block;
+    executable->system = false;
+    executable->return_type = NULL;
     return executable;
 }
 

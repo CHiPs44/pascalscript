@@ -19,10 +19,10 @@ Begin
         End;
     { One statement in then and else }
     If I = 1 Then
-        Write('I', '=', '1') { No ; }
+        Write('I=1') { No ; }
     Else
-        Write('I', '<', '>', '1');
-    WriteLn(' ', '(' , I, ')');
+        Write('I<>1');
+    WriteLn(' (' , I, ')');
     { One compound statement in then and else }
     I := (I + 1) * 1000;
     If I = 1 Then
@@ -42,9 +42,9 @@ Begin
     I := 2;
     If I + 1 = 2 Then
         If I + 2 = 3 Then
-            WriteLn('I', '=', '1', ' ', '(' , I, ')')
+            WriteLn('I=1 ', '(' , I, ')')
         Else
-            WriteLn('I', '<', '>', '1', ' ', '(' , I, ')')
+            WriteLn('I<>1 ', '(' , I, ')')
     Else
-        WriteLn('I', '<', '>', '1', ' ', '(' , I, ')')
+        WriteLn('I<>1 ', '(' , I, ')')
 End.

@@ -14,8 +14,7 @@ Var
   I: Integer;
 
 Begin
-  I := 1 + F(12, 34); // <== OK
-//   I := F(F(12, 34), 56) + 1;
+  I := F(F(12, 34), 56) + 1;
 //   I := I + 1;
 //   WriteLn(I);
 //WriteLn(F(12, 34));

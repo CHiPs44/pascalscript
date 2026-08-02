@@ -231,8 +231,8 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
                 else
                     value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
                 fprintf(output, "┃%c%c%05d┃%08x┃%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : ' ',
-                        symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN,
-                        symbol->name, kind_name, type_name, PS_IDENTIFIER_LEN, value);
+                        symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN, symbol->name, kind_name,
+                        type_name, PS_IDENTIFIER_LEN, value);
             }
         }
     }
@@ -240,7 +240,7 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
         output,
         "┗━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┛\n");
-    fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, free + used);
+    fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, size);
 }
 
 /* EOF */

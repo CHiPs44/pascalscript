@@ -11,6 +11,7 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_functions.h"
 #include "ps_memory.h"
 #include "ps_signature.h"
 #include "ps_system.h"
@@ -124,8 +125,22 @@ static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
     case PS_AST_BINARY_OPERATION:
         return ((const ps_ast_binary_operation *)node)->result_type;
     case PS_AST_FUNCTION_CALL:
-        ps_symbol *function = ((const ps_ast_call *)node)->executable;
-        if (function != NULL && function->value != NULL)
+        ps_ast_call *function_call = (ps_ast_call *)node;
+        ps_symbol *function = function_call->executable;
+        if (function->system)
+        {
+            if (function->value->data.x->return_type != NULL)
+                return function->value->data.x->return_type;
+            if (function == &ps_system_function_random)
+            {
+                if (function_call->n_args > 0)
+                    return &ps_system_unsigned;
+                else
+                    return &ps_system_real;
+            }
+            // TODO other system functions specific return types: Abs, Even, Odd, High, Lo, Succ, Pred
+        }
+        else if (function != NULL && function->value != NULL)
             return function->value->type;
         return NULL;
     default:

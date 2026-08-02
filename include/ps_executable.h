@@ -52,6 +52,7 @@ extern "C"
         ps_executable_kind kind; /** @brief Kind of executable (system function/procedure or user defined) */
         bool system : 1;         /** @brief True if executable is a system function/procedure, false if user defined */
         int filler : 23;         /** @brief Unused bits to fill 32 bits */
+        ps_symbol *return_type;  /** @brief Return type for system functions */
         union {
             void *address;                           /** @brief Generic pointer to system function/procedure       */
             ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
