@@ -448,8 +448,10 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
     {
         if (function_call->n_args == 0)
         {
-            if (!ps_function_random(interpreter, NULL, &result->value))
-                return false;
+            ps_error error = ps_function_random(interpreter, NULL, &result->value);
+            if (error != PS_ERROR_NONE)
+                return ps_interpreter_set_error_message(interpreter, error, "RANDOM function failed");
+            return true;
         }
         else if (function_call->n_args == 1)
         {
@@ -460,7 +462,7 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
                 return false;
             ps_error error = ps_function_random(interpreter, &ast_value.value, &result->value);
             if (error != PS_ERROR_NONE)
-                return false;
+                return ps_interpreter_set_error_message(interpreter, error, "RANDOM(X) function failed");
             return true;
         }
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,

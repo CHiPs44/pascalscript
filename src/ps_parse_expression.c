@@ -598,12 +598,14 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
 {
     PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 
-    int n_args = -2;
+    int n_args = 0;
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
     ps_ast_variable *symbol_node = NULL;
     ps_ast_node *arg1 = NULL;
     ps_ast_node *arg2 = NULL;
+
+    READ_NEXT_TOKEN
 
     if (function == &ps_system_function_random)
     {
@@ -619,9 +621,6 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
             EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
             READ_NEXT_TOKEN
         }
-        // factor.type = &ps_system_unsigned;
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, &ps_system_function_get_tick_count,
-                                   0, NULL, NULL);
         n_args = 0;
     }
     else if (function == &ps_system_function_low || function == &ps_system_function_high)
@@ -629,9 +628,9 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         // Low and High have one "symbolic" argument
         if (!ps_parse_function_call_low_high(compiler, block, &symbol))
             TRACE_ERROR("LOW_HIGH")
-        symbol_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, symbol);
+        symbol_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_RVALUE, symbol);
+        n_args = 1;
         args[0] = (ps_ast_node *)symbol_node;
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, symbol, 1, args, NULL);
     }
     else if (function == &ps_system_function_power)
     {
@@ -653,34 +652,18 @@ bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *block, p
         ps_ast_debug_node(0, arg1);
         EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
         READ_NEXT_TOKEN
-        args[0] = arg1;
-        ps_ast_debug_node(0, args[0]);
         n_args = 1;
+        args[0] = arg1;
     }
 
-    // fprintf(stderr, "CALL %s with %d arg(s):\n", function->name, n_args);
-    if (n_args >= 1)
-        ps_ast_debug_node(0, args[0]);
-    if (n_args >= 2)
-        ps_ast_debug_node(0, args[1]);
-
-    switch (n_args)
+    if (n_args < 0 || n_args > 2)
     {
-    case -1:
-        break;
-    case 0:
-        break;
-    case 1:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL);
-        break;
-    case 2:
-        *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args, args, NULL);
-        break;
-    default:
-        compiler->error = PS_ERROR_INVALID_PARAMETERS;
         ps_compiler_set_message(compiler, "System functions must have 0, 1 or 2 arguments");
-        TRACE_ERROR("SYSTEM_FUNCTION")
+        RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
     }
+
+    *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args,
+                               n_args == 0 ? NULL : args, NULL);
 
     PARSE_END("OK")
 }
@@ -695,7 +678,6 @@ bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_c
     (void)start_line;
     (void)start_column;
 
-    READ_NEXT_TOKEN
     if (function->system)
     {
         if (!ps_parse_function_call_system(compiler, block, call, function))
