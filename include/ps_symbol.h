@@ -42,7 +42,7 @@ extern "C"
         bool            system:1;    /** @brief true if symbol is a system symbol (predefined)                */
         bool            allocated:1; /** @brief true if symbol was allocated (and must be freed)              */
         // clang-format on
-    } /*__attribute__((__packed__))*/ ps_symbol;
+    } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)

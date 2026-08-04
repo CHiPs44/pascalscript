@@ -145,8 +145,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false;
 
-    ps_value value = {.allocated = false, .type = NULL, .data = {0}};
-    value.type = value_node.value.type;
+    ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     value.data = value_node.value.data;
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "{Expression value: %s}",
                          ps_value_get_display_string(&value, 0, 0));
