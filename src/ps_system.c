@@ -64,11 +64,11 @@ PS_SYSTEM_TYPE(record           , "#RECORD"           , PS_TYPE_RECORD    , PS_T
 PS_SYSTEM_TYPE(procedure        , "#PROCEDURE"        , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
 PS_SYSTEM_TYPE(function         , "#FUNCTION"         , PS_TYPE_EXECUTABLE, PS_TYPE_EXECUTABLE                        );
 
+/* clang-format on */
+
 /**********************************************************************************************************************/
 /* CONSTANTS                                                                                                          */
 /**********************************************************************************************************************/
-
-/* clang-format on */
 
 #define PS_SYSTEM_CONSTANT(TYPE, VALUE, NAME, FIELD, VALUE2)                                                           \
     ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.FIELD = VALUE2}};                       \

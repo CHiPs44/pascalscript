@@ -441,10 +441,10 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, const ps_ast_node *operand)
 {
     ps_symbol *operand_type = ps_ast_node_get_type(operand);
-    if (operand_type == NULL)
+    if (operand_type == NULL || operand_type->value == NULL || operand_type->value->data.t == NULL)
         return NULL;
-    ps_value_type type = ps_value_get_type(operand_type->value);
-    ps_value_type base = ps_value_get_base(operand_type->value);
+    ps_value_type type = operand_type->value->data.t->type;
+    ps_value_type base = operand_type->value->data.t->base;
     // - U => I
     if ((operator == PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
         return &ps_system_integer;

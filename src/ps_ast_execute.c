@@ -541,7 +541,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     case PS_AST_RVALUE:
         const ps_ast_variable *variable = (const ps_ast_variable *)expression;
         ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable->variable->name);
-        ps_value value = {.allocated = false, .type = NULL, .data = {0}};
+        ps_value value = {.allocated = false, .type = &ps_system_none, .data = {0}};
         if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
             return false;
         if (!ps_interpreter_copy_value(interpreter, &value, &result->value))

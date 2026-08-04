@@ -50,7 +50,7 @@ bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_symbol *variable, b
 {
     (void)variable;
     (void)is_inc;
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "INC/DEC");
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "%s", is_inc ? "INC" : "DEC");
     // ps_value value = {0};
     // if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
     //     return false;
