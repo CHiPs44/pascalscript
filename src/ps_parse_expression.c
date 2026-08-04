@@ -576,16 +576,25 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, block, arg1))
         TRACE_ERROR("ARG1")
-    // if (!ps_value_is_number(arg1) && !ps_value_is_real(arg1))
-    //     RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    ps_symbol *type1 = ps_ast_node_get_type(*arg1);
+    if (type1 == NULL || (!ps_value_is_number(type1->value) && !ps_value_is_real(type1->value)))
+    {
+        ps_compiler_set_message(compiler, "Power: expected number for argument #1, got %s",
+                                type1 == NULL ? "NULL!" : ps_value_get_type_name(type1->value));
+        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    }
     EXPECT_TOKEN(PS_TOKEN_COMMA)
     READ_NEXT_TOKEN
     if (!ps_parse_expression(compiler, block, arg2))
         TRACE_ERROR("ARG2")
-    // if (!ps_value_is_number(arg2) && !ps_value_is_real(arg2))
-    //     RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
-    EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
-    READ_NEXT_TOKEN
+    ps_symbol *type2 = ps_ast_node_get_type(*arg2);
+    if (type2 == NULL || (!ps_value_is_number(type2->value) && !ps_value_is_real(type2->value)))
+    {
+        ps_compiler_set_message(compiler, "Power: expected number for argument #2, got %s",
+                                type2 == NULL ? "NULL!" : ps_value_get_type_name(type2->value));
+        RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
+    }
+    // READ_NEXT_TOKEN
 
     PARSE_END("OK")
 }

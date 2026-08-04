@@ -253,6 +253,13 @@ extern "C"
     ps_ast_node *ps_ast_free_lvalue_simple   (ps_ast_variable  *lvalue            );
     // clang-format on
 
+    /**
+     * @brief Extract type from an AST node
+     * @param node The AST node to extract type from
+     * @return The symbol representing the type, or NULL if type cannot be determined
+     */
+    ps_symbol *ps_ast_node_get_type(const ps_ast_node *node);
+
 #ifdef __cplusplus
 }
 #endif

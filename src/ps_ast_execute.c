@@ -475,6 +475,22 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
             return false;
         return true;
     }
+    else if (function_call->executable == &ps_system_function_power)
+    {
+        ps_ast_value a = {.group = PS_AST_EXPRESSION,
+                          .kind = PS_AST_LITERAL_VALUE,
+                          .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+
+        ps_ast_value b = {.group = PS_AST_EXPRESSION,
+                          .kind = PS_AST_LITERAL_VALUE,
+                          .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+        if (!ps_ast_eval_expression(interpreter, function_call->args[0], &a))
+            return false;
+        if (!ps_ast_eval_expression(interpreter, function_call->args[1], &b))
+            return false;
+        ps_error error = ps_function_power(interpreter, &a.value, &b.value, &result->value);
+        return PS_ERROR_NONE == error;
+    }
     // all other functions have 1 argument
     if (function_call->n_args != 1)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,

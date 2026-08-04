@@ -9,7 +9,9 @@ Var
     R: Real;
 
 Begin
-    R := -1/3;
+    R := Power('A', 'B');
+    // R := Power(1.2, 3.4);
+    // R := -1 / 3;
     WriteLn(R);
     // WriteLn('Math constants and functions'                                                    );
     // WriteLn('--------------------------------------------------------------------------------');
@@ -18,7 +20,7 @@ Begin
     // WriteLn('03 Max      = ', MaxReal                                                            );
     // WriteLn('04 1.2E+34  = ', 1.23456789E+34                                                     );
     // WriteLn('05 1.2E-34  = ', 1.23456789e-34                                                     );
-    // WriteLn('06 |-1/3|   = ', Abs(-1/3)                                                          );
+    // // WriteLn('06 |-1/3|   = ', Abs(-1/3)                                                          );
     // WriteLn('07 1.0/3.0  = ', 1.0/3.0                                                            );
     // WriteLn('08 π        = ', Pi                                                                 );
     // WriteLn('09 trunc(π) = ', Trunc(Pi)                                                          );
@@ -33,7 +35,7 @@ Begin
     // WriteLn('18 √2/2     = ', Sqrt(2.0) / 2.0                                                    );
     // WriteLn('19 e        = ', Exp(1.0)                                                           );
     // WriteLn('20 round(e) = ', Round(Exp(1.0))                                                    );
-    // WriteLn('21 1.2^3.4  = ', Power(1.2, 3.4)                                                    );
+    // // WriteLn('21 1.2^3.4  = ', Power(1.2, 3.4)                                                    );
     // WriteLn('--------------------------------------------------------------------------------');
     // WriteLn('OK!'                                                                             );
 End.

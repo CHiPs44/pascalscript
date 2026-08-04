@@ -278,6 +278,8 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
 
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s\n", program->name);
     bool result = ps_ast_execute_program(interpreter, program);
+    if (!result)
+        fprintf(stderr, "ERROR %d %s\n", interpreter->error, ps_error_get_message(interpreter->error));
     ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s => %s\n", program->name,
                        result ? "OK" : "KO");
 

@@ -105,7 +105,7 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
  * @param node The AST node to extract type from
  * @return The symbol representing the type, or NULL if type cannot be determined
  */
-static ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
+ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 {
     if (node == NULL)
         return NULL;

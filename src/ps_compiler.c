@@ -241,11 +241,17 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     if (!ps_parse_program(compiler, *program))
     {
-        error = compiler->parser->error;
-        if (error == PS_ERROR_NONE)
-            error = PS_ERROR_GENERIC;
-        return ps_compiler_set_error_message(compiler, error, "Could not parse program at %d/%d", lexer->start_line,
-                                             lexer->start_column);
+        if (compiler->error == PS_ERROR_NONE)
+        {
+            error = compiler->parser->error;
+            if (error == PS_ERROR_NONE)
+            {
+                error = PS_ERROR_GENERIC;
+                return ps_compiler_set_error_message(compiler, error, "Could not parse program at %d/%d",
+                                                     lexer->start_line, lexer->start_column);
+            }
+            return false;
+        }
     }
     return true;
 }
