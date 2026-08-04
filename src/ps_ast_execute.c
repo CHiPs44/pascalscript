@@ -140,8 +140,11 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     ps_ast_debug_execute(interpreter, PS_DEBUG_VERBOSE, "Variable: %s of type %s", variable->variable->name,
                          ps_value_type_get_name(variable_type));
 
-    ps_ast_value value_node = {0};
-    // value_node.value.type = variable->variable->value->type;
+    ps_ast_value value_node = {.column = 0,
+                               .line = 0,
+                               .value.allocated = false,
+                               .value.type = variable->variable->value->type,
+                               .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false;
 
