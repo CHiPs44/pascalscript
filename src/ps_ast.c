@@ -129,6 +129,7 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
         ps_symbol *function = function_call->executable;
         if (function->system)
         {
+            // use pre-defined return type
             if (function->value->data.x->return_type != NULL)
                 return function->value->data.x->return_type;
             if (function == &ps_system_function_random)
@@ -138,7 +139,7 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
                 else
                     return &ps_system_real;
             }
-            // TODO other system functions specific return types: Abs, Even, Odd, High, Lo, Succ, Pred
+            // TODO other system functions with specific return types: Abs, Even, Odd, High, Lo, Succ, Pred
         }
         else if (function != NULL && function->value != NULL)
             return function->value->type;
@@ -528,32 +529,32 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
     ps_value_type left_base = left_type->value->data.t->base;
     ps_value_type right_base = right_type->value->data.t->base;
 
+    // Comparison => Boolean
     if (ps_ast_binary_operation_is_comparison(operator))
         return &ps_system_boolean;
-
+    // / => R
     if (operator == PS_OP_DIV_REAL)
         return &ps_system_real;
-
+    // C or S + C or S => String
     if (ps_ast_binary_operation_is_string_concat(operator, left_base, right_base))
         return &ps_system_string;
-
+    // AND, OR, XOR with booleans => Boolean
     if (ps_ast_binary_operation_is_boolean_operation(operator, left_base, right_base))
         return &ps_system_boolean;
-
+    // +, -, *, / with R => Real
     if (ps_ast_binary_operation_is_real_operation(operator) &&
         (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL))
         return &ps_system_real;
-
+    // +, -, *, DIV with U => Unsigned
     if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
         return &ps_system_unsigned;
-
+    // +, -, *, DIV with I and U => Interger or Unsigned from left operand
     if (ps_ast_binary_operation_is_mixed_integer_unsigned(left_base, right_base))
         return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
-
+    // +, -, *, DIV with I => Integer
     if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
         return &ps_system_integer;
 
-    fprintf(stderr, "Error: incompatible types for binary operation '%s'\n", ps_operator_binary_get_name(operator));
     return NULL;
 }
 

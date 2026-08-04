@@ -9,9 +9,9 @@ Var
     R: Real;
 
 Begin
-    R := Power('A', 'B');
+    // R := Power('A', 'B');
     // R := Power(1.2, 3.4);
-    // R := -1 / 3;
+    R := -1 / 3;
     WriteLn(R);
     // WriteLn('Math constants and functions'                                                    );
     // WriteLn('--------------------------------------------------------------------------------');
