@@ -441,10 +441,11 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, const ps_ast_node *operand)
 {
     ps_symbol *operand_type = ps_ast_node_get_type(operand);
-    if (operand_type == NULL || operand_type->value == NULL || operand_type->value->data.t == NULL)
+    if (operand_type == NULL)
         return NULL;
-    ps_value_type type = operand_type->value->data.t->type;
-    ps_value_type base = operand_type->value->data.t->base;
+    ps_value value = {.allocated = false, .type = operand_type, .data = {0}};
+    ps_value_type type = ps_value_get_type(&value);
+    ps_value_type base = ps_value_get_base(&value);
     // - U => I
     if ((operator == PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
         return &ps_system_integer;
@@ -452,6 +453,8 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, co
     if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER || type == PS_TYPE_REAL ||
         (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED) || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER))
         return operand_type;
+    if (type == PS_TYPE_BOOLEAN)
+        return &ps_system_boolean;
     return NULL;
 }
 

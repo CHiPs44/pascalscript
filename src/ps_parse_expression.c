@@ -68,7 +68,7 @@ bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
                                                  ps_token_get_keyword(or_operator), or_operator);
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
-            TRACE_ERROR("BINARY_OP")
+            TRACE_ERROR("BINARY_OP (OR)")
     } while (true);
 
     *expression = left;
@@ -119,7 +119,7 @@ bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_
         }
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
-            TRACE_ERROR("BINARY_OP");
+            TRACE_ERROR("BINARY_OP (AND)");
     } while (true);
 
     *expression = left;
@@ -216,7 +216,7 @@ bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *block, ps_a
         }
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
-            TRACE_ERROR("BINARY_OP");
+            TRACE_ERROR("BINARY_OP (SIMPLE)");
     } while (true);
 
     PARSE_END("SIMPLE2");
@@ -266,7 +266,7 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **exp
         }
         left = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
         if (left == NULL)
-            TRACE_ERROR("BINARY_OP");
+            TRACE_ERROR("BINARY_OP (term)");
     } while (true);
 
     PARSE_END("TERM2");

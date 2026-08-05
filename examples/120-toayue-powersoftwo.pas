@@ -1,6 +1,4 @@
 { From https://wiki.freepascal.org/Basic_Pascal_Tutorial/Chapter_3/Solution}
-
-
 (* Author:    Tao Yue
    Date:      13 July 2000
    Description:
@@ -11,12 +9,12 @@
 
 Program PowersofTwo;
 
-Const 
+Const
   numperline = 5;
   maxnum = 20000;
   base = 2;
 
-Var 
+Var
   number : integer;
 (*longint;*)
   linecount : integer;
@@ -37,12 +35,12 @@ Begin
       If linecount > 1 Then
         write (', ');
          (* Display the number *)
-      write (number);
+      write (number:7);
 
 (* Print a comma and go to the next line if this is
          the last number on the line UNLESS it is the
          last number of the series *)
-      If (linecount = numperline) And Not (number * 2 > maxnum) Then
+      If (linecount = numperline) and not (number * 2 > maxnum) Then
         Begin
           writeln (',');
           linecount := 0
