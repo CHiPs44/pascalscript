@@ -35,10 +35,10 @@
 // #define DEBUG_SOURCE "examples/010-operators.pas"
 // #define DEBUG_SOURCE "examples/024-for-do.pas"
 // #define DEBUG_SOURCE "examples/021-repeat-until.pas"
-// #define DEBUG_SOURCE "examples/070-random.pas"
+#define DEBUG_SOURCE "examples/070-random.pas"
 // #define DEBUG_SOURCE "examples/080-math.pas"
 // #define DEBUG_SOURCE "examples/090-boolean.pas"
-#define DEBUG_SOURCE "examples/120-toayue-powersoftwo.pas"
+// #define DEBUG_SOURCE "examples/120-toayue-powersoftwo.pas"
 // #define DEBUG_SOURCE "examples/130-big-loops.pas"
 
 // Runtime options
@@ -192,8 +192,10 @@ bool compile(const char *source_file)
     ok = ps_compiler_compile(compiler, &program);
     if (ok)
         fprintf(stderr, "Compilation OK\n");
-    fprintf(stderr, "Compiler error:   %d %s", compiler->error, ps_error_get_message(compiler->error));
-    fprintf(stderr, "         message: %s\n", compiler->message);
+    if (compiler->error != PS_ERROR_NONE)
+        fprintf(stderr, "Compiler error:   %d %s\n", compiler->error, ps_error_get_message(compiler->error));
+    if (strlen(compiler->message) > 0)
+        fprintf(stderr, "         message: %s\n", compiler->message);
     if (verbose)
         fprintf(stderr, "================================ END COMPILATION ===============================\n");
 
