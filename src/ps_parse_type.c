@@ -396,7 +396,7 @@ cleanup:
 bool ps_parse_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
                                           ps_value_type *min_base, ps_type_definition_subrange *subrange)
 {
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MIN")
     (void)start_line;
     (void)start_column;
 
@@ -435,7 +435,7 @@ bool ps_parse_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *b
 bool ps_parse_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
                                           ps_value_type *max_base, ps_type_definition_subrange *subrange)
 {
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MAX")
     (void)start_line;
     (void)start_column;
 
@@ -475,7 +475,7 @@ bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *compiler, p
                                                         const char *type_name, ps_symbol **type_symbol, ps_symbol *type,
                                                         const ps_type_definition_subrange *subrange)
 {
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "REGISTER_TYPE_DEF")
     (void)start_line;
     (void)start_column;
 
@@ -553,7 +553,7 @@ bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
     if (!ps_compiler_copy_value(compiler, &tmp_value, &max_value))
     {
         ps_compiler_set_message(compiler, "Min and max value of subrange type mismatch: %s %s", min_value.type->name,
-                                max_value.type->name);
+                                tmp_value.type->name);
         TRACE_ERROR("COPY_MAX")
     }
     // *** Check that subrange min is less than max
@@ -561,15 +561,15 @@ bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block
         (max_base == PS_TYPE_INTEGER && subrange.i.max <= subrange.i.min) ||
         (max_base == PS_TYPE_UNSIGNED && subrange.u.max <= subrange.u.min))
         RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    else if (max_base == PS_TYPE_ENUM)
+    if (max_base == PS_TYPE_ENUM)
     {
         if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
             RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
         if (subrange.u.max <= subrange.u.min)
             RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
-    else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
+    // else
+    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
     // *** Register subrange
     if (!ps_parse_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
                                                             &subrange))

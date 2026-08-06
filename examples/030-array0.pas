@@ -5,11 +5,11 @@
 *)
 Program Array0;
 
-Type
-    NumberArray = Array[1..10] Of Integer;
+// Type
+//     NumberArray = Array[1..10] Of Integer;
 
 Var
-    Numbers: NumberArray;
+    Numbers: Array[1..10] Of Integer;//NumberArray;
     I, N: Integer;
 
 Begin

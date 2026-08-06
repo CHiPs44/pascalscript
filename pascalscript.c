@@ -32,14 +32,16 @@
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
+#define DEBUG_SOURCE "examples/009-subrange1.pas"
 // #define DEBUG_SOURCE "examples/010-operators.pas"
 // #define DEBUG_SOURCE "examples/024-for-do.pas"
 // #define DEBUG_SOURCE "examples/021-repeat-until.pas"
-#define DEBUG_SOURCE "examples/070-random.pas"
+// #define DEBUG_SOURCE "examples/070-random.pas"
 // #define DEBUG_SOURCE "examples/080-math.pas"
 // #define DEBUG_SOURCE "examples/090-boolean.pas"
 // #define DEBUG_SOURCE "examples/120-toayue-powersoftwo.pas"
 // #define DEBUG_SOURCE "examples/130-big-loops.pas"
+#define DEBUG_SOURCE "examples/030-array0.pas"
 
 // Runtime options
 bool bool_eval = false;
