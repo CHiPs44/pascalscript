@@ -12,7 +12,7 @@ Const
 
 Var
     A, B, C, D: Integer;
-    R, R1, R2, R3, R4: Real;
+    R0, R1, R2, R3, R4: Real;
 
 Begin
     WriteLn('FOO=', FOO, ', BAR=', BAR, ', BAZ=', BAZ);
@@ -21,11 +21,11 @@ Begin
     C := A + B;
     D := (A * B) Div C;
     WriteLn('A=', A, ', B=', B, ', C=', C, ', D=', D);
-    R := (A * B) / c;
+    R0 := (A * B) / C;
     R1 := FOO * BAR * BAZ;
     R2 := FOO + BAR + BAZ;
     R3 := FOO * BAR + BAZ;
     R4 := FOO + BAR * BAZ;
-    WriteLn('R=', R, ', R1=', R1, ', R2=', R2, ', R3=', R3, ', R4=', R4);
+    WriteLn('R0=', R0, ', R1=', R1, ', R2=', R2, ', R3=', R3, ', R4=', R4);
     // FOO := 12;
 End.

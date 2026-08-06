@@ -63,7 +63,6 @@ Begin
     w := u + v;
     WriteLn('  - Addition:             $FFFFFFFF = ', w:12);
 
-
     WriteLn('*** Arithmetic Real operators');
     x := 10.0;
     y := 3.0;

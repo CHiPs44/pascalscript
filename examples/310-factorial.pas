@@ -46,14 +46,14 @@ End;
 Var
   N, Recursive, Iterative: Unsigned;
 Begin
+  WriteLn('Factorial - Recursive and Iterative:');
+  WriteLn('--------------------------------------------------------------------------------');
+  WriteLn;
   // Repeat
   //   Write('N=');
   //   ReadLn(N);
   // Until N > 0;
   // N := 31;
-  WriteLn('Factorial - Recursive and Iterative:');
-  WriteLn('--------------------------------------------------------------------------------');
-  WriteLn;
   WriteLn(' N  Recursive   Iterative');
   WriteLn('--- ---------- ----------');
   For N := 0 To 13 Do

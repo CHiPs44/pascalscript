@@ -31,13 +31,7 @@ Begin
             If A<>B Then
             Begin
                 R := LCM(A, B);
-                // if A <   10  Then Write(' ');
-                // if B <   10  Then Write(' ');
-                Write('(', A:2, ',', B:2, ')=');
-                // If R < 1000 Then Write(' ');
-                // If R <  100 Then Write(' ');
-                // if R <   10 Then Write(' ');
-                Write(R:4, ' ');
+                Write('(', A:2, ',', B:2, ')=', R:4, ' ');
             End;
         End;
         WriteLn;
