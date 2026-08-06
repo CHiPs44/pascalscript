@@ -580,8 +580,11 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
             return false;
+        ps_value result_value = {.allocated = false, .type = &ps_system_none, .data = {0}};
         if (!ps_operator_binary_eval(interpreter, (const ps_value *)&left.value, (const ps_value *)&right.value,
-                                     &result->value, binary_operation->operator))
+                                     &result_value, binary_operation->operator))
+            return false;
+        if (!ps_interpreter_copy_value(interpreter, &result_value, &result->value))
             return false;
         break;
     case PS_AST_FUNCTION_CALL:
