@@ -144,6 +144,7 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
 {
     assert(compiler != NULL);
     assert(block != NULL);
+    assert(identifier != NULL && strlen(identifier) > 0);
     assert(type_symbol != NULL);
     // Variable handle is its index in block variables
     ps_value_data data = {.h = (ps_handle)(block->n_vars++)};

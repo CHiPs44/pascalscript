@@ -5,15 +5,15 @@
 *)
 Program Array0;
 
-// Type
-//     NumberArray = Array[1..10] Of Integer;
+Type
+    NumberArray = Array[1..10] Of Integer;
 
 Var
-    Numbers: Array[1..10] Of Integer;//NumberArray;
+    Numbers: NumberArray;
     I, N: Integer;
 
 Begin
-    N := 2;
+    N := 1;
     For I := 1 To 10 Do
     Begin
         Numbers[I] := N;
