@@ -23,6 +23,7 @@
 /**
  * @brief Visit type definition
  * @details
+ *    NB: adds type definition(s) to current block symbol table, does not produce any new AST nodes
  *    IDENTIFIER '=' TYPE_REFERENCE
  */
 bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
@@ -33,30 +34,23 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
 
     ps_symbol *type_reference = NULL;
     ps_identifier type_name = {0};
-    ps_symbol *type_definition = NULL;
-    ps_value *type_value = NULL;
 
     // IDENTIFIER
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(type_name)
+
     // Check that type name does not already exist in local symbol table
     if (ps_compiler_find_symbol(compiler, block, type_name, true) != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
     READ_NEXT_TOKEN
+
     // '='
     EXPECT_TOKEN(PS_TOKEN_EQ)
     READ_NEXT_TOKEN
+
     // TYPE_REFERENCE
     if (!ps_parse_type_reference(compiler, block, &type_reference, type_name))
         TRACE_ERROR("TYPE REFERENCE")
-
-    ps_value_data data = {.t = type_reference->value->data.t};
-    type_value = ps_value_alloc(&ps_system_type_def, data);
-    type_definition = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, type_name, type_value);
-
-    if (!ps_compiler_add_symbol(compiler, block, type_definition))
-        TRACE_ERROR("ADD SYMBOL")
 
     PARSE_END("OK")
 }
@@ -274,8 +268,8 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         break;
     case PS_TOKEN_ARRAY:
         // => ARRAY
-        // NB: this can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
-        // and may recursively call ps_parse_type_reference()
+        //  NB: this can be something like "ARRAY [1..10] OF (Value1, Value2, ...)"
+        //      and may recursively call ps_parse_type_reference()
         advance = false;
         if (!ps_parse_type_reference_array(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ARRAY")

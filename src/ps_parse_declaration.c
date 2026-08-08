@@ -315,13 +315,14 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
  */
 bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
 {
-    // NB: adds symbols to current block symbol table, does not produce any new AST nodes
-
     PARSE_BEGIN("TYPE", "");
+
+    // Expect TYPE
     EXPECT_TOKEN(PS_TOKEN_TYPE);
     READ_NEXT_TOKEN
-    if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+
+    // Expect IDENTIFIER
+    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
 
     do
     {
