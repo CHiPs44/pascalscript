@@ -6,12 +6,18 @@
 Program TypeDef1;
 
 Type
-    Subrange = 1..10;
+    Subrange1To10 = 1..10;
+    Letter = 'A'..'Z';
 
 Var
-    N: Subrange;
+    N: vSubrange1To10;
+    L: Letter;
 
 Begin
-    N := 1;
+    N := 5;
     WriteLn(N);
+    L := 'X';
+    WriteLn(L);
+    // N := 42; // <= ERROR 177 Out of range
+    // WriteLn(N);
 End.

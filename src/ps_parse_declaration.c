@@ -318,24 +318,20 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
     // NB: adds symbols to current block symbol table, does not produce any new AST nodes
 
     PARSE_BEGIN("TYPE", "");
-    (void)start_line;
-    (void)start_column;
-
     EXPECT_TOKEN(PS_TOKEN_TYPE);
     READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
-    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    // do
-    // {
-    //     if (!ps_parse_type_definition(compiler, block))
-    //         TRACE_ERROR("TYPE_DEFINITION");
-    //     EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-    //     READ_NEXT_TOKEN
-    // } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
+    do
+    {
+        if (!ps_parse_type_definition(compiler, block))
+            TRACE_ERROR("TYPE_DEFINITION");
+        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN
+    } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
-    // PARSE_END("OK")
+    PARSE_END("OK")
 }
 
 /**

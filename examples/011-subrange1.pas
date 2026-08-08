@@ -6,9 +6,14 @@
 Program Subrange1;
 
 Var
-    I: 1..10;
+    N: 1..10;
+    L: 'A'..'Z';
 
 Begin
-    I := 5;
-    WriteLn(I);
+    N := 5;
+    WriteLn(N);
+    L := 'X';
+    WriteLn(L);
+    // N := 42; // <= ERROR 177 Out of range
+    // WriteLn(N);
 End.
