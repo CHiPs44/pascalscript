@@ -136,13 +136,24 @@ bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, 
         if (type_def == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         type_def->def.s.max = (ps_string_len)len;
-        ps_value *value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+        ps_value *type_value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+        if (type_value == NULL)
+        {
+            ps_type_definition_free(type_def);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        }
         ps_identifier name = {0};
         if (type_name == NULL)
             snprintf(name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
+        *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, type_value);
+        if (*type_symbol == NULL)
+        {
+            ps_type_definition_free(type_def);
+            ps_value_free(type_value);
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        }
     }
     else
     {
@@ -311,7 +322,13 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
     if (advance)
+    {
         READ_NEXT_TOKEN
+        // TODO check if this can be valid
+        ps_type_definition *type_def = (*type_symbol)->value->type->value->data.t;
+        if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
+            TRACE_ERROR("TYPE_DEFINITION_REGISTER")
+    }
 
     PARSE_END("OK")
 }
