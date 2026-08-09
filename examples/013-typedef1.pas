@@ -15,7 +15,6 @@ Type
     Subrange2 = ONE..TEN;
     Letter = 'A'..'Z';
     Color = (Red, Green, Blue);
-    // AnsiColor = (Black, Red, Green, Yellow, Blue, Magenta, Cyan, White);
 
 Var
     N1: Subrange1;
