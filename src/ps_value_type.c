@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ps_value_types.h"
+#include "ps_value_type.h"
 
 char *ps_type_names[] = {"UNKNOWN", "NODE",   "REAL",     "INTEGER",    "UNSIGNED", "BOOLEAN",
                          "CHAR",    "STRING", "TYPE_DEF", "EXECUTABLE", "SUBRANGE", "ENUM",

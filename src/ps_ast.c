@@ -603,7 +603,7 @@ ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *binary_operat
 }
 
 // =============================================================================
-// PS_AST_LITERAL_VALUE: integer, real, string, boolean, char
+// PS_AST_LITERAL_VALUE: integer, real, string, boolean, char, enum
 // =============================================================================
 
 ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_value literal)
@@ -611,7 +611,7 @@ ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_val
     assert(literal.type != NULL);
     assert(literal.type == &ps_system_boolean || literal.type == &ps_system_char ||
            literal.type == &ps_system_integer || literal.type == &ps_system_real || literal.type == &ps_system_string ||
-           literal.type == &ps_system_unsigned);
+           literal.type == &ps_system_unsigned || literal.type->value->data.t->type == PS_TYPE_ENUM);
     ps_ast_value *literal_node =
         (ps_ast_value *)ps_ast_create_node(line, column, PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, sizeof(ps_ast_value));
     if (literal_node == NULL)

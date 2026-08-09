@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_VALUE_TYPES
-#define _PS_VALUE_TYPES
+#ifndef _PS_VALUE_TYPE
+#define _PS_VALUE_TYPE
 
 #ifdef __cplusplus
 extern "C"
@@ -42,4 +42,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_VALUE_TYPES */
+#endif /* _PS_VALUE_TYPE */

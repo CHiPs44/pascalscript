@@ -57,10 +57,6 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
 
 /**
  * @brief Register type definition in symbol table
- * @details
- *  - Allocate value for type definition
- *  - Allocate symbol for type definition
- *  - Register type symbol in symbol table
  */
 static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *block, const char *name,
                                         ps_type_definition *type_def, ps_symbol **symbol)
@@ -76,6 +72,7 @@ static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *blo
         ps_type_definition_free(type_def);
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
+
     // Allocate symbol for type definition
     *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, value);
     if (*symbol == NULL)
@@ -84,6 +81,7 @@ static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *blo
         ps_type_definition_free(type_def);
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
+
     // Register type symbol in symbol table
     if (!ps_compiler_add_symbol(compiler, block, *symbol))
     {

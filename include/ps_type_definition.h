@@ -15,7 +15,7 @@
 #include "ps_system_types.h"
 #include "ps_value.h"
 #include "ps_value_data.h"
-#include "ps_value_types.h"
+#include "ps_value_type.h"
 
 #ifdef __cplusplus
 extern "C"
