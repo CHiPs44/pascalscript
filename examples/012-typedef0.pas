@@ -12,10 +12,13 @@ Type
 Var
     I : MyInteger1;
     J : MyInteger2;
+    K : Integer;
 
 Begin
     I := 42;
-    WriteLn(I);
+    Write(I, ' <= 42 expected: '); If I = 42 Then WriteLn('OK') Else WriteLn('KO');
     J := 43;
-    WriteLn(J);
+    Write(J, ' <= 43 expected: '); If J = 43 Then WriteLn('OK') Else WriteLn('KO');
+    K := J + 1;
+    Write(K, ' <= 44 expected: '); If K = 44 Then WriteLn('OK') Else WriteLn('KO');
 End.
