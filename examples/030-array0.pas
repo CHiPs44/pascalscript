@@ -10,15 +10,16 @@ Type
 
 Var
     Numbers: NumberArray;
-    I, N: Integer;
+//     I, N: Integer;
 
 Begin
-    N := 1;
-    For I := 1 To 10 Do
-    Begin
-        Numbers[I] := N;
-        N := N * 2;
-    End;
-    For I := 1 To 10 Do
-        WriteLn('Numbers[', I:2, '] = ', Numbers[I]:4);
+    Numbers[1] := 1;
+    // N := 1;
+    // For I := 1 To 10 Do
+    // Begin
+    //     Numbers[I] := N;
+    //     N := N * 2;
+    // End;
+    // For I := 1 To 10 Do
+    //     WriteLn('Numbers[', I:2, '] = ', Numbers[I]:4);
 End.

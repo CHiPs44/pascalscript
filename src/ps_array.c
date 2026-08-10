@@ -197,23 +197,23 @@ ps_error ps_array_set_value(ps_symbol *array_var, uint8_t dimensions, const ps_v
     return PS_ERROR_NONE;
 }
 
-void ps_array_debug_values(FILE *out, ps_symbol *array_var)
+void ps_array_debug_values(FILE *output, ps_symbol *array_var)
 {
-    if (out == NULL)
-        out = stderr;
-    fprintf(out, "========== ARRAY: %s ==========\n", array_var->name);
+    if (output == NULL)
+        output = stderr;
+    fprintf(output, "========== ARRAY: %s ==========\n", array_var->name);
     const ps_type_definition *type_def = ps_array_get_type_def(array_var);
-    ps_type_definition_debug(out, "TYPE_DEF ", type_def);
+    ps_type_definition_debug(output, "TYPE_DEF ", type_def);
     const ps_symbol *subrange = ps_array_get_subrange(array_var);
-    ps_symbol_debug(out, "SUBRANGE ", subrange);
+    ps_symbol_debug(output, "SUBRANGE ", subrange);
     ps_symbol *item_type = ps_array_get_item_type(array_var);
     ps_value value = {.allocated = false, .type = item_type, .data.v = NULL};
     ps_unsigned count = array_var->value->data.a->count;
-    fprintf(out, "count=%u\n", count);
+    fprintf(output, "count=%u\n", count);
     for (ps_unsigned i = 0; i < count; i += 1)
     {
         value.data = array_var->value->data.a->values[i];
-        fprintf(out, " - %s[%u] = %s\n", array_var->name, i, ps_value_get_debug_string(&value));
+        fprintf(output, " - %s[%u] = %s\n", array_var->name, i, ps_value_get_debug_string(&value));
     }
-    fprintf(out, "\n");
+    fprintf(output, "\n");
 }

@@ -37,7 +37,8 @@ ps_string *ps_string_alloc(ps_string_len max)
 
 ps_string *ps_string_free(ps_string *s)
 {
-    ps_memory_free(PS_MEMORY_STRING, s);
+    if (s != NULL)
+        ps_memory_free(PS_MEMORY_STRING, s);
     return NULL;
 }
 

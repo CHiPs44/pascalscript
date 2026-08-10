@@ -148,11 +148,11 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     assert(type_symbol != NULL);
     // Variable handle is its index in block variables
     ps_value_data data = {.h = (ps_handle)(block->n_vars++)};
-    if (ps_type_definition_is_array(type_symbol->value->data.t))
-    {
-        return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
-                                             "Array variables are not implemented yet");
-    }
+    // if (ps_type_definition_is_array(type_symbol->value->data.t))
+    // {
+    //     return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
+    //                                          "Array variables are not implemented yet");
+    // }
     ps_value *value = ps_value_alloc(type_symbol, data);
     ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
     if (variable == NULL)
@@ -236,7 +236,6 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         return ps_compiler_set_error_message(compiler, error, "Could not read next token at %d/%d", lexer->start_line,
                                              lexer->start_column);
     }
-    ps_token_debug(stderr, "FIRST TOKEN\t", &lexer->current_token);
     *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
     if (*program == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);

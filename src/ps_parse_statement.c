@@ -112,80 +112,73 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
-// bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_ast_node *statement, ps_symbol
-// *variable)
-// {
-//     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
+bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable,
+                               ps_ast_variable **lvalue)
+{
+    PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
-//     ps_value result = {.allocated = false, .type = &ps_system_none, .data.v = NULL};
-//     ps_symbol *item_type = ps_array_get_subrange(variable);
-//     u_int8_t dimensions = ps_array_get_dimensions(variable);
-//     if (dimensions > 8)
-//         RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-//     ps_value indexes[8] = {0};
-//     int dimension = 0;
-//     // Initialize index types for each dimension
-//     bool loop = true;
-//     do
-//     {
-//         indexes[dimension].allocated = false;
-//         indexes[dimension].type = item_type;
-//         indexes[dimension].data.v = NULL;
-//         if (!loop)
-//             break;
-//         dimension += 1;
-//         item_type = item_type->value->type->value->data.t->def.a.subrange;
-//         if (item_type->kind != PS_TYPE_ARRAY)
-//             loop = false;
-//     } while (true);
+    // Check array dimensions
+    int dimensions = ps_array_get_dimensions(variable->value->type);
+    if (dimensions == 0)
+        RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
+    if (dimensions > PS_ARRAY_MAX_DIMENSIONS)
+        RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+    if (dimensions > 1)
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    ps_ast_node *indexes[dimensions];
 
-//     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
-//     READ_NEXT_TOKEN
-//     do
-//     {
-//         // At least one index
-//         if (!ps_parse_expression(compiler, &indexes[dimension]))
-//             TRACE_ERROR("INDEX")
-//         dimension += 1;
-//         // ',' begins another index
-//         if (lexer->current_token.type == PS_TOKEN_COMMA)
-//         {
-//             // Too many indexes?
-//             if (dimension == dimensions)
-//                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-//             READ_NEXT_TOKEN
-//             continue;
-//         }
-//         // ']' ends indexes (and loop)
-//         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
-//         {
-//             // Not enough indexes?
-//             if (dimension != dimensions)
-//                 RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-//             READ_NEXT_TOKEN
-//             break;
-//         }
-//         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-//     } while (true);
-//     // Check for ':='
-//     EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-//     READ_NEXT_TOKEN
-//     // Parse expression for value, expected type is item type
-//     result.type = item_type;
-//     if (!ps_parse_expression(compiler, &result))
-//         TRACE_ERROR("EXPRESSION1")
-//     // if (mode == MODE_EXEC)
-//     // {
-//     //     ps_error error = ps_array_set_value(variable, &indexes, &result, compiler->range_check);
-//     //     if (error != PS_ERROR_NONE)
-//     //     {
-//     //         compiler->error = error;
-//     //         TRACE_ERROR("ARRAY_ASSIGN")
-//     //     }
-//     // }
+    // Parse indexes enclosed in '[' and ']', separated by ','
+    EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+    READ_NEXT_TOKEN
+    int dimension = 0;
+    do
+    {
+        // At least one index
+        ps_ast_node *index = NULL;
+        if (!ps_parse_expression(compiler, block, &index))
+            TRACE_ERROR("INDEX")
+        indexes[dimension] = index;
+        dimension += 1;
+        // ',' begins another index
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            // Too many indexes?
+            if (dimension >= dimensions)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN
+            continue;
+        }
+        // ']' ends indexes (and loop)
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+        {
+            // Not enough indexes?
+            if (dimension != dimensions)
+                RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
+            READ_NEXT_TOKEN
+            break;
+        }
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    } while (true);
 
-//     PARSE_END("OK")
-// }
+    // Check for ':='
+    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
+    READ_NEXT_TOKEN
+
+    // Parse expression for assignement value
+    ps_ast_node *rvalue = NULL;
+    if (!ps_parse_expression(compiler, block, &rvalue))
+        TRACE_ERROR("EXPRESSION1")
+    // TODO Check if rvalue's type is compatible with array's item type
+
+    // Create statement: lvalue := rvalue
+    ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, block, PS_AST_LVALUE,
+                                                                 variable, dimensions, (ps_ast_node **)(&indexes));
+    if (ast_variable == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    *lvalue = ast_variable;
+
+    PARSE_END("OK")
+}
 
 /**
  * Parse assignment:
@@ -205,6 +198,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     assert(block != NULL);
     assert(assignment_ptr != NULL);
     assert(variable != NULL);
+
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
     ps_ast_variable *lvalue = NULL;
     ps_ast_node *rvalue = NULL;
@@ -212,15 +206,15 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     // IDENTIFIER
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
     {
-        compiler->error = PS_ERROR_ASSIGN_TO_CONST;
-        ps_compiler_set_message(compiler, "Constant '%s' cannot be assigned", variable->name);
-        TRACE_ERROR("CONSTANT");
+        ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
+                                      variable->name);
+        TRACE_ERROR("CONSTANT!");
     }
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
-        compiler->error = PS_ERROR_EXPECTED_VARIABLE;
-        ps_compiler_set_message(compiler, "Symbol '%s' is not a variable", variable->name);
-        TRACE_ERROR("VARIABLE");
+        ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Symbol '%s' is not a variable",
+                                      variable->name);
+        TRACE_ERROR("VARIABLE!");
     }
 
     if (compiler->debug >= PS_DEBUG_VERBOSE)
@@ -229,23 +223,16 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
         // => array[index] := expression
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-        // if (!ps_parse_assignment_array(compiler, variable))
-        //     TRACE_ERROR("ARRAY")
+        // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+        if (!ps_parse_assignment_array(compiler, block, variable, &lvalue))
+            TRACE_ERROR("ARRAY")
     }
     else
     {
-        if (compiler->debug >= PS_DEBUG_VERBOSE)
-            fprintf(stderr, "\nINFO\tASSIGNMENT: #2 variable '%s' type is '%s'\n", variable->name,
-                    ps_type_definition_get_name(variable->value->type->value->data.t));
         lvalue = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
-    if (compiler->debug >= PS_DEBUG_VERBOSE)
-        fprintf(stderr, "DEBUG\tLValue is node of kind '%s' at %p\n", ps_ast_node_get_kind_name(lvalue->kind),
-                (void *)lvalue);
-    ps_ast_debug_node(1, (ps_ast_node *)lvalue);
 
     // ':='
     EXPECT_TOKEN(PS_TOKEN_ASSIGN);
@@ -256,6 +243,8 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     // RVALUE / EXPRESSION
     if (!ps_parse_expression(compiler, block, &rvalue))
         TRACE_ERROR("EXPRESSION1");
+
+    // Create assignement
     ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
     if (assignment == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
