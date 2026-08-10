@@ -8,10 +8,10 @@ Program TypeDef0;
 Type
     MyInteger = Integer;
 
-Var
-    I : MyInteger;
+// Var
+//     I : MyInteger;
 
 Begin
-    I := 42;
-    WriteLn(I);
+    // I := 42;
+    // WriteLn(I);
 End.

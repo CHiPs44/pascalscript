@@ -240,7 +240,13 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     {
         /* ********** Base types ********** */
     case PS_TOKEN_INTEGER:
-        *type_symbol = &ps_system_integer;
+        symbol = &ps_system_integer;
+        if (type_name != NULL)
+        {
+            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+        }
+        advance = false;
+        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_UNSIGNED:
         *type_symbol = &ps_system_unsigned;
@@ -254,23 +260,23 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     case PS_TOKEN_CHAR:
         *type_symbol = &ps_system_char;
         break;
+        /* ********** Other types ********** */
     case PS_TOKEN_STRING:
         advance = false;
         if (!ps_parse_type_reference_string(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
         break;
-        /* ********** Other types ********** */
     case PS_TOKEN_CHAR_VALUE:
     case PS_TOKEN_INTEGER_VALUE:
     case PS_TOKEN_MINUS:
     case PS_TOKEN_UNSIGNED_VALUE:
-        // => SUBRANGE
+        // => SUBRANGE definition
         advance = false;
         if (!ps_parse_type_reference_subrange(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
         break;
     case PS_TOKEN_LEFT_PARENTHESIS:
-        // => ENUMERATION
+        // => ENUMERATION definition
         advance = false;
         if (!ps_parse_type_reference_enum(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_ENUM")
@@ -322,10 +328,10 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     if (advance)
     {
         READ_NEXT_TOKEN
-        // TODO check if this can be valid
-        ps_type_definition *type_def = (*type_symbol)->value->type->value->data.t;
-        if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
-            TRACE_ERROR("TYPE_DEFINITION_REGISTER")
+        // // TODO check if this can be valid
+        // ps_type_definition *type_def = (*type_symbol)->value->type->value->data.t;
+        // if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
+        //     TRACE_ERROR("REGISTER")
     }
 
     PARSE_END("OK")

@@ -617,7 +617,6 @@ ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_val
     if (literal_node == NULL)
         return NULL;
     literal_node->value = literal;
-    literal_node->value = literal;
     return literal_node;
 }
 
