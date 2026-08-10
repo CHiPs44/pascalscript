@@ -241,31 +241,33 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         /* ********** Base types ********** */
     case PS_TOKEN_INTEGER:
         symbol = &ps_system_integer;
-        if (type_name != NULL)
-        {
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-        }
-        advance = false;
-        READ_NEXT_TOKEN
         break;
     case PS_TOKEN_UNSIGNED:
-        *type_symbol = &ps_system_unsigned;
+        symbol = &ps_system_unsigned;
         break;
     case PS_TOKEN_REAL:
-        *type_symbol = &ps_system_real;
+        symbol = &ps_system_real;
         break;
     case PS_TOKEN_BOOLEAN:
-        *type_symbol = &ps_system_boolean;
+        symbol = &ps_system_boolean;
         break;
     case PS_TOKEN_CHAR:
-        *type_symbol = &ps_system_char;
+        symbol = &ps_system_char;
         break;
-        /* ********** Other types ********** */
+        /* ********** String type ********** */
     case PS_TOKEN_STRING:
+        // => String[MAX_LENGTH] or String
         advance = false;
         if (!ps_parse_type_reference_string(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
+        if (*type_symbol == &ps_system_string)
+        {
+            symbol = *type_symbol;
+            *type_symbol = NULL;
+            advance = true;
+        }
         break;
+        /* ********** Other types ********** */
     case PS_TOKEN_CHAR_VALUE:
     case PS_TOKEN_INTEGER_VALUE:
     case PS_TOKEN_MINUS:
@@ -309,8 +311,7 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         }
         else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
         {
-            *type_symbol = symbol;
-            READ_NEXT_TOKEN
+            advance = true;
         }
         else
             RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
@@ -327,11 +328,21 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     }
     if (advance)
     {
+        if (symbol == NULL)
+            RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
         READ_NEXT_TOKEN
-        // // TODO check if this can be valid
-        // ps_type_definition *type_def = (*type_symbol)->value->type->value->data.t;
-        // if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
-        //     TRACE_ERROR("REGISTER")
+        if (type_name == NULL)
+        {
+            // return existing type
+            *type_symbol = symbol;
+        }
+        else
+        {
+            // register new type
+            ps_type_definition *type_def = symbol->value->data.t;
+            if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
+                TRACE_ERROR("REGISTER")
+        }
     }
 
     PARSE_END("OK")

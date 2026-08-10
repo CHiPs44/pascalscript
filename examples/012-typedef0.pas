@@ -6,12 +6,16 @@
 Program TypeDef0;
 
 Type
-    MyInteger = Integer;
+    MyInteger1 = Integer;
+    MyInteger2 = MyInteger1;
 
-// Var
-//     I : MyInteger;
+Var
+    I : MyInteger1;
+    J : MyInteger2;
 
 Begin
-    // I := 42;
-    // WriteLn(I);
+    I := 42;
+    WriteLn(I);
+    J := 43;
+    WriteLn(J);
 End.

@@ -400,6 +400,8 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
         // TYPE_REFERENCE
         if (!ps_parse_type_reference(compiler, block, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
+        if (type_symbol == NULL)
+            RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
         // ';'
         EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
         // Add variable(s) to symbol table of current block
