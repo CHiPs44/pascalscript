@@ -115,6 +115,9 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
     return item_type;
 }
 
+/**
+ * @brief Get the offset of an array element in the array data.
+ */
 ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes,
                                    ps_unsigned *final_offset)
 {
@@ -134,7 +137,7 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t dimension
     if (type_def->def.a.dimensions > dimensions)
         return PS_ERROR_TOO_MANY_DIMENSIONS;
     // Collect all subranges for each dimension
-    ps_symbol *subranges[dimensions];
+    ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
     ps_symbol *subrange = ps_array_get_subrange(array_var);
     for (uint8_t i = 0; i < dimensions; i += 1)
     {
