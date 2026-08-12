@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include <stdio.h>
+#include <errno.h>
 #include <string.h>
 
 #include "ps_array.h"
@@ -55,8 +55,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
     {
-        errno = ENONEM;
-        return ps_interpreter_free(interpreter);
+        return ps_interpreter_free(interpreter); // errno = ENONEM;
     }
     for (ps_handle i = 0; i < system->n_vars; i++)
     {
@@ -133,7 +132,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
     assert(NULL != block);
     assert(NULL != frame);
 
-    size_t count = block->n_vars;
+    // size_t count = block->n_vars;
     // if (block->signature != NULL)
     // {
     //     count += block->signature->parameter_count;
@@ -143,22 +142,31 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
 
     for (int b = 0; b < block->symbols->buckets; b++)
     {
+        // Empty bucket? => next
         if (block->symbols->buckets[b] == NULL)
             continue;
         for (int i = 0; i < block->symbols->buckets[b]->size; i++)
         {
             ps_symbol *symbol = block->symbols->buckets[b]->symbols[i];
+            // Null or not a variable? => next
             if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_VARIABLE)
                 continue;
+            // Array? => allocate data
             ps_type_definition *type_def = ps_array_get_type_def(symbol);
-            if (type_def == NULL)
+            if (type_def != NULL)
+            {
+                // Allocate the array
+                ps_array_data *data = ps_array_alloc_data(symbol);
+                if (data == NULL)
+                    return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
+                                                            "Could not allocate array data for %s", symbol->name);
+                frame->data[i].a = data;
                 continue;
-            size_t n_elements = ps_array_get_subrange(type_def);
-            ps_value_data *data = &frame->data[symbol->index];
-            data->a = ps_memory_malloc(PS_MEMORY_STACK, array_type->size);
-            if (data->a == NULL)
-                return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
-            memset(data->a, 0, array_type->size);
+            }
+            // String? => allocate data
+            if (ps_value_is_string(symbol->value)){
+                ps_string *data = ps_string_alloc(type_def);
+            }
         }
     }
 
@@ -291,7 +299,6 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
         return false;
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Found block %s of type %s\n", frame->block->name,
                        ps_ast_node_get_kind_name(frame->block->kind));
-
 
     // Copy the value to the variable
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copying value %s\n", ps_value_get_debug_string(value));

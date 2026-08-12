@@ -66,6 +66,9 @@ extern "C"
     /** @brief Normalize symbol name (makes it UPPERCASE) in place (no string copy) */
     void ps_symbol_normalize_name(ps_symbol *symbol);
 
+    /** @brief Get type definition from type or variable symbol */
+    ps_type_definition *ps_symbol_get_type_def(const ps_symbol *var_or_type);
+
     /** @brief Get hash key of symbol name (using DJB2's algorithm) */
     ps_symbol_hash_key ps_symbol_get_hash_key(const char *name);
 

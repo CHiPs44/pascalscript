@@ -60,6 +60,27 @@ void ps_symbol_normalize_name(ps_symbol *symbol)
             *name++ += ('A' - 'a');
 }
 
+ps_type_definition *ps_symbol_get_type_def(const ps_symbol *var_or_type)
+{
+    if (var_or_type == NULL || var_or_type->value == NULL || var_or_type->value->type == NULL)
+        return NULL;
+    const ps_symbol *type = NULL;
+    if (var_or_type->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
+    {
+        type = var_or_type;
+    }
+    else if (var_or_type->kind == PS_SYMBOL_KIND_VARIABLE)
+    {
+        type = var_or_type->value->type;
+    }
+    else
+    {
+        return NULL;
+    }
+    ps_type_definition *type_def = type->value->data.t;
+    return type_def;
+}
+
 typedef struct s_ps_symbol_kind_name
 {
     ps_symbol_kind kind;

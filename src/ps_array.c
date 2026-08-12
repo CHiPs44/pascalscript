@@ -15,33 +15,30 @@
 
 bool ps_array_debug = false;
 
-ps_array_data *ps_array_alloc_data(const ps_symbol *array_type)
+ps_array_data *ps_array_alloc_data(const ps_symbol *array)
 {
     if (ps_array_debug)
-        ps_symbol_debug(stderr, "ps_array_alloc_data, array_type: ", array_type);
-    const ps_type_definition *type_def = array_type->value->data.t;
-    if (ps_array_debug)
-        ps_type_definition_debug(stderr, "ps_array_alloc_data, type_def: ", type_def);
-    ps_array_data *array_data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data));
-    if (array_data == NULL)
+        ps_symbol_debug(stderr, "ps_array_alloc_data, array_type: ", array);
+    const ps_type_definition *type_def = ps_array_get_type_def(array);
+    if (type_def == NULL || type_def->def.a.dimensions < 1)
         return NULL;
-    ps_unsigned count = ps_subrange_get_count(type_def->def.a.subrange->value->data.t);
-    if (ps_array_debug)
-        fprintf(stderr, " DEBUG\tps_array_alloc, size: %u * %zu = %zu\n", count, sizeof(ps_value_data),
-                count * sizeof(ps_value_data));
-    if (count == PS_UNSIGNED_MAX)
+    ps_unsigned total = 1;
+    ps_unsigned count;
+    for (uint8_t i = 0; i < type_def->def.a.dimensions; i++)
     {
-        ps_memory_free(PS_MEMORY_VALUE, array_data);
-        return NULL;
+        count = ps_subrange_get_count(type_def->def.a.subranges[i]->value->data.t);
+        if (count == PS_UNSIGNED_MAX)
+            return NULL;
+        total *= count;
     }
-    array_data->count = count;
-    array_data->values = ps_memory_calloc(PS_MEMORY_VALUE, count, sizeof(ps_value_data));
-    if (array_data->values == NULL)
-    {
-        ps_memory_free(PS_MEMORY_VALUE, array_data);
+    if (ps_array_debug)
+        fprintf(stderr, " DEBUG\tps_array_alloc_data, size: %u * %zu = %zu\n", total, sizeof(ps_value_data),
+                total * sizeof(ps_value_data));
+    ps_array_data *data = ps_memory_malloc(PS_MEMORY_VALUE, sizeof(ps_array_data) + total * sizeof(ps_value_data));
+    if (data == NULL)
         return NULL;
-    }
-    return array_data;
+    data->count = total;
+    return data;
 }
 
 ps_array_data *ps_array_free_data(ps_array_data *array_data)
@@ -55,34 +52,9 @@ ps_array_data *ps_array_free_data(ps_array_data *array_data)
 
 ps_type_definition *ps_array_get_type_def(const ps_symbol *var_or_type)
 {
-    if (ps_array_debug)
-        ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => array    : ", var_or_type);
-    if (var_or_type == NULL || var_or_type->value == NULL || var_or_type->value->type == NULL)
-        return NULL;
-    const ps_symbol *type = NULL;
-    if (var_or_type->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
-    {
-        type = var_or_type;
-        if (ps_array_debug)
-            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type_def : ", type);
-    }
-    else if (var_or_type->kind == PS_SYMBOL_KIND_VARIABLE)
-    {
-        type = var_or_type->value->type;
-        if (ps_array_debug)
-            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => variable : ", type);
-    }
-    else
-    {
-        if (ps_array_debug)
-            ps_symbol_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type/var!: ", var_or_type);
-        return NULL;
-    }
-    ps_type_definition *type_def = type->value->data.t;
+    ps_type_definition *type_def = ps_symbol_get_type_def(var_or_type);
     if (!ps_type_definition_is_array(type_def))
         return NULL;
-    if (ps_array_debug)
-        ps_type_definition_debug(stderr, "PS_ARRAY_GET_TYPE_DEF, => type/var!: ", type_def);
     return type_def;
 }
 
@@ -92,10 +64,12 @@ uint8_t ps_array_get_dimensions(const ps_symbol *array_type)
     return type_def == NULL ? 0 : type_def->def.a.dimensions;
 }
 
-ps_symbol *ps_array_get_subrange(const ps_symbol *array_type)
+ps_symbol *ps_array_get_subrange(const ps_symbol *array_type, uint8_t dimension)
 {
     const ps_type_definition *type_def = ps_array_get_type_def(array_type);
-    return type_def == NULL ? NULL : type_def->def.a.subrange;
+    if (type_def == NULL || dimension >= type_def->def.a.dimensions)
+        return NULL;
+    return type_def->def.a.subranges[dimension];
 }
 
 ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)

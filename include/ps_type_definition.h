@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "ps_config.h"
+#include "ps_subrange.h"
 #include "ps_symbol.h"
 #include "ps_system_types.h"
 #include "ps_value.h"
@@ -33,32 +34,6 @@ extern "C"
         ps_symbol **values; /** @brief TODO use a VLA - Array of symbols for each item in the enumeration */
     } __attribute__((__packed__)) ps_type_definition_enum;
 
-    typedef struct s_ps_type_definition_subrange_char
-    {
-        ps_char min;
-        ps_char max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_char;
-
-    typedef struct s_ps_type_definition_subrange_integer
-    {
-        ps_integer min;
-        ps_integer max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_integer;
-
-    typedef struct s_ps_type_definition_subrange_unsigned
-    {
-        ps_unsigned min;
-        ps_unsigned max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
-
-    typedef ps_unsigned ps_enum_value;
-    typedef struct s_ps_type_definition_subrange_enum
-    {
-        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_enum_value min;      /** @brief Minimum value in the enumeration for the subrange      */
-        ps_enum_value max;      /** @brief Maximum value in the enumeration for the subrange      */
-    } __attribute__((__packed__)) ps_type_definition_subrange_enum;
-
     typedef struct s_ps_type_definition_subrange
     {
         union {
@@ -68,6 +43,8 @@ extern "C"
             ps_type_definition_subrange_enum e;
         };
     } __attribute__((__packed__)) ps_type_definition_subrange;
+
+#define PS_TYPE_DEFINITION_SUBRANGE_SIZE sizeof(ps_type_definition_subrange)
 
     /** @brief Sets are stored in 32 bytes as a 256 bits field,
      *         each value of referenced enumeration or Char is corresponding

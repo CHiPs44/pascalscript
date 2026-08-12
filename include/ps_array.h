@@ -21,8 +21,10 @@ extern "C"
     typedef struct s_ps_array_data
     {
         ps_unsigned count;
-        ps_value_data *values;
+        ps_value_data values[];
     } ps_array_data;
+
+    #define PS_ARRAY_DATA_SIZE sizeof(ps_array_data)
 
     /** @brief Allocate array and values */
     ps_array_data *ps_array_alloc_data(const ps_symbol *type_symbol);
