@@ -37,6 +37,8 @@ extern "C"
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         ps_logger *logger;           /** @brief Logger for error and debug messages                            */
+        uint16_t error_line;         /** @brief Line number of error                                           */
+        uint16_t error_column;       /** @brief Column number of error                                         */
         bool range_check;            /** @brief Range checking for integer and real values                     */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */

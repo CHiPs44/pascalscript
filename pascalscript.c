@@ -34,11 +34,11 @@
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/010-operators.pas"
 // #define DEBUG_SOURCE "examples/011-subrange1.pas"
-#define DEBUG_SOURCE "examples/012-typedef0.pas"
+// #define DEBUG_SOURCE "examples/012-typedef0.pas"
 // #define DEBUG_SOURCE "examples/013-typedef1.pas"
 // #define DEBUG_SOURCE "examples/021-repeat-until.pas"
 // #define DEBUG_SOURCE "examples/024-for-do.pas"
-// #define DEBUG_SOURCE "examples/030-array0.pas"
+#define DEBUG_SOURCE "examples/030-array0.pas"
 // #define DEBUG_SOURCE "examples/070-random.pas"
 // #define DEBUG_SOURCE "examples/080-math.pas"
 // #define DEBUG_SOURCE "examples/090-boolean.pas"
@@ -220,7 +220,7 @@ bool execute()
     else if (trace)
         interpreter->logger->debug_level = PS_DEBUG_TRACE;
 
-    /* List symbols BEFORE */
+    /* List symbols BEFORE execution */
     if (dump_symbols)
         ps_symbol_table_dump(NULL, "Initialization", program->symbols);
 
@@ -231,7 +231,7 @@ bool execute()
     if (verbose)
         fprintf(stderr, "================================= END EXECUTION ================================\n");
 
-    /* List symbols AFTER */
+    /* List symbols AFTER execution */
     if (dump_symbols)
         ps_symbol_table_dump(NULL, "End", program->symbols);
 

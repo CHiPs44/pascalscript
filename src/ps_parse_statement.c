@@ -112,8 +112,7 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
-bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable,
-                               ps_ast_variable **lvalue)
+bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable, ps_ast_variable **lvalue)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
@@ -160,15 +159,15 @@ bool ps_parse_assignment_array(ps_compiler *compiler, ps_ast_block *block, ps_sy
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
 
-    // Check for ':='
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-    READ_NEXT_TOKEN
+    // // Check for ':='
+    // EXPECT_TOKEN(PS_TOKEN_ASSIGN)
+    // READ_NEXT_TOKEN
 
-    // Parse expression for assignement value
-    ps_ast_node *rvalue = NULL;
-    if (!ps_parse_expression(compiler, block, &rvalue))
-        TRACE_ERROR("EXPRESSION1")
-    // TODO Check if rvalue's type is compatible with array's item type
+    // // Parse expression for assignement value
+    // ps_ast_node *rvalue = NULL;
+    // if (!ps_parse_expression(compiler, block, &rvalue))
+    //     TRACE_ERROR("EXPRESSION1")
+    // // TODO Check if rvalue's type is compatible with array's item type
 
     // Create statement: lvalue := rvalue
     ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, block, PS_AST_LVALUE,
@@ -222,9 +221,8 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
                 ps_type_definition_get_name(variable->value->type->value->data.t));
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
-        // => array[index] := expression
-        // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-        if (!ps_parse_assignment_array(compiler, block, variable, &lvalue))
+        // => array_var[index(, index)]
+        if (!ps_parse_array_lvalue(compiler, block, variable, &lvalue))
             TRACE_ERROR("ARRAY")
     }
     else

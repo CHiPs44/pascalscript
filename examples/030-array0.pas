@@ -6,7 +6,8 @@
 Program Array0;
 
 Type
-    NumberArray = Array[1..10] Of Integer;
+    MyInteger = Integer;
+    NumberArray = Array[1..10] Of MyInteger;
 
 Var
     Numbers: NumberArray;

@@ -6,6 +6,7 @@
 
 #include <assert.h>
 
+#include "ps_array.h"
 #include "ps_enum.h"
 #include "ps_executable.h"
 #include "ps_memory.h"
@@ -615,19 +616,22 @@ bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
     (void)start_line;
     (void)start_column;
 
-    ps_symbol *subranges[8] = {0};
+    ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
+    ps_symbol *subrange = NULL;
     uint8_t dimensions = 0;
     ps_symbol *item_type = NULL;
-    ps_symbol *subrange = NULL;
 
     // Expect 'ARRAY'
     if (lexer->current_token.type != PS_TOKEN_ARRAY)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+
     // Expect '['
     if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     READ_NEXT_TOKEN
+
+    // Parse dimensions
     do
     {
         // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
@@ -641,7 +645,7 @@ bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
         // ',' starts another dimension
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            if (dimensions == 8)
+            if (dimensions >= PS_ARRAY_MAX_DIMENSIONS)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
             READ_NEXT_TOKEN
             continue;
