@@ -5,6 +5,7 @@
 */
 
 #include "ps_error.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 #ifndef _PS_SYMBOL_H
@@ -15,8 +16,9 @@ extern "C"
 {
 #endif
 
-    // Forward reference to symbol value
+    // Forward references
     typedef struct s_ps_value ps_value;
+    typedef struct s_ps_type_definition ps_type_definition;
 
     /** @brief Only?! 8 kinds of symbols for now... */
     typedef enum e_ps_symbol_kind

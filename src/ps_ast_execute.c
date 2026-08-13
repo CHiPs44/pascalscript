@@ -188,20 +188,16 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     }
 
     ps_ast_variable *lvalue = assignment->lvalue;
-    ps_symbol *expected_type =  expected_type = ps_array_get_item_type(lvalue->variable);
-    }
-    else
-    {
-        expected_type = lvalue->variable->value->type;
-    }
-    ps_ast_value value_node = {.column = 0, .line = 0, .value.allocated = false, .value.type = toto, .value.data = {0}};
+    ps_symbol *expected_type = ps_array_get_item_type(lvalue->variable);
+    ps_ast_value value_node = {
+        .column = 0, .line = 0, .value.allocated = false, .value.type = expected_type, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false;
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     value.data = value_node.value.data;
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "{Expression value: %s}", ps_value_get_debug_string(&value));
 
-    if (!ps_interpreter_set_variable_value(interpreter, variable, &value))
+    if (!ps_interpreter_set_variable_value(interpreter, lvalue, &value))
         goto error;
 
     return true;

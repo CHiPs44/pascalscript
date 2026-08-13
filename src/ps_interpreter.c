@@ -140,7 +140,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
     //         count += 1;
     // }
 
-    for (int b = 0; b < block->symbols->buckets; b++)
+    for (int b = 0; b < block->symbols->table_size; b++)
     {
         // Empty bucket? => next
         if (block->symbols->buckets[b] == NULL)
@@ -164,8 +164,13 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
                 continue;
             }
             // String? => allocate data
-            if (ps_value_is_string(symbol->value)){
-                ps_string *data = ps_string_alloc(type_def);
+            if (ps_value_is_string(symbol->value))
+            {
+                ps_string *data = ps_string_alloc(type_def->def.s.max);
+                if (data == NULL)
+                    return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
+                                                            "Could not allocate string data for %s", symbol->name);
+                frame->data[i].s = data;
             }
         }
     }

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "ps_config.h"
+#include "ps_enum.h"
 #include "ps_subrange.h"
 #include "ps_symbol.h"
 #include "ps_system_types.h"
@@ -26,13 +27,44 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-    /** @brief Enumerations are stored as unsigned integers (first=0, second=1, ...) */
-    /** @example Months: (January, February, March, April, ..., December) with Ord(January)=0, ..., Ord(December)=11 */
+    typedef ps_unsigned ps_enum_value;
+
+    /**
+     * @brief Enumerations are stored as unsigned integers (first=0, second=1, ...)
+     *
+     *        Example: Months = (January, February, March, April, ..., December)
+     *                 with Ord(January)=0, ..., Ord(December)=11
+     */
     typedef struct s_ps_type_definition_enum
     {
         ps_unsigned count;  /** @brief Number of items in the enumeration */
         ps_symbol **values; /** @brief TODO use a VLA - Array of symbols for each item in the enumeration */
     } __attribute__((__packed__)) ps_type_definition_enum;
+
+    typedef struct s_ps_type_definition_subrange_char
+    {
+        ps_char min;
+        ps_char max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_char;
+
+    typedef struct s_ps_type_definition_subrange_integer
+    {
+        ps_integer min;
+        ps_integer max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_integer;
+
+    typedef struct s_ps_type_definition_subrange_unsigned
+    {
+        ps_unsigned min;
+        ps_unsigned max;
+    } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
+
+    typedef struct s_ps_type_definition_subrange_enum
+    {
+        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
+        ps_enum_value min;      /** @brief Minimum value in the enumeration for the subrange      */
+        ps_enum_value max;      /** @brief Maximum value in the enumeration for the subrange      */
+    } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
     {
@@ -82,9 +114,9 @@ extern "C"
     /** @brief Array type definition: type + dimensions + subranges */
     typedef struct s_ps_type_definition_array
     {
-        ps_symbol *item_type;   /** @brief type of elements, may be another array definition */
-        uint8_t dimensions;     /** @brief 1 for vectors, more than 1 for arrays of arrays   */
-        ps_symbol *subranges[]; /** @brief index range as subrange                           */
+        ps_symbol *item_type;  /** @brief type of elements, may be another array definition */
+        int dimensions;        /** @brief 1 for vectors, more than 1 for arrays of arrays   */
+        ps_symbol **subranges; /** @brief index range as subrange                           */
     } __attribute__((__packed__)) ps_type_definition_array;
 
     /** @brief *FUTURE* */

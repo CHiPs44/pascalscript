@@ -492,7 +492,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         EXECUTABLE_VALUE
         break;
     case PS_TYPE_ARRAY:
-        snprintf(buffer, sizeof(buffer) - 1, "ARRAY[%s] OF %s", value->type->value->data.t->def.a.subrange->name,
+        snprintf(buffer, sizeof(buffer) - 1, "ARRAY[%d] OF %s", value->type->value->data.t->def.a.dimensions,
                  value->type->value->data.t->def.a.item_type->name);
         break;
     case PS_TYPE_POINTER:

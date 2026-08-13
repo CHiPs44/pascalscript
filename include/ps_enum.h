@@ -11,6 +11,8 @@
 
 #include "ps_config.h"
 #include "ps_symbol.h"
+#include "ps_system.h"
+#include "ps_type_definition.h"
 
 #ifdef __cplusplus
 extern "C"

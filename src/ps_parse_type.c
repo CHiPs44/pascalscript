@@ -618,7 +618,7 @@ bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
 
     ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
     ps_symbol *subrange = NULL;
-    uint8_t dimensions = 0;
+    int dimensions = 0;
     ps_symbol *item_type = NULL;
 
     // Expect 'ARRAY'

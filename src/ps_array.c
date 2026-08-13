@@ -64,7 +64,7 @@ uint8_t ps_array_get_dimensions(const ps_symbol *array_type)
     return type_def == NULL ? 0 : type_def->def.a.dimensions;
 }
 
-ps_symbol *ps_array_get_subrange(const ps_symbol *array_type, uint8_t dimension)
+ps_symbol *ps_array_get_subrange(const ps_symbol *array_type, int dimension)
 {
     const ps_type_definition *type_def = ps_array_get_type_def(array_type);
     if (type_def == NULL || dimension >= type_def->def.a.dimensions)
@@ -89,61 +89,46 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
     return item_type;
 }
 
-/**
- * @brief Get the offset of an array element in the array data.
- */
-ps_error ps_array_get_value_offset(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes,
+ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions, const ps_value **indexes,
                                    ps_unsigned *final_offset)
 {
+    // Check if the array variable has the expected number of dimensions
     const ps_type_definition *type_def = ps_array_get_type_def(array_var);
-    if (ps_array_debug)
-    {
-        ps_symbol_debug(stderr, "ps_array_get_value_offset, array: ", array_var);
-        fprintf(stderr, "ps_array_get_value_offset, dimensions: %u\n", dimensions);
-        for (uint8_t i = 0; i < dimensions; i += 1)
-            ps_value_debug(stderr, "ps_array_get_value_offset, index[%u]: ", indexes[i]);
-        ps_type_definition_debug(stderr, "ps_array_get_value_offset, type_def: ", type_def);
-    }
-    if (!ps_type_definition_is_array(type_def))
+    if (type_def == NULL)
         return PS_ERROR_INVALID_PARAMETERS;
     if (type_def->def.a.dimensions < dimensions)
         return PS_ERROR_NOT_ENOUGH_DIMENSIONS;
     if (type_def->def.a.dimensions > dimensions)
         return PS_ERROR_TOO_MANY_DIMENSIONS;
-    // Collect all subranges for each dimension
-    ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
-    ps_symbol *subrange = ps_array_get_subrange(array_var);
-    for (uint8_t i = 0; i < dimensions; i += 1)
-    {
-        subranges[i] = subrange;
-        if (i < dimensions - 1)
-            subrange = ps_array_get_subrange(subrange);
-    }
+
     // Calculate offset using row-major ordering (iterate backwards, right to left)
     *final_offset = 0;
     ps_unsigned stride = 1;
     for (int i = dimensions - 1; i >= 0; i -= 1)
     {
+        ps_symbol *subrange = ps_array_get_subrange(subrange, i);
+        ps_type_definition *subrange_def = ps_symbol_get_type_def(subrange);
         // Copy given index to a local variable of the same type as subrange definition
-        ps_value index = {.allocated = false, .type = subranges[i], .data.v = NULL};
+        ps_value index = {.allocated = false, .type = subrange, .data = {0}};
         ps_error error = ps_value_copy(indexes[i], &index, true);
         if (error != PS_ERROR_NONE)
             return error;
-        ps_unsigned index_offset = ps_subrange_get_offset(subranges[i]->value->data.t, &index);
-        ps_unsigned subrange_count = ps_subrange_get_count(subranges[i]->value->data.t);
+        ps_unsigned index_offset = ps_subrange_get_offset(subrange_def, &index);
+        ps_unsigned subrange_count = ps_subrange_get_count(subrange_def);
         if (index_offset >= subrange_count)
             return PS_ERROR_OUT_OF_RANGE;
         *final_offset += stride * index_offset;
         stride *= subrange_count;
     }
+
+    // Check if the calculated offset is within the array bounds
     if (*final_offset >= array_var->value->data.a->count)
         return PS_ERROR_OUT_OF_RANGE;
-    if (ps_array_debug)
-        fprintf(stderr, "ps_array_get_value_offset, final_offset: %u\n", *final_offset);
+
     return PS_ERROR_NONE;
 }
 
-ps_error ps_array_get_value(const ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes, ps_value *value,
+ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions, const ps_value **indexes, ps_value *value,
                             bool range_check)
 {
     ps_unsigned offset = 0;
@@ -159,7 +144,7 @@ ps_error ps_array_get_value(const ps_symbol *array_var, uint8_t dimensions, cons
     return error;
 }
 
-ps_error ps_array_set_value(ps_symbol *array_var, uint8_t dimensions, const ps_value **indexes, const ps_value *value,
+ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes, const ps_value *value,
                             bool range_check)
 {
     ps_unsigned offset = 0;
@@ -174,23 +159,30 @@ ps_error ps_array_set_value(ps_symbol *array_var, uint8_t dimensions, const ps_v
     return PS_ERROR_NONE;
 }
 
-void ps_array_debug_values(FILE *output, ps_symbol *array_var)
+void ps_array_debug_type(FILE *output, ps_symbol *array_var)
 {
+    char buffer[32];
+
     if (output == NULL)
         output = stderr;
-    fprintf(output, "========== ARRAY: %s ==========\n", array_var->name);
+
     const ps_type_definition *type_def = ps_array_get_type_def(array_var);
-    ps_type_definition_debug(output, "TYPE_DEF ", type_def);
-    const ps_symbol *subrange = ps_array_get_subrange(array_var);
-    ps_symbol_debug(output, "SUBRANGE ", subrange);
-    ps_symbol *item_type = ps_array_get_item_type(array_var);
-    ps_value value = {.allocated = false, .type = item_type, .data.v = NULL};
-    ps_unsigned count = array_var->value->data.a->count;
-    fprintf(output, "count=%u\n", count);
-    for (ps_unsigned i = 0; i < count; i += 1)
+    if (type_def == NULL)
     {
-        value.data = array_var->value->data.a->values[i];
-        fprintf(output, " - %s[%u] = %s\n", array_var->name, i, ps_value_get_debug_string(&value));
+        fprintf(output, "TYPE_DEF NULL\n");
+        return;
     }
-    fprintf(output, "\n");
+    int dimensions = ps_array_get_dimensions(array_var);
+    ps_symbol *item_type = ps_array_get_item_type(array_var);
+
+    fprintf(output, "========== ARRAY: %s ==========\n", array_var->name);
+    ps_symbol_debug(output, "ITEM_TYPE ", item_type);
+    ps_type_definition_debug(output, "TYPE_DEF ", type_def);
+
+    for (int dimension = 0; dimension < dimensions; dimension += 1)
+    {
+        const ps_symbol *subrange = ps_array_get_subrange(array_var, dimension);
+        snprintf(buffer, sizeof(buffer) - 1, "SUBRANGE %d/%d ", dimension, dimensions);
+        ps_symbol_debug(output, buffer, subrange);
+    }
 }

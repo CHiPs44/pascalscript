@@ -7,6 +7,7 @@
 #include <stdbool.h>
 
 #include "ps_config.h"
+#include "ps_enum.h"
 #include "ps_symbol.h"
 #include "ps_type_definition.h"
 

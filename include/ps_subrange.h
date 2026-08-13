@@ -8,6 +8,7 @@
 #define _PS_SUBRANGE
 
 #include "ps_config.h"
+#include "ps_enum.h"
 #include "ps_symbol.h"
 #include "ps_type_definition.h"
 
@@ -15,38 +16,6 @@
 extern "C"
 {
 #endif
-
-    typedef struct s_ps_type_definition_subrange_char
-    {
-        ps_char min;
-        ps_char max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_char;
-
-    typedef struct s_ps_type_definition_subrange_integer
-    {
-        ps_integer min;
-        ps_integer max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_integer;
-
-    typedef struct s_ps_type_definition_subrange_unsigned
-    {
-        ps_unsigned min;
-        ps_unsigned max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
-
-    typedef ps_unsigned ps_enum_value;
-    typedef struct s_ps_type_definition_subrange_enum
-    {
-        ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_enum_value min;      /** @brief Minimum value in the enumeration for the subrange      */
-        ps_enum_value max;      /** @brief Maximum value in the enumeration for the subrange      */
-    } __attribute__((__packed__)) ps_type_definition_subrange_enum;
-
-    /*
-        This file is part of the PascalScript Pascal interpreter.
-        SPDX-FileCopyrightText: 2024 Christophe "CHiPs" Petit <chips44@gmail.com>
-        SPDX-License-Identifier: LGPL-3.0-or-later
-    */
 
     /** @brief Create a char based subrange type definition */
     ps_type_definition *ps_subrange_create_char(ps_char min, ps_char max);

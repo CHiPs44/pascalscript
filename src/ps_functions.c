@@ -315,7 +315,7 @@ ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *ty
             low ? ps_system_constant_boolean_true.value->data.b : ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_ARRAY:
-        ps_symbol *subrange = type_def->def.a.subrange;
+        ps_symbol *subrange = type_def->def.a.subranges[0];
         return ps_function_low_or_high_type(interpreter, subrange, result, low);
     case PS_TYPE_SUBRANGE:
         return ps_function_low_or_high_subrange(type, result, low);
