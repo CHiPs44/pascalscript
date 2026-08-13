@@ -27,8 +27,6 @@ extern "C"
     // Forward reference
     typedef struct s_ps_value ps_value;
 
-    typedef ps_unsigned ps_enum_value;
-
     /**
      * @brief Enumerations are stored as unsigned integers (first=0, second=1, ...)
      *
@@ -62,8 +60,8 @@ extern "C"
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_enum_value min;      /** @brief Minimum value in the enumeration for the subrange      */
-        ps_enum_value max;      /** @brief Maximum value in the enumeration for the subrange      */
+        ps_unsigned min;      /** @brief Minimum value in the enumeration for the subrange      */
+        ps_unsigned max;      /** @brief Maximum value in the enumeration for the subrange      */
     } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
@@ -111,7 +109,7 @@ extern "C"
         ps_string_len max;
     } __attribute__((__packed__)) ps_type_definition_string;
 
-    /** @brief Array type definition: type + dimensions + subranges */
+    /** @brief Array type definition: item type + dimensions + subranges */
     typedef struct s_ps_type_definition_array
     {
         ps_symbol *item_type;  /** @brief type of elements, may be another array definition */
@@ -129,8 +127,8 @@ extern "C"
     /** @brief *FUTURE* */
     typedef struct s_ps_type_definition_record
     {
-        uint8_t fields_count;
-        ps_type_definition_record_field *fields;
+        uint8_t count;
+        ps_type_definition_record_field **fields;
     } __attribute__((__packed__)) ps_type_definition_record;
 
     /** @brief *FUTURE* => file type definition */

@@ -43,7 +43,7 @@ ps_type_definition *ps_subrange_create_unsigned(ps_unsigned min, ps_unsigned max
     return type_def;
 }
 
-ps_type_definition *ps_subrange_create_enum(ps_symbol *symbol_enum, ps_enum_value min, ps_enum_value max)
+ps_type_definition *ps_subrange_create_enum(ps_symbol *symbol_enum, ps_unsigned min, ps_unsigned max)
 {
     ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_SUBRANGE, PS_TYPE_ENUM);
     if (type_def == NULL)

@@ -7,6 +7,7 @@
 #ifndef _PS_SYSTEM_H
 #define _PS_SYSTEM_H
 
+// #include "ps_ast.h"
 #include "ps_interpreter.h"
 #include "ps_symbol.h"
 
@@ -14,6 +15,8 @@
 extern "C"
 {
 #endif
+
+    typedef struct s_ps_ast_block ps_ast_block;
 
 #ifndef PS_SYSTEM_SYMBOL_TABLE_SIZE
 #define PS_SYSTEM_SYMBOL_TABLE_SIZE 32

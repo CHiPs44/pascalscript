@@ -331,7 +331,7 @@ char *ps_value_get_enum(const ps_value *value)
         return NULL;
     const ps_type_definition *type_def = value->type->value->data.t;
     ps_symbol **values = type_def->def.e.values;
-    ps_enum_value index = value->data.u;
+    ps_unsigned index = value->data.u;
     if (index >= type_def->def.e.count)
         return NULL;
     return values[index]->name;

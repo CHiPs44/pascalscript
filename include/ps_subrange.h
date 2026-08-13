@@ -27,12 +27,14 @@ extern "C"
     ps_type_definition *ps_subrange_create_unsigned(ps_unsigned min, ps_unsigned max);
 
     /** @brief Create an enum based subrange type definition */
-    ps_type_definition *ps_subrange_create_enum(ps_symbol *symbol_enum, ps_enum_value min, ps_enum_value max);
+    ps_type_definition *ps_subrange_create_enum(ps_symbol *symbol_enum, ps_unsigned min, ps_unsigned max);
 
     /**
      * @brief Get the number of elements in a subrange
      *
-     *        Example: 'A'..'F' will return return Ord('F') - Ord('A') e.g. 6
+     *          - 1..10 will return 10 - 1 + 1 = 10
+     *
+     *          - 'A'..'F' will return return Ord('F') - Ord('A') + 1 = 6
      *
      * @returns PS_UNSIGNED_MAX if not a subrange
      */
@@ -41,7 +43,9 @@ extern "C"
     /**
      * @brief Get the zero based offset of an index in a subrange
      *
-     *        Example: 'C' in 'A'..'F' will return Ord('C') - Ord('A') e.g. 2
+     *        - 3 in 1..10 will return 3 - 1 = 2
+     *
+     *        - 'C' in 'A'..'F' will return Ord('C') - Ord('A') + 1 = 2
      *
      * @returns PS_UNSIGNED_MAX if not a subrange or index is out of range
      */

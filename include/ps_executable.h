@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "ps_interpreter.h"
+
 #ifndef _PS_EXECUTABLE_H
 #define _PS_EXECUTABLE_H
 

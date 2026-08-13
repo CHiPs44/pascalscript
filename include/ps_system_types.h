@@ -8,6 +8,7 @@
 #define _PS_SYSTEM_TYPES_H
 
 #include "ps_config.h"
+#include "ps_system_types.h"
 
 #ifdef __cplusplus
 extern "C"

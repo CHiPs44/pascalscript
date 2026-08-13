@@ -28,12 +28,13 @@ extern "C"
 
     typedef struct s_ps_ast_variable ps_ast_variable;
 
+    /** @brief Interpreter instance: all the glue to run a Pascal program */
     typedef struct s_ps_interpreter
     {
         ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
-        ps_stack *stack;             /** @brief Stack to hold variable values                                  */
-        char message[128 - 16];      /** @brief Explanatory error message                                      */
+        ps_stack *stack;             /** @brief Stack to hold frames for variable values                       */
+        char message[128];           /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         ps_logger *logger;           /** @brief Logger for error and debug messages                            */
@@ -42,13 +43,13 @@ extern "C"
         bool range_check;            /** @brief Range checking for integer and real values                     */
         bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation                      */
         bool io_check;               /** @brief *FUTURE* stop or set IOResult on I/O error                     */
-    } /*__attribute__((__packed__))*/ ps_interpreter;
+    } ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
     /**
      * @brief Initialize interpreter and children objects
-     * @param system      symbol table for system (built-in types, constants, variables, procedures and functions)
+     * @param system      AST block for system (built-in types, constants, variables, procedures and functions)
      * @param string_heap string heap holding string constants (from compiler)
      * @param range_check enable range checking for values
      * @param bool_eval   *FUTURE* enable short circuit boolean evaluation

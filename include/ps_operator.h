@@ -18,6 +18,9 @@ extern "C"
 {
 #endif
 
+    // Forward reference
+    typedef struct s_ps_interpreter ps_interpreter;
+
     /** @brief Unary operators */
     typedef enum e_ps_operator_unary
     {
@@ -84,3 +87,4 @@ extern "C"
 #endif
 
 #endif /* _PS_OPERATOR_H */
+

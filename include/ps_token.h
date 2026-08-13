@@ -8,6 +8,7 @@
 #define _PS_TOKEN_H
 
 #include "ps_config.h"
+#include "ps_system_types.h"
 #include "ps_value.h"
 
 #ifdef __cplusplus
@@ -136,7 +137,7 @@ extern "C"
         PS_TOKEN_NOT, // logical or binary not
         PS_TOKEN_SHL, // shift left
         PS_TOKEN_SHR, // shift right
-        PS_TOKEN_IN,  // "*FUTURE*" in operator for sets, i.e. 1 in [1,2,3]
+        PS_TOKEN_IN,  // *FUTURE* in operator for sets, i.e. 1 in [1,2,3]
         // Reserved words: more than 0x8f to avoid conflict with 2 char symbols & operators
         PS_TOKEN_PROGRAM = 0x90,
         PS_TOKEN_CONST,
@@ -165,20 +166,20 @@ extern "C"
         PS_TOKEN_FOR,
         PS_TOKEN_TO,
         PS_TOKEN_DOWNTO,
-        PS_TOKEN_NIL,            // "*FUTURE*"
-        PS_TOKEN_SET,            // "*FUTURE*"
-        PS_TOKEN_RECORD,         // "*FUTURE*"
-        PS_TOKEN_WITH,           // "*FUTURE*"
-        PS_TOKEN_FILE,           // "*FUTURE*"
-        PS_TOKEN_TEXT,           // "*FUTURE*"
-        PS_TOKEN_CASE,           // "*FUTURE*"
-        PS_TOKEN_OTHERWISE,      // "*FUTURE*"
-        PS_TOKEN_GOTO,           // "*FUTURE*"
-        PS_TOKEN_LABEL,          // "*FUTURE*"
-        PS_TOKEN_UNIT,           // "*FUTURE*"
-        PS_TOKEN_USES,           // "*FUTURE*"
-        PS_TOKEN_INTERFACE,      // "*FUTURE*"
-        PS_TOKEN_IMPLEMENTATION, // "*FUTURE*"
+        PS_TOKEN_NIL,            // *FUTURE*
+        PS_TOKEN_SET,            // *FUTURE*
+        PS_TOKEN_RECORD,         // *FUTURE*
+        PS_TOKEN_WITH,           // *FUTURE*
+        PS_TOKEN_FILE,           // *FUTURE*
+        PS_TOKEN_TEXT,           // *FUTURE*
+        PS_TOKEN_CASE,           // *FUTURE*
+        PS_TOKEN_OTHERWISE,      // *FUTURE*
+        PS_TOKEN_GOTO,           // *FUTURE*
+        PS_TOKEN_LABEL,          // *FUTURE*
+        PS_TOKEN_UNIT,           // *FUTURE*
+        PS_TOKEN_USES,           // *FUTURE*
+        PS_TOKEN_INTERFACE,      // *FUTURE*
+        PS_TOKEN_IMPLEMENTATION, // *FUTURE*
         // Make sure token value fits in one byte
         PS_TOKEN_MAX = UINT8_MAX
     } ps_token_type;
