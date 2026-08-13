@@ -10,7 +10,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "ps_type_definition.h"
+/* forward declaration to avoid including ps_symbol.h here */
+typedef struct s_ps_symbol ps_symbol;
+
 #include "ps_value_data.h"
 #include "ps_value_type.h"
 
@@ -18,6 +20,9 @@
 extern "C"
 {
 #endif
+
+    /* forward declaration to avoid including ps_symbol.h here */
+    typedef struct s_ps_symbol ps_symbol;
 
     /** @brief Value: type + data + allocated */
     typedef struct s_ps_value

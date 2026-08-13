@@ -5,7 +5,6 @@
 */
 
 #include "ps_error.h"
-#include "ps_type_definition.h"
 
 #ifndef _PS_SYMBOL_H
 #define _PS_SYMBOL_H

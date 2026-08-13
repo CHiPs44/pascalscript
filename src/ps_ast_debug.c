@@ -13,6 +13,7 @@
 #include "ps_operator.h"
 #include "ps_signature.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 /** @brief Global flag to enable/disable AST debug output */

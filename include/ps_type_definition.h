@@ -13,11 +13,12 @@
 #include "ps_config.h"
 #include "ps_enum.h"
 #include "ps_subrange.h"
-#include "ps_symbol.h"
 #include "ps_system_types.h"
-#include "ps_value.h"
 #include "ps_value_data.h"
 #include "ps_value_type.h"
+
+    /* forward declarations to avoid cyclic includes */
+    typedef struct s_ps_symbol ps_symbol;
 
 #ifdef __cplusplus
 extern "C"
