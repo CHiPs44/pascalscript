@@ -6,8 +6,9 @@
 Program Array0;
 
 Type
+    MySubRange = 1..10;
     MyInteger = Integer;
-    NumberArray = Array[1..10] Of MyInteger;
+    NumberArray = Array[MySubRange] Of MyInteger;
 
 Var
     Numbers: NumberArray;

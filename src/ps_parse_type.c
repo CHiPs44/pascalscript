@@ -689,14 +689,9 @@ bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
         snprintf(name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
     else
         memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-    type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
+    type_def = ps_type_definition_create_array(item_type, dimensions, subranges);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    type_def->def.a.item_type = item_type;
-    type_def->def.a.dimensions = dimensions;
-    for (int i = 0; i < dimensions; i++)
-        type_def->def.a.subranges[i] = subranges[i];
-
     // Register new type definition in symbol table
     if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
         TRACE_ERROR("REGISTER")
