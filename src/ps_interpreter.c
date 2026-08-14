@@ -277,17 +277,45 @@ ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_a
     return frame;
 }
 
-bool ps_interpreter_set_array_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
-                                    const ps_value *value)
+bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_frame *frame,
+                                             const ps_ast_variable *variable_node, const ps_value *value)
 {
     assert(NULL != interpreter);
     assert(NULL != variable_node);
     assert(NULL != value);
 
-    // TODO
-    (void)interpreter;
-    (void)variable_node;
-    (void)value;
+    // Evaluate indexes
+    ps_symbol *variable = variable_node->variable;
+    int dimensions = ps_array_get_dimensions(variable->value->type);
+    ps_value indexes[PS_ARRAY_MAX_DIMENSIONS] = {0};
+    for (int i = 0; i < dimensions; i++)
+    {
+        ps_ast_value index_node = {.line = 0,
+                                   .column = 0,
+                                   .group = PS_AST_EXPRESSION,
+                                   .kind = PS_AST_RVALUE,
+                                   .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+        if (!ps_ast_eval_expression(interpreter, variable_node->indexes[i], &index_node))
+            return false;
+        // indexes[i] = index_node.value;
+        indexes[i].allocated = false;
+        indexes[i].type = index_node.value.type;
+        indexes[i].data = index_node.value.data;
+    }
+
+    // Set value in array data
+    ps_value_data array_data = frame->data[variable_node->variable->value->data.h];
+    // TODO /home/chips/src/pascalscript/src/ps_interpreter.c:309:41: warning: converting a packed ‘ps_value’ {aka
+    // ‘struct s_ps_value’} pointer (alignment 1) to a ‘const ps_value *’ {aka ‘const struct s_ps_value *’} pointer
+    // (alignment 4) may result in an unaligned pointer value [-Waddress-of-packed-member]
+    ps_error error = ps_array_set_value(variable, dimensions, (const ps_value **)(&indexes), &array_data, value,
+                                        interpreter->range_check);
+    if (error != PS_ERROR_NONE)
+    {
+        ps_interpreter_set_error_message(interpreter, error, "Error setting array value");
+        return false;
+    }
+    frame->data[variable_node->variable->value->data.h] = array_data;
 
     return true;
 }
@@ -311,16 +339,23 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
 
     // Copy the value to the variable
     ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copying value %s\n", ps_value_get_debug_string(value));
-    ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
-    if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
-        return false;
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
-    frame->data[ast_variable->variable->value->data.h] = variable_value.data;
-
-    ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
-    debug_value.data = frame->data[ast_variable->variable->value->data.h];
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s set to %s\n", ast_variable->variable->name,
-                       ps_value_get_debug_string(&debug_value));
+    if (ps_value_is_array(ast_variable->variable->value))
+    {
+        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s is an array\n", ast_variable->variable->name);
+        return ps_interpreter_set_variable_value_array(interpreter, frame, ast_variable, value);
+    }
+    else
+    {
+        ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
+        if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
+            return false;
+        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
+        frame->data[ast_variable->variable->value->data.h] = variable_value.data;
+        ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
+        debug_value.data = frame->data[ast_variable->variable->value->data.h];
+        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s set to %s\n", ast_variable->variable->name,
+                           ps_value_get_debug_string(&debug_value));
+    }
 
     return true;
 }

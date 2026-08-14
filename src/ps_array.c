@@ -148,18 +148,23 @@ ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions, const ps
     return error;
 }
 
-ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes, const ps_value *value,
-                            bool range_check)
+ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes, ps_value_data *array_data,
+                            const ps_value *value, bool range_check)
 {
+    ps_error error = PS_ERROR_NONE;
     ps_unsigned offset = 0;
-    ps_error error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
+
+    error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
     if (error != PS_ERROR_NONE)
         return error;
+
     ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};
     error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
         return error;
-    array_var->value->data.a->values[offset] = array_value.data;
+
+    array_data->a->values[offset] = array_value.data;
+
     return PS_ERROR_NONE;
 }
 

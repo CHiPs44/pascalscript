@@ -190,14 +190,15 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     }
 
     ps_ast_variable *lvalue = assignment->lvalue;
-    ps_symbol *expected_type = ps_array_get_item_type(lvalue->variable);
+    bool is_array = ps_value_is_array(lvalue->variable->value);
+    ps_symbol *expected_type = is_array ? ps_array_get_item_type(lvalue->variable) : lvalue->variable->value->type;
     ps_ast_value value_node = {
         .column = 0, .line = 0, .value.allocated = false, .value.type = expected_type, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
-        return false;
+        return false; // line & column of error set when evaluating expression
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     value.data = value_node.value.data;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "{Expression value: %s}", ps_value_get_debug_string(&value));
+    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Expression value: %s", ps_value_get_debug_string(&value));
 
     if (!ps_interpreter_set_variable_value(interpreter, lvalue, &value))
         goto error;

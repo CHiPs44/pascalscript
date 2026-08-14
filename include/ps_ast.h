@@ -18,7 +18,8 @@ extern "C"
 {
 #endif
 
-#define PS_AST_PACKED __attribute__((__packed__))
+#define PS_AST_PACKED
+    //  __attribute__((__packed__))
 
     /** @brief Abstract Syntax Tree node group */
     typedef enum e_ps_ast_node_group

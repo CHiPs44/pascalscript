@@ -51,8 +51,8 @@ extern "C"
                                 bool range_check);
 
     /** @brief array[indexes] := value */
-    ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes, const ps_value *value,
-                                bool range_check);
+    ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes,
+                                ps_value_data *array_data, const ps_value *value, bool range_check);
 
     /** @brief Display array type for debugging */
     void ps_array_debug_type(FILE *out, ps_symbol *array_var);

@@ -41,8 +41,12 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
     COPY_IDENTIFIER(type_name)
 
     // Check that type name does not already exist in local symbol table
-    if (ps_compiler_find_symbol(compiler, block, type_name, true) != NULL)
+    type_reference = ps_compiler_find_symbol(compiler, block, type_name, true);
+    if (type_reference != NULL)
+    {
+        ps_compiler_set_message(compiler, "Identifier '%s' already exists", type_name);
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
+    }
     READ_NEXT_TOKEN
 
     // '='
@@ -99,8 +103,8 @@ static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *blo
  * @brief Visit type reference for string type
  *   'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
  */
-bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                    const char *type_name)
+static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                           const char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_STRING", "")
     (void)start_line;
@@ -158,6 +162,358 @@ bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, 
     {
         *type_symbol = &ps_system_string;
     }
+
+    PARSE_END("OK")
+}
+
+static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                         const char *type_name)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_ENUM", "");
+    (void)start_line;
+    (void)start_column;
+
+    // Up to 256 values in an enumeration, re-allocate 16 more if exhausted
+    ps_symbol_list *list = ps_symbol_list_alloc(16, 16);
+    if (list == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+
+    // Re-check that current token is '('
+    if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
+        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN_OR_CLEANUP
+
+    // Empty enumeration not allowed
+    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
+
+    // Create enumeration type definition
+    ps_type_definition *type_def = ps_enum_create();
+    if (type_def == NULL)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+
+    // Register it
+    if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
+        GOTO_CLEANUP(compiler->error)
+
+    // Parse enumeration values
+    do // NOSONAR
+    {
+        if (list->used == 256)
+            GOTO_CLEANUP(PS_ERROR_OVERFLOW);
+        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
+            GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
+        // Check that enumeration value does not already exist:
+        //  - locally in the same enumeration
+        //  - or globally in the symbol table
+        if (ps_symbol_list_find(list, lexer->current_token.value.identifier) ||
+            (ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, true) != NULL))
+            GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
+        ps_symbol *value_symbol = ps_symbol_list_add(list, *type_symbol, lexer->current_token.value.identifier);
+        if (value_symbol == NULL)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+        if (!ps_compiler_add_symbol(compiler, block, value_symbol))
+            GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
+        READ_NEXT_TOKEN_OR_CLEANUP
+        // If next token is ',' continue with next enumeration value
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            READ_NEXT_TOKEN_OR_CLEANUP
+            continue;
+        }
+        // If next token is ')' end of enumeration definition
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
+            break;
+    } while (true);
+    READ_NEXT_TOKEN_OR_CLEANUP
+    // Copy enum values to enum type definition
+    if (!ps_enum_set_values(type_def, list->used, list->values))
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    ps_symbol_list_free(list, false);
+    PARSE_END("OK")
+cleanup:
+    // TODO? remove type symbol from table
+    ps_symbol_list_free(list, true);
+    return false;
+}
+
+static bool ps_parse_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
+                                                 ps_value_type *min_base, ps_type_definition_subrange *subrange)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MIN")
+    (void)start_line;
+    (void)start_column;
+
+    if (!ps_parse_constant_expression(compiler, block, min_value))
+        TRACE_ERROR("MIN")
+    *min_base = ps_value_get_type(min_value);
+    switch (*min_base)
+    {
+    case PS_TYPE_CHAR:
+        if (ps_value_get_type(min_value) != PS_TYPE_CHAR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
+        subrange->c.min = min_value->data.c;
+        break;
+    case PS_TYPE_INTEGER:
+        if (ps_value_get_type(min_value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        subrange->i.min = min_value->data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        if (ps_value_get_type(min_value) != PS_TYPE_UNSIGNED)
+            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
+        subrange->u.min = min_value->data.u;
+        break;
+    case PS_TYPE_ENUM:
+        if (ps_value_get_type(min_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
+        subrange->e.min = min_value->data.u;
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+
+    PARSE_END("OK")
+}
+
+static bool ps_parse_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
+                                                 ps_value_type *max_base, ps_type_definition_subrange *subrange)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MAX")
+    (void)start_line;
+    (void)start_column;
+
+    if (!ps_parse_constant_expression(compiler, block, max_value))
+        TRACE_ERROR("MAX")
+    *max_base = ps_value_get_type(max_value);
+    switch (*max_base)
+    {
+    case PS_TYPE_CHAR:
+        if (ps_value_get_type(max_value) != PS_TYPE_CHAR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
+        subrange->c.max = max_value->data.c;
+        break;
+    case PS_TYPE_INTEGER:
+        if (ps_value_get_type(max_value) != PS_TYPE_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        subrange->i.max = max_value->data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        if (ps_value_get_type(max_value) != PS_TYPE_UNSIGNED)
+            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
+        subrange->u.max = max_value->data.u;
+        break;
+    case PS_TYPE_ENUM:
+        if (ps_value_get_type(max_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
+        subrange->e.max = max_value->data.u;
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    }
+
+    PARSE_END("OK")
+}
+
+static bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
+                                                               const char *type_name, ps_symbol **type_symbol,
+                                                               ps_symbol *type,
+                                                               const ps_type_definition_subrange *subrange)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "REGISTER_TYPE_DEF")
+    (void)start_line;
+    (void)start_column;
+
+    ps_type_definition *type_def = NULL;
+    ps_identifier name = {0};
+
+    // Create type definition for subrange
+    switch (type->value->data.t->type)
+    {
+    case PS_TYPE_CHAR:
+        type_def = ps_subrange_create_char(subrange->c.min, subrange->c.max);
+        if (type_name == NULL)
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_INTEGER:
+        type_def = ps_subrange_create_integer(subrange->i.min, subrange->i.max);
+        if (type_name == NULL)
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_UNSIGNED:
+        type_def = ps_subrange_create_unsigned(subrange->u.min, subrange->u.max);
+        if (type_name == NULL)
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    case PS_TYPE_ENUM:
+        type_def = ps_subrange_create_enum(type, subrange->e.min, subrange->e.max);
+        if (type_name == NULL)
+            snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
+        else
+            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+        break;
+    default:
+        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    }
+    if (type_def == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    // Register new type definition in symbol table
+    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
+        RETURN_ERROR(compiler->error)
+
+    PARSE_END("OK")
+}
+
+static bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                             const char *type_name)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
+    (void)start_line;
+    (void)start_column;
+
+    ps_type_definition_subrange subrange = {0};
+    ps_value min_value = {0};
+    ps_value tmp_value = {0};
+    ps_value max_value = {0};
+    ps_value_type min_base = PS_TYPE_UNKNOWN;
+    ps_value_type max_base = PS_TYPE_UNKNOWN;
+
+    // *** Parse min value of subrange as a constant expression
+    if (!ps_parse_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
+        TRACE_ERROR("MIN")
+    // *** Parse '..'
+    EXPECT_TOKEN(PS_TOKEN_RANGE)
+    READ_NEXT_TOKEN
+    // *** Parse max value of subrange as a constant expression
+    if (!ps_parse_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
+        TRACE_ERROR("MAX")
+    // *** Copy value to max with same type as min
+    max_value.type = min_value.type;
+    if (!ps_compiler_copy_value(compiler, &tmp_value, &max_value))
+    {
+        ps_compiler_set_message(compiler, "Min and max value of subrange type mismatch: %s %s", min_value.type->name,
+                                tmp_value.type->name);
+        TRACE_ERROR("COPY_MAX")
+    }
+    // *** Check that subrange min is less than max
+    if ((max_base == PS_TYPE_CHAR && subrange.c.max <= subrange.c.min) ||
+        (max_base == PS_TYPE_INTEGER && subrange.i.max <= subrange.i.min) ||
+        (max_base == PS_TYPE_UNSIGNED && subrange.u.max <= subrange.u.min))
+        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    if (max_base == PS_TYPE_ENUM)
+    {
+        if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
+            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+        if (subrange.u.max <= subrange.u.min)
+            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
+    }
+    // else
+    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
+    // *** Register subrange
+    if (!ps_parse_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
+                                                            &subrange))
+        TRACE_ERROR("TYPE_DEF_SUBRANGE")
+
+    PARSE_END("OK")
+}
+
+/**
+ * Visit
+ *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
+ */
+static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                          const char *type_name)
+{
+    PARSE_BEGIN("TYPE_REFERENCE_ARRAY", "")
+    (void)start_line;
+    (void)start_column;
+
+    ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
+    ps_symbol *subrange = NULL;
+    int dimensions = 0;
+    ps_symbol *item_type = NULL;
+
+    // Expect 'ARRAY'
+    if (lexer->current_token.type != PS_TOKEN_ARRAY)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+
+    // Expect '['
+    if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+
+    // Parse dimensions
+    do
+    {
+        // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
+        if (!ps_parse_type_reference(compiler, block, &subrange, NULL))
+            TRACE_ERROR("DIMENSION")
+        // Dimension *must* be a subrange
+        if (subrange == NULL || subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION ||
+            subrange->value->data.t->type != PS_TYPE_SUBRANGE)
+            RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
+        subranges[dimensions] = subrange;
+        dimensions += 1;
+        // ',' starts another dimension
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            if (dimensions >= PS_ARRAY_MAX_DIMENSIONS)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN
+            continue;
+        }
+        // ']' ends dimensions definitions
+        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
+        {
+            READ_NEXT_TOKEN
+            break;
+        }
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    } while (true);
+
+    // For now, only accept one dimension
+    // We should define and register an array type definition for each dimension
+    // and "chain" them, exactly as if array[dim1, dim2] of item would have been
+    // written as array[dim1] of array[dim2] of item
+    if (dimensions > 1)
+    {
+        ps_compiler_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
+        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    }
+
+    // Expect 'OF'
+    if (lexer->current_token.type != PS_TOKEN_OF)
+        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN
+
+    // Item type (may be another array definition)
+    if (!ps_parse_type_reference(compiler, block, &item_type, NULL))
+        TRACE_ERROR("ITEM_TYPE")
+
+    // Item type can be any type, even another array
+    if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
+        RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
+
+    // Create type definition for array
+    ps_type_definition *type_def = NULL;
+    ps_identifier name = {0};
+    if (type_name == NULL)
+        snprintf(name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
+    else
+        memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+    type_def = ps_type_definition_create_array(item_type, dimensions, subranges);
+    if (type_def == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    // Register new type definition in symbol table
+    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
+        TRACE_ERROR("REGISTER")
 
     PARSE_END("OK")
 }
@@ -345,356 +701,6 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
                 TRACE_ERROR("REGISTER")
         }
     }
-
-    PARSE_END("OK")
-}
-
-bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                  const char *type_name)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_ENUM", "");
-    (void)start_line;
-    (void)start_column;
-
-    // Up to 256 values in an enumeration, re-allocate 16 more if exhausted
-    ps_symbol_list *list = ps_symbol_list_alloc(16, 16);
-    if (list == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-
-    // Re-check that current token is '('
-    if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
-        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN_OR_CLEANUP
-
-    // Empty enumeration not allowed
-    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
-
-    // Create enumeration type definition
-    ps_type_definition *type_def = ps_enum_create();
-    if (type_def == NULL)
-        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-
-    // Register it
-    if (!ps_type_definition_register(compiler, block, type_name, type_def, type_symbol))
-        GOTO_CLEANUP(compiler->error)
-
-    // Parse enumeration values
-    do // NOSONAR
-    {
-        if (list->used == 256)
-            GOTO_CLEANUP(PS_ERROR_OVERFLOW);
-        if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
-            GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
-        // Check that enumeration value does not already exist:
-        //  - locally in the same enumeration
-        //  - or globally in the symbol table
-        if (ps_symbol_list_find(list, lexer->current_token.value.identifier) ||
-            (ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, true) != NULL))
-            GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
-        ps_symbol *value_symbol = ps_symbol_list_add(list, *type_symbol, lexer->current_token.value.identifier);
-        if (value_symbol == NULL)
-            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_compiler_add_symbol(compiler, block, value_symbol))
-            GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
-        READ_NEXT_TOKEN_OR_CLEANUP
-        // If next token is ',' continue with next enumeration value
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
-            READ_NEXT_TOKEN_OR_CLEANUP
-            continue;
-        }
-        // If next token is ')' end of enumeration definition
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-            break;
-    } while (true);
-    READ_NEXT_TOKEN_OR_CLEANUP
-    // Copy enum values to enum type definition
-    if (!ps_enum_set_values(type_def, list->used, list->values))
-        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-    ps_symbol_list_free(list, false);
-    PARSE_END("OK")
-cleanup:
-    // TODO? remove type symbol from table
-    ps_symbol_list_free(list, true);
-    return false;
-}
-
-bool ps_parse_type_reference_subrange_min(ps_compiler *compiler, ps_ast_block *block, ps_value *min_value,
-                                          ps_value_type *min_base, ps_type_definition_subrange *subrange)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MIN")
-    (void)start_line;
-    (void)start_column;
-
-    if (!ps_parse_constant_expression(compiler, block, min_value))
-        TRACE_ERROR("MIN")
-    *min_base = ps_value_get_type(min_value);
-    switch (*min_base)
-    {
-    case PS_TYPE_CHAR:
-        if (ps_value_get_type(min_value) != PS_TYPE_CHAR)
-            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
-        subrange->c.min = min_value->data.c;
-        break;
-    case PS_TYPE_INTEGER:
-        if (ps_value_get_type(min_value) != PS_TYPE_INTEGER)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        subrange->i.min = min_value->data.i;
-        break;
-    case PS_TYPE_UNSIGNED:
-        if (ps_value_get_type(min_value) != PS_TYPE_UNSIGNED)
-            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
-        subrange->u.min = min_value->data.u;
-        break;
-    case PS_TYPE_ENUM:
-        if (ps_value_get_type(min_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
-        subrange->e.min = min_value->data.u;
-        break;
-    default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    }
-
-    PARSE_END("OK")
-}
-
-bool ps_parse_type_reference_subrange_max(ps_compiler *compiler, ps_ast_block *block, ps_value *max_value,
-                                          ps_value_type *max_base, ps_type_definition_subrange *subrange)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "MAX")
-    (void)start_line;
-    (void)start_column;
-
-    if (!ps_parse_constant_expression(compiler, block, max_value))
-        TRACE_ERROR("MAX")
-    *max_base = ps_value_get_type(max_value);
-    switch (*max_base)
-    {
-    case PS_TYPE_CHAR:
-        if (ps_value_get_type(max_value) != PS_TYPE_CHAR)
-            RETURN_ERROR(PS_ERROR_EXPECTED_CHAR)
-        subrange->c.max = max_value->data.c;
-        break;
-    case PS_TYPE_INTEGER:
-        if (ps_value_get_type(max_value) != PS_TYPE_INTEGER)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        subrange->i.max = max_value->data.i;
-        break;
-    case PS_TYPE_UNSIGNED:
-        if (ps_value_get_type(max_value) != PS_TYPE_UNSIGNED)
-            RETURN_ERROR(PS_ERROR_EXPECTED_UNSIGNED)
-        subrange->u.max = max_value->data.u;
-        break;
-    case PS_TYPE_ENUM:
-        if (ps_value_get_type(max_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
-        subrange->e.max = max_value->data.u;
-        break;
-    default:
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    }
-
-    PARSE_END("OK")
-}
-
-bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
-                                                        const char *type_name, ps_symbol **type_symbol, ps_symbol *type,
-                                                        const ps_type_definition_subrange *subrange)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "REGISTER_TYPE_DEF")
-    (void)start_line;
-    (void)start_column;
-
-    ps_type_definition *type_def = NULL;
-    ps_identifier name = {0};
-
-    // Create type definition for subrange
-    switch (type->value->data.t->type)
-    {
-    case PS_TYPE_CHAR:
-        type_def = ps_subrange_create_char(subrange->c.min, subrange->c.max);
-        if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
-        else
-            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        break;
-    case PS_TYPE_INTEGER:
-        type_def = ps_subrange_create_integer(subrange->i.min, subrange->i.max);
-        if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
-        else
-            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        break;
-    case PS_TYPE_UNSIGNED:
-        type_def = ps_subrange_create_unsigned(subrange->u.min, subrange->u.max);
-        if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
-        else
-            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        break;
-    case PS_TYPE_ENUM:
-        type_def = ps_subrange_create_enum(type, subrange->e.min, subrange->e.max);
-        if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
-        else
-            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        break;
-    default:
-        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    // Register new type definition in symbol table
-    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
-        RETURN_ERROR(compiler->error)
-
-    PARSE_END("OK")
-}
-
-bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                      const char *type_name)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
-    (void)start_line;
-    (void)start_column;
-
-    ps_type_definition_subrange subrange = {0};
-    ps_value min_value = {0};
-    ps_value tmp_value = {0};
-    ps_value max_value = {0};
-    ps_value_type min_base = PS_TYPE_UNKNOWN;
-    ps_value_type max_base = PS_TYPE_UNKNOWN;
-
-    // *** Parse min value of subrange as a constant expression
-    if (!ps_parse_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
-        TRACE_ERROR("MIN")
-    // *** Parse '..'
-    EXPECT_TOKEN(PS_TOKEN_RANGE)
-    READ_NEXT_TOKEN
-    // *** Parse max value of subrange as a constant expression
-    if (!ps_parse_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
-        TRACE_ERROR("MAX")
-    // *** Copy value to max with same type as min
-    max_value.type = min_value.type;
-    if (!ps_compiler_copy_value(compiler, &tmp_value, &max_value))
-    {
-        ps_compiler_set_message(compiler, "Min and max value of subrange type mismatch: %s %s", min_value.type->name,
-                                tmp_value.type->name);
-        TRACE_ERROR("COPY_MAX")
-    }
-    // *** Check that subrange min is less than max
-    if ((max_base == PS_TYPE_CHAR && subrange.c.max <= subrange.c.min) ||
-        (max_base == PS_TYPE_INTEGER && subrange.i.max <= subrange.i.min) ||
-        (max_base == PS_TYPE_UNSIGNED && subrange.u.max <= subrange.u.min))
-        RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    if (max_base == PS_TYPE_ENUM)
-    {
-        if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
-        if (subrange.u.max <= subrange.u.min)
-            RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
-    }
-    // else
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
-    // *** Register subrange
-    if (!ps_parse_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
-                                                            &subrange))
-        TRACE_ERROR("TYPE_DEF_SUBRANGE")
-
-    PARSE_END("OK")
-}
-
-/**
- * Visit
- *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
- */
-bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                   const char *type_name)
-{
-    PARSE_BEGIN("TYPE_REFERENCE_ARRAY", "")
-    (void)start_line;
-    (void)start_column;
-
-    ps_symbol *subranges[PS_ARRAY_MAX_DIMENSIONS] = {0};
-    ps_symbol *subrange = NULL;
-    int dimensions = 0;
-    ps_symbol *item_type = NULL;
-
-    // Expect 'ARRAY'
-    if (lexer->current_token.type != PS_TOKEN_ARRAY)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
-
-    // Expect '['
-    if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
-
-    // Parse dimensions
-    do
-    {
-        // Expect SUBRANGE: LOW '..' HIGH | IDENTIFIER
-        if (!ps_parse_type_reference(compiler, block, &subrange, NULL))
-            TRACE_ERROR("DIMENSION")
-        // Dimension *must* be a subrange
-        if (subrange->kind != PS_SYMBOL_KIND_TYPE_DEFINITION || subrange->value->data.t->type != PS_TYPE_SUBRANGE)
-            RETURN_ERROR(PS_ERROR_EXPECTED_SUBRANGE)
-        subranges[dimensions] = subrange;
-        dimensions += 1;
-        // ',' starts another dimension
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
-            if (dimensions >= PS_ARRAY_MAX_DIMENSIONS)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN
-            continue;
-        }
-        // ']' ends dimensions definitions
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
-        {
-            READ_NEXT_TOKEN
-            break;
-        }
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    } while (true);
-
-    // For now, only accept one dimension
-    // We should define and register an array type definition for each dimension
-    // and "chain" them, exactly as if array[dim1, dim2] of item would have been
-    // written as array[dim1] of array[dim2] of item
-    if (dimensions > 1)
-    {
-        ps_compiler_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    }
-
-    // Expect 'OF'
-    if (lexer->current_token.type != PS_TOKEN_OF)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
-
-    // Item type (may be another array definition)
-    if (!ps_parse_type_reference(compiler, block, &item_type, NULL))
-        TRACE_ERROR("ITEM_TYPE")
-
-    // Item type can be any type, even another array
-    if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
-        RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
-
-    // Create type definition for array
-    ps_type_definition *type_def = NULL;
-    ps_identifier name = {0};
-    if (type_name == NULL)
-        snprintf(name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
-    else
-        memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-    type_def = ps_type_definition_create_array(item_type, dimensions, subranges);
-    if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    // Register new type definition in symbol table
-    if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
-        TRACE_ERROR("REGISTER")
 
     PARSE_END("OK")
 }
