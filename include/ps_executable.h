@@ -13,6 +13,7 @@
 #define _PS_EXECUTABLE_H
 
 #include "ps_error.h"
+#include "ps_value.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -21,24 +22,27 @@ extern "C"
 
     // Forward references
     typedef struct s_ps_interpreter ps_interpreter;
-    typedef struct s_ps_value ps_value;
+    // typedef struct s_ps_value ps_value;
     typedef struct s_ps_symbol ps_symbol;
     typedef struct s_ps_ast_block ps_ast_block;
 
-    typedef ps_error (*ps_function_1arg)(ps_interpreter *i, const ps_value *v, ps_value *r);
-    typedef ps_error (*ps_function_1arg_s)(ps_interpreter *i, ps_symbol *t, ps_value *r);
-    typedef ps_error (*ps_function_2args)(ps_interpreter *i, const ps_value *a, const ps_value *b, ps_value *r);
-    typedef bool (*ps_procedure_1arg)(ps_interpreter *i, const ps_value *v);
-    typedef bool (*ps_procedure_1arg_s)(ps_interpreter *i, ps_symbol *v);
-    typedef bool (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, const ps_value *v, int16_t w, int16_t p);
-    typedef bool (*ps_procedure_file_read)(ps_interpreter *i, FILE *f, ps_value *s);
+    // clang-format off
+    typedef ps_error (*ps_function_1arg_v     )(ps_interpreter *i, const ps_value *v, ps_value *r);
+    typedef ps_error (*ps_function_1arg_s     )(ps_interpreter *i, ps_symbol *s, ps_value *r);
+    typedef ps_error (*ps_function_2arg_v     )(ps_interpreter *i, const ps_value *a, const ps_value *b, ps_value *r);
+    typedef bool     (*ps_procedure_1arg_v    )(ps_interpreter *i, const ps_value *v);
+    typedef bool     (*ps_procedure_1arg_s    )(ps_interpreter *i, ps_symbol *s);
+    typedef bool     (*ps_procedure_file_write)(ps_interpreter *i, FILE *f, const ps_value *v, int16_t w, int16_t p);
+    typedef bool     (*ps_procedure_file_read )(ps_interpreter *i, FILE *f, ps_value *s);
+    // clang-format on
 
+    /** @brief Executable kind */
     typedef enum e_ps_executable_kind
     {
-        PS_EXECUTABLE_FUNC_1ARG,
+        PS_EXECUTABLE_FUNC_1ARG_V,
         PS_EXECUTABLE_FUNC_1ARG_S,
-        PS_EXECUTABLE_FUNC_2ARGS,
-        PS_EXECUTABLE_PROC_1ARG,
+        PS_EXECUTABLE_FUNC_2ARG_V,
+        PS_EXECUTABLE_PROC_1ARG_V,
         PS_EXECUTABLE_PROC_1ARG_S,
         PS_EXECUTABLE_PROC_FILE_READ,
         PS_EXECUTABLE_PROC_FILE_WRITE,
@@ -56,15 +60,17 @@ extern "C"
         int filler : 23;         /** @brief Unused bits to fill 32 bits */
         ps_symbol *return_type;  /** @brief Return type for system functions */
         union {
-            void *address;                           /** @brief Generic pointer to system function/procedure       */
-            ps_function_1arg func_1arg;              /** @brief Pointer to system function with 1 value argument   */
-            ps_function_1arg_s func_1arg_s;          /** @brief Pointer to system function with 1 byref argument   */
-            ps_function_2args func_2args;            /** @brief Pointer to system function with 2 value arguments  */
-            ps_procedure_1arg proc_1arg;             /** @brief Pointer to system procedure with 1 value argument  */
-            ps_procedure_1arg_s proc_1arg_s;         /** @brief Pointer to system procedure with 1 byref argument  */
-            ps_procedure_file_read proc_file_read;   /** @brief Pointer to "read(file, variable)" system procedure */
+            // clang-format off
+            void                   *address;         /** @brief Generic pointer to function or procedure           */
+            ps_function_1arg_v      func_1arg_v;     /** @brief Pointer to system function with 1 value argument   */
+            ps_function_1arg_s      func_1arg_s;     /** @brief Pointer to system function with 1 byref argument   */
+            ps_function_2arg_v      func_2arg_v;     /** @brief Pointer to system function with 2 value arguments  */
+            ps_procedure_1arg_v     proc_1arg_v;     /** @brief Pointer to system procedure with 1 value argument  */
+            ps_procedure_1arg_s     proc_1arg_s;     /** @brief Pointer to system procedure with 1 byref argument  */
+            ps_procedure_file_read  proc_file_read;  /** @brief Pointer to "read(file, variable)" system procedure */
             ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)"   system procedure */
-            ps_ast_block *block;                     /** @brief AST block of user defined function or procedure    */
+            ps_ast_block           *block;           /** @brief AST block of user defined function or procedure    */
+            // clang-format on
         };
     } __attribute__((__packed__)) ps_executable;
 

@@ -10,11 +10,13 @@
 
 #include "ps_ast.h"
 #include "ps_error.h"
+#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_procedures.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 /**********************************************************************************************************************/
@@ -24,7 +26,7 @@
 /* clang-format off */
 PS_SYSTEM_PROCEDURE(procedure, dec      , "DEC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_dec      )
 PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_inc      )
-PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG      , .proc_1arg      , &ps_procedure_randomize)
+PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG_V    , .proc_1arg_v    , &ps_procedure_randomize)
 PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_read     )
 PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_readln   )
 PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_write    )

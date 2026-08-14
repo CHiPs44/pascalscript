@@ -8,9 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ps_executable.h"
 #include "ps_system_types.h"
-#include "ps_value_type.h"
 
 #ifndef _PS_VALUE_DATA_H
 #define _PS_VALUE_DATA_H
@@ -20,9 +18,14 @@ extern "C"
 {
 #endif
 
-    typedef struct s_ps_ast_node ps_ast_node;
+    // clang-format off
+    typedef struct s_ps_array_data      ps_array_data;
+    typedef struct s_ps_executable      ps_executable;
+    typedef struct s_ps_ast_node        ps_ast_node;
+    typedef struct s_ps_file            ps_file;
+    typedef struct s_ps_string          ps_string;
     typedef struct s_ps_type_definition ps_type_definition;
-    typedef struct s_ps_array_data ps_array_data;
+    // clang-format on
 
     /** @brief Value union */
     typedef union u_ps_value_data {

@@ -554,7 +554,7 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
     if (!ps_ast_eval_expression(interpreter, function_call->args[0], &ast_value))
         return false;
-    ps_function_1arg function = function_call->executable->value->data.x->func_1arg;
+    ps_function_1arg_v function = function_call->executable->value->data.x->func_1arg_v;
     ps_error error = function(interpreter, &ast_value.value, &result->value);
     return PS_ERROR_NONE == error;
 }

@@ -52,13 +52,13 @@ char *ps_executable_get_kind_name(ps_executable_kind kind)
 
     switch (kind)
     {
-    case PS_EXECUTABLE_FUNC_1ARG:
+    case PS_EXECUTABLE_FUNC_1ARG_V:
         return "FUNC_1ARG";
     case PS_EXECUTABLE_FUNC_1ARG_S:
         return "FUNC_1ARG_S";
-    case PS_EXECUTABLE_FUNC_2ARGS:
+    case PS_EXECUTABLE_FUNC_2ARG_V:
         return "FUNC_2ARGS";
-    case PS_EXECUTABLE_PROC_1ARG:
+    case PS_EXECUTABLE_PROC_1ARG_V:
         return "PROC_1ARG";
     case PS_EXECUTABLE_PROC_1ARG_S:
         return "PROC_1ARG_S";

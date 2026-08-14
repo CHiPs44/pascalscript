@@ -325,18 +325,6 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
     PS_VALUE_SET(ps_system_char, c);
 }
 
-char *ps_value_get_enum(const ps_value *value)
-{
-    if (!ps_value_is_valid(value) || !ps_value_is_enum(value))
-        return NULL;
-    const ps_type_definition *type_def = value->type->value->data.t;
-    ps_symbol **values = type_def->def.e.values;
-    ps_unsigned index = value->data.u;
-    if (index >= type_def->def.e.count)
-        return NULL;
-    return values[index]->name;
-}
-
 #define NULL_VALUE                                                                                                     \
     {                                                                                                                  \
         if (debug)                                                                                                     \
@@ -359,7 +347,7 @@ char *ps_value_get_enum(const ps_value *value)
 
 #define ENUM_VALUE                                                                                                     \
     {                                                                                                                  \
-        char *enum_value = ps_value_get_enum(value);                                                                   \
+        char *enum_value = ps_enum_get_string_value(value);                                                                   \
         if (debug)                                                                                                     \
             snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", enum_value == NULL ? "NULL" : value->type->name,        \
                      enum_value == NULL ? "NULL" : enum_value, value->data.u);                                         \
@@ -453,7 +441,7 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         NULL_TYPE
     if (value->type->value->data.t->type == PS_TYPE_ENUM)
     {
-        const char *enum_value = ps_value_get_enum(value);
+        const char *enum_value = ps_enum_get_string_value(value);
         if (debug)
             snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", enum_value == NULL ? "NULL" : value->type->name,
                      enum_value == NULL ? "NULL" : enum_value, value->data.u);

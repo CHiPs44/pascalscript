@@ -49,8 +49,8 @@ extern "C"
 
     /**
      * @brief Initialize interpreter and children objects
-     * @param system      AST block for system (built-in types, constants, variables, procedures and functions)
-     * @param string_heap string heap holding string constants (from compiler)
+     * @param system      AST block for built-in types, constants, variables, procedures and functions
+     * @param string_heap heap holding string constants (from compiler)
      * @param range_check enable range checking for values
      * @param bool_eval   *FUTURE* enable short circuit boolean evaluation
      * @param io_check    *FUTURE* enable I/O error checking

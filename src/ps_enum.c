@@ -8,6 +8,7 @@
 
 #include "ps_memory.h"
 #include "ps_type_definition.h"
+#include "ps_value.h"
 
 ps_type_definition *ps_enum_create()
 {
@@ -32,4 +33,16 @@ bool ps_enum_set_values(ps_type_definition *type_def, ps_unsigned count, ps_symb
         type_def->def.e.values[i] = values[i];
     }
     return true;
+}
+
+char *ps_enum_get_string_value(const ps_value *value)
+{
+    if (!ps_value_is_valid(value) || !ps_value_is_enum(value))
+        return NULL;
+    const ps_type_definition *type_def = value->type->value->data.t;
+    ps_symbol **values = type_def->def.e.values;
+    ps_unsigned index = value->data.u;
+    if (index >= type_def->def.e.count)
+        return NULL;
+    return values[index]->name;
 }

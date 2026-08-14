@@ -26,8 +26,12 @@ extern "C"
     /** @brief Set values of (empty) enumeration */
     bool ps_enum_set_values(ps_type_definition *type_def, ps_unsigned count, ps_symbol **values);
 
+    /** @brief Get string value of enumeration value */
+    char *ps_enum_get_string_value(const ps_value *value);
+
 #ifdef __cplusplus
-}
+/**/ }
+
 #endif
 
 #endif /* _PS_ENUM */

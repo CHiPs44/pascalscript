@@ -14,6 +14,9 @@ extern "C"
 {
 #endif
 
+    // Forward reference
+    typedef struct s_ps_ast_block ps_ast_block;
+
     /** @brief Stack frame */
     typedef struct s_ps_frame
     {
@@ -27,7 +30,7 @@ extern "C"
         size_t size;        /** @brief Count of frames in stack */
         size_t used;        /** @brief Count of frames used     */
         size_t sp;          /** @brief Stack pointer            */
-        ps_frame *frames[]; /** @brief Frames                   */
+        ps_frame *frames[]; /** @brief Frames (VLA)             */
     } ps_stack;
 
 #define PS_FRAME_SIZE sizeof(ps_frame)

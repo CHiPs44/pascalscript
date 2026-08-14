@@ -12,6 +12,7 @@ extern "C"
 {
 #endif
 
+#include "ps_symbol.h"
 #include "ps_value_data.h"
 
 #ifndef PS_ARRAY_MAX_DIMENSIONS

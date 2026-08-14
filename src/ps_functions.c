@@ -26,37 +26,37 @@
 
 /* clang-format off */
 // Math
-PS_SYSTEM_FUNCTION(function, abs           , "ABS"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_abs           , NULL                 )
-PS_SYSTEM_FUNCTION(function, arctan        , "ARCTAN"      , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_arctan        , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, cos           , "COS"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_cos           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, even          , "EVEN"        , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_even          , NULL                 )
-PS_SYSTEM_FUNCTION(function, exp           , "EXP"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_exp           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, frac          , "FRAC"        , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_frac          , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, int           , "INT"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_int           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, ln            , "LN"          , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_ln            , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, log           , "LOG"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_log           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, odd           , "ODD"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_odd           , NULL                 )
-PS_SYSTEM_FUNCTION(function, power         , "POWER"       , PS_EXECUTABLE_FUNC_1ARG_S, .func_2args , &ps_function_power         , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, random        , "RANDOM"      , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_random        , NULL                 )
-PS_SYSTEM_FUNCTION(function, round         , "ROUND"       , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_round         , &ps_system_integer   )
-PS_SYSTEM_FUNCTION(function, sin           , "SIN"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_sin           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, sqr           , "SQR"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_sqr           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, sqrt          , "SQRT"        , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_sqrt          , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, succ          , "SUCC"        , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_succ          , NULL                 )
-PS_SYSTEM_FUNCTION(function, tan           , "TAN"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_tan           , &ps_system_real      )
-PS_SYSTEM_FUNCTION(function, trunc         , "TRUNC"       , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_trunc         , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, abs           , "ABS"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_abs           , NULL                 )
+PS_SYSTEM_FUNCTION(function, arctan        , "ARCTAN"      , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_arctan        , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, cos           , "COS"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_cos           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, even          , "EVEN"        , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_even          , NULL                 )
+PS_SYSTEM_FUNCTION(function, exp           , "EXP"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_exp           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, frac          , "FRAC"        , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_frac          , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, int           , "INT"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_int           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, ln            , "LN"          , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_ln            , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, log           , "LOG"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_log           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, odd           , "ODD"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_odd           , NULL                 )
+PS_SYSTEM_FUNCTION(function, power         , "POWER"       , PS_EXECUTABLE_FUNC_1ARG_S, .func_2arg_v , &ps_function_power         , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, random        , "RANDOM"      , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_random        , NULL                 )
+PS_SYSTEM_FUNCTION(function, round         , "ROUND"       , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_round         , &ps_system_integer   )
+PS_SYSTEM_FUNCTION(function, sin           , "SIN"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_sin           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, sqr           , "SQR"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_sqr           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, sqrt          , "SQRT"        , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_sqrt          , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, succ          , "SUCC"        , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_succ          , NULL                 )
+PS_SYSTEM_FUNCTION(function, tan           , "TAN"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_tan           , &ps_system_real      )
+PS_SYSTEM_FUNCTION(function, trunc         , "TRUNC"       , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_trunc         , &ps_system_real      )
 // Ordinal
-PS_SYSTEM_FUNCTION(function, chr           , "CHR"         , PS_EXECUTABLE_FUNC_1ARG,   .func_1arg  , &ps_function_chr           , &ps_system_char      )
+PS_SYSTEM_FUNCTION(function, chr           , "CHR"         , PS_EXECUTABLE_FUNC_1ARG_V,   .func_1arg_v  , &ps_function_chr           , &ps_system_char      )
 PS_SYSTEM_FUNCTION(function, high          , "HIGH"        , PS_EXECUTABLE_FUNC_1ARG_S, .func_1arg_s, &ps_function_high          , NULL                 )
 PS_SYSTEM_FUNCTION(function, low           , "LOW"         , PS_EXECUTABLE_FUNC_1ARG_S, .func_1arg_s, &ps_function_low           , NULL                 )
-PS_SYSTEM_FUNCTION(function, ord           , "ORD"         , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_ord           , &ps_system_unsigned  )
-PS_SYSTEM_FUNCTION(function, pred          , "PRED"        , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_pred          , NULL                 )
+PS_SYSTEM_FUNCTION(function, ord           , "ORD"         , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_ord           , &ps_system_unsigned  )
+PS_SYSTEM_FUNCTION(function, pred          , "PRED"        , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_pred          , NULL                 )
 // String
-PS_SYSTEM_FUNCTION(function, length        , "LENGTH"      , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_length        , &ps_system_unsigned  )
-PS_SYSTEM_FUNCTION(function, lowercase     , "LOWERCASE"   , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_lowercase     , &ps_system_string    )
-PS_SYSTEM_FUNCTION(function, uppercase     , "UPPERCASE"   , PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_uppercase     , &ps_system_string    )
+PS_SYSTEM_FUNCTION(function, length        , "LENGTH"      , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_length        , &ps_system_unsigned  )
+PS_SYSTEM_FUNCTION(function, lowercase     , "LOWERCASE"   , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_lowercase     , &ps_system_string    )
+PS_SYSTEM_FUNCTION(function, uppercase     , "UPPERCASE"   , PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_uppercase     , &ps_system_string    )
 // System
-PS_SYSTEM_FUNCTION(function, get_tick_count, "GETTICKCOUNT", PS_EXECUTABLE_FUNC_1ARG  , .func_1arg  , &ps_function_get_tick_count, &ps_system_unsigned  )
+PS_SYSTEM_FUNCTION(function, get_tick_count, "GETTICKCOUNT", PS_EXECUTABLE_FUNC_1ARG_V  , .func_1arg_v  , &ps_function_get_tick_count, &ps_system_unsigned  )
 /* clang-format on */
 
 bool ps_functions_init(ps_ast_block *system)
@@ -105,7 +105,7 @@ ps_error ps_function_exec_1arg(ps_interpreter *interpreter, const ps_symbol *sym
     assert(symbol != NULL);
     assert(symbol->value != NULL);
     assert(symbol->value->data.x != NULL);
-    ps_function_1arg function = symbol->value->data.x->func_1arg;
+    ps_function_1arg_v function = symbol->value->data.x->func_1arg_v;
     if (function != &ps_function_random && function != &ps_function_get_tick_count)
         assert(value != NULL);
     assert(result != NULL);
@@ -142,7 +142,7 @@ ps_error ps_function_exec_2args(ps_interpreter *interpreter, const ps_symbol *sy
     assert(a != NULL);
     assert(b != NULL);
     assert(result != NULL);
-    ps_function_2args function = (ps_function_2args)(symbol->value->data.x->func_2args);
+    ps_function_2arg_v function = (ps_function_2arg_v)(symbol->value->data.x->func_2arg_v);
     if (function == NULL)
     {
         ps_interpreter_set_message(interpreter, "Function '%s' not implemented", symbol->name);
