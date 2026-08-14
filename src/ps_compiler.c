@@ -18,6 +18,7 @@
 #include "ps_procedures.h"
 #include "ps_string_heap.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 ps_compiler *ps_compiler_alloc(ps_ast_block *system, ps_string_heap *string_heap)

@@ -11,10 +11,12 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_memory.h"
 #include "ps_signature.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 
 // =============================================================================
 // ps_ast_node

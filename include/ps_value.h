@@ -13,6 +13,7 @@
 /* forward declaration to avoid including ps_symbol.h here */
 typedef struct s_ps_symbol ps_symbol;
 
+#include "ps_error.h"
 #include "ps_value_data.h"
 #include "ps_value_type.h"
 

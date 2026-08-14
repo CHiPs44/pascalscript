@@ -11,6 +11,7 @@
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
 #include "ps_ast_execute.h"
+#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_logger.h"
@@ -20,6 +21,7 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 void ps_ast_debug_execution(ps_interpreter *interpreter, ps_debug_level level, const char *format, ...) // NOSONAR

@@ -20,6 +20,7 @@
 #include "ps_symbol.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
 
 /**
  * Parse statement:

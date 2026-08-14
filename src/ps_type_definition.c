@@ -49,34 +49,34 @@ ps_type_definition *ps_type_definition_create_string(ps_string_len max)
     return type_def;
 }
 
-ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension)
+ps_type_definition *ps_type_definition_create_array(ps_symbol *item_type, int dimensions, ps_symbol **subranges)
 {
     ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_ARRAY, PS_TYPE_ARRAY);
     if (type_def == NULL)
         return NULL;
-    type_def->def.a.subrange = dimension;
+    type_def->def.a.dimensions = dimensions;
+    type_def->def.a.item_type = item_type;
+    type_def->def.a.subranges = ps_memory_malloc(PS_MEMORY_TYPE, dimensions * sizeof(ps_symbol *));
+    if (type_def->def.a.subranges == NULL)
+        return ps_type_definition_free(type_def);
+    for (int i = 0; i < dimensions; i++)
+        type_def->def.a.subranges[i] = subranges[i];
     return type_def;
 }
 
 bool ps_type_definition_is_enum(const ps_type_definition *type_def)
 {
-    if (type_def == NULL || type_def->type != PS_TYPE_ENUM)
-        return false;
-    return true;
+    return type_def != NULL && type_def->type == PS_TYPE_ENUM;
 }
 
 bool ps_type_definition_is_subrange(const ps_type_definition *type_def)
 {
-    if (type_def == NULL || type_def->type != PS_TYPE_SUBRANGE)
-        return false;
-    return true;
+    return type_def != NULL && type_def->type == PS_TYPE_SUBRANGE;
 }
 
 bool ps_type_definition_is_array(const ps_type_definition *type_def)
 {
-    if (type_def == NULL || type_def->type != PS_TYPE_ARRAY)
-        return false;
-    return true;
+    return type_def != NULL && type_def->type == PS_TYPE_ARRAY;
 }
 
 char *ps_type_definition_get_name(const ps_type_definition *type_def)
@@ -138,8 +138,8 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
         }
         break;
     case PS_TYPE_ARRAY:
-        // ARRAY[1..10] OF INTEGER => "ARRAY(SUBRANGE, INTEGER)"
-        snprintf(buffer, sizeof(buffer) - 1, "ARRAY(%s, %s)", type_def->def.a.subrange->name,
+        // ARRAY[1..10] OF INTEGER => "ARRAY(1, INTEGER)"
+        snprintf(buffer, sizeof(buffer) - 1, "ARRAY(%d, %s)", type_def->def.a.dimensions,
                  type_def->def.a.item_type->name);
         break;
     default:

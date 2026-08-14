@@ -15,6 +15,7 @@
 #include "ps_string.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 /**

@@ -22,6 +22,7 @@
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *string_heap, bool range_check,
@@ -265,7 +266,7 @@ ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_a
                                          ps_symbol_get_kind_name(variable_node->variable->kind));
         return NULL;
     }
-    ps_frame *frame = ps_stack_find_frame_by_block(interpreter->stack, variable_node->owner);
+    ps_frame *frame = ps_stack_find_frame_for_block(interpreter->stack, variable_node->owner);
     if (frame == NULL)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found in any frame",
@@ -284,6 +285,9 @@ bool ps_interpreter_set_array_value(ps_interpreter *interpreter, const ps_ast_va
     assert(NULL != value);
 
     // TODO
+    (void)interpreter;
+    (void)variable_node;
+    (void)value;
 
     return true;
 }

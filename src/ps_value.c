@@ -12,6 +12,7 @@
 
 #include "ps_array.h"
 #include "ps_error.h"
+#include "ps_executable.h"
 #include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_symbol.h"
@@ -347,7 +348,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 
 #define ENUM_VALUE                                                                                                     \
     {                                                                                                                  \
-        char *enum_value = ps_enum_get_string_value(value);                                                                   \
+        char *enum_value = ps_enum_get_string_value(value);                                                            \
         if (debug)                                                                                                     \
             snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", enum_value == NULL ? "NULL" : value->type->name,        \
                      enum_value == NULL ? "NULL" : enum_value, value->data.u);                                         \

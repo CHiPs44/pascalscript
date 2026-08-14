@@ -106,8 +106,12 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions, c
     ps_unsigned stride = 1;
     for (int i = dimensions - 1; i >= 0; i -= 1)
     {
-        ps_symbol *subrange = ps_array_get_subrange(subrange, i);
+        ps_symbol *subrange = ps_array_get_subrange(array_var, i);
+        if (subrange == NULL)
+            return PS_ERROR_INVALID_PARAMETERS;
         ps_type_definition *subrange_def = ps_symbol_get_type_def(subrange);
+        if (subrange_def == NULL || !ps_type_definition_is_subrange(subrange_def))
+            return PS_ERROR_INVALID_PARAMETERS;
         // Copy given index to a local variable of the same type as subrange definition
         ps_value index = {.allocated = false, .type = subrange, .data = {0}};
         ps_error error = ps_value_copy(indexes[i], &index, true);

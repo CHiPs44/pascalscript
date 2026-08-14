@@ -19,6 +19,7 @@
 #include "ps_procedures.h"
 #include "ps_string.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 
 /**
  *  This is the entry point for parsing all expressions.

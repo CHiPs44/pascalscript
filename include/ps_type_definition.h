@@ -17,8 +17,8 @@
 #include "ps_value_data.h"
 #include "ps_value_type.h"
 
-    /* forward declarations to avoid cyclic includes */
-    typedef struct s_ps_symbol ps_symbol;
+/* forward declarations to avoid cyclic includes */
+typedef struct s_ps_symbol ps_symbol;
 
 #ifdef __cplusplus
 extern "C"
@@ -61,8 +61,8 @@ extern "C"
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
-        ps_unsigned min;      /** @brief Minimum value in the enumeration for the subrange      */
-        ps_unsigned max;      /** @brief Maximum value in the enumeration for the subrange      */
+        ps_unsigned min;        /** @brief Minimum value in the enumeration for the subrange      */
+        ps_unsigned max;        /** @brief Maximum value in the enumeration for the subrange      */
     } __attribute__((__packed__)) ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
@@ -160,14 +160,71 @@ extern "C"
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
+    /**
+     * @brief Get the name of a type definition
+     * @param type_def Pointer to the type definition
+     * @return Name string of the type definition
+     */
     char *ps_type_definition_get_name(const ps_type_definition *type_def);
 
+    /**
+     * @brief Debug print a type definition
+     * @param output File stream for output
+     * @param message Message prefix to print
+     * @param type_def Pointer to the type definition to debug
+     */
     void ps_type_definition_debug(FILE *output, char *message, const ps_type_definition *type_def);
 
+    /**
+     * @brief Allocate and initialize a new type definition
+     * @param type Visible value type
+     * @param base Base value type
+     * @return Pointer to the newly allocated type definition
+     */
     ps_type_definition *ps_type_definition_alloc(ps_value_type type, ps_value_type base);
+
+    /**
+     * @brief Free a type definition and its resources
+     * @param type_def Pointer to the type definition to free
+     * @return NULL pointer
+     */
     ps_type_definition *ps_type_definition_free(ps_type_definition *type_def);
+
+    /**
+     * @brief Create a string type definition
+     * @param max Maximum length of the string
+     * @return Pointer to the newly created string type definition
+     */
     ps_type_definition *ps_type_definition_create_string(ps_string_len max);
-    ps_type_definition *ps_type_definition_create_array(ps_symbol *dimension);
+
+    /**
+     * @brief Create an array type definition
+     * @param item_type Symbol of the element type
+     * @param dimensions Number of dimensions (1 for vector, >1 for multi-dimensional arrays)
+     * @param subranges Array of subrange symbols for each dimension
+     * @return Pointer to the newly created array type definition
+     */
+    ps_type_definition *ps_type_definition_create_array(ps_symbol *item_type, int dimensions, ps_symbol **subranges);
+
+    /**
+     * @brief Check if a type definition is an enumeration
+     * @param type_def Pointer to the type definition
+     * @return true if the type is an enumeration, false otherwise
+     */
+    bool ps_type_definition_is_enum(const ps_type_definition *type_def);
+
+    /**
+     * @brief Check if a type definition is a subrange
+     * @param type_def Pointer to the type definition
+     * @return true if the type is a subrange, false otherwise
+     */
+    bool ps_type_definition_is_subrange(const ps_type_definition *type_def);
+
+    /**
+     * @brief Check if a type definition is an array
+     * @param type_def Pointer to the type definition
+     * @return true if the type is an array, false otherwise
+     */
     bool ps_type_definition_is_array(const ps_type_definition *type_def);
 
 #ifdef __cplusplus

@@ -7,9 +7,10 @@
 #include <string.h>
 
 #include "ps_config.h"
+#include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_symbol_list.h"
-#include "ps_memory.h"
+#include "ps_value.h"
 
 ps_symbol_list *ps_symbol_list_alloc(int size, int more)
 {

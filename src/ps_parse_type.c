@@ -694,7 +694,8 @@ bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, p
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     type_def->def.a.item_type = item_type;
     type_def->def.a.dimensions = dimensions;
-    type_def->def.a.subrange = subranges[0];
+    for (int i = 0; i < dimensions; i++)
+        type_def->def.a.subranges[i] = subranges[i];
 
     // Register new type definition in symbol table
     if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))

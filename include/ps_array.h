@@ -19,10 +19,11 @@ extern "C"
 #define PS_ARRAY_MAX_DIMENSIONS 8
 #endif
 
+    /** @brief Array data structure: count + values */
     typedef struct s_ps_array_data
     {
-        ps_unsigned count;
-        ps_value_data values[];
+        ps_unsigned count;      /** @brief Total number of values, e.g. 100 for a [1..10, 1..10] array */
+        ps_value_data values[]; /** @brief VLA for these values */
     } ps_array_data;
 
 #define PS_ARRAY_DATA_SIZE sizeof(ps_array_data)
@@ -53,7 +54,7 @@ extern "C"
     ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes, const ps_value *value,
                                 bool range_check);
 
-    /** @brief Display (part of) array values */
+    /** @brief Display array type for debugging */
     void ps_array_debug_type(FILE *out, ps_symbol *array_var);
 
 #ifdef __cplusplus

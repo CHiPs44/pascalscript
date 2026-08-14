@@ -12,12 +12,14 @@
 
 #include "ps_ast.h"
 #include "ps_error.h"
+#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_string.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_type_definition.h"
 #include "ps_value.h"
 
 /******************************************************************************/
