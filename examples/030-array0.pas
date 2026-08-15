@@ -15,7 +15,7 @@ Var
 //     I, N: Integer;
 
 Begin
-    Numbers[1] := 1;
+    Numbers[1+1] := 1;
     // N := 1;
     // For I := 1 To 10 Do
     // Begin

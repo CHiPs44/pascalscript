@@ -13,6 +13,7 @@ extern "C"
 #endif
 
 #include "ps_symbol.h"
+#include "ps_value.h"
 #include "ps_value_data.h"
 
 #ifndef PS_ARRAY_MAX_DIMENSIONS
@@ -47,11 +48,11 @@ extern "C"
     ps_symbol *ps_array_get_item_type(const ps_symbol *var_or_type);
 
     /** @brief value := array[indexes] */
-    ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions, const ps_value **indexes, ps_value *value,
-                                bool range_check);
+    ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions,
+                                ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], ps_value *value, bool range_check);
 
     /** @brief array[indexes] := value */
-    ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, const ps_value **indexes,
+    ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, ps_value indexes[PS_ARRAY_MAX_DIMENSIONS],
                                 ps_value_data *array_data, const ps_value *value, bool range_check);
 
     /** @brief Display array type for debugging */

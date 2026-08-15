@@ -297,7 +297,6 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
                                    .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (!ps_ast_eval_expression(interpreter, variable_node->indexes[i], &index_node))
             return false;
-        // indexes[i] = index_node.value;
         indexes[i].allocated = false;
         indexes[i].type = index_node.value.type;
         indexes[i].data = index_node.value.data;
@@ -305,11 +304,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
 
     // Set value in array data
     ps_value_data array_data = frame->data[variable_node->variable->value->data.h];
-    // TODO /home/chips/src/pascalscript/src/ps_interpreter.c:309:41: warning: converting a packed ‘ps_value’ {aka
-    // ‘struct s_ps_value’} pointer (alignment 1) to a ‘const ps_value *’ {aka ‘const struct s_ps_value *’} pointer
-    // (alignment 4) may result in an unaligned pointer value [-Waddress-of-packed-member]
-    ps_error error = ps_array_set_value(variable, dimensions, (const ps_value **)(&indexes), &array_data, value,
-                                        interpreter->range_check);
+    ps_error error = ps_array_set_value(variable, dimensions, indexes, &array_data, value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
     {
         ps_interpreter_set_error_message(interpreter, error, "Error setting array value");
