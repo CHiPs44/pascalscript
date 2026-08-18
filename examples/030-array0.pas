@@ -11,11 +11,12 @@ Type
     NumberArray = Array[MySubRange] Of MyInteger;
 
 Var
+    I, N: Integer;
     Numbers: NumberArray;
-//     I, N: Integer;
 
 Begin
-    Numbers[1+1] := 1;
+    I := Numbers[1];
+    // Numbers[1] := 42;
     // N := 1;
     // For I := 1 To 10 Do
     // Begin

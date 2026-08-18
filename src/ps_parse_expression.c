@@ -277,41 +277,34 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
                                       ps_value *result)
 {
     PARSE_BEGIN("FACTOR", "ARRAY");
-    (void)start_line;
-    (void)start_column;
-    (void)compiler;
-    (void)block;
-    (void)symbol;
-    (void)result;
-    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    // const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
-    // if (type_def == NULL)
-    //     RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-    // READ_NEXT_TOKEN
-    // if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-    // {
-    //     ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
-    //     READ_NEXT_TOKEN
-    //     if (!ps_parse_expression(compiler,block, &index))
-    //     {
-    //         ps_compiler_set_message(compiler, "Index is invalid");
-    //         TRACE_ERROR("INDEX")
-    //     }
-    //     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
-    //     if (mode == MODE_EXEC)
-    //     {
-    //         ps_error error = ps_array_get_value(symbol, &index, expression, compiler->range_check);
-    //         if (error != PS_ERROR_NONE)
-    //         {
-    //             ps_compiler_set_message(compiler, "Can't get array value for index %s",
-    //                                        ps_value_get_debug_string(&index));
-    //             RETURN_ERROR(error)
-    //         }
-    //     }
-    //     READ_NEXT_TOKEN
-    // }
 
-    // PARSE_END("OK")
+    // (void)start_line;
+    // (void)start_column;
+    // (void)compiler;
+    // (void)block;
+    // (void)symbol;
+    // (void)result;
+    // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+
+    const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
+    if (type_def == NULL)
+        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+    READ_NEXT_TOKEN
+    if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+    {
+        ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
+        READ_NEXT_TOKEN
+        if (!ps_parse_expression(compiler, block, &index))
+        {
+            ps_compiler_set_message(compiler, "Index is invalid");
+            TRACE_ERROR("INDEX")
+        }
+        EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+
+        READ_NEXT_TOKEN
+    }
+
+    PARSE_END("OK")
 }
 
 /**
@@ -353,9 +346,8 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         }
         if (ps_value_is_array(symbol->value))
         {
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-            // if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
-            //     TRACE_ERROR("ARRAY")
+            if (!ps_parse_factor_identifier_array(compiler, block, symbol, factor))
+                TRACE_ERROR("ARRAY")
         }
         else
         {

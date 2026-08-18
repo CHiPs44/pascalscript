@@ -134,44 +134,46 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions,
         stride *= subrange_count;
     }
 
-    // Check if the calculated offset is within the array bounds
-    if (*final_offset >= array_var->value->data.a->count)
-        return PS_ERROR_OUT_OF_RANGE;
-
     return PS_ERROR_NONE;
 }
 
-ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions, ps_value indexes[PS_ARRAY_MAX_DIMENSIONS],
-                            ps_value *value, bool range_check)
+ps_error ps_array_get_value(const ps_symbol *array_var, ps_array_data *array_data, int dimensions,
+                            ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], ps_value *value, bool range_check)
 {
     ps_unsigned offset = 0;
     ps_error error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
     if (error != PS_ERROR_NONE)
         return error;
-    ps_value array_value = {.allocated = false,
-                            .type = ps_array_get_item_type(array_var),
-                            .data = array_var->value->data.a->values[offset]};
+    if (offset >= array_data->count)
+        return PS_ERROR_OUT_OF_RANGE;
+    ps_value_data value_data = array_data->values[offset];
+    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data = value_data};
     error = ps_value_copy(&array_value, value, range_check);
     if (ps_array_debug)
         ps_value_debug(stderr, "ps_array_get_value, array: ", &array_value);
     return error;
 }
 
-ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, ps_value indexes[PS_ARRAY_MAX_DIMENSIONS],
-                            ps_value_data *array_data, const ps_value *value, bool range_check)
+ps_error ps_array_set_value(ps_symbol *array_var, ps_value_data *array_data, int dimensions,
+                            ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], const ps_value *value, bool range_check)
 {
     ps_error error = PS_ERROR_NONE;
     ps_unsigned offset = 0;
 
+    // Calculate the offset in the array using the provided indexes
     error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
     if (error != PS_ERROR_NONE)
         return error;
 
-    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data.v = NULL};
+    // Check if the calculated offset is within the array bounds
+    if (offset >= array_data->a->count)
+        return PS_ERROR_OUT_OF_RANGE;
+
+    // Copy the value to the array at the calculated offset
+    ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data = {0}};
     error = ps_value_copy(value, &array_value, range_check);
     if (error != PS_ERROR_NONE)
         return error;
-
     array_data->a->values[offset] = array_value.data;
 
     return PS_ERROR_NONE;

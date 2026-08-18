@@ -303,8 +303,9 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
     }
 
     // Set value in array data
-    ps_value_data array_data = frame->data[variable_node->variable->value->data.h];
-    ps_error error = ps_array_set_value(variable, dimensions, indexes, &array_data, value, interpreter->range_check);
+    ps_handle handle = variable_node->variable->value->data.h;
+    ps_value_data array_data = frame->data[handle];
+    ps_error error = ps_array_set_value(variable, &array_data, dimensions, indexes, value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
     {
         ps_interpreter_set_error_message(interpreter, error, "Error setting array value");

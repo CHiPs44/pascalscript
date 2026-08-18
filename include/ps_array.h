@@ -48,12 +48,12 @@ extern "C"
     ps_symbol *ps_array_get_item_type(const ps_symbol *var_or_type);
 
     /** @brief value := array[indexes] */
-    ps_error ps_array_get_value(const ps_symbol *array_var, int dimensions,
+    ps_error ps_array_get_value(const ps_symbol *array_var, ps_array_data *array_data, int dimensions,
                                 ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], ps_value *value, bool range_check);
 
     /** @brief array[indexes] := value */
-    ps_error ps_array_set_value(ps_symbol *array_var, int dimensions, ps_value indexes[PS_ARRAY_MAX_DIMENSIONS],
-                                ps_value_data *array_data, const ps_value *value, bool range_check);
+    ps_error ps_array_set_value(ps_symbol *array_var, ps_value_data *array_data, int dimensions,
+                                ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], const ps_value *value, bool range_check);
 
     /** @brief Display array type for debugging */
     void ps_array_debug_type(FILE *out, ps_symbol *array_var);
