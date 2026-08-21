@@ -19,7 +19,7 @@ extern "C"
 #endif
 
 #define PS_AST_PACKED
-    //  __attribute__((__packed__))
+    // #define PS_AST_PACKED __attribute__((__packed__))
 
     /** @brief Abstract Syntax Tree node group */
     typedef enum e_ps_ast_node_group
@@ -125,7 +125,7 @@ extern "C"
         PS_AST_NODE_COMMON
         ps_ast_block *owner;    /** @brief Block where variable is defined */
         ps_symbol *variable;    /** @brief Variable being referenced       */
-        size_t n_indexes;       /** @brief Number of dimensions            */
+        size_t dimensions;      /** @brief Number of indexes               */
         ps_ast_node *indexes[]; /** @brief Expressions for each dimension  */
     } PS_AST_PACKED ps_ast_variable;
 
@@ -218,6 +218,7 @@ extern "C"
 
     /** @brief Create a new AST node of the given group & kind at given position in source code */
     ps_ast_node             *ps_ast_create_node            (uint16_t line, uint16_t column, ps_ast_node_group group, ps_ast_node_kind kind, size_t size);
+
     ps_ast_block            *ps_ast_create_block           (uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind, const char *name                                                    );
     ps_ast_statement_list   *ps_ast_create_statement_list  (uint16_t line, uint16_t column, size_t count                                                                                                     );
     ps_ast_assignment       *ps_ast_create_assignment      (uint16_t line, uint16_t column, ps_ast_variable *lvalue,ps_ast_node *rvalue                                                                      );
@@ -229,15 +230,11 @@ extern "C"
     ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node *operand                                                                 );
     ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right                                               );
     ps_ast_value            *ps_ast_create_literal_value   (uint16_t line, uint16_t column, ps_value value                                                                                                   );
-    ps_ast_variable         *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable                                                  );
-    ps_ast_variable         *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable, size_t n_indexes, ps_ast_node **indexes         );
-
-    // clang-format on
+    ps_ast_variable         *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, const ps_symbol *variable                                            );
+    ps_ast_variable         *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, const ps_symbol *variable, size_t dimensions, ps_ast_node **indexes   );
 
     /** @brief Free an AST node and all its children */
-    ps_ast_node *ps_ast_free_node(ps_ast_node *node);
-
-    // clang-format off
+    ps_ast_node *ps_ast_free_node            (ps_ast_node             *node              );
     ps_ast_node *ps_ast_free_block           (ps_ast_block            *block             );
     ps_ast_node *ps_ast_free_statement_list  (ps_ast_statement_list   *list              );
     ps_ast_node *ps_ast_free_assignment      (ps_ast_assignment       *assignment        );
@@ -250,8 +247,9 @@ extern "C"
     ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *operation         );
     ps_ast_node *ps_ast_free_function_call   (ps_ast_call             *call              );
     ps_ast_node *ps_ast_free_value           (ps_ast_value            *value             );
-    ps_ast_node *ps_ast_free_variable (ps_ast_variable  *variable          );
-    ps_ast_node *ps_ast_free_lvalue_simple   (ps_ast_variable  *lvalue            );
+    ps_ast_node *ps_ast_free_variable_simple (ps_ast_variable         *variable          );
+    ps_ast_node *ps_ast_free_variable_array  (ps_ast_variable         *variable          );
+
     // clang-format on
 
     /**

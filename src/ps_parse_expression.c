@@ -274,35 +274,54 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **exp
 }
 
 bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *symbol,
-                                      ps_value *result)
+                                      ps_ast_node *factor)
 {
     PARSE_BEGIN("FACTOR", "ARRAY");
 
-    // (void)start_line;
-    // (void)start_column;
-    // (void)compiler;
-    // (void)block;
-    // (void)symbol;
-    // (void)result;
-    // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-
+    // Re-check that the symbol is an array
     const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     if (type_def == NULL)
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
     READ_NEXT_TOKEN
-    if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
+    int dimensions = ps_array_get_dimensions(symbol);
+
+    // '['
+    EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+
+    // [ expression [ ',' expression ]* ]
+    ps_ast_node *indexes[PS_ARRAY_MAX_DIMENSIONS] = {0};
+    ps_ast_node *index = NULL;
+    size_t i = 0;
+    READ_NEXT_TOKEN
+    do
     {
-        ps_value index = {.type = &ps_system_none /*type_def->def.a.item_type*/, .allocated = false, .data.v = NULL};
-        READ_NEXT_TOKEN
         if (!ps_parse_expression(compiler, block, &index))
         {
             ps_compiler_set_message(compiler, "Index is invalid");
             TRACE_ERROR("INDEX")
         }
-        EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+        indexes[i] = index;
+        if (lexer->current_token.type == PS_TOKEN_COMMA)
+        {
+            i++;
+            if (i >= dimensions)
+                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN
+        }
+        else
+            break;
+    } while (true);
 
-        READ_NEXT_TOKEN
-    }
+    // ']'
+    EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
+    READ_NEXT_TOKEN
+
+    // Create the variable array AST node
+    ps_ast_variable *ast_variable =
+        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, 1, indexes);
+    if (ast_variable == NULL)
+        TRACE_ERROR("VARIABLE_ARRAY")
+    factor = (ps_ast_node *)ast_variable;
 
     PARSE_END("OK")
 }
@@ -540,7 +559,6 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
 
     ps_identifier identifier = {0};
 
-    // Low and High functions have one "symbolic" argument, i.e. Low(Days) or High(Day)
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
@@ -565,8 +583,11 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
     (void)start_line;
     (void)start_column;
 
+    // '('
     EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN
+
+    // Parse first argument
     if (!ps_parse_expression(compiler, block, arg1))
         TRACE_ERROR("ARG1")
     ps_symbol *type1 = ps_ast_node_get_type(*arg1);
@@ -577,8 +598,12 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
                                 type1 == NULL ? "NULL!" : ps_value_get_type_name(&value1));
         RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     }
+
+    // ','
     EXPECT_TOKEN(PS_TOKEN_COMMA)
     READ_NEXT_TOKEN
+
+    // Parse second argument
     if (!ps_parse_expression(compiler, block, arg2))
         TRACE_ERROR("ARG2")
     ps_symbol *type2 = ps_ast_node_get_type(*arg2);
@@ -589,6 +614,8 @@ bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps
                                 type2 == NULL ? "NULL!" : ps_value_get_type_name(&value2));
         RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
     }
+
+    // ')'
     EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN
 
