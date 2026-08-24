@@ -5,46 +5,50 @@
 *)
 Program Array4;
 
-Const
-    Rows = 3;
-    Cols = 5;
+// Const
+//     Rows = 3;
+//     Cols = 5;
 
 Type
-    NumberArray   = Array[1..Rows] Of Array[1..Cols] Of Integer;
-    CharArray     = Array[1..Rows] Of Array[1..Cols] Of Char;
-    ArrayOfArray2 = Array[1..2] Of CharArray;
+    // NumberArray   = Array[1..Rows] Of Array[1..Cols] Of Integer;
+    // CharArray     = Array[1..Rows] Of Array[1..Cols] Of Char;
+    // ArrayOfArray2 = Array[1..2] Of CharArray;
     Array3D       = Array[1..10, 1..10, 1..10] Of Integer;
 
-Function GetPoint(Var A: Array3D; X, Y, Z: Integer): Integer;
-Begin
-    Result := A[X, Y, Z];
-End;
+// Function GetPoint(Var A: Array3D; X, Y, Z: Integer): Integer;
+// Begin
+//     Result := A[X, Y, Z];
+// End;
 
 Var
-    Numbers: NumberArray;
-    Chars: CharArray;
-    I, J: Integer;
+//     Numbers: NumberArray;
+//     Chars: CharArray;
+//     I, J: Integer;
+    A: Array3D;
 
 Begin
-    For I := 1 To Rows Do
-        For J := 1 To Cols Do
-        Begin
-            Numbers[I, J] := (I * J) Mod 26;
-            Chars[I, J] := Chr(65 + Numbers[I, J]);
-        End;
-    Write('    ');
-    For J := 1 To Cols Do
-        Write(J:4);
-    WriteLn;
-    For I := 1 To Rows Do
-    Begin
-        Write('#', I:2, ' ');
-        For J := 1 To Cols Do
-            Write(Numbers[I, J]:4);
-        WriteLn;
-        Write('    ');
-        For J := 1 To Cols Do
-            Write('   ', Chars[I, J]);
-        WriteLn;
-    End;
+    WriteLn('Array4');
+    // A[1, 2, 3] := 42;
+    WriteLn(A[1, 2, 3]);
+    // For I := 1 To Rows Do
+    //     For J := 1 To Cols Do
+    //     Begin
+    //         Numbers[I, J] := (I * J) Mod 26;
+    //         Chars[I, J] := Chr(65 + Numbers[I, J]);
+    //     End;
+    // Write('    ');
+    // For J := 1 To Cols Do
+    //     Write(J:4);
+    // WriteLn;
+    // For I := 1 To Rows Do
+    // Begin
+    //     Write('#', I:2, ' ');
+    //     For J := 1 To Cols Do
+    //         Write(Numbers[I, J]:4);
+    //     WriteLn;
+    //     Write('    ');
+    //     For J := 1 To Cols Do
+    //         Write('   ', Chars[I, J]);
+    //     WriteLn;
+    // End;
 End.

@@ -15,26 +15,25 @@ Var
     R, MinR, MaxR, TotalR: Real;
 
 Begin
-    // // Type mismatch
-    // D20 := 10 + 10;//Random(10 + 10) + 1;
     WriteLn('PascalScript Random Number Generation Example');
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('Seeding Random Number Generator...');
     Randomize;
-    WriteLn(MaxD20, ' random d20 rolls:');
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn(MaxD20 + 1, ' random d20 rolls:');
     Min := MaxInt;
     Max := 0;
     Total := 0;
-    For I := 1 To MaxD20 Do
+    For I := 0 To MaxD20 Do
     Begin
         D20 := Random(10 + 10) + 1;
         Write(I:2, ': ', D20:2);
-        If I Mod 11 = 0 Then WriteLn Else Write(' ');
+        If I > 0 And (I + 1) Mod 10 = 0 Then WriteLn Else Write(' ');
         if D20 < Min Then Min := D20;
         if D20 > Max Then Max := D20;
         Total := Total + D20;
     End;
-    WriteLn('Min=', Min, ', Max=', Max, ', Total=', Total, ' Mean=', Trunc(Total / MaxD20));
+    WriteLn('Min=', Min, ', Max=', Max, ', Total=', Total, ' Mean=', Total / (MaxD20 + 1));
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn(MaxRandom + 1, ' random real numbers [0.0..1.0):');
     MinR := MaxReal;

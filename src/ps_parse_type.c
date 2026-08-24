@@ -482,11 +482,11 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
     // We should define and register an array type definition for each dimension
     // and "chain" them, exactly as if array[dim1, dim2] of item would have been
     // written as array[dim1] of array[dim2] of item
-    if (dimensions > 1)
-    {
-        ps_compiler_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    }
+    // if (dimensions > 1)
+    // {
+    //     ps_compiler_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
+    //     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    // }
 
     // Expect 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
