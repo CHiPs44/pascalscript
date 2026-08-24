@@ -92,7 +92,7 @@ ps_symbol *ps_array_get_item_type(const ps_symbol *array_type)
 ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions,
                                    ps_value indexes[PS_ARRAY_MAX_DIMENSIONS], ps_unsigned *final_offset)
 {
-    fprintf(stderr, "ps_array_get_value_offset, array_var: %s, dimensions: %d\n", array_var->name, dimensions);
+    // fprintf(stderr, "ps_array_get_value_offset, array_var: %s, dimensions: %d\n", array_var->name, dimensions);
     // Check if the array variable has the expected number of dimensions
     const ps_type_definition *type_def = ps_array_get_type_def(array_var);
     if (type_def == NULL)
@@ -102,10 +102,10 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions,
     if (type_def->def.a.dimensions > dimensions)
         return PS_ERROR_TOO_MANY_DIMENSIONS;
 
-    for (int i = 0; i < dimensions; i++)
-    {
-        ps_value_debug(stderr, "ps_array_get_value_offset, index: ", &indexes[i]);
-    }
+    // for (int i = 0; i < dimensions; i++)
+    // {
+    //     ps_value_debug(stderr, "ps_array_get_value_offset, index: ", &indexes[i]);
+    // }
 
     // Calculate offset using row-major ordering (iterate backwards, right to left)
     *final_offset = 0;
@@ -115,11 +115,11 @@ ps_error ps_array_get_value_offset(const ps_symbol *array_var, int dimensions,
         ps_symbol *subrange = ps_array_get_subrange(array_var, i);
         if (subrange == NULL)
             return PS_ERROR_INVALID_PARAMETERS;
-        ps_symbol_debug(stderr, "ps_array_get_value_offset, subrange: ", subrange);
+        // ps_symbol_debug(stderr, "ps_array_get_value_offset, subrange: ", subrange);
         ps_type_definition *subrange_def = ps_symbol_get_type_def(subrange);
         if (subrange_def == NULL || !ps_type_definition_is_subrange(subrange_def))
             return PS_ERROR_INVALID_PARAMETERS;
-        ps_type_definition_debug(stderr, "ps_array_get_value_offset, subrange_def: ", subrange_def);
+        // ps_type_definition_debug(stderr, "ps_array_get_value_offset, subrange_def: ", subrange_def);
         // Copy given index to a local variable of the same type as subrange definition
         ps_value index = {.allocated = false, .type = subrange, .data = {0}};
         ps_value *index_ptr = &indexes[i];
