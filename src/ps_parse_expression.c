@@ -274,14 +274,14 @@ bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **exp
 }
 
 bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *symbol,
-                                      ps_ast_node *factor)
+                                      ps_ast_node **factor)
 {
     PARSE_BEGIN("FACTOR", "ARRAY");
 
     // Re-check that the symbol is an array
     const ps_type_definition *type_def = ps_array_get_type_def(symbol->value->type);
     if (type_def == NULL)
-        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+        RETURN_ERROR(PS_ERROR_EXPECTED_ARRAY)
     READ_NEXT_TOKEN
     int dimensions = ps_array_get_dimensions(symbol);
 
@@ -291,7 +291,7 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
     // [ expression [ ',' expression ]* ]
     ps_ast_node *indexes[PS_ARRAY_MAX_DIMENSIONS] = {0};
     ps_ast_node *index = NULL;
-    size_t i = 0;
+    int i = 0;
     READ_NEXT_TOKEN
     do
     {
@@ -321,7 +321,7 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
         ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, 1, indexes);
     if (ast_variable == NULL)
         TRACE_ERROR("VARIABLE_ARRAY")
-    factor = (ps_ast_node *)ast_variable;
+    *factor = (ps_ast_node *)ast_variable;
 
     PARSE_END("OK")
 }

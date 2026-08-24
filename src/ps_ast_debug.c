@@ -90,7 +90,7 @@ void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
 
 void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable_simple)
 {
-    ps_ast_debug_line(margin, "{VARIABLE_SIMPLE: %s}", variable_simple->variable->name);
+    ps_ast_debug_line(margin, "{VARIABLE_SIMPLE} %s", variable_simple->variable->name);
 }
 
 void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
@@ -101,6 +101,14 @@ void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_
         ps_ast_debug_node(margin + 1, variable_array->indexes[i]);
     }
     ps_ast_debug_line(margin, "]");
+}
+
+void ps_ast_debug_variable(size_t margin, const ps_ast_variable *variable)
+{
+    if (variable->dimensions == 0)
+        ps_ast_debug_variable_simple(margin, variable);
+    else
+        ps_ast_debug_variable_array(margin, variable);
 }
 
 void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *statement_list)
@@ -204,7 +212,7 @@ void ps_ast_debug_repeat(size_t margin, const ps_ast_repeat *repeat_statement)
 void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
 {
     ps_ast_debug_line(margin, "FOR");
-    ps_ast_debug_variable_simple(margin + 1, for_statement->variable);
+    ps_ast_debug_variable(margin + 1, for_statement->variable);
     ps_ast_debug_line(margin, ":=");
     ps_ast_debug_node(margin + 1, for_statement->start);
     ps_ast_debug_line(margin, "%s", for_statement->downto ? "DOWNTO" : "TO");
@@ -290,7 +298,7 @@ void ps_ast_debug_node(size_t margin, const ps_ast_node *node)
         break;
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
-        ps_ast_debug_variable_simple(margin, (const ps_ast_variable *)node);
+        ps_ast_debug_variable(margin, (const ps_ast_variable *)node);
         break;
     default:
         ps_ast_debug_line(margin, "Error: unknown AST node kind %d", node->kind);

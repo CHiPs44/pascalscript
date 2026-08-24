@@ -247,8 +247,7 @@ extern "C"
     ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *operation         );
     ps_ast_node *ps_ast_free_function_call   (ps_ast_call             *call              );
     ps_ast_node *ps_ast_free_value           (ps_ast_value            *value             );
-    ps_ast_node *ps_ast_free_variable_simple (ps_ast_variable         *variable          );
-    ps_ast_node *ps_ast_free_variable_array  (ps_ast_variable         *variable          );
+    ps_ast_node *ps_ast_free_variable        (ps_ast_variable         *variable          );
 
     // clang-format on
 

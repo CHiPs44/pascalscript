@@ -152,6 +152,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
             // Null or not a variable? => next
             if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_VARIABLE)
                 continue;
+            ps_handle handle = symbol->value->data.h;
             // Array? => allocate data
             ps_type_definition *type_def = ps_array_get_type_def(symbol);
             if (type_def != NULL)
@@ -161,7 +162,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
                 if (data == NULL)
                     return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
                                                             "Could not allocate array data for %s", symbol->name);
-                frame->data[i].a = data;
+                frame->data[handle].a = data;
                 continue;
             }
             // String? => allocate data
@@ -171,7 +172,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
                 if (data == NULL)
                     return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
                                                             "Could not allocate string data for %s", symbol->name);
-                frame->data[i].s = data;
+                frame->data[handle].s = data;
             }
         }
     }
@@ -356,13 +357,9 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     return true;
 }
 
-bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
-                                       ps_value *value)
+bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+                                              ps_value *value)
 {
-    assert(NULL != interpreter);
-    assert(NULL != variable_node);
-    assert(NULL != value);
-
     ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
     if (frame == NULL)
         return false;
@@ -371,6 +368,54 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast
                                .data = frame->data[variable_node->variable->value->data.h]};
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
+}
+
+bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+                                             ps_value *value)
+{
+    // Retrieve the frame containing the variable
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
+    if (frame == NULL)
+        return false;
+    // Get the item type of the array
+    ps_symbol *item_type = ps_array_get_item_type(variable_node->variable);
+    if (item_type == NULL)
+        return false;
+    // Evaluate the indexes
+    ps_value index_values[PS_ARRAY_MAX_DIMENSIONS] = {0};
+    for (size_t i = 0; i < variable_node->dimensions; i++)
+    {
+        ps_ast_value index_value = {.line = 0,
+                                    .column = 0,
+                                    .group = PS_AST_EXPRESSION,
+                                    .kind = PS_AST_LITERAL_VALUE,
+                                    .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+        if (!ps_ast_eval_expression(interpreter, variable_node->indexes[i], &index_value))
+            return false;
+        index_values[i] = index_value.value;
+    }
+    // Get the value
+    ps_handle handle = variable_node->variable->value->data.h;
+    ps_array_data *array_data = frame->data[handle].a;
+    ps_error error = ps_array_get_value(variable_node->variable, array_data, variable_node->dimensions, index_values,
+                                        value, interpreter->range_check);
+    if (error != PS_ERROR_NONE)
+        return ps_interpreter_return_false(interpreter, error);
+
+    return true;
+}
+
+bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+                                       ps_value *value)
+{
+    assert(NULL != interpreter);
+    assert(NULL != variable_node);
+    assert(NULL != value);
+
+    if (variable_node->dimensions == 0)
+        return ps_interpreter_get_variable_value_simple(interpreter, variable_node, value);
+    else
+        return ps_interpreter_get_variable_value_array(interpreter, variable_node, value);
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR

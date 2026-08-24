@@ -98,10 +98,7 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
         ps_ast_variable *variable = (ps_ast_variable *)node;
-        if (variable->dimensions > 0)
-            return ps_ast_free_variable_array(variable);
-        else
-            return ps_ast_free_variable_simple((ps_ast_variable *)node);
+        return ps_ast_free_variable(variable);
     }
     return NULL;
 }
@@ -119,7 +116,8 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
     switch (node->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        const ps_ast_value *value = ((const ps_ast_value *)node)->value;
+        ps_ast_value *ast_value = (ps_ast_value *)node;
+        ps_value *value = &ast_value->value;
         if (value != NULL)
             return value->type;
         return NULL;
@@ -648,7 +646,7 @@ ps_ast_node *ps_ast_free_value(ps_ast_value *value)
 }
 
 // =============================================================================
-// PS_AST_RVALUE_SIMPLE
+// PS_AST_VARIABLE_SIMPLE
 // =============================================================================
 
 ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, ps_ast_block *owner,
@@ -714,5 +712,20 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_variable *variable)
     }
     ps_memory_free(PS_MEMORY_AST, variable->indexes);
     ps_memory_free(PS_MEMORY_AST, variable);
+    return NULL;
+}
+
+// =============================================================================
+// PS_AST_VARIABLE
+// =============================================================================
+
+ps_ast_node *ps_ast_free_variable(ps_ast_variable *variable)
+{
+    assert(variable != NULL);
+    assert(variable->kind == PS_AST_LVALUE || variable->kind == PS_AST_RVALUE);
+    if (variable->dimensions == 0)
+        ps_ast_free_variable_simple(variable);
+    else
+        ps_ast_free_variable_array(variable);
     return NULL;
 }

@@ -42,8 +42,8 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_CONSTANT_VALUE, "Constant value"},
     {PS_ERROR_INVALID_SUBRANGE, "Invalid subrange"},
     /* ================== SYMBOL TABLE ================== */
-    {PS_ERROR_SYMBOL_TABLE_FULL,"Symbol table full"},
-    {PS_ERROR_SYMBOL_TABLE_INVALID,"Symbol table invalid"},
+    {PS_ERROR_SYMBOL_TABLE_FULL, "Symbol table full"},
+    {PS_ERROR_SYMBOL_TABLE_INVALID, "Symbol table invalid"},
     {PS_ERROR_SYMBOL_NOT_ADDED, "Symbol not added"},
     {PS_ERROR_SYMBOL_NOT_FOUND, "Symbol not found"},
     {PS_ERROR_SYMBOL_EXISTS, "Symbol already exists"},
@@ -71,6 +71,7 @@ static const ps_error_message ps_error_messages[] = {
     {PS_ERROR_EXPECTED_STRING_LENGTH, "String length expected"},
     {PS_ERROR_EXPECTED_SUBRANGE, "Subrange expected"},
     {PS_ERROR_EXPECTED_TYPE, "Type expected"},
+    {PS_ERROR_EXPECTED_ARRAY, "Array expected"},
     {PS_ERROR_ASSIGN_TO_CONST, "Constants can't be changed"},
     {PS_ERROR_TYPE_MISMATCH, "Type mismatch"},
     {PS_ERROR_DIVISION_BY_ZERO, "Division by zero"},

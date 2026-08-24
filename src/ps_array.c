@@ -144,8 +144,6 @@ ps_error ps_array_get_value(const ps_symbol *array_var, ps_array_data *array_dat
     ps_error error = ps_array_get_value_offset(array_var, dimensions, indexes, &offset);
     if (error != PS_ERROR_NONE)
         return error;
-    if (offset >= array_data->count)
-        return PS_ERROR_OUT_OF_RANGE;
     ps_value_data value_data = array_data->values[offset];
     ps_value array_value = {.allocated = false, .type = ps_array_get_item_type(array_var), .data = value_data};
     error = ps_value_copy(&array_value, value, range_check);

@@ -15,7 +15,7 @@ Var
     Numbers: NumberArray;
 
 Begin
-    I := Numbers[1];
+    N := Numbers[1];
     // Numbers[1] := 42;
     // N := 1;
     // For I := 1 To 10 Do
