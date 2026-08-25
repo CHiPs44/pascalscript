@@ -27,8 +27,8 @@ Var
     A: Array3D;
 
 Begin
-    WriteLn('Array4');
-    // A[1, 2, 3] := 42;
+    // WriteLn('Array4');
+    A[1, 2, 3] := 42;
     WriteLn(A[1, 2, 3]);
     // For I := 1 To Rows Do
     //     For J := 1 To Cols Do

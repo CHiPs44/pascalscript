@@ -123,8 +123,8 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_symbol
         RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
     if (dimensions > PS_ARRAY_MAX_DIMENSIONS)
         RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    if (dimensions > 1)
-        RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    // if (dimensions > 1)
+    //     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     ps_ast_node *indexes[dimensions];
 
     // Parse indexes enclosed in '[' and ']', separated by ','
