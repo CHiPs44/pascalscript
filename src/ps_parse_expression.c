@@ -287,12 +287,12 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
 
     // '['
     EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
+    READ_NEXT_TOKEN
 
     // [ expression [ ',' expression ]* ]
     ps_ast_node *indexes[PS_ARRAY_MAX_DIMENSIONS] = {0};
     ps_ast_node *index = NULL;
     int i = 0;
-    READ_NEXT_TOKEN
     do
     {
         if (!ps_parse_expression(compiler, block, &index))
@@ -312,13 +312,16 @@ bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block
             break;
     } while (true);
 
+    if (i != dimensions - 1)
+        RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
+
     // ']'
     EXPECT_TOKEN(PS_TOKEN_RIGHT_BRACKET)
     READ_NEXT_TOKEN
 
     // Create the variable array AST node
     ps_ast_variable *ast_variable =
-        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, 1, indexes);
+        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, dimensions, indexes);
     if (ast_variable == NULL)
         TRACE_ERROR("VARIABLE_ARRAY")
     *factor = (ps_ast_node *)ast_variable;

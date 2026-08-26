@@ -95,7 +95,7 @@ void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable
 
 void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
 {
-    ps_ast_debug_line(margin, "%s[", variable_array->variable->name);
+    ps_ast_debug_line(margin, "{%d}%s[", variable_array->dimensions, variable_array->variable->name);
     for (size_t i = 0; i < variable_array->dimensions; i++)
     {
         ps_ast_debug_node(margin + 1, variable_array->indexes[i]);
@@ -155,7 +155,13 @@ void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
     }
     else
     {
-        ps_ast_debug_line(margin, "%s[...%zu]", variable->variable->name, variable->dimensions);
+        // ps_ast_debug_line(margin, "%s[...%zu]", variable->variable->name, variable->dimensions);
+        ps_ast_debug_line(margin, "%s[", variable->variable->name);
+        for (size_t i = 0; i < variable->dimensions; i++)
+        {
+            ps_ast_debug_node(margin + 1, variable->indexes[i]);
+        }
+        ps_ast_debug_line(margin, "]");
     }
     ps_ast_debug_line(margin, ":=");
     ps_ast_debug_node(margin + 1, assignment->expression);
