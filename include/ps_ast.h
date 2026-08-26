@@ -172,7 +172,7 @@ extern "C"
         ps_value value;
     } PS_AST_PACKED ps_ast_value;
 
-    /** @brief Unary operation: operator and operand */
+    /** @brief Unary operation: operator, operand and result type */
     typedef struct s_ps_ast_unary_operation
     {
         PS_AST_NODE_COMMON
@@ -181,7 +181,7 @@ extern "C"
         ps_symbol *result_type;     /** @brief Result type    */
     } PS_AST_PACKED ps_ast_unary_operation;
 
-    /** @brief Binary operation: operator and operands */
+    /** @brief Binary operation: operator, operands and result type */
     typedef struct s_ps_ast_binary_operation
     {
         PS_AST_NODE_COMMON

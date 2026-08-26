@@ -8,6 +8,7 @@ Program Array4;
 Const
     Rows = 3;
     Cols = 5;
+    Max3D = 3;
 
 Type
     // NumberArray   = Array[1..Rows] Of Array[1..Cols] Of Integer;
@@ -15,7 +16,7 @@ Type
     // CharArray     = Array[1..Rows] Of Array[1..Cols] Of Char;
     CharArray     = Array[1..Rows, 1..Cols] Of Char;
     ArrayOfArray2 = Array[1..2] Of CharArray;
-    Array3D       = Array[1..10, 1..10, 1..10] Of Integer;
+    Array3D       = Array[1..Max3D, 1..Max3D, 1..Max3D] Of Real;
 
 // Function GetPoint(Var A: Array3D; X, Y, Z: Integer): Integer;
 // Begin
@@ -31,17 +32,13 @@ Var
 
 Begin
     WriteLn('Array4');
-    // A[1, 2, 3] := 42;
-    // I := A[1, 2, 3];
-    // WriteLn(A[1, 2, 3]);
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('2D array:');
     For I := 1 To Rows Do
         For J := 1 To Cols Do
         Begin
             Numbers[I, J] := (I * J) Mod 26;
-            // Chars[I, J] := Chr(65 + Numbers[I, J]);
-            K := 65 + Numbers[I, J];
-            C := Chr(K);
-            Chars[I, J] := C;
+            Chars  [I, J] := Chr(Ord('A') + Numbers[I, J]);
         End;
     Write('    ');
     For J := 1 To Cols Do
@@ -58,12 +55,14 @@ Begin
             Write('   ', Chars[I, J]);
         WriteLn;
     End;
-    For I := 1 To 10 Do
-        For J := 1 To 10 Do
-            For K := 1 To 10 Do
-                A[I, J, K] := I * J * K;
-    For I := 1 To 10 Do
-        For J := 1 To 10 Do
-            For K := 1 To 10 Do
-                WriteLn('A[', I:2, ', ', J:2, ', ', K:2 , '] = ', A[I, J, K]:4);
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('3D array:');
+    For I := 1 To Max3D Do
+        For J := 1 To Max3D Do
+            For K := 1 To Max3D Do
+                A[I, J, K] := I * J / K;
+    For I := 1 To Max3D Do
+        For J := 1 To Max3D Do
+            For K := 1 To Max3D Do
+                WriteLn('A[', I:2, ', ', J:2, ', ', K:2 , '] = ', A[I, J, K]);
 End.

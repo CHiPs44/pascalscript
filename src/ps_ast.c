@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_array.h"
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
 #include "ps_executable.h"
@@ -123,10 +124,12 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
         return NULL;
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
-        ps_symbol *variable = ((const ps_ast_variable *)node)->variable;
-        if (variable != NULL && variable->value != NULL)
+        ps_ast_variable *ast_variable = (ps_ast_variable *)node;
+        ps_symbol *variable = ast_variable->variable;
+        if (ast_variable->dimensions == 0)
             return variable->value->type;
-        return NULL;
+        else
+            return ps_array_get_item_type(variable);
     case PS_AST_UNARY_OPERATION:
         return ((const ps_ast_unary_operation *)node)->result_type;
     case PS_AST_BINARY_OPERATION:
