@@ -25,6 +25,7 @@ Type
 Var
     Numbers: NumberArray;
     Chars: CharArray;
+    C: Char;
     I, J, K: Integer;
     A: Array3D;
 
@@ -37,7 +38,10 @@ Begin
         For J := 1 To Cols Do
         Begin
             Numbers[I, J] := (I * J) Mod 26;
-            Chars[I, J] := Chr(65 + Numbers[I, J]);
+            // Chars[I, J] := Chr(65 + Numbers[I, J]);
+            K := 65 + Numbers[I, J];
+            C := Chr(K);
+            Chars[I, J] := C;
         End;
     Write('    ');
     For J := 1 To Cols Do

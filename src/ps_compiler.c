@@ -249,7 +249,7 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
             {
                 error = PS_ERROR_GENERIC;
                 return ps_compiler_set_error_message(compiler, error, "Could not parse program at %d/%d",
-                                                     lexer->start_line, lexer->start_column);
+                                                     lexer->start_line + 1, lexer->start_column + 1);
             }
             return false;
         }
