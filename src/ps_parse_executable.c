@@ -259,8 +259,7 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
  *      'END' ';'
  *      PARAMETER_DEFINITION =  [ 'VAR' ] IDENTIFIER ':' TYPE_REFERENCE
  */
-bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block,
-                                                ps_ast_block **block_executable, ps_symbol_kind kind)
+bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_block *block, ps_symbol_kind kind)
 {
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION")
 
@@ -274,8 +273,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     bool result_symbol_added = false;
     bool executable_symbol_added = false;
     ps_identifier result_identifier = "RESULT";
-
-    *block_executable = NULL;
+    ps_ast_block *block_executable = NULL;
 
     // 'PROCEDURE' or 'FUNCTION' only
     if (kind != PS_SYMBOL_KIND_PROCEDURE && kind != PS_SYMBOL_KIND_FUNCTION)
@@ -284,18 +282,19 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     // Get procedure or function name
     READ_NEXT_TOKEN_OR_CLEANUP
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_IDENTIFIER);
-    // Does it already exist in the current block?
     COPY_IDENTIFIER(identifier)
+    READ_NEXT_TOKEN
+
+    // Does it already exist in the current block?
     executable_symbol = ps_compiler_find_symbol(compiler, block, identifier, true);
     if (executable_symbol != NULL)
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
 
     // Create a new block for the procedure or function, and set its parent to the current block
     ps_ast_node_kind node_kind = kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
-    *block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier);
-    if (*block_executable == NULL)
+    block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier);
+    if (block_executable == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    READ_NEXT_TOKEN
 
     // Initialize signature
     signature = ps_formal_signature_alloc(0, NULL);
@@ -347,13 +346,15 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 
     // ';' after procedure or function declaration
     EXPECT_TOKEN_OR_CLEANUP(PS_TOKEN_SEMI_COLON);
+    READ_NEXT_TOKEN
 
     // Create executable and symbol for the procedure/function
     ps_executable_kind executable_kind =
         kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
-    executable = ps_executable_alloc(executable_kind, *block_executable);
+    executable = ps_executable_alloc(executable_kind, block_executable);
     if (executable == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    executable->block->signature = signature;
 
     if (compiler->debug >= PS_DEBUG_VERBOSE)
     {
@@ -363,6 +364,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
         fprintf(stderr, "================================================================================\n");
     }
 
+    // Create symbol for the procedure or function
     executable_symbol = ps_symbol_alloc(kind, identifier, NULL);
     if (executable_symbol == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
@@ -371,12 +373,15 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     if (value == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     executable_symbol->value = value;
+
     // Add the procedure/function to the current block
     if (!ps_compiler_add_symbol(compiler, block, executable_symbol))
         goto cleanup;
+
     /* Ownership of 'value' is transferred to the environment via the symbol */
     value = NULL;
     executable_symbol_added = true;
+
     // Function have a return value
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
@@ -395,8 +400,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
         result_symbol_added = true;
     }
 
-    READ_NEXT_TOKEN
-    if (!ps_parse_block(compiler, block))
+    if (!ps_parse_block(compiler, block_executable))
     {
         goto cleanup;
     }
@@ -504,9 +508,9 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
     }
 
     // Build AST node for CALL
-    *call = ps_ast_create_call(line, column,
-                               executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION,
-                               executable, 0, NULL, NULL);
+    *call = ps_ast_create_call(
+        line, column, executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL,
+        executable, 0, NULL, NULL);
 
 cleanup:
     if (compiler->error != PS_ERROR_NONE)

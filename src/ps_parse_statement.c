@@ -318,19 +318,16 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
         // "Write[Ln]()"?
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            // if (mode == MODE_EXEC && newline)
-            //     fprintf(stdout, "\n");
             READ_NEXT_TOKEN
             loop = false;
         }
-
         while (loop)
         {
             if (compiler->debug >= PS_DEBUG_VERBOSE)
                 fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
             if (!ps_parse_expression(compiler, block, &expression))
                 TRACE_ERROR("EXPRESSION")
-            // retrieve string/numeric format
+            // retrieve string/numeric format :width[:precision]
             width = 0;
             precision = 0;
             if (lexer->current_token.type == PS_TOKEN_COLON)
@@ -347,8 +344,6 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
                     READ_NEXT_TOKEN
                 }
             }
-            // if (mode == MODE_EXEC && !ps_procedure_write(compiler, stdout, &result, width, precision))
-            //     TRACE_ERROR(newline ? "WRITELN" : "WRITE");
             if (n_args >= PS_PARAMETERS_MAX)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
             args[n_args] = expression;

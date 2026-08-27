@@ -201,23 +201,15 @@ bool ps_parse_block(ps_compiler *compiler, ps_ast_block *block)
                 TRACE_ERROR("VAR")
             break;
         case PS_TOKEN_PROCEDURE:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-            // ps_ast_block *procedure =
-            //     ps_ast_create_block(lexer->start_line, lexer->start_column, block, PS_AST_BLOCK, NULL);
-            // if (procedure == NULL)
-            //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            // if (!ps_parse_procedure_or_function_declaration(compiler, procedure, PS_SYMBOL_KIND_PROCEDURE))
-            //     TRACE_ERROR("PROCEDURE")
-            // break;
+            // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+            if (!ps_parse_procedure_or_function_declaration(compiler, block, PS_SYMBOL_KIND_PROCEDURE))
+                TRACE_ERROR("PROCEDURE")
+            break;
         case PS_TOKEN_FUNCTION:
-            RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-            // ps_ast_block *function =
-            //     ps_ast_create_block(lexer->start_line, lexer->start_column, block, PS_AST_BLOCK, NULL);
-            // if (function == NULL)
-            //     RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            // if (!ps_parse_procedure_or_function_declaration(compiler, function, PS_SYMBOL_KIND_FUNCTION))
-            //     TRACE_ERROR("FUNCTION")
-            // break;
+            // RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+            if (!ps_parse_procedure_or_function_declaration(compiler, block, PS_SYMBOL_KIND_FUNCTION))
+                TRACE_ERROR("FUNCTION")
+            break;
         case PS_TOKEN_BEGIN:
             loop = false;
             break;
