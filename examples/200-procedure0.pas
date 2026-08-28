@@ -6,14 +6,8 @@
 Program ExampleProcedure0;
 
 Procedure Procedure0;
-    Procedure Procedure1;
-    Begin
-        WriteLn('        This is Procedure1');
-    End;
 Begin
     WriteLn('    This is Procedure0');
-    Procedure1;
-    WriteLn('    This is Procedure0 again');
 End;
 
 Begin
