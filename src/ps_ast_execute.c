@@ -448,14 +448,13 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     {
         return ps_ast_execute_procedure_call_system(interpreter, procedure_call);
     }
-    ps_ast_node *node = procedure_call->executable->value->data.n;
-    if (!ps_ast_node_check_group(node, PS_AST_BLOCK))
+    ps_ast_block *procedure = procedure_call->executable->value->data.x->block;
+    if (!ps_ast_node_check_group((ps_ast_node *)procedure, PS_AST_BLOCK))
         return ps_interpreter_set_message(interpreter, "Expected block, got %s",
-                                          ps_ast_node_get_group_name(node->group));
-    if (!ps_ast_node_check_kind(node, PS_AST_PROCEDURE))
+                                          ps_ast_node_get_group_name(procedure->group));
+    if (!ps_ast_node_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return ps_interpreter_set_message(interpreter, "Expected procedure, got %s",
-                                          ps_ast_node_get_kind_name(node->kind));
-    ps_ast_block *procedure = (ps_ast_block *)node;
+                                          ps_ast_node_get_kind_name(procedure->kind));
     // Check if argument count is same as procedure declaration
     if (procedure_call->n_args != procedure->signature->parameter_count)
     {

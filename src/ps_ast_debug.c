@@ -28,6 +28,14 @@ static const char *ps_ast_node_group_names[] = {[PS_AST_GROUP_UNKNOWN] = "UNKNOW
 
 const char *ps_ast_node_get_group_name(ps_ast_node_group group)
 {
+    static char error[16];
+    unsigned int group_value = (unsigned int)group;
+    if (group_value > PS_AST_GROUP_LVALUE)
+    {
+        snprintf(error, sizeof(error), "ERROR(%d)", group_value);
+        fprintf(stderr, "ERROR: Invalid AST node group %d\n", group_value);
+        return error;
+    }
     return ps_ast_node_group_names[group];
 }
 
@@ -53,6 +61,14 @@ static const char *ps_ast_node_kind_names[] = {[PS_AST_KIND_UNKNOWN] = "UNKNOWN"
 
 const char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
 {
+    static char error[16];
+    unsigned int kind_value = (unsigned int)kind;
+    if (kind_value > PS_AST_LVALUE)
+    {
+        snprintf(error, sizeof(error), "ERROR(%d)", kind_value);
+        fprintf(stderr, "ERROR: Invalid AST node kind %d\n", kind_value);
+        return error;
+    }
     return ps_ast_node_kind_names[kind];
 }
 
