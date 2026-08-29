@@ -33,6 +33,7 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
     (void)start_line;
     (void)start_column;
 
+    ps_ast_block *owner = NULL;
     ps_symbol *type_reference = NULL;
     ps_identifier type_name = {0};
 
@@ -41,8 +42,7 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
     COPY_IDENTIFIER(type_name)
 
     // Check that type name does not already exist in local symbol table
-    type_reference = ps_compiler_find_symbol(compiler, block, type_name, true);
-    if (type_reference != NULL)
+    if (ps_compiler_find_symbol(compiler, block, type_name, true, &owner, &type_reference))
     {
         ps_compiler_set_message(compiler, "Identifier '%s' already exists", type_name);
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
@@ -173,6 +173,9 @@ static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *bl
     (void)start_line;
     (void)start_column;
 
+    ps_ast_block *owner = NULL;
+    ps_symbol *symbol = NULL;
+
     // Up to 256 values in an enumeration, re-allocate 16 more if exhausted
     ps_symbol_list *list = ps_symbol_list_alloc(16, 16);
     if (list == NULL)
@@ -207,7 +210,7 @@ static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *bl
         //  - locally in the same enumeration
         //  - or globally in the symbol table
         if (ps_symbol_list_find(list, lexer->current_token.value.identifier) ||
-            (ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, true) != NULL))
+            (ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, true, &owner, &symbol)))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_EXISTS)
         ps_symbol *value_symbol = ps_symbol_list_add(list, *type_symbol, lexer->current_token.value.identifier);
         if (value_symbol == NULL)
@@ -585,6 +588,7 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     (void)start_line;
     (void)start_column;
 
+    ps_ast_block *owner = NULL;
     ps_symbol *symbol = NULL;
 
     // By default, we advance to next token after processing type reference,
@@ -655,8 +659,7 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         //  - a copy of an existing type
         //  - a subrange definition from an enumeration
         //  - a subrange definition beginning with a constant expression
-        symbol = ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, false);
-        if (symbol == NULL)
+        if (!ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, false, &owner, &symbol))
             RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
         if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
         {

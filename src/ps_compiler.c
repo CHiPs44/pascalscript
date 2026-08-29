@@ -95,33 +95,35 @@ bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const 
     return false;
 }
 
-ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local)
+bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local,
+                             ps_ast_block **owner, ps_symbol **symbol)
 {
     assert(compiler != NULL);
     assert(name != NULL);
-    ps_symbol *symbol = NULL;
 
     // No block => search into SYSTEM
     if (block == NULL)
     {
-        symbol = ps_symbol_table_find(compiler->system->symbols, name);
+        *symbol = ps_symbol_table_find(compiler->system->symbols, name);
+        *owner = symbol == NULL ? NULL : compiler->system;
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
-                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : (*symbol)->name);
     }
     else
     {
         // Search in current block
-        symbol = ps_symbol_table_find(block->symbols, name);
+        *symbol = ps_symbol_table_find(block->symbols, name);
+        *owner = symbol == NULL ? NULL : block;
         if (!local && symbol == NULL)
             // Not found => search in parent
-            return ps_compiler_find_symbol(compiler, block->parent, name, false);
+            return ps_compiler_find_symbol(compiler, block->parent, name, false, owner, symbol);
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
-                    local ? "Local" : "Global", symbol == NULL ? "Not found" : symbol->name);
+                    local ? "Local" : "Global", symbol == NULL ? "Not found" : (*symbol)->name);
     }
 
-    return symbol;
+    return *symbol != NULL;
 }
 
 bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol)

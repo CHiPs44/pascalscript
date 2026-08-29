@@ -383,10 +383,12 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     (void)start_column;
 
     ps_identifier identifier;
+    ps_ast_block *owner = NULL;
     ps_symbol *symbol;
     ps_ast_call *call = NULL;
     ps_ast_assignment *assignement = NULL;
     bool is_result = false;
+    bool symbol_found = false;
 
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
@@ -398,15 +400,15 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
-        symbol = ps_compiler_find_symbol(compiler, block, "RESULT", false);
+        symbol_found = ps_compiler_find_symbol(compiler, block, "RESULT", false, &owner, &symbol);
         is_result = true;
     }
     else
     {
         // Normal lookup - can be variable, constant, procedure, or function
-        symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
+        symbol_found = ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol);
     }
-    if (symbol == NULL)
+    if (!symbol_found)
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (compiler->debug >= PS_DEBUG_VERBOSE)
         ps_symbol_debug(stderr, "DEBUG\tFound symbol ", symbol);
@@ -616,6 +618,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
 {
     PARSE_BEGIN("STATEMENT", "FOR_DO");
 
+    ps_ast_block *owner = NULL;
     ps_symbol *variable = NULL;
     ps_ast_variable *variable_node = NULL;
     ps_ast_node *start = NULL;
@@ -633,15 +636,12 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
-    variable = ps_compiler_find_symbol(compiler, block, identifier, true);
-    if (variable == NULL)
+    if (!ps_compiler_find_symbol(compiler, block, identifier, true, &owner, &variable))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
         RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
     if (!ps_value_is_ordinal(variable->value))
         RETURN_ERROR(PS_ERROR_EXPECTED_ORDINAL)
-    // start.type = variable->value->type;
-    // finish.type = variable->value->type;
 
     // :=
     EXPECT_TOKEN(PS_TOKEN_ASSIGN)

@@ -47,6 +47,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
     (void)start_column;
 
     ps_identifier identifier;
+    ps_ast_block *owner;
     ps_symbol *symbol;
 
     // Re-check
@@ -55,8 +56,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
     READ_NEXT_TOKEN
 
     // Existing symbol?
-    symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
-    if (symbol == NULL)
+    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
 
     // Variable?
@@ -264,6 +264,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION")
 
     ps_identifier identifier = {0};
+    ps_ast_block *executable_owner = NULL;
     ps_symbol *executable_symbol = NULL;
     ps_value *value = NULL;
     ps_formal_signature *signature = NULL;
@@ -286,8 +287,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     READ_NEXT_TOKEN
 
     // Does it already exist in the current block?
-    executable_symbol = ps_compiler_find_symbol(compiler, block, identifier, true);
-    if (executable_symbol != NULL)
+    if (ps_compiler_find_symbol(compiler, block, identifier, true, &executable_owner, &executable_symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
 
     // Create a new block for the procedure or function, and set its parent to the current block

@@ -5,13 +5,24 @@
 *)
 Program ExampleProcedure0;
 
-Procedure Procedure0;
-Begin
-    WriteLn('    This is Procedure0');
-End;
+Var
+    G: Unsigned;
+    // N: Real;
+
+// Procedure Procedure0;
+// // Var
+// //     N: Integer;
+// Begin
+//     // N := 42;
+//     // WriteLn('    This is Procedure0         N=', N);
+//     WriteLn('                               G=', G);
+// End;
 
 Begin
-    WriteLn('This is the main program');
-    Procedure0;
-    WriteLn('This is the main program again');
+    G := 123;
+    WriteLn('                               G=', G);
+    // N := Pi;
+    // WriteLn('This is the main program       N=', N:10:9);
+    // Procedure0;
+    // WriteLn('This is the main program again N=', N:10:9);
 End.

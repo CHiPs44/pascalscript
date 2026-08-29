@@ -348,12 +348,12 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
     PARSE_BEGIN("FACTOR", "IDENTIFIER");
 
     ps_identifier identifier;
+    ps_ast_block *owner = NULL;
     ps_symbol *symbol = NULL;
     ps_value value = {0};
 
     COPY_IDENTIFIER(identifier)
-    symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
-    if (symbol == NULL)
+    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
 
     switch (symbol->kind)
@@ -559,6 +559,7 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
     PARSE_BEGIN("FUNCTION_CALL", "LOW_HIGH")
     (void)start_line;
     (void)start_column;
+    ps_ast_block *owner = NULL;
 
     ps_identifier identifier = {0};
 
@@ -568,8 +569,7 @@ bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block *block,
         lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     COPY_IDENTIFIER(identifier)
-    *symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
-    if (*symbol == NULL)
+    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
     if (!ps_value_is_ordinal((*symbol)->value) && !ps_value_is_array((*symbol)->value))
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
@@ -746,6 +746,7 @@ bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps
 
     bool negate = false;
     ps_identifier identifier = {0};
+    ps_ast_block *owner = NULL;
     ps_symbol *symbol = NULL;
 
     // For now only keep track of '-' so "Const Foo = -4;" or "Const Bar = -Foo;" work as expected
@@ -800,8 +801,7 @@ bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps
         break;
     case PS_TOKEN_IDENTIFIER:
         COPY_IDENTIFIER(identifier)
-        symbol = ps_compiler_find_symbol(compiler, block, identifier, false);
-        if (symbol == NULL)
+        if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
         if (symbol->kind != PS_SYMBOL_KIND_CONSTANT)
             RETURN_ERROR(PS_ERROR_EXPECTED_CONSTANT);

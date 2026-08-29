@@ -52,7 +52,8 @@ extern "C"
     bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const char *format, ...); // NOSONAR
 
     /** @brief Find symbol by name in current block (or its parents if not local) */
-    ps_symbol *ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local);
+    bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local,
+                                 ps_ast_block **owner, ps_symbol **symbol);
 
     /** @brief Add symbol to current block */
     bool ps_compiler_add_symbol(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol);

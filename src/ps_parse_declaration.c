@@ -342,8 +342,9 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifiers[*var_count])
-        const ps_symbol *variable = ps_compiler_find_symbol(compiler, block, identifiers[*var_count], true);
-        if (variable != NULL)
+        ps_ast_block *owner = NULL;
+        ps_symbol *variable = NULL;
+        if (ps_compiler_find_symbol(compiler, block, identifiers[*var_count], true, &owner, &variable))
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN
         if (lexer->current_token.type == PS_TOKEN_COLON)
