@@ -375,7 +375,7 @@ bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *block, ps_a
         {
             // factor.type = symbol->value->type;
             if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
-                *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_RVALUE,
+                *factor = (ps_ast_node *)ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_RVALUE,
                                                                        symbol);
             else
             {

@@ -113,7 +113,8 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
-bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_symbol *variable, ps_ast_variable **lvalue)
+bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner, ps_symbol *variable,
+                           ps_ast_variable **lvalue)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
@@ -171,7 +172,7 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_symbol
     // // TODO Check if rvalue's type is compatible with array's item type
 
     // Create statement: lvalue := rvalue
-    ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, block, PS_AST_LVALUE,
+    ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, owner, PS_AST_LVALUE,
                                                                  variable, dimensions, (ps_ast_node **)(&indexes));
     if (ast_variable == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -192,7 +193,7 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_symbol
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
  */
 bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment_ptr,
-                         ps_symbol *variable)
+                         ps_ast_block *owner, ps_symbol *variable)
 {
     assert(compiler != NULL);
     assert(block != NULL);
@@ -223,12 +224,12 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
     {
         // => array_var[index(, index)]
-        if (!ps_parse_array_lvalue(compiler, block, variable, &lvalue))
+        if (!ps_parse_array_lvalue(compiler, block, owner, variable, &lvalue))
             TRACE_ERROR("ARRAY")
     }
     else
     {
-        lvalue = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
+        lvalue = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
         if (lvalue == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
@@ -420,7 +421,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         // fprintf(stderr,
         //         "DEBUG\tps_parse_assignment_or_procedure_call\tParsing assignment to variable '%s' of type '%s'\n",
         //         symbol->name, ps_type_definition_get_name(symbol->value->type->value->data.t));
-        if (!ps_parse_assignment(compiler, block, &assignement, symbol))
+        if (!ps_parse_assignment(compiler, block, &assignement, owner, symbol))
             TRACE_ERROR("ASSIGNMENT")
         // fprintf(stderr,
         //         "DEBUG\tps_parse_assignment_or_procedure_call\tParsed assignment to variable '%s' of type '%s' as
@@ -442,7 +443,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
             ps_compiler_set_message(compiler, "Cannot assign to %s from %s", symbol->name, block->name);
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN);
         }
-        if (!ps_parse_assignment(compiler, block, &assignement, symbol))
+        if (!ps_parse_assignment(compiler, block, &assignement, owner, symbol))
             TRACE_ERROR("ASSIGNMENT")
         *statement_ptr = (ps_ast_node *)(assignement);
         break;
