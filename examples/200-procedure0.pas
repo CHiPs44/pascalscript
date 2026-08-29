@@ -13,8 +13,8 @@ Procedure Procedure0;
 Var
     N: Integer; // Shadows global variable
 Begin
-    // Copy global variable value
-    N := G;
+    // Use global variable value
+    N := G * 42;
     // Change global variable value
     G := 234;
     WriteLn('    This is Procedure0         N=', N:11, ' G=', G);
@@ -23,8 +23,7 @@ End;
 Begin
     N := Pi;
     G := 123;
-    WriteLn('                                 12345678901234567890');
-    WriteLn('This is the main program       N=', N:10:1, ' G=', G);
+    WriteLn('This is the main program       N=', N:10:9, ' G=', G);
     Procedure0;
     WriteLn('This is the main program again N=', N:10:9, ' G=', G);
 End.
