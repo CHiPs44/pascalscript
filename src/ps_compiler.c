@@ -115,8 +115,8 @@ bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const c
         // Search in current block
         *symbol = ps_symbol_table_find(block->symbols, name);
         *owner = symbol == NULL ? NULL : block;
-        if (!local && symbol == NULL)
-            // Not found => search in parent
+        if (!local && *symbol == NULL)
+            // Search in parents, then system
             return ps_compiler_find_symbol(compiler, block->parent, name, false, owner, symbol);
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,

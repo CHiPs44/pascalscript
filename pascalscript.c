@@ -196,10 +196,13 @@ bool compile(const char *source_file)
     if (verbose)
         fprintf(stderr, "=============================== BEGIN COMPILATION ==============================\n");
     ok = ps_compiler_compile(compiler, &program);
+    if (compiler->error != PS_ERROR_NONE)
+    {
+        fprintf(stderr, "Compiler error:   %d %s\n", compiler->error, ps_error_get_message(compiler->error));
+        ok = false;
+    }
     if (ok)
         fprintf(stderr, "Compilation OK\n");
-    if (compiler->error != PS_ERROR_NONE)
-        fprintf(stderr, "Compiler error:   %d %s\n", compiler->error, ps_error_get_message(compiler->error));
     if (strlen(compiler->message) > 0)
         fprintf(stderr, "         message: %s\n", compiler->message);
     if (verbose)

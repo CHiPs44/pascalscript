@@ -55,7 +55,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
 
-    // Existing symbol?
+    // Non-existing symbol?
     if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
 

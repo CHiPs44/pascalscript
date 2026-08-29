@@ -337,13 +337,14 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
     (void)start_line;
     (void)start_column;
 
+    ps_ast_block *owner = NULL;
+    ps_symbol *variable = NULL;
+
     *var_count = 0;
     do
     {
         EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifiers[*var_count])
-        ps_ast_block *owner = NULL;
-        ps_symbol *variable = NULL;
         if (ps_compiler_find_symbol(compiler, block, identifiers[*var_count], true, &owner, &variable))
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN
