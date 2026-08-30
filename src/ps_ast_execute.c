@@ -47,7 +47,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "BLOCK kind=%s name=%s",
                            ps_ast_node_get_kind_name(block->kind), block->name);
 
-    if (!ps_interpreter_enter_frame(interpreter, (ps_ast_block *)block))
+    if (!ps_interpreter_enter_frame(interpreter, block))
         goto error;
 
     result = ps_ast_execute_statement_list(interpreter, block->statement_list);
@@ -300,42 +300,55 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     assert(for_statement != NULL);
     assert(for_statement->group == PS_AST_STATEMENT);
     assert(for_statement->kind == PS_AST_FOR);
+
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "FOR statement");
 
-    ps_ast_variable *variable_simple = for_statement->variable;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable_simple->variable->name);
-
+    // Initialize variables
+    ps_ast_variable *for_variable = for_statement->variable;
     ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    ps_ast_value end_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+    ps_value iteration_value = {.allocated = false, .type = for_variable->variable->value->type, .data = {0}};
+
+    if (strcmp(for_variable->variable->name, "J") == 0)
+    {
+        ps_ast_debug = true;
+        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+    }
+
+    // Evaluate start value
     if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
         return false;
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Start value: %s",
                            ps_value_get_display_string(&start_value.value, 0, 0));
 
-    ps_ast_value end_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    // Evaluate end value
     if (!ps_ast_eval_expression(interpreter, for_statement->end, &end_value))
         return false;
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "End value: %s",
                            ps_value_get_display_string(&end_value.value, 0, 0));
 
-    if (!ps_interpreter_set_variable_value(interpreter, variable_simple, (const ps_value *)&start_value.value))
+    // Set variable to start value
+    if (!ps_interpreter_set_variable_value(interpreter, for_variable, (const ps_value *)&start_value.value))
         return false;
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
-                           ps_value_get_display_string(variable_simple->variable->value, 0, 0));
+                           ps_value_get_display_string(for_variable->variable->value, 0, 0));
 
-    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
     do
     {
+        // Retrieve iteration variable value
+        if (!ps_interpreter_get_variable_value(interpreter, for_variable, &iteration_value))
+            return false;
         // Stop if variable > finish for "TO"
         //      or variable < finish for "DOWNTO"
-        ps_value iteration_value = {.allocated = false, .type = variable_simple->variable->value->type, .data = {0}};
-        if (!ps_interpreter_get_variable_value(interpreter, variable_simple, &iteration_value))
-            return false;
         if (!ps_operator_binary_eval(interpreter, &iteration_value, &end_value.value, &stop,
                                      for_statement->downto ? PS_OP_LT : PS_OP_GT))
             return false;
         if (stop.data.b)
         {
-            ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STOP!");
+            ps_ast_debug_execution(
+                interpreter, PS_DEBUG_VERBOSE, "STOP! %s %s %s", ps_value_get_display_string(&iteration_value, 0, 0),
+                for_statement->downto ? "<" : ">", ps_value_get_display_string(&end_value.value, 0, 0));
             break;
         }
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
@@ -348,11 +361,19 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
         interpreter->range_check = range_check;
         if (error != PS_ERROR_NONE)
             return false;
-        if (!ps_interpreter_set_variable_value(interpreter, variable_simple, &iteration_value))
+        if (!ps_interpreter_set_variable_value(interpreter, for_variable, &iteration_value))
+            return false;
+        if (!ps_interpreter_get_variable_value(interpreter, for_variable, &iteration_value))
             return false;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
-                               ps_value_get_display_string(variable_simple->variable->value, 0, 0));
+                               ps_value_get_display_string(for_variable->variable->value, 0, 0));
     } while (true);
+
+    if (strcmp(for_variable->variable->name, "J") == 0)
+    {
+        ps_ast_debug = false;
+        interpreter->logger->debug_level = PS_DEBUG_FATAL;
+    }
 
     return true;
 }

@@ -45,7 +45,8 @@
 // #define DEBUG_SOURCE "examples/090-boolean.pas"
 // #define DEBUG_SOURCE "examples/120-toayue-powersoftwo.pas"
 // #define DEBUG_SOURCE "examples/130-big-loops.pas"
-#define DEBUG_SOURCE "examples/200-procedure0.pas"
+// #define DEBUG_SOURCE "examples/200-procedure0.pas"
+#define DEBUG_SOURCE "examples/210-procedure1.pas"
 
 // Runtime options
 bool bool_eval = false;

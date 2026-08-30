@@ -124,8 +124,6 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_bl
         RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
     if (dimensions > PS_ARRAY_MAX_DIMENSIONS)
         RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    // if (dimensions > 1)
-    //     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
     ps_ast_node *indexes[dimensions];
 
     // Parse indexes enclosed in '[' and ']', separated by ','
@@ -161,17 +159,7 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_bl
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
 
-    // // Check for ':='
-    // EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-    // READ_NEXT_TOKEN
-
-    // // Parse expression for assignement value
-    // ps_ast_node *rvalue = NULL;
-    // if (!ps_parse_expression(compiler, block, &rvalue))
-    //     TRACE_ERROR("EXPRESSION1")
-    // // TODO Check if rvalue's type is compatible with array's item type
-
-    // Create statement: lvalue := rvalue
+    // Create left part of assignment
     ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, owner, PS_AST_LVALUE,
                                                                  variable, dimensions, (ps_ast_node **)(&indexes));
     if (ast_variable == NULL)
@@ -280,6 +268,33 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
 }
 
+bool static inline ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width,
+                                                    int16_t *precision)
+{
+    PARSE_BEGIN("WRITE_OR_WRITELN", "FORMAT");
+    (void)start_line;
+    (void)start_column;
+
+    *width = 0;
+    *precision = 0;
+    if (lexer->current_token.type == PS_TOKEN_COLON)
+    {
+        READ_NEXT_TOKEN
+        EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+        *width = (int16_t)(lexer->current_token.value.u);
+        READ_NEXT_TOKEN
+        if (lexer->current_token.type == PS_TOKEN_COLON)
+        {
+            READ_NEXT_TOKEN
+            EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+            *precision = (int16_t)(lexer->current_token.value.u);
+            READ_NEXT_TOKEN
+        }
+    }
+
+    PARSE_END("OK")
+}
+
 /**
  * Parse
  *      'WRITE' | 'WRITELN' [ '('
@@ -302,7 +317,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
 {
     PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
 
-    size_t n_args = 0;
+    uint16_t n_args = 0;
     ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
     ps_ast_format formats[PS_PARAMETERS_MAX] = {0};
     bool loop = true;
@@ -329,22 +344,8 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
             if (!ps_parse_expression(compiler, block, &expression))
                 TRACE_ERROR("EXPRESSION")
             // retrieve string/numeric format :width[:precision]
-            width = 0;
-            precision = 0;
-            if (lexer->current_token.type == PS_TOKEN_COLON)
-            {
-                READ_NEXT_TOKEN
-                EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
-                width = (int16_t)(lexer->current_token.value.u);
-                READ_NEXT_TOKEN
-                if (lexer->current_token.type == PS_TOKEN_COLON)
-                {
-                    READ_NEXT_TOKEN
-                    EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
-                    precision = (int16_t)(lexer->current_token.value.u);
-                    READ_NEXT_TOKEN
-                }
-            }
+            if (!ps_parse_write_or_writeln_format(compiler, block, &width, &precision))
+                TRACE_ERROR("FORMAT")
             if (n_args >= PS_PARAMETERS_MAX)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
             args[n_args] = expression;
@@ -477,23 +478,25 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     EXPECT_TOKEN(PS_TOKEN_IF)
     READ_NEXT_TOKEN
 
-    // Condition
+    // Condition: boolean expression
     if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("CONDITION")
-    // if (result.type != &ps_system_boolean)
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+    const ps_symbol *result_type = ps_ast_node_get_type(condition);
+    if (result_type != &ps_system_boolean)
+        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
 
     // THEN
     EXPECT_TOKEN(PS_TOKEN_THEN)
     READ_NEXT_TOKEN
 
-    // Statement
+    // Statement or compound statement
     if (!ps_parse_statement(compiler, block, &then_node))
         TRACE_ERROR("THEN")
-    if ((then_node)->kind == PS_AST_STATEMENT_LIST)
+    if (then_node->kind == PS_AST_STATEMENT_LIST)
         then_branch = (ps_ast_statement_list *)(then_node);
     else
     {
+        // 1 statement in statement list
         statement_list = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
         if (statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -554,8 +557,9 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("EXPRESSION");
-    // if (result.type != &ps_system_boolean)
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+    const ps_symbol *result_type = ps_ast_node_get_type(condition);
+    if (result_type != &ps_system_boolean)
+        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
 
     // AST NODE => REPEAT(BODY, CONDITION)
     *repeat_statement = ps_ast_create_repeat(start_line, start_column, body, condition);
@@ -574,8 +578,8 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     PARSE_BEGIN("STATEMENT", "WHILE_DO");
 
     ps_ast_node *condition = NULL;
-    ps_ast_statement_list *body = NULL;
-    ps_ast_node *body_node = NULL;
+    ps_ast_statement_list *statement_list = NULL;
+    ps_ast_node *body = NULL;
 
     // WHILE
     EXPECT_TOKEN(PS_TOKEN_WHILE)
@@ -584,27 +588,28 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
         TRACE_ERROR("EXPRESSION");
-    // if (result.type != &ps_system_boolean)
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE);
+    const ps_symbol *result_type = ps_ast_node_get_type(condition);
+    if (result_type != &ps_system_boolean)
+        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
 
     // DO
     EXPECT_TOKEN(PS_TOKEN_DO);
     READ_NEXT_TOKEN
 
-    if (!ps_parse_statement(compiler, block, &body_node))
+    // BODY
+    if (!ps_parse_statement(compiler, block, &body))
         TRACE_ERROR("STATEMENT");
-    if (body_node->kind == PS_AST_STATEMENT_LIST)
-        body = (ps_ast_statement_list *)body_node;
+    if (body->kind == PS_AST_STATEMENT_LIST)
+        statement_list = (ps_ast_statement_list *)body;
     else
     {
-        ps_ast_statement_list *statement_list = ps_ast_create_statement_list(body_node->line, body_node->column, 1);
+        statement_list = ps_ast_create_statement_list(body->line, body->column, 1);
         if (statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        statement_list->statements[0] = body_node;
-        body = statement_list;
+        statement_list->statements[0] = body;
     }
 
-    *while_statement = ps_ast_create_while(start_line, start_column, condition, body);
+    *while_statement = ps_ast_create_while(start_line, start_column, condition, statement_list);
     if (*while_statement == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
@@ -637,7 +642,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN
-    if (!ps_compiler_find_symbol(compiler, block, identifier, true, &owner, &variable))
+    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &variable))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
         RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
@@ -707,42 +712,41 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
         *statement_list = ps_ast_create_statement_list(start_line, start_column, 0);
         if (*statement_list == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        PARSE_END("EMPTY")
     }
-    else
+
+    // Let's go!
+    ps_ast_node *statement = NULL;
+    // Up to 256 statements for now
+    int count = 0;
+    ps_ast_node *statements[256];
+    bool loop = true;
+    do
     {
-        // Let's go!
-        ps_ast_node *statement = NULL;
-        // Up to 256 statements for now
-        size_t count = 0;
-        ps_ast_node *statements[256];
-        bool loop = true;
-        do
+        if (!ps_parse_statement(compiler, block, &statement))
+            TRACE_ERROR("STATEMENT");
+        count += 1;
+        if (count > 255)
+            RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
+        statements[count - 1] = statement;
+        // NB: semi-colon at statement list end is optional
+        if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
         {
-            if (!ps_parse_statement(compiler, block, &statement))
-                TRACE_ERROR("STATEMENT");
-            count += 1;
-            if (count > 255)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
-            statements[count - 1] = (ps_ast_node *)(statement);
-            // NB: semi-colon at statement list end is optional
-            if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
-            {
-                READ_NEXT_TOKEN
-                if (lexer->current_token.type == stop) // NOSONAR
-                    loop = false;
-            }
-            else if (lexer->current_token.type == stop)
+            READ_NEXT_TOKEN
+            if (lexer->current_token.type == stop) // NOSONAR
                 loop = false;
-            else
-                RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        } while (loop);
-        // Create statement list and copy statements into it
-        *statement_list = ps_ast_create_statement_list(start_line, start_column, count);
-        if (*statement_list == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        for (size_t i = 0; i < count; i += 1)
-            (*statement_list)->statements[i] = statements[i];
-    }
+        }
+        else if (lexer->current_token.type == stop)
+            loop = false;
+        else
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    } while (loop);
+
+    // Create statement list and copy statements into it
+    *statement_list = ps_ast_create_statement_list(start_line, start_column, count);
+    if (*statement_list == NULL)
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    memcpy((*statement_list)->statements, statements, sizeof(ps_ast_node *) * count);
 
     PARSE_END("OK")
 }

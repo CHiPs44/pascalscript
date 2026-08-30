@@ -129,9 +129,9 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
 
 bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block *block, ps_frame *frame)
 {
-    assert(NULL != interpreter);
-    assert(NULL != block);
-    assert(NULL != frame);
+    assert(interpreter != NULL);
+    assert(block != NULL);
+    assert(frame != NULL);
 
     // size_t count = block->n_vars;
     // if (block->signature != NULL)
@@ -154,7 +154,7 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
                 continue;
             ps_handle handle = symbol->value->data.h;
             // Array? => allocate data
-            ps_type_definition *type_def = ps_array_get_type_def(symbol);
+            const ps_type_definition *type_def = ps_array_get_type_def(symbol);
             if (type_def != NULL)
             {
                 // Allocate the array
@@ -176,14 +176,6 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_ast_block
             }
         }
     }
-
-    // for (size_t i = 0; i < count; i++)
-    // {
-    //     ps_value_data *data = &frame->data[i];
-    //     data->u = i % 2 == 0 ? 0xDEADDEAD : 0xBEEFBEEF;
-    //     // if (block->variables[i].type->kind == PS_AST_TYPE_KIND_ARRAY)
-    //     // {
-    //     //    )
 
     return true;
 }
@@ -231,6 +223,7 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, ps_ast_block *block
 bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
+    assert(interpreter->level > 0);
 
     // Decrease interpreter's level
     interpreter->level -= 1;
@@ -253,25 +246,25 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     return true;
 }
 
-ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *variable_node)
+ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *ast_variable)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable_node);
-    assert(NULL != variable_node->owner);
-    assert(NULL != variable_node->variable);
+    assert(NULL != ast_variable);
+    assert(NULL != ast_variable->owner);
+    assert(NULL != ast_variable->variable);
 
-    if (variable_node->variable->kind != PS_SYMBOL_KIND_VARIABLE)
+    if (ast_variable->variable->kind != PS_SYMBOL_KIND_VARIABLE)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE, "Symbol '%s' is a %s, not a variable",
-                                         variable_node->variable->name,
-                                         ps_symbol_get_kind_name(variable_node->variable->kind));
+                                         ast_variable->variable->name,
+                                         ps_symbol_get_kind_name(ast_variable->variable->kind));
         return NULL;
     }
-    ps_frame *frame = ps_stack_find_frame_for_block(interpreter->stack, variable_node->owner);
+    ps_frame *frame = ps_stack_find_frame_for_block(interpreter->stack, ast_variable->owner);
     if (frame == NULL)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found in any frame",
-                                         variable_node->variable->name);
+                                         ast_variable->variable->name);
         return NULL;
     }
 
@@ -279,14 +272,14 @@ ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_a
 }
 
 bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_frame *frame,
-                                             const ps_ast_variable *variable_node, const ps_value *value)
+                                             const ps_ast_variable *ast_variable, const ps_value *value)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable_node);
+    assert(NULL != ast_variable);
     assert(NULL != value);
 
     // Evaluate indexes
-    ps_symbol *variable = variable_node->variable;
+    ps_symbol *variable = ast_variable->variable;
     int dimensions = ps_array_get_dimensions(variable->value->type);
     ps_value indexes[PS_ARRAY_MAX_DIMENSIONS] = {0};
     for (int i = 0; i < dimensions; i++)
@@ -296,7 +289,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
                                    .group = PS_AST_EXPRESSION,
                                    .kind = PS_AST_RVALUE,
                                    .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_eval_expression(interpreter, variable_node->indexes[i], &index_node))
+        if (!ps_ast_eval_expression(interpreter, ast_variable->indexes[i], &index_node))
             return false;
         indexes[i].allocated = false;
         indexes[i].type = index_node.value.type;
@@ -304,7 +297,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
     }
 
     // Set value in array data
-    ps_handle handle = variable_node->variable->value->data.h;
+    ps_handle handle = ast_variable->variable->value->data.h;
     ps_value_data array_data = frame->data[handle];
     ps_error error = ps_array_set_value(variable, &array_data, dimensions, indexes, value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
@@ -312,7 +305,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
         ps_interpreter_set_error_message(interpreter, error, "Error setting array value");
         return false;
     }
-    frame->data[variable_node->variable->value->data.h] = array_data;
+    frame->data[ast_variable->variable->value->data.h] = array_data;
 
     return true;
 }
@@ -324,80 +317,108 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != ast_variable);
     assert(NULL != value);
 
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "SET VARIABLE VALUE: %s <= %s\n", ast_variable->variable->name,
-                       ps_value_get_debug_string(value));
+    if (strcmp(ast_variable->variable->name, "J") == 0)
+    {
+        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+    }
+
+    ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
+                       ast_variable->variable->name, ps_value_get_debug_string(value));
 
     // Retrieve the frame containing the variable
     ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Found block %s of type %s\n", frame->block->name,
+    ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Found block %s of type %s\n", frame->block->name,
                        ps_ast_node_get_kind_name(frame->block->kind));
 
     // Copy the value to the variable
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copying value %s\n", ps_value_get_debug_string(value));
+    ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Copying value %s\n", ps_value_get_debug_string(value));
     if (ps_value_is_array(ast_variable->variable->value))
     {
-        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s is an array\n", ast_variable->variable->name);
+        ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Variable %s.%s is an array\n", ast_variable->owner->name,
+                           ast_variable->variable->name);
         return ps_interpreter_set_variable_value_array(interpreter, frame, ast_variable, value);
     }
     else
     {
+        if (strcmp(ast_variable->variable->name, "J") == 0)
+            ps_stack_dump(interpreter->logger->file, interpreter->stack);
         ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
             return false;
-        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
+        ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Copied value %s\n",
+                           ps_value_get_debug_string(&variable_value));
         frame->data[ast_variable->variable->value->data.h] = variable_value.data;
         ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         debug_value.data = frame->data[ast_variable->variable->value->data.h];
-        ps_interpreter_log(interpreter, PS_DEBUG_INFO, "Variable %s set to %s\n", ast_variable->variable->name,
-                           ps_value_get_debug_string(&debug_value));
+        ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
+                           ast_variable->variable->name, ps_value_get_debug_string(&debug_value));
+        if (strcmp(ast_variable->variable->name, "J") == 0)
+            ps_stack_dump(interpreter->logger->file, interpreter->stack);
+    }
+
+    if (strcmp(ast_variable->variable->name, "J") == 0)
+    {
+        interpreter->logger->debug_level = PS_DEBUG_FATAL;
     }
 
     return true;
 }
 
-bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
                                               ps_value *value)
 {
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
+    if (strcmp(ast_variable->variable->name, "J") == 0)
+    {
+        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+        ps_stack_dump(interpreter->logger->file, interpreter->stack);
+    }
+
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
     ps_value variable_value = {.allocated = false,
-                               .type = variable_node->variable->value->type,
-                               .data = frame->data[variable_node->variable->value->data.h]};
+                               .type = ast_variable->variable->value->type,
+                               .data = frame->data[ast_variable->variable->value->data.h]};
+
+    if (strcmp(ast_variable->variable->name, "J") == 0)
+    {
+        interpreter->logger->debug_level = PS_DEBUG_FATAL;
+        ps_stack_dump(interpreter->logger->file, interpreter->stack);
+    }
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
 
-bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
                                              ps_value *value)
 {
     // Retrieve the frame containing the variable
-    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, variable_node);
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
     // Get the item type of the array
-    ps_symbol *item_type = ps_array_get_item_type(variable_node->variable);
+    ps_symbol *item_type = ps_array_get_item_type(ast_variable->variable);
     if (item_type == NULL)
         return false;
     // Evaluate the indexes
     ps_value index_values[PS_ARRAY_MAX_DIMENSIONS] = {0};
-    for (size_t i = 0; i < variable_node->dimensions; i++)
+    for (size_t i = 0; i < ast_variable->dimensions; i++)
     {
         ps_ast_value index_value = {.line = 0,
                                     .column = 0,
                                     .group = PS_AST_EXPRESSION,
                                     .kind = PS_AST_LITERAL_VALUE,
                                     .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_eval_expression(interpreter, variable_node->indexes[i], &index_value))
+        if (!ps_ast_eval_expression(interpreter, ast_variable->indexes[i], &index_value))
             return false;
         index_values[i] = index_value.value;
     }
     // Get the value
-    ps_handle handle = variable_node->variable->value->data.h;
+    ps_handle handle = ast_variable->variable->value->data.h;
     ps_array_data *array_data = frame->data[handle].a;
-    ps_error error = ps_array_get_value(variable_node->variable, array_data, variable_node->dimensions, index_values,
+    ps_error error = ps_array_get_value(ast_variable->variable, array_data, ast_variable->dimensions, index_values,
                                         value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
         return ps_interpreter_return_false(interpreter, error);
@@ -405,17 +426,20 @@ bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const 
     return true;
 }
 
-bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
+bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
                                        ps_value *value)
 {
     assert(NULL != interpreter);
-    assert(NULL != variable_node);
+    assert(NULL != ast_variable);
     assert(NULL != value);
 
-    if (variable_node->dimensions == 0)
-        return ps_interpreter_get_variable_value_simple(interpreter, variable_node, value);
+    ps_interpreter_log(interpreter, PS_DEBUG_FATAL, "GET VARIABLE VALUE: %s.%s", ast_variable->owner->name,
+                       ast_variable->variable->name);
+
+    if (ast_variable->dimensions == 0)
+        return ps_interpreter_get_variable_value_simple(interpreter, ast_variable, value);
     else
-        return ps_interpreter_get_variable_value_array(interpreter, variable_node, value);
+        return ps_interpreter_get_variable_value_array(interpreter, ast_variable, value);
 }
 
 bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to) // NOSONAR
