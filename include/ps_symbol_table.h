@@ -27,20 +27,20 @@ extern "C"
 
     typedef struct s_ps_bucket
     {
-        ssize_t size;         /** @brief capacity of the bucket          */
-        ssize_t more;         /** @brief how much more symbols to grow   */
-        ssize_t used;         /** @brief number of symbols in the bucket */
-        ps_symbol *symbols[]; /** @brief array of symbols in the bucket  */
+        int size;             /** @brief capacity of the bucket          */
+        int more;             /** @brief how much more symbols to grow   */
+        int used;             /** @brief number of symbols in the bucket */
+        ps_symbol *symbols[]; /** @brief symbols in the bucket (VLA)     */
     } ps_bucket;
 
     /** @brief Symbol table holding names & their values */
     typedef struct s_ps_symbol_table
     {
-        ssize_t table_size;   /** @brief count of buckets in table       */
-        ssize_t bucket_size;  /** @brief count of symbols in each bucket */
-        ssize_t bucket_more;  /** @brief bucket realloc increment        */
-        ssize_t used_buckets; /** @brief count of used buckets           */
-        ps_bucket *buckets[]; /** @brief symbol buckets array            */
+        int table_size;       /** @brief count of buckets in table       */
+        int bucket_size;      /** @brief count of symbols in each bucket */
+        int bucket_more;      /** @brief bucket realloc increment        */
+        int used_buckets;     /** @brief count of used buckets           */
+        ps_bucket *buckets[]; /** @brief buckets in the table (VLA)      */
     } __attribute__((__packed__)) ps_symbol_table;
 
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
@@ -71,6 +71,8 @@ extern "C"
 
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table);
+
+    ps_symbol *ps_symbol_table_find_variable_by_handle(ps_symbol_table *table, ps_handle handle);
 
 #ifdef __cplusplus
 }

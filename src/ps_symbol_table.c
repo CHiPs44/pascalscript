@@ -47,14 +47,13 @@ ps_bucket *ps_symbol_table_bucket_alloc(ssize_t size, ssize_t more)
 
 ps_bucket *ps_symbol_table_bucket_free(ps_bucket *bucket, bool free_symbols)
 {
-    if (bucket != NULL)
-    {
-        if (free_symbols)
-            for (ssize_t i = 0; i < bucket->used; i++)
-                if (bucket->symbols[i] != NULL && bucket->symbols[i]->allocated)
-                    bucket->symbols[i] = ps_symbol_free(bucket->symbols[i]);
-        ps_memory_free(PS_MEMORY_SYMBOL, bucket);
-    }
+    if (bucket == NULL)
+        return NULL;
+    if (free_symbols)
+        for (ssize_t i = 0; i < bucket->used; i++)
+            if (bucket->symbols[i] != NULL && bucket->symbols[i]->allocated)
+                bucket->symbols[i] = ps_symbol_free(bucket->symbols[i]);
+    ps_memory_free(PS_MEMORY_SYMBOL, bucket);
     return NULL;
 }
 
@@ -122,7 +121,7 @@ ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
     ssize_t index = hash % table->table_size;
-    ps_bucket *bucket = table->buckets[index];
+    const ps_bucket *bucket = table->buckets[index];
     if (bucket == NULL || bucket->used == 0)
     {
         ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' not found\n", name);
@@ -183,9 +182,9 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
 void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table)
 {
     ps_symbol *symbol;
-    ssize_t size = 0;
-    ssize_t free = 0;
-    ssize_t used = 0;
+    int size = 0;
+    int free = 0;
+    int used = 0;
     ps_symbol_hash_key hash;
     char *kind_name;
     char *type_name;
@@ -241,6 +240,24 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
         "┗━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
         "━━━━━━━━━━━┛\n");
     fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, size);
+}
+
+ps_symbol *ps_symbol_table_find_variable_by_handle(ps_symbol_table *table, ps_handle handle)
+{
+    ps_symbol *symbol = NULL;
+    for (ssize_t i = 0; i < table->table_size; i++)
+    {
+        if (table->buckets[i] != NULL)
+        {
+            for (ssize_t j = 0; j < table->buckets[i]->used; j++)
+            {
+                symbol = table->buckets[i]->symbols[j];
+                if (symbol->kind == PS_SYMBOL_KIND_VARIABLE && symbol->value->data.h == handle)
+                    return symbol;
+            }
+        }
+    }
+    return NULL;
 }
 
 /* EOF */
