@@ -12,7 +12,7 @@
 #include "ps_stack.h"
 #include "ps_value_data.h"
 
-ps_frame *ps_frame_alloc(ps_ast_block *block)
+ps_frame *ps_frame_alloc(const ps_ast_block *block)
 {
     // NB: works even if procedure hasn't any variables or parameters
     size_t count = block->n_vars;

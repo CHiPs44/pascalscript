@@ -24,14 +24,14 @@
 
 /**
  * Parse statement:
- *  - compound: begin ... end
- *  - assignment: variable := expression
- *  - procedure call: procedure(arguments)
- *  - conditional: if ... then ... else ...
+ *  - compound: Begin ... End
+ *  - assignment: Variable := Expression
+ *  - procedure call: Procedure(Arguments)
+ *  - conditional: If ... Then ... Else ...
  *  - loops:
- *     - repeat ... until ...
- *     - while ... do ...
- *     - for variable := start to/downto finish do ...
+ *     - Pepeat ... Until ...
+ *     - While ... Do ...
+ *     - For variable := start To/Downto finish Do ...
  */
 bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
@@ -268,7 +268,7 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
 }
 
-bool static inline ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width,
+static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width,
                                                     int16_t *precision)
 {
     PARSE_BEGIN("WRITE_OR_WRITELN", "FORMAT");
@@ -515,7 +515,6 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
             else_branch = (ps_ast_statement_list *)else_node;
         else
         {
-            ps_ast_statement_list *statement_list = NULL;
             statement_list = ps_ast_create_statement_list(else_node->line, else_node->column, 1);
             if (statement_list == NULL)
                 RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)

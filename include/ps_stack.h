@@ -20,8 +20,8 @@ extern "C"
     /** @brief Stack frame holding variables & parameters */
     typedef struct s_ps_frame
     {
-        ps_ast_block *block;  /** @brief Block with symbols, variabless, parameters & lexical parent   */
-        ps_value_data data[]; /** @brief Variable type is in symbol, index is handle from symbol (VLA) */
+        const ps_ast_block *block; /** @brief Block with symbols, variabless, parameters & lexical parent   */
+        ps_value_data data[];      /** @brief Variable type is in symbol, index is handle from symbol (VLA) */
     } ps_frame;
 
     /** @brief Stack itself */
@@ -41,7 +41,7 @@ extern "C"
      * @param block The AST block
      * @return NULL if allocation failed
      */
-    ps_frame *ps_frame_alloc(ps_ast_block *block);
+    ps_frame *ps_frame_alloc(const ps_ast_block *block);
 
     /**
      * @brief Free a frame
