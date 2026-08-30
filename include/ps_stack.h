@@ -107,7 +107,9 @@ extern "C"
      * @param block The block to search for
      * @return The frame for the block or NULL if not found
      */
-    ps_frame *ps_stack_find_frame_for_block(ps_stack *stack, ps_ast_block *block);
+    ps_frame *ps_stack_find_frame_for_block(const ps_stack *stack, const ps_ast_block *block);
+
+    void ps_stack_dump(FILE *output, const ps_stack *stack);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
+#include "ps_ast_debug.h"
 #include "ps_memory.h"
 #include "ps_stack.h"
 #include "ps_value_data.h"
@@ -96,7 +97,7 @@ ps_frame *ps_stack_top(const ps_stack *stack)
     return stack->frames[stack->sp - 1];
 }
 
-ps_frame *ps_stack_find_frame_for_block(ps_stack *stack, ps_ast_block *block)
+ps_frame *ps_stack_find_frame_for_block(const ps_stack *stack, const ps_ast_block *block)
 {
     if (ps_stack_is_empty(stack))
         return NULL;
@@ -104,4 +105,28 @@ ps_frame *ps_stack_find_frame_for_block(ps_stack *stack, ps_ast_block *block)
         if (stack->frames[i]->block == block)
             return stack->frames[i];
     return NULL;
+}
+
+void ps_stack_dump(FILE *output, const ps_stack *stack)
+{
+    fprintf(output, "Stack: %zu/%zu\n", stack->used, stack->size);
+    fprintf(output, "  SP: %zu\n", stack->sp);
+    for (size_t i = 0; i < stack->sp; i++)
+    {
+        ps_frame *frame = stack->frames[i];
+        fprintf(output, "  Frame: %p\n", (void *)frame);
+        fprintf(output, "    Block: %s %s\n", ps_ast_node_get_kind_name(frame->block->kind), frame->block->name);
+        fprintf(output, "    Variables: %d\n", frame->block->n_vars);
+        for (ps_handle handle = 0; handle < frame->block->n_vars; handle++)
+        {
+            ps_symbol *symbol = ps_symbol_table_find_variable_by_handle(frame->block->symbols, handle);
+            if (symbol == NULL)
+            {
+                fprintf(output, "      %d: NOT FOUND!\n", handle);
+                continue;
+            }
+            ps_value value = {.allocated = false, .type = symbol->value->type, .data = frame->data[handle]};
+            fprintf(output, "      %d: %s = %s\n", handle, symbol->name, ps_value_get_debug_string(&value));
+        }
+    }
 }
