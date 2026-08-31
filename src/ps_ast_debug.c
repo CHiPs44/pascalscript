@@ -72,7 +72,7 @@ const char *ps_ast_node_get_kind_name(ps_ast_node_kind kind)
     return ps_ast_node_kind_names[kind];
 }
 
-void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
+void ps_ast_debug_line(int margin, const char *format, ...) // NOSONAR
 {
     if (!ps_ast_debug)
         return;
@@ -85,7 +85,7 @@ void ps_ast_debug_line(size_t margin, const char *format, ...) // NOSONAR
     va_end(args);
 }
 
-void ps_ast_debug_word(size_t margin, const char *format, ...) // NOSONAR
+void ps_ast_debug_word(int margin, const char *format, ...) // NOSONAR
 {
     if (!ps_ast_debug)
         return;
@@ -97,19 +97,19 @@ void ps_ast_debug_word(size_t margin, const char *format, ...) // NOSONAR
     va_end(args);
 }
 
-void ps_ast_debug_value(size_t margin, const ps_ast_value *value_node)
+void ps_ast_debug_value(int margin, const ps_ast_value *value_node)
 {
     ps_ast_debug_line(margin, "{VALUE:} %s {%s: %s}", ps_value_get_display_string(&value_node->value, 0, 0),
                       ps_type_definition_get_name(value_node->value.type->value->data.t),
                       ps_value_get_debug_string(&value_node->value));
 }
 
-void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable_simple)
+void ps_ast_debug_variable_simple(int margin, const ps_ast_variable *variable_simple)
 {
     ps_ast_debug_line(margin, "{VARIABLE_SIMPLE} %s", variable_simple->variable->name);
 }
 
-void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
+void ps_ast_debug_variable_array(int margin, const ps_ast_variable *variable_array)
 {
     ps_ast_debug_line(margin, "{%d}%s[", variable_array->dimensions, variable_array->variable->name);
     for (int i = 0; i < variable_array->dimensions; i++)
@@ -119,7 +119,7 @@ void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_
     ps_ast_debug_line(margin, "]");
 }
 
-void ps_ast_debug_variable(size_t margin, const ps_ast_variable *variable)
+void ps_ast_debug_variable(int margin, const ps_ast_variable *variable)
 {
     if (variable->dimensions == 0)
         ps_ast_debug_variable_simple(margin, variable);
@@ -127,7 +127,7 @@ void ps_ast_debug_variable(size_t margin, const ps_ast_variable *variable)
         ps_ast_debug_variable_array(margin, variable);
 }
 
-void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *statement_list)
+void ps_ast_debug_statement_list(int margin, const ps_ast_statement_list *statement_list)
 {
     size_t count = statement_list == NULL ? 0 : statement_list->count;
     ps_ast_debug_line(margin, "BEGIN {STATEMENT_LIST: %zu statements}", count);
@@ -143,7 +143,7 @@ void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *sta
     ps_ast_debug_line(margin, "END {STATEMENT_LIST}");
 }
 
-void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
+void ps_ast_debug_block(int margin, const ps_ast_block *block)
 {
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
     if (block->signature != NULL)
@@ -157,7 +157,7 @@ void ps_ast_debug_block(size_t margin, const ps_ast_block *block)
         ps_ast_debug_line(margin, ". {%s}", block->name);
 }
 
-void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
+void ps_ast_debug_assignment(int margin, const ps_ast_assignment *assignment)
 {
     assert(assignment != NULL);
     assert(assignment->kind == PS_AST_ASSIGNMENT);
@@ -167,34 +167,41 @@ void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
     ps_ast_variable *variable = assignment->lvalue;
     if (variable->dimensions == 0)
     {
-        ps_ast_debug_line(margin, "%s", variable->variable->name);
+        ps_ast_debug_line(margin, "%s :=", variable->variable->name);
     }
     else
     {
-        // ps_ast_debug_line(margin, "%s[...%zu]", variable->variable->name, variable->dimensions);
         ps_ast_debug_line(margin, "%s[", variable->variable->name);
         for (int i = 0; i < variable->dimensions; i++)
         {
             ps_ast_debug_node(margin + 1, variable->indexes[i]);
         }
-        ps_ast_debug_line(margin, "]");
+        ps_ast_debug_line(margin, "] :=");
     }
-    ps_ast_debug_line(margin, ":=");
     ps_ast_debug_node(margin + 1, assignment->expression);
 }
 
-void ps_ast_debug_unary_operation(size_t margin, const ps_ast_unary_operation *unary_operation)
+void ps_ast_debug_unary_operation(int margin, const ps_ast_unary_operation *unary_operation)
 {
+    char *tmp = NULL;
+    switch (unary_operation->operator)
+    {
+    case PS_OP_NEG:
+        tmp = "-";
+        break;
+    case PS_OP_NOT:
+        tmp = "NOT";
+        break;
+    default:
+        tmp = "???";
+    }
     ps_ast_debug_line(margin, "{%s, %s}(%s", ps_operator_unary_get_name(unary_operation->operator),
-                      unary_operation->result_type->name,
-                      unary_operation->operator == PS_OP_NEG   ? "-"
-                      : unary_operation->operator == PS_OP_NOT ? "NOT"
-                                                               : "???");
+                      unary_operation->result_type->name, tmp);
     ps_ast_debug_node(margin + 1, unary_operation->operand);
     ps_ast_debug_line(margin, ")");
 }
 
-void ps_ast_debug_binary_operation(size_t margin, const ps_ast_binary_operation *binary_operation)
+void ps_ast_debug_binary_operation(int margin, const ps_ast_binary_operation *binary_operation)
 {
     ps_ast_debug_line(margin, "(");
     ps_ast_debug_node(margin + 1, binary_operation->left);
@@ -203,7 +210,7 @@ void ps_ast_debug_binary_operation(size_t margin, const ps_ast_binary_operation 
     ps_ast_debug_line(margin, ")");
 }
 
-void ps_ast_debug_if(size_t margin, const ps_ast_if *if_statement)
+void ps_ast_debug_if(int margin, const ps_ast_if *if_statement)
 {
     ps_ast_debug_line(margin, "IF");
     ps_ast_debug_node(margin + 1, if_statement->condition);
@@ -216,14 +223,14 @@ void ps_ast_debug_if(size_t margin, const ps_ast_if *if_statement)
     }
 }
 
-void ps_ast_debug_while(size_t margin, const ps_ast_while *while_statement)
+void ps_ast_debug_while(int margin, const ps_ast_while *while_statement)
 {
     ps_ast_debug_line(margin, "WHILE");
     ps_ast_debug_node(margin + 1, while_statement->condition);
     ps_ast_debug_statement_list(margin, while_statement->body);
 }
 
-void ps_ast_debug_repeat(size_t margin, const ps_ast_repeat *repeat_statement)
+void ps_ast_debug_repeat(int margin, const ps_ast_repeat *repeat_statement)
 {
     ps_ast_debug_line(margin, "REPEAT");
     ps_ast_debug_statement_list(margin + 1, repeat_statement->body);
@@ -231,7 +238,7 @@ void ps_ast_debug_repeat(size_t margin, const ps_ast_repeat *repeat_statement)
     ps_ast_debug_node(margin + 1, repeat_statement->condition);
 }
 
-void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
+void ps_ast_debug_for(int margin, const ps_ast_for *for_statement)
 {
     ps_ast_debug_line(margin, "FOR");
     ps_ast_debug_variable(margin + 1, for_statement->variable);
@@ -243,7 +250,7 @@ void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
     ps_ast_debug_statement_list(margin, for_statement->body);
 }
 
-void ps_ast_debug_procedure_call(size_t margin, const ps_ast_call *call)
+void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call)
 {
     ps_ast_debug_line(margin, "{PROCEDURE_CALL} %s(", call->executable->name);
     for (int i = 0; i < call->n_args; i++)
@@ -253,7 +260,7 @@ void ps_ast_debug_procedure_call(size_t margin, const ps_ast_call *call)
     ps_ast_debug_line(margin, ")");
 }
 
-void ps_ast_debug_function_call(size_t margin, const ps_ast_call *call)
+void ps_ast_debug_function_call(int margin, const ps_ast_call *call)
 {
     ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
     for (int i = 0; i < call->n_args; i++)
@@ -264,7 +271,7 @@ void ps_ast_debug_function_call(size_t margin, const ps_ast_call *call)
     ps_ast_debug_line(margin, ")");
 }
 
-void ps_ast_debug_node(size_t margin, const ps_ast_node *node)
+void ps_ast_debug_node(int margin, const ps_ast_node *node)
 {
     if (node == NULL)
     {

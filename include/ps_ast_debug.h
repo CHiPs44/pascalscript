@@ -30,16 +30,16 @@ extern "C"
      * @brief Print a debug line with optional margin
      * @note This function is only active if ps_ast_debug is true
      */
-    void ps_ast_debug_line(size_t margin, const char *format, ...); // NOSONAR
+    void ps_ast_debug_line(int margin, const char *format, ...); // NOSONAR
 
     /**
      * @brief Print a debug "word" without line break
      * @note This function is only active if ps_ast_debug is true
      */
-    void ps_ast_debug_word(size_t margin, const char *format, ...); // NOSONAR
+    void ps_ast_debug_word(int margin, const char *format, ...); // NOSONAR
 
     /** @brief Debug print information about any AST node */
-    void ps_ast_debug_node(size_t margin, const ps_ast_node *node);
+    void ps_ast_debug_node(int margin, const ps_ast_node *node);
 
 #ifdef __cplusplus
 }
