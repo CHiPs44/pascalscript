@@ -118,7 +118,7 @@ bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_sta
 
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT_LIST %zu:", statement_list->count);
 
-    for (size_t i = 0; i < statement_list->count; i++)
+    for (int i = 0; i < statement_list->count; i++)
     {
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
         assert(statement_list->statements != NULL);
@@ -485,7 +485,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     // Evaluate arguments
     ps_value parameters[procedure_call->n_args];
     ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    for (size_t i = 0; i < procedure_call->n_args; i++)
+    for (int i = 0; i < procedure_call->n_args; i++)
     {
         if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
@@ -497,7 +497,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     if (!ps_interpreter_enter_frame(interpreter, procedure))
         return false;
     // Store arguments in frame
-    for (size_t i = 0; i < procedure_call->n_args; i++)
+    for (int i = 0; i < procedure_call->n_args; i++)
     {
         ps_symbol *symbol = ps_symbol_table_find(procedure->symbols, procedure->signature->parameters[i].name);
         if (symbol == NULL)

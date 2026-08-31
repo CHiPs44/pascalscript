@@ -32,7 +32,7 @@ void ps_symbol_table_log(ps_debug_level debug_level, const char *format, ...) //
     va_end(args);
 }
 
-ps_bucket *ps_symbol_table_bucket_alloc(ssize_t size, ssize_t more)
+ps_bucket *ps_symbol_table_bucket_alloc(int size, int more)
 {
     ps_bucket *bucket = ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_bucket) + sizeof(ps_symbol *) * size);
     if (bucket == NULL)
@@ -40,7 +40,7 @@ ps_bucket *ps_symbol_table_bucket_alloc(ssize_t size, ssize_t more)
     bucket->size = size;
     bucket->more = more;
     bucket->used = 0;
-    for (ssize_t i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
         bucket->symbols[i] = NULL;
     return bucket;
 }
@@ -50,7 +50,7 @@ ps_bucket *ps_symbol_table_bucket_free(ps_bucket *bucket, bool free_symbols)
     if (bucket == NULL)
         return NULL;
     if (free_symbols)
-        for (ssize_t i = 0; i < bucket->used; i++)
+        for (int i = 0; i < bucket->used; i++)
             if (bucket->symbols[i] != NULL && bucket->symbols[i]->allocated)
                 bucket->symbols[i] = ps_symbol_free(bucket->symbols[i]);
     ps_memory_free(PS_MEMORY_SYMBOL, bucket);
@@ -59,7 +59,7 @@ ps_bucket *ps_symbol_table_bucket_free(ps_bucket *bucket, bool free_symbols)
 
 void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 {
-    for (ssize_t i = 0; i < table->table_size; i++)
+    for (int i = 0; i < table->table_size; i++)
     {
         if (table->buckets[i] != NULL)
             table->buckets[i] = ps_symbol_table_bucket_free(table->buckets[i], free_symbols);
@@ -67,7 +67,7 @@ void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
     table->used_buckets = 0;
 }
 
-ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size)
+ps_symbol_table *ps_symbol_table_alloc(int table_size, int bucket_size)
 {
     table_size = table_size > 0 ? table_size : PS_SYMBOL_TABLE_SIZE;
     ps_symbol_table *table =
@@ -77,7 +77,7 @@ ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size)
     table->table_size = table_size;
     table->bucket_size = bucket_size > 0 ? bucket_size : PS_SYMBOL_BUCKET_SIZE;
     table->used_buckets = 0;
-    for (ssize_t i = 0; i < table_size; i++)
+    for (int i = 0; i < table_size; i++)
         table->buckets[i] = NULL;
     return table;
 }
@@ -92,12 +92,12 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-ssize_t ps_symbol_table_find_used_buckets(const ps_symbol_table *table)
+int ps_symbol_table_find_used_buckets(const ps_symbol_table *table)
 {
     return table == NULL ? -1 : table->used_buckets;
 }
 
-ssize_t ps_symbol_table_find_free(const ps_symbol_table *table)
+int ps_symbol_table_find_free(const ps_symbol_table *table)
 {
     return table == NULL ? -1 : table->table_size - table->used_buckets;
 }
@@ -120,14 +120,14 @@ ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
 ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
-    ssize_t index = hash % table->table_size;
+    int index = hash % table->table_size;
     const ps_bucket *bucket = table->buckets[index];
     if (bucket == NULL || bucket->used == 0)
     {
         ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' not found\n", name);
         return NULL;
     }
-    for (ssize_t i = 0; i < bucket->used; i++)
+    for (int i = 0; i < bucket->used; i++)
     {
         if (strcmp(bucket->symbols[i]->name, name) == 0)
         {
@@ -149,7 +149,7 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     if (symbol->kind == PS_SYMBOL_KIND_AUTO)
         return PS_ERROR_SYMBOL_TABLE_INVALID;
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(symbol->name);
-    ssize_t index = hash % table->table_size;
+    int index = hash % table->table_size;
     ps_bucket *bucket = table->buckets[index];
     // no bucket yet, allocate one
     if (bucket == NULL)
@@ -179,6 +179,33 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     return PS_ERROR_NONE;
 }
 
+static inline void ps_symbol_table_dump_header(FILE *output)
+{
+    // clang-format off
+    fprintf(output, "┏━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    fprintf(output, "┃      #┃Hash    ┃Index┃Name                           ┃Kind      ┃Type                ┃Value                          ┃\n");
+    fprintf(output, "┣━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n");
+    // clang-format on
+}
+
+static inline void ps_symbol_table_dump_footer(FILE *output)
+{
+    // clang-format off
+    fprintf(output, "┗━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    // clang-format on
+}
+
+static inline char *ps_symbol_table_get_dump_value(const ps_symbol *symbol)
+{
+    if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+    {
+        static char buffer[128] = {0};
+        snprintf(buffer, sizeof(buffer), "HANDLE#%" PS_HANDLE_FMT_10, symbol->value->data.h);
+        return buffer;
+    }
+    return symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
+}
+
 void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table)
 {
     ps_symbol *symbol;
@@ -188,73 +215,50 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
     ps_symbol_hash_key hash;
     char *kind_name;
     char *type_name;
-    char *value;
-    static char buffer[128] = {0};
+    char *display_value;
 
     if (output == NULL)
         output = stderr;
+
     fprintf(output, "*** Symbol table %s (%d/%d) ***\n", title, table->used_buckets, table->table_size);
-    //                        1         2         3         4         5         6         7         8         9
-    //               1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
-    //                1234 1234567890123456789012345678901 1234567890 1234567890 1234567890123456789012345678901
-    fprintf(
-        output,
-        "┏━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━"
-        "━━━━━━━━━━━┓\n");
-    fprintf(
-        output,
-        "┃      #┃Hash    ┃Index┃Name                           ┃Kind      ┃Type                ┃Value               "
-        "           ┃\n");
-    fprintf(
-        output,
-        "┣━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━"
-        "━━━━━━━━━━━┫\n");
-    for (ssize_t i = 0; i < table->table_size; i++)
+    ps_symbol_table_dump_header(output);
+
+    for (int i = 0; i < table->table_size; i++)
     {
-        if (table->buckets[i] != NULL)
+        if (table->buckets[i] == NULL)
+            continue;
+        size += table->buckets[i]->size;
+        free += table->buckets[i]->size - table->buckets[i]->used;
+        used += table->buckets[i]->used;
+        for (int j = 0; j < table->buckets[i]->used; j++)
         {
-            size += table->buckets[i]->size;
-            free += table->buckets[i]->size - table->buckets[i]->used;
-            used += table->buckets[i]->used;
-            for (ssize_t j = 0; j < table->buckets[i]->used; j++)
-            {
-                symbol = table->buckets[i]->symbols[j];
-                hash = ps_symbol_get_hash_key((char *)symbol->name);
-                kind_name = ps_symbol_get_kind_name(symbol->kind);
-                type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
-                if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
-                {
-                    snprintf(buffer, sizeof(buffer), "handle#%" PS_HANDLE_FMT_10, symbol->value->data.h);
-                    value = (char *)&buffer;
-                }
-                else
-                    value = symbol->value == NULL ? "NULL!" : ps_value_get_debug_string(symbol->value);
-                fprintf(output, "┃%c%c%05d┃%08x┃%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : ' ',
-                        symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN, symbol->name, kind_name,
-                        type_name, PS_IDENTIFIER_LEN, value);
-            }
+            symbol = table->buckets[i]->symbols[j];
+            hash = ps_symbol_get_hash_key((char *)symbol->name);
+            kind_name = ps_symbol_get_kind_name(symbol->kind);
+            type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
+            display_value = ps_symbol_table_get_dump_value(symbol);
+            fprintf(output, "┃%c%c%05d┃%08x┃%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : ' ',
+                    symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,
+                    PS_IDENTIFIER_LEN, display_value);
         }
     }
-    fprintf(
-        output,
-        "┗━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━"
-        "━━━━━━━━━━━┛\n");
+
+    ps_symbol_table_dump_footer(output);
     fprintf(output, "(free=%d/used=%u/size=%u)\n", free, used, size);
 }
 
-ps_symbol *ps_symbol_table_find_variable_by_handle(ps_symbol_table *table, ps_handle handle)
+ps_symbol *ps_symbol_table_find_variable_by_handle(const ps_symbol_table *table, ps_handle handle)
 {
     ps_symbol *symbol = NULL;
-    for (ssize_t i = 0; i < table->table_size; i++)
+    for (int i = 0; i < table->table_size; i++)
     {
-        if (table->buckets[i] != NULL)
+        if (table->buckets[i] == NULL)
+            continue;
+        for (int j = 0; j < table->buckets[i]->used; j++)
         {
-            for (ssize_t j = 0; j < table->buckets[i]->used; j++)
-            {
-                symbol = table->buckets[i]->symbols[j];
-                if (symbol->kind == PS_SYMBOL_KIND_VARIABLE && symbol->value->data.h == handle)
-                    return symbol;
-            }
+            symbol = table->buckets[i]->symbols[j];
+            if (symbol->kind == PS_SYMBOL_KIND_VARIABLE && symbol->value->data.h == handle)
+                return symbol;
         }
     }
     return NULL;

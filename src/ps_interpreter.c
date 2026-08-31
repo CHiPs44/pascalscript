@@ -56,7 +56,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
     {
-        return ps_interpreter_free(interpreter); // errno = ENONEM;
+        return ps_interpreter_free(interpreter);
     }
     for (ps_handle i = 0; i < system->n_vars; i++)
     {
@@ -426,7 +426,7 @@ bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const 
         return false;
     // Evaluate the indexes
     ps_value index_values[PS_ARRAY_MAX_DIMENSIONS] = {0};
-    for (size_t i = 0; i < ast_variable->dimensions; i++)
+    for (int i = 0; i < ast_variable->dimensions; i++)
     {
         ps_ast_value index_value = {.line = 0,
                                     .column = 0,

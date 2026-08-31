@@ -110,7 +110,7 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     (void)start_line;
     (void)start_column;
 
-    ssize_t len = 0;
+    int len = 0;
 
     if (lexer->current_token.type != PS_TOKEN_STRING)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)

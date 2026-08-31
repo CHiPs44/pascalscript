@@ -49,16 +49,16 @@ extern "C"
     extern ps_debug_level ps_symbol_table_debug_level;
 
     /** @brief Allocate and initialize symbol table, use 0 for defaults */
-    ps_symbol_table *ps_symbol_table_alloc(ssize_t table_size, ssize_t bucket_size);
+    ps_symbol_table *ps_symbol_table_alloc(int table_size, int bucket_size);
 
     /** @brief Free symbol table */
     void *ps_symbol_table_free(ps_symbol_table *table);
 
     /** @brief How many used symbols? */
-    ssize_t ps_symbol_table_find_used_buckets(const ps_symbol_table *table);
+    int ps_symbol_table_find_used_buckets(const ps_symbol_table *table);
 
     /** @brief How many free symbols? */
-    ssize_t ps_symbol_table_find_free(const ps_symbol_table *table);
+    int ps_symbol_table_find_free(const ps_symbol_table *table);
 
     /** @brief Find symbol in table by name or return NULL */
     ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name);
@@ -72,7 +72,7 @@ extern "C"
     /** @brief Dump symbol table to stderr */
     void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *table);
 
-    ps_symbol *ps_symbol_table_find_variable_by_handle(ps_symbol_table *table, ps_handle handle);
+    ps_symbol *ps_symbol_table_find_variable_by_handle(const ps_symbol_table *table, ps_handle handle);
 
 #ifdef __cplusplus
 }

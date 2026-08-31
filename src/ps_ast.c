@@ -214,7 +214,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
 // PS_AST_STATEMENT_LIST
 // =============================================================================
 
-ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t column, size_t count)
+ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t column, int count)
 {
     ps_ast_statement_list *statement_list = (ps_ast_statement_list *)ps_ast_create_node(
         line, column, PS_AST_STATEMENT, PS_AST_STATEMENT_LIST, sizeof(ps_ast_statement_list));
@@ -237,7 +237,7 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 {
     assert(statement_list != NULL);
     assert(statement_list->kind == PS_AST_STATEMENT_LIST);
-    for (size_t i = 0; i < statement_list->count; i++)
+    for (int i = 0; i < statement_list->count; i++)
         statement_list->statements[i] = ps_ast_free_node(statement_list->statements[i]);
     ps_memory_free(PS_MEMORY_AST, statement_list->statements);
     ps_memory_free(PS_MEMORY_AST, statement_list);
@@ -441,7 +441,7 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
     assert(call->kind == PS_AST_PROCEDURE_CALL || call->kind == PS_AST_FUNCTION_CALL);
     if (call->args != NULL)
     {
-        for (size_t i = 0; i < call->n_args; i++)
+        for (int i = 0; i < call->n_args; i++)
             ps_ast_free_node(call->args[i]);
         ps_memory_free(PS_MEMORY_AST, call->args);
     }
@@ -681,7 +681,7 @@ ps_ast_node *ps_ast_free_variable_simple(ps_ast_variable *variable_simple)
 // =============================================================================
 
 ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps_ast_block *owner,
-                                              ps_ast_node_kind kind, const ps_symbol *variable, size_t dimensions,
+                                              ps_ast_node_kind kind, const ps_symbol *variable, int dimensions,
                                               ps_ast_node **indexes)
 {
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
@@ -697,7 +697,7 @@ ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps
     variable_array->owner = owner;
     variable_array->variable = (ps_symbol *)variable;
     variable_array->dimensions = dimensions;
-    for (size_t i = 0; i < variable_array->dimensions; i++)
+    for (int i = 0; i < variable_array->dimensions; i++)
     {
         variable_array->indexes[i] = indexes[i];
     }
@@ -708,7 +708,7 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_variable *variable)
 {
     assert(variable != NULL);
     assert(variable->kind == PS_AST_LVALUE || variable->kind == PS_AST_RVALUE);
-    for (size_t i = 0; i < variable->dimensions; i++)
+    for (int i = 0; i < variable->dimensions; i++)
     {
         ps_ast_free_node(variable->indexes[i]);
         variable->indexes[i] = NULL;

@@ -112,7 +112,7 @@ void ps_ast_debug_variable_simple(size_t margin, const ps_ast_variable *variable
 void ps_ast_debug_variable_array(size_t margin, const ps_ast_variable *variable_array)
 {
     ps_ast_debug_line(margin, "{%d}%s[", variable_array->dimensions, variable_array->variable->name);
-    for (size_t i = 0; i < variable_array->dimensions; i++)
+    for (int i = 0; i < variable_array->dimensions; i++)
     {
         ps_ast_debug_node(margin + 1, variable_array->indexes[i]);
     }
@@ -137,7 +137,7 @@ void ps_ast_debug_statement_list(size_t margin, const ps_ast_statement_list *sta
     }
     else
     {
-        for (size_t i = 0; i < statement_list->count; i++)
+        for (int i = 0; i < statement_list->count; i++)
             ps_ast_debug_node(margin + 1, statement_list->statements[i]);
     }
     ps_ast_debug_line(margin, "END {STATEMENT_LIST}");
@@ -173,7 +173,7 @@ void ps_ast_debug_assignment(size_t margin, const ps_ast_assignment *assignment)
     {
         // ps_ast_debug_line(margin, "%s[...%zu]", variable->variable->name, variable->dimensions);
         ps_ast_debug_line(margin, "%s[", variable->variable->name);
-        for (size_t i = 0; i < variable->dimensions; i++)
+        for (int i = 0; i < variable->dimensions; i++)
         {
             ps_ast_debug_node(margin + 1, variable->indexes[i]);
         }
@@ -246,7 +246,7 @@ void ps_ast_debug_for(size_t margin, const ps_ast_for *for_statement)
 void ps_ast_debug_procedure_call(size_t margin, const ps_ast_call *call)
 {
     ps_ast_debug_line(margin, "{PROCEDURE_CALL} %s(", call->executable->name);
-    for (size_t i = 0; i < call->n_args; i++)
+    for (int i = 0; i < call->n_args; i++)
     {
         ps_ast_debug_node(margin + 1, call->args[i]);
     }
@@ -256,7 +256,7 @@ void ps_ast_debug_procedure_call(size_t margin, const ps_ast_call *call)
 void ps_ast_debug_function_call(size_t margin, const ps_ast_call *call)
 {
     ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
-    for (size_t i = 0; i < call->n_args; i++)
+    for (int i = 0; i < call->n_args; i++)
     {
         ps_ast_debug_line(margin, " - Argument %zu:", i);
         ps_ast_debug_node(margin + 1, call->args[i]);
