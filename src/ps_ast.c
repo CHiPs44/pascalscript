@@ -104,6 +104,43 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     return NULL;
 }
 
+static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *function_call)
+{
+    ps_symbol *function = function_call->executable;
+    if (function->system)
+    {
+        // Use pre-defined return type
+        if (function->value->data.x->return_type != NULL)
+            return function->value->data.x->return_type;
+        // Random returns real if no argument is provided
+        if (function == &ps_system_function_random)
+        {
+            if (function_call->n_args > 0)
+                return &ps_system_unsigned;
+            else
+                return &ps_system_real;
+        }
+        // Other system functions with specific return types: Abs, Even, Odd, Succ, Pred
+        if (function == &ps_system_function_abs || function == &ps_system_function_even ||
+            function == &ps_system_function_odd || function == &ps_system_function_succ ||
+            function == &ps_system_function_pred)
+        {
+            ps_symbol *parameter_type = ps_ast_node_get_type(function_call->args[0]);
+            return parameter_type;
+        }
+        // High, Low
+        if (function == &ps_system_function_high || function == &ps_system_function_low)
+        {
+            ps_symbol *parameter_type = ps_ast_node_get_type(function_call->args[0]);
+            return parameter_type;
+        }
+        return NULL;
+    }
+    else if (function != NULL && function->value != NULL)
+        return function->value->type;
+    return NULL;
+}
+
 /**
  * @brief Extract type from an AST node
  * @param node The AST node to extract type from
@@ -117,15 +154,13 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
     switch (node->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        ps_ast_value *ast_value = (ps_ast_value *)node;
-        ps_value *value = &ast_value->value;
-        if (value != NULL)
-            return value->type;
-        return NULL;
+        const ps_ast_value *ast_value = (const ps_ast_value *)node;
+        const ps_value *value = &ast_value->value;
+        return value != NULL ? value->type : NULL;
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
-        ps_ast_variable *ast_variable = (ps_ast_variable *)node;
-        ps_symbol *variable = ast_variable->variable;
+        const ps_ast_variable *ast_variable = (const ps_ast_variable *)node;
+        const ps_symbol *variable = ast_variable->variable;
         if (ast_variable->dimensions == 0)
             return variable->value->type;
         else
@@ -135,36 +170,7 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
     case PS_AST_BINARY_OPERATION:
         return ((const ps_ast_binary_operation *)node)->result_type;
     case PS_AST_FUNCTION_CALL:
-        ps_ast_call *function_call = (ps_ast_call *)node;
-        ps_symbol *function = function_call->executable;
-        if (function->system)
-        {
-            // use pre-defined return type
-            if (function->value->data.x->return_type != NULL)
-                return function->value->data.x->return_type;
-            if (function == &ps_system_function_random)
-            {
-                if (function_call->n_args > 0)
-                    return &ps_system_unsigned;
-                else
-                    return &ps_system_real;
-            }
-            // TODO other system functions with specific return types: Abs, Even, Odd, Succ, Pred
-            if (function == &ps_system_function_abs || function == &ps_system_function_even ||
-                function == &ps_system_function_odd || function == &ps_system_function_succ ||
-                function == &ps_system_function_pred)
-            {
-                // Get parameter type
-                ps_symbol *parameter_type = ps_ast_node_get_type(function_call->args[0]);
-                return parameter_type;
-            }
-            // High, Lo
-            // TODO return arg type
-            return NULL;
-        }
-        else if (function != NULL && function->value != NULL)
-            return function->value->type;
-        return NULL;
+        return ps_ast_function_call_get_type((const ps_ast_call *)node);
     default:
         return NULL;
     }

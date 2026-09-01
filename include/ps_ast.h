@@ -26,31 +26,31 @@ extern "C"
         PS_AST_STATEMENT,         /** @brief List, IF, CASE, WHILE, REPEAT, FOR, Procedure call                 */
         PS_AST_EXPRESSION,        /** @brief Unary or binary operation, literal value, simple or array variable */
         PS_AST_GROUP_LVALUE,      /** @brief Variable assignment                                                */
-    } ps_ast_node_group;
+    } __attribute__((__packed__)) ps_ast_node_group;
 
     /** @brief Abstract Syntax Tree node kind */
     typedef enum e_ps_ast_node_kind
     {
-        PS_AST_KIND_UNKNOWN = 0, /** @brief Unknown node kind                                        */
-        PS_AST_PROGRAM,          /** @brief BLOCK:      PROGRAM                                      */
-        PS_AST_PROCEDURE,        /** @brief BLOCK:      PROCEDURE                                    */
-        PS_AST_FUNCTION,         /** @brief BLOCK:      FUNCTION                                     */
-        PS_AST_UNIT,             /** @brief BLOCK:      UNIT                                         */
-        PS_AST_STATEMENT_LIST,   /** @brief STATEMENT:  List of statements                           */
-        PS_AST_ASSIGNMENT,       /** @brief STATEMENT:  Assignment                                   */
-        PS_AST_IF,               /** @brief STATEMENT:  IF                                           */
-        PS_AST_CASE,             /** @brief STATEMENT:  CASE                                         */
-        PS_AST_WHILE,            /** @brief STATEMENT:  WHILE                                        */
-        PS_AST_REPEAT,           /** @brief STATEMENT:  REPEAT                                       */
-        PS_AST_FOR,              /** @brief STATEMENT:  FOR                                          */
-        PS_AST_PROCEDURE_CALL,   /** @brief STATEMENT:  PROCEDURE call                               */
-        PS_AST_UNARY_OPERATION,  /** @brief EXPRESSION: Unary operation                              */
-        PS_AST_BINARY_OPERATION, /** @brief EXPRESSION: Binary operation                             */
-        PS_AST_FUNCTION_CALL,    /** @brief EXPRESSION: FUNCTION call                                */
-        PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Literal value: integer, real, string, ...    */
-        PS_AST_RVALUE,           /** @brief EXPRESSION: Simple variable (or constant) being accessed */
-        PS_AST_LVALUE,           /** @brief LVALUE:     Simple variable being written to             */
-    } ps_ast_node_kind;
+        PS_AST_KIND_UNKNOWN = 0, /** @brief Unknown node kind                                     */
+        PS_AST_PROGRAM,          /** @brief BLOCK:      PROGRAM                                   */
+        PS_AST_UNIT,             /** @brief BLOCK:      UNIT                                      */
+        PS_AST_PROCEDURE,        /** @brief BLOCK:      PROCEDURE                                 */
+        PS_AST_FUNCTION,         /** @brief BLOCK:      FUNCTION                                  */
+        PS_AST_STATEMENT_LIST,   /** @brief STATEMENT:  List of statements                        */
+        PS_AST_ASSIGNMENT,       /** @brief STATEMENT:  Assignment                                */
+        PS_AST_IF,               /** @brief STATEMENT:  IF                                        */
+        PS_AST_CASE,             /** @brief STATEMENT:  CASE                                      */
+        PS_AST_WHILE,            /** @brief STATEMENT:  WHILE                                     */
+        PS_AST_REPEAT,           /** @brief STATEMENT:  REPEAT                                    */
+        PS_AST_FOR,              /** @brief STATEMENT:  FOR                                       */
+        PS_AST_PROCEDURE_CALL,   /** @brief STATEMENT:  PROCEDURE call                            */
+        PS_AST_UNARY_OPERATION,  /** @brief EXPRESSION: Unary operation                           */
+        PS_AST_BINARY_OPERATION, /** @brief EXPRESSION: Binary operation                          */
+        PS_AST_FUNCTION_CALL,    /** @brief EXPRESSION: FUNCTION call                             */
+        PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Literal value: integer, real, string, ... */
+        PS_AST_RVALUE,           /** @brief EXPRESSION: Variable (or constant) being accessed     */
+        PS_AST_LVALUE,           /** @brief LVALUE:     Variable being written to                 */
+    } __attribute__((__packed__)) ps_ast_node_kind;
 
 #define PS_AST_NODE_COMMON                                                                                             \
     ps_ast_node_group group; /** @brief 1 Node group                                                        */         \
@@ -232,6 +232,7 @@ extern "C"
 
     /** @brief Free an AST node and all its children */
     ps_ast_node *ps_ast_free_node            (ps_ast_node             *node              );
+
     ps_ast_node *ps_ast_free_block           (ps_ast_block            *block             );
     ps_ast_node *ps_ast_free_statement_list  (ps_ast_statement_list   *list              );
     ps_ast_node *ps_ast_free_assignment      (ps_ast_assignment       *assignment        );
@@ -251,7 +252,7 @@ extern "C"
     /**
      * @brief Extract type from an AST node
      * @param node The AST node to extract type from
-     * @return The symbol representing the type, or NULL if type cannot be determined
+     * @return The symbol representing the type, or NULL if type is undefined or cannot be determined
      */
     ps_symbol *ps_ast_node_get_type(const ps_ast_node *node);
 

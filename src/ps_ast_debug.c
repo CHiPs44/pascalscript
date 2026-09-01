@@ -143,7 +143,7 @@ void ps_ast_debug_statement_list(int margin, const ps_ast_statement_list *statem
     ps_ast_debug_line(margin, "END {STATEMENT_LIST}");
 }
 
-void ps_ast_debug_block_signature(int margin, const ps_formal_signature *signature)
+void ps_ast_debug_formal_signature(int margin, const ps_formal_signature *signature)
 {
     if (signature == NULL)
         return;
@@ -166,7 +166,7 @@ void ps_ast_debug_block_signature(int margin, const ps_formal_signature *signatu
 void ps_ast_debug_block(int margin, const ps_ast_block *block)
 {
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
-    ps_ast_debug_block_signature(margin, block->signature);
+    ps_ast_debug_formal_signature(margin, block->signature);
     ps_ast_debug_line(margin, ";");
     ps_ast_debug_statement_list(margin, block->statement_list);
     if (block->kind == PS_AST_PROGRAM)
@@ -267,9 +267,12 @@ void ps_ast_debug_for(int margin, const ps_ast_for *for_statement)
     ps_ast_debug_statement_list(margin, for_statement->body);
 }
 
-void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call)
+static void ps_ast_debug_call(int margin, const ps_ast_call *call)
 {
-    ps_ast_debug_line(margin, "{PROCEDURE_CALL} %s(", call->executable->name);
+    if (call->executable->kind == PS_SYMBOL_KIND_PROCEDURE)
+        ps_ast_debug_line(margin, "{PROCEDURE_CALL} %s(", call->executable->name);
+    else
+        ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
     for (int i = 0; i < call->n_args; i++)
     {
         ps_ast_debug_node(margin + 1, call->args[i]);
@@ -277,15 +280,14 @@ void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call)
     ps_ast_debug_line(margin, ")");
 }
 
+void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call)
+{
+    ps_ast_debug_call(margin, call);
+}
+
 void ps_ast_debug_function_call(int margin, const ps_ast_call *call)
 {
-    ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
-    for (int i = 0; i < call->n_args; i++)
-    {
-        ps_ast_debug_line(margin + 1, " - Argument %zu:", i);
-        ps_ast_debug_node(margin + 2, call->args[i]);
-    }
-    ps_ast_debug_line(margin, ")");
+    ps_ast_debug_call(margin, call);
 }
 
 void ps_ast_debug_node(int margin, const ps_ast_node *node)
