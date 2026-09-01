@@ -194,10 +194,6 @@ extern "C"
 
     void ps_config_report(FILE *output);
 
-#ifdef __cplusplus
-}
-#endif
-
 #ifndef PS_IDENTIFIERS_MAX
 /** @brief Maximum number of multi-identifier declaration */
 #define PS_IDENTIFIERS_MAX 8
@@ -206,6 +202,10 @@ extern "C"
 #ifndef PS_PARAMETERS_MAX
 /** @brief Maximum number of parameters for procedures and functions */
 #define PS_PARAMETERS_MAX 16
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* _PS_CONFIG_H */
