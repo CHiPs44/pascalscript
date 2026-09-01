@@ -143,14 +143,30 @@ void ps_ast_debug_statement_list(int margin, const ps_ast_statement_list *statem
     ps_ast_debug_line(margin, "END {STATEMENT_LIST}");
 }
 
+void ps_ast_debug_block_signature(int margin, const ps_formal_signature *signature)
+{
+    if (signature == NULL)
+        return;
+    ps_ast_debug_line(margin + 1, "Signature:");
+    ps_ast_debug_line(margin + 2, "     Count: %d", signature->parameter_count);
+    ps_ast_debug_line(margin + 2, "      Size: %d", signature->size);
+    ps_ast_debug_line(margin + 2, "    Result: %s",
+                      signature->result_type == NULL
+                          ? "N/A"
+                          : ps_type_definition_get_name(ps_symbol_get_type_def(signature->result_type)));
+    ps_ast_debug_line(margin + 2, "Parameters:");
+    for (int i = 0; i < signature->parameter_count; i++)
+    {
+        ps_ast_debug_line(margin + 3, "%d: %s%s: %s", i + 1, signature->parameters[i].byref ? "VAR " : "",
+                          signature->parameters[i].type,
+                          ps_type_definition_get_name(ps_symbol_get_type_def(signature->parameters[i].type)));
+    }
+}
+
 void ps_ast_debug_block(int margin, const ps_ast_block *block)
 {
     ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
-    if (block->signature != NULL)
-    {
-        ps_ast_debug_line(margin + 1, "{Signature:}");
-        // ps_signature_debug(margin + 2, block->signature);
-    }
+    ps_ast_debug_block_signature(margin, block->signature);
     ps_ast_debug_line(margin, ";");
     ps_ast_debug_statement_list(margin, block->statement_list);
     if (block->kind == PS_AST_PROGRAM)
@@ -183,6 +199,7 @@ void ps_ast_debug_assignment(int margin, const ps_ast_assignment *assignment)
 
 void ps_ast_debug_unary_operation(int margin, const ps_ast_unary_operation *unary_operation)
 {
+    // Sonar does not like imbricated ternaries...
     char *tmp = NULL;
     switch (unary_operation->operator)
     {
@@ -265,8 +282,8 @@ void ps_ast_debug_function_call(int margin, const ps_ast_call *call)
     ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
     for (int i = 0; i < call->n_args; i++)
     {
-        ps_ast_debug_line(margin, " - Argument %zu:", i);
-        ps_ast_debug_node(margin + 1, call->args[i]);
+        ps_ast_debug_line(margin + 1, " - Argument %zu:", i);
+        ps_ast_debug_node(margin + 2, call->args[i]);
     }
     ps_ast_debug_line(margin, ")");
 }
