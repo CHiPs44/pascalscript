@@ -4,19 +4,35 @@ NB: this project has no link with [RemObjects Pascal Script](https://github.com/
 
 ## Status
 
-As of 2026-08-02, the AST based interpreter is able to run Pascal programs with:
+As of 2026-09-02, the AST based interpreter is able to run Pascal programs with:
 
-- **Data types**: `Integer`, `Unsigned`, `Real`, `Boolean`, `Char`, `String`
+- **Data types**
+  - `Integer`, `Unsigned`, `Real`, `Boolean`, `Char`
+  - `String`: fixed-size buffers (max 255 chars, no garbage collection, a long running program will exhaust memorry)
+  - `Array`: multi-dimensional arrays
+  - `Type` definition for subranges & enumerations
 - **Assignment** to variable from an expression with `:=`
-- **Expressions** with full operator support
+- **Expressions**
+  - Arithmetic: `+`, `-`, `*`, `/`, `DIV`, `MOD`
+  - Relational: `=`, `<>`, `<`, `<=`, `>`, `>=`
+  - Logical: `AND`, `OR`, `NOT`
+  - Bitwise: `SHL`, `SHR`, `AND`, `OR`, `XOR`, `NOT`
+  - Array item access with `[]`
 - **Writing** values to standard output with `Write` / `WriteLn`, formatting with `:width:precision`
 - **Conditional** execution with `If` / `Then` / `Else`
-- **Loops**:
+- **Loops**
   - `Repeat` / `Until`
   - `While` / `Do`
   - `For` / `To` / `Downto` / `Do`
-- **System Procedure & functions**: scalar, ordinal, math, misc.
-- **Strings** with fixed-size buffers (max 255 chars, no garbage collection)
+- **System constants, procedures & functions**
+  - `Abs`, `Even`, `Odd`, `Succ`, `Pred`
+  - `Chr`, `Ord`, `Length`, `LowerCase`, `UpperCase`
+  - `Sqr`, `Sqrt`, `Sin`, `Cos`, `Arctan`, `Ln`, `Exp`, `Pi`
+  - `Low`, `High`
+  - `Random`, `Round`, `Trunc`
+  - `GetTickCount`, `Randomize`
+
+User procedures & functions are on their way...
 
 ## Abstract Syntax Tree vs. "direct" interpretation
 
@@ -35,6 +51,11 @@ NB:
 - The AST is not optimized, it is interpreted as-is
 - Many features of previous design were kept, hence the `ps_value` / `ps_ast_value` existence
 
+This may lead to other steps:
+
+- emitting "P-Code" from the AST for a stack-based virtual machine
+- then interpreting this P-Code like Pascal P4
+
 ### Implementation of AST nodes
 
 As C has no classes, the AST nodes are implemented as structs with common fields at the beginning.
@@ -43,7 +64,7 @@ These common fields are:
 
 - Group: Block, Statement, Expression, LValue
 - Kind:
-  - Block: Program, Procedure, Function, Unit
+  - Block: Program, Procedure, Function, Unit (future)
   - Statement: Statement list (compound), Assignment, If, Repeat, While, For, Procedure call
   - Expression: Constant, Variable, Function Call, Unary, Binary
   - LValue: Variable
