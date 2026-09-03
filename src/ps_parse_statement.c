@@ -685,7 +685,7 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
         body->statements[0] = statement;
     }
 
-    variable_node = ps_ast_create_variable_simple(start_line, start_column, block, PS_AST_LVALUE, variable);
+    variable_node = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
     if (variable_node == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
