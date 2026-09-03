@@ -310,11 +310,11 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
     ps_value iteration_value = {.allocated = false, .type = for_variable->variable->value->type, .data = {0}};
 
-    if (strcmp(for_variable->variable->name, "J") == 0)
-    {
-        ps_ast_debug = true;
-        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    }
+    // if (strcmp(for_variable->variable->name, "J") == 0)
+    // {
+    //     ps_ast_debug = true;
+    //     interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+    // }
 
     // Evaluate start value
     if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
@@ -366,14 +366,14 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
         if (!ps_interpreter_get_variable_value(interpreter, for_variable, &iteration_value))
             return false;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
-                               ps_value_get_display_string(for_variable->variable->value, 0, 0));
+                               ps_value_get_display_string(&iteration_value, 0, 0));
     } while (true);
 
-    if (strcmp(for_variable->variable->name, "J") == 0)
-    {
-        ps_ast_debug = false;
-        interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    }
+    // if (strcmp(for_variable->variable->name, "J") == 0)
+    // {
+    //     ps_ast_debug = false;
+    //     interpreter->logger->debug_level = PS_DEBUG_FATAL;
+    // }
 
     return true;
 }

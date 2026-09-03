@@ -339,10 +339,10 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != ast_variable);
     assert(NULL != value);
 
-    if (strcmp(ast_variable->variable->name, "J") == 0)
-    {
-        interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    }
+    // if (strcmp(ast_variable->variable->name, "J") == 0)
+    // {
+    //     interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+    // }
 
     ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
                        ast_variable->variable->name, ps_value_get_debug_string(value));
@@ -380,10 +380,10 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
         //     ps_stack_dump(interpreter->logger->file, interpreter->stack);
     }
 
-    if (strcmp(ast_variable->variable->name, "J") == 0)
-    {
-        interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    }
+    // if (strcmp(ast_variable->variable->name, "J") == 0)
+    // {
+    //     interpreter->logger->debug_level = PS_DEBUG_FATAL;
+    // }
 
     return true;
 }
@@ -455,8 +455,8 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != ast_variable);
     assert(NULL != value);
 
-    ps_interpreter_log(interpreter, PS_DEBUG_FATAL, "GET VARIABLE VALUE: %s.%s", ast_variable->owner->name,
-                       ast_variable->variable->name);
+    // ps_interpreter_log(interpreter, PS_DEBUG_FATAL, "GET VARIABLE VALUE: %s.%s", ast_variable->owner->name,
+    //                    ast_variable->variable->name);
 
     if (ast_variable->dimensions == 0)
         return ps_interpreter_get_variable_value_simple(interpreter, ast_variable, value);
