@@ -22,23 +22,23 @@ extern "C"
 #define PS_SYSTEM_SYMBOL_TABLE_SIZE 32
 #endif
 
-#define PS_SYSTEM_FUNCTION(TYPE, VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE, RETURN_TYPE)                             \
-    ps_executable ps_executable_##TYPE##_##VALUE = {                                                                   \
+#define PS_SYSTEM_FUNCTION(VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE, RETURN_TYPE)                                   \
+    ps_executable ps_executable_function_##VALUE = {                                                                   \
         .kind = KIND, CALLABLE_FIELD = CALLABLE, .return_type = RETURN_TYPE};                                          \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
-    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
+    ps_value ps_value_function_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
+    ps_symbol ps_system_function_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
                                             .name = NAME,                                                              \
-                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
+                                            .value = &ps_value_function_##VALUE,                                       \
                                             .system = true,                                                            \
                                             .allocated = false};
-#define PS_SYSTEM_PROCEDURE(TYPE, VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE)                                         \
-    ps_executable ps_executable_##TYPE##_##VALUE = {.kind = KIND, CALLABLE_FIELD = CALLABLE};                          \
-    ps_value ps_value_##TYPE##_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}};  \
-    ps_symbol ps_system_##TYPE##_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                          \
-                                            .name = NAME,                                                              \
-                                            .value = &ps_value_##TYPE##_##VALUE,                                       \
-                                            .system = true,                                                            \
-                                            .allocated = false};
+#define PS_SYSTEM_PROCEDURE(VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE)                                               \
+    ps_executable ps_executable_procedure_##VALUE = {.kind = KIND, CALLABLE_FIELD = CALLABLE};                         \
+    ps_value ps_value_procedure_##VALUE = {.type = &ps_system_##TYPE, .data = {.x = &ps_executable_##TYPE##_##VALUE}}; \
+    ps_symbol ps_system_procedure_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                         \
+                                             .name = NAME,                                                             \
+                                             .value = &ps_value_procedure_##VALUE,                                     \
+                                             .system = true,                                                           \
+                                             .allocated = false};
 
 #define ADD_SYSTEM_SYMBOL(__SYMBOL__)                                                                                  \
     if (!ps_system_add_symbol(system, &__SYMBOL__))                                                                    \

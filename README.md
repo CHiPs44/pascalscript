@@ -26,7 +26,8 @@ As of 2026-09-02, the AST based interpreter is able to run Pascal programs with:
   - `For` / `To` / `Downto` / `Do`
 - **System constants, procedures & functions**
   - `Abs`, `Even`, `Odd`, `Succ`, `Pred`
-  - `Chr`, `Ord`, `Length`, `LowerCase`, `UpperCase`
+  - `Chr`, `Ord`
+  - `Length`, `LowerCase`, `UpperCase`
   - `Sqr`, `Sqrt`, `Sin`, `Cos`, `Arctan`, `Ln`, `Exp`, `Pi`
   - `Low`, `High`
   - `Random`, `Round`, `Trunc`

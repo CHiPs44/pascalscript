@@ -24,13 +24,13 @@
 /**********************************************************************************************************************/
 
 /* clang-format off */
-PS_SYSTEM_PROCEDURE(procedure, dec      , "DEC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_dec      )
-PS_SYSTEM_PROCEDURE(procedure, inc      , "INC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_inc      )
-PS_SYSTEM_PROCEDURE(procedure, randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG_V    , .proc_1arg_v    , &ps_procedure_randomize)
-PS_SYSTEM_PROCEDURE(procedure, read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_read     )
-PS_SYSTEM_PROCEDURE(procedure, readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_readln   )
-PS_SYSTEM_PROCEDURE(procedure, write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_write    )
-PS_SYSTEM_PROCEDURE(procedure, writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_writeln  )
+PS_SYSTEM_PROCEDURE(dec      , "DEC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_dec      )
+PS_SYSTEM_PROCEDURE(inc      , "INC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_inc      )
+PS_SYSTEM_PROCEDURE(randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG_V    , .proc_1arg_v    , &ps_procedure_randomize)
+PS_SYSTEM_PROCEDURE(read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_read     )
+PS_SYSTEM_PROCEDURE(readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_readln   )
+PS_SYSTEM_PROCEDURE(write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_write    )
+PS_SYSTEM_PROCEDURE(writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_writeln  )
 /* clang-format on */
 
 bool ps_procedures_init(ps_ast_block *system)
