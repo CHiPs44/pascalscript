@@ -7,7 +7,6 @@
 #ifndef _PS_SYSTEM_H
 #define _PS_SYSTEM_H
 
-// #include "ps_ast.h"
 #include "ps_interpreter.h"
 #include "ps_symbol.h"
 
