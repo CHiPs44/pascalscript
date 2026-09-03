@@ -133,7 +133,7 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
     if (!ps_parse_type_reference(compiler, block, &type_reference, NULL))
         TRACE_ERROR("TYPE REFERENCE");
     // Add the parameters to the signature and to the current environment
-    for (int i = 0; i <= index; i++)
+    for (int i = 0; i < index; i++)
     {
         if (!ps_formal_signature_add_parameter(signature, byref, names[i], type_reference))
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -170,7 +170,12 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
         if (parameter_count != 0)
+        {
+            ps_compiler_set_error_message(compiler, PS_ERROR_UNEXPECTED_TOKEN,
+                                          "Procedure or function %s expects %d parameter%s, got none", executable->name,
+                                          parameter_count, parameter_count > 1 ? "s" : "");
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        }
         PARSE_END("NO_PARAMETERS");
     }
     if (parameter_count == 0)
@@ -206,10 +211,11 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
         }
         else
         {
-            // result.type = parameter->type;
-            // result.data.v = NULL;
             if (!ps_parse_expression(compiler, block, &args[i]))
                 TRACE_ERROR("EXPRESSION");
+            value = ps_value_alloc(parameter->type, (ps_value_data){.h = i});
+            if (value == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
             argument = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, value);
             if (argument == NULL)
             {
@@ -241,7 +247,8 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
         }
     } while (true);
 
-    ps_ast_node_kind node_kind = executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
+    ps_ast_node_kind node_kind =
+        executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
     *call = ps_ast_create_call(start_line, start_column, node_kind, executable, parameter_count, args, NULL);
     if (*call == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)

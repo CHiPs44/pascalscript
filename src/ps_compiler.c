@@ -149,19 +149,12 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
     assert(block != NULL);
     assert(identifier != NULL && strlen(identifier) > 0);
     assert(type_symbol != NULL);
-    // Variable handle is its index in block variables
-    ps_value_data data = {.h = (ps_handle)(block->n_vars++)};
-    // if (ps_type_definition_is_array(type_symbol->value->data.t))
-    // {
-    //     return ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED,
-    //                                          "Array variables are not implemented yet");
-    // }
+    // Variable handle is its index in frame variables for block
+    ps_value_data data = {.h = block->n_vars++};
     ps_value *value = ps_value_alloc(type_symbol, data);
     ps_symbol *variable = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, identifier, value);
     if (variable == NULL)
     {
-        // if (ps_type_definition_is_array(type_symbol->value->data.t))
-        //     ps_memory_free(PS_MEMORY_VALUE, data.a);
         return ps_compiler_set_error_message(compiler, PS_ERROR_OUT_OF_MEMORY, "Cannot add variable %s", identifier);
     }
     return ps_compiler_add_symbol(compiler, block, variable);
