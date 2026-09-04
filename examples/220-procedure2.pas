@@ -5,9 +5,9 @@
 *)
 Program ExampleProcedure2;
 
-Var
-    Variable1, I: Integer;
-    Variable2: Integer;
+// Var
+//     Variable1, I: Integer;
+//     Variable2: Integer;
 
 { 2 parameters of the same type }
 Procedure Procedure1(Parameter1, Parameter2: Integer);
@@ -15,7 +15,7 @@ Var
     Variable1: Integer; { local variable with the name of a global variable }
 Begin
     Variable1 := Parameter1 * 2 + Parameter2 * 2;
-    WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ', Parameter2=', Parameter2, ' Variable1=', Variable1);
+    // WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ', Parameter2=', Parameter2, ' Variable1=', Variable1);
 End;
 
 // { 1 parameter with the same name as a global variable, another to test if all this works fine }
@@ -27,21 +27,22 @@ End;
 // End;
 
 Begin
-    WriteLn('----------------------------------------------------------------------');
-    WriteLn('Procedure with 2 parameters and local variables');
-    Variable1 := 1;
-    For I := 1 to 3 Do
-    Begin
-        WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', I * 10);
-        Procedure1(I * 10, 42);
-    End;
-    WriteLn('----------------------------------------------------------------------');
-    WriteLn('Procedure with 2 parameters:');
-    WriteLn(' - one having the same name as a global variable,');
-    WriteLn(' - another to test if all this works fine');
-    // Variable2 := 123;
-    // WriteLn('1. This is Program, Variable2=', Variable2);
-    // Procedure2(Variable2 * 100, 42);
-    // WriteLn('2. This is Program, Variable2=', Variable2);
+    Procedure1(1, 2);
     // WriteLn('----------------------------------------------------------------------');
+    // WriteLn('Procedure with 2 parameters and local variables');
+    // Variable1 := 1;
+    // For I := 1 to 3 Do
+    // Begin
+    //     WriteLn(I, '. This is Program, Variable1=', Variable1, ', Parameter=', I * 10);
+    //     Procedure1(I * 10, 42);
+    // End;
+    // WriteLn('----------------------------------------------------------------------');
+    // WriteLn('Procedure with 2 parameters:');
+    // WriteLn(' - one having the same name as a global variable,');
+    // WriteLn(' - another to test if all this works fine');
+    // // Variable2 := 123;
+    // // WriteLn('1. This is Program, Variable2=', Variable2);
+    // // Procedure2(Variable2 * 100, 42);
+    // // WriteLn('2. This is Program, Variable2=', Variable2);
+    // // WriteLn('----------------------------------------------------------------------');
 End.

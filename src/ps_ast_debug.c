@@ -9,6 +9,7 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_executable.h"
 #include "ps_interpreter.h"
 #include "ps_operator.h"
 #include "ps_signature.h"
@@ -147,7 +148,7 @@ void ps_ast_debug_formal_signature(int margin, const ps_formal_signature *signat
 {
     if (signature == NULL)
         return;
-    ps_ast_debug_line(margin + 1, "Signature:");
+    ps_ast_debug_line(margin + 1, "{Signature:");
     ps_ast_debug_line(margin + 2, "     Count: %d", signature->parameter_count);
     ps_ast_debug_line(margin + 2, "      Size: %d", signature->size);
     ps_ast_debug_line(margin + 2, "    Result: %s",
@@ -158,16 +159,52 @@ void ps_ast_debug_formal_signature(int margin, const ps_formal_signature *signat
     for (int i = 0; i < signature->parameter_count; i++)
     {
         ps_ast_debug_line(margin + 3, "%d: %s%s: %s", i + 1, signature->parameters[i].byref ? "VAR " : "",
-                          signature->parameters[i].type,
+                          signature->parameters[i].name,
                           ps_type_definition_get_name(ps_symbol_get_type_def(signature->parameters[i].type)));
+    }
+    ps_ast_debug_line(margin + 1, "}");
+}
+
+void ps_ast_debug_block(int margin, const ps_ast_block *block);
+
+void ps_ast_debug_block_symbols(int margin, const ps_symbol_table *symbol_table)
+{
+    const ps_symbol *symbol = NULL;
+    const ps_executable *executable = NULL;
+
+    if (symbol_table == NULL)
+        return;
+    for (int i = 0; i < symbol_table->table_size; i++)
+    {
+        if (symbol_table->buckets[i] == NULL)
+            continue;
+        for (int j = 0; j < symbol_table->buckets[i]->used; j++)
+        {
+            symbol = symbol_table->buckets[i]->symbols[j];
+            if (symbol->kind == PS_SYMBOL_KIND_VARIABLE)
+            {
+                const ps_type_definition *type_definition = ps_symbol_get_type_def(symbol);
+                ps_ast_debug_line(margin, "VAR %s: %s;", symbol->name, ps_type_definition_get_name(type_definition));
+            }
+            if (symbol->kind == PS_SYMBOL_KIND_PROCEDURE || symbol->kind == PS_SYMBOL_KIND_FUNCTION)
+            {
+                executable = symbol->value->data.x;
+                ps_ast_debug_block(margin + 1, executable->block);
+            }
+        }
     }
 }
 
 void ps_ast_debug_block(int margin, const ps_ast_block *block)
 {
-    ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
+    if (block->kind == PS_AST_PROGRAM)
+        ps_ast_debug_line(margin, "PROGRAM %s;", block->name);
+    else
+        ps_ast_debug_line(margin, "%s %s", ps_ast_node_get_kind_name(block->kind), block->name);
     ps_ast_debug_formal_signature(margin, block->signature);
-    ps_ast_debug_line(margin, ";");
+    if (block->kind != PS_AST_PROGRAM)
+        ps_ast_debug_line(margin, ";");
+    ps_ast_debug_block_symbols(margin, block->symbols);
     ps_ast_debug_statement_list(margin, block->statement_list);
     if (block->kind == PS_AST_PROGRAM)
         ps_ast_debug_line(margin, ". {%s}", block->name);

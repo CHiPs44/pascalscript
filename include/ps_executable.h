@@ -55,12 +55,12 @@ extern "C"
     /** @brief Executable is a function or procedure, from system or user defined */
     typedef struct s_ps_executable
     {
-        ps_executable_kind kind; /** @brief Kind of executable (system function/procedure or user defined) */
-        bool system : 1;         /** @brief True if executable is a system function/procedure, false if user defined */
-        int filler : 23;         /** @brief Unused bits to fill 32 bits */
-        ps_symbol *return_type;  /** @brief Return type for system functions */
+        // clang-format off
+        ps_executable_kind kind;  /** @brief Kind of executable (system function/procedure or user defined)           */
+        bool system : 1;          /** @brief True if executable is a system function/procedure, false if user defined */
+        unsigned int filler : 23; /** @brief Unused bits to fill 32 bits                                              */
+        ps_symbol *return_type;   /** @brief Return type for system functions                                         */
         union {
-            // clang-format off
             void                   *address;         /** @brief Generic pointer to function or procedure           */
             ps_function_1arg_v      func_1arg_v;     /** @brief Pointer to system function with 1 value argument   */
             ps_function_1arg_s      func_1arg_s;     /** @brief Pointer to system function with 1 byref argument   */
@@ -70,8 +70,8 @@ extern "C"
             ps_procedure_file_read  proc_file_read;  /** @brief Pointer to "read(file, variable)" system procedure */
             ps_procedure_file_write proc_file_write; /** @brief Pointer to "write(file, value)"   system procedure */
             ps_ast_block           *block;           /** @brief AST block of user defined function or procedure    */
-            // clang-format on
         };
+        // clang-format on
     } __attribute__((__packed__)) ps_executable;
 
 #define PS_EXECUTABLE_SIZE sizeof(ps_executable)
