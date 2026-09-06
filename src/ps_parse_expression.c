@@ -22,13 +22,13 @@
 #include "ps_type_definition.h"
 
 // clang-format off
-bool ps_parse_or_expression        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_and_expression       (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
-bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function);
+static bool ps_parse_or_expression        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_and_expression       (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
+static bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function);
 // clang-format on
 
 /**

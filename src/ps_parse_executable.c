@@ -40,14 +40,13 @@
  * "Nested" access (Record.Field.SubField, Array[0].Field, Pointer^.Field, ...):
  *      IDENTIFIER [ '.' IDENTIFIER ]* '.' IDENTIFIER
  */
-bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **variable)
+bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_ast_block **owner, ps_symbol **variable)
 {
     PARSE_BEGIN("EXECUTABLE", "VARIABLE_REFERENCE")
     (void)start_line;
     (void)start_column;
 
     ps_identifier identifier;
-    ps_ast_block *owner;
     ps_symbol *symbol;
 
     // Re-check
@@ -56,7 +55,7 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Non-existing symbol?
-    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
+    if (!ps_compiler_find_symbol(compiler, block, identifier, false, owner, &symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
 
     // Variable?
@@ -145,13 +144,14 @@ bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, p
 }
 
 bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, const ps_formal_parameter *parameter,
-                             ps_symbol **args, int i)
+                             ps_ast_node *args[PS_PARAMETERS_MAX], int i)
 {
     PARSE_BEGIN("EXECUTABLE", "BYREF_ARGUMENT")
 
+    ps_ast_block *owner = NULL;
     ps_symbol *variable = NULL;
 
-    if (!ps_parse_variable_reference(compiler, block, &variable))
+    if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
         TRACE_ERROR("VARIABLE");
 
     // Create a new symbol for the argument
@@ -181,7 +181,7 @@ bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, const p
 }
 
 bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, const ps_formal_parameter *parameter,
-                             ps_symbol **args, int i)
+                             ps_ast_node *args[PS_PARAMETERS_MAX], int i)
 {
     PARSE_BEGIN("EXECUTABLE", "BYVAL_ARGUMENT")
 
@@ -235,7 +235,7 @@ bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block, ps_as
     const ps_formal_parameter *parameter = NULL;
     uint8_t parameter_count = formal_signature->parameter_count;
     uint8_t i = 0;
-    ps_ast_node *args[16] = {0};
+    ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
 
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
 
@@ -551,8 +551,7 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
         // Function have a return value
         const ps_ast_block *executable_block = ps_symbol_get_executable_block(executable);
         const ps_formal_signature *signature = executable_block->signature;
-        result_value =
-            ps_value_alloc(signature->result_type, (ps_value_data){.h = 0});
+        result_value = ps_value_alloc(signature->result_type, (ps_value_data){.h = 0});
         if (result_value == NULL)
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
