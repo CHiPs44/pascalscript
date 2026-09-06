@@ -33,25 +33,25 @@ static bool ps_parse_program_parameters(ps_compiler *compiler, ps_ast_block *blo
     // Empty list?
     if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
     {
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             PARSE_END("OK")
         }
     }
     bool loop = true;
     do
     {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
-        READ_NEXT_TOKEN
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         switch (lexer->current_token.type)
         {
         case PS_TOKEN_COMMA:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             break;
         case PS_TOKEN_RIGHT_PARENTHESIS:
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             loop = false;
             break;
         default:
@@ -78,22 +78,21 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     ps_symbol *program_symbol = NULL;
 
     // 'PROGRAM'
-    EXPECT_TOKEN(PS_TOKEN_PROGRAM)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_PROGRAM)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // IDENTIFIER
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(program_identifier)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Skip optional parameters enclosed in parentheses
-    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-        if (!ps_parse_program_parameters(compiler, block))
-            TRACE_ERROR("PARAMETERS")
+    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS && !ps_parse_program_parameters(compiler, block))
+        TRACE_ERROR("PARAMETERS")
 
     // ';'
-    EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
     block->line = start_line;
@@ -117,7 +116,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
 
     // Expect '.' at the end of program declaration
     // NB: text after '.' is not analyzed and has not to be
-    EXPECT_TOKEN(PS_TOKEN_DOT)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_DOT)
 
     PARSE_END("OK")
 }
@@ -135,20 +134,20 @@ bool ps_parse_uses(ps_compiler *compiler, ps_ast_block *block)
 
     if (lexer->current_token.type == PS_TOKEN_USES)
     {
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         bool loop = true;
         do
         {
             if (lexer->current_token.type != PS_TOKEN_IDENTIFIER)
                 RETURN_ERROR(PS_ERROR_EXPECTED_IDENTIFIER)
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             switch (lexer->current_token.type)
             {
             case PS_TOKEN_COMMA:
-                READ_NEXT_TOKEN
+                READ_NEXT_TOKEN_OR_RETURN_FALSE
                 break;
             case PS_TOKEN_SEMI_COLON:
-                READ_NEXT_TOKEN
+                READ_NEXT_TOKEN_OR_RETURN_FALSE
                 loop = false;
                 break;
             default:
@@ -270,15 +269,15 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
     ps_value_data data = {0};
     ps_symbol *constant;
 
-    EXPECT_TOKEN(PS_TOKEN_CONST)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_CONST)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     do
     {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifier)
-        READ_NEXT_TOKEN
-        EXPECT_TOKEN(PS_TOKEN_EQ)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_EQ)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         value = ps_value_alloc(&ps_system_none, data);
         if (value == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -287,8 +286,8 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
             ps_value_free(value);
             TRACE_ERROR("CONSTANT_EXPRESSION")
         }
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, identifier, value);
         if (constant == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -310,18 +309,18 @@ bool ps_parse_type(ps_compiler *compiler, ps_ast_block *block)
     PARSE_BEGIN("TYPE", "");
 
     // Expect TYPE
-    EXPECT_TOKEN(PS_TOKEN_TYPE);
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_TYPE);
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Expect IDENTIFIER
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
 
     do
     {
         if (!ps_parse_type_definition(compiler, block))
             TRACE_ERROR("TYPE_DEFINITION");
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON);
-        READ_NEXT_TOKEN
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON);
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     PARSE_END("OK")
@@ -343,16 +342,16 @@ static bool ps_parse_var_identifier_list(ps_compiler *compiler, ps_ast_block *bl
     *var_count = 0;
     do
     {
-        EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifiers[*var_count])
         if (ps_compiler_find_symbol(compiler, block, identifiers[*var_count], true, &owner, &variable))
             RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (lexer->current_token.type == PS_TOKEN_COLON)
             break;
         if (lexer->current_token.type != PS_TOKEN_COMMA)
             RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         *var_count += 1;
         if (*var_count == PS_IDENTIFIERS_MAX)
             RETURN_ERROR(PS_ERROR_TOO_MANY_VARIABLES)
@@ -381,30 +380,30 @@ bool ps_parse_var(ps_compiler *compiler, ps_ast_block *block)
     ps_symbol *type_symbol = NULL;
 
     // VAR
-    EXPECT_TOKEN(PS_TOKEN_VAR)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_VAR)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     do
     {
         // IDENTIFIER [ ',' IDENTIFIER ]*
         if (!ps_parse_var_identifier_list(compiler, block, identifiers, &var_count))
             TRACE_ERROR("VARIABLE IDENTIFIER LIST")
         // ':'
-        EXPECT_TOKEN(PS_TOKEN_COLON)
-        READ_NEXT_TOKEN
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_COLON)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         // TYPE_REFERENCE
         if (!ps_parse_type_reference(compiler, block, &type_symbol, NULL))
             TRACE_ERROR("TYPE REFERENCE")
         if (type_symbol == NULL)
             RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
         // ';'
-        EXPECT_TOKEN(PS_TOKEN_SEMI_COLON)
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
         // Add variable(s) to symbol table of current block
         for (int i = 0; i <= var_count; i++)
         {
             if (!ps_compiler_add_variable(compiler, block, identifiers[i], type_symbol))
                 TRACE_ERROR("ADD VARIABLE")
         }
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     PARSE_END("OK")

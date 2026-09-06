@@ -94,11 +94,11 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_BEGIN("STATEMENT", "COMPOUND");
 
     // 'BEGIN'
-    EXPECT_TOKEN(PS_TOKEN_BEGIN);
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_BEGIN);
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // [ STATEMENT [ ';' STATEMENT ]* ] [ ';' ]
-    ps_ast_statement_list *statement_list = statement_list;
+    ps_ast_statement_list *statement_list = NULL;
     if (!ps_parse_statement_list(compiler, block, &statement_list, PS_TOKEN_END))
         TRACE_ERROR("STATEMENT_LIST")
     // Fix statement list position to BEGIN token, not first statement (if any)
@@ -107,14 +107,14 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     *statement_list_ptr = statement_list;
 
     // 'END'
-    EXPECT_TOKEN(PS_TOKEN_END)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_END)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     PARSE_END("OK")
 }
 
-bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner, ps_symbol *variable,
-                           ps_ast_variable **lvalue)
+static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner,
+                                  const ps_symbol *variable, ps_ast_variable **lvalue)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 
@@ -127,8 +127,8 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_bl
     ps_ast_node *indexes[dimensions];
 
     // Parse indexes enclosed in '[' and ']', separated by ','
-    EXPECT_TOKEN(PS_TOKEN_LEFT_BRACKET)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_BRACKET)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     int dimension = 0;
     do
     {
@@ -144,7 +144,7 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_bl
             // Too many indexes?
             if (dimension >= dimensions)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             continue;
         }
         // ']' ends indexes (and loop)
@@ -153,7 +153,7 @@ bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_bl
             // Not enough indexes?
             if (dimension != dimensions)
                 RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             break;
         }
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -223,8 +223,8 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     }
 
     // ':='
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN);
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN);
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     ps_ast_debug_line(1, "DEBUG\tParsing assignment to variable '%s' of type '%s'", variable->name,
                       ps_type_definition_get_name(variable->value->type->value->data.t));
 
@@ -279,16 +279,16 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
     *precision = 0;
     if (lexer->current_token.type == PS_TOKEN_COLON)
     {
-        READ_NEXT_TOKEN
-        EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNSIGNED_VALUE)
         *width = (int16_t)(lexer->current_token.value.u);
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (lexer->current_token.type == PS_TOKEN_COLON)
         {
-            READ_NEXT_TOKEN
-            EXPECT_TOKEN(PS_TOKEN_UNSIGNED_VALUE);
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
+            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNSIGNED_VALUE)
             *precision = (int16_t)(lexer->current_token.value.u);
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
         }
     }
 
@@ -329,12 +329,12 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
     // (Write without parameters is legal but is a no-op)
     if (PS_TOKEN_NONE == ps_parser_expect_statement_end_token(compiler->parser))
     {
-        EXPECT_TOKEN(PS_TOKEN_LEFT_PARENTHESIS);
-        READ_NEXT_TOKEN
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         // "Write[Ln]()"?
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             loop = false;
         }
         while (loop)
@@ -354,11 +354,11 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
             n_args += 1;
             if (lexer->current_token.type == PS_TOKEN_COMMA)
             {
-                READ_NEXT_TOKEN
+                READ_NEXT_TOKEN_OR_RETURN_FALSE
                 continue;
             }
-            EXPECT_TOKEN(PS_TOKEN_RIGHT_PARENTHESIS);
-            READ_NEXT_TOKEN
+            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RIGHT_PARENTHESIS)
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             loop = false;
         }
     }
@@ -393,7 +393,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
     bool symbol_found = false;
 
     COPY_IDENTIFIER(identifier)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // First, check if this is an assignment to the current function name
     symbol = block->parent == NULL ? NULL : ps_symbol_table_find(block->parent->symbols, identifier);
@@ -475,8 +475,8 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     ps_ast_node *else_node = NULL;
 
     // IF
-    EXPECT_TOKEN(PS_TOKEN_IF)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IF)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Condition: boolean expression
     if (!ps_parse_expression(compiler, block, &condition))
@@ -486,8 +486,8 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
         RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
 
     // THEN
-    EXPECT_TOKEN(PS_TOKEN_THEN)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_THEN)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Statement or compound statement
     if (!ps_parse_statement(compiler, block, &then_node))
@@ -507,7 +507,7 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     // ELSE?
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         // Statement
         if (!ps_parse_statement(compiler, block, &else_node))
             TRACE_ERROR("ELSE")
@@ -542,16 +542,16 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
     ps_ast_node *condition = NULL;
 
     // REPEAT
-    EXPECT_TOKEN(PS_TOKEN_REPEAT)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_REPEAT)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // STATEMENT LIST
     if (!ps_parse_statement_list(compiler, block, &body, PS_TOKEN_UNTIL))
         TRACE_ERROR("STATEMENTS");
 
     // UNTIL
-    EXPECT_TOKEN(PS_TOKEN_UNTIL);
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNTIL)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
@@ -581,8 +581,8 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     ps_ast_node *body = NULL;
 
     // WHILE
-    EXPECT_TOKEN(PS_TOKEN_WHILE)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_WHILE)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
@@ -592,8 +592,8 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
         RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
 
     // DO
-    EXPECT_TOKEN(PS_TOKEN_DO);
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_DO);
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // BODY
     if (!ps_parse_statement(compiler, block, &body))
@@ -634,13 +634,13 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     ps_identifier identifier = {0};
 
     // FOR
-    EXPECT_TOKEN(PS_TOKEN_FOR)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_FOR)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // CONTROL_VARIABLE
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &variable))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
     if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
@@ -649,8 +649,8 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
         RETURN_ERROR(PS_ERROR_EXPECTED_ORDINAL)
 
     // :=
-    EXPECT_TOKEN(PS_TOKEN_ASSIGN)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // START VALUE
     if (!ps_parse_expression(compiler, block, &start))
@@ -663,15 +663,15 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
         downto = true;
     else
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // FINISH VALUE
     if (!ps_parse_expression(compiler, block, &finish))
         TRACE_ERROR("FINISH");
 
     // DO
-    EXPECT_TOKEN(PS_TOKEN_DO)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_DO)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     if (!ps_parse_statement(compiler, block, &statement))
         TRACE_ERROR("BODY")
@@ -731,7 +731,7 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
         // NB: semi-colon at statement list end is optional
         if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
         {
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             if (lexer->current_token.type == stop) // NOSONAR
                 loop = false;
         }

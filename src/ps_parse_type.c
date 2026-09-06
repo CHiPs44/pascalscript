@@ -38,7 +38,7 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
     ps_identifier type_name = {0};
 
     // IDENTIFIER
-    EXPECT_TOKEN(PS_TOKEN_IDENTIFIER)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(type_name)
 
     // Check that type name does not already exist in local symbol table
@@ -47,11 +47,11 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
         ps_compiler_set_message(compiler, "Identifier '%s' already exists", type_name);
         RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
     }
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // '='
-    EXPECT_TOKEN(PS_TOKEN_EQ)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_EQ)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // TYPE_REFERENCE
     if (!ps_parse_type_reference(compiler, block, &type_reference, type_name))
@@ -114,11 +114,11 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
 
     if (lexer->current_token.type != PS_TOKEN_STRING)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
     {
         // String[CONSTANT]
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         ps_value constant = {.type = &ps_system_none, .data.v = NULL};
         if (!ps_parse_constant_expression(compiler, block, &constant))
             TRACE_ERROR("CONSTANT_EXPRESSION");
@@ -391,8 +391,8 @@ static bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block
     if (!ps_parse_type_reference_subrange_min(compiler, block, &min_value, &min_base, &subrange))
         TRACE_ERROR("MIN")
     // *** Parse '..'
-    EXPECT_TOKEN(PS_TOKEN_RANGE)
-    READ_NEXT_TOKEN
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RANGE)
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     // *** Parse max value of subrange as a constant expression
     if (!ps_parse_type_reference_subrange_max(compiler, block, &tmp_value, &max_base, &subrange))
         TRACE_ERROR("MAX")
@@ -445,12 +445,12 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
     // Expect 'ARRAY'
     if (lexer->current_token.type != PS_TOKEN_ARRAY)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Expect '['
     if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Parse dimensions
     do
@@ -469,13 +469,13 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
         {
             if (dimensions >= PS_ARRAY_MAX_DIMENSIONS)
                 RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             continue;
         }
         // ']' ends dimensions definitions
         if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
         {
-            READ_NEXT_TOKEN
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
             break;
         }
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -494,7 +494,7 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
     // Expect 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Item type (may be another array definition)
     if (!ps_parse_type_reference(compiler, block, &item_type, NULL))
@@ -690,7 +690,7 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
     {
         if (symbol == NULL)
             RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-        READ_NEXT_TOKEN
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (type_name == NULL)
         {
             // return existing type

@@ -45,7 +45,23 @@ extern "C"
 #define READ_NEXT_TOKEN                                                                                                \
     {                                                                                                                  \
         if (!ps_lexer_read_token(lexer))                                                                               \
+        {                                                                                                              \
+            compiler->error = lexer->error;                                                                            \
+        }                                                                                                              \
+        else if (compiler->debug >= PS_DEBUG_TRACE)                                                                    \
+        {                                                                                                              \
+            fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "", "");        \
+            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
+        }                                                                                                              \
+    }
+
+#define READ_NEXT_TOKEN_OR_RETURN_FALSE                                                                                \
+    {                                                                                                                  \
+        if (!ps_lexer_read_token(lexer))                                                                               \
+        {                                                                                                              \
+            compiler->error = lexer->error;                                                                            \
             return false;                                                                                              \
+        }                                                                                                              \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "", "");        \
@@ -53,7 +69,19 @@ extern "C"
         }                                                                                                              \
     }
 
-#define EXPECT_TOKEN(__PS_TOKEN_TYPE__)                                                                                \
+#define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
+    if (!ps_lexer_read_token(lexer))                                                                                   \
+    {                                                                                                                  \
+        compiler->error = lexer->error;                                                                                \
+        if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
+        {                                                                                                              \
+            fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "", "");        \
+            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
+        }                                                                                                              \
+        goto cleanup;                                                                                                  \
+    }
+
+#define EXPECT_TOKEN_OR_RETURN_FALSE(__PS_TOKEN_TYPE__)                                                                \
     if (!ps_parser_expect_token_type(compiler->parser, __PS_TOKEN_TYPE__))                                             \
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
@@ -65,17 +93,6 @@ extern "C"
         ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
         compiler->error = PS_ERROR_UNEXPECTED_TOKEN;                                                                   \
         return false;                                                                                                  \
-    }
-
-#define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
-    if (!ps_lexer_read_token(lexer))                                                                                   \
-    {                                                                                                                  \
-        if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
-        {                                                                                                              \
-            fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "", "");        \
-            ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
-        }                                                                                                              \
-        goto cleanup;                                                                                                  \
     }
 
 #define EXPECT_TOKEN_OR_CLEANUP(__PS_TOKEN_TYPE__)                                                                     \

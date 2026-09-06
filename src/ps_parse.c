@@ -23,7 +23,7 @@ bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block)
     (void)start_line;
     (void)start_column;
 
-    READ_NEXT_TOKEN
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_PROGRAM:
