@@ -71,7 +71,7 @@ char *ps_executable_get_kind_name(ps_executable_kind kind)
     case PS_EXECUTABLE_PROC_USER:
         return "PROCEDURE";
     default:
-        snprintf(name, 15, "???%d???", kind);
+        snprintf(name, 16, "???%d???", kind);
         return name;
     }
 }

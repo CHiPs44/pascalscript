@@ -68,7 +68,7 @@ void ps_lexer_reset(ps_lexer *lexer)
 char *ps_lexer_get_error_message(const ps_lexer *lexer)
 {
     static char message[128];
-    snprintf(message, sizeof(message) - 1, "LEXER: Error %d %s, Line %d, Column %d", lexer->error,
+    snprintf(message, sizeof(message), "LEXER: Error %d %s, Line %d, Column %d", lexer->error,
              ps_error_get_message(lexer->error), lexer->buffer->current_line + 1, lexer->buffer->current_column + 1);
     return message;
 }
@@ -618,32 +618,32 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_NONE:
-        snprintf(value, sizeof(value) - 1, "NONE");
+        snprintf(value, sizeof(value), "NONE");
         break;
     case PS_TOKEN_INTEGER_VALUE:
-        snprintf(value, sizeof(value) - 1, "INTEGER %" PS_INTEGER_FMT_10, lexer->current_token.value.i);
+        snprintf(value, sizeof(value), "INTEGER %" PS_INTEGER_FMT_10, lexer->current_token.value.i);
         break;
     case PS_TOKEN_UNSIGNED_VALUE:
-        snprintf(value, sizeof(value) - 1, "UNSIGNED %" PS_UNSIGNED_FMT_10, lexer->current_token.value.u);
+        snprintf(value, sizeof(value), "UNSIGNED %" PS_UNSIGNED_FMT_10, lexer->current_token.value.u);
         break;
     case PS_TOKEN_REAL_VALUE:
-        snprintf(value, sizeof(value) - 1, "REAL %" PS_REAL_FMT, lexer->current_token.value.r);
+        snprintf(value, sizeof(value), "REAL %" PS_REAL_FMT, lexer->current_token.value.r);
         break;
     case PS_TOKEN_BOOLEAN_VALUE:
-        snprintf(value, sizeof(value) - 1, "BOOLEAN %s", lexer->current_token.value.b ? "TRUE" : "FALSE");
+        snprintf(value, sizeof(value), "BOOLEAN %s", lexer->current_token.value.b ? "TRUE" : "FALSE");
         break;
     case PS_TOKEN_CHAR_VALUE:
-        snprintf(value, sizeof(value) - 1, "CHAR '%c'", lexer->current_token.value.c);
+        snprintf(value, sizeof(value), "CHAR '%c'", lexer->current_token.value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
         ps_strscpy(string, lexer->current_token.value.s, sizeof(string) - 1);
-        snprintf(value, sizeof(value) - 1, "STRING \"%s\"", string);
+        snprintf(value, sizeof(value), "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:
-        snprintf(value, sizeof(value) - 1, "IDENTIFIER \"%s\"", lexer->current_token.value.identifier);
+        snprintf(value, sizeof(value), "IDENTIFIER \"%s\"", lexer->current_token.value.identifier);
         break;
     default:
-        snprintf(value, sizeof(value) - 1, "TOKEN %d %s", lexer->current_token.type,
+        snprintf(value, sizeof(value), "TOKEN %d %s", lexer->current_token.type,
                  ps_token_get_keyword(lexer->current_token.type));
         break;
     }

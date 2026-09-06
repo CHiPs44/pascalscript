@@ -26,7 +26,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const char *name, ps_value *valu
     else
     {
         memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);
-        snprintf(symbol->name, PS_IDENTIFIER_LEN, "#AUTO_%08X", ps_symbol_get_auto_num());
+        snprintf(symbol->name, PS_IDENTIFIER_SIZE, "#AUTO_%08X", ps_symbol_get_auto_num());
     }
     symbol->system = false;
     symbol->allocated = true;

@@ -37,11 +37,12 @@ extern "C"
     typedef struct s_ps_symbol
     {
         // clang-format off
-        ps_identifier   name;        /** @brief Symbol name in uppercase                                      */
-        ps_value       *value;       /** @brief current value, must be a pointer as it is a forward reference */
-        ps_symbol_kind  kind:6;      /** @brief Auto, type definition, program, ...                           */
-        bool            system:1;    /** @brief true if symbol is a system symbol (predefined)                */
-        bool            allocated:1; /** @brief true if symbol was allocated (and must be freed)              */
+        ps_identifier   name;             /** @brief Symbol name in uppercase                                         */
+        ps_value       *value;            /** @brief current value, must be a pointer as it is a forward reference    */
+        ps_symbol_kind  kind;             /** @brief Auto, type definition, program, ...                              */
+        bool            system       : 1; /** @brief true if symbol is a system symbol (predefined)                   */
+        bool            allocated    : 1; /** @brief true if symbol was allocated (and must be freed)                 */
+        uint16_t        lexical_index:14; /** @brief Index in the block source code (for transpilation and debugging) */
         // clang-format on
     } __attribute__((__packed__)) ps_symbol;
 

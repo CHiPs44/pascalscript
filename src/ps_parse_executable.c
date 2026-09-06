@@ -154,7 +154,14 @@ bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, const p
     if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
         TRACE_ERROR("VARIABLE");
 
-    // Create a new symbol for the argument
+    // Check that the variable type matches the parameter type
+    const ps_type_definition *variable_type = ps_ast_node_get_type(variable);
+    const ps_type_definition *parameter_type = ps_symbol_get_type_def(parameter->type);
+    if (variable_type != parameter_type)
+        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+
+    // Create a new symbol for the byref argument
+    ps_symbol *arg = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, variable->value);
     args[i] = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, variable->value);
     if (args[i] == NULL)
     {
@@ -190,6 +197,13 @@ bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, const p
 
     if (!ps_parse_expression(compiler, block, &expression))
         TRACE_ERROR("EXPRESSION");
+
+    // Check that the expression type matches the parameter type
+    const ps_type_definition *expression_type = ps_ast_node_get_type(expression);
+    const ps_type_definition *parameter_type = ps_symbol_get_type_def(parameter->type);
+    if (expression_type != parameter_type)
+        RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
+
     args[i] = expression;
 
     value = ps_value_alloc(parameter->type, (ps_value_data){.h = i});

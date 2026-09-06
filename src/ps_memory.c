@@ -78,7 +78,7 @@ void *ps_memory_realloc(ps_memory_class memory_class, void *ptr, size_t size)
         // avoid use after free in debug output
         size_t size1 = malloc_usable_size(ptr);
         char old[16] = {0};
-        snprintf(old, sizeof(old) - 1, "%p", ptr);
+        snprintf(old, sizeof(old), "%p", ptr);
         new = realloc(ptr, size);
         size_t size2 = malloc_usable_size(new);
         fprintf(stderr, "%04zu REALLOC\t%-16s %8zu bytes at %s => %p, size %8zu => %8zu\n", reallocations[memory_class],

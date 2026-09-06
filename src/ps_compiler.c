@@ -78,7 +78,7 @@ bool ps_compiler_set_message(ps_compiler *compiler, const char *format, ...) // 
     assert(format != NULL);
     va_list args;
     va_start(args, format);
-    vsnprintf(compiler->message, sizeof(compiler->message) - 1, format, args); // NOSONAR
+    vsnprintf(compiler->message, sizeof(compiler->message), format, args); // NOSONAR
     va_end(args);
     return false;
 }
@@ -90,9 +90,16 @@ bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const 
     compiler->error = error;
     va_list args;
     va_start(args, format);
-    vsnprintf(compiler->message, sizeof(compiler->message) - 1, format, args); // NOSONAR
+    vsnprintf(compiler->message, sizeof(compiler->message), format, args); // NOSONAR
     va_end(args);
     return false;
+}
+
+bool ps_compiler_find_system_symbol(ps_compiler *compiler, const char *name, ps_ast_block **owner, ps_symbol **symbol)
+{
+    *symbol = ps_symbol_table_find(compiler->system->symbols, name);
+    *owner = symbol == NULL ? NULL : compiler->system;
+    return *symbol != NULL;
 }
 
 bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local,
@@ -103,25 +110,14 @@ bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const c
 
     // No block => search into SYSTEM
     if (block == NULL)
-    {
-        *symbol = ps_symbol_table_find(compiler->system->symbols, name);
-        *owner = symbol == NULL ? NULL : compiler->system;
-        if (compiler->debug >= PS_DEBUG_VERBOSE)
-            fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", "SYSTEM", name,
-                    local ? "Local" : "Global", symbol == NULL ? "Not found" : (*symbol)->name);
-    }
-    else
-    {
-        // Search in current block
-        *symbol = ps_symbol_table_find(block->symbols, name);
-        *owner = symbol == NULL ? NULL : block;
-        if (!local && *symbol == NULL)
-            // Search in parents, then system
-            return ps_compiler_find_symbol(compiler, block->parent, name, false, owner, symbol);
-        if (compiler->debug >= PS_DEBUG_VERBOSE)
-            fprintf(stderr, " DEBUG\tps_compiler_find_symbol('%s', '%s', %s) => '%s'\n", block->name, name,
-                    local ? "Local" : "Global", symbol == NULL ? "Not found" : (*symbol)->name);
-    }
+        return ps_compiler_find_system_symbol(compiler, name, owner, symbol);
+
+    // Search in current block
+    *symbol = ps_symbol_table_find(block->symbols, name);
+    *owner = symbol == NULL ? NULL : block;
+    if (!local && *symbol == NULL)
+        // Search in parent(s)
+        return ps_compiler_find_symbol(compiler, block->parent, name, false, owner, symbol);
 
     return *symbol != NULL;
 }

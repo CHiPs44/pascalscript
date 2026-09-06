@@ -100,34 +100,8 @@ const char *ps_error_get_message(ps_error error)
         }
     }
 
-    snprintf(message, sizeof(message) - 1, "Unknown %d", error);
+    snprintf(message, sizeof(message), "Unknown %d", error);
     return message;
-}
-
-int ps_error_sprintf(char *buffer, size_t len, ps_error error, const char *format, ...) // NOSONAR
-{
-    assert(buffer != NULL);
-    assert(len > 0);
-    int n = snprintf(buffer, len, "ERROR: %s ", ps_error_get_message(error));
-    va_list args;
-    va_start(args, format);
-    n += vsnprintf(buffer + n, len - n, format, args); // NOSONAR
-    va_end(args);
-    return n;
-}
-
-int ps_error_fprintf(FILE *output, ps_error error, const char *format, ...) // NOSONAR
-{
-    int n = 0;
-    if (output == NULL)
-        output = stderr;
-    va_list args;
-    va_start(args, format);
-    n += fprintf(output, "ERROR: %s ", ps_error_get_message(error));
-    n += vfprintf(output, format, args); // NOSONAR
-    n += fprintf(output, "\n");
-    va_end(args);
-    return n;
 }
 
 ps_error ps_error_map_errno()

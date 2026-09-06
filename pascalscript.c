@@ -274,14 +274,13 @@ int main(int argc, char *argv[])
     if (arg + 1 < argc)
     {
         program_file = argv[argc - 1];
-        snprintf(source_file, sizeof(source_file) - 1, "%s/%s", current_path, program_file);
+        snprintf(source_file, sizeof(source_file), "%s/%s", current_path, program_file);
     }
     else
     {
         program_file = DEBUG_SOURCE;
         if (program_file != NULL)
         {
-            // char *executable_path = realpath(argv[0], NULL);
             char self[128] = {0};
             int nchar = readlink("/proc/self/exe", self, sizeof(self));
             if (nchar < 0 || nchar >= (int)sizeof(self))
@@ -293,7 +292,6 @@ int main(int argc, char *argv[])
             if (separator != NULL)
                 *separator = '\0';
             snprintf(source_file, sizeof(source_file), "%s/../%s", /*executable_path*/ self, program_file);
-            // free(executable_path);
         }
         else
             source_file[0] = '\0';

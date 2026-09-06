@@ -200,7 +200,7 @@ void ps_array_debug_type(FILE *output, ps_symbol *array_var)
     for (int dimension = 0; dimension < dimensions; dimension += 1)
     {
         const ps_symbol *subrange = ps_array_get_subrange(array_var, dimension);
-        snprintf(buffer, sizeof(buffer) - 1, "SUBRANGE %d/%d ", dimension, dimensions);
+        snprintf(buffer, sizeof(buffer), "SUBRANGE %d/%d ", dimension, dimensions);
         ps_symbol_debug(output, buffer, subrange);
     }
 }
