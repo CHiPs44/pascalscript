@@ -227,8 +227,8 @@ extern "C"
     ps_ast_unary_operation  *ps_ast_create_unary_operation (uint16_t line, uint16_t column, ps_operator_unary operator, ps_ast_node *operand                                                                 );
     ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t column, ps_operator_binary operator, ps_ast_node *left, ps_ast_node *right                                               );
     ps_ast_value            *ps_ast_create_literal_value   (uint16_t line, uint16_t column, ps_value value                                                                                                   );
-    ps_ast_variable         *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, const ps_symbol *variable                                            );
-    ps_ast_variable         *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, const ps_symbol *variable, int dimensions, ps_ast_node **indexes     );
+    ps_ast_variable         *ps_ast_create_variable_simple (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable                                            );
+    ps_ast_variable         *ps_ast_create_variable_array  (uint16_t line, uint16_t column, ps_ast_block *owner, ps_ast_node_kind kind, ps_symbol *variable, int dimensions, ps_ast_node **indexes     );
 
     /** @brief Free an AST node and all its children */
     ps_ast_node *ps_ast_free_node            (ps_ast_node             *node              );

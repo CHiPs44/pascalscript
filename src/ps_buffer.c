@@ -92,7 +92,7 @@ void ps_buffer_reset(ps_buffer *buffer)
 char *ps_buffer_show_error(const ps_buffer *buffer)
 {
     static char error_message[128];
-    snprintf(error_message, sizeof(error_message) - 1, "BUFFER: %d %s, line %d, column %d", buffer->error,
+    snprintf(error_message, sizeof(error_message), "BUFFER: %d %s, line %d, column %d", buffer->error,
              ps_error_get_message(buffer->error), buffer->current_line, buffer->current_column);
     return error_message;
 }
@@ -107,13 +107,13 @@ char *ps_buffer_debug_char(char c)
     //     "CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "};
     if (c < ' ')
         // control characters
-        snprintf(tmp, sizeof(tmp) - 1, "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
+        snprintf(tmp, sizeof(tmp), "^%c/%02x", c + 'A' /*ctrl[c + 0]*/, c);
     else if (c < 0x7f)
         // ASCII printable characters (DEL excluded)
-        snprintf(tmp, sizeof(tmp) - 1, "%c/%02x", c, c);
+        snprintf(tmp, sizeof(tmp), "%c/%02x", c, c);
     else
         // DEL + extended characters
-        snprintf(tmp, sizeof(tmp) - 1, "%02x", c);
+        snprintf(tmp, sizeof(tmp), "%02x", c);
     return tmp;
 }
 

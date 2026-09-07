@@ -205,7 +205,7 @@ bool compile(const char *source_file)
     }
     if (ok)
         fprintf(stderr, "Compilation OK\n");
-    if (strlen(compiler->message) > 0)
+    if (compiler->message[0] != '\0')
         fprintf(stderr, "         message: %s\n", compiler->message);
     if (verbose)
         fprintf(stderr, "================================ END COMPILATION ===============================\n");
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
         if (program_file != NULL)
         {
             char self[128] = {0};
-            int nchar = readlink("/proc/self/exe", self, sizeof(self));
+            ssize_t nchar = readlink("/proc/self/exe", self, sizeof(self));
             if (nchar < 0 || nchar >= (int)sizeof(self))
             {
                 fprintf(stderr, "/proc/self/exe readlink : %s\n", self);
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
         else
             source_file[0] = '\0';
     }
-    if (strlen(source_file) == 0)
+    if (source_file[0] == '\0')
     {
         fprintf(stderr, "No file to run!\n");
         usage(stderr, argv[0]);

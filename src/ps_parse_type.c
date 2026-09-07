@@ -110,60 +110,72 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     (void)start_line;
     (void)start_column;
 
-    int len = 0;
+    ps_string_len len = 0;
+    ps_value constant = {.type = &ps_system_none, .data.v = NULL};
+    ps_type_definition *type_def = NULL;
+    ps_value *type_value = NULL;
+    ps_identifier name = {0};
 
-    if (lexer->current_token.type != PS_TOKEN_STRING)
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_STRING)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
-    if (lexer->current_token.type == PS_TOKEN_LEFT_BRACKET)
-    {
-        // String[CONSTANT]
-        READ_NEXT_TOKEN_OR_RETURN_FALSE
-        ps_value constant = {.type = &ps_system_none, .data.v = NULL};
-        if (!ps_parse_constant_expression(compiler, block, &constant))
-            TRACE_ERROR("CONSTANT_EXPRESSION");
-        switch (constant.type->value->data.t->base)
-        {
-        case PS_TYPE_INTEGER:
-            len = constant.data.i;
-            break;
-        case PS_TYPE_UNSIGNED:
-            len = constant.data.u;
-            break;
-        default:
-            RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
-        }
-        if (len < 1 || len > PS_STRING_MAX_LEN)
-            RETURN_ERROR(PS_ERROR_EXPECTED_STRING_LENGTH)
-        ps_type_definition *type_def = ps_type_definition_alloc(PS_TYPE_DEFINITION, PS_TYPE_STRING);
-        if (type_def == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        type_def->def.s.max = (ps_string_len)len;
-        ps_value *type_value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
-        if (type_value == NULL)
-        {
-            ps_type_definition_free(type_def);
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        }
-        ps_identifier name = {0};
-        if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
-        else
-            memcpy(name, type_name, PS_IDENTIFIER_SIZE);
-        *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, type_value);
-        if (*type_symbol == NULL)
-        {
-            ps_type_definition_free(type_def);
-            ps_value_free(type_value);
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        }
-    }
-    else
+
+    // String?
+    if (lexer->current_token.type != PS_TOKEN_LEFT_BRACKET)
     {
         *type_symbol = &ps_system_string;
+        PARSE_END("STRING")
+    }
+
+    // String[CONSTANT]
+    READ_NEXT_TOKEN_OR_CLEANUP
+    if (!ps_parse_constant_expression(compiler, block, &constant))
+        goto cleanup;
+
+    // Check if length is valid
+    switch (constant.type->value->data.t->base)
+    {
+    case PS_TYPE_INTEGER:
+        if (constant.data.i < 1 || constant.data.i > PS_STRING_MAX_LEN)
+            GOTO_CLEANUP(PS_ERROR_EXPECTED_STRING_LENGTH)
+        len = (ps_string_len)constant.data.i;
+        break;
+    case PS_TYPE_UNSIGNED:
+        if (constant.data.u < 1 || constant.data.u > PS_STRING_MAX_LEN)
+            GOTO_CLEANUP(PS_ERROR_EXPECTED_STRING_LENGTH)
+        len = (ps_string_len)constant.data.u;
+        break;
+    default:
+        GOTO_CLEANUP(PS_ERROR_EXPECTED_STRING_LENGTH)
+    }
+
+    type_def = ps_type_definition_alloc(PS_TYPE_DEFINITION, PS_TYPE_STRING);
+    if (type_def == NULL)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    type_def->def.s.max = len;
+
+    type_value = ps_value_alloc(&ps_system_type_def, (ps_value_data){.t = type_def});
+    if (type_value == NULL)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    if (type_name == NULL)
+        snprintf(name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
+    else
+        memcpy(name, type_name, PS_IDENTIFIER_SIZE);
+    *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, type_value);
+    if (*type_symbol == NULL)
+    {
+        ps_type_definition_free(type_def);
+        ps_value_free(type_value);
+        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
     }
 
     PARSE_END("OK")
+
+cleanup:
+    if (type_value != NULL)
+        ps_value_free(type_value);
+    if (type_def != NULL)
+        ps_type_definition_free(type_def);
+    return false;
 }
 
 static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
@@ -412,12 +424,11 @@ static bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block
     if (max_base == PS_TYPE_ENUM)
     {
         if (ps_value_get_type(&max_value) != PS_TYPE_ENUM)
-            RETURN_ERROR(PS_ERROR_EXPECTED_INTEGER)
+            RETURN_ERROR(PS_ERROR_EXPECTED_ENUM)
         if (subrange.u.max <= subrange.u.min)
             RETURN_ERROR(PS_ERROR_INVALID_SUBRANGE)
     }
-    // else
-    //     RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
+
     // *** Register subrange
     if (!ps_parse_type_reference_subrange_register_type_def(compiler, block, type_name, type_symbol, min_value.type,
                                                             &subrange))
@@ -481,16 +492,6 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
 
-    // For now, only accept one dimension
-    // We should define and register an array type definition for each dimension
-    // and "chain" them, exactly as if array[dim1, dim2] of item would have been
-    // written as array[dim1] of array[dim2] of item
-    // if (dimensions > 1)
-    // {
-    //     ps_compiler_set_message(compiler, "%d dimensions for an array is TODO/WIP", dimensions);
-    //     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
-    // }
-
     // Expect 'OF'
     if (lexer->current_token.type != PS_TOKEN_OF)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
@@ -501,7 +502,7 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
         TRACE_ERROR("ITEM_TYPE")
 
     // Item type can be any type, even another array
-    if (item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
+    if (item_type == NULL || item_type->kind != PS_SYMBOL_KIND_TYPE_DEFINITION)
         RETURN_ERROR(PS_ERROR_EXPECTED_TYPE)
 
     // Create type definition for array
@@ -517,6 +518,38 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
     // Register new type definition in symbol table
     if (!ps_type_definition_register(compiler, block, name, type_def, type_symbol))
         TRACE_ERROR("REGISTER")
+
+    PARSE_END("OK")
+}
+
+bool ps_parse_type_reference_identifier(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                        const ps_identifier type_name, ps_ast_block **owner, ps_symbol **symbol,
+                                        bool *advance)
+{
+    PARSE_BEGIN("TYPE_REFERENCE", "")
+
+    *advance = false;
+
+    // This could be:
+    //  - a copy of an existing type
+    //  - a subrange definition from an enumeration
+    //  - a subrange definition beginning with a constant expression
+    if (!ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, false, owner, symbol))
+        RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
+    if ((*symbol)->kind == PS_SYMBOL_KIND_CONSTANT)
+    {
+        // Subrange from enumeration/char/integer/unsigned constant
+        ps_value_type type = ps_value_get_type((*symbol)->value);
+        if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
+            !ps_parse_type_reference_subrange(compiler, block, type_symbol, type_name))
+            TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
+    }
+    else if ((*symbol)->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
+    {
+        *advance = true;
+    }
+    else
+        RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
 
     PARSE_END("OK")
 }
@@ -654,27 +687,8 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         break;
         /* ********** Identifier can be many things ********** */
     case PS_TOKEN_IDENTIFIER:
-        advance = false;
-        // This could be:
-        //  - a copy of an existing type
-        //  - a subrange definition from an enumeration
-        //  - a subrange definition beginning with a constant expression
-        if (!ps_compiler_find_symbol(compiler, block, lexer->current_token.value.identifier, false, &owner, &symbol))
-            RETURN_ERROR(PS_ERROR_UNKOWN_IDENTIFIER);
-        if (symbol->kind == PS_SYMBOL_KIND_CONSTANT)
-        {
-            // Subrange from enumeration/char/integer/unsigned constant
-            ps_value_type type = ps_value_get_type(symbol->value);
-            if ((type == PS_TYPE_ENUM || type == PS_TYPE_CHAR || type == PS_TYPE_INTEGER || type == PS_TYPE_UNSIGNED) &&
-                !ps_parse_type_reference_subrange(compiler, block, type_symbol, type_name))
-                TRACE_ERROR("TYPE_REFERENCE_SUBRANGE")
-        }
-        else if (symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
-        {
-            advance = true;
-        }
-        else
-            RETURN_ERROR(PS_ERROR_EXPECTED_TYPE);
+        if (!ps_parse_type_reference_identifier(compiler, block, type_symbol, type_name, &owner, &symbol, &advance))
+            TRACE_ERROR("TYPE_REFERENCE_IDENTIFIER")
         break;
         /* ********** UNIMPLEMENTED ********** */
     case PS_TOKEN_SET:    // set
@@ -707,3 +721,4 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
 
     PARSE_END("OK")
 }
+>
