@@ -29,7 +29,7 @@ extern "C"
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */
         char message[128];           /** @brief Additional error message                                       */
         ps_debug_level debug;        /** @brief Debug level: NONE, TRACE, VERBOSE                              */
-    } /*__attribute__((__packed__))*/ ps_compiler;
+    } ps_compiler;
 
 #define PS_COMPILER_SIZEOF sizeof(ps_compiler)
 

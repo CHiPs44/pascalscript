@@ -72,31 +72,31 @@ ps_ast_block   *program      = NULL;
 ps_interpreter *interpreter  = NULL;
 // clang-format on
 
-void banner(FILE *output)
+void banner(FILE *out)
 {
-    fprintf(output, "PascalScript v%s (%d bits) - License: LGPL 3.0 or later, see LICENSE\n", PS_VERSION, PS_BITNESS);
+    fprintf(out, "PascalScript v%s (%d bits) - License: LGPL 3.0 or later, see LICENSE file\n", PS_VERSION, PS_BITNESS);
 }
 
-void usage(FILE *output, char *program_name)
+void usage(FILE *out, char *program_name)
 {
-    banner(output);
-    fprintf(output, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
-    fprintf(output, "Runtime options:\n");
-    fprintf(output, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
-    fprintf(output, "  -i : flips I/O error checking (default: true, ${I})\n");
-    fprintf(output, "  -r : flips range checking (default: true, {$R})\n");
-    fprintf(output, "Other options:\n");
-    fprintf(output, "  -a : launch AST tests\n");
-    fprintf(output, "  -c : display configuration and exit\n");
-    fprintf(output, "  -d : debug (more verbose trace)\n");
-    fprintf(output, "  -h : display this help message and exit\n");
-    fprintf(output, "  -m : display memory usage at end\n");
-    fprintf(output, "  -n : do not execute program, just parse source code\n");
-    fprintf(output, "  -s : dump symbols at initialization and termination\n");
-    fprintf(output, "  -t : trace execution\n");
-    fprintf(output, "  -u : dump source buffer after loading\n");
-    fprintf(output, "  -v : verbose (display banner and other infos)\n");
-    fprintf(output, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUG_SOURCE);
+    banner(out);
+    fprintf(out, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
+    fprintf(out, "Runtime options:\n");
+    fprintf(out, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
+    fprintf(out, "  -i : flips I/O error checking (default: true, ${I})\n");
+    fprintf(out, "  -r : flips range checking (default: true, {$R})\n");
+    fprintf(out, "Other options:\n");
+    fprintf(out, "  -a : launch AST tests\n");
+    fprintf(out, "  -c : display configuration and exit\n");
+    fprintf(out, "  -d : debug (more verbose trace)\n");
+    fprintf(out, "  -h : display this help message and exit\n");
+    fprintf(out, "  -m : display memory usage at end\n");
+    fprintf(out, "  -n : do not execute program, just parse source code\n");
+    fprintf(out, "  -s : dump symbols at initialization and termination\n");
+    fprintf(out, "  -t : trace execution\n");
+    fprintf(out, "  -u : dump source buffer after loading\n");
+    fprintf(out, "  -v : verbose (display banner and other infos)\n");
+    fprintf(out, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUG_SOURCE);
 }
 
 int get_options(int argc, char *argv[])
@@ -166,7 +166,12 @@ int get_options(int argc, char *argv[])
 
 bool compile(const char *source_file)
 {
-    assert(NULL != compiler);
+    compiler = ps_compiler_alloc(system_block, string_heap);
+    if (compiler == NULL)
+    {
+        fprintf(stderr, "Could not initialize compiler!\n");
+        return false;
+    }
 
     bool ok = false;
 
