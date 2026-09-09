@@ -127,7 +127,7 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     }
 
     // String[CONSTANT]
-    READ_NEXT_TOKEN_OR_CLEANUP
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
     if (!ps_parse_constant_expression(compiler, block, &constant))
         goto cleanup;
 
@@ -196,7 +196,7 @@ static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *bl
     // Re-check that current token is '('
     if (lexer->current_token.type != PS_TOKEN_LEFT_PARENTHESIS)
         GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN_OR_CLEANUP
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // Empty enumeration not allowed
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
@@ -229,18 +229,18 @@ static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *bl
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_compiler_add_symbol(compiler, block, value_symbol))
             GOTO_CLEANUP(PS_ERROR_SYMBOL_NOT_ADDED)
-        READ_NEXT_TOKEN_OR_CLEANUP
+        READ_NEXT_TOKEN_OR_GOTO_CLEANUP
         // If next token is ',' continue with next enumeration value
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
-            READ_NEXT_TOKEN_OR_CLEANUP
+            READ_NEXT_TOKEN_OR_GOTO_CLEANUP
             continue;
         }
         // If next token is ')' end of enumeration definition
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
             break;
     } while (true);
-    READ_NEXT_TOKEN_OR_CLEANUP
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
     // Copy enum values to enum type definition
     if (!ps_enum_set_values(type_def, list->used, list->values))
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)

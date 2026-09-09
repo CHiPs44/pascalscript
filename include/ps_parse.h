@@ -69,7 +69,7 @@ extern "C"
         }                                                                                                              \
     }
 
-#define READ_NEXT_TOKEN_OR_CLEANUP                                                                                     \
+#define READ_NEXT_TOKEN_OR_GOTO_CLEANUP                                                                                \
     if (!ps_lexer_read_token(lexer))                                                                                   \
     {                                                                                                                  \
         compiler->error = lexer->error;                                                                                \
@@ -95,7 +95,7 @@ extern "C"
         return false;                                                                                                  \
     }
 
-#define EXPECT_TOKEN_OR_CLEANUP(__PS_TOKEN_TYPE__)                                                                     \
+#define EXPECT_TOKEN_OR_GOTO_CLEANUP(__PS_TOKEN_TYPE__)                                                                \
     if (!ps_parser_expect_token_type(compiler->parser, __PS_TOKEN_TYPE__))                                             \
     {                                                                                                                  \
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
