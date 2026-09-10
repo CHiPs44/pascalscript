@@ -319,8 +319,9 @@ static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Create the variable array AST node
+    ps_symbol *symbol2 = symbol + 0;
     ps_ast_variable *ast_variable =
-        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, dimensions, indexes);
+        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol2, dimensions, indexes);
     if (ast_variable == NULL)
         TRACE_ERROR("VARIABLE_ARRAY")
     *factor = (ps_ast_node *)ast_variable;

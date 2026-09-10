@@ -8,8 +8,10 @@
 
 #include "ps_ast.h"
 #include "ps_compiler.h"
+#include "ps_executable.h"
 #include "ps_parse.h"
 #include "ps_parse_declaration.h"
+#include "ps_symbol.h"
 
 /**
  * Parse
@@ -37,4 +39,12 @@ bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block)
     }
 
     PARSE_END("OK")
+}
+
+ps_ast_block *ps_symbol_get_executable_block(ps_symbol *executable)
+{
+    if (executable == NULL || executable->value == NULL || executable->value->data.x == NULL ||
+        executable->value->data.x->block == NULL)
+        return NULL;
+    return executable->value->data.x->block;
 }

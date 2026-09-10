@@ -721,4 +721,4 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
 
     PARSE_END("OK")
 }
->
+

@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <string.h>
 
 #include "ps_ast.h"
@@ -13,6 +14,7 @@
 #include "ps_parse.h"
 #include "ps_parse_call.h"
 #include "ps_parse_expression.h"
+#include "ps_parse_statement.h"
 #include "ps_procedures.h"
 #include "ps_system.h"
 
@@ -86,8 +88,9 @@ static bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, 
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
 
     // Create a new symbol for the byref argument
-    ps_symbol *toto = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, variable->value);
-    args[i] = ps_ast_create_variable_simple(start_line, start_column, owner, toto);
+    ps_symbol *symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, variable->value);
+    ps_ast_variable *arg = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, symbol);
+    args[i] = (ps_ast_node *)arg;
     if (args[i] == NULL)
     {
         compiler->error = PS_ERROR_OUT_OF_MEMORY;
@@ -95,9 +98,10 @@ static bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, 
     }
 
     // Add the argument to the current block
-    if (!ps_compiler_add_symbol(compiler, block, args[i]))
+    if (!ps_compiler_add_symbol(compiler, block, symbol))
     {
-        args[i] = ps_symbol_free(args[i]);
+        ps_ast_free_variable(arg);
+        args[i] = NULL;
         compiler->error = PS_ERROR_OUT_OF_MEMORY;
         TRACE_ERROR("ADD_BYREF");
     }
@@ -123,46 +127,21 @@ static bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, 
 
     PARSE_BEGIN("EXECUTABLE", "BYVAL_ARGUMENT")
 
-    ps_value *value = NULL;
     ps_ast_node *expression = NULL;
 
     if (!ps_parse_expression(compiler, block, &expression))
-        TRACE_ERROR("EXPRESSION");
+        TRACE_ERROR("EXPRESSION")
 
     // Check that the expression type matches the parameter type
-    const ps_type_definition *expression_type = ps_ast_node_get_type(expression);
-    const ps_type_definition *parameter_type = ps_symbol_get_type_def(parameter->type);
-    if (expression_type != parameter_type)
+    const ps_symbol *expression_type = ps_ast_node_get_type(expression);
+    const ps_type_definition *expression_type_def = ps_symbol_get_type_def(expression_type);
+    const ps_type_definition *parameter_type_def = ps_symbol_get_type_def(parameter->type);
+    if (expression_type_def != parameter_type_def)
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
 
     args[i] = expression;
 
-    value = ps_value_alloc(parameter->type, (ps_value_data){.h = i});
-    if (value == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    args[i] = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, parameter->name, value);
-    if (args[i] == NULL)
-    {
-        compiler->error = PS_ERROR_OUT_OF_MEMORY;
-        TRACE_ERROR("ARGUMENT_BYVAL");
-    }
-
-    if (!ps_compiler_add_symbol(compiler, block, args[i]))
-    {
-        args[i] = ps_symbol_free(args[i]);
-        compiler->error = PS_ERROR_OUT_OF_MEMORY;
-        TRACE_ERROR("ADD_BYVAL");
-    }
-
     PARSE_END("OK")
-}
-
-ps_ast_block *ps_symbol_get_executable_block(ps_symbol *executable)
-{
-    if (executable == NULL || executable->value == NULL || executable->value->data.x == NULL ||
-        executable->value->data.x->block == NULL)
-        return NULL;
-    return executable->value->data.x->block;
 }
 
 /**
@@ -245,63 +224,6 @@ static bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
-}
-
-static bool ps_parse_formal_signature(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature **signature)
-{
-    assert(compiler != NULL);
-    assert(block != NULL);
-    assert(signature != NULL);
-
-    PARSE_BEGIN("EXECUTABLE", "FORMAL_SIGNATURE")
-
-    // Allocate signature
-    *signature = ps_formal_signature_alloc(0, NULL);
-    if (signature == NULL)
-        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-
-    // No parameter list?
-    if (PS_TOKEN_LEFT_PARENTHESIS != lexer->current_token.type)
-        PARSE_END("NO_PARAMETERS");
-    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
-
-    // Empty parameter list? ()
-    if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
-    {
-        READ_NEXT_TOKEN_OR_GOTO_CLEANUP
-        PARSE_END("NO_PARAMETERS");
-    }
-
-    bool loop = true;
-    do
-    {
-        if (!ps_parse_parameter_definition(compiler, block, signature))
-            loop = false;
-        else
-            switch (lexer->current_token.type)
-            {
-            case PS_TOKEN_COMMA:
-                // , introduces antoher parameter
-                READ_NEXT_TOKEN
-                loop = compiler->error == PS_ERROR_NONE;
-                break;
-            case PS_TOKEN_RIGHT_PARENTHESIS:
-                // ) ends parameter list
-                READ_NEXT_TOKEN
-                loop = false;
-                break;
-            default:
-                compiler->error = PS_ERROR_UNEXPECTED_TOKEN;
-                loop = false;
-            }
-    } while (loop);
-    if (compiler->error != PS_ERROR_NONE)
-        goto cleanup;
-
-    PARSE_END("OK")
-
-cleanup:
-    TRACE_ERROR("FORMAL_SIGNATURE")
 }
 
 bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call,

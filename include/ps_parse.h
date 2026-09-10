@@ -17,8 +17,11 @@ extern "C"
 {
 #endif
 
-    /* src/ps_parse.c */
+    /** @brief Start parsing into a program block */
     bool ps_parse_start(ps_compiler *compiler, ps_ast_block *block_program);
+
+    /** @brief Retrieve executable block from symbol */
+    ps_ast_block *ps_symbol_get_executable_block(ps_symbol *executable);
 
 #define PARSE_BEGIN(__PARSE__, __PLUS__)                                                                               \
     ps_lexer *lexer = ps_parser_get_lexer(compiler->parser);                                                           \
