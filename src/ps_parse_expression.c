@@ -319,9 +319,8 @@ static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // Create the variable array AST node
-    ps_symbol *symbol2 = symbol + 0;
     ps_ast_variable *ast_variable =
-        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol2, dimensions, indexes);
+        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, dimensions, indexes);
     if (ast_variable == NULL)
         TRACE_ERROR("VARIABLE_ARRAY")
     *factor = (ps_ast_node *)ast_variable;
@@ -629,7 +628,7 @@ static bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *b
 {
     PARSE_BEGIN("FUNCTION_CALL", "SYSTEM");
 
-    int16_t n_args = 0;
+    int n_args = 0;
     ps_ast_node *args[2] = {NULL, NULL};
     ps_symbol *symbol = NULL;
     ps_ast_variable *symbol_node = NULL;
@@ -693,7 +692,7 @@ static bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *b
         RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
     }
 
-    *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, n_args,
+    *call = ps_ast_create_call(start_line, start_column, PS_AST_FUNCTION_CALL, function, (uint16_t)n_args,
                                n_args == 0 ? NULL : args, NULL);
 
     PARSE_END("OK")

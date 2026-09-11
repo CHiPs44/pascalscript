@@ -25,23 +25,29 @@
 
 bool ps_ast_node_check_group(const ps_ast_node *node, ps_ast_node_group expected_group)
 {
+    assert(node != NULL);
+
     if (node->group != expected_group)
     {
         ps_ast_debug_line(0, "Error: expected AST node group %s but got %s\n",
                           ps_ast_node_get_group_name(expected_group), ps_ast_node_get_group_name(node->group));
         return false;
     }
+
     return true;
 }
 
 bool ps_ast_node_check_kind(const ps_ast_node *node, ps_ast_node_kind expected_kind)
 {
+    assert(node != NULL);
+
     if (node->kind != expected_kind)
     {
         ps_ast_debug_line(0, "Error: expected AST node kind %s but got %s\n", ps_ast_node_get_kind_name(expected_kind),
                           ps_ast_node_get_kind_name(node->kind));
         return false;
     }
+
     return true;
 }
 
@@ -101,12 +107,16 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
         ps_ast_variable *variable = (ps_ast_variable *)node;
         return ps_ast_free_variable(variable);
     }
+
     return NULL;
 }
 
 static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *function_call)
 {
+    assert(function_call != NULL);
+
     ps_symbol *function = function_call->executable;
+
     if (function->system)
     {
         // Use pre-defined return type
@@ -138,6 +148,7 @@ static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *functi
     }
     else if (function != NULL && function->value != NULL)
         return function->value->type;
+
     return NULL;
 }
 
@@ -150,13 +161,12 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 {
     if (node == NULL)
         return NULL;
-
     switch (node->kind)
     {
     case PS_AST_LITERAL_VALUE:
         const ps_ast_value *ast_value = (const ps_ast_value *)node;
-        const ps_value *value = &ast_value->value;
-        return value != NULL ? value->type : NULL;
+        ps_value value = ast_value->value;
+        return value.type;
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
         const ps_ast_variable *ast_variable = (const ps_ast_variable *)node;
@@ -184,7 +194,10 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
                                   const char *name)
 {
     static uint32_t block_id = 0;
+
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
+    assert(name == NULL || (strlen(name) > 0 && strlen(name) < PS_IDENTIFIER_SIZE));
+
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(line, column, PS_AST_BLOCK, kind, sizeof(ps_ast_block));
     if (block == NULL)
         return NULL;
@@ -198,6 +211,7 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     block->signature = NULL;
     block->n_vars = 0;
     block->statement_list = NULL;
+
     return block;
 }
 
@@ -206,6 +220,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
     assert(block != NULL);
     assert(block->kind == PS_AST_PROGRAM || block->kind == PS_AST_PROCEDURE || block->kind == PS_AST_FUNCTION ||
            block->kind == PS_AST_UNIT);
+
     if (block->signature != NULL)
         ps_formal_signature_free(block->signature);
     if (block->symbols != NULL)
@@ -213,6 +228,7 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
     if (block->statement_list != NULL)
         ps_ast_free_statement_list(block->statement_list);
     ps_memory_free(PS_MEMORY_AST, block);
+
     return NULL;
 }
 
@@ -222,6 +238,8 @@ ps_ast_node *ps_ast_free_block(ps_ast_block *block)
 
 ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t column, int count)
 {
+    assert(count >= 0);
+
     ps_ast_statement_list *statement_list = (ps_ast_statement_list *)ps_ast_create_node(
         line, column, PS_AST_STATEMENT, PS_AST_STATEMENT_LIST, sizeof(ps_ast_statement_list));
     if (statement_list == NULL)
@@ -236,6 +254,7 @@ ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t colu
             return NULL;
         }
     }
+
     return statement_list;
 }
 
@@ -243,10 +262,12 @@ ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 {
     assert(statement_list != NULL);
     assert(statement_list->kind == PS_AST_STATEMENT_LIST);
+
     for (int i = 0; i < statement_list->count; i++)
         statement_list->statements[i] = ps_ast_free_node(statement_list->statements[i]);
     ps_memory_free(PS_MEMORY_AST, statement_list->statements);
     ps_memory_free(PS_MEMORY_AST, statement_list);
+
     return NULL;
 }
 
@@ -409,11 +430,13 @@ ps_ast_node *ps_ast_free_for(ps_ast_for *for_statement)
 {
     assert(for_statement != NULL);
     assert(for_statement->kind == PS_AST_FOR);
+
     for_statement->variable = (ps_ast_variable *)ps_ast_free_variable(for_statement->variable);
     for_statement->start = ps_ast_free_node(for_statement->start);
     for_statement->end = ps_ast_free_node(for_statement->end);
     for_statement->body = (ps_ast_statement_list *)ps_ast_free_statement_list(for_statement->body);
     ps_memory_free(PS_MEMORY_AST, for_statement);
+
     return NULL;
 }
 
@@ -427,6 +450,7 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
     assert(kind == PS_AST_PROCEDURE_CALL || kind == PS_AST_FUNCTION_CALL);
     assert(executable != NULL);
     assert(n_args == 0 || args != NULL);
+
     ps_ast_node_group group = kind == PS_AST_PROCEDURE_CALL ? PS_AST_STATEMENT : PS_AST_EXPRESSION;
     ps_ast_call *call = (ps_ast_call *)ps_ast_create_node(line, column, group, kind, sizeof(ps_ast_call));
     if (call == NULL)
@@ -449,6 +473,7 @@ ps_ast_call *ps_ast_create_call(uint16_t line, uint16_t column, ps_ast_node_kind
             memcpy(call->formats, formats, n_args * sizeof(ps_ast_format));
         }
     }
+
     return call;
 }
 
@@ -456,6 +481,7 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 {
     assert(call != NULL);
     assert(call->kind == PS_AST_PROCEDURE_CALL || call->kind == PS_AST_FUNCTION_CALL);
+
     if (call->args != NULL)
     {
         for (int i = 0; i < call->n_args; i++)
@@ -463,6 +489,7 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
         ps_memory_free(PS_MEMORY_AST, call->args);
     }
     ps_memory_free(PS_MEMORY_AST, call);
+
     return NULL;
 }
 
@@ -478,6 +505,8 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
  */
 ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, const ps_ast_node *operand)
 {
+    assert(operand != NULL);
+
     ps_symbol *operand_type = ps_ast_node_get_type(operand);
     if (operand_type == NULL)
         return NULL;
@@ -493,6 +522,7 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, co
         return operand_type;
     if (type == PS_TYPE_BOOLEAN)
         return &ps_system_boolean;
+
     return NULL;
 }
 
@@ -501,6 +531,7 @@ ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t co
 {
     assert(operator == PS_OP_NEG || operator == PS_OP_NOT);
     assert(operand != NULL && ps_ast_node_check_group(operand, PS_AST_EXPRESSION));
+
     ps_ast_unary_operation *unary_operation = (ps_ast_unary_operation *)ps_ast_create_node(
         line, column, PS_AST_EXPRESSION, PS_AST_UNARY_OPERATION, sizeof(ps_ast_unary_operation));
     if (unary_operation == NULL)
@@ -508,13 +539,18 @@ ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t co
     unary_operation->operator = operator;
     unary_operation->operand = operand;
     unary_operation->result_type = ps_ast_unary_operation_get_result_type(operator, operand);
+
     return unary_operation;
 }
 
 ps_ast_node *ps_ast_free_unary_operation(ps_ast_unary_operation *unary_operation)
 {
+    assert(unary_operation != NULL);
+    assert(unary_operation->kind == PS_AST_UNARY_OPERATION);
+
     unary_operation->operand = ps_ast_free_node(unary_operation->operand);
     ps_memory_free(PS_MEMORY_AST, unary_operation);
+
     return NULL;
 }
 
@@ -629,19 +665,24 @@ ps_ast_binary_operation *ps_ast_create_binary_operation(uint16_t line, uint16_t 
         ps_memory_free(PS_MEMORY_AST, binary_operation);
         return NULL;
     }
+
     return binary_operation;
 }
 
 ps_ast_node *ps_ast_free_binary_operation(ps_ast_binary_operation *binary_operation)
 {
+    assert(binary_operation != NULL);
+    assert(binary_operation->kind == PS_AST_BINARY_OPERATION);
+
     binary_operation->left = ps_ast_free_node(binary_operation->left);
     binary_operation->right = ps_ast_free_node(binary_operation->right);
     ps_memory_free(PS_MEMORY_AST, binary_operation);
+
     return NULL;
 }
 
 // =============================================================================
-// PS_AST_LITERAL_VALUE: integer, real, string, boolean, char, enum
+// PS_AST_LITERAL_VALUE: integer, unsigned, real, string, boolean, char, enum
 // =============================================================================
 
 ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_value literal)
@@ -650,18 +691,23 @@ ps_ast_value *ps_ast_create_literal_value(uint16_t line, uint16_t column, ps_val
     assert(literal.type == &ps_system_boolean || literal.type == &ps_system_char ||
            literal.type == &ps_system_integer || literal.type == &ps_system_real || literal.type == &ps_system_string ||
            literal.type == &ps_system_unsigned || literal.type->value->data.t->type == PS_TYPE_ENUM);
+
     ps_ast_value *literal_node =
         (ps_ast_value *)ps_ast_create_node(line, column, PS_AST_EXPRESSION, PS_AST_LITERAL_VALUE, sizeof(ps_ast_value));
     if (literal_node == NULL)
         return NULL;
     literal_node->value = literal;
+
     return literal_node;
 }
 
 ps_ast_node *ps_ast_free_value(ps_ast_value *value)
 {
-    // TODO ps_value_free(&value->value);
+    assert(value != NULL);
+    assert(value->kind == PS_AST_LITERAL_VALUE);
+
     ps_memory_free(PS_MEMORY_AST, value);
+
     return NULL;
 }
 
@@ -675,6 +721,7 @@ ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, p
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
     assert(variable != NULL);
     assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
+
     ps_ast_node_group group = kind == PS_AST_LVALUE ? PS_AST_GROUP_LVALUE : PS_AST_EXPRESSION;
     ps_ast_variable *variable_simple =
         (ps_ast_variable *)ps_ast_create_node(line, column, group, kind, sizeof(ps_ast_variable));
@@ -682,6 +729,7 @@ ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, p
         return NULL;
     variable_simple->owner = owner;
     variable_simple->variable = variable;
+
     return variable_simple;
 }
 
@@ -689,7 +737,9 @@ ps_ast_node *ps_ast_free_variable_simple(ps_ast_variable *variable_simple)
 {
     assert(variable_simple != NULL);
     assert(variable_simple->kind == PS_AST_RVALUE || variable_simple->kind == PS_AST_LVALUE);
+
     ps_memory_free(PS_MEMORY_AST, variable_simple);
+
     return NULL;
 }
 
@@ -705,6 +755,7 @@ ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps
     assert(variable != NULL);
     assert(dimensions >= 1);
     assert(indexes != NULL);
+
     ps_ast_node_group group = kind == PS_AST_RVALUE ? PS_AST_EXPRESSION : PS_AST_GROUP_LVALUE;
     // struct + VLA for indexes
     size_t size = sizeof(ps_ast_variable) + dimensions * sizeof(ps_ast_node *);
@@ -718,6 +769,7 @@ ps_ast_variable *ps_ast_create_variable_array(uint16_t line, uint16_t column, ps
     {
         variable_array->indexes[i] = indexes[i];
     }
+
     return variable_array;
 }
 
@@ -725,6 +777,7 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_variable *variable)
 {
     assert(variable != NULL);
     assert(variable->kind == PS_AST_LVALUE || variable->kind == PS_AST_RVALUE);
+
     for (int i = 0; i < variable->dimensions; i++)
     {
         ps_ast_free_node(variable->indexes[i]);
@@ -732,6 +785,7 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_variable *variable)
     }
     ps_memory_free(PS_MEMORY_AST, variable->indexes);
     ps_memory_free(PS_MEMORY_AST, variable);
+
     return NULL;
 }
 
@@ -743,9 +797,11 @@ ps_ast_node *ps_ast_free_variable(ps_ast_variable *variable)
 {
     assert(variable != NULL);
     assert(variable->kind == PS_AST_LVALUE || variable->kind == PS_AST_RVALUE);
+
     if (variable->dimensions == 0)
         ps_ast_free_variable_simple(variable);
     else
         ps_ast_free_variable_array(variable);
+
     return NULL;
 }
