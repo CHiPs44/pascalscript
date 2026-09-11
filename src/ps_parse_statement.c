@@ -113,8 +113,8 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
-static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner,
-                                  const ps_symbol *variable, ps_ast_variable **lvalue)
+static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner, ps_symbol *variable,
+                                  ps_ast_variable **lvalue)
 {
     PARSE_BEGIN("ASSIGNMENT", "ARRAY")
 

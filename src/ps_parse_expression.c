@@ -272,7 +272,7 @@ static bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_nod
     PARSE_END("TERM2");
 }
 
-static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, const ps_symbol *symbol,
+static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol,
                                              ps_ast_node **factor)
 {
     PARSE_BEGIN("FACTOR", "ARRAY");
