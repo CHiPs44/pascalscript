@@ -307,9 +307,9 @@ void ps_ast_debug_for(int margin, const ps_ast_for *for_statement)
 static void ps_ast_debug_call(int margin, const ps_ast_call *call)
 {
     if (call->executable->kind == PS_SYMBOL_KIND_PROCEDURE)
-        ps_ast_debug_line(margin, "{PROCEDURE_CALL} %s(", call->executable->name);
+        ps_ast_debug_line(margin, "{PROCEDURE_CALL %d} %s(", call->n_args, call->executable->name);
     else
-        ps_ast_debug_line(margin, "{FUNCTION_CALL} %s(", call->executable->name);
+        ps_ast_debug_line(margin, "{FUNCTION_CALL %d} %s(", call->n_args,call->executable->name);
     for (int i = 0; i < call->n_args; i++)
     {
         ps_ast_debug_node(margin + 1, call->args[i]);

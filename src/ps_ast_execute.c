@@ -603,13 +603,21 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     assert(expression != NULL);
     assert(expression->group == PS_AST_EXPRESSION);
     assert(result != NULL);
+
+    const ps_ast_value *rvalue = NULL;
+    const ps_ast_variable *variable = NULL;
+    ps_ast_value operand_value = {0};
+    const ps_ast_unary_operation *unary_operation = NULL;
+    const ps_ast_binary_operation *binary_operation = NULL;
+    const ps_ast_call *function_call = NULL;
+
     if (!ps_ast_node_check_group(expression, PS_AST_EXPRESSION))
         return false;
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "EXPRESSION @%p", (const void *)expression);
     switch (expression->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        const ps_ast_value *rvalue = (const ps_ast_value *)expression;
+        rvalue = (const ps_ast_value *)expression;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Value: %s",
                                ps_value_get_display_string(&rvalue->value, 0, 0));
         if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
@@ -618,7 +626,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         }
         break;
     case PS_AST_RVALUE:
-        const ps_ast_variable *variable = (const ps_ast_variable *)expression;
+        variable = (const ps_ast_variable *)expression;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable->variable->name);
         ps_value value = {.allocated = false, .type = &ps_system_none, .data = {0}};
         if (!ps_interpreter_get_variable_value(interpreter, variable, &value) ||
@@ -628,12 +636,12 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         }
         break;
     case PS_AST_UNARY_OPERATION:
-        ps_ast_value operand_value = {.group = PS_AST_EXPRESSION,
-                                      .kind = PS_AST_LITERAL_VALUE,
-                                      .value.allocated = false,
-                                      .value.type = &ps_system_none,
-                                      .value.data = {0}};
-        const ps_ast_unary_operation *unary_operation = (const ps_ast_unary_operation *)expression;
+        operand_value = (ps_ast_value){.group = PS_AST_EXPRESSION,
+                                       .kind = PS_AST_LITERAL_VALUE,
+                                       .value.allocated = false,
+                                       .value.type = &ps_system_none,
+                                       .value.data = {0}};
+        unary_operation = (const ps_ast_unary_operation *)expression;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Unary operation: %s",
                                ps_operator_unary_get_name(unary_operation->operator));
         // first evaluate operand
@@ -645,7 +653,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         }
         break;
     case PS_AST_BINARY_OPERATION:
-        const ps_ast_binary_operation *binary_operation = (const ps_ast_binary_operation *)expression;
+        binary_operation = (const ps_ast_binary_operation *)expression;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Binary operation: %s",
                                ps_operator_binary_get_name(binary_operation->operator));
         // first evaluate operands, then apply operator to them
@@ -668,7 +676,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         }
         break;
     case PS_AST_FUNCTION_CALL:
-        const ps_ast_call *function_call = (const ps_ast_call *)expression;
+        function_call = (const ps_ast_call *)expression;
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Function call: %s", function_call->executable->name);
         if (!ps_ast_execute_function_call(interpreter, function_call, result))
             return false;

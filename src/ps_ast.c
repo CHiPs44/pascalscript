@@ -67,6 +67,8 @@ ps_ast_node *ps_ast_create_node(uint16_t line, uint16_t column, ps_ast_node_grou
 
 ps_ast_node *ps_ast_free_node(ps_ast_node *node)
 {
+    ps_ast_variable *variable = NULL;
+
     if (node == NULL)
         return NULL;
     switch (node->kind)
@@ -104,7 +106,7 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
         return ps_ast_free_call((ps_ast_call *)node);
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
-        ps_ast_variable *variable = (ps_ast_variable *)node;
+        variable = (ps_ast_variable *)node;
         return ps_ast_free_variable(variable);
     }
 
@@ -159,18 +161,22 @@ static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *functi
  */
 ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 {
+    const ps_ast_value *ast_value = NULL;
+    const ps_ast_variable *ast_variable = NULL;
+    const ps_symbol *variable = NULL;
+
     if (node == NULL)
         return NULL;
     switch (node->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        const ps_ast_value *ast_value = (const ps_ast_value *)node;
+        ast_value = (const ps_ast_value *)node;
         ps_value value = ast_value->value;
         return value.type;
     case PS_AST_RVALUE:
     case PS_AST_LVALUE:
-        const ps_ast_variable *ast_variable = (const ps_ast_variable *)node;
-        const ps_symbol *variable = ast_variable->variable;
+        ast_variable = (const ps_ast_variable *)node;
+        variable = ast_variable->variable;
         if (ast_variable->dimensions == 0)
             return variable->value->type;
         else

@@ -27,7 +27,7 @@ End;
 // End;
 
 Begin
-    Procedure1(1, 2);
+    Procedure1(-1, -2);
     // WriteLn('----------------------------------------------------------------------');
     // WriteLn('Procedure with 2 parameters and local variables');
     // Variable1 := 1;

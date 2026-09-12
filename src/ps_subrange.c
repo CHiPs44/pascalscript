@@ -96,10 +96,15 @@ ps_unsigned ps_subrange_get_count(const ps_type_definition *subrange)
 
 ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_value *index)
 {
+    ps_char c = '\0';
+    ps_unsigned u = 0;
+    ps_integer i = 0;
     ps_unsigned offset = PS_UNSIGNED_MAX;
     bool valid = false;
+
     if (subrange->type != PS_TYPE_SUBRANGE)
         return offset;
+
     if (subrange_debug)
     {
         fprintf(stderr, " DEBUG\tSUBRANGE\ttype = %s\n", ps_value_type_get_name(subrange->type));
@@ -109,18 +114,18 @@ ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_
                 ps_value_type_get_name(ps_value_get_type(index)), ps_value_type_get_name(ps_value_get_base(index)),
                 ps_value_get_debug_string(index));
     }
+
     switch (subrange->base)
     {
     case PS_TYPE_CHAR:
         // 'C' from 'A'..'F' => Ord('C') - Ord('A') => offset = 2
         // 'G' from 'A'..'F' => 'G' is out of range => offset = PS_UNSIGNED_MAX
-        ps_char c = index->data.c;
+        c = index->data.c;
         if (ps_value_get_base(index) == PS_TYPE_CHAR && c >= subrange->def.g.c.min && c <= subrange->def.g.c.max)
             offset = c - subrange->def.g.c.min;
         break;
     case PS_TYPE_UNSIGNED:
         // 3 from 1..10 => 3 - 1 => 2
-        ps_unsigned u = 0;
         valid = false;
         if (ps_value_get_base(index) == PS_TYPE_INTEGER && index->data.i >= 0)
         {
@@ -141,8 +146,8 @@ ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_
         break;
     case PS_TYPE_INTEGER:
         // 3 from -4..4 => 3 - -4 => 7
-        //         0..8
-        ps_integer i = 0;
+        //  -4 -3 -2 -1  0  1  2  3  4
+        //   0  1  2  3  4  5  6  7  8
         valid = false;
         if (ps_value_get_base(index) == PS_TYPE_UNSIGNED && index->data.u <= PS_INTEGER_MAX)
         {
@@ -166,5 +171,6 @@ ps_unsigned ps_subrange_get_offset(const ps_type_definition *subrange, const ps_
     default:
         break;
     }
+
     return offset;
 }

@@ -34,9 +34,11 @@
 #else
 #if defined(__GNUC__)
 #define PS_COMPILER_VERSION "GCC " __VERSION__
+#else
+#define PS_COMPILER_VERSION "UNKNOWN"
 #endif
 #endif
-#if __BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define PS_BYTE_ORDER "LITTLE_ENDIAN"
 #else
 #define PS_BYTE_ORDER "BIG_ENDIAN"

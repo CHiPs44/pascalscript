@@ -82,28 +82,34 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
 char *ps_type_definition_get_name(const ps_type_definition *type_def)
 {
     static char buffer[128];
+    ps_symbol **values = NULL;
+
     if (type_def == NULL)
     {
         snprintf(buffer, sizeof(buffer), "NULL");
         return buffer;
     }
+
     char *type_name = ps_value_type_get_name(type_def->type);
     if (type_name == NULL)
     {
         snprintf(buffer, sizeof(buffer), "UNKNOWN");
         return buffer;
     }
+
     if (type_def->type == type_def->base && type_def->type != PS_TYPE_ARRAY)
     {
         snprintf(buffer, sizeof(buffer), "%s", type_name);
         return buffer;
     }
+
     char *base_name = ps_value_type_get_name(type_def->base);
     if (base_name == NULL)
     {
         snprintf(buffer, sizeof(buffer), "%s with unknown base!", type_name);
         return buffer;
     }
+
     switch (type_def->type)
     {
     case PS_TYPE_ENUM:
@@ -128,7 +134,7 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
                      type_def->def.g.u.max);
             break;
         case PS_TYPE_ENUM:
-            ps_symbol **values = type_def->def.g.e.symbol_enum->value->type->value->data.t->def.e.values;
+            values = type_def->def.g.e.symbol_enum->value->type->value->data.t->def.e.values;
             snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %s..%s)", type_name, base_name,
                      values[type_def->def.g.e.min]->name, values[type_def->def.g.e.max]->name);
             break;

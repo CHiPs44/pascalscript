@@ -39,10 +39,15 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
     (void)start_line;
     (void)start_column;
 
+    ps_ast_statement_list *statement_list = NULL;
+    ps_ast_if *if_statement = NULL;
+    ps_ast_repeat *repeat_statement = NULL;
+    ps_ast_while *while_statement = NULL;
+    ps_ast_for *for_statement = NULL;
+
     switch (lexer->current_token.type)
     {
     case PS_TOKEN_BEGIN:
-        ps_ast_statement_list *statement_list = NULL;
         if (!ps_parse_compound_statement(compiler, block, &statement_list))
             TRACE_ERROR("COMPOUND")
         *statement_ptr = (ps_ast_node *)statement_list;
@@ -52,25 +57,21 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
             TRACE_ERROR("ASSIGNMENT/PROCEDURE")
         break;
     case PS_TOKEN_IF:
-        ps_ast_if *if_statement = NULL;
         if (!ps_parse_if_then_else(compiler, block, &if_statement))
             TRACE_ERROR("IF")
         *statement_ptr = (ps_ast_node *)if_statement;
         break;
     case PS_TOKEN_REPEAT:
-        ps_ast_repeat *repeat_statement = NULL;
         if (!ps_parse_repeat_until(compiler, block, &repeat_statement))
             TRACE_ERROR("REPEAT")
         *statement_ptr = (ps_ast_node *)repeat_statement;
         break;
     case PS_TOKEN_WHILE:
-        ps_ast_while *while_statement = NULL;
         if (!ps_parse_while_do(compiler, block, &while_statement))
             TRACE_ERROR("WHILE")
         *statement_ptr = (ps_ast_node *)while_statement;
         break;
     case PS_TOKEN_FOR:
-        ps_ast_for *for_statement = NULL;
         if (!ps_parse_for_do(compiler, block, &for_statement))
             TRACE_ERROR("FOR")
         *statement_ptr = (ps_ast_node *)for_statement;

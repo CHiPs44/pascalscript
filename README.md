@@ -4,11 +4,11 @@ NB: this project has no link with [RemObjects Pascal Script](https://github.com/
 
 ## Status
 
-As of 2026-09-02, the AST based interpreter is able to run Pascal programs with:
+As of 2026-09-12, the AST based interpreter is able to run Pascal programs with:
 
 - **Data types**
   - `Integer`, `Unsigned`, `Real`, `Boolean`, `Char`
-  - `String`: fixed-size buffers (max 255 chars, no garbage collection, a long running program will exhaust memorry)
+  - `String`: fixed-size buffers (max 255 chars, no garbage collection, a long running program will exhaust memory)
   - `Array`: multi-dimensional arrays
   - `Type` definition for subranges & enumerations
 - **Assignment** to variable from an expression with `:=`
@@ -32,8 +32,10 @@ As of 2026-09-02, the AST based interpreter is able to run Pascal programs with:
   - `Low`, `High`
   - `Random`, `Round`, `Trunc`
   - `GetTickCount`, `Randomize`
-
-User procedures & functions are on their way...
+- **User defined** procedures
+  - For now
+    - without parameters
+    - no functions
 
 ## Abstract Syntax Tree vs. "direct" interpretation
 
@@ -324,22 +326,24 @@ Language elements are limited to:
 - Operators: `+` `-` `*` `/` `div` `mod`
 
 ```pascal
-program step1a;
-const   foo = 1;
-var     a: integer;
-        b: integer;
-        c: integer;
-begin
-        a := foo;
-        b := 2;
-        c := a + b;
-        { line below should print 3 }
-        WriteLn(c);
-        { line below will throw an error "Undeclared identifier 'd' at line L, column C" and stop execution }
-        d := a * b div c;
-        { line below will throw an error "Constant 'foo' cannot be assigned at line L, column C" and stop execution }
-        foo := 12;
-end. { . is mandatory }
+Program Step1A;
+Const
+  Foo = 1;
+Var
+  A: Integer;
+  B: Integer;
+  C: Integer;
+Begin
+  A := Foo;
+  B := 2;
+  C := A + B;
+  { line below should print 3 }
+  WriteLn(C);
+  { line below will throw an error "Undeclared identifier 'D' at line L, column C" and stop execution }
+  D := A * B Div C;
+  { line below will throw an error "Constant 'Foo' cannot be assigned at line L, column C" and stop execution }
+  Foo := 12;
+End. { . is mandatory }
 ```
 
 Remarks:
@@ -355,42 +359,46 @@ Remarks:
 - `Write` and `WriteLn` should accept a string constant as parameter
 
 ```pascal
-program step1b;
-const   foo = 1;
-        msg = 'Result is: ';
-var     a, b, c: integer;
-begin
-        a := foo;
-        b := 2;
-        c := a + b;
-        Write(msg);
-        WriteLn(c);
-end.
+Program Step1B;
+Const
+  Foo = 1;
+  Msg = 'Result is: ';
+Var
+  A, B, C: Integer;
+Begin
+  A := Foo;
+  B := 2;
+  C := A + B;
+  Write(Msg);
+  WriteLn(C);
+End.
 ```
 
 ### Step 3: Conditional
 
-New keywords: `if` `then` `else`
+New keywords: `If` `Then` `Else`
 
-New operators: `<` `>` `<=` `>=` `<>` `and` `or` `not` (`=` with a different meaning is already there for constants)
+New operators: `<` `>` `<=` `>=` `<>` `And` `Or` `Not` (`=` with a different meaning is already there for constants)
 
 ```pascal
-program step2;
-const   MSG1 = 'C is greater than 3.';
-        MSG2 = 'C is less than 3.';
-var     a, b, c: integer;
-begin
-        a := 1;
-        b := 2;
-        c := a + b;
-        if not(c <= 3) then { means c > 3 but we should illustrate not unary operator ;-) }
-        begin
-          WriteLn(MSG1);
-          WriteLn(c);
-        end { no ; }
-        else
-          WriteLn(MSG2);
-end.
+Program Step2;
+Const
+  Msg1 = 'C is greater than 3.';
+  Msg2 = 'C is less than 3.';
+Var
+  A, B, C: Integer;
+Begin
+  A := 1;
+  B := 2;
+  C := A + B;
+  If Not(C <= 3) Then { means C > 3 but we should illustrate Not unary operator ;-) }
+  Begin
+    WriteLn(Msg1);
+    WriteLn(C);
+  End { no ; }
+  Else
+    WriteLn(Msg2);
+End.
 ```
 
 NB: no booleans mean false is zero, true is not zero.
@@ -400,24 +408,24 @@ NB: no booleans mean false is zero, true is not zero.
 New keywords: `while` `do` `repeat` `until` `for` `to` `downto`
 
 ```pascal
-program step3;
-var
-    i: integer;
-begin
-    i := 1;
-    while i < 5 do
-    begin
-        WriteLn(i);
-        i := i + 1;
-    end;
-    i := 1;
-    repeat
-        WriteLn(i);
-        i := i + 1;
-    until i > 5;
-    for i := 9 downto 0 do
-        WriteLn(i);
-end.
+Program Step3;
+Var
+    I: Integer;
+Begin
+    I := 1;
+    While I < 5 Do
+    Begin
+        WriteLn(I);
+        I := I + 1;
+    End;
+    I := 1;
+    Repeat
+        WriteLn(I);
+        I := I + 1;
+    Until I > 5;
+    For I := 9 Downto 0 Do
+        WriteLn(I);
+End.
 ```
 
 NB:
@@ -430,43 +438,43 @@ NB:
 This means we have input ("by value") and output ("by reference") parameters, local variables, and recursive calls.
 
 ```pascal
-Program Step4a;
+Program Step4A;
 
 Var
-  r: Integer;
+  R: Integer;
 
-Procedure Sum(a: Integer, b: Integer, var c: Integer);
+Procedure Sum(A: Integer, B: Integer, Var C: Integer);
 Begin
-  c := a + b;
+  C := A + B;
 End;
 
 Begin
-  Sum(12, 34, r);
-  WriteLn(r);
+  Sum(12, 34, R);
+  WriteLn(R);
 End.
 ```
 
 ### Functions
 
 ```pascal
-Program step4b;
+Program Step4B;
 
-Var r: Integer;
+Var R: Integer;
 
 (* The "de-facto" standard of recursive functions *)
-Function Fact(n: Integer): Integer;
-Var f: Integer;
+Function Fact(N: Integer): Integer;
+Var F: Integer;
 Begin
-  If n <= 1 Then
-    f := 1
+  If N <= 1 Then
+    F := 1
   Else
-    f := n * Fact(n - 1);
-  Fact := f;
+    F := N * Fact(N - 1);
+  Fact := F;
 End;
 
 Begin
-  r:= Fact(5);
-  WriteLn(r);
+  R := Fact(5);
+  WriteLn(R);
 End.
 ```
 
@@ -481,10 +489,11 @@ End.
 
 - Unsigned and signed integers:
   - `Integer` is 32 bits signed type, period.
-  - 8 bits: `Byte` / `Shortint`
-  - 16 bits: `Word` / `Smallint`
-  - 32 bits: `Longword` / `Longint` => `UNSIGNED`
-  - 64 bits: `QWord` / `Int64`
+  - `Unsigned` is 32 bits unsigned type, period.
+  - 8 bits: `Byte` / `Shortint` => not for 32 bits
+  - 16 bits: `Word` / `Smallint`=> not for 32 bits
+  - 32 bits: `Longword` / `Longint` => `Unsigned`
+  - 64 bits: `QWord` / `Int64` => not for 32 bits
 - Ranges: `Min .. Max` for chars `'A'..'Z'`, unsigned `0..999` & signed integers `-100..100`
 - Enums: `(One, Two, Three, Four)`
 - Arrays: `Array[1..10] Of Integer` or `Array[1..10,1..10] Of Integer`

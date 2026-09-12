@@ -418,7 +418,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
     }
 
 #define EXECUTABLE_VALUE                                                                                               \
-    const ps_executable *executable = value->data.x;                                                                   \
+    executable = value->data.x;                                                                                        \
     if (executable == NULL)                                                                                            \
         snprintf(buffer, sizeof(buffer) - 1, "NULL!");                                                                 \
     else                                                                                                               \
@@ -436,6 +436,8 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
+    const ps_executable *executable = NULL;                                                                   \
+
     if (value == NULL)
         NULL_VALUE
     if (value->type == NULL || value->type->value == NULL)

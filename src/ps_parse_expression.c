@@ -350,6 +350,7 @@ static bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *bloc
     ps_ast_block *owner = NULL;
     ps_symbol *symbol = NULL;
     ps_value value = {0};
+    ps_ast_call *call = NULL;
 
     COPY_IDENTIFIER(identifier)
     if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &symbol))
@@ -388,7 +389,6 @@ static bool ps_parse_factor_identifier(ps_compiler *compiler, ps_ast_block *bloc
         }
         break;
     case PS_SYMBOL_KIND_FUNCTION:
-        ps_ast_call *call = NULL;
         if (!ps_parse_function_call(compiler, block, &call, symbol))
             TRACE_ERROR("FUNCTION")
         *factor = (ps_ast_node *)(call);
