@@ -24,89 +24,48 @@ As of 2026-09-12, the AST based interpreter is able to run Pascal programs with:
   - `Repeat` / `Until`
   - `While` / `Do`
   - `For` / `To` / `Downto` / `Do`
+- **Type** definitions
 - **System constants, procedures & functions**
-  - `Abs`, `Even`, `Odd`, `Succ`, `Pred`
-  - `Chr`, `Ord`
-  - `Length`, `LowerCase`, `UpperCase`
-  - `Sqr`, `Sqrt`, `Sin`, `Cos`, `Arctan`, `Ln`, `Exp`, `Pi`
-  - `Low`, `High`
-  - `Random`, `Round`, `Trunc`
-  - `GetTickCount`, `Randomize`
+  - see [System Library](doc/system.md)
 - **User defined** procedures
   - For now
     - without parameters
     - no functions
 
-## Abstract Syntax Tree vs. "direct" interpretation
-
-As of 2026-05-21, use of a compiler generating an AST then an interpreter executing this AST is on its way.
-
-Direct interpretation within the recursive descent parser was really too cumbersome to implement, mostly with array item access...
-
-Running a program now has 2 phases:
-
-1. **Compilation** - Parsing the source file and building the AST
-2. **Interpretation** - Executing the AST
-
-NB:
-
-- The AST is built in memory, no file is generated
-- The AST is not optimized, it is interpreted as-is
-- Many features of previous design were kept, hence the `ps_value` / `ps_ast_value` existence
-
-This may lead to other steps:
-
-- emitting "P-Code" from the AST for a stack-based virtual machine
-- then interpreting this P-Code like Pascal P4
-
-### Implementation of AST nodes
-
-As C has no classes, the AST nodes are implemented as structs with common fields at the beginning.
-
-These common fields are:
-
-- Group: Block, Statement, Expression, LValue
-- Kind:
-  - Block: Program, Procedure, Function, Unit (future)
-  - Statement: Statement list (compound), Assignment, If, Repeat, While, For, Procedure call
-  - Expression: Constant, Variable, Function Call, Unary, Binary
-  - LValue: Variable
-- Line & column in source file
-
-This means we have to cast the AST node to the proper type to access its specific fields and vice-versa.
-
-### Stack & frames
-
-Interpreter uses a stack of frames to manage variables values and function calls.
-
-When a procedure or function is called, a new frame is pushed on the stack for the parameters and local variables.
-
-Variables are kept in the local symbol table they are defined in, their values are stored in a frame and accessed through an handle corresponding to their order of declaration.
-
-Functions automagically reserve a `Result` variable.
+PascalScript now uses an Abstract Syntax instead of "direct" interpretation, see [AST](doc/ast.md).
 
 ## TODO
+
+Work in progress:
+
+- **Procedure** declaration and calls
+- **Function** declaration and calls, with return value
 
 Next steps should be implementing:
 
 - Check if **Recursivity** works
-- **Procedure** declaration and calls
-- **Function** declaration and calls, with return value
-- **Type** definitions
 - Check if **Enums** & **Subranges** still work within the AST context
-- **Arrays** - Full "static" array support, with several dimensions (up to 8?)
 
 More advanced features:
 
-- **Statement** - `Case` ... `Of` ... `Else` (switch-case logic)
+- **String**
+  - Individual character access with `[]`
+  - Memory management handling with garbage collection
+  - Perhaps handle "unlimited" strings and make classic Pascal usage transparent
+- **Statement** - `Case` ... `Of` ... `Else` / `Otherwise`
 - **Records** - Record/struct type definitions
+- **Pointers and Heap** - Pointer type and operations:
+  - `Pointer`, `New`, `Dispose`, `^`
+  - Maybe we need to handle `Forward` declarations?
 - **Sets** - Set type and operations
-- **Files** - File I/O operations (`File`, `Text`, `Assign`, `Rewrite`, `Reset`, `Close`, `Read`, `Write`, `Seek`, `Eof`, `Eoln`)
+- **Files** - File I/O operations
+  - `File`, `Text`, `Assign`, `Rewrite`, `Reset`, `Close`, `Read`, `Write`, `Seek`, `Eof`, `Eoln`
 - **Units** - Module/unit system
-- **Pointers** - Pointer type and operations (`Pointer`, `New`, `Dispose`, `^`)
-- **String memory management** - Better string handling with garbage collection
-- Additional system procedures: `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
-- Memory access arrays: `Mem`, `MemW`
+  - this time `Forward` declarations will be mandatory as `Interface` is essentially a bunch of forward declarations for `Implementation`
+- Additional system procedures:
+  - `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
+- Memory access arrays:
+  - `Mem`, `MemW`
 
 ## History
 

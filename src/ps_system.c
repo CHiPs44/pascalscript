@@ -5,6 +5,10 @@
 */
 
 #include <math.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "ps_ast.h"
 #include "ps_functions.h"
