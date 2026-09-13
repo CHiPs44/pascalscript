@@ -552,7 +552,8 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
             return false;
         return true;
     }
-    else if (function_call->executable == &ps_system_function_power)
+    else if (function_call->executable == &ps_system_function_power ||
+             function_call->executable == &ps_system_function_logn)
     {
         ps_ast_value a = {.group = PS_AST_EXPRESSION,
                           .kind = PS_AST_LITERAL_VALUE,
@@ -565,7 +566,9 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
             return false;
         if (!ps_ast_eval_expression(interpreter, function_call->args[1], &b))
             return false;
-        ps_error error = ps_function_power(interpreter, &a.value, &b.value, &result->value);
+        ps_error error = function_call->executable == &ps_system_function_power
+                             ? ps_function_power(interpreter, &a.value, &b.value, &result->value)
+                             : ps_function_logn(interpreter, &a.value, &b.value, &result->value);
         return PS_ERROR_NONE == error;
     }
     // all other functions have 1 argument

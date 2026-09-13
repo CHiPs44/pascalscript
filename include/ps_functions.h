@@ -29,7 +29,9 @@ extern "C"
     extern ps_symbol ps_system_function_frac;
     extern ps_symbol ps_system_function_int;
     extern ps_symbol ps_system_function_ln;
-    extern ps_symbol ps_system_function_log;
+    extern ps_symbol ps_system_function_log10;
+    extern ps_symbol ps_system_function_log2;
+    extern ps_symbol ps_system_function_logn;
     extern ps_symbol ps_system_function_odd;
     extern ps_symbol ps_system_function_power;
     extern ps_symbol ps_system_function_random;

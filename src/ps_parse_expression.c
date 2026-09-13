@@ -573,10 +573,10 @@ static bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block 
     PARSE_END("OK")
 }
 
-static bool ps_parse_function_call_power(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **arg1,
-                                         ps_ast_node **arg2)
+static bool ps_parse_function_call_func2argv(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **arg1,
+                                             ps_ast_node **arg2)
 {
-    PARSE_BEGIN("FUNCTION_CALL", "POWER");
+    PARSE_BEGIN("FUNCTION_CALL", "FUNC2ARGV");
     (void)start_line;
     (void)start_column;
 
@@ -662,10 +662,10 @@ static bool ps_parse_function_call_system(ps_compiler *compiler, ps_ast_block *b
         n_args = 1;
         args[0] = (ps_ast_node *)symbol_node;
     }
-    else if (function == &ps_system_function_power)
+    else if (function == &ps_system_function_power || function == &ps_system_function_logn)
     {
-        // Power function has two "by value" numeric arguments
-        if (!ps_parse_function_call_power(compiler, block, &arg1, &arg2))
+        // LogN and Power functions have two "by value" numeric arguments
+        if (!ps_parse_function_call_func2argv(compiler, block, &arg1, &arg2))
             TRACE_ERROR("POWER")
         n_args = 2;
         args[0] = arg1;
