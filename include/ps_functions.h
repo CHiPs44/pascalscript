@@ -98,6 +98,16 @@ extern "C"
     /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
     ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
+    /** @brief LOG10(REAL): REAL - Get base 10 logarithm of floating point value */
+    ps_error ps_function_log10(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+
+    /** @brief LOG2(REAL): REAL - Get base 2 logarithm of floating point value */
+    ps_error ps_function_log2(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
+
+    /** @brief LOGN(REAL, REAL): REAL - Get logarithm of floating point value */
+    ps_error ps_function_logn(ps_interpreter *interpreter, const ps_value *base, const ps_value *value,
+                          ps_value *result);
+
     /** @brief ODD - true if integer/unsigned value is odd, false if even */
     ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
