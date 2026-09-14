@@ -97,9 +97,6 @@ extern "C"
     /** @brief LN(REAL): REAL - Get logarithm of floating point value */
     ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
-    /** @brief LOG(REAL): REAL - Get base 10 logarithm of floating point value */
-    ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
-
     /** @brief LOG10(REAL): REAL - Get base 10 logarithm of floating point value */
     ps_error ps_function_log10(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 

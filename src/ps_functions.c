@@ -263,7 +263,7 @@ ps_error ps_function_chr(ps_interpreter *interpreter, const ps_value *value, ps_
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low_or_high_subrange(const ps_symbol *type, ps_value *result, bool low)
+static ps_error ps_function_low_or_high_subrange(ps_symbol *type, ps_value *result, bool low)
 {
     const ps_type_definition *type_def = type->value->data.t;
     if (type_def->type != PS_TYPE_SUBRANGE)
@@ -283,7 +283,7 @@ ps_error ps_function_low_or_high_subrange(const ps_symbol *type, ps_value *resul
         result->data.u = low ? type_def->def.g.u.min : type_def->def.g.u.max;
         break;
     case PS_TYPE_ENUM:
-        result->type = /*(ps_symbol *)*/type;
+        result->type = /*(ps_symbol *)*/ type;
         result->data.u = low ? type_def->def.g.e.min : type_def->def.g.e.max;
         break;
     default:
@@ -292,7 +292,7 @@ ps_error ps_function_low_or_high_subrange(const ps_symbol *type, ps_value *resul
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *type, ps_value *result, bool low)
+static ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *type, ps_value *result, bool low)
 {
     const ps_type_definition *type_def = type->value->data.t;
     ps_symbol *subrange = NULL;
@@ -333,7 +333,7 @@ ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_symbol *ty
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_low_or_high(ps_interpreter *interpreter, ps_symbol *type_or_var, ps_value *result, bool low)
+static ps_error ps_function_low_or_high(ps_interpreter *interpreter, ps_symbol *type_or_var, ps_value *result, bool low)
 {
     ps_symbol *type = NULL;
     if (type_or_var->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
@@ -357,7 +357,7 @@ ps_error ps_function_high(ps_interpreter *interpreter, ps_symbol *type, ps_value
     return ps_function_low_or_high(interpreter, type, result, false);
 }
 
-ps_error ps_function_pred_ius(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+static ps_error ps_function_pred_ius(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (ps_value_get_type(value))
     {
@@ -407,7 +407,7 @@ ps_error ps_function_pred_ius(const ps_interpreter *interpreter, const ps_value 
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_pred_ceb(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+static ps_error ps_function_pred_ceb(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (ps_value_get_type(value))
     {
@@ -449,7 +449,7 @@ ps_error ps_function_pred(ps_interpreter *interpreter, const ps_value *value, ps
                                                  ps_type_definition_get_name(value->type->value->data.t));
 }
 
-ps_error ps_function_succ_ius(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+static ps_error ps_function_succ_ius(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     switch (ps_value_get_type(value))
     {
@@ -499,7 +499,7 @@ ps_error ps_function_succ_ius(const ps_interpreter *interpreter, const ps_value 
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_succ_ceb(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
+static ps_error ps_function_succ_ceb(const ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     result->type = value->type;
     switch (ps_value_get_type(value))
@@ -683,7 +683,7 @@ ps_error ps_function_sqr(ps_interpreter *interpreter, const ps_value *value, ps_
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Sqr: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     double r = value->data.r * value->data.r;
-    if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))
+    if (interpreter->range_check && r > PS_REAL_MAX)
         return PS_ERROR_OUT_OF_RANGE;
     result->type = &ps_system_real;
     result->data.r = (ps_real)r;
@@ -727,18 +727,6 @@ ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_v
     return PS_ERROR_NONE;
 }
 
-ps_error ps_function_log(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
-{
-    if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Log: Real expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->data.t));
-    if (value->data.r <= 0.0)
-        return PS_ERROR_OUT_OF_RANGE;
-    result->type = &ps_system_real;
-    result->data.r = (ps_real)log10(value->data.r);
-    return PS_ERROR_NONE;
-}
-
 ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
 {
     if (!ps_value_is_real(a) || !ps_value_is_real(b))
@@ -756,7 +744,8 @@ ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const
 ps_error ps_function_log10(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(value))
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL, "Log10: Real expected, got %s",
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
+                                                     "Log10: Real expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     if (value->data.r <= 0.0)
         return PS_ERROR_OUT_OF_RANGE;
@@ -780,9 +769,10 @@ ps_error ps_function_log2(ps_interpreter *interpreter, const ps_value *value, ps
 ps_error ps_function_logn(ps_interpreter *interpreter, const ps_value *base, const ps_value *value, ps_value *result)
 {
     if (!ps_value_is_real(base) || !ps_value_is_real(value))
-        return ps_function_return_error_with_message(
-            interpreter, PS_ERROR_EXPECTED_REAL, "LogN: Reals expected, got %s and %s",
-            ps_type_definition_get_name(base->type->value->data.t), ps_type_definition_get_name(value->type->value->data.t));
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
+                                                     "LogN: Reals expected, got %s and %s",
+                                                     ps_type_definition_get_name(base->type->value->data.t),
+                                                     ps_type_definition_get_name(value->type->value->data.t));
     if (base->data.r <= 0.0 || base->data.r == 1.0 || value->data.r <= 0.0)
         return PS_ERROR_OUT_OF_RANGE;
     result->type = &ps_system_real;
@@ -849,7 +839,7 @@ ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value 
 
 // from https://www.cs.yale.edu/homes/aspnes/pinewiki/C(2f)Randomization.html
 //   => correct "bias" introduced by modulus operator
-int rand_range_integer(int n)
+static int rand_range_integer(int n)
 {
     int r;
     int limit;
@@ -861,7 +851,7 @@ int rand_range_integer(int n)
     return r % n;
 }
 
-unsigned int rand_range_unsigned(unsigned int n)
+static unsigned int rand_range_unsigned(unsigned int n)
 {
     // use rand_range_integer() for small values
     if (n <= RAND_MAX)
