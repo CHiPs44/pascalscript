@@ -13,6 +13,7 @@
 #include "ps_compiler.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
+#include "ps_parse_call.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_statement.h"

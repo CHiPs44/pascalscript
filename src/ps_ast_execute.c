@@ -464,11 +464,14 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
+
     ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE CALL %s", procedure_call->executable->name);
+
     if (procedure_call->executable->system)
     {
         return ps_ast_execute_procedure_call_system(interpreter, procedure_call);
     }
+
     ps_ast_block *procedure = procedure_call->executable->value->data.x->block;
     if (!ps_ast_node_check_group((ps_ast_node *)procedure, PS_AST_BLOCK))
         return ps_interpreter_set_message(interpreter, "Expected block, got %s",
@@ -476,12 +479,14 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     if (!ps_ast_node_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
         return ps_interpreter_set_message(interpreter, "Expected procedure, got %s",
                                           ps_ast_node_get_kind_name(procedure->kind));
+
     // Check if argument count is same as procedure declaration
     if (procedure_call->n_args != procedure->signature->parameter_count)
     {
         return ps_interpreter_set_message(interpreter, "Expected %zu arguments, got %zu",
                                           procedure->signature->parameter_count, procedure_call->n_args);
     }
+
     // Evaluate arguments
     ps_value parameters[procedure_call->n_args];
     ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
@@ -493,9 +498,11 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
                                ps_value_get_display_string(&arg_value.value, 0, 0));
         parameters[i] = arg_value.value;
     }
+
     // Allocate frame for procedure
     if (!ps_interpreter_enter_frame(interpreter, procedure))
         return false;
+
     // Store arguments in frame
     for (int i = 0; i < procedure_call->n_args; i++)
     {
@@ -508,9 +515,11 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         if (!ps_interpreter_copy_value(interpreter, &parameters[i], symbol->value))
             return false;
     }
+
     // Execute procedure with arguments on top frame of stack
     bool ok = ps_ast_execute_block(interpreter, procedure);
     ps_interpreter_exit_frame(interpreter);
+
     return ok;
 }
 
