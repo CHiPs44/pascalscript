@@ -9,14 +9,19 @@ Program ExampleProcedure2;
 //     Variable1, I: Integer;
 //     Variable2: Integer;
 
-{ 2 parameters of the same type }
-Procedure Procedure1(Parameter1, Parameter2: Integer);
-Var
-    Variable1: Integer; { local variable with the name of a global variable }
+Procedure Procedure0(Parameter: Integer);
 Begin
-    Variable1 := Parameter1 * 2 + Parameter2 * 2;
-    // WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ', Parameter2=', Parameter2, ' Variable1=', Variable1);
+    WriteLn('    This is Procedure0, Parameter=', Parameter);
 End;
+
+// { 2 parameters of the same type }
+// Procedure Procedure1(Parameter1, Parameter2: Integer);
+// Var
+//     Variable1: Integer; { local variable with the name of a global variable }
+// Begin
+//     Variable1 := Parameter1 * 2 + Parameter2 * 2;
+//     // WriteLn('    a. This is Procedure1, Parameter1=', Parameter1, ', Parameter2=', Parameter2, ' Variable1=', Variable1);
+// End;
 
 // { 1 parameter with the same name as a global variable, another to test if all this works fine }
 // Procedure Procedure2(Variable2: Integer, Foo: Integer);
@@ -27,7 +32,8 @@ End;
 // End;
 
 Begin
-    Procedure1(-1, -2);
+    Procedure0(-42);
+    // Procedure1(-1, -2);
     // WriteLn('----------------------------------------------------------------------');
     // WriteLn('Procedure with 2 parameters and local variables');
     // Variable1 := 1;

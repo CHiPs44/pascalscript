@@ -100,7 +100,7 @@ static bool ps_parse_formal_signature(ps_compiler *compiler, ps_ast_block *block
 
     // Allocate signature
     *signature = ps_formal_signature_alloc(0, NULL);
-    if (signature == NULL)
+    if (*signature == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     // No parameter list?
@@ -218,7 +218,6 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     executable = ps_executable_alloc(executable_kind, block_executable);
     if (executable == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-    executable->block->signature = signature;
 
     // Create symbol for the procedure or function
     executable_symbol = ps_symbol_alloc(kind, identifier, NULL);
