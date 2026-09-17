@@ -23,6 +23,7 @@
 #include "ps_type_definition.h"
 
 // clang-format off
+
 static bool ps_parse_or_expression        (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
 static bool ps_parse_and_expression       (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
 static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
@@ -30,6 +31,7 @@ static bool ps_parse_simple_expression    (ps_compiler *compiler, ps_ast_block *
 static bool ps_parse_term                 (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
 static bool ps_parse_factor               (ps_compiler *compiler, ps_ast_block *block, ps_ast_node **expression);
 static bool ps_parse_function_call        (ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call, ps_symbol *function);
+
 // clang-format on
 
 /**
@@ -45,6 +47,7 @@ bool ps_parse_expression(ps_compiler *compiler, ps_ast_block *block, ps_ast_node
  *      or_expression = and_expression { ( 'OR' | 'XOR' ) and_expression }
  * Goal:
  *      make A < 1 OR A > 10 OR A = 5 OR ... work without parenthesis
+ *      ByteValue OR $0F should work too
  * AST:
  *      A               => A
  *      A or B          => binary_op(or, A, B)
@@ -67,8 +70,7 @@ static bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, p
         or_operator = ps_parser_expect_token_types(compiler->parser, or_operator_count, or_operators);
         if (or_operator == PS_TOKEN_NONE)
         {
-            *expression = left;
-            PARSE_END("LEFT")
+            break;
         }
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (!ps_parse_and_expression(compiler, block, &right))
@@ -85,7 +87,7 @@ static bool ps_parse_or_expression(ps_compiler *compiler, ps_ast_block *block, p
 
     *expression = left;
 
-    PARSE_END("RIGHT");
+    PARSE_END("OR");
 }
 
 /**
@@ -116,8 +118,7 @@ static bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, 
         and_operator = ps_parser_expect_token_types(compiler->parser, and_operator_count, and_operators);
         if (and_operator == PS_TOKEN_NONE)
         {
-            *expression = left;
-            PARSE_END("AND1");
+            break;
         }
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (!ps_parse_relational_expression(compiler, block, &right))
@@ -136,7 +137,7 @@ static bool ps_parse_and_expression(ps_compiler *compiler, ps_ast_block *block, 
 
     *expression = left;
 
-    PARSE_END("AND2");
+    PARSE_END("AND");
 }
 
 /**
@@ -163,23 +164,25 @@ static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *
     // No loop, only one relational operator allowed, no a <= b <= c
     relational_operator = ps_parser_expect_token_types(
         compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
-    if (relational_operator == PS_TOKEN_NONE)
+    if (relational_operator = PS_TOKEN_NONE)
     {
         *expression = left;
-        PARSE_END("RELATIONAL1");
     }
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
-    if (!ps_parse_simple_expression(compiler, block, &right))
-        TRACE_ERROR("RELATIONAL2");
-    ps_operator_binary operator = ps_operator_binary_from_token(relational_operator);
-    if (operator == PS_OP_BINARY_INVALID)
+    else
     {
-        ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
-                                ps_token_get_keyword(relational_operator), relational_operator);
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
+        if (!ps_parse_simple_expression(compiler, block, &right))
+            TRACE_ERROR("RELATIONAL2");
+        ps_operator_binary operator = ps_operator_binary_from_token(relational_operator);
+        if (operator == PS_OP_BINARY_INVALID)
+        {
+            ps_compiler_set_message(compiler, "Token %s (%d) has no matching AST binary operator",
+                                    ps_token_get_keyword(relational_operator), relational_operator);
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        }
+        *expression = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
     }
-    *expression = (ps_ast_node *)ps_ast_create_binary_operation(start_line, start_column, operator, left, right);
-    PARSE_END("RELATIONAL2");
+    PARSE_END("RELATIONAL");
 }
 
 /**
@@ -209,7 +212,7 @@ static bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *bloc
         if (additive_operator == PS_TOKEN_NONE)
         {
             *expression = left;
-            PARSE_END("SIMPLE1");
+            break;
         }
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (!ps_parse_term(compiler, block, &right))
@@ -226,7 +229,7 @@ static bool ps_parse_simple_expression(ps_compiler *compiler, ps_ast_block *bloc
             TRACE_ERROR("BINARY_OP (SIMPLE)");
     } while (true);
 
-    PARSE_END("SIMPLE2");
+    PARSE_END("SIMPLE");
 }
 
 /**
@@ -253,7 +256,7 @@ static bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_nod
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
             *expression = left;
-            PARSE_END("TERM1");
+            break;
         }
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (!ps_parse_factor(compiler, block, &right))
@@ -270,7 +273,7 @@ static bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_nod
             TRACE_ERROR("BINARY_OP (term)");
     } while (true);
 
-    PARSE_END("TERM2");
+    PARSE_END("TERM");
 }
 
 static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol *symbol,
@@ -297,7 +300,7 @@ static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block
     {
         if (!ps_parse_expression(compiler, block, &index))
         {
-            ps_compiler_set_message(compiler, "Index is invalid");
+            ps_compiler_set_message(compiler, "Index %d is invalid", i);
             TRACE_ERROR("INDEX")
         }
         indexes[i] = index;
@@ -800,12 +803,12 @@ static bool ps_parse_constant_expression_identifier(ps_compiler *compiler, ps_as
 
 /**
  * Parse constant expression:
- *      [ '-' ] INTEGER_VALUE
+ *        [ '-' ] INTEGER_VALUE
+ *      | [ '-' ] REAL_VALUE
+ *      | [ '-' ] IDENTIFIER
  *      | UNSIGNED_VALUE
  *      | CHAR_VALUE
- *      | [ '-' ] REAL_VALUE
  *      | BOOLEAN_VALUE
- *      | [ '-' ] IDENTIFIER
  *      | STRING_VALUE
  */
 bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps_value *constant)
