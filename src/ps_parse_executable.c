@@ -297,29 +297,3 @@ cleanup:
     }
     PARSE_END("OK")
 }
-
-bool ps_parse_randomize(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call)
-{
-    PARSE_BEGIN("EXECUTABLE", "RANDOMIZE")
-
-    ps_ast_node *args[1] = {0};
-    uint16_t n_args = 0;
-
-    // Even whenb Randomize is called without argument, if can be called with parenthesis
-    if (lexer->current_token.type == PS_TOKEN_LEFT_PARENTHESIS)
-    {
-        READ_NEXT_TOKEN_OR_RETURN_FALSE
-        if (lexer->current_token.type != PS_TOKEN_RIGHT_PARENTHESIS)
-        {
-            if (!ps_parse_expression(compiler, block, &args[0]))
-                TRACE_ERROR("EXPRESSION")
-            n_args = 1;
-        }
-        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RIGHT_PARENTHESIS)
-    }
-
-    *call = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL, &ps_system_procedure_randomize, n_args,
-                               n_args == 0 ? NULL : args, NULL);
-
-    PARSE_END("OK")
-}

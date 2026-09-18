@@ -164,7 +164,7 @@ static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *
     // No loop, only one relational operator allowed, no a <= b <= c
     relational_operator = ps_parser_expect_token_types(
         compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
-    if (relational_operator = PS_TOKEN_NONE)
+    if (relational_operator == PS_TOKEN_NONE)
     {
         *expression = left;
     }
