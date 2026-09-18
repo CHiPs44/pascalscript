@@ -90,23 +90,26 @@ extern "C"
             PS_TOKEN_PERCENT,           % => Binary
      */
 
+    /** @brief Token types */
     typedef enum e_ps_token_type
     {
         PS_TOKEN_NONE = 0,
-        // Numeric values
+        // Base type values
+        // ====================================================================================================c
         PS_TOKEN_INTEGER_VALUE,
         PS_TOKEN_UNSIGNED_VALUE,
         PS_TOKEN_REAL_VALUE,
-        // Other value types
         PS_TOKEN_BOOLEAN_VALUE,
         PS_TOKEN_CHAR_VALUE,
         PS_TOKEN_STRING_VALUE,
         // Identifier
+        // ====================================================================================================c
         PS_TOKEN_IDENTIFIER,
         // Single character tokens: ASCII value
-        PS_TOKEN_AT_SIGN = '@',           // "@"  *FUTURE* address of
-        PS_TOKEN_CARET = '^',             // "^"  *FUTURE* pointer to
-        PS_TOKEN_COLON = ':',             // ":"  various uses: type definition, field access, etc.
+        // ====================================================================================================c
+        PS_TOKEN_AT_SIGN = '@',           // "@"  _FUTURE_ address of
+        PS_TOKEN_CARET = '^',             // "^"  _FUTURE_ pointer to
+        PS_TOKEN_COLON = ':',             // ":"  various uses: type definition, field definition, etc.
         PS_TOKEN_COMMA = ',',             // ","  various uses: separating identifiers, parameters, etc.
         PS_TOKEN_DOT = '.',               // "."  various uses: final dot of program / unit, field access, etc.
         PS_TOKEN_EQ = '=',                // "="  equals to
@@ -122,13 +125,15 @@ extern "C"
         PS_TOKEN_SLASH = '/',             // "/"  division (real)
         PS_TOKEN_STAR = '*',              // "*"  multiplication (integer or real)
         // 2 characters symbols: more than 0x7f to avoid conflict with single char tokens
+        // ====================================================================================================c
         PS_TOKEN_ASSIGN = 0x80, // := assignment
         PS_TOKEN_GE,            // >= greater or equal
         PS_TOKEN_LE,            // <= less or equal
         PS_TOKEN_NE,            // <> not equal
-        PS_TOKEN_POWER,         // ** *FUTURE* exponentiation
+        PS_TOKEN_POWER,         // ** _FUTURE_ exponentiation
         PS_TOKEN_RANGE,         // .. ranges, i.e. 1..10 or Monday..Friday
         // Operators
+        // ====================================================================================================c
         PS_TOKEN_DIV, // division (integer)
         PS_TOKEN_MOD, // modulo (integer)
         PS_TOKEN_AND, // logical or binary and
@@ -137,63 +142,67 @@ extern "C"
         PS_TOKEN_NOT, // logical or binary not
         PS_TOKEN_SHL, // shift left
         PS_TOKEN_SHR, // shift right
-        PS_TOKEN_IN,  // *FUTURE* in operator for sets, i.e. 1 in [1,2,3]
+        PS_TOKEN_IN,  // _FUTURE_ in operator for sets, i.e. 1 in [1,2,3]
         // Reserved words: more than 0x8f to avoid conflict with 2 char symbols & operators
-        PS_TOKEN_PROGRAM = 0x90,
-        PS_TOKEN_CONST,
-        PS_TOKEN_TYPE,
-        PS_TOKEN_VAR,
-        PS_TOKEN_OUT,
-        PS_TOKEN_FUNCTION,
-        PS_TOKEN_PROCEDURE,
-        PS_TOKEN_BEGIN,
-        PS_TOKEN_END,
-        PS_TOKEN_INTEGER,
-        PS_TOKEN_UNSIGNED,
-        PS_TOKEN_BOOLEAN,
-        PS_TOKEN_CHAR,
-        PS_TOKEN_REAL,
-        PS_TOKEN_STRING,
-        PS_TOKEN_ARRAY,
-        PS_TOKEN_OF,
-        PS_TOKEN_IF,
-        PS_TOKEN_THEN,
-        PS_TOKEN_ELSE,
-        PS_TOKEN_DO,
-        PS_TOKEN_WHILE,
-        PS_TOKEN_REPEAT,
-        PS_TOKEN_UNTIL,
-        PS_TOKEN_FOR,
-        PS_TOKEN_TO,
-        PS_TOKEN_DOWNTO,
-        PS_TOKEN_NIL,            // *FUTURE*
-        PS_TOKEN_SET,            // *FUTURE*
-        PS_TOKEN_RECORD,         // *FUTURE*
-        PS_TOKEN_WITH,           // *FUTURE*
-        PS_TOKEN_FILE,           // *FUTURE*
-        PS_TOKEN_TEXT,           // *FUTURE*
-        PS_TOKEN_CASE,           // *FUTURE*
-        PS_TOKEN_OTHERWISE,      // *FUTURE*
-        PS_TOKEN_GOTO,           // *FUTURE*
-        PS_TOKEN_LABEL,          // *FUTURE*
-        PS_TOKEN_UNIT,           // *FUTURE*
-        PS_TOKEN_USES,           // *FUTURE*
-        PS_TOKEN_INTERFACE,      // *FUTURE*
-        PS_TOKEN_IMPLEMENTATION, // *FUTURE*
+        // ====================================================================================================c
+        PS_TOKEN_PROGRAM = 0x90, // PROGRAM
+        PS_TOKEN_CONST,          // Constant definition
+        PS_TOKEN_TYPE,           // Type definition
+        PS_TOKEN_VAR,            // Variable definition / by reference parameter definition
+        PS_TOKEN_OUT,            // By reference parameter definition
+        PS_TOKEN_FUNCTION,       // Function definition
+        PS_TOKEN_PROCEDURE,      // Procedure definition
+        PS_TOKEN_BEGIN,          // Beginning of compound statement
+        PS_TOKEN_END,            // End of compound statement
+        PS_TOKEN_INTEGER,        // Integer type
+        PS_TOKEN_UNSIGNED,       // Unsigned integer type
+        PS_TOKEN_BOOLEAN,        // Boolean type
+        PS_TOKEN_CHAR,           // Char type
+        PS_TOKEN_REAL,           // Real type
+        PS_TOKEN_STRING,         // String type
+        PS_TOKEN_ARRAY,          // Array type
+        PS_TOKEN_OF,             // Used by xxx and SET
+        PS_TOKEN_IF,             // IF statement
+        PS_TOKEN_THEN,           // THEN part of IF statement
+        PS_TOKEN_ELSE,           // ELSE part of IF statement
+        PS_TOKEN_DO,             // Start of WHILE statement or FOR part
+        PS_TOKEN_WHILE,          // WHILE statement
+        PS_TOKEN_REPEAT,         // REPEAT statement
+        PS_TOKEN_UNTIL,          // UNTIL part of REPEAT statement
+        PS_TOKEN_FOR,            // FOR statement
+        PS_TOKEN_TO,             // TO part of FOR statement
+        PS_TOKEN_DOWNTO,         // DOWNTO part of FOR statement
+        PS_TOKEN_NIL,            // _FUTURE_ NIL pointer (NULL / Not In List)
+        PS_TOKEN_SET,            // _FUTURE_ SET OF type
+        PS_TOKEN_RECORD,         // _FUTURE_ RECORD definition
+        PS_TOKEN_WITH,           // _FUTURE_ WITH record access
+        PS_TOKEN_FILE,           // _FUTURE_ FILE OF type
+        PS_TOKEN_TEXT,           // _FUTURE_ TEXT file type
+        PS_TOKEN_CASE,           // _FUTURE_ CASE statement
+        PS_TOKEN_OTHERWISE,      // _FUTURE_ OTHERWISE case default
+        PS_TOKEN_GOTO,           // _FUTURE_ Root of all evil ;-)
+        PS_TOKEN_LABEL,          // _FUTURE_ Part of Root of all evil ;-)
+        PS_TOKEN_UNIT,           // _FUTURE_ UNIT definition
+        PS_TOKEN_USES,           // _FUTURE_ USES unit reference
+        PS_TOKEN_INTERFACE,      // _FUTURE_ INTERFACE unit part
+        PS_TOKEN_IMPLEMENTATION, // _FUTURE_ IMPLEMENTATION unit part
         // Make sure token value fits in one byte
+        // ====================================================================================================c
         PS_TOKEN_MAX = UINT8_MAX
     } ps_token_type;
 
+    /** @brief Token value */
     typedef union u_ps_token_value {
-        char identifier[PS_IDENTIFIER_LEN + 1];
-        ps_integer i;
-        ps_unsigned u;
-        ps_real r;
-        ps_char c;
-        ps_boolean b;
-        char s[PS_STRING_MAX_LEN + 1];
+        char identifier[PS_IDENTIFIER_LEN + 1]; /** @brief Identifier             */
+        ps_integer i;                           /** @brief Integer value          */
+        ps_unsigned u;                          /** @brief Unsigned integer value */
+        ps_real r;                              /** @brief Real value             */
+        ps_char c;                              /** @brief Char value             */
+        ps_boolean b;                           /** @brief Boolean value          */
+        char s[PS_STRING_MAX_LEN + 1];          /** @brief String value           */
     } ps_token_value;
 
+    /** @brief Token itself: type + value*/
     typedef struct s_ps_token
     {
         ps_token_type type;
@@ -204,11 +213,18 @@ extern "C"
 #define PS_TOKEN_VALUE_SIZE sizeof(ps_token_value)
 #define PS_TOKEN_SIZE sizeof(ps_token)
 
-    char *ps_token_type_dump_value(ps_token_type token_type, char *default_value);
-    void ps_token_debug(FILE *output, const char *message, ps_token *token);
-    char *ps_token_dump_value(ps_token *token);
     /** @brief Convert token type to string */
+    char *ps_token_type_get_string(ps_token_type token_type, char *default_value);
+
+    /** @brief Dump token to stderr */
+    void ps_token_debug(FILE *output, const char *message, ps_token *token);
+
+    /** @brief Convert token to string */
+    char *ps_token_dump_value(ps_token *token);
+
+    /** @brief Convert keyword to string */
     char *ps_token_get_keyword(ps_token_type token_type);
+
     /** @brief Convert identifier to keyword */
     ps_token_type ps_token_is_keyword(const char *identifier);
 

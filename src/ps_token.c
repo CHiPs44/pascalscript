@@ -13,47 +13,47 @@ void ps_token_debug(FILE *output, const char *message, ps_token *token)
 {
     if (output == NULL)
         output = stderr;
-    fprintf(output, "%s\t%s\n", message == NULL || 0 == strlen(message) ? "TOKEN: " : message,
-            ps_token_dump_value(token));
+    fprintf(output, "%s\t%s\n", message != NULL && *message != '\0' ? message : "TOKEN: ", ps_token_dump_value(token));
 }
 
-char *ps_token_type_dump_value(ps_token_type token_type, char *default_value)
+char *ps_token_type_get_string(ps_token_type token_type, char *default_value)
 {
     char *type_name;
     // clang-format off
-    switch (token_type) // NOSONAR
+    switch (token_type) //  NOSONAR (c:S1479 Reduce the number of switch cases from 32 to at most 30.)
     {
-    case PS_TOKEN_NONE:              return "NONE";
-    case PS_TOKEN_INTEGER_VALUE:     return "INTEGER";
-    case PS_TOKEN_UNSIGNED_VALUE:    return "UNSIGNED";
-    case PS_TOKEN_REAL_VALUE:        return "REAL";
-    case PS_TOKEN_BOOLEAN_VALUE:     return "BOOLEAN";
-    case PS_TOKEN_CHAR_VALUE:        return "CHAR";
-    case PS_TOKEN_STRING_VALUE:      return "STRING";
-    case PS_TOKEN_IDENTIFIER:        return "IDENTIFIER";
-    case PS_TOKEN_AT_SIGN:           return "AT_SIGN@";
-    case PS_TOKEN_CARET:             return "CARET^";
-    case PS_TOKEN_COLON:             return "COLON:";
-    case PS_TOKEN_COMMA:             return "COMMA,";
-    case PS_TOKEN_DOT:               return "DOT.";
-    case PS_TOKEN_EQ:                return "EQ=";
-    case PS_TOKEN_GT:                return "GT>";
-    case PS_TOKEN_LEFT_BRACKET:      return "LEFT_BRACKET[";
-    case PS_TOKEN_LEFT_PARENTHESIS:  return "LEFT_PARENTHESIS(";
-    case PS_TOKEN_LT:                return "LT<";
-    case PS_TOKEN_MINUS:             return "MINUS-";
-    case PS_TOKEN_PLUS:              return "PLUS+";
-    case PS_TOKEN_RIGHT_BRACKET:     return "RIGHT_BRACKET]";
-    case PS_TOKEN_RIGHT_PARENTHESIS: return "RIGHT_PARENTHESIS(";
-    case PS_TOKEN_SEMI_COLON:        return "SEMI_COLON;";
-    case PS_TOKEN_SLASH:             return "SLASH/";
-    case PS_TOKEN_STAR:              return "STAR*";
-    case PS_TOKEN_ASSIGN:            return "ASSIGN:=";
-    case PS_TOKEN_GE:                return "GE>=";
-    case PS_TOKEN_LE:                return "LE<=";
-    case PS_TOKEN_NE:                return "NE<>";
-    case PS_TOKEN_POWER:             return "POWER**";
-    case PS_TOKEN_RANGE:             return "RANGE..";
+        //                                   12345678901234567890
+    case PS_TOKEN_NONE:              return "   NONE             ";
+    case PS_TOKEN_INTEGER_VALUE:     return "   INTEGER          ";
+    case PS_TOKEN_UNSIGNED_VALUE:    return "   UNSIGNED         ";
+    case PS_TOKEN_REAL_VALUE:        return "   REAL             ";
+    case PS_TOKEN_BOOLEAN_VALUE:     return "   BOOLEAN          ";
+    case PS_TOKEN_CHAR_VALUE:        return "   CHAR             ";
+    case PS_TOKEN_STRING_VALUE:      return "   STRING           ";
+    case PS_TOKEN_IDENTIFIER:        return "   IDENTIFIER       ";
+    case PS_TOKEN_AT_SIGN:           return "@  AT_SIGN          ";
+    case PS_TOKEN_CARET:             return "^  CARET            ";
+    case PS_TOKEN_COLON:             return ":  COLON            ";
+    case PS_TOKEN_COMMA:             return ",  COMMA            ";
+    case PS_TOKEN_DOT:               return ".  DOT              ";
+    case PS_TOKEN_EQ:                return "=  EQ               ";
+    case PS_TOKEN_GT:                return ">  GT               ";
+    case PS_TOKEN_LEFT_BRACKET:      return "[  LEFT_BRACKET     ";
+    case PS_TOKEN_LEFT_PARENTHESIS:  return "(  LEFT_PARENTHESIS ";
+    case PS_TOKEN_LT:                return "<  LT               ";
+    case PS_TOKEN_MINUS:             return "-  MINUS            ";
+    case PS_TOKEN_PLUS:              return "+  PLUS             ";
+    case PS_TOKEN_RIGHT_BRACKET:     return "]  RIGHT_BRACKET    ";
+    case PS_TOKEN_RIGHT_PARENTHESIS: return ")  RIGHT_PARENTHESIS";
+    case PS_TOKEN_SEMI_COLON:        return ";  SEMI_COLON       ";
+    case PS_TOKEN_SLASH:             return "/  SLASH            ";
+    case PS_TOKEN_STAR:              return "*  STAR             ";
+    case PS_TOKEN_ASSIGN:            return ":= ASSIGN           ";
+    case PS_TOKEN_GE:                return ">= GE               ";
+    case PS_TOKEN_LE:                return "<= LE               ";
+    case PS_TOKEN_NE:                return "<> NE               ";
+    case PS_TOKEN_POWER:             return "** POWER            ";
+    case PS_TOKEN_RANGE:             return ".. RANGE            ";
     default:
         type_name = ps_token_get_keyword(token_type);
         if (type_name == NULL)
@@ -71,7 +71,7 @@ char *ps_token_dump_value(ps_token *token)
     static char value[80];
     static char string[64];
 
-    type_name = ps_token_type_dump_value(token->type, "UNKNOWN");
+    type_name = ps_token_type_get_string(token->type, "UNKNOWN");
     memset(value, 0, sizeof(value));
     switch (token->type) // NOSONAR
     {

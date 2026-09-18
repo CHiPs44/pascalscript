@@ -90,7 +90,7 @@ extern "C"
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%d/%d\t%-32s %-32s %-32s ", start_line, start_column, block->name, "EXPECTED",     \
-                    ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
+                    ps_token_type_get_string(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
         ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
@@ -104,7 +104,7 @@ extern "C"
         if (compiler->debug >= PS_DEBUG_TRACE)                                                                         \
         {                                                                                                              \
             fprintf(stderr, "TOKEN\t%d/%d\t%-32s -%32s %-32s ", start_line, start_column, block->name, "EXPECTED",     \
-                    ps_token_type_dump_value(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
+                    ps_token_type_get_string(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
         ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
