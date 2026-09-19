@@ -25,7 +25,7 @@
  * Add the parameter(s) to the signature
  * Up to PS_PARAMETERS_MAX parameters at once.
  */
-bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature *signature)
+static bool ps_parse_parameter_definition(ps_compiler *compiler, ps_ast_block *block, ps_formal_signature *signature)
 {
     PARSE_BEGIN("EXECUTABLE", "PARAMETER_DEFINITION")
     (void)start_line;

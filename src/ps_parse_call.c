@@ -286,10 +286,15 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
         }
     }
 
-    // Build AST node for CALL
-    ps_ast_node_kind executable_kind =
-        executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
-    *call = ps_ast_create_call(start_line, start_column, executable_kind, executable, 0, NULL, NULL);
+    if (*call == NULL)
+    {
+        // Build AST node for CALL
+        ps_ast_node_kind executable_kind =
+            executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
+        *call = ps_ast_create_call(start_line, start_column, executable_kind, executable, 0, NULL, NULL);
+        if (*call == NULL)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    }
 
     PARSE_END("OK")
 

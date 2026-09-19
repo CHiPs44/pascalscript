@@ -310,12 +310,6 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
     ps_value iteration_value = {.allocated = false, .type = for_variable->variable->value->type, .data = {0}};
 
-    // if (strcmp(for_variable->variable->name, "J") == 0)
-    // {
-    //     ps_ast_debug = true;
-    //     interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    // }
-
     // Evaluate start value
     if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
         return false;
@@ -368,12 +362,6 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
         ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
                                ps_value_get_display_string(&iteration_value, 0, 0));
     } while (true);
-
-    // if (strcmp(for_variable->variable->name, "J") == 0)
-    // {
-    //     ps_ast_debug = false;
-    //     interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    // }
 
     return true;
 }
@@ -472,19 +460,13 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         return ps_ast_execute_procedure_call_system(interpreter, procedure_call);
     }
 
-    ps_ast_block *procedure = procedure_call->executable->value->data.x->block;
-    if (!ps_ast_node_check_group((ps_ast_node *)procedure, PS_AST_BLOCK))
-        return ps_interpreter_set_message(interpreter, "Expected block, got %s",
-                                          ps_ast_node_get_group_name(procedure->group));
-    if (!ps_ast_node_check_kind((ps_ast_node *)procedure, PS_AST_PROCEDURE))
-        return ps_interpreter_set_message(interpreter, "Expected procedure, got %s",
-                                          ps_ast_node_get_kind_name(procedure->kind));
-
     // Check if argument count is same as procedure declaration
+    const ps_ast_block *procedure = procedure_call->executable->value->data.x->block;
     if (procedure_call->n_args != procedure->signature->parameter_count)
     {
-        return ps_interpreter_set_message(interpreter, "Expected %zu arguments, got %zu",
-                                          procedure->signature->parameter_count, procedure_call->n_args);
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_PARAMETER_COUNT_MISMATCH,
+                                                "Expected %d arguments, got %d", procedure->signature->parameter_count,
+                                                procedure_call->n_args);
     }
 
     // Evaluate arguments
