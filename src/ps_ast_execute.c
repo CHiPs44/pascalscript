@@ -24,17 +24,19 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
+// Macro to avoid call and evaluation of arguments
+#define PS_AST_DEBUG_EXECUTION(interpreter, level, ...)                                                                \
+    if (interpreter->logger->debug_level >= level)                                                                     \
+        ps_ast_debug_execution(interpreter, level, __VA_ARGS__)
+
 void ps_ast_debug_execution(ps_interpreter *interpreter, ps_debug_level level, const char *format, ...) // NOSONAR
 {
-    if (interpreter->logger->debug_level >= level)
-    {
-        va_list args;
-        va_start(args, format);
-        fprintf(interpreter->logger->file, "%*s", interpreter->level * 2, " ");
-        vfprintf(interpreter->logger->file, format, args); // NOSONAR
-        fprintf(interpreter->logger->file, "\n");
-        va_end(args);
-    }
+    va_list args;
+    va_start(args, format);
+    fprintf(interpreter->logger->file, "%*s", interpreter->level * 2, " ");
+    vfprintf(interpreter->logger->file, format, args); // NOSONAR
+    fprintf(interpreter->logger->file, "\n");
+    va_end(args);
 }
 
 bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block)
@@ -44,7 +46,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
         goto error;
 
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "BLOCK kind=%s name=%s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "BLOCK kind=%s name=%s",
                            ps_ast_node_get_kind_name(block->kind), block->name);
 
     if (!ps_interpreter_enter_frame(interpreter, block))
@@ -71,7 +73,7 @@ bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *pro
         interpreter->error_column = program->column;
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected PROGRAM AST node");
     }
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "PROGRAM %s;", program->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROGRAM %s;", program->name);
     return ps_ast_execute_block(interpreter, program);
 }
 
@@ -84,7 +86,7 @@ bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *p
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
                                                 "Expected PROCEDURE AST node");
     }
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE %s;", procedure->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE %s;", procedure->name);
     return ps_ast_execute_block(interpreter, procedure);
 }
 
@@ -97,7 +99,7 @@ bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *fu
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
                                                 "Expected FUNCTION AST node");
     }
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "FUNCTION %s;", function->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FUNCTION %s;", function->name);
     return ps_ast_execute_block(interpreter, function);
 }
 
@@ -116,21 +118,21 @@ bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_sta
     if (statement_list->count == 0)
         return true; // Empty statement list is valid (no-op)
 
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT_LIST %zu:", statement_list->count);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT_LIST %zu:", statement_list->count);
 
     for (int i = 0; i < statement_list->count; i++)
     {
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
         assert(statement_list->statements != NULL);
         assert(statement_list->statements[i] != NULL);
         if (!ps_ast_execute_statement(interpreter, statement_list->statements[i]))
         {
-            ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu failed", i + 1);
+            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu failed", i + 1);
             return false;
         }
     }
 
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "STATEMENT_LIST completed");
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT_LIST completed");
 
     return true;
 }
@@ -156,7 +158,7 @@ bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *st
         interpreter->error_column = statement->column;
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
                                                 "CASE statement not implemented");
-        // return ps_ast_execute_case(interpreter, (const ps_ast_case *)statement);
+        // r e t u r n ps_ast_execute_case(interpreter, (const ps_ast_case *)statement);
     case PS_AST_WHILE:
         return ps_ast_execute_while(interpreter, (const ps_ast_while *)statement);
     case PS_AST_REPEAT:
@@ -198,7 +200,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
         return false; // line & column of error set when evaluating expression
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     value.data = value_node.value.data;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Expression value: %s", ps_value_get_debug_string(&value));
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Expression value: %s", ps_value_get_debug_string(&value));
 
     if (!ps_interpreter_set_variable_value(interpreter, lvalue, &value))
         goto error;
@@ -216,13 +218,13 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
     assert(if_statement != NULL);
     assert(if_statement->group == PS_AST_STATEMENT);
     assert(if_statement->kind == PS_AST_IF);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "IF statement");
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "IF statement");
 
     // Evaluate condition
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value))
         return false;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                            ps_value_get_display_string(&condition_value.value, 0, 0));
     if (condition_value.value.type != &ps_system_boolean)
         return false;
@@ -230,12 +232,12 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
     // Execute then or else branch
     if (condition_value.value.data.b)
     {
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Then branch: %zu statements",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Then branch: %zu statements",
                                if_statement->then_branch->count);
         return ps_ast_execute_statement_list(interpreter, if_statement->then_branch);
     }
     if (if_statement->else_branch != NULL)
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Else branch: %zu statements",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Else branch: %zu statements",
                                if_statement->else_branch->count);
 
     return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
@@ -246,7 +248,7 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
     assert(while_statement != NULL);
     assert(while_statement->group == PS_AST_STATEMENT);
     assert(while_statement->kind == PS_AST_WHILE);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "WHILE statement: %d statements in body",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "WHILE statement: %d statements in body",
                            while_statement->body->count);
 
     while (true)
@@ -255,13 +257,13 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
         bool result = ps_ast_eval_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                                ps_value_get_display_string(&condition_value.value, 0, 0));
         if (condition_value.value.type != &ps_system_boolean)
             return false;
         if (!condition_value.value.data.b)
             break;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Body");
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body");
         if (!ps_ast_execute_statement_list(interpreter, while_statement->body))
             return false;
     }
@@ -274,19 +276,19 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
     assert(repeat_statement != NULL);
     assert(repeat_statement->group == PS_AST_STATEMENT);
     assert(repeat_statement->kind == PS_AST_REPEAT);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "REPEAT statement");
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "REPEAT statement");
 
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
 
     int iteration = 0;
     do
     {
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Body %d", ++iteration);
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body %d", ++iteration);
         if (!ps_ast_execute_statement_list(interpreter, repeat_statement->body))
             return false;
         if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                                ps_value_get_display_string(&condition_value.value, 0, 0));
         if (condition_value.value.type != &ps_system_boolean)
             return false;
@@ -301,7 +303,7 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     assert(for_statement->group == PS_AST_STATEMENT);
     assert(for_statement->kind == PS_AST_FOR);
 
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "FOR statement");
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR statement");
 
     // Initialize variables
     ps_ast_variable *for_variable = for_statement->variable;
@@ -313,19 +315,19 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     // Evaluate start value
     if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
         return false;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Start value: %s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Start value: %s",
                            ps_value_get_display_string(&start_value.value, 0, 0));
 
     // Evaluate end value
     if (!ps_ast_eval_expression(interpreter, for_statement->end, &end_value))
         return false;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "End value: %s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "End value: %s",
                            ps_value_get_display_string(&end_value.value, 0, 0));
 
     // Set variable to start value
     if (!ps_interpreter_set_variable_value(interpreter, for_variable, (const ps_value *)&start_value.value))
         return false;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
                            ps_value_get_display_string(for_variable->variable->value, 0, 0));
 
     do
@@ -345,7 +347,7 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
                 for_statement->downto ? "<" : ">", ps_value_get_display_string(&end_value.value, 0, 0));
             break;
         }
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
         if (!ps_ast_execute_statement_list(interpreter, for_statement->body))
             return false;
         bool range_check = interpreter->range_check;
@@ -359,7 +361,7 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
             return false;
         if (!ps_interpreter_get_variable_value(interpreter, for_variable, &iteration_value))
             return false;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Variable value: %s",
                                ps_value_get_display_string(&iteration_value, 0, 0));
     } while (true);
 
@@ -389,7 +391,7 @@ bool ps_ast_execute_procedure_write_or_writeln(ps_interpreter *interpreter, cons
         int16_t precision = procedure_call->formats[i].precision;
         if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Argument %zu: %s", i,
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
                                ps_value_get_display_string(&arg_value.value, width, precision));
         if (procedure_call->executable == &ps_system_procedure_write &&
             !ps_procedure_write(interpreter, stdout, &arg_value.value, width, precision))
@@ -408,7 +410,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "System procedure: %s with %zu argument%s",
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "System procedure: %s with %zu argument%s",
                            procedure_call->executable->name, procedure_call->n_args,
                            procedure_call->n_args > 1 ? "s" : "");
     if (procedure_call->executable == &ps_system_procedure_write ||
@@ -420,7 +422,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
     else if (procedure_call->executable == &ps_system_procedure_randomize)
     {
         // RANDOMIZE procedure (0 or 1 argument)
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "System procedure: RANDOMIZE");
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "System procedure: RANDOMIZE");
         if (procedure_call->n_args == 0)
         {
             return ps_procedure_randomize(interpreter, NULL);
@@ -430,7 +432,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
             ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
             if (!ps_ast_eval_expression(interpreter, procedure_call->args[0], &arg_value))
                 return false;
-            ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
+            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
             return ps_procedure_randomize(interpreter, &arg_value.value);
         }
@@ -453,7 +455,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     assert(procedure_call->group == PS_AST_STATEMENT);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
 
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE CALL %s", procedure_call->executable->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE CALL %s", procedure_call->executable->name);
 
     if (procedure_call->executable->system)
     {
@@ -474,11 +476,21 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     for (int i = 0; i < procedure_call->n_args; i++)
     {
-        if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
-            return false;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
-                               ps_value_get_display_string(&arg_value.value, 0, 0));
-        parameters[i] = arg_value.value;
+        if (procedure->signature->parameters[i].byref)
+        {
+            // TODO initialize byref parameter / argument correctly
+            parameters[i].allocated = false;
+            parameters[i].type = procedure->signature->parameters[i].type;
+            parameters[i].data.h = 0; // ???
+        }
+        else
+        {
+            if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
+                return false;
+            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
+                                   ps_value_get_display_string(&arg_value.value, 0, 0));
+            parameters[i] = arg_value.value;
+        }
     }
 
     // Allocate frame for procedure
@@ -486,15 +498,20 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         return false;
 
     // Store arguments in frame
+    ps_symbol *symbol = NULL;
+    ps_ast_variable *ast_variable = ps_ast_create_variable_simple(0, 0, procedure, PS_AST_LVALUE, symbol);
     for (int i = 0; i < procedure_call->n_args; i++)
     {
-        ps_symbol *symbol = ps_symbol_table_find(procedure->symbols, procedure->signature->parameters[i].name);
+        if (procedure->signature->parameters[i].byref)
+            continue;
+        symbol = ps_symbol_table_find(procedure->symbols, procedure->signature->parameters[i].name);
         if (symbol == NULL)
         {
             ps_formal_parameter parameter = procedure->signature->parameters[i];
             return ps_interpreter_set_message(interpreter, "Parameter %s not found", parameter.name);
         }
-        if (!ps_interpreter_copy_value(interpreter, &parameters[i], symbol->value))
+        ast_variable->variable = symbol;
+        if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &parameters[i]))
             return false;
     }
 
@@ -511,7 +528,7 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
     assert(function_call != NULL);
     assert(function_call->group == PS_AST_EXPRESSION);
     assert(function_call->kind == PS_AST_FUNCTION_CALL);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "SYSTEM FUNCTION CALL %s", function_call->executable->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "SYSTEM FUNCTION CALL %s", function_call->executable->name);
     if (function_call->executable == &ps_system_function_random)
     {
         if (function_call->n_args == 0)
@@ -581,7 +598,7 @@ bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call
     assert(function_call != NULL);
     assert(function_call->group == PS_AST_EXPRESSION);
     assert(function_call->kind == PS_AST_FUNCTION_CALL);
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "FUNCTION CALL %s", function_call->executable->name);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FUNCTION CALL %s", function_call->executable->name);
     result->value.type = &ps_system_none;
     result->value.data = (ps_value_data){0};
     if (function_call->executable->system)
@@ -607,12 +624,12 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
 
     if (!ps_ast_node_check_group(expression, PS_AST_EXPRESSION))
         return false;
-    ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "EXPRESSION @%p", (const void *)expression);
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "EXPRESSION @%p", (const void *)expression);
     switch (expression->kind)
     {
     case PS_AST_LITERAL_VALUE:
         rvalue = (const ps_ast_value *)expression;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Value: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Value: %s",
                                ps_value_get_display_string(&rvalue->value, 0, 0));
         if (!ps_interpreter_copy_value(interpreter, &rvalue->value, &result->value))
         {
@@ -621,7 +638,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         break;
     case PS_AST_RVALUE:
         variable = (const ps_ast_variable *)expression;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable->variable->name);
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable->variable->name);
         ps_value value = {.allocated = false, .type = &ps_system_none, .data = {0}};
         if (!ps_interpreter_get_variable_value(interpreter, variable, &value) ||
             !ps_interpreter_copy_value(interpreter, &value, &result->value))
@@ -636,7 +653,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
                                        .value.type = &ps_system_none,
                                        .value.data = {0}};
         unary_operation = (const ps_ast_unary_operation *)expression;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Unary operation: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Unary operation: %s",
                                ps_operator_unary_get_name(unary_operation->operator));
         // first evaluate operand
         // then apply operator to it
@@ -648,7 +665,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         break;
     case PS_AST_BINARY_OPERATION:
         binary_operation = (const ps_ast_binary_operation *)expression;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Binary operation: %s",
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Binary operation: %s",
                                ps_operator_binary_get_name(binary_operation->operator));
         // first evaluate operands, then apply operator to them
         ps_ast_value left = {.group = PS_AST_EXPRESSION,
@@ -671,7 +688,7 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
         break;
     case PS_AST_FUNCTION_CALL:
         function_call = (const ps_ast_call *)expression;
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "Function call: %s", function_call->executable->name);
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Function call: %s", function_call->executable->name);
         if (!ps_ast_execute_function_call(interpreter, function_call, result))
             return false;
         break;

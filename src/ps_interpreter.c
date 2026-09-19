@@ -166,13 +166,6 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, const ps_ast
     assert(frame != NULL);
 
     int count = block->n_vars;
-    if (block->signature != NULL)
-    {
-        count += block->signature->parameter_count;
-        if (block->signature->result_type != NULL)
-            count += 1;
-    }
-
     for (int b = 0; b < block->symbols->table_size; b++)
     {
         // Empty bucket? => next

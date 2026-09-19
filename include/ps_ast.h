@@ -82,8 +82,8 @@ extern "C"
         struct s_ps_ast_block *parent;         /** @brief Parent block, NULL for SYSTEM, SYSTEM for PROGRAM, ... */
         ps_handle n_vars;                      /** @brief Number of variables to allocate at startup             */
         ps_symbol_table *symbols;              /** @brief Constants, types, variables, procedures and functions  */
-        ps_ast_statement_list *statement_list; /** @brief Statements for this block                              */
         ps_formal_signature *signature;        /** @brief For procedures and functions, including return type    */
+        ps_ast_statement_list *statement_list; /** @brief Statements for this block                              */
     } ps_ast_block;
 
     /******************************************************************************************************************/
@@ -189,21 +189,21 @@ extern "C"
     } ps_ast_binary_operation;
 
     // clang-format off
-    #define PS_AST_NODE_GROUP_SIZE            sizeof(ps_ast_node_group)
-    #define PS_AST_NODE_KIND_SIZE             sizeof(ps_ast_node_kind)
-    #define PS_AST_NODE_SIZE                  sizeof(ps_ast_node)
-    #define PS_AST_NODE_BLOCK_SIZE            sizeof(ps_ast_block)
-    #define PS_AST_NODE_STATEMENT_LIST_SIZE   sizeof(ps_ast_statement_list)
-    #define PS_AST_NODE_IF_SIZE               sizeof(ps_ast_if)
-    #define PS_AST_NODE_WHILE_SIZE            sizeof(ps_ast_while);
-    #define PS_AST_NODE_REPEAT_SIZE           sizeof(ps_ast_repeat)
-    #define PS_AST_NODE_FOR_SIZE              sizeof(ps_ast_for)
-    #define PS_AST_NODE_CALL_SIZE             sizeof(ps_ast_call)
-    #define PS_AST_NODE_ASSIGNMENT_SIZE       sizeof(ps_ast_assignment)
-    #define PS_AST_NODE_VALUE_SIZE            sizeof(ps_ast_value)
-    #define PS_AST_NODE_UNARY_OPERATION_SIZE  sizeof(ps_ast_unary_operation)
+    #define PS_AST_NODE_GROUP_SIZE            sizeof(ps_ast_node_group      )
+    #define PS_AST_NODE_KIND_SIZE             sizeof(ps_ast_node_kind       )
+    #define PS_AST_NODE_SIZE                  sizeof(ps_ast_node            )
+    #define PS_AST_NODE_BLOCK_SIZE            sizeof(ps_ast_block           )
+    #define PS_AST_NODE_STATEMENT_LIST_SIZE   sizeof(ps_ast_statement_list  )
+    #define PS_AST_NODE_IF_SIZE               sizeof(ps_ast_if              )
+    #define PS_AST_NODE_WHILE_SIZE            sizeof(ps_ast_while           )
+    #define PS_AST_NODE_REPEAT_SIZE           sizeof(ps_ast_repeat          )
+    #define PS_AST_NODE_FOR_SIZE              sizeof(ps_ast_for             )
+    #define PS_AST_NODE_CALL_SIZE             sizeof(ps_ast_call            )
+    #define PS_AST_NODE_ASSIGNMENT_SIZE       sizeof(ps_ast_assignment      )
+    #define PS_AST_NODE_VALUE_SIZE            sizeof(ps_ast_value           )
+    #define PS_AST_NODE_UNARY_OPERATION_SIZE  sizeof(ps_ast_unary_operation )
     #define PS_AST_NODE_BINARY_OPERATION_SIZE sizeof(ps_ast_binary_operation)
-    #define PS_AST_NODE_VARIABLE_SIZE         sizeof(ps_ast_variable)
+    #define PS_AST_NODE_VARIABLE_SIZE         sizeof(ps_ast_variable        )
     // clang-format on
 
     /** @brief Check if an AST node belongs to a specific group */

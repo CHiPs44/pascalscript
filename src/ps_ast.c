@@ -725,8 +725,7 @@ ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, p
                                                ps_ast_node_kind kind, ps_symbol *variable)
 {
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
-    assert(variable != NULL);
-    assert(variable->kind == PS_SYMBOL_KIND_VARIABLE);
+    assert(variable == NULL || variable->kind == PS_SYMBOL_KIND_VARIABLE);
 
     ps_ast_node_group group = kind == PS_AST_LVALUE ? PS_AST_GROUP_LVALUE : PS_AST_EXPRESSION;
     ps_ast_variable *variable_simple =
