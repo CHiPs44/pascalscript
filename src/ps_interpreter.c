@@ -332,11 +332,6 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != ast_variable);
     assert(NULL != value);
 
-    // if (strcmp(ast_variable->variable->name, "J") == 0)
-    // {
-    //     interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    // }
-
     ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
                        ast_variable->variable->name, ps_value_get_debug_string(value));
 
@@ -357,8 +352,6 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     }
     else
     {
-        // if (strcmp(ast_variable->variable->name, "J") == 0)
-        //     ps_stack_dump(interpreter->logger->file, interpreter->stack);
         ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
             return false;
@@ -366,17 +359,11 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
                            ps_value_get_debug_string(&variable_value));
         frame->data[ast_variable->variable->value->data.h] = variable_value.data;
         ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
-        debug_value.data = frame->data[ast_variable->variable->value->data.h];
+        ps_handle handle = ast_variable->variable->value->data.h;
+        debug_value.data = frame->data[handle];
         ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
                            ast_variable->variable->name, ps_value_get_debug_string(&debug_value));
-        // if (strcmp(ast_variable->variable->name, "J") == 0)
-        //     ps_stack_dump(interpreter->logger->file, interpreter->stack);
     }
-
-    // if (strcmp(ast_variable->variable->name, "J") == 0)
-    // {
-    //     interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    // }
 
     return true;
 }
@@ -384,24 +371,12 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
 bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
                                               ps_value *value)
 {
-    // if (strcmp(ast_variable->variable->name, "J") == 0)
-    // {
-    //     interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
-    //     ps_stack_dump(interpreter->logger->file, interpreter->stack);
-    // }
-
     const ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
-    ps_value variable_value = {.allocated = false,
-                               .type = ast_variable->variable->value->type,
-                               .data = frame->data[ast_variable->variable->value->data.h]};
-
-    // if (strcmp(ast_variable->variable->name, "J") == 0)
-    // {
-    //     interpreter->logger->debug_level = PS_DEBUG_FATAL;
-    //     ps_stack_dump(interpreter->logger->file, interpreter->stack);
-    // }
+    ps_handle handle = ast_variable->variable->value->data.h;
+    ps_value variable_value = {
+        .allocated = false, .type = ast_variable->variable->value->type, .data = frame->data[handle]};
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
