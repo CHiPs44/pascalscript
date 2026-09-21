@@ -517,6 +517,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     // Store arguments in frame
     ps_symbol *symbol = NULL;
     ps_ast_variable *ast_variable = ps_ast_create_variable_simple(0, 0, procedure, PS_AST_LVALUE, symbol);
+    bool ok = true;
     for (int i = 0; i < procedure_call->n_args; i++)
     {
         if (procedure->signature->parameters[i].byref)
@@ -525,18 +526,28 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         if (symbol == NULL)
         {
             ps_formal_parameter parameter = procedure->signature->parameters[i];
-            return ps_interpreter_set_message(interpreter, "Parameter %s not found", parameter.name);
+            ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Parameter %s not found",
+                                             parameter.name);
+            ok = false;
         }
-        ast_variable->variable = symbol;
-        if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &parameters[i]))
-            return false;
+        if (ok)
+        {
+            ast_variable->variable = symbol;
+            if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &parameters[i]))
+                ok = false;
+        }
+        if (!ok)
+            goto cleanup;
     }
 
     // Execute procedure with arguments on top frame of stack
-    bool ok = ps_ast_execute_block(interpreter, procedure);
+    ok = ps_ast_execute_block(interpreter, procedure);
     ps_interpreter_exit_frame(interpreter);
-
     return ok;
+
+cleanup:
+    ps_interpreter_exit_frame(interpreter);
+    return false;
 }
 
 static bool ps_ast_execute_function_call_system_random(ps_interpreter *interpreter, const ps_ast_call *function_call,
