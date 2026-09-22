@@ -177,30 +177,24 @@ bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *st
 
 bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
 {
-    if (assignment == NULL)
-    {
-        ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
-                                         "Expected ASSIGNMENT AST node, got NULL");
-        return false;
-    }
-    if (assignment->group != PS_AST_STATEMENT || assignment->kind != PS_AST_ASSIGNMENT || assignment->lvalue == NULL ||
-        assignment->lvalue->group != PS_AST_GROUP_LVALUE || assignment->lvalue->kind != PS_AST_LVALUE ||
-        assignment->expression == NULL || assignment->expression->group != PS_AST_EXPRESSION)
-    {
-        ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
-                                         "Expected ASSIGNMENT AST node, got invalid node");
-        goto error;
-    }
+    assert(interpreter != NULL);
+    assert(assignment != NULL);
+
+    interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
 
     ps_ast_variable *lvalue = assignment->lvalue;
     bool is_array = ps_value_is_array(lvalue->variable->value);
     ps_symbol *expected_type = is_array ? ps_array_get_item_type(lvalue->variable) : lvalue->variable->value->type;
-    ps_ast_value value_node = {
-        .column = 0, .line = 0, .value.allocated = false, .value.type = expected_type, .value.data = {0}};
+    ps_ast_value value_node = {.column = assignment->column,
+                               .line = assignment->line,
+                               .value.allocated = false,
+                               .value.type = expected_type,
+                               .value.data = {0}};
     if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
         return false; // line & column of error set when evaluating expression
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
-    value.data = value_node.value.data;
+    if (!ps_interpreter_copy_value(interpreter, &value, &value_node.value))
+        goto error;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Expression value: %s", ps_value_get_debug_string(&value));
 
     if (!ps_interpreter_set_variable_value(interpreter, lvalue, &value))
@@ -312,9 +306,9 @@ static bool ps_ast_execute_for_iteration(ps_interpreter *interpreter, const ps_a
     *should_stop = stop.data.b;
     if (*should_stop)
     {
-        ps_ast_debug_execution(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
-                               ps_value_get_display_string(iteration_value, 0, 0), for_statement->downto ? "<=" : ">=",
-                               ps_value_get_display_string(&end_value->value, 0, 0));
+        ps_ast_debug_execution(
+            interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s", ps_value_get_display_string(iteration_value, 0, 0),
+            for_statement->downto ? "<=" : ">=", ps_value_get_display_string(&end_value->value, 0, 0));
         return true;
     }
 
