@@ -298,7 +298,7 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE(PS_OP_ADD << 16 | RI, r, i, +, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_ADD << 16 | RR, r, r, +, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_ADD << 16 | RU, r, u, +, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_ADD << 16 | UI, u, i, +, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_ADD << 16 | UI, u, i, +, i, PS_TYPE_INTEGER)
     NUMBER_CASE(PS_OP_ADD << 16 | UR, u, r, +, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_ADD << 16 | UU, u, u, +, u, PS_TYPE_UNSIGNED)
     // SUB.I/U/R
@@ -308,7 +308,7 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE(PS_OP_SUB << 16 | RI, r, i, -, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_SUB << 16 | RR, r, r, -, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_SUB << 16 | RU, r, u, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 16 | UI, u, i, -, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_SUB << 16 | UI, u, i, -, i, PS_TYPE_INTEGER)
     NUMBER_CASE(PS_OP_SUB << 16 | UR, u, r, -, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_SUB << 16 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
     // MUL.I/U/R
@@ -318,13 +318,13 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE(PS_OP_MUL << 16 | RI, r, i, *, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_MUL << 16 | RR, r, r, *, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_MUL << 16 | RU, r, u, *, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_MUL << 16 | UI, u, i, *, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE(PS_OP_MUL << 16 | UI, u, i, *, i, PS_TYPE_INTEGER)
     NUMBER_CASE(PS_OP_MUL << 16 | UR, u, r, *, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_MUL << 16 | UU, u, u, *, u, PS_TYPE_UNSIGNED)
     // DIV.I/U
     NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | II, i, i, /, i, PS_TYPE_INTEGER)
     NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | IU, i, u, /, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UI, u, i, /, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UI, u, i, /, i, PS_TYPE_INTEGER)
     NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UU, u, u, /, u, PS_TYPE_UNSIGNED)
     // DIV.R
     NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | II, i, i)
@@ -339,7 +339,7 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     // MOD.I/U
     NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | II, i, i, %, i, PS_TYPE_INTEGER)
     NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | IU, i, u, %, i, PS_TYPE_INTEGER)
-    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | UI, u, i, %, u, PS_TYPE_UNSIGNED)
+    NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | UI, u, i, %, i, PS_TYPE_INTEGER)
     NUMBER_CASE_DIV_MOD(PS_OP_MOD << 16 | UU, u, u, %, u, PS_TYPE_UNSIGNED)
     // EQ.I/U/R/C/S
     NUMBER_CASE_SIGNED(PS_OP_EQ << 16 | IU, i, u, ==, b, PS_TYPE_BOOLEAN, ps_integer)
