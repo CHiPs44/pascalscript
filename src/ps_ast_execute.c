@@ -180,7 +180,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
     assert(interpreter != NULL);
     assert(assignment != NULL);
 
-    interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
+    // interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
 
     ps_ast_variable *lvalue = assignment->lvalue;
     bool is_array = ps_value_is_array(lvalue->variable->value);
@@ -717,19 +717,29 @@ static bool ps_ast_eval_expression_binary(ps_interpreter *interpreter, const ps_
                          .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
     if (!ps_ast_eval_expression(interpreter, binary_operation->left, &left))
         return false;
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "{LEFT: %s, %s}", ps_value_get_type_name(&left.value),
+                           ps_value_get_debug_string(&left.value));
 
     ps_ast_value right = {.group = PS_AST_EXPRESSION,
                           .kind = PS_AST_LITERAL_VALUE,
                           .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
     if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
         return false;
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "{RIGHT: %s, %s}", ps_value_get_type_name(&right.value),
+                           ps_value_get_debug_string(&right.value));
 
     ps_value result_value = {.allocated = false, .type = &ps_system_none, .data = {0}};
-    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Binary operation: %s",
-                           ps_operator_binary_get_name(binary_operation->operator));
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Binary operation: %s {%s, %s}",
+                           ps_operator_binary_get_name(binary_operation->operator), ps_value_get_type_name(&left.value),
+                           ps_value_get_type_name(&right.value));
     if (!ps_operator_binary_eval(interpreter, (const ps_value *)&left.value, (const ps_value *)&right.value,
-                                 &result_value, binary_operation->operator) ||
-        !ps_interpreter_copy_value(interpreter, &result_value, &result->value))
+                                 &result_value, binary_operation->operator))
+    {
+        return false;
+    }
+    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "{RESULT: %s, %s}", ps_value_get_type_name(&result_value),
+                           ps_value_get_debug_string(&result_value));
+    if (!ps_interpreter_copy_value(interpreter, &result_value, &result->value))
     {
         return false;
     }
