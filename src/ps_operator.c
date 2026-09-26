@@ -310,7 +310,8 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE(PS_OP_SUB << 16 | RU, r, u, -, r, PS_TYPE_REAL)
     NUMBER_CASE(PS_OP_SUB << 16 | UI, u, i, -, i, PS_TYPE_INTEGER)
     NUMBER_CASE(PS_OP_SUB << 16 | UR, u, r, -, r, PS_TYPE_REAL)
-    NUMBER_CASE(PS_OP_SUB << 16 | UU, u, u, -, u, PS_TYPE_UNSIGNED)
+    // U - U => I cf. https://www.freepascal.org/docs-html/current/ref/refsu4.html
+    NUMBER_CASE(PS_OP_SUB << 16 | UU, u, u, -, i, PS_TYPE_INTEGER)
     // MUL.I/U/R
     NUMBER_CASE(PS_OP_MUL << 16 | II, i, i, *, i, PS_TYPE_INTEGER)
     NUMBER_CASE(PS_OP_MUL << 16 | IR, i, r, *, r, PS_TYPE_REAL)
@@ -436,11 +437,12 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE(PS_OP_SHR << 16 | UI, u, i, >>, u, PS_TYPE_UNSIGNED)
     NUMBER_CASE(PS_OP_SHR << 16 | UU, u, u, >>, u, PS_TYPE_UNSIGNED)
     {
-        ps_interpreter_set_message(interpreter, "Binary operator %s (%d) is not applicable for types %s and %s\n",
-                                   ps_operator_binary_get_name(operator), operator,
-                                   ps_value_type_get_name(a->type->value->data.t->base),
-                                   ps_value_type_get_name(b->type->value->data.t->base));
-        return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+        ps_interpreter_set_error_message(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE,
+                                         "Binary operator %s (%d) is not applicable for types %s and %s\n",
+                                         ps_operator_binary_get_name(operator), operator,
+                                         ps_value_type_get_name(a->type->value->data.t->base),
+                                         ps_value_type_get_name(b->type->value->data.t->base));
+        return false;
     }
     // Convert type to symbolic type
     switch (r)

@@ -24,13 +24,13 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
 bool ps_lexer_read_number(ps_lexer *lexer);
 bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
 
-#define ADVANCE                                                                                                        \
+#define ADVANCE()                                                                                                      \
     if (!ps_lexer_read_next_char(lexer))                                                                               \
         return false;
 
 #define GET_NEXT_CHAR(C)                                                                                               \
     {                                                                                                                  \
-        ADVANCE                                                                                                        \
+        ADVANCE()                                                                                                      \
         C = ps_buffer_peek_char(lexer->buffer);                                                                        \
     }
 
@@ -120,7 +120,7 @@ bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
             if (c == '\0')
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
-        ADVANCE
+        ADVANCE()
     }
     return true;
 }
@@ -138,7 +138,7 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
         *changed = true;
         do
         {
-            ADVANCE
+            ADVANCE()
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
             if (c1 == '\0' || c2 == '\0')
@@ -149,9 +149,9 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
             }
         } while (true);
         // Skip )
-        ADVANCE
+        ADVANCE()
         // Advance after )
-        ADVANCE
+        ADVANCE()
     }
     return true;
 }
@@ -169,12 +169,12 @@ bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
         *changed = true;
         while (c1 != '\n')
         {
-            ADVANCE
+            ADVANCE()
             c1 = ps_buffer_peek_char(lexer->buffer);
             if (c1 == '\0')
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
-        ADVANCE
+        ADVANCE()
     }
     return true;
 }
@@ -233,10 +233,10 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 
 bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
 {
-    char buffer[PS_BITNESS + 1]; // up to PS_BITNESS binary digits
+    char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
-    char *end;
+    char *end = NULL;
     if (strchr(digits, c) == NULL)
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
     do
@@ -256,53 +256,59 @@ bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *dig
 }
 
 #define APPEND_CHAR_DEC()                                                                                              \
-    if (pos > 32)                                                                                                      \
-        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                           \
-    buffer[pos++] = c;                                                                                                 \
-    GET_NEXT_CHAR(c)
+    {                                                                                                                  \
+        if (pos > 32)                                                                                                  \
+            return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                       \
+        buffer[pos++] = c;                                                                                             \
+        GET_NEXT_CHAR(c)                                                                                               \
+    }
+
+#define READ_DOT_DEC()                                                                                                 \
+    {                                                                                                                  \
+        if (is_real)                                                                                                   \
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                         \
+                                         "Only one dot allowed in real constants");                                    \
+        if (has_exponent)                                                                                              \
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "no dot in exponent allowed");          \
+        if (ps_buffer_peek_next_char(lexer->buffer) == '.')                                                            \
+            break;                                                                                                     \
+        is_real = true;                                                                                                \
+        APPEND_CHAR_DEC()                                                                                              \
+    }
+
+#define READ_EXP_DEC()                                                                                                 \
+    {                                                                                                                  \
+        if (has_exponent)                                                                                              \
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                         \
+                                         "Only one exponent allowed in real constants");                               \
+        is_real = true;                                                                                                \
+        has_exponent = true;                                                                                           \
+        APPEND_CHAR_DEC()                                                                                              \
+        if (c == '+' || c == '-')                                                                                      \
+            APPEND_CHAR_DEC()                                                                                          \
+    }
 
 bool ps_lexer_read_number_dec(ps_lexer *lexer)
 {
-    char buffer[33];
+    char buffer[33] = {0};
     int pos = 0;
     bool is_real = false;
-    bool has_exp = false;
-    char *end;
+    bool has_exponent = false;
+    char *end = NULL;
     char c = ps_buffer_peek_char(lexer->buffer);
+
     if (!isdigit(c))
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
+
     do
     {
         APPEND_CHAR_DEC()
-        // floating point or exponent part?
+        // floating point?
         if (c == '.')
-        {
-            if (is_real)
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
-                                             "Only one dot allowed in real constants");
-            if (has_exp)
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "no dot in exponent allowed");
-            if (ps_buffer_peek_next_char(lexer->buffer) == '.')
-                break;
-            is_real = true;
-            APPEND_CHAR_DEC()
-        }
+            READ_DOT_DEC()
         // exponent part?
         else if (c == 'e' || c == 'E')
-        {
-            if (has_exp)
-                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
-                                             "Only one exponent allowed in real constants");
-            // 1E12 is valid
-            is_real = true;
-            has_exp = true;
-            APPEND_CHAR_DEC()
-            // Exponent sign?
-            if (c == '+' || c == '-')
-            {
-                APPEND_CHAR_DEC()
-            }
-        }
+            READ_EXP_DEC()
     } while (isdigit(c));
     buffer[pos] = '\0';
     if (is_real)
@@ -318,8 +324,16 @@ bool ps_lexer_read_number_dec(ps_lexer *lexer)
         unsigned long u = strtoul(buffer, &end, 10);
         if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
-        lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
-        lexer->current_token.value.u = (ps_unsigned)u;
+        if (u <= PS_INTEGER_MAX)
+        {
+            lexer->current_token.type = PS_TOKEN_INTEGER_VALUE;
+            lexer->current_token.value.i = (ps_integer)u;
+        }
+        else
+        {
+            lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
+            lexer->current_token.value.u = (ps_unsigned)u;
+        }
     }
     return true;
 }
@@ -362,13 +376,14 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     char c;
     char buffer[PS_STRING_MAX_LEN + 1];
     unsigned int pos = 0;
+    char next_char;
 
     c = ps_buffer_peek_char(lexer->buffer);
     if (c != '\'')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Char or string value must start with a single quote");
     // Consume the opening quote
-    ADVANCE
+    ADVANCE()
     while (true)
     {
         c = ps_buffer_peek_char(lexer->buffer);
@@ -380,26 +395,26 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         if (c == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
-            char next_char = ps_buffer_peek_next_char(lexer->buffer);
+            next_char = ps_buffer_peek_next_char(lexer->buffer);
             if (next_char == '\'')
             {
                 CHECK_STRING_OVERFLOW
                 buffer[pos++] = '\'';
-                ADVANCE     // Consume the first quote
-                    ADVANCE // Consume the second quote
+                ADVANCE() // Consume the first quote
+                ADVANCE() // Consume the second quote
             }
             else
             {
                 // End of the string
-                ADVANCE // Consume the closing quote
-                    break;
+                ADVANCE() // Consume the closing quote
+                break;
             }
         }
         else
         {
             CHECK_STRING_OVERFLOW
             buffer[pos++] = c;
-            ADVANCE
+            ADVANCE()
         }
     }
     buffer[pos] = '\0';
@@ -426,121 +441,121 @@ bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_ch
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ":=");
             lexer->current_token.type = PS_TOKEN_ASSIGN;
-            ADVANCE
+            ADVANCE()
         }
         else
             lexer->current_token.type = PS_TOKEN_COLON;
-        ADVANCE
+        ADVANCE()
         break;
     case '@':
         lexer->current_token.type = PS_TOKEN_AT_SIGN;
-        ADVANCE
+        ADVANCE()
         break;
     case '^':
         lexer->current_token.type = PS_TOKEN_CARET;
-        ADVANCE
+        ADVANCE()
         break;
     case ',':
         lexer->current_token.type = PS_TOKEN_COMMA;
-        ADVANCE
+        ADVANCE()
         break;
     case '.':
         if (next_char == '.')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "..");
             lexer->current_token.type = PS_TOKEN_RANGE;
-            ADVANCE
+            ADVANCE()
         }
         else
             lexer->current_token.type = PS_TOKEN_DOT;
-        ADVANCE
+        ADVANCE()
         break;
     case '(':
         lexer->current_token.type = PS_TOKEN_LEFT_PARENTHESIS;
-        ADVANCE
+        ADVANCE()
         break;
     case ')':
         lexer->current_token.type = PS_TOKEN_RIGHT_PARENTHESIS;
-        ADVANCE
+        ADVANCE()
         break;
     case '[':
         lexer->current_token.type = PS_TOKEN_LEFT_BRACKET;
-        ADVANCE
+        ADVANCE()
         break;
     case ']':
         lexer->current_token.type = PS_TOKEN_RIGHT_BRACKET;
-        ADVANCE
+        ADVANCE()
         break;
     case ';':
         lexer->current_token.type = PS_TOKEN_SEMI_COLON;
-        ADVANCE
+        ADVANCE()
         break;
     case '+':
         lexer->current_token.type = PS_TOKEN_PLUS;
-        ADVANCE
+        ADVANCE()
         break;
     case '-':
         lexer->current_token.type = PS_TOKEN_MINUS;
-        ADVANCE
+        ADVANCE()
         break;
     case '*':
         if (next_char == '*')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "**");
             lexer->current_token.type = PS_TOKEN_POWER;
-            ADVANCE
+            ADVANCE()
         }
         else
             lexer->current_token.type = PS_TOKEN_STAR;
-        ADVANCE
+        ADVANCE()
         break;
     case '/':
         lexer->current_token.type = PS_TOKEN_SLASH;
-        ADVANCE
+        ADVANCE()
         break;
     case '=':
         lexer->current_token.type = PS_TOKEN_EQ;
-        ADVANCE
+        ADVANCE()
         break;
     case '<':
         if (next_char == '>')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<>");
             lexer->current_token.type = PS_TOKEN_NE;
-            ADVANCE
+            ADVANCE()
         }
         else if (next_char == '=')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<=");
             lexer->current_token.type = PS_TOKEN_LE;
-            ADVANCE
+            ADVANCE()
         }
         else if (next_char == '<')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<<");
             lexer->current_token.type = PS_TOKEN_SHL;
-            ADVANCE
+            ADVANCE()
         }
         else
             lexer->current_token.type = PS_TOKEN_LT;
-        ADVANCE
+        ADVANCE()
         break;
     case '>':
         if (next_char == '=')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">=");
             lexer->current_token.type = PS_TOKEN_GE;
-            ADVANCE
+            ADVANCE()
         }
         else if (next_char == '>')
         {
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">>");
             lexer->current_token.type = PS_TOKEN_SHR;
-            ADVANCE
+            ADVANCE()
         }
         else
             lexer->current_token.type = PS_TOKEN_GT;
-        ADVANCE
+        ADVANCE()
         break;
     default:
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid character");
@@ -555,8 +570,6 @@ bool ps_lexer_read_token(ps_lexer *lexer)
 {
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
-    // fprintf(stderr, "AFTER SKIP WHITESPACE AND COMMENTS at Line %d, Column %d\n", lexer->buffer->current_line + 1,
-    //         lexer->buffer->current_column + 1);
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;

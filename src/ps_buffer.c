@@ -169,7 +169,7 @@ static bool ps_buffer_index_lines(ps_buffer *buffer)
         // At EOL?
         if (current_char == '\r' || current_char == '\n')
         {
-            line_length = text - start; // + 1;
+            line_length = text - start;
             if (line_length > PS_BUFFER_MAX_COLUMNS)
             {
                 ps_buffer_free_lines(buffer);
