@@ -17,6 +17,7 @@
 #include "ps_parse_statement.h"
 #include "ps_procedures.h"
 #include "ps_system.h"
+#include "ps_type_definition.h"
 
 /**
  * Parse variable reference:
@@ -133,12 +134,19 @@ static bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, 
         TRACE_ERROR("EXPRESSION")
 
     // Check that the expression type matches the parameter type
-    const ps_symbol *expression_type = ps_ast_node_get_type(expression);
-    const ps_type_definition *expression_type_def = ps_symbol_get_type_def(expression_type);
+    ps_symbol_debug(stderr, "parameter  ", parameter->type);
     const ps_type_definition *parameter_type_def = ps_symbol_get_type_def(parameter->type);
-    if (expression_type_def != parameter_type_def)
+    const ps_symbol *expression_type = ps_ast_node_get_type(expression);
+    ps_symbol_debug(stderr, "expression ", parameter->type);
+    const ps_type_definition *expression_type_def = ps_symbol_get_type_def(expression_type);
+    if (parameter_type_def != expression_type_def)
+    {
+        ps_compiler_set_message(compiler, "Parameter %s expects %s@%p, got %s@%p (undegned=%p)", parameter->name,
+                                ps_type_definition_get_name(parameter_type_def), parameter_type_def,
+                                ps_type_definition_get_name(expression_type_def), expression_type_def,
+                                ps_system_unsigned.value->data.t);
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
-
+    }
     args[i] = expression;
 
     PARSE_END("OK")
@@ -163,8 +171,8 @@ static bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block
     const ps_ast_block *executable_block = ps_symbol_get_executable_block(executable);
     const ps_formal_signature *formal_signature = executable_block->signature;
     const ps_formal_parameter *parameter = NULL;
-    uint8_t parameter_count = formal_signature->parameter_count;
-    uint8_t i = 0;
+    int parameter_count = formal_signature->parameter_count;
+    int i = 0;
     ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
 
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
@@ -173,7 +181,7 @@ static bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block
     READ_NEXT_TOKEN_OR_RETURN_FALSE
     if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
     {
-        if (parameter_count != 0)
+        if (parameter_count > 0)
         {
             ps_compiler_set_error_message(compiler, PS_ERROR_UNEXPECTED_TOKEN,
                                           "Procedure or function %s expects %d parameter%s, got none", executable->name,
