@@ -615,7 +615,7 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
     // Comparison => Boolean
     if (ps_ast_binary_operation_is_comparison(operator))
         return &ps_system_boolean;
-    // / => R
+    // / => Real
     if (operator == PS_OP_DIV_REAL)
         return &ps_system_real;
     // C or S + C or S => String

@@ -32,7 +32,7 @@
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
-// #define DEBUG_SOURCE "examples/010-operators.pas"
+#define DEBUG_SOURCE "examples/009-operators.pas"
 // #define DEBUG_SOURCE "examples/011-subrange1.pas"
 // #define DEBUG_SOURCE "examples/012-typedef0.pas"
 // #define DEBUG_SOURCE "examples/013-typedef1.pas"
@@ -47,7 +47,7 @@
 // #define DEBUG_SOURCE "examples/130-big-loops.pas"
 // #define DEBUG_SOURCE "examples/200-procedure0.pas"
 // #define DEBUG_SOURCE "examples/210-procedure1.pas"
-#define DEBUG_SOURCE "examples/220-procedure2.pas"
+// #define DEBUG_SOURCE "examples/220-procedure2.pas"
 
 // Runtime options
 bool bool_eval = false;

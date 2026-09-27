@@ -282,14 +282,20 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
     if (lexer->current_token.type == PS_TOKEN_COLON)
     {
         READ_NEXT_TOKEN_OR_RETURN_FALSE
-        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNSIGNED_VALUE)
-        *width = (int16_t)(lexer->current_token.value.u);
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_INTEGER_VALUE)
+        int16_t w = (int16_t)(lexer->current_token.value.i);
+        if (w < 0 || w > 255)
+            RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
+        *width = w;
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (lexer->current_token.type == PS_TOKEN_COLON)
         {
             READ_NEXT_TOKEN_OR_RETURN_FALSE
-            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNSIGNED_VALUE)
-            *precision = (int16_t)(lexer->current_token.value.u);
+            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_INTEGER_VALUE)
+            int16_t p = (int16_t)(lexer->current_token.value.i);
+            if (p < 0 || p > 255)
+                RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
+            *precision = p;
             READ_NEXT_TOKEN_OR_RETURN_FALSE
         }
     }

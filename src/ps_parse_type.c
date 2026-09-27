@@ -650,15 +650,13 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         break;
         /* ********** String type ********** */
     case PS_TOKEN_STRING:
-        // => String[MAX_LENGTH] or String
+        // => String[MAX_LENGTH] or String only
         advance = false;
         if (!ps_parse_type_reference_string(compiler, block, type_symbol, type_name))
             TRACE_ERROR("TYPE_REFERENCE_STRING")
         if (*type_symbol == &ps_system_string)
         {
             symbol = *type_symbol;
-            *type_symbol = NULL;
-            advance = true;
         }
         break;
         /* ********** Other types ********** */
