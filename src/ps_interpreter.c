@@ -304,7 +304,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
                                    .group = PS_AST_EXPRESSION,
                                    .kind = PS_AST_RVALUE,
                                    .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_eval_expression(interpreter, ast_variable->indexes[i], &index_node))
+        if (!ps_ast_evaluate_expression(interpreter, ast_variable->indexes[i], &index_node))
             return false;
         indexes[i].allocated = false;
         indexes[i].type = index_node.value.type;
@@ -401,7 +401,7 @@ bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const 
                                     .group = PS_AST_EXPRESSION,
                                     .kind = PS_AST_LITERAL_VALUE,
                                     .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_eval_expression(interpreter, ast_variable->indexes[i], &index_value))
+        if (!ps_ast_evaluate_expression(interpreter, ast_variable->indexes[i], &index_value))
             return false;
         index_values[i] = index_value.value;
     }

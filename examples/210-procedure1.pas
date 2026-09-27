@@ -8,7 +8,7 @@ Program ExampleProcedure0;
 Var
     I: Integer;
 
-{ No parameters, with nested procedures }
+{ No parameters, no parenthesis, with nested procedures }
 Procedure Procedure0a;
     Var
         J: Integer;
@@ -33,7 +33,7 @@ Begin
     WriteLn('    This is Procedure0a I=', I);
 End;
 
-{ No parameters with parentheses }
+{ No parameters, with parentheses }
 Procedure Procedure0b();
 Begin
     WriteLn('    This is Procedure0b I=', I);
@@ -48,7 +48,7 @@ Begin
         WriteLn('Begin I=', I);
         Procedure0a;
         Procedure0b();
-        WriteLn('End I=', I);
+        WriteLn('End   I=', I);
     End;
     WriteLn('----------------------------------------------------------------------');
 End.

@@ -40,13 +40,15 @@ void ps_ast_debug_execution(ps_interpreter *interpreter, ps_debug_level level, c
     va_end(args);
 }
 
-bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame)
+static bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame)
 {
     bool result = false;
 
     if (!ps_ast_node_check_group((const ps_ast_node *)block, PS_AST_BLOCK))
+    {
+        ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected BLOCK AST node");
         goto error;
-
+    }
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "BLOCK kind=%s name=%s",
                            ps_ast_node_get_kind_name(block->kind), block->name);
 
@@ -188,7 +190,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
                                .value.allocated = false,
                                .value.type = expected_type,
                                .value.data = {0}};
-    if (!ps_ast_eval_expression(interpreter, assignment->expression, &value_node))
+    if (!ps_ast_evaluate_expression(interpreter, assignment->expression, &value_node))
         return false; // line & column of error set when evaluating expression
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     if (!ps_interpreter_copy_value(interpreter, &value_node.value, &value))
@@ -215,7 +217,7 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
 
     // Evaluate condition
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
-    if (!ps_ast_eval_expression(interpreter, if_statement->condition, &condition_value))
+    if (!ps_ast_evaluate_expression(interpreter, if_statement->condition, &condition_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                            ps_value_get_display_string(&condition_value.value, 0, 0));
@@ -247,7 +249,7 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
     while (true)
     {
         ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-        bool result = ps_ast_eval_expression(interpreter, while_statement->condition, &condition_value);
+        bool result = ps_ast_evaluate_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
@@ -279,7 +281,7 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body %d", ++iteration);
         if (!ps_ast_execute_statement_list(interpreter, repeat_statement->body))
             return false;
-        if (!ps_ast_eval_expression(interpreter, repeat_statement->condition, &condition_value))
+        if (!ps_ast_evaluate_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                                ps_value_get_display_string(&condition_value.value, 0, 0));
@@ -304,7 +306,7 @@ static bool ps_ast_execute_for_iteration(ps_interpreter *interpreter, const ps_a
     *should_stop = stop.data.b;
     if (*should_stop)
     {
-        ps_ast_debug_execution(
+        PS_AST_DEBUG_EXECUTION(
             interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s", ps_value_get_display_string(iteration_value, 0, 0),
             for_statement->downto ? "<=" : ">=", ps_value_get_display_string(&end_value->value, 0, 0));
         return true;
@@ -348,13 +350,13 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     // clang-format on
 
     // Evaluate start value
-    if (!ps_ast_eval_expression(interpreter, for_statement->start, &start_value))
+    if (!ps_ast_evaluate_expression(interpreter, for_statement->start, &start_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tStart value: %s",
                            ps_value_get_display_string(&start_value.value, 0, 0));
 
     // Evaluate end value
-    if (!ps_ast_eval_expression(interpreter, for_statement->end, &end_value))
+    if (!ps_ast_evaluate_expression(interpreter, for_statement->end, &end_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tEnd value: %s",
                            ps_value_get_display_string(&end_value.value, 0, 0));
@@ -398,7 +400,7 @@ bool ps_ast_execute_procedure_write_or_writeln(ps_interpreter *interpreter, cons
         ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
         int16_t width = procedure_call->formats[i].width;
         int16_t precision = procedure_call->formats[i].precision;
-        if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
+        if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
                                ps_value_get_display_string(&arg_value.value, width, precision));
@@ -439,7 +441,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
         else if (procedure_call->n_args == 1)
         {
             ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-            if (!ps_ast_eval_expression(interpreter, procedure_call->args[0], &arg_value))
+            if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[0], &arg_value))
                 return false;
             PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
@@ -494,7 +496,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         }
         else
         {
-            if (!ps_ast_eval_expression(interpreter, procedure_call->args[i], &arg_value))
+            if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
                 return false;
             PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
@@ -559,7 +561,7 @@ static bool ps_ast_execute_function_call_system_random(ps_interpreter *interpret
         ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
                                   .kind = PS_AST_LITERAL_VALUE,
                                   .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_eval_expression(interpreter, function_call->args[0], &ast_value))
+        if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &ast_value))
             return false;
         ps_error error = ps_function_random(interpreter, &ast_value.value, &result->value);
         if (error != PS_ERROR_NONE)
@@ -597,9 +599,9 @@ static bool ps_ast_execute_function_call_system_2arg(ps_interpreter *interpreter
     ps_ast_value b = {.group = PS_AST_EXPRESSION,
                       .kind = PS_AST_LITERAL_VALUE,
                       .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-    if (!ps_ast_eval_expression(interpreter, function_call->args[0], &a))
+    if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &a))
         return false;
-    if (!ps_ast_eval_expression(interpreter, function_call->args[1], &b))
+    if (!ps_ast_evaluate_expression(interpreter, function_call->args[1], &b))
         return false;
     ps_error error = function_call->executable == &ps_system_function_power
                          ? ps_function_power(interpreter, &a.value, &b.value, &result->value)
@@ -617,7 +619,7 @@ static bool ps_ast_execute_function_call_system_1arg(ps_interpreter *interpreter
     ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
                               .kind = PS_AST_LITERAL_VALUE,
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-    if (!ps_ast_eval_expression(interpreter, function_call->args[0], &ast_value))
+    if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &ast_value))
         return false;
     // Call function with argument
     ps_function_1arg_v function = function_call->executable->value->data.x->func_1arg_v;
@@ -667,7 +669,8 @@ bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call
                                             "User Function call not implemented");
 }
 
-static bool ps_ast_eval_expression_literal(ps_interpreter *interpreter, const ps_ast_value *value, ps_ast_value *result)
+static bool ps_ast_evaluate_expression_literal(ps_interpreter *interpreter, const ps_ast_value *value,
+                                               ps_ast_value *result)
 {
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Value: %s",
                            ps_value_get_display_string(&value->value, 0, 0));
@@ -676,8 +679,8 @@ static bool ps_ast_eval_expression_literal(ps_interpreter *interpreter, const ps
     return true;
 }
 
-static bool ps_ast_eval_expression_rvalue(ps_interpreter *interpreter, const ps_ast_variable *variable,
-                                          ps_ast_value *result)
+static bool ps_ast_evaluate_expression_rvalue(ps_interpreter *interpreter, const ps_ast_variable *variable,
+                                              ps_ast_value *result)
 {
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Variable: %s", variable->variable->name);
     ps_value value = {.allocated = false, .type = &ps_system_none, .data = {0}};
@@ -689,8 +692,8 @@ static bool ps_ast_eval_expression_rvalue(ps_interpreter *interpreter, const ps_
     return true;
 }
 
-static bool ps_ast_eval_expression_unary(ps_interpreter *interpreter, const ps_ast_unary_operation *unary_operation,
-                                         ps_ast_value *result)
+static bool ps_ast_evaluate_expression_unary(ps_interpreter *interpreter, const ps_ast_unary_operation *unary_operation,
+                                             ps_ast_value *result)
 {
     ps_ast_value operand_value = {.group = PS_AST_EXPRESSION,
                                   .kind = PS_AST_LITERAL_VALUE,
@@ -699,7 +702,7 @@ static bool ps_ast_eval_expression_unary(ps_interpreter *interpreter, const ps_a
                                   .value.data = {0}};
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Unary operation: %s",
                            ps_operator_unary_get_name(unary_operation->operator));
-    if (!ps_ast_eval_expression(interpreter, unary_operation->operand, &operand_value) ||
+    if (!ps_ast_evaluate_expression(interpreter, unary_operation->operand, &operand_value) ||
         !ps_operator_unary_eval(interpreter, &operand_value.value, &result->value, unary_operation->operator))
     {
         return false;
@@ -707,13 +710,13 @@ static bool ps_ast_eval_expression_unary(ps_interpreter *interpreter, const ps_a
     return true;
 }
 
-static bool ps_ast_eval_expression_binary(ps_interpreter *interpreter, const ps_ast_binary_operation *binary_operation,
-                                          ps_ast_value *result)
+static bool ps_ast_evaluate_expression_binary(ps_interpreter *interpreter,
+                                              const ps_ast_binary_operation *binary_operation, ps_ast_value *result)
 {
     ps_ast_value left = {.group = PS_AST_EXPRESSION,
                          .kind = PS_AST_LITERAL_VALUE,
                          .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-    if (!ps_ast_eval_expression(interpreter, binary_operation->left, &left))
+    if (!ps_ast_evaluate_expression(interpreter, binary_operation->left, &left))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "{LEFT: %s, %s}", ps_value_get_type_name(&left.value),
                            ps_value_get_debug_string(&left.value));
@@ -721,7 +724,7 @@ static bool ps_ast_eval_expression_binary(ps_interpreter *interpreter, const ps_
     ps_ast_value right = {.group = PS_AST_EXPRESSION,
                           .kind = PS_AST_LITERAL_VALUE,
                           .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-    if (!ps_ast_eval_expression(interpreter, binary_operation->right, &right))
+    if (!ps_ast_evaluate_expression(interpreter, binary_operation->right, &right))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "{RIGHT: %s, %s}", ps_value_get_type_name(&right.value),
                            ps_value_get_debug_string(&right.value));
@@ -744,14 +747,14 @@ static bool ps_ast_eval_expression_binary(ps_interpreter *interpreter, const ps_
     return true;
 }
 
-static bool ps_ast_eval_expression_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                                 ps_ast_value *result)
+static bool ps_ast_evaluate_expression_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                                     ps_ast_value *result)
 {
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Function call: %s", function_call->executable->name);
     return ps_ast_execute_function_call(interpreter, function_call, result);
 }
 
-bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result)
+bool ps_ast_evaluate_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result)
 {
     assert(expression != NULL);
     assert(expression->group == PS_AST_EXPRESSION);
@@ -764,23 +767,23 @@ bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expr
     switch (expression->kind)
     {
     case PS_AST_LITERAL_VALUE:
-        if (!ps_ast_eval_expression_literal(interpreter, (const ps_ast_value *)expression, result))
+        if (!ps_ast_evaluate_expression_literal(interpreter, (const ps_ast_value *)expression, result))
             goto error;
         return true;
     case PS_AST_RVALUE:
-        if (!ps_ast_eval_expression_rvalue(interpreter, (const ps_ast_variable *)expression, result))
+        if (!ps_ast_evaluate_expression_rvalue(interpreter, (const ps_ast_variable *)expression, result))
             goto error;
         return true;
     case PS_AST_UNARY_OPERATION:
-        if (!ps_ast_eval_expression_unary(interpreter, (const ps_ast_unary_operation *)expression, result))
+        if (!ps_ast_evaluate_expression_unary(interpreter, (const ps_ast_unary_operation *)expression, result))
             goto error;
         return true;
     case PS_AST_BINARY_OPERATION:
-        if (!ps_ast_eval_expression_binary(interpreter, (const ps_ast_binary_operation *)expression, result))
+        if (!ps_ast_evaluate_expression_binary(interpreter, (const ps_ast_binary_operation *)expression, result))
             goto error;
         return true;
     case PS_AST_FUNCTION_CALL:
-        if (!ps_ast_eval_expression_function_call(interpreter, (const ps_ast_call *)expression, result))
+        if (!ps_ast_evaluate_expression_function_call(interpreter, (const ps_ast_call *)expression, result))
             return false;
         return true;
     default:

@@ -44,9 +44,9 @@ Begin
     WriteLn('Procedure with 2 parameters:');
     WriteLn(' - one having the same name as a global variable,');
     WriteLn(' - another to test if all this works fine');
-    Variable2 := -123 + 0;
+    Variable2 := 123 + 0;
     WriteLn('1. This is Program, Variable2=', Variable2);
-    Procedure2(Variable2 * 10, -42);
+    Procedure2(Variable2 * 10, 42);
     WriteLn('2. This is Program, Variable2=', Variable2);
     WriteLn('----------------------------------------------------------------------');
 End.

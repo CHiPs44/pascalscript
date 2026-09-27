@@ -23,9 +23,6 @@ extern "C"
     /** @brief Execute function */
     bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
 
-    /** @brief Execute block */
-    bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame);
-
     /** @brief Execute a list of Pascal statements */
     bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
 
@@ -55,7 +52,7 @@ extern "C"
                                       ps_ast_value *result);
 
     /** @brief Evaluate an expression */
-    bool ps_ast_eval_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
+    bool ps_ast_evaluate_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
 
 #ifdef __cplusplus
 }

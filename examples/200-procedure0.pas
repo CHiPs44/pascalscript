@@ -6,24 +6,24 @@
 Program ExampleProcedure0;
 
 Var
-    N: Real;
+    R: Real;
     G: Integer;
 
 Procedure Procedure0;
 Var
-    N: Integer; // Shadows global variable
+    R: Integer; // Shadows global variable with another type
 Begin
     // Use global variable value
-    N := G * 42;
+    R := G * 42;
     // Change global variable value
     G := 234;
-    WriteLn('    This is Procedure0         N=', N:11, ' G=', G);
+    WriteLn('    This is Procedure0         R=', R:11, ' G=', G);
 End;
 
 Begin
-    N := Pi;
+    R := Pi;
     G := 123;
-    WriteLn('This is the main program       N=', N:10:9, ' G=', G);
+    WriteLn('This is the main program R=', R:10:9, ' G=', G);
     Procedure0;
-    WriteLn('This is the main program again N=', N:10:9, ' G=', G);
+    WriteLn('This is the main program R=', R:10:9, ' G=', G);
 End.
