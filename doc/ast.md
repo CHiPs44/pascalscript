@@ -17,8 +17,8 @@ NB:
 
 This may lead to other steps:
 
-- emitting "P-Code" from the AST for a stack-based virtual machine
-- then interpreting this P-Code like Pascal P4
+- Emitting "P-Code" from the AST for a stack-based virtual machine
+- Then interpreting this P-Code like Pascal P4
 
 ## Implementation of AST nodes
 
@@ -40,12 +40,9 @@ This also means these structs can not be packed, as the size of the common field
 
 ## Interpretation: Stack & frames
 
-Interpreter uses a stack of frames to manage variables values and function calls.
+Interpreter uses a stack of frames to manage variables values and function calls:
 
-When a procedure or function is called, a new frame is pushed on the stack for the parameters and local variables.
-
-Variables are kept in the local symbol table they are defined in, their values are stored in a frame and accessed through an handle corresponding to their order of declaration.
-
-Global variables are accessed
-
-Functions automagically reserve a `Result` variable.
+- When a procedure or function is called, a new frame is pushed on this stack for the parameters and local variables
+- Variables are kept in the local symbol table they are defined in, their values are stored in a frame and accessed through an handle corresponding to their order of declaration
+- Functions automagically reserve a `Result` variable
+- Global variables are local variables of the program block
