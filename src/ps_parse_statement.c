@@ -175,12 +175,18 @@ static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps
  * Parse assignment:
  *  Simple:
  *      IDENTIFIER := EXPRESSION
- * Next steps:
  *  Array access:
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' := EXPRESSION
+ * Next steps:
  *  Pointer dereference:
  *      IDENTIFIER '^' = EXPRESSION
  *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
+ *  Record access:
+ *      IDENTIFIER '.' IDENTIFIER := EXPRESSION
+ *     IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '.' IDENTIFIER := EXPRESSION
+ * Pointer dereference + record access:
+ *      IDENTIFIER '^' '.' IDENTIFIER := EXPRESSION
+ *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' '.' IDENTIFIER := EXPRESSION
  */
 bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment_ptr,
                          ps_ast_block *owner, ps_symbol *variable)
@@ -191,6 +197,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     assert(variable != NULL);
 
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
+
     ps_ast_variable *lvalue = NULL;
     ps_ast_node *rvalue = NULL;
 
@@ -233,6 +240,8 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     // RVALUE / EXPRESSION
     if (!ps_parse_expression(compiler, block, &rvalue))
         TRACE_ERROR("EXPRESSION1");
+
+    // TODO check if rvalue type matches lvalue type
 
     // Create assignement
     ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
