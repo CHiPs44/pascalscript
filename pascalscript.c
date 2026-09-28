@@ -29,7 +29,7 @@
 
 // #define DEBUG_SOURCE "examples/000-minimal.pas"
 // #define DEBUG_SOURCE "examples/001-hello.pas"
-// #define DEBUG_SOURCE "examples/002-test-expr1.pas"
+#define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/009-operators.pas"
@@ -48,7 +48,7 @@
 // #define DEBUG_SOURCE "examples/200-procedure0.pas"
 // #define DEBUG_SOURCE "examples/210-procedure1.pas"
 // #define DEBUG_SOURCE "examples/220-procedure2.pas"
-#define DEBUG_SOURCE "examples/230-procedure3.pas"
+// #define DEBUG_SOURCE "examples/230-procedure3.pas"
 
 // Runtime options
 bool bool_eval = false;

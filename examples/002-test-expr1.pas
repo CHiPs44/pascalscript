@@ -6,8 +6,8 @@
 Program TestExpression1;
 Var
     U: Unsigned;
-    I: Integer;
-    R: Real;
+    // I: Integer;
+    // R: Real;
 Begin
     U := 'A';
     // WriteLn('Example 002 - Test expression #1');

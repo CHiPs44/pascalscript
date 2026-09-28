@@ -113,6 +113,16 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     return NULL;
 }
 
+bool ps_ast_check_lvalue_rvalue_compatibility(const ps_type_definition *left, const ps_type_definition *right)
+{
+    assert(left != NULL && right != NULL);
+
+    if (left->type == right->type)
+        return true;
+
+    return false;
+}
+
 static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *function_call)
 {
     assert(function_call != NULL);

@@ -13,6 +13,7 @@
 #include "ps_compiler.h"
 #include "ps_functions.h"
 #include "ps_parse.h"
+#include "ps_parse_assignment.h"
 #include "ps_parse_call.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
@@ -28,14 +29,21 @@
  *  - compound: Begin ... End
  *  - assignment: Variable := Expression
  *  - procedure call: Procedure(Arguments)
- *  - conditional: If ... Then ... Else ...
+ *  - conditional:
+ *     - If ... Then ... Else ...
  *  - loops:
- *     - Pepeat ... Until ...
+ *     - Repeat ... Until ...
  *     - While ... Do ...
  *     - For variable := start To/Downto finish Do ...
+ *  Next:
+ *   - Case ... Of ... [ Else|Otherwise ... ] End
  */
 bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(statement_ptr != NULL);
+
     PARSE_BEGIN("STATEMENT", "");
     (void)start_line;
     (void)start_column;
@@ -93,6 +101,10 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
  */
 bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(statement_list_ptr != NULL);
+
     PARSE_BEGIN("STATEMENT", "COMPOUND");
 
     // 'BEGIN'
@@ -115,142 +127,6 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
-static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps_ast_block *owner, ps_symbol *variable,
-                                  ps_ast_variable **lvalue)
-{
-    PARSE_BEGIN("ASSIGNMENT", "ARRAY")
-
-    // Check array dimensions
-    int dimensions = ps_array_get_dimensions(variable->value->type);
-    if (dimensions == 0)
-        RETURN_ERROR(PS_ERROR_INVALID_PARAMETERS)
-    if (dimensions > PS_ARRAY_MAX_DIMENSIONS)
-        RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-    ps_ast_node *indexes[dimensions];
-
-    // Parse indexes enclosed in '[' and ']', separated by ','
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_BRACKET)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
-    int dimension = 0;
-    do
-    {
-        // At least one index
-        ps_ast_node *index = NULL;
-        if (!ps_parse_expression(compiler, block, &index))
-            TRACE_ERROR("INDEX")
-        indexes[dimension] = index;
-        dimension += 1;
-        // ',' begins another index
-        if (lexer->current_token.type == PS_TOKEN_COMMA)
-        {
-            // Too many indexes?
-            if (dimension >= dimensions)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
-            continue;
-        }
-        // ']' ends indexes (and loop)
-        if (lexer->current_token.type == PS_TOKEN_RIGHT_BRACKET)
-        {
-            // Not enough indexes?
-            if (dimension != dimensions)
-                RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
-            break;
-        }
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    } while (true);
-
-    // Create left part of assignment
-    ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, owner, PS_AST_LVALUE,
-                                                                 variable, dimensions, (ps_ast_node **)(&indexes));
-    if (ast_variable == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    *lvalue = ast_variable;
-
-    PARSE_END("OK")
-}
-
-/**
- * Parse assignment:
- *  Simple:
- *      IDENTIFIER := EXPRESSION
- *  Array access:
- *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' := EXPRESSION
- * Next steps:
- *  Pointer dereference:
- *      IDENTIFIER '^' = EXPRESSION
- *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' := EXPRESSION
- *  Record access:
- *      IDENTIFIER '.' IDENTIFIER := EXPRESSION
- *     IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '.' IDENTIFIER := EXPRESSION
- * Pointer dereference + record access:
- *      IDENTIFIER '^' '.' IDENTIFIER := EXPRESSION
- *      IDENTIFIER '[' EXPRESSION [ ',' EXPRESSION ]* ']' '^' '.' IDENTIFIER := EXPRESSION
- */
-bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assignment **assignment_ptr,
-                         ps_ast_block *owner, ps_symbol *variable)
-{
-    assert(compiler != NULL);
-    assert(block != NULL);
-    assert(assignment_ptr != NULL);
-    assert(variable != NULL);
-
-    PARSE_BEGIN("STATEMENT", "ASSIGNMENT")
-
-    ps_ast_variable *lvalue = NULL;
-    ps_ast_node *rvalue = NULL;
-
-    // IDENTIFIER
-    if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
-    {
-        ps_compiler_set_error_message(compiler, PS_ERROR_ASSIGN_TO_CONST, "Constant '%s' cannot be assigned",
-                                      variable->name);
-        TRACE_ERROR("CONSTANT!");
-    }
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-    {
-        ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Symbol '%s' is not a variable",
-                                      variable->name);
-        TRACE_ERROR("VARIABLE!");
-    }
-
-    if (compiler->debug >= PS_DEBUG_VERBOSE)
-        fprintf(stderr, "\nINFO\tASSIGNMENT: #1 variable '%s' type is '%s'\n", variable->name,
-                ps_type_definition_get_name(variable->value->type->value->data.t));
-    if (ps_value_get_type(variable->value) == PS_TYPE_ARRAY)
-    {
-        // => array_var[index(, index)]
-        if (!ps_parse_array_lvalue(compiler, block, owner, variable, &lvalue))
-            TRACE_ERROR("ARRAY")
-    }
-    else
-    {
-        lvalue = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
-        if (lvalue == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    }
-
-    // ':='
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN);
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
-    ps_ast_debug_line(1, "DEBUG\tParsing assignment to variable '%s' of type '%s'", variable->name,
-                      ps_type_definition_get_name(variable->value->type->value->data.t));
-
-    // RVALUE / EXPRESSION
-    if (!ps_parse_expression(compiler, block, &rvalue))
-        TRACE_ERROR("EXPRESSION1");
-
-    // TODO check if rvalue type matches lvalue type
-
-    // Create assignement
-    ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
-    if (assignment == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-    *assignment_ptr = assignment;
-    PARSE_END("OK")
-}
-
 /**
  * Parse
  *      'READ'  | 'READLN' [ '('
@@ -269,6 +145,10 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
  */
 bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(call_ptr != NULL);
+
     (void)compiler;
     (void)block;
     (void)call_ptr;
@@ -282,6 +162,11 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_
 static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width,
                                                     int16_t *precision)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(width != NULL);
+    assert(precision != NULL);
+
     PARSE_BEGIN("WRITE_OR_WRITELN", "FORMAT");
     (void)start_line;
     (void)start_column;
@@ -332,6 +217,10 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
  */
 bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(call_ptr != NULL);
+
     PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
 
     uint16_t n_args = 0;
@@ -397,6 +286,10 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
  */
 bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node **statement_ptr)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(statement_ptr != NULL);
+
     PARSE_BEGIN("STATEMENT", "ASSIGNMENT OR PROCEDURE CALL");
     (void)start_line;
     (void)start_column;
@@ -482,6 +375,10 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
  */
 bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if **if_statement)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(if_statement != NULL);
+
     PARSE_BEGIN("STATEMENT", "IF_THEN_ELSE")
 
     ps_ast_node *condition = NULL;
@@ -553,6 +450,10 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
  */
 bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_repeat **repeat_statement)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(repeat_statement != NULL);
+
     PARSE_BEGIN("STATEMENT", "REPEAT_UNTIL");
 
     ps_ast_statement_list *body = NULL;
@@ -591,6 +492,10 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
  */
 bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while **while_statement)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(while_statement != NULL);
+
     PARSE_BEGIN("STATEMENT", "WHILE_DO");
 
     ps_ast_node *condition = NULL;
@@ -638,6 +543,10 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
  */
 bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **for_statement)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(for_statement != NULL);
+
     PARSE_BEGIN("STATEMENT", "FOR_DO");
 
     ps_ast_block *owner = NULL;
@@ -720,6 +629,10 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
 bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list,
                              ps_token_type stop)
 {
+    assert(compiler != NULL);
+    assert(block != NULL);
+    assert(statement_list != NULL);
+
     PARSE_BEGIN("STATEMENT", "STATEMENT_LIST");
 
     // Empty block?
