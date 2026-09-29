@@ -113,11 +113,19 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     return NULL;
 }
 
-bool ps_ast_check_lvalue_rvalue_compatibility(const ps_type_definition *left, const ps_type_definition *right)
+bool ps_ast_check_type_compatibility(const ps_type_definition *left, const ps_type_definition *right)
 {
     assert(left != NULL && right != NULL);
 
+    // Exact same type?
     if (left->type == right->type)
+        return true;
+
+    bool left_is_enum = ps_value_is_enum(left);
+    bool right_is_enum = ps_value_is_enum(right);
+    ps_value_type left_base = ps_value_get_base(left);
+    ps_value_type right_base = ps_value_get_base(right);
+    if (left_base == right_base)
         return true;
 
     return false;
