@@ -113,6 +113,13 @@ ps_ast_node *ps_ast_free_node(ps_ast_node *node)
     return NULL;
 }
 
+/**
+ * Checks if two types are compatible.
+ *  - Same type => OK
+ *  - Integer <=> Unsigned => OK
+ *  - Integer | Unsigned
+ *  -
+ */
 bool ps_ast_check_type_compatibility(const ps_type_definition *left, const ps_type_definition *right)
 {
     assert(left != NULL && right != NULL);
@@ -121,8 +128,6 @@ bool ps_ast_check_type_compatibility(const ps_type_definition *left, const ps_ty
     if (left->type == right->type)
         return true;
 
-    bool left_is_enum = ps_value_is_enum(left);
-    bool right_is_enum = ps_value_is_enum(right);
     ps_value_type left_base = ps_value_get_base(left);
     ps_value_type right_base = ps_value_get_base(right);
     if (left_base == right_base)
