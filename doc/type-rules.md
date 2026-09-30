@@ -17,22 +17,22 @@ cf. [ps_ast.c:ps_ast_unary_operation_get_result_type()](../src/ps_ast.c) and [ps
 | Operator | Type              | Result type       |
 | :------: | :---------------- | :---------------: |
 |   `+`    | Integer           | Integer           |
-|   `-`    | Integer           | Integer           |
-|   `+`    | Unsigned          | Unsigned          |
-|   `-`    | Unsigned          | Integer           |
-|   `+`    | Real              | Real              |
-|   `-`    | Real              | Real              |
 |   `+`    | Integer subrange  | Integer subrange  |
-|   `-`    | Integer subrange  | Integer subrange  |
+|   `+`    | Real              | Real              |
+|   `+`    | Unsigned          | Unsigned          |
 |   `+`    | Unsigned subrange | Unsigned subrange |
+|   `-`    | Integer           | Integer           |
+|   `-`    | Integer subrange  | Integer subrange  |
+|   `-`    | Real              | Real              |
+|   `-`    | Unsigned          | Integer           |
 |   `-`    | Unsigned subrange | Integer           |
-|  `Not`   | Integer           | Integer           |
-|  `Not`   | Unsigned          | Unsigned          |
-|  `Not`   | Integer subrange  | Integer subrange  |
-|  `Not`   | Unsigned subrange | Unsigned subrange |
 |  `Not`   | Boolean           | Boolean           |
+|  `Not`   | Integer           | Integer           |
+|  `Not`   | Integer subrange  | Integer subrange  |
+|  `Not`   | Unsigned          | Unsigned          |
+|  `Not`   | Unsigned subrange | Unsigned subrange |
 
-Unary `+` is parsed as a no-op and does not validate its operand type. Unary `-` and `Not` are evaluated at runtime;
+TODO Unary `+` is parsed as a no-op and does not validate its operand type. Unary `-` and `Not` are evaluated at runtime;
 they do not check that a result remains within the operand's subrange.
 
 ## Binary operators
@@ -63,12 +63,7 @@ cf. [ps_ast.c:ps_ast_binary_operation_get_result_type()](../src/ps_ast.c) and [p
 ³ Infix `**` is not implemented. `Power(a, b)` is available as a function, but its runtime implementation requires
 Real arguments. The parser accepts other numeric arguments too, so those calls can compile and then fail at runtime.
 
-The listed `Integer`-left, `Unsigned`-right combinations are implemented. The reverse order is inconsistent: for
-`Unsigned`-left and `Integer`-right, `+`, `-`, `*`, `Div`, `Mod`, and `Or` infer an `Unsigned` result in the AST but
-produce an `Integer` value at runtime. This mismatch may cause an implicit conversion at the point of use; it does not
-always fail with a type error. In addition, the runtime implementation of `Integer / Real` reads the right operand as
-an Integer, so this documented operand pair does not compute reliably. The AST infers `Boolean` for comparisons
-without checking operand compatibility; unsupported operand pairs are rejected only at runtime.
+TODO The listed `Integer`-left, `Unsigned`-right combinations are implemented. The reverse order is inconsistent: for `Unsigned`-left and `Integer`-right, `+`, `-`, `*`, `Div`, `Mod`, and `Or` infer an `Unsigned` result in the AST but produce an `Integer` value at runtime. This mismatch may cause an implicit conversion at the point of use; it does not always fail with a type error. In addition, the runtime implementation of `Integer / Real` reads the right operand as an Integer, so this documented operand pair does not compute reliably. The AST infers `Boolean` for comparisons without checking operand compatibility; unsupported operand pairs are rejected only at runtime.
 
 ## Compatibility
 
@@ -82,7 +77,4 @@ without checking operand compatibility; unsupported operand pairs are rejected o
 |     Integer      | Unsigned subrange |     Yes     |
 | Integer subrange | Integer\|Unsigned |     Yes     |
 
-This compatibility table is not enforced as a general static rule. The compatibility helper in `ps_ast.c` has no
-call sites and does not implement all the listed pairs. Assignments instead attempt runtime value conversion; range
-checking can make otherwise convertible values fail. User-defined procedure and function arguments currently require
-the exact same type definition, for both by-value and by-reference parameters.
+TODO This compatibility table is not enforced as a general static rule. The compatibility helper in `ps_ast.c` has no call sites and does not implement all the listed pairs. Assignments instead attempt runtime value conversion; range checking can make otherwise convertible values fail. User-defined procedure and function arguments currently require the exact same type definition, for both by-value and by-reference parameters.
