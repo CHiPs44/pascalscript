@@ -594,11 +594,11 @@ static bool ps_ast_execute_function_call_system_2arg(ps_interpreter *interpreter
 
     ps_ast_value a = {.group = PS_AST_EXPRESSION,
                       .kind = PS_AST_LITERAL_VALUE,
-                      .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+                      .value = {.allocated = false, .type = &ps_system_real, .data = {0}}};
 
     ps_ast_value b = {.group = PS_AST_EXPRESSION,
                       .kind = PS_AST_LITERAL_VALUE,
-                      .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
+                      .value = {.allocated = false, .type = &ps_system_real, .data = {0}}};
     if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &a))
         return false;
     if (!ps_ast_evaluate_expression(interpreter, function_call->args[1], &b))

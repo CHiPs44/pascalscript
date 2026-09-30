@@ -12,32 +12,37 @@ Integer arithmetic has no explicit PascalScript runtime overflow check, even whe
 
 ## Unary operators
 
-cf. [ps_ast.c:ps_ast_unary_operation_get_result_type()](../src/ps_ast.c) and [ps_ast_execute.c:ps_ast_evaluate_expression_unary()](../src/ps_ast_execute.c)
+C Functions:
 
-| Operator | Type              | Result type       |
+- [ps_parse_factor()](../src/ps_parse_expression.c)
+- [ps_ast.c:ps_ast_unary_operation_get_result_type()](../src/ps_ast.c)
+- [ps_ast_execute.c:ps_ast_evaluate_expression_unary()](../src/ps_ast_execute.c)
+
+| Operator | Type              |    Result type    |
 | :------: | :---------------- | :---------------: |
-|   `+`    | Integer           | Integer           |
+|   `+`    | Integer           |      Integer      |
 |   `+`    | Integer subrange  | Integer subrange  |
-|   `+`    | Real              | Real              |
-|   `+`    | Unsigned          | Unsigned          |
+|   `+`    | Real              |       Real        |
+|   `+`    | Unsigned          |     Unsigned      |
 |   `+`    | Unsigned subrange | Unsigned subrange |
-|   `-`    | Integer           | Integer           |
+|   `-`    | Integer           |      Integer      |
 |   `-`    | Integer subrange  | Integer subrange  |
-|   `-`    | Real              | Real              |
-|   `-`    | Unsigned          | Integer           |
-|   `-`    | Unsigned subrange | Integer           |
-|  `Not`   | Boolean           | Boolean           |
-|  `Not`   | Integer           | Integer           |
+|   `-`    | Real              |       Real        |
+|   `-`    | Unsigned          |      Integer      |
+|   `-`    | Unsigned subrange |      Integer      |
+|  `Not`   | Boolean           |      Boolean      |
+|  `Not`   | Integer           |      Integer      |
 |  `Not`   | Integer subrange  | Integer subrange  |
-|  `Not`   | Unsigned          | Unsigned          |
+|  `Not`   | Unsigned          |     Unsigned      |
 |  `Not`   | Unsigned subrange | Unsigned subrange |
-
-TODO Unary `+` is parsed as a no-op and does not validate its operand type. Unary `-` and `Not` are evaluated at runtime;
-they do not check that a result remains within the operand's subrange.
 
 ## Binary operators
 
-cf. [ps_ast.c:ps_ast_binary_operation_get_result_type()](../src/ps_ast.c) and [ps_ast_execute.c:ps_ast_evaluate_expression_binary()](../src/ps_ast_execute.c)
+C Functions:
+
+- [ps_parse_expression()](../src/ps_parse_expression.c)
+- [ps_ast.c:ps_ast_binary_operation_get_result_type()](../src/ps_ast.c)
+- [ps_ast_execute.c:ps_ast_evaluate_expression_binary()](../src/ps_ast_execute.c)
 
 |                 Operator                 |   Left   |  Right   | Result type |
 | :--------------------------------------: | :------: | :------: | :---------: |
@@ -58,10 +63,9 @@ cf. [ps_ast.c:ps_ast_binary_operation_get_result_type()](../src/ps_ast.c) and [p
 
 ¹ cf. <https://www.freepascal.org/docs-html/current/ref/refsu4.html>
 
-² Scalar is: Integer, Unsigned, Integer subrange, Unsigned subrange, Real
+² Scalar in this case is: Integer, Unsigned, Integer subrange, Unsigned subrange, Real
 
-³ Infix `**` is not implemented. `Power(a, b)` is available as a function, but its runtime implementation requires
-Real arguments. The parser accepts other numeric arguments too, so those calls can compile and then fail at runtime.
+³ Infix `**` is not implemented. `Power(a, b)` is available as a function. The parser accepts numeric arguments, and the runtime converts both arguments to Real before calling `Power` (the same conversion is used by `LogN` in [ps_ast_execute_function_call_system_2arg()](../src/ps_ast_execute.c)).
 
 TODO The listed `Integer`-left, `Unsigned`-right combinations are implemented. The reverse order is inconsistent: for `Unsigned`-left and `Integer`-right, `+`, `-`, `*`, `Div`, `Mod`, and `Or` infer an `Unsigned` result in the AST but produce an `Integer` value at runtime. This mismatch may cause an implicit conversion at the point of use; it does not always fail with a type error. In addition, the runtime implementation of `Integer / Real` reads the right operand as an Integer, so this documented operand pair does not compute reliably. The AST infers `Boolean` for comparisons without checking operand compatibility; unsupported operand pairs are rejected only at runtime.
 

@@ -128,10 +128,10 @@ bool ps_ast_check_type_compatibility(const ps_type_definition *left, const ps_ty
     if (left->type == right->type)
         return true;
 
-    ps_value_type left_base = ps_value_get_base(left);
-    ps_value_type right_base = ps_value_get_base(right);
-    if (left_base == right_base)
-        return true;
+    // ps_value_type left_base = ps_value_get_base(left);
+    // ps_value_type right_base = ps_value_get_base(right);
+    // if (left_base == right_base)
+    //     return true;
 
     return false;
 }
@@ -542,15 +542,33 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, co
     ps_value value = {.allocated = false, .type = operand_type, .data = {0}};
     ps_value_type type = ps_value_get_type(&value);
     ps_value_type base = ps_value_get_base(&value);
-    // - U => I
-    if ((operator == PS_OP_NEG) && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
-        return &ps_system_integer;
-    // cf. ps_value_is_number()
-    if (type == PS_TYPE_UNSIGNED || type == PS_TYPE_INTEGER || type == PS_TYPE_REAL ||
-        (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED) || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER))
-        return operand_type;
-    if (type == PS_TYPE_BOOLEAN)
+
+    // NOT B => B
+    if (operator == PS_OP_NOT && type == PS_TYPE_BOOLEAN)
         return &ps_system_boolean;
+
+    // +/- R => R
+    if ((operator == PS_OP_POS || operator == PS_OP_NEG) && type == PS_TYPE_REAL)
+        return &ps_system_real;
+
+    // +/NOT I/U => I/U
+    if (operator == PS_OP_POS || operator == PS_OP_NOT)
+    {
+        if ((type == PS_TYPE_INTEGER || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER)) ||
+            (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
+            return operand_type;
+        else
+            return NULL;
+    }
+
+    // - U => I
+    if (operator == PS_OP_NEG && (type == PS_TYPE_UNSIGNED || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_UNSIGNED)))
+        return &ps_system_integer;
+
+    // - I/R => I/R
+    if (operator == PS_OP_NEG &&
+        (type == PS_TYPE_INTEGER || type == PS_TYPE_REAL || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_INTEGER)))
+        return operand_type;
 
     return NULL;
 }
@@ -558,7 +576,7 @@ ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, co
 ps_ast_unary_operation *ps_ast_create_unary_operation(uint16_t line, uint16_t column, ps_operator_unary operator,
                                                       ps_ast_node *operand)
 {
-    assert(operator == PS_OP_NEG || operator == PS_OP_NOT);
+    assert(operator == PS_OP_POS || operator == PS_OP_NEG || operator == PS_OP_NOT);
     assert(operand != NULL && ps_ast_node_check_group(operand, PS_AST_EXPRESSION));
 
     ps_ast_unary_operation *unary_operation = (ps_ast_unary_operation *)ps_ast_create_node(

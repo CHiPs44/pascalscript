@@ -25,7 +25,8 @@ extern "C"
     typedef enum e_ps_operator_unary
     {
         PS_OP_UNARY_INVALID = 0,
-        PS_OP_NEG,
+        PS_OP_POS, // +
+        PS_OP_NEG, // -
         PS_OP_NOT,
         // force 16 bits size
         PS_OP_UNARY_MAX = 0xffff
@@ -87,4 +88,3 @@ extern "C"
 #endif
 
 #endif /* _PS_OPERATOR_H */
-

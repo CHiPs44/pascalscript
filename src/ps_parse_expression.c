@@ -422,7 +422,6 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
     PARSE_BEGIN("FACTOR", "");
 
     ps_value factor_value = {.type = &ps_system_none, .data.v = NULL};
-    ps_token_type unary_operator = PS_TOKEN_NONE;
 
     switch (lexer->current_token.type)
     {
@@ -436,19 +435,13 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         break;
     // *** Unary operators ***
     case PS_TOKEN_PLUS:
-        // does nothing => skip it (?)
-        READ_NEXT_TOKEN_OR_RETURN_FALSE
-        if (!ps_parse_factor(compiler, block, expression))
-            TRACE_ERROR("UNARY_PLUS");
-        break;
     case PS_TOKEN_MINUS:
     case PS_TOKEN_NOT:
-        unary_operator = lexer->current_token.type;
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         ps_ast_node *operand = NULL;
         if (!ps_parse_factor(compiler, block, &operand))
             TRACE_ERROR("UNARY");
-        ps_operator_unary operator_unary = ps_operator_unary_from_token(unary_operator);
+        ps_operator_unary operator_unary = ps_operator_unary_from_token(lexer->current_token.type);
         *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, operator_unary, operand);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)

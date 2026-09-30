@@ -8,7 +8,7 @@
       1.0 - original version
 *)
 Program Fibonacci;
-Var 
+Var
   Fibonacci1, Fibonacci2 : integer;
   Temp : integer;
   Count : integer;

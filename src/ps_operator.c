@@ -36,6 +36,9 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
     case PS_TYPE_INTEGER:
         switch (operator)
         {
+        case PS_OP_POS:
+            result->data.i = value->data.i;
+            break;
         case PS_OP_NOT:
             result->data.i = ~value->data.i;
             break;
@@ -48,45 +51,45 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
         }
         break;
     case PS_TYPE_UNSIGNED:
-        if (operator == PS_OP_NOT)
+        switch (operator)
         {
+        case PS_OP_POS:
+            result->data.u = value->data.u;
+            break;
+        case PS_OP_NOT:
             result->data.u = ~value->data.u;
-        }
-        else if (operator == PS_OP_NEG)
-        {
+            break;
+        case PS_OP_NEG:
             if (interpreter->range_check && value->data.u > PS_INTEGER_MAX)
                 return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_RANGE);
             result->type = &ps_system_integer;
             result->data.i = -((ps_integer)(value->data.u));
-        }
-        else
-        {
+            break;
+        default:
             ps_interpreter_set_message(interpreter, "Unexpected operator %d for UNSIGNED unary operation", operator);
             return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
         }
         break;
     case PS_TYPE_REAL:
-        if (operator == PS_OP_NEG)
+        switch (operator)
         {
+        case PS_OP_POS:
+            result->data.r = value->data.r;
+            break;
+        case PS_OP_NEG:
             result->data.r = -value->data.r;
-        }
-        else
-        {
-            ps_interpreter_set_message(interpreter, "Unexpected operator %d for REAL unary operation", operator);
-            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
+            break;
+        default:
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE,
+                                                    "Unexpected operator %d for REAL unary operation", operator);
         }
         break;
     case PS_TYPE_BOOLEAN:
         if (operator == PS_OP_NOT)
-        {
             result->data.b = !value->data.b;
-        }
         else
-        {
-
-            ps_interpreter_set_message(interpreter, "Unexpected operator %d for BOOLEAN unary operation", operator);
-            return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
-        }
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE,
+                                                    "Unexpected operator %d for BOOLEAN unary operation", operator);
         break;
     default:
         return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
@@ -487,6 +490,8 @@ ps_operator_unary ps_operator_unary_from_token(ps_token_type token)
 {
     switch (token)
     {
+    case PS_TOKEN_PLUS:
+        return PS_OP_POS;
     case PS_TOKEN_MINUS:
         return PS_OP_NEG;
     case PS_TOKEN_NOT:
