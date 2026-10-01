@@ -612,7 +612,7 @@ static bool ps_ast_binary_operation_is_comparison(ps_operator_binary operator)
 }
 
 static ps_symbol *ps_ast_binary_operation_get_result_type_comparison(ps_operator_binary operator,
-                                                                     const ps_ast_node *left, const ps_ast_node *right)
+                                                                     ps_value_type left_base, ps_value_type right_base)
 {
     bool ok = false;
     if (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL)
@@ -634,6 +634,31 @@ static ps_symbol *ps_ast_binary_operation_get_result_type_comparison(ps_operator
     else if (left_base == PS_TYPE_BOOLEAN && right_base == PS_TYPE_BOOLEAN)
         ok = operator == PS_OP_EQ || operator == PS_OP_NE;
     return ok ? &ps_system_boolean : NULL;
+}
+
+static ps_symbol *ps_ast_binary_operation_get_result_type_real_division(ps_value_type left_base,
+                                                                        ps_value_type right_base)
+{
+    bool ok = false;
+    if (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL)
+        ok = true;
+    else if (left_base == PS_TYPE_REAL && right_base == PS_TYPE_UNSIGNED)
+        ok = true;
+    else if (left_base == PS_TYPE_REAL && right_base == PS_TYPE_INTEGER)
+        ok = true;
+    else if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_REAL)
+        ok = true;
+    else if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_REAL)
+        ok = true;
+    else if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
+        ok = true;
+    else if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED)
+        ok = true;
+    else if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER)
+        ok = true;
+    else if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
+        ok = true;
+    return ok ? &ps_system_real : NULL;
 }
 
 static bool ps_ast_binary_operation_is_string_concat(ps_operator_binary operator, ps_value_type left_base,
@@ -680,18 +705,14 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
 
     // Comparison => Boolean
     if (ps_ast_binary_operation_is_comparison(operator))
-    {
-        return ps_ast_binary_operation_get_result_type_comparison(operator, left_base, right_base)
-    }
+        return ps_ast_binary_operation_get_result_type_comparison(operator, left_base, right_base);
     // / => Real
     if (operator == PS_OP_DIV_REAL)
-    {
-        return &ps_system_real;
-    }
+        return ps_ast_binary_operation_get_result_type_real_division(left_base, right_base);
     // C or S + C or S => String
     if (ps_ast_binary_operation_is_string_concat(operator, left_base, right_base))
         return &ps_system_string;
-    // AND, OR, XOR with booleans => Boolean
+    // B AND|OR|XOR B => Boolean
     if (ps_ast_binary_operation_is_boolean_operation(operator, left_base, right_base))
         return &ps_system_boolean;
     // +, -, *, / with R => Real
