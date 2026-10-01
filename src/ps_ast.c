@@ -611,6 +611,31 @@ static bool ps_ast_binary_operation_is_comparison(ps_operator_binary operator)
            operator == PS_OP_LT || operator == PS_OP_NE;
 }
 
+static ps_symbol *ps_ast_binary_operation_get_result_type_comparison(ps_operator_binary operator,
+                                                                     const ps_ast_node *left, const ps_ast_node *right)
+{
+    bool ok = false;
+    if (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL)
+        ok = true;
+    else if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
+        ok = true;
+    else if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED)
+        ok = true;
+    else if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER)
+        ok = true;
+    else if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
+        ok = true;
+    else if (left_base == PS_TYPE_CHAR && right_base == PS_TYPE_CHAR)
+        ok = true;
+    else if (left_base == PS_TYPE_CHAR && right_base == PS_TYPE_STRING)
+        ok = true;
+    else if (left_base == PS_TYPE_STRING && right_base == PS_TYPE_CHAR)
+        ok = true;
+    else if (left_base == PS_TYPE_BOOLEAN && right_base == PS_TYPE_BOOLEAN)
+        ok = operator == PS_OP_EQ || operator == PS_OP_NE;
+    return ok ? &ps_system_boolean : NULL;
+}
+
 static bool ps_ast_binary_operation_is_string_concat(ps_operator_binary operator, ps_value_type left_base,
                                                      ps_value_type right_base)
 {
@@ -655,10 +680,14 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
 
     // Comparison => Boolean
     if (ps_ast_binary_operation_is_comparison(operator))
-        return &ps_system_boolean;
+    {
+        return ps_ast_binary_operation_get_result_type_comparison(operator, left_base, right_base)
+    }
     // / => Real
     if (operator == PS_OP_DIV_REAL)
+    {
         return &ps_system_real;
+    }
     // C or S + C or S => String
     if (ps_ast_binary_operation_is_string_concat(operator, left_base, right_base))
         return &ps_system_string;
@@ -679,7 +708,7 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
         else
             return NULL;
     } // MOD with I/U => Integer or Unsigned from left operand
-    if (operator == PS_OP_MOD)
+    if (operator == PS_OP_MOD && (left_base == PS_TYPE_INTEGER || left_base == PS_TYPE_UNSIGNED))
         return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
     // +, *, DIV with U => Unsigned
     // -                => Integer

@@ -332,7 +332,7 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     NUMBER_CASE_DIV_MOD(PS_OP_DIV << 16 | UU, u, u, /, u, PS_TYPE_UNSIGNED)
     // DIV.R
     NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | II, i, i)
-    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | IR, i, i)
+    NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | IR, i, r)
     NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | IU, i, u)
     NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | RI, r, i)
     NUMBER_CASE_DIV_REAL(PS_OP_DIV_REAL << 16 | RR, r, r)
