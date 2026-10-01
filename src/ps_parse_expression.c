@@ -437,11 +437,13 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
     case PS_TOKEN_PLUS:
     case PS_TOKEN_MINUS:
     case PS_TOKEN_NOT:
+        ps_operator_unary operator_unary = ps_operator_unary_from_token(lexer->current_token.type);
+        if (operator_unary == PS_OP_UNARY_INVALID)
+            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         ps_ast_node *operand = NULL;
         if (!ps_parse_factor(compiler, block, &operand))
             TRACE_ERROR("UNARY");
-        ps_operator_unary operator_unary = ps_operator_unary_from_token(lexer->current_token.type);
         *expression = (ps_ast_node *)ps_ast_create_unary_operation(start_line, start_column, operator_unary, operand);
         if (*expression == NULL)
             RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -747,6 +749,7 @@ static bool ps_parse_constant_expression_numeric(ps_compiler *compiler, ps_ast_b
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     PARSE_END("OK")
 }
@@ -790,6 +793,7 @@ static bool ps_parse_constant_expression_identifier(ps_compiler *compiler, ps_as
             RETURN_ERROR(PS_ERROR_EXPECTED_NUMBER)
         }
     }
+    READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     PARSE_END("OK")
 }
