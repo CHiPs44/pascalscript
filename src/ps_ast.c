@@ -528,9 +528,7 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
 
 /**
  * Get result type of unary operation
- *  NOT X => X
- *  NEG U => I
- *  NEG X => X
+ * @see doc/type-rules.md
  */
 ps_symbol *ps_ast_unary_operation_get_result_type(ps_operator_unary operator, const ps_ast_node *operand)
 {
@@ -690,6 +688,7 @@ static bool ps_ast_binary_operation_is_mixed_integer_unsigned(ps_value_type left
 
 /**
  * Get result type of binary operation
+ * @see doc/type-rules.md
  */
 ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, const ps_ast_node *left,
                                                    const ps_ast_node *right)
@@ -703,23 +702,22 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
     ps_value_type left_base = left_type->value->data.t->base;
     ps_value_type right_base = right_type->value->data.t->base;
 
-    // Comparison => Boolean
     if (ps_ast_binary_operation_is_comparison(operator))
         return ps_ast_binary_operation_get_result_type_comparison(operator, left_base, right_base);
-    // / => Real
+
     if (operator == PS_OP_DIV_REAL)
         return ps_ast_binary_operation_get_result_type_real_division(left_base, right_base);
-    // C or S + C or S => String
+
     if (ps_ast_binary_operation_is_string_concat(operator, left_base, right_base))
         return &ps_system_string;
-    // B AND|OR|XOR B => Boolean
+
     if (ps_ast_binary_operation_is_boolean_operation(operator, left_base, right_base))
         return &ps_system_boolean;
-    // +, -, *, / with R => Real
+
     if (ps_ast_binary_operation_is_real_operation(operator) &&
         (left_base == PS_TYPE_REAL || right_base == PS_TYPE_REAL))
         return &ps_system_real;
-    // SHL, SHR with I/U => Integer or Unsigned from left operand
+
     if (operator == PS_OP_SHL || operator == PS_OP_SHR)
     {
         if (left_base == PS_TYPE_UNSIGNED)
@@ -728,7 +726,8 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
             return &ps_system_integer;
         else
             return NULL;
-    } // MOD with I/U => Integer or Unsigned from left operand
+    }
+    // MOD with I/U => Integer or Unsigned from left operand
     if (operator == PS_OP_MOD && (left_base == PS_TYPE_INTEGER || left_base == PS_TYPE_UNSIGNED))
         return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
     // +, *, DIV with U => Unsigned
