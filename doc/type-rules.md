@@ -106,47 +106,9 @@ All these yield a Boolean result.
 
 ## Type compatibility matrix
 
-This table is for asssignment `:=` and parameter passing:
-
-```pascal
-Program TypeCompatibility;
-
-Type
-  Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
-  Months = (January, February, March, April, May, June, July, August, September, October, November, December);
-
-Var
-  i: Integer;
-  d1, d2: Days;
-
-Procedure Foo(a: Integer);
-Begin
-  {...}
-End;
-
-Procedure Bar(a: Real);
-Begin
-  {...}
-End;
-
-Begin
-  i := 1.0;     // Error: incompatible types
-  i := 1;       // OK
-  Foo(1.0);     // Error: incompatible types
-  Foo(1);       // OK
-  Bar(1.0);     // OK
-  Bar(1);       // OK
-  d1 := Monday; // OK
-  d1 := 1;      // Error: incompatible types
-  d1 := d2;     // OK
-  d1 := i;      // Error: incompatible types
-  d1 := April;  // Error: incompatible types
-End.
-```
+This table is for asssignment `:=` and parameter passing.
 
 Same type for left and right should be always compatible, this is not shown in the table.
-
-Yes means the left type can accept the right type in an assignment or parameter passing operation.
 
 | Left / Right | Integer | Unsigned | Real | Char | String | Boolean | Array |
 | ------------ | :-----: | :------: | :--: | :--: | :----: | :-----: | :---: |
@@ -159,3 +121,49 @@ Yes means the left type can accept the right type in an assignment or parameter 
 | Array        |    ✗    |    ✗     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
 
 For now, arrays are not assignable nor passable by value.
+
+Example:
+
+```pascal
+Program TypeCompatibility;
+
+Type
+  Days = (Mon, Tue, Wed, Thu, Fri, Sat, Sun);
+  Months = (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec);
+  D100Roll = 1..100;
+
+Var
+  i: Integer;
+  Day1, Day2: Days;
+  d100: D100Roll;
+
+Procedure Foo(a: Integer);
+Begin
+  {...}
+End;
+
+Procedure Bar(a: Real);
+Begin
+  {...}
+End;
+
+Begin
+  { ---------- OK ---------- }
+  i := 1;
+  Day1 := Mon;
+  Day2 := Day1;
+  d100 := 42;
+  Foo(1);
+  Bar(1.0);
+  Bar(1);
+  { ---------- Error: incompatible types ---------- }
+  i := 1.0;
+  Day1 := 1;
+  Day1 := i;
+  Day1 := Apr;
+  Foo(1.0);
+  { ---------- Runtime range error when range checking is enabled ---------- }
+  i := Maxint + 1;
+  d100 := 101;
+End.
+```
