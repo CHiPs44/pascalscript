@@ -285,7 +285,16 @@ bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *dig
         has_exponent = true;                                                                                           \
         APPEND_CHAR_DEC()                                                                                              \
         if (c == '+' || c == '-')                                                                                      \
+        {                                                                                                              \
             APPEND_CHAR_DEC()                                                                                          \
+            char c2 = ps_buffer_peek_char(lexer->buffer);                                                              \
+            if (c2 == '+' || c2 == '-')                                                                                \
+                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                     \
+                                             "Only one exponent sign allowed in real constants");                      \
+            if (!isdigit(c2))                                                                                          \
+                return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                     \
+                                             "Exponent sign must e be followed by a digit in real constants");         \
+        }                                                                                                              \
     }
 
 bool ps_lexer_read_number_dec(ps_lexer *lexer)
