@@ -30,7 +30,7 @@ End;
 // End;
 
 Begin
-    WriteLine('-', 80);
+    // WriteLine('-', 80);
     // Global1 := 123456789;
     // Global2 := 987654321;
     // WriteLn('Before Ops, Global1=', Global1, ' Global2=', Global2);
