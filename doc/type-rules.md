@@ -1,8 +1,8 @@
 # Type rules
 
-Rules for result type of unary and binary operations are enforced when parsing the source code into the AST.
+Rules for result type of unary and binary operations and assignment are enforced when parsing the source code into the AST.
 
-They are also checked or used when evaluating the AST.
+They are also checked or used when evaluating/executing the AST.
 
 ## Range checking
 
@@ -19,12 +19,6 @@ Integer arithmetic has no explicit PascalScript runtime overflow check, even whe
 
 ## Unary operators
 
-Rules are checked in C Functions:
-
-- [ps_ast.c:ps_ast_unary_operation_get_result_type()](../src/ps_ast.c)
-- [ps_parse_factor()](../src/ps_parse_expression.c)
-- [ps_ast_execute.c:ps_ast_evaluate_expression_unary()](../src/ps_ast_execute.c)
-
 | Operator | Type     | Result type |
 | -------- | -------- | ----------- |
 | `+`      | Integer  | Integer     |
@@ -37,9 +31,47 @@ Rules are checked in C Functions:
 | `Not`    | Integer  | Integer     |
 | `Not`    | Unsigned | Unsigned    |
 
+Integer and Unsigned subranges are treated as Integer and Unsigned respectively, but are likely to fail when range checking is enabled.
+
 Types not listed above are invalid, and will fail to parse.
 
-One can not negate a string, for example.
+```pascal
+Program UnaryOperators;
+Type
+  D20Roll = 1..20;
+Var
+  I: Integer;
+  U: Unsigned;
+  R: Real;
+  B: Boolean;
+  D: D20Roll;
+Begin
+  I := 1;
+  U := 1;
+  R := 1.0;
+  B := True;
+  D := 1;
+  { ---------- OK ---------- }
+  I := +I;
+  I := -I;
+  U := +U;
+  R := +R;
+  R := -R;
+  B := Not B;
+  I := Not I;
+  U := Not U;
+  D := +D;
+  { ---------- Compiler error during parsing ---------- }
+  B := +B;
+  B := -B;
+  R := Not R;
+  { ---------- Runtime range error when range checking is enabled ---------- }
+  I := -U; { If U > MaxInt }
+  U := -U;
+  D := -D;
+  D := Not D;
+End.
+```
 
 ## Binary operators
 
@@ -112,13 +144,13 @@ Same type for left and right should be always compatible, this is not shown in t
 
 | Left / Right | Integer | Unsigned | Real | Char | String | Boolean | Array |
 | ------------ | :-----: | :------: | :--: | :--: | :----: | :-----: | :---: |
-| Integer      |    ✓    |    ✓     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
-| Unsigned     |    ✓    |    ✓     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
-| Real         |    ✓    |    ✓     |  ✓   |  ✗   |   ✗    |    ✗    |   ✗   |
-| Char         |    ✗    |    ✗     |  ✗   |  ✓   |   ✗    |    ✗    |   ✗   |
-| String       |    ✗    |    ✗     |  ✗   |  ✓   |   ✓    |    ✗    |   ✗   |
-| Boolean      |    ✗    |    ✗     |  ✗   |  ✗   |   ✗    |    ✓    |   ✗   |
-| Array        |    ✗    |    ✗     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
+| Integer      |   ✅    |    ✅    |  🚫  |  🚫  |   🚫   |   🚫    |  🚫   |
+| Unsigned     |   ✅    |    ✅    |  🚫  |  🚫  |   🚫   |   🚫    |  🚫   |
+| Real         |   ✅    |    ✅    |  ✅  |  🚫  |   🚫   |   🚫    |  🚫   |
+| Char         |   🚫    |    🚫    |  🚫  |  ✅  |   🚫   |   🚫    |  🚫   |
+| String       |   🚫    |    🚫    |  🚫  |  ✅  |   ✅   |   🚫    |  🚫   |
+| Boolean      |   🚫    |    🚫    |  🚫  |  🚫  |   🚫   |   ✅    |  🚫   |
+| Array        |   🚫    |    🚫    |  🚫  |  🚫  |   🚫   |   🚫    |  🚫   |
 
 For now, arrays are not assignable nor passable by value.
 
@@ -156,7 +188,7 @@ Begin
   Foo(1);
   Bar(1.0);
   Bar(1);
-  { ---------- Error: incompatible types ---------- }
+  { ---------- Compiler error during parsing ---------- }
   i := 1.0;
   Day1 := 1;
   Day1 := i;
