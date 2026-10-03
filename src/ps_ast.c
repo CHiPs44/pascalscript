@@ -662,10 +662,8 @@ static ps_symbol *ps_ast_binary_operation_get_result_type_real_division(ps_value
 static bool ps_ast_binary_operation_is_string_concat(ps_operator_binary operator, ps_value_type left_base,
                                                      ps_value_type right_base)
 {
-    if (operator != PS_OP_ADD)
-        return false;
-    return (left_base == PS_TYPE_CHAR || left_base == PS_TYPE_STRING) &&
-           (right_base == PS_TYPE_CHAR || right_base == PS_TYPE_STRING);
+    return ((operator == PS_OP_ADD) && (left_base == PS_TYPE_CHAR || left_base == PS_TYPE_STRING) &&
+            (right_base == PS_TYPE_CHAR || right_base == PS_TYPE_STRING));
 }
 
 static bool ps_ast_binary_operation_is_boolean_operation(ps_operator_binary operator, ps_value_type left_base,
@@ -720,25 +718,23 @@ ps_symbol *ps_ast_binary_operation_get_result_type(ps_operator_binary operator, 
 
     if (operator == PS_OP_SHL || operator == PS_OP_SHR)
     {
-        if (left_base == PS_TYPE_UNSIGNED)
+        if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER)
             return &ps_system_unsigned;
-        else if (left_base == PS_TYPE_INTEGER)
+        if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED)
             return &ps_system_integer;
-        else
-            return NULL;
+        return NULL;
     }
-    // MOD with I/U => Integer or Unsigned from left operand
-    if (operator == PS_OP_MOD && (left_base == PS_TYPE_INTEGER || left_base == PS_TYPE_UNSIGNED))
+
+    if (operator == PS_OP_MOD && ((left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_UNSIGNED) ||
+                                  (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_INTEGER)))
         return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
-    // +, *, DIV with U => Unsigned
-    // -                => Integer
-    // cf. https://www.freepascal.org/docs-html/current/ref/refsu4.html
+
     if (left_base == PS_TYPE_UNSIGNED && right_base == PS_TYPE_UNSIGNED)
         return operator == PS_OP_SUB ? &ps_system_integer : &ps_system_unsigned;
-    // +, -, *, DIV with I and U => Integer or Unsigned from left operand
+
     if (ps_ast_binary_operation_is_mixed_integer_unsigned(left_base, right_base))
         return left_base == PS_TYPE_UNSIGNED ? &ps_system_unsigned : &ps_system_integer;
-    // +, -, *, DIV with I => Integer
+
     if (left_base == PS_TYPE_INTEGER && right_base == PS_TYPE_INTEGER)
         return &ps_system_integer;
 

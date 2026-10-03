@@ -10,38 +10,32 @@ Range checking is a runtime option.
 
 It applies to value copies and conversions into a target type, and to some specific operations.
 
-Examples when range checking is enabled:
+Examples that will fail when range checking is enabled:
 
-- assigning an Integer or Unsigned value outside a subrange to a variable of that subrange will fail
-- assigning a negative Integer to an Unsigned will fail
+- assigning an Integer or Unsigned value outside a subrange to a variable of that subrange
+- assigning a negative Integer to an Unsigned
 
 Integer arithmetic has no explicit PascalScript runtime overflow check, even when range checking is enabled.
 
 ## Unary operators
 
-Enforced in C Functions:
+Rules are checked in C Functions:
 
-- [ps_parse_factor()](../src/ps_parse_expression.c)
 - [ps_ast.c:ps_ast_unary_operation_get_result_type()](../src/ps_ast.c)
+- [ps_parse_factor()](../src/ps_parse_expression.c)
 - [ps_ast_execute.c:ps_ast_evaluate_expression_unary()](../src/ps_ast_execute.c)
 
-| Operator | Type              |    Result type    |
-| :------: | :---------------- | :---------------: |
-|   `+`    | Integer           |      Integer      |
-|   `+`    | Integer subrange  | Integer subrange  |
-|   `+`    | Real              |       Real        |
-|   `+`    | Unsigned          |     Unsigned      |
-|   `+`    | Unsigned subrange | Unsigned subrange |
-|   `-`    | Integer           |      Integer      |
-|   `-`    | Integer subrange  | Integer subrange  |
-|   `-`    | Real              |       Real        |
-|   `-`    | Unsigned          |      Integer      |
-|   `-`    | Unsigned subrange |      Integer      |
-|  `Not`   | Boolean           |      Boolean      |
-|  `Not`   | Integer           |      Integer      |
-|  `Not`   | Integer subrange  | Integer subrange  |
-|  `Not`   | Unsigned          |     Unsigned      |
-|  `Not`   | Unsigned subrange | Unsigned subrange |
+| Operator | Type     | Result type |
+| -------- | -------- | ----------- |
+| `+`      | Integer  | Integer     |
+| `+`      | Real     | Real        |
+| `+`      | Unsigned | Unsigned    |
+| `-`      | Integer  | Integer     |
+| `-`      | Real     | Real        |
+| `-`      | Unsigned | Integer     |
+| `Not`    | Boolean  | Boolean     |
+| `Not`    | Integer  | Integer     |
+| `Not`    | Unsigned | Unsigned    |
 
 Types not listed above are invalid, and will fail to parse.
 
@@ -55,35 +49,33 @@ C Functions:
 - [ps_ast.c:ps_ast_binary_operation_get_result_type()](../src/ps_ast.c)
 - [ps_ast_execute.c:ps_ast_evaluate_expression_binary()](../src/ps_ast_execute.c)
 
-## Arithmetic operations
+### Arithmetic operations
 
 | Operator                | Left     | Right    | Result type |
-| :---------------------- | :------- | :------- | :---------- |
+| ----------------------- | -------- | -------- | ----------- |
 | `+` `-` `*` `Div` `Mod` | Integer  | Integer  | Integer     |
 | `+` `-` `*` `Div` `Mod` | Integer  | Unsigned | Integer     |
-| `+` `-` `*` `Div` `Mod` | Unsigned | Integer  | Unsigned¹   |
+| `+` `-` `*` `Div` `Mod` | Unsigned | Integer  | Unsigned    |
 | `+` `*` `Div` `Mod`     | Unsigned | Unsigned | Unsigned    |
 | `-`                     | Unsigned | Unsigned | Integer¹    |
 | `+` `-` `*` `/` `**`³   | Real     | Scalar²  | Real        |
 | `+` `-` `*` `/` `**`³   | Scalar²  | Real     | Real        |
 
-### Bit operations
+¹ Free Pascal has a special rule for this, see <https://www.freepascal.org/docs-html/current/ref/refsu4.html>.
 
-| Operator         | Left     | Right    | Result type |
-| :--------------- | :------- | :------- | :---------- |
-| `And` `Or` `Xor` | Integer  | Integer  | Integer     |
-| `And` `Or` `Xor` | Integer  | Unsigned | Integer     |
-| `And` `Or` `Xor` | Unsigned | Integer  | Unsigned¹   |
-| `And` `Or` `Xor` | Unsigned | Unsigned | Unsigned    |
-| `Shl` `Shr`      | Integer  | Integer  | Integer     |
-| `Shl` `Shr`      | Integer  | Unsigned | Integer     |
-| `Shl` `Shr`      | Unsigned | Integer  | Unsigned    |
-| `Shl` `Shr`      | Unsigned | Unsigned | Unsigned    |
+### Bitwise operations
+
+| Operator                     | Left     | Right    | Result type |
+| ---------------------------- | -------- | -------- | ----------- |
+| `And` `Or` `Xor` `Shl` `Shr` | Integer  | Integer  | Integer     |
+| `And` `Or` `Xor` `Shl` `Shr` | Integer  | Unsigned | Integer     |
+| `And` `Or` `Xor` `Shl` `Shr` | Unsigned | Integer  | Unsigned    |
+| `And` `Or` `Xor` `Shl` `Shr` | Unsigned | Unsigned | Unsigned    |
 
 ### String concatenation
 
 | Operator | Left   | Right  | Result type |
-| :------- | :----- | :----- | :---------- |
+| -------- | ------ | ------ | ----------- |
 | `+`      | Char   | Char   | String      |
 | `+`      | Char   | String | String      |
 | `+`      | String | Char   | String      |
@@ -94,7 +86,7 @@ C Functions:
 All these yield a Boolean result.
 
 | Operator                   | Left     | Right    |
-| :------------------------- | :------- | :------- |
+| -------------------------- | -------- | -------- |
 | `And` `Or` `Xor`           | Boolean  | Boolean  |
 | `=` `<>`                   | Boolean  | Boolean  |
 | `=` `<>` `<` `<=` `>` `>=` | Char     | Char     |
@@ -108,29 +100,62 @@ All these yield a Boolean result.
 | `=` `<>` `<` `<=` `>` `>=` | Unsigned | Integer  |
 | `=` `<>` `<` `<=` `>` `>=` | Unsigned | Unsigned |
 
-¹ cf. <https://www.freepascal.org/docs-html/current/ref/refsu4.html>
-
 ² Scalar in this case is: Integer, Unsigned, Integer subrange, Unsigned subrange, Real
 
 ³ Infix `**` is not implemented. `Power(a, b)` is available as a function. The parser accepts numeric arguments, and the runtime converts both arguments to Real before calling `Power` (the same conversion is used by `LogN` in [ps_ast_execute_function_call_system_2arg()](../src/ps_ast_execute.c)).
 
-TODO
+## Type compatibility matrix
 
-- The `Unsigned`-left, `Integer`-right order is inconsistent:
-  - `+`, `-`, `*`, `Div`, `Mod`, and `Or` infer an `Unsigned` result in the AST but produce an `Integer` value at runtime.
-  - The mismatch can cause an implicit conversion where the expression is consumed
-- Comparisons infer `Boolean` without checking operand compatibility; unsupported pairs are rejected only at runtime.
+This table is for asssignment `:=` and parameter passing:
 
-## Compatibility
+```pascal
+Program TypeCompatibility;
 
-|       Left       |       Right       | Compatible? |
-| :--------------: | :---------------: | :---------: |
-|       Same       |       Same        |     Yes     |
-|     Integer      |     Unsigned      |     Yes     |
-|     Unsigned     |      Integer      |     Yes     |
-|     Integer      | Integer subrange  |     Yes     |
-|     Unsigned     | Unsigned subrange |     Yes     |
-|     Integer      | Unsigned subrange |     Yes     |
-| Integer subrange | Integer\|Unsigned |     Yes     |
+Type
+  Days = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+  Months = (January, February, March, April, May, June, July, August, September, October, November, December);
 
-TODO This compatibility table is not enforced as a general static rule. The helper in `ps_ast.c` has no call sites and only compares the top-level type tag: it can treat distinct subranges or enums as compatible, while rejecting different tags that assignment conversion supports. Assignments instead convert values at runtime; with range checking enabled, conversions can fail for negative Integer-to-Unsigned values, values outside a destination subrange, or Unsigned values too large for Integer. Enums require the exact same enum type. User-defined procedure and function arguments also require the exact same type definition, for both by-value and by-reference parameters.
+Var
+  i: Integer;
+  d1, d2: Days;
+
+Procedure Foo(a: Integer);
+Begin
+  {...}
+End;
+
+Procedure Bar(a: Real);
+Begin
+  {...}
+End;
+
+Begin
+  i := 1.0;     // Error: incompatible types
+  i := 1;       // OK
+  Foo(1.0);     // Error: incompatible types
+  Foo(1);       // OK
+  Bar(1.0);     // OK
+  Bar(1);       // OK
+  d1 := Monday; // OK
+  d1 := 1;      // Error: incompatible types
+  d1 := d2;     // OK
+  d1 := i;      // Error: incompatible types
+  d1 := April;  // Error: incompatible types
+End.
+```
+
+Same type for left and right should be always compatible, this is not shown in the table.
+
+Yes means the left type can accept the right type in an assignment or parameter passing operation.
+
+| Left / Right | Integer | Unsigned | Real | Char | String | Boolean | Array |
+| ------------ | :-----: | :------: | :--: | :--: | :----: | :-----: | :---: |
+| Integer      |    ✓    |    ✓     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
+| Unsigned     |    ✓    |    ✓     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
+| Real         |    ✓    |    ✓     |  ✓   |  ✗   |   ✗    |    ✗    |   ✗   |
+| Char         |    ✗    |    ✗     |  ✗   |  ✓   |   ✗    |    ✗    |   ✗   |
+| String       |    ✗    |    ✗     |  ✗   |  ✓   |   ✓    |    ✗    |   ✗   |
+| Boolean      |    ✗    |    ✗     |  ✗   |  ✗   |   ✗    |    ✓    |   ✗   |
+| Array        |    ✗    |    ✗     |  ✗   |  ✗   |   ✗    |    ✗    |   ✗   |
+
+For now, arrays are not assignable nor passable by value.
