@@ -353,7 +353,7 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
     {
         // Read or ReadLn
         compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-        if (!ps_parse_read_or_readln(compiler, block, call, executable == &ps_system_procedure_readln))
+        if (!ps_parse_read_or_readln_or_readstr(compiler, block, call, executable == &ps_system_procedure_readln))
             TRACE_ERROR("READ[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)

@@ -143,7 +143,8 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
  *          file_variable ',' variable
  *      ')' ;
  */
-bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
+bool ps_parse_read_or_readln_or_readstr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr,
+                                        ps_read_write_mode mode)
 {
     assert(compiler != NULL);
     assert(block != NULL);
@@ -152,7 +153,7 @@ bool ps_parse_read_or_readln(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     (void)compiler;
     (void)block;
     (void)call_ptr;
-    (void)newline;
+    (void)mode;
     PARSE_BEGIN("STATEMENT", "READ_OR_READLN")
     (void)start_line;
     (void)start_column;
@@ -217,7 +218,7 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
  *      ')' ;
  */
 bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr,
-                                           bool newline)
+                                           ps_read_write_mode mode)
 {
     assert(compiler != NULL);
     assert(block != NULL);
@@ -232,19 +233,48 @@ bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *
     int16_t width = 0;
     int16_t precision = 0;
     ps_ast_node *expression = NULL;
-    ps_ast_variable *variable = NULL;
+    ps_symbol *variable = NULL;
+    ps_ast_variable *variable_node = NULL;
+    ps_ast_block *owner = NULL;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
-    // (Write without parameters is legal but is a no-op)
-    if (PS_TOKEN_NONE == ps_parser_expect_statement_end_token(compiler->parser))
+    // (Write without parameters is "legal" but is a no-op)
+    if (PS_TOKEN_NONE != ps_parser_expect_statement_end_token(compiler->parser))
+    {
+        // "WriteStr" is not "legal"
+        if (mode == PS_READ_WRITE_MODE_STR)
+            RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
+    }
+    else
     {
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         // "Write[Ln]()"?
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
+            // "WriteStr()" is not "legal"
+            if (mode == PS_READ_WRITE_MODE_STR)
+                RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
             READ_NEXT_TOKEN_OR_RETURN_FALSE
             loop = false;
+        }
+        // "WriteStr"?
+        if (mode == PS_READ_WRITE_MODE_STR)
+        {
+            if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
+                TRACE_ERROR("VARIABLE")
+            if (!ps_value_is_string(variable->value))
+                TRACE_ERROR("STRING_VARIABLE")
+            // TODO Like FOR loop, allow only simple variable
+            variable_node = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
+            if (variable_node == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            args[n_args] = (ps_ast_node *)variable_node;
+            formats[n_args].width = 0;
+            formats[n_args].precision = 0;
+            n_args += 1;
+            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_COMMA)
+            READ_NEXT_TOKEN_OR_RETURN_FALSE
         }
         while (loop)
         {
@@ -272,8 +302,12 @@ bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *
         }
     }
 
-    *call_ptr = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL,
-                                   newline ? &ps_system_procedure_writeln : &ps_system_procedure_write, n_args,
+    ps_symbol *procedure = &ps_system_procedure_write;
+    if (mode == PS_READ_WRITE_MODE_LN)
+        procedure = &ps_system_procedure_writeln;
+    else if (mode == PS_READ_WRITE_MODE_STR)
+        procedure = &ps_system_procedure_writestr;
+    *call_ptr = ps_ast_create_call(start_line, start_column, PS_AST_PROCEDURE_CALL, procedure, n_args,
                                    n_args > 0 ? args : NULL, formats);
     if (*call_ptr == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
