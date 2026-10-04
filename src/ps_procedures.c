@@ -16,6 +16,7 @@
 #include "ps_procedures.h"
 #include "ps_system.h"
 #include "ps_token.h"
+#include "ps_tools.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
@@ -24,13 +25,15 @@
 /**********************************************************************************************************************/
 
 /* clang-format off */
-PS_SYSTEM_PROCEDURE(dec      , "DEC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_dec      )
-PS_SYSTEM_PROCEDURE(inc      , "INC"      , PS_EXECUTABLE_PROC_1ARG_S    , .proc_1arg_s    , &ps_procedure_inc      )
-PS_SYSTEM_PROCEDURE(randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG_V    , .proc_1arg_v    , &ps_procedure_randomize)
-PS_SYSTEM_PROCEDURE(read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_read     )
-PS_SYSTEM_PROCEDURE(readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ , .proc_file_read , &ps_procedure_readln   )
-PS_SYSTEM_PROCEDURE(write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_write    )
-PS_SYSTEM_PROCEDURE(writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE, .proc_file_write, &ps_procedure_writeln  )
+PS_SYSTEM_PROCEDURE(dec      , "DEC"      , PS_EXECUTABLE_PROC_1ARG_S      , .proc_1arg_s      , &ps_procedure_dec      )
+PS_SYSTEM_PROCEDURE(inc      , "INC"      , PS_EXECUTABLE_PROC_1ARG_S      , .proc_1arg_s      , &ps_procedure_inc      )
+PS_SYSTEM_PROCEDURE(randomize, "RANDOMIZE", PS_EXECUTABLE_PROC_1ARG_V      , .proc_1arg_v      , &ps_procedure_randomize)
+PS_SYSTEM_PROCEDURE(read     , "READ"     , PS_EXECUTABLE_PROC_FILE_READ   , .proc_file_read   , &ps_procedure_read     )
+PS_SYSTEM_PROCEDURE(readln   , "READLN"   , PS_EXECUTABLE_PROC_FILE_READ   , .proc_file_read   , &ps_procedure_readln   )
+PS_SYSTEM_PROCEDURE(readstr  , "READSTR"  , PS_EXECUTABLE_PROC_STRING_READ , .proc_string_read , &ps_procedure_readstr  )
+PS_SYSTEM_PROCEDURE(write    , "WRITE"    , PS_EXECUTABLE_PROC_FILE_WRITE  , .proc_file_write  , &ps_procedure_write    )
+PS_SYSTEM_PROCEDURE(writeln  , "WRITELN"  , PS_EXECUTABLE_PROC_FILE_WRITE  , .proc_file_write  , &ps_procedure_writeln  )
+PS_SYSTEM_PROCEDURE(writestr , "WRITESTR" , PS_EXECUTABLE_PROC_STRING_WRITE, .proc_string_write, &ps_procedure_writestr )
 /* clang-format on */
 
 bool ps_procedures_init(ps_ast_block *system)
@@ -43,6 +46,7 @@ bool ps_procedures_init(ps_ast_block *system)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_readln)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_write)
     ADD_SYSTEM_SYMBOL(ps_system_procedure_writeln)
+    ADD_SYSTEM_SYMBOL(ps_system_procedure_writestr)
     return true;
 error:
     return false;
@@ -53,32 +57,34 @@ bool ps_procedure_inc_or_dec(ps_interpreter *interpreter, ps_symbol *variable, b
     (void)variable;
     (void)is_inc;
     return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "%s", is_inc ? "INC" : "DEC");
-    // ps_value value = {0};
-    // if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
-    //     return false;
-    // if (!ps_value_is_ordinal(&value))
-    //     return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
-    // ps_value new_value = {.allocated = false, .type = value.type, .data = {0}};
-    // ps_value_type base = ps_value_get_base(&value);
-    // switch (base)
-    // {
-    // case PS_TYPE_CHAR:
-    // case PS_TYPE_INTEGER:
-    // case PS_TYPE_UNSIGNED:
-    //     ps_error error = is_inc ? ps_function_succ(interpreter, &value, &new_value)
-    //                             : ps_function_pred(interpreter, &value, &new_value);
-    //     if (error != PS_ERROR_NONE)
-    //         return ps_interpreter_return_false(interpreter, error);
-    //     break;
-    // default:
-    //     return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
-    // }
-    // ps_error error = ps_value_copy(&new_value, &value, interpreter->range_check);
-    // if (error != PS_ERROR_NONE)
-    //     return ps_interpreter_return_false(interpreter, error);
-    // if (!ps_interpreter_set_variable_value(interpreter, variable, &value))
-    //     return false;
-    // return true;
+    /*
+    ps_value value = {0};
+    if (!ps_interpreter_get_variable_value(interpreter, variable, &value))
+        return false;
+    if (!ps_value_is_ordinal(&value))
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    ps_value new_value = {.allocated = false, .type = value.type, .data = {0}};
+    ps_value_type base = ps_value_get_base(&value);
+    switch (base)
+    {
+    case PS_TYPE_CHAR:
+    case PS_TYPE_INTEGER:
+    case PS_TYPE_UNSIGNED:
+        ps_error error = is_inc ? ps_function_succ(interpreter, &value, &new_value)
+                                : ps_function_pred(interpreter, &value, &new_value);
+        if (error != PS_ERROR_NONE)
+            return ps_interpreter_return_false(interpreter, error);
+        break;
+    default:
+        return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+    }
+    ps_error error = ps_value_copy(&new_value, &value, interpreter->range_check);
+    if (error != PS_ERROR_NONE)
+        return ps_interpreter_return_false(interpreter, error);
+    if (!ps_interpreter_set_variable_value(interpreter, variable, &value))
+        return false;
+    return true;
+    */
 }
 
 bool ps_procedure_dec(ps_interpreter *interpreter, ps_symbol *variable)
@@ -145,13 +151,24 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
     return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
 }
 
+/**
+ * Execute system procedure ReadStr(S, Value)
+ */
+bool ps_procedure_readstr(ps_interpreter *interpreter, ps_string *s, ps_value *value) // NOSONAR
+{
+    ((void)s);
+    ((void)value);
+    ps_interpreter_set_message(interpreter, "READSTR not implemented");
+    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
+}
+
 bool ps_procedure_write_or_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,
                                    int16_t precision)
 {
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
-    if (interpreter->logger->debug_level)
+    if (interpreter->logger->debug_level >= PS_DEBUG_VERBOSE)
         fprintf(f, "WRITE('%s')\n", display_value);
     else
         fprintf(f, "%s", display_value);
@@ -166,4 +183,17 @@ bool ps_procedure_write(ps_interpreter *interpreter, FILE *f, const ps_value *va
 bool ps_procedure_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width, int16_t precision)
 {
     return ps_procedure_write_or_writeln(interpreter, f, value, width, precision);
+}
+
+bool ps_procedure_writestr(ps_interpreter *interpreter, ps_string *s, const ps_value *value, int16_t width,
+                           int16_t precision)
+{
+    static char buffer[PS_STRING_MAX_LEN + 1];
+    char *display_value = ps_value_get_display_string(value, width, precision);
+    if (display_value == NULL)
+        return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
+    snprintf(buffer, sizeof(buffer), "%s%s", s->str, display_value);
+    ps_strscpy((char *)s->str, buffer, (ssize_t)s->max);
+
+    return true;
 }

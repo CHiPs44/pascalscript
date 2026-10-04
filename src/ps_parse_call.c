@@ -13,6 +13,7 @@
 #include "ps_functions.h"
 #include "ps_parse.h"
 #include "ps_parse_call.h"
+#include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
 #include "ps_parse_statement.h"
 #include "ps_procedures.h"
@@ -32,8 +33,7 @@
  * "Nested" access (Record.Field.SubField, Array[0].Field, Pointer^.Field, ...):
  *      IDENTIFIER [ '.' IDENTIFIER ]* '.' IDENTIFIER
  */
-static bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_ast_block **owner,
-                                        ps_symbol **variable)
+bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_ast_block **owner, ps_symbol **variable)
 {
     assert(compiler != NULL);
     assert(block != NULL);

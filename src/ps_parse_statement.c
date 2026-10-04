@@ -160,8 +160,7 @@ bool ps_parse_read_or_readln_or_readstr(ps_compiler *compiler, ps_ast_block *blo
     RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
 }
 
-static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width,
-                                                    int16_t *precision)
+static inline bool ps_parse_write_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width, int16_t *precision)
 {
     assert(compiler != NULL);
     assert(block != NULL);
@@ -198,6 +197,77 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
     PARSE_END("OK")
 }
 
+static bool ps_parse_writestr_string(ps_compiler *compiler, ps_ast_block *block, ps_read_write_mode mode,
+                                     uint16_t *n_args, ps_ast_node *args[PS_PARAMETERS_MAX])
+{
+    ps_symbol *variable = NULL;
+    ps_ast_variable *variable_node = NULL;
+    ps_ast_block *owner = NULL;
+
+    PARSE_BEGIN("STATEMENT", "WRITESTR_STRING");
+
+    if (mode == PS_READ_WRITE_MODE_STR)
+    {
+        // STRING_VARIABLE
+        //  - must be an ordinal simple variable, not an array item
+        if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
+        {
+            ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Expected variable, got %s",
+                                          ps_symbol_get_kind_name(variable->kind));
+            TRACE_ERROR("EXPECTED_VARIABLE")
+        }
+        if (!ps_value_is_string(variable->value))
+        {
+            ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_STRING, "Expected string variable, got %s",
+                                          ps_value_get_type_name(variable->value));
+            TRACE_ERROR("STRING_VARIABLE")
+        }
+        variable_node = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
+        if (variable_node == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        args[0] = (ps_ast_node *)variable_node;
+        *n_args = 1;
+        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_COMMA)
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
+    }
+
+    PARSE_END("OK")
+}
+
+static bool ps_parse_write_expression(ps_compiler *compiler, ps_ast_block *block, uint16_t *n_args,
+                                      ps_ast_node *args[PS_PARAMETERS_MAX], ps_ast_format formats[PS_PARAMETERS_MAX])
+{
+    PARSE_BEGIN("WRITE", "EXPRESSION")
+
+    int16_t width = 0;
+    int16_t precision = 0;
+    ps_ast_node *expression = NULL;
+
+    // Check number of arguments
+    if (*n_args >= PS_PARAMETERS_MAX)
+    {
+        ps_compiler_set_error_message(compiler, PS_ERROR_TOO_MANY_ARGUMENTS, "Too many arguments, maximum is %d",
+                                      PS_PARAMETERS_MAX);
+        TRACE_ERROR("TOO_MANY_ARGUMENTS")
+    }
+
+    // Parse argument value
+    if (!ps_parse_expression(compiler, block, &expression))
+        TRACE_ERROR("EXPRESSION")
+
+    // Retrieve optional string/numeric format :width[:precision]
+    if (!ps_parse_write_format(compiler, block, &width, &precision))
+        TRACE_ERROR("FORMAT")
+
+    // Store argument and format
+    args[*n_args] = expression;
+    formats[*n_args].width = width;
+    formats[*n_args].precision = precision;
+    *n_args += 1;
+
+    PARSE_END("OK")
+}
+
 /**
  * Parse
  *      'WRITE' | 'WRITELN' | 'WRITESTR' [ '('
@@ -230,26 +300,21 @@ bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *
     ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
     ps_ast_format formats[PS_PARAMETERS_MAX] = {0};
     bool loop = true;
-    int16_t width = 0;
-    int16_t precision = 0;
-    ps_ast_node *expression = NULL;
-    ps_symbol *variable = NULL;
-    ps_ast_variable *variable_node = NULL;
-    ps_ast_block *owner = NULL;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is "legal" but is a no-op)
     if (PS_TOKEN_NONE != ps_parser_expect_statement_end_token(compiler->parser))
     {
-        // "WriteStr" is not "legal"
+        // "WriteStr" only is not "legal", it needs a string variable
         if (mode == PS_READ_WRITE_MODE_STR)
             RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
     }
     else
     {
+        // '('
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
         READ_NEXT_TOKEN_OR_RETURN_FALSE
-        // "Write[Ln]()"?
+        // ')' =>"Write[Ln]()"?
         if (lexer->current_token.type == PS_TOKEN_RIGHT_PARENTHESIS)
         {
             // "WriteStr()" is not "legal"
@@ -259,49 +324,28 @@ bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *
             loop = false;
         }
         // "WriteStr"?
-        if (mode == PS_READ_WRITE_MODE_STR)
-        {
-            if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
-                TRACE_ERROR("VARIABLE")
-            if (!ps_value_is_string(variable->value))
-                TRACE_ERROR("STRING_VARIABLE")
-            // TODO Like FOR loop, allow only simple variable
-            variable_node = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
-            if (variable_node == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            args[n_args] = (ps_ast_node *)variable_node;
-            formats[n_args].width = 0;
-            formats[n_args].precision = 0;
-            n_args += 1;
-            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_COMMA)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
-        }
+        if (!ps_parse_writestr_string(compiler, block, mode, &n_args, args))
+            TRACE_ERROR("STRING")
+        // Expressions + formats
         while (loop)
         {
-            if (compiler->debug >= PS_DEBUG_VERBOSE)
-                fprintf(stderr, "\nINFO\tWRITE_OR_WRITELN: expecting expression of type 'ANY'\n");
-            if (!ps_parse_expression(compiler, block, &expression))
-                TRACE_ERROR("EXPRESSION")
-            // retrieve string/numeric format :width[:precision]
-            if (!ps_parse_write_or_writeln_format(compiler, block, &width, &precision))
-                TRACE_ERROR("FORMAT")
-            if (n_args >= PS_PARAMETERS_MAX)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS)
-            args[n_args] = expression;
-            formats[n_args].width = width;
-            formats[n_args].precision = precision;
-            n_args += 1;
+            // EXPRESSION [ ':' WIDTH [ ':' PRECISION ] ]
+            if (!ps_parse_write_expression(compiler, block, &n_args, args, formats))
+                TRACE_ERROR("PARAMETER")
+            // ',' => another argument
             if (lexer->current_token.type == PS_TOKEN_COMMA)
-            {
                 READ_NEXT_TOKEN_OR_RETURN_FALSE
-                continue;
+            else
+            {
+                // ')' => end of arguments
+                EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RIGHT_PARENTHESIS)
+                READ_NEXT_TOKEN_OR_RETURN_FALSE
+                loop = false;
             }
-            EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RIGHT_PARENTHESIS)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
-            loop = false;
         }
     }
 
+    // Create AST node for this call
     ps_symbol *procedure = &ps_system_procedure_write;
     if (mode == PS_READ_WRITE_MODE_LN)
         procedure = &ps_system_procedure_writeln;
@@ -594,22 +638,25 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     bool downto = false;
     ps_ast_node *statement = NULL;
     ps_ast_statement_list *body = NULL;
-    ps_identifier identifier = {0};
 
     // FOR
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_FOR)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
     // CONTROL_VARIABLE
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
-    COPY_IDENTIFIER(identifier)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
-    if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, &variable))
-        RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND);
-    if (variable->kind != PS_SYMBOL_KIND_VARIABLE)
-        RETURN_ERROR(PS_ERROR_EXPECTED_VARIABLE)
+    //  - must be an ordinal simple variable, not an array item
+    if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
+    {
+        ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Expected variable, got %s",
+                                      ps_symbol_get_kind_name(variable->kind));
+        TRACE_ERROR("EXPECTED_VARIABLE")
+    }
     if (!ps_value_is_ordinal(variable->value))
-        RETURN_ERROR(PS_ERROR_EXPECTED_ORDINAL)
+    {
+        ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_ORDINAL, "Expected ordinal variable, got %s",
+                                      ps_value_get_type_name(variable->value));
+        TRACE_ERROR("ORDINAL_VARIABLE")
+    }
 
     // :=
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN)

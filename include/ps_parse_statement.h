@@ -17,24 +17,25 @@ extern "C"
 {
 #endif
 
+    /** @brief Read/Write mode: Simple, [Read|Write]Ln or [Read|Write]Str */
     typedef enum e_ps_read_write_mode
     {
-        PS_READ_WRITE_MODE,
-        PS_READ_WRITE_MODE_LN,
-        PS_READ_WRITE_MODE_STR
+        PS_READ_WRITE_MODE,     // Simple
+        PS_READ_WRITE_MODE_LN,  // Read/WriteLn
+        PS_READ_WRITE_MODE_STR, // Read/WriteStr
     } ps_read_write_mode;
 
     // clang-format off
     bool ps_parse_statement                   (ps_compiler *compiler, ps_ast_block *block, ps_ast_node           **statement_ptr                                 );
     bool ps_parse_compound_statement          (ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr                            );
-    bool ps_parse_read_or_readln_or_readstr   (ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr             , ps_read_write_mode mode);
-    bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr             , ps_read_write_mode mode);
     bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node           **statement_ptr                                 );
     bool ps_parse_if_then_else                (ps_compiler *compiler, ps_ast_block *block, ps_ast_if             **if_statement_ptr                              );
     bool ps_parse_repeat_until                (ps_compiler *compiler, ps_ast_block *block, ps_ast_repeat         **repeat_statement_ptr                          );
     bool ps_parse_while_do                    (ps_compiler *compiler, ps_ast_block *block, ps_ast_while          **while_statement_ptr                           );
     bool ps_parse_for_do                      (ps_compiler *compiler, ps_ast_block *block, ps_ast_for            **for_statement_ptr                             );
     bool ps_parse_statement_list              (ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr   , ps_token_type stop     );
+    bool ps_parse_read_or_readln_or_readstr   (ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr             , ps_read_write_mode mode);
+    bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr             , ps_read_write_mode mode);
     // clang-format on
 
 #ifdef __cplusplus
