@@ -136,8 +136,7 @@ bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) //
 {
     ((void)f);
     ((void)value);
-    ps_interpreter_set_message(interpreter, "READ not implemented");
-    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "READ not implemented");
 }
 
 /**
@@ -147,8 +146,7 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
 {
     ((void)f);
     ((void)value);
-    ps_interpreter_set_message(interpreter, "READLN not implemented");
-    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
+    return ps_interpreter_set_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "READLN not implemented");
 }
 
 /**
@@ -158,8 +156,7 @@ bool ps_procedure_readstr(ps_interpreter *interpreter, ps_string *s, ps_value *v
 {
     ((void)s);
     ((void)value);
-    ps_interpreter_set_message(interpreter, "READSTR not implemented");
-    return ps_interpreter_return_false(interpreter, PS_ERROR_NOT_IMPLEMENTED);
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "READSTR not implemented");
 }
 
 bool ps_procedure_write_or_writeln(ps_interpreter *interpreter, FILE *f, const ps_value *value, int16_t width,

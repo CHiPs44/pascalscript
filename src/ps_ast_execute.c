@@ -379,21 +379,26 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     return true;
 }
 
-bool ps_ast_execute_procedure_write_or_writeln(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
+bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *interpreter,
+                                                           const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
     assert(procedure_call->executable == &ps_system_procedure_write ||
-           procedure_call->executable == &ps_system_procedure_writeln);
+           procedure_call->executable == &ps_system_procedure_writeln ||
+           procedure_call->executable == &ps_system_procedure_writestr);
 
     if (procedure_call->args == NULL || procedure_call->n_args == 0)
     {
+        if (procedure_call->executable == &ps_system_procedure_writestr)
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC,
+                                                    "WRITESTR calleed without parameters");
         if (procedure_call->executable == &ps_system_procedure_writeln)
             fprintf(stdout, "\n");
         return true;
     }
-    for (uint16_t i = 0; i < procedure_call->n_args; i += 1)
+    for (int i = 0; i < procedure_call->n_args; i += 1)
     {
         if (procedure_call->args[i] == NULL)
             continue;
@@ -428,7 +433,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
         procedure_call->executable == &ps_system_procedure_writeln)
     {
         // WRITE or WRITELN procedure: Evaluate and output each argument
-        return ps_ast_execute_procedure_write_or_writeln(interpreter, procedure_call);
+        return ps_ast_execute_procedure_write_or_writeln_or_writestr(interpreter, procedure_call);
     }
     else if (procedure_call->executable == &ps_system_procedure_randomize)
     {
