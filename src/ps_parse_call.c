@@ -346,7 +346,7 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
     if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
     {
         // Write or WriteLn
-        if (!ps_parse_write_or_writeln(compiler, block, call, executable == &ps_system_procedure_writeln))
+        if (!ps_parse_write_or_writeln_or_writestr(compiler, block, call, executable == &ps_system_procedure_writeln))
             TRACE_ERROR("WRITE[LN]");
     }
     else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)

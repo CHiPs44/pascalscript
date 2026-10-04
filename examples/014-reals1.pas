@@ -21,8 +21,10 @@ Begin
     R := 123.45E+34; WriteLn('123.45E+34 ', R);
     R := 123.456E34; WriteLn('123.456E34 ', R);
     // These one fail:
+    // R := 1.2e;       WriteLn('1.2e       ', R);
     // R := 1.2e-;      WriteLn('1.2e-      ', R);
     // R := 1.2e--34;   WriteLn('1.2e--34   ', R);
     // R := 1.2e+-34;   WriteLn('1.2e+-34   ', R);
     // R := 123..45E34; WriteLn('123..45E34 ', R);
+    // R := 1.23456E78; WriteLn('1.23456E78 ', R);
 End.

@@ -199,14 +199,15 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
 
 /**
  * Parse
- *      'WRITE' | 'WRITELN' [ '('
+ *      'WRITE' | 'WRITELN' | 'WRITESTR' [ '('
+ *         [ string_variable ',' ]
  *          expression [ ':' width [ ':' precision ] ]
  *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *      ')' ] ;
  * Next steps:
  *   Write to text file:
  *      'WRITE' | 'WRITELN' [ '('
- *          [ file_variable ',' ]
+ *          file_variable ','
  *          expression [ ':' width [ ':' precision ] ]
  *          [ ',' expression [ ':' width [ ':' precision ] ] ]*
  *      ')' ] ;
@@ -215,13 +216,14 @@ static inline bool ps_parse_write_or_writeln_format(ps_compiler *compiler, ps_as
  *          file_variable ',' expression
  *      ')' ;
  */
-bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr, bool newline)
+bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call **call_ptr,
+                                           bool newline)
 {
     assert(compiler != NULL);
     assert(block != NULL);
     assert(call_ptr != NULL);
 
-    PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN");
+    PARSE_BEGIN("STATEMENT", "WRITE_OR_WRITELN_OR_WRITESTR");
 
     uint16_t n_args = 0;
     ps_ast_node *args[PS_PARAMETERS_MAX] = {0};
@@ -230,6 +232,7 @@ bool ps_parse_write_or_writeln(ps_compiler *compiler, ps_ast_block *block, ps_as
     int16_t width = 0;
     int16_t precision = 0;
     ps_ast_node *expression = NULL;
+    ps_ast_variable *variable = NULL;
 
     // "Write[Ln];" or "Write[Ln] Else|End|Until"?
     // (Write without parameters is legal but is a no-op)

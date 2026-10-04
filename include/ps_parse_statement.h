@@ -21,7 +21,7 @@ extern "C"
     bool ps_parse_statement                   (ps_compiler *compiler, ps_ast_block *block, ps_ast_node           **statement_ptr                         );
     bool ps_parse_compound_statement          (ps_compiler *compiler, ps_ast_block *block, ps_ast_statement_list **statement_list_ptr                    );
     bool ps_parse_read_or_readln              (ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr          , bool newline      );
-    bool ps_parse_write_or_writeln            (ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr          , bool newline      );
+    bool ps_parse_write_or_writeln_or_writestr(ps_compiler *compiler, ps_ast_block *block, ps_ast_call           **call_ptr          , bool newline      );
     bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *block, ps_ast_node           **statement_ptr                         );
     bool ps_parse_if_then_else                (ps_compiler *compiler, ps_ast_block *block, ps_ast_if             **if_statement_ptr                      );
     bool ps_parse_repeat_until                (ps_compiler *compiler, ps_ast_block *block, ps_ast_repeat         **repeat_statement_ptr                  );
