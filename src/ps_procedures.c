@@ -146,7 +146,7 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
 {
     ((void)f);
     ((void)value);
-    return ps_interpreter_set_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "READLN not implemented");
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "READLN not implemented");
 }
 
 /**
@@ -186,6 +186,7 @@ bool ps_procedure_writestr(ps_interpreter *interpreter, ps_string *s, const ps_v
                            int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
+    buffer[0] = '\0';
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);

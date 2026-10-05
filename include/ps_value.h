@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/* forward declaration to avoid including ps_symbol.h here */
-typedef struct s_ps_symbol ps_symbol;
-
 #include "ps_error.h"
 #include "ps_value_data.h"
 #include "ps_value_type.h"
+
+/* forward declaration to avoid including ps_symbol.h here */
+typedef struct s_ps_symbol ps_symbol;
 
 #ifdef __cplusplus
 extern "C"
@@ -25,13 +25,13 @@ extern "C"
     /* forward declaration to avoid including ps_symbol.h here */
     typedef struct s_ps_symbol ps_symbol;
 
-    /** @brief Value: type + data + allocated */
+    /** @brief Value: type + data + allocated flag + padding */
     typedef struct s_ps_value
     {
-        ps_symbol *type;    /** @brief Symbol with type definition                     */
-        ps_value_data data; /** @brief Current value or handle for variables           */
-        bool allocated : 1; /** @brief True if value was allocated (and must be freed) */
-        int padding : 31;   /** @brief Padding                                         */
+        ps_symbol *type;      /** @brief Symbol with type definition                     */
+        ps_value_data data;   /** @brief Current value or handle for variables           */
+        bool allocated : 1;   /** @brief True if value was allocated (and must be freed) */
+        int32_t padding : 31; /** @brief Padding                                         */
     } /*__attribute__((__packed__))*/ ps_value;
 
 #define PS_VALUE_SIZE sizeof(ps_value)
@@ -49,9 +49,9 @@ extern "C"
     bool ps_value_is_scalar(const ps_value *value);
     /** @brief Number is: Real, Integer, Unsigned, Integer or Unsigned subrange */
     bool ps_value_is_number(const ps_value *value);
-    /** @brief Is Integer? */
+    /** @brief Is Integer or Integer subrange? */
     bool ps_value_is_integer(const ps_value *value);
-    /** @brief Is Unsigned? */
+    /** @brief Is Unsigned or Unsigned subrange? */
     bool ps_value_is_unsigned(const ps_value *value);
     /** @brief Is Boolean? */
     bool ps_value_is_boolean(const ps_value *value);

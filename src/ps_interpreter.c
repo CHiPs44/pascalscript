@@ -357,9 +357,9 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
             return false;
         ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Copied value %s\n",
                            ps_value_get_debug_string(&variable_value));
-        frame->data[ast_variable->variable->value->data.h] = variable_value.data;
-        ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         ps_handle handle = ast_variable->variable->value->data.h;
+        frame->data[handle] = variable_value.data;
+        ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         debug_value.data = frame->data[handle];
         ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
                            ast_variable->variable->name, ps_value_get_debug_string(&debug_value));

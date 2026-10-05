@@ -343,11 +343,16 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
     (void)start_line;
     (void)start_column;
 
-    if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln)
+    if (executable == &ps_system_procedure_write || executable == &ps_system_procedure_writeln ||
+        executable == &ps_system_procedure_writestr)
     {
-        // Write or WriteLn
-        if (!ps_parse_write_or_writeln_or_writestr(compiler, block, call, executable == &ps_system_procedure_writeln))
-            TRACE_ERROR("WRITE[LN]");
+        ps_read_write_mode mode = PS_READ_WRITE_MODE;
+        if (executable == &ps_system_procedure_writeln)
+            mode = PS_READ_WRITE_MODE_LN;
+        if (executable == &ps_system_procedure_writestr)
+            mode = PS_READ_WRITE_MODE_STR;
+        if (!ps_parse_write_or_writeln_or_writestr(compiler, block, call, mode))
+            TRACE_ERROR("WRITE[LN|STR]");
     }
     else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
     {
