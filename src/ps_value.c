@@ -250,7 +250,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     // Same value type, just copy value
     if (from->type == to->type)
     {
-        // TODO copy array?
+        // TODO copy string or array?
         to->data = from->data;
         return PS_ERROR_NONE;
     }

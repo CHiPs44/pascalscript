@@ -186,7 +186,7 @@ bool ps_procedure_writestr(ps_interpreter *interpreter, ps_string *s, const ps_v
                            int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
-    buffer[0] = '\0';
+    memset(buffer, 0, sizeof(buffer));
     char *display_value = ps_value_get_display_string(value, width, precision);
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
