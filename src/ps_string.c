@@ -44,21 +44,22 @@ ps_string *ps_string_free(ps_string *s)
 
 ps_string *ps_string_set(ps_string *s, const char *z)
 {
-    size_t len = strlen(z);
+    size_t len = z == NULL ? 0 : strlen(z); // NOSONAR
     if (len > s->max)
     {
         errno = EINVAL;
         return NULL;
     }
     s->len = (ps_string_len)len;
-    memcpy(s->str, z, len);
+    if (z != NULL)
+        memcpy(s->str, z, len);
     s->str[len] = '\0'; // null terminate
     return s;
 }
 
 ps_string *ps_string_create(const char *z, ps_string_len max)
 {
-    size_t len = strlen(z);
+    size_t len = z == NULL ? 0 : strlen(z); // NOSONAR
     if (max == 0)
         max = PS_STRING_MAX_LEN; // default max length
     if (len > max)
@@ -66,7 +67,7 @@ ps_string *ps_string_create(const char *z, ps_string_len max)
         errno = EINVAL;
         return NULL;
     }
-    ps_string *s = ps_string_alloc((ps_string_len)len);
+    ps_string *s = ps_string_alloc(max);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     if (ps_string_set(s, z) == NULL)

@@ -47,6 +47,13 @@ extern "C"
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)
 
+// Macro to avoid call and evaluation of arguments
+#define PS_INTERPRETER_LOG(INTERPRETER, DEBUG_LEVEL, ...)                                                              \
+    if (INTERPRETER->logger->debug_level >= DEBUG_LEVEL)                                                               \
+    {                                                                                                                  \
+        ps_interpreter_log(INTERPRETER, DEBUG_LEVEL, __VA_ARGS__);                                                     \
+    }
+
     /**
      * @brief Initialize interpreter and children objects
      * @param system      AST block for built-in types, constants, variables, procedures and functions

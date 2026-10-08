@@ -202,9 +202,9 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
 
     // Increase interpreter's level
     interpreter->level += 1;
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
-                       block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
-                       block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
+                      block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
+                      block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
 
     // Allocate a new frame
     ps_frame *frame = ps_frame_alloc(block);
@@ -242,7 +242,7 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
 
     // Decrease interpreter's level
     interpreter->level -= 1;
-    ps_interpreter_log(interpreter, PS_DEBUG_INFO, "EXIT FRAME level=%d\n", interpreter->level);
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_INFO, "EXIT FRAME level=%d\n", interpreter->level);
 
     // Pop the frame from the stack
     if (ps_stack_is_empty(interpreter->stack))
@@ -331,23 +331,24 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != interpreter);
     assert(NULL != ast_variable);
     assert(NULL != value);
+    // interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
 
-    ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
-                       ast_variable->variable->name, ps_value_get_debug_string(value));
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
+                      ast_variable->variable->name, ps_value_get_debug_string(value));
 
     // Retrieve the frame containing the variable
     ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
-    ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Found block %s of type %s\n", frame->block->name,
-                       ps_ast_node_get_kind_name(frame->block->kind));
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Found block %s of type %s\n", frame->block->name,
+                      ps_ast_node_get_kind_name(frame->block->kind));
 
     // Copy the value to the variable
-    ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Copying value %s\n", ps_value_get_debug_string(value));
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Copying value %s\n", ps_value_get_debug_string(value));
     if (ps_value_is_array(ast_variable->variable->value))
     {
-        ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Variable %s.%s is an array\n", ast_variable->owner->name,
-                           ast_variable->variable->name);
+        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Variable %s.%s is an array\n", ast_variable->owner->name,
+                          ast_variable->variable->name);
         return ps_interpreter_set_variable_value_array(interpreter, frame, ast_variable, value);
     }
     else
@@ -355,21 +356,21 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
         ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
             return false;
-        ps_interpreter_log(interpreter, PS_DEBUG_TRACE, "Copied value %s\n",
-                           ps_value_get_debug_string(&variable_value));
+        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
         ps_handle handle = ast_variable->variable->value->data.h;
         frame->data[handle] = variable_value.data;
         ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
         debug_value.data = frame->data[handle];
-        ps_interpreter_log(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
-                           ast_variable->variable->name, ps_value_get_debug_string(&debug_value));
+        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
+                          ast_variable->variable->name, ps_value_get_debug_string(&debug_value));
     }
 
+    // interpreter->logger->debug_level = PS_DEBUG_FATAL;
     return true;
 }
 
-bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
-                                              ps_value *value)
+static bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
+                                                     ps_value *value)
 {
     const ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
@@ -381,8 +382,8 @@ bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
 
-bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
-                                             ps_value *value)
+static bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
+                                                    ps_value *value)
 {
     // Retrieve the frame containing the variable
     ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
@@ -423,9 +424,6 @@ bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != ast_variable);
     assert(NULL != value);
 
-    // ps_interpreter_log(interpreter, PS_DEBUG_FATAL, "GET VARIABLE VALUE: %s.%s", ast_variable->owner->name,
-    //                    ast_variable->variable->name);
-
     if (ast_variable->dimensions == 0)
         return ps_interpreter_get_variable_value_simple(interpreter, ast_variable, value);
     else
@@ -438,9 +436,9 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     assert(NULL != from);
     assert(NULL != to);
 
-    ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
-                       ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
-                       ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
+                      ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
+                      ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
         return true;
@@ -460,13 +458,13 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
     assert(NULL != program);
     assert(PS_AST_BLOCK == program->group && PS_AST_PROGRAM == program->kind);
 
-    ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s\n", program->name);
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s\n", program->name);
     bool result = ps_ast_execute_program(interpreter, program);
     if (!result)
         fprintf(stderr, "ERROR %d %s at line %u, column %u\n", interpreter->error,
                 ps_error_get_message(interpreter->error), interpreter->error_line + 1, interpreter->error_column + 1);
-    ps_interpreter_log(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s => %s\n", program->name,
-                       result ? "OK" : "KO");
+    PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s => %s\n", program->name,
+                      result ? "OK" : "KO");
 
     return result;
 }

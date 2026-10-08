@@ -400,17 +400,14 @@ bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *inter
             fprintf(stdout, "\n");
         return true;
     }
-    ps_string s = {.max = PS_STRING_MAX_LEN, .len = 0, .str = {0}};
+    ps_string *buffer = NULL;
     if (is_writestr)
     {
         const ps_ast_variable *variable_node = (ps_ast_variable *)procedure_call->args[0];
-        ps_value variable_value = {.allocated = false, .type = &ps_system_string, .data.s = &s};
-        if (!ps_interpreter_set_variable_value(interpreter, variable_node, &variable_value))
+        ps_value *variable_value = NULL;
+        if (!ps_interpreter_get_variable_value(interpreter, variable_node, variable_value))
             return false;
-        // ps_value zzz = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
-        // if (!ps_interpreter_get_variable_value(interpreter, variable_node, &zzz))
-        //     return false;
-        // ps_value_debug(stderr, "ZZZ1 ", &zzz);
+        buffer = variable_value->data.s;
     }
     for (int i = is_writestr ? 1 : 0; i < procedure_call->n_args; i += 1)
     {
@@ -430,23 +427,8 @@ bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *inter
             !ps_procedure_write(interpreter, stdout, &arg_value.value, width, precision))
             return false;
         if (procedure_call->executable == &ps_system_procedure_writestr &&
-            !ps_procedure_writestr(interpreter, &s, &arg_value.value, width, precision))
+            !ps_procedure_writestr(interpreter, buffer, &arg_value.value, width, precision))
             return false;
-    }
-    if (is_writestr)
-    {
-        s.len = (ps_string_len)strlen((char *)(s.str)); // NOSONAR
-        fprintf(stderr, ">>>%s<<< (%d/%d)\n", s.str, s.len, s.max);
-        const ps_ast_variable *variable_node = (ps_ast_variable *)procedure_call->args[0];
-        // ps_ast_debug = true;
-        ps_ast_debug_node(0, procedure_call->args[0]);
-        ps_value variable_value = {.allocated = false, .type = &ps_system_string, .data.s = &s};
-        if (!ps_interpreter_set_variable_value(interpreter, variable_node, &variable_value))
-            return false;
-        // ps_value zzz = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
-        // if (!ps_interpreter_get_variable_value(interpreter, variable_node, &zzz))
-        //     return false;
-        // ps_value_debug(stderr, "ZZZ2 ", &zzz);
     }
     if (procedure_call->executable == &ps_system_procedure_writeln)
         fprintf(stdout, "\n");
