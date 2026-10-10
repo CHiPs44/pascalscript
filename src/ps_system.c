@@ -129,12 +129,13 @@ PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_versio
 
 ps_ast_block *ps_system_alloc(void)
 {
-    ps_ast_block *system = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "#SYSTEM");
+    // Pre-allocate symbol table as it does not use default parameters
+    ps_symbol_table *symbols = ps_symbol_table_alloc(64, 4);
+    if (symbols == NULL)
+        return NULL;
+    ps_ast_block *system = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "#SYSTEM", symbols);
     if (system == NULL)
         return NULL;
-    system->symbols = ps_symbol_table_alloc(64, 4);
-    if (system->symbols == NULL)
-        return (ps_ast_block *)ps_ast_free_block(system);
 
     /**************************************************************************/
     /* TYPES                                                                  */

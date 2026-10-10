@@ -335,13 +335,6 @@ int main(int argc, char *argv[])
         ps_symbol_table_dump(stderr, "SYSTEM SYMBOLS", system_block->symbols);
     string_heap = ps_string_heap_alloc(PS_STRING_HEAP_SIZE, PS_STRING_HEAP_MORE);
 
-    compiler = ps_compiler_alloc(system_block, string_heap);
-    if (compiler == NULL)
-    {
-        fprintf(stderr, "Could not initialize compiler!\n");
-        return EXIT_FAILURE;
-    }
-
     if (compile(source_file))
     {
         ok = true;
@@ -382,6 +375,8 @@ int main(int argc, char *argv[])
     compiler = ps_compiler_free(compiler);
     system_block = (ps_ast_block *)ps_ast_free_block(system_block);
     string_heap = ps_string_heap_free(string_heap);
+    if (program != NULL)
+        program = (ps_ast_block *)ps_ast_free_block(program);
 
     if (memory)
         ps_memory_debug(stderr);

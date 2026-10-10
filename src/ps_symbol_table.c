@@ -87,8 +87,8 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     if (table != NULL)
     {
         ps_symbol_table_reset(table, true);
+        ps_memory_free(PS_MEMORY_SYMBOL, table);
     }
-    ps_memory_free(PS_MEMORY_SYMBOL, table);
     return NULL;
 }
 

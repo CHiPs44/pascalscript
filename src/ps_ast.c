@@ -220,7 +220,7 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 // =============================================================================
 
 ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
-                                  const char *name)
+                                  const char *name, ps_symbol_table *symbols)
 {
     static uint32_t block_id = 0;
 
@@ -236,7 +236,7 @@ ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *
     else
         snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", name);
     block->parent = parent;
-    block->symbols = ps_symbol_table_alloc(0, 0);
+    block->symbols = symbols != NULL ? symbols : ps_symbol_table_alloc(0, 0);
     block->signature = NULL;
     block->n_vars = 0;
     block->statement_list = NULL;

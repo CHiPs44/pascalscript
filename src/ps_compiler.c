@@ -228,7 +228,7 @@ bool ps_compiler_compile(ps_compiler *compiler, ps_ast_block **program)
         return ps_compiler_set_error_message(compiler, error, "Could not read next token at %d/%d", lexer->start_line,
                                              lexer->start_column);
     }
-    *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL);
+    *program = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, NULL, NULL);
     if (*program == NULL)
         return ps_compiler_return_false(compiler, PS_ERROR_OUT_OF_MEMORY);
     if (!ps_parse_program(compiler, *program))
