@@ -98,7 +98,7 @@ cleanup:
 bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Exit environment for the program %s", block_program->name);
-    ASSERT(ps_interpreter_exit_frame(interpreter));
+    ASSERT(ps_interpreter_exit_frame(interpreter, block_program));
     ps_ast_debug_line(0, "Free interpreter");
     interpreter->system = NULL;
     interpreter->string_heap = NULL;

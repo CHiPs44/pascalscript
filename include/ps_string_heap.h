@@ -17,11 +17,11 @@ extern "C"
 #endif
 
 #ifndef PS_STRING_HEAP_SIZE
-#define PS_STRING_HEAP_SIZE (16)
+#define PS_STRING_HEAP_SIZE (32)
 #endif
 
 #ifndef PS_STRING_HEAP_MORE
-#define PS_STRING_HEAP_MORE (16)
+#define PS_STRING_HEAP_MORE (32)
 #endif
 
     /**
@@ -40,6 +40,7 @@ extern "C"
 
     ps_string_heap *ps_string_heap_alloc(size_t size, size_t more);
     ps_string_heap *ps_string_heap_free(ps_string_heap *heap);
+    ps_string *ps_string_heap_add(ps_string_heap *heap, ps_string *s);
     ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z);
     bool ps_string_heap_grow(ps_string_heap *heap);
     bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);

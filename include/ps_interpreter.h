@@ -86,7 +86,7 @@ extern "C"
     bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block);
 
     /** @brief Exit current frame / block */
-    bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
+    bool ps_interpreter_exit_frame(ps_interpreter *interpreter, const ps_ast_block *block);
 
     /** @brief Get variable value */
     bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,

@@ -40,7 +40,6 @@ ps_string *ps_string_free(ps_string *s)
 {
     if (s != NULL)
         ps_memory_free(PS_MEMORY_STRING, s);
-    }
     return NULL;
 }
 
@@ -141,7 +140,8 @@ ps_string *ps_string_append(ps_string *a, const ps_string *b)
     size_t len = a->len + b->len;
     if (len > a->max)
     {
-        return NULL; // errno = EINVAL
+        errno = EINVAL;
+        return NULL;
     }
     memcpy(a->str + a->len, b->str, b->len);
     a->len = (ps_string_len)len;
@@ -155,6 +155,7 @@ ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len 
         errno = EINVAL;
         return NULL;
     }
+
     if (from + len > a->len)
         len = a->len - from;
     ps_string *b = ps_string_alloc(len);
@@ -162,6 +163,8 @@ ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len 
         return NULL; // errno = ENOMEM
     memcpy(b->str, &a->str[from - 1], len);
     b->len = len;
+    b->str[len] = '\0';
+
     return b;
 }
 
@@ -172,12 +175,13 @@ int ps_string_compare(ps_string *a, ps_string *b)
     return strcmp((char *)a->str, (char *)b->str);
 }
 
-ps_string_len ps_string_position(ps_string *substr, ps_string *s)
+ps_string_len ps_string_position(ps_string *needle, ps_string *haystack)
 {
-    const char *pos = strstr((char *)s->str, (char *)substr->str);
+    const char *pos = strstr((char *)haystack->str, (char *)needle->str);
     if (pos == NULL)
         return 0;
-    return (ps_string_len)(pos - (char *)s->str + 1);
+
+    return (ps_string_len)(pos - (char *)haystack->str + 1);
 }
 
 ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len count)
@@ -195,15 +199,42 @@ ps_string *ps_string_delete(ps_string *s, ps_string_len index, ps_string_len cou
     }
     memmove(&s->str[index - 1], &s->str[index - 1 + count], s->len - (index - 1 + count));
     s->len -= count;
+
     return s;
 }
 
-ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index) // NOSONAR
+ps_string *ps_string_insert_string(ps_string *source, const ps_string *s, ps_string_len index)
 {
-    (void)source;
-    (void)s;
-    (void)index;
-    return NULL;
+    if (source == NULL || s == NULL)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    if (index < 1 || index > source->len + 1)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    // Nothing to insert?
+    if (s->len == 0)
+        return source;
+    // Check if there's enough space
+    if (source->len + s->len > source->max)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    // Shift characters to the right to make space
+    size_t pos = index - 1;
+    memmove(&source->str[pos + s->len], &source->str[pos], source->len - pos);
+    // Copy the new string
+    memcpy(&source->str[pos], s->str, s->len);
+    // Update length
+    source->len += s->len;
+    // Ensure null termination
+    source->str[source->len] = '\0';
+
+    return source;
 }
 
 ps_string *ps_string_lowercase(const ps_string *s)
@@ -211,6 +242,7 @@ ps_string *ps_string_lowercase(const ps_string *s)
     ps_string *t = ps_string_alloc(s->max);
     if (t == NULL)
         return NULL; // errno = ENOMEM
+
     for (ps_string_len i = 0; i < s->len; i++)
     {
         if (s->str[i] >= 'A' && s->str[i] <= 'Z')
@@ -243,10 +275,10 @@ char *ps_string_dump(ps_string *s)
     const ps_string_len width = PS_IDENTIFIER_LEN;
     static char buffer[128];
     if (s == NULL)
-        sprintf(buffer, "NULL");
+        snprintf(buffer, sizeof(buffer), "NULL");
     else
-        snprintf(buffer, sizeof(buffer) - 1, "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3,
-                 s->max, PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
+        snprintf(buffer, sizeof(buffer), "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3, s->max,
+                 PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
     return buffer;
 }
 

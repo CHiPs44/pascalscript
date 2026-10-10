@@ -517,6 +517,8 @@ ps_ast_node *ps_ast_free_call(ps_ast_call *call)
             ps_ast_free_node(call->args[i]);
         ps_memory_free(PS_MEMORY_AST, call->args);
     }
+    if (call->formats != NULL)
+        ps_memory_free(PS_MEMORY_AST, call->formats);
     ps_memory_free(PS_MEMORY_AST, call);
 
     return NULL;

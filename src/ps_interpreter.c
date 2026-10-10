@@ -195,6 +195,46 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, const ps_ast
     return true;
 }
 
+bool ps_interpreter_free_variables(ps_interpreter *interpreter, const ps_ast_block *block, ps_frame *frame)
+{
+    assert(interpreter != NULL);
+    assert(block != NULL);
+    assert(frame != NULL);
+
+    int count = block->n_vars;
+    for (int b = 0; b < block->symbols->table_size; b++)
+    {
+        // Empty bucket? => next
+        if (block->symbols->buckets[b] == NULL)
+            continue;
+        for (int i = 0; i < block->symbols->buckets[b]->size; i++)
+        {
+            ps_symbol *symbol = block->symbols->buckets[b]->symbols[i];
+            // Null or not a variable? => next
+            if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_VARIABLE)
+                continue;
+            // Should be 0 at end of loop
+            count -= 1;
+            ps_handle handle = symbol->value->data.h;
+            // Array? => free data
+            if (ps_value_is_array(symbol->value))
+                return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "TODO!");
+            // String? => free data
+            if (ps_value_is_string(symbol->value))
+            {
+                ps_string *s = frame->data[handle].s;
+                fprintf(stderr, "FREE STRING VARIABLE %s '%s' %d/%d\n", symbol->name, s->str, s->len, s->max);
+                frame->data[handle].s = ps_string_free(s);
+            }
+        }
+    }
+
+    if (count != 0)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "Variable count mismatch: %d", count);
+
+    return true;
+}
+
 bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     assert(NULL != interpreter);
@@ -235,7 +275,7 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     return true;
 }
 
-bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
+bool ps_interpreter_exit_frame(ps_interpreter *interpreter, const ps_ast_block *block)
 {
     assert(NULL != interpreter);
     assert(interpreter->level > 0);
@@ -252,10 +292,10 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     }
     ps_frame *frame = ps_stack_pop(interpreter->stack);
     if (frame == NULL)
-    {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR,
                                                 "Stack error at level %d: pop failed", interpreter->level);
-    }
+    if (!ps_interpreter_free_variables(interpreter, block, frame))
+        return false;
     ps_frame_free(frame);
 
     return true;

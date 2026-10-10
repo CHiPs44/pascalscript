@@ -373,10 +373,10 @@ int main(int argc, char *argv[])
 
     /* Terminate compiler & system */
     compiler = ps_compiler_free(compiler);
-    system_block = (ps_ast_block *)ps_ast_free_block(system_block);
-    string_heap = ps_string_heap_free(string_heap);
     if (program != NULL)
         program = (ps_ast_block *)ps_ast_free_block(program);
+    system_block = (ps_ast_block *)ps_ast_free_block(system_block);
+    string_heap = ps_string_heap_free(string_heap);
 
     if (memory)
         ps_memory_debug(stderr);

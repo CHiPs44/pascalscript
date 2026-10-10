@@ -291,6 +291,11 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         s = ps_string_concat(a->data.s, b->data.s, PS_STRING_MAX_LEN);
         if (s == NULL)
             return false;
+        if (NULL == ps_string_heap_add(interpreter->string_heap, s))
+        {
+            ps_string_free(s);
+            return false;
+        }
         result->data.s = s;
         r = PS_TYPE_STRING;
     }

@@ -484,8 +484,8 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         factor_value.data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
         if (factor_value.data.s == NULL)
         {
-            ps_compiler_set_message(compiler, "Failed to create string value: %s", strerror(errno));
-            compiler->error = ps_error_map_errno();
+            ps_compiler_set_error_message(compiler, ps_error_map_errno(), "Failed to create string value: %s",
+                                          strerror(errno));
             TRACE_ERROR("STRING_VALUE")
         }
         READ_NEXT_TOKEN_OR_RETURN_FALSE
