@@ -147,6 +147,7 @@ ps_ast_block *ps_system_alloc(void)
     ADD_SYSTEM_SYMBOL(ps_system_integer)
     ADD_SYSTEM_SYMBOL(ps_system_unsigned)
     ADD_SYSTEM_SYMBOL(ps_system_real)
+    ps_system_string.value->data.t->def.s.max = PS_STRING_MAX_LEN;
     ADD_SYSTEM_SYMBOL(ps_system_string)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_char)
     ADD_SYSTEM_SYMBOL(ps_system_subrange_integer)

@@ -404,10 +404,13 @@ bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *inter
     if (is_writestr)
     {
         const ps_ast_variable *variable_node = (ps_ast_variable *)procedure_call->args[0];
-        ps_value *variable_value = NULL;
-        if (!ps_interpreter_get_variable_value(interpreter, variable_node, variable_value))
+        ps_value variable_value = {.allocated = false, .type = variable_node->variable->value->type, .data = {0}};
+        if (!ps_interpreter_get_variable_value(interpreter, variable_node, &variable_value))
             return false;
-        buffer = variable_value->data.s;
+        buffer = variable_value.data.s;
+        buffer->len = 0;
+        memset(buffer->str, '\0', buffer->max + 1);
+        // fprintf(stderr, "BUFFER 00 '%s' %d/%d\n", buffer->str, buffer->len, buffer->max);
     }
     for (int i = is_writestr ? 1 : 0; i < procedure_call->n_args; i += 1)
     {
@@ -429,6 +432,8 @@ bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *inter
         if (procedure_call->executable == &ps_system_procedure_writestr &&
             !ps_procedure_writestr(interpreter, buffer, &arg_value.value, width, precision))
             return false;
+        // if (is_writestr)
+        //     fprintf(stderr, "BUFFER %02d '%s' %d/%d\n", i, buffer->str, buffer->len, buffer->max);
     }
     if (procedure_call->executable == &ps_system_procedure_writeln)
         fprintf(stdout, "\n");

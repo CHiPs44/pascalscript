@@ -32,6 +32,7 @@ ps_string *ps_string_alloc(ps_string_len max)
         return NULL; // errno = ENOMEM
     s->max = max;
     s->len = 0;
+    memset(s->str, '\0', max + 1);
     return s;
 }
 

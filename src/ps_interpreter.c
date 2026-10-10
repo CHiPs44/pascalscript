@@ -203,8 +203,8 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     // Increase interpreter's level
     interpreter->level += 1;
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_INFO, "ENTER FRAME level=%d '%s' with %zu symbol%s\n", interpreter->level,
-                      block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
-                      block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
+                       block->name, block->symbols == NULL ? 0 : block->symbols->used_buckets,
+                       block->symbols != NULL && block->symbols->used_buckets > 1 ? "s" : "");
 
     // Allocate a new frame
     ps_frame *frame = ps_frame_alloc(block);
@@ -334,35 +334,50 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     // interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
 
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
-                      ast_variable->variable->name, ps_value_get_debug_string(value));
+                       ast_variable->variable->name, ps_value_get_debug_string(value));
 
     // Retrieve the frame containing the variable
     ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Found block %s of type %s\n", frame->block->name,
-                      ps_ast_node_get_kind_name(frame->block->kind));
+                       ps_ast_node_get_kind_name(frame->block->kind));
 
     // Copy the value to the variable
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Copying value %s\n", ps_value_get_debug_string(value));
     if (ps_value_is_array(ast_variable->variable->value))
     {
         PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Variable %s.%s is an array\n", ast_variable->owner->name,
-                          ast_variable->variable->name);
+                           ast_variable->variable->name);
         return ps_interpreter_set_variable_value_array(interpreter, frame, ast_variable, value);
     }
     else
     {
-        ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
-        if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
-            return false;
-        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_TRACE, "Copied value %s\n", ps_value_get_debug_string(&variable_value));
         ps_handle handle = ast_variable->variable->value->data.h;
-        frame->data[handle] = variable_value.data;
-        ps_value debug_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
-        debug_value.data = frame->data[handle];
-        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_DEBUG, "Variable %s.%s set to %s\n", ast_variable->owner->name,
-                          ast_variable->variable->name, ps_value_get_debug_string(&debug_value));
+        if (ps_value_is_string(ast_variable->variable->value))
+        {
+            const ps_string *source_string = value->data.s;
+            ps_string *target_string = frame->data[handle].s;
+            if (source_string->len > target_string->max)
+            {
+                memcpy(target_string->str, source_string->str, target_string->max);
+                target_string->str[target_string->max + 1] = '\0';
+                target_string->len = target_string->max;
+            }
+            else
+            {
+                memcpy(target_string->str, source_string->str, source_string->len);
+                target_string->str[source_string->len] = '\0';
+                target_string->len = source_string->len;
+            }
+        }
+        else
+        {
+            ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
+            if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
+                return false;
+            frame->data[handle] = variable_value.data;
+        }
     }
 
     // interpreter->logger->debug_level = PS_DEBUG_FATAL;
@@ -437,8 +452,8 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     assert(NULL != to);
 
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
-                      ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
-                      ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
+                       ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
+                       ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
         return true;
@@ -464,7 +479,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
         fprintf(stderr, "ERROR %d %s at line %u, column %u\n", interpreter->error,
                 ps_error_get_message(interpreter->error), interpreter->error_line + 1, interpreter->error_column + 1);
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s => %s\n", program->name,
-                      result ? "OK" : "KO");
+                       result ? "OK" : "KO");
 
     return result;
 }
