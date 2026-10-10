@@ -40,6 +40,7 @@ ps_string *ps_string_free(ps_string *s)
 {
     if (s != NULL)
         ps_memory_free(PS_MEMORY_STRING, s);
+    }
     return NULL;
 }
 
