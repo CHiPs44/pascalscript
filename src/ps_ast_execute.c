@@ -57,7 +57,7 @@ static bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block
 
     result = ps_ast_execute_statement_list(interpreter, block->statement_list);
 
-    if (!has_frame && !ps_interpreter_exit_frame(interpreter, block))
+    if (!has_frame && !ps_interpreter_exit_frame(interpreter))
         goto error;
 
     return result;
@@ -561,13 +561,14 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
 
     // Execute procedure with arguments on top frame of stack
     ok = ps_ast_execute_block(interpreter, procedure, true);
-    if (!ps_interpreter_exit_frame(interpreter, procedure))
+    if (!ps_interpreter_exit_frame(interpreter))
         return false;
 
     return ok;
 
 cleanup:
-    ps_interpreter_exit_frame(interpreter, procedure);
+    ps_interpreter_exit_frame(interpreter);
+
     return false;
 }
 

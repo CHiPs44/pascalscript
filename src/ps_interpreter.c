@@ -30,9 +30,12 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
 {
     assert(NULL != system);
     assert(NULL != string_heap);
+
+    // Allocate interpreter
     ps_interpreter *interpreter = ps_memory_malloc(PS_MEMORY_INTERPRETER, sizeof(ps_interpreter));
     if (interpreter == NULL)
         return NULL;
+
     // Initialize interpreter
     interpreter->system = system;
     interpreter->string_heap = string_heap;
@@ -41,6 +44,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     memset(interpreter->message, 0, sizeof(interpreter->message));
     interpreter->error_line = 0;
     interpreter->error_column = 0;
+
     // Allocate logger
     interpreter->logger = ps_logger_alloc(stderr, PS_DEBUG_FATAL);
     if (interpreter->logger == NULL)
@@ -48,10 +52,12 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     interpreter->range_check = range_check;
     interpreter->bool_eval = bool_eval;
     interpreter->io_check = io_check;
+
     // Allocate stack
     interpreter->stack = ps_stack_alloc(PS_INTERPRETER_STACK_SIZE);
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
+
     // Allocate system variables
     ps_frame *frame = ps_frame_alloc(system);
     if (frame == NULL)
@@ -62,12 +68,14 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     {
         frame->data[i].v = 0;
     }
+
     // Push system frame on stack
     if (NULL == ps_stack_push(interpreter->stack, frame))
     {
         ps_frame_free(frame);
         return ps_interpreter_free(interpreter);
     }
+
     return interpreter;
 }
 
@@ -81,6 +89,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
             interpreter->stack = ps_stack_free(interpreter->stack);
         ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);
     }
+
     return NULL;
 }
 
@@ -100,7 +109,9 @@ void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level,
 bool ps_interpreter_return_false(ps_interpreter *interpreter, ps_error error)
 {
     assert(NULL != interpreter);
+
     interpreter->error = error;
+
     return false;
 }
 
@@ -108,11 +119,13 @@ bool ps_interpreter_set_error_message(ps_interpreter *interpreter, ps_error erro
 {
     assert(NULL != interpreter);
     assert(NULL != format);
+
     interpreter->error = error;
     va_list args;
     va_start(args, format);
     vsnprintf(interpreter->message, sizeof(interpreter->message) - 1, format, args); // NOSONAR
     va_end(args);
+
     return false;
 }
 
@@ -120,15 +133,17 @@ bool ps_interpreter_set_message(ps_interpreter *interpreter, const char *format,
 {
     assert(NULL != interpreter);
     assert(NULL != format);
+
     va_list args;
     va_start(args, format);
     vsnprintf(interpreter->message, sizeof(interpreter->message) - 1, format, args); // NOSONAR
     va_end(args);
+
     return false;
 }
 
-static inline bool ps_interpreter_allocate_array(ps_interpreter *interpreter, const ps_ast_block *block,
-                                                 ps_symbol *symbol, ps_frame *frame, ps_handle handle)
+static inline bool ps_interpreter_allocate_array(ps_interpreter *interpreter, ps_frame *frame, ps_symbol *symbol,
+                                                 ps_handle handle)
 {
     const ps_type_definition *type_def = ps_array_get_type_def(symbol);
     if (type_def != NULL)
@@ -136,36 +151,54 @@ static inline bool ps_interpreter_allocate_array(ps_interpreter *interpreter, co
         ps_array_data *array_data = ps_array_alloc_data(symbol);
         if (array_data == NULL)
             return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
-                                                    "Could not allocate array data for %s.%s", block->name,
+                                                    "Could not allocate array data for %s.%s", frame->block->name,
                                                     symbol->name);
         frame->data[handle].a = array_data;
     }
     return true;
 }
 
-static inline bool ps_interpreter_allocate_string(ps_interpreter *interpreter, const ps_ast_block *block,
-                                                  ps_symbol *symbol, ps_frame *frame, ps_handle handle)
+static inline bool ps_interpreter_allocate_string(ps_interpreter *interpreter, ps_frame *frame, ps_symbol *symbol,
+                                                  ps_handle handle)
 {
     if (ps_value_is_string(symbol->value))
     {
+        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ALLOCATE STRING VARIABLE %s.%s", frame->block->name,
+                           symbol->name)
         const ps_type_definition *type_def = ps_symbol_get_type_def(symbol);
         ps_string *string_data = ps_string_alloc(type_def->def.s.max);
         if (string_data == NULL)
             return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
-                                                    "Could not allocate string data for %s.%s", block->name,
+                                                    "Could not allocate string data for %s.%s", frame->block->name,
                                                     symbol->name);
         frame->data[handle].s = string_data;
     }
+
     return true;
 }
 
-bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, const ps_ast_block *block, ps_frame *frame)
+static inline bool ps_interpreter_free_string(ps_interpreter *interpreter, ps_frame *frame, ps_symbol *symbol,
+                                              ps_handle handle)
+{
+    if (ps_value_is_string(symbol->value))
+    {
+        ps_string *s = frame->data[handle].s;
+        PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "FREE STRING VARIABLE %s.%s", frame->block->name,
+                           symbol->name, s->str, s->len, s->max);
+        frame->data[handle].s = ps_string_free(s);
+    }
+
+    return true;
+}
+
+bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_frame *frame)
 {
     assert(interpreter != NULL);
-    assert(block != NULL);
     assert(frame != NULL);
 
+    const ps_ast_block *block = frame->block;
     int count = block->n_vars;
+
     for (int b = 0; b < block->symbols->table_size; b++)
     {
         // Empty bucket? => next
@@ -181,10 +214,10 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, const ps_ast
             count -= 1;
             ps_handle handle = symbol->value->data.h;
             // Array? => allocate data
-            if (!ps_interpreter_allocate_array(interpreter, block, symbol, frame, handle))
+            if (!ps_interpreter_allocate_array(interpreter, frame, symbol, handle))
                 return false;
             // String? => allocate data
-            if (!ps_interpreter_allocate_string(interpreter, block, symbol, frame, handle))
+            if (!ps_interpreter_allocate_string(interpreter, frame, symbol, handle))
                 return false;
         }
     }
@@ -195,12 +228,12 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, const ps_ast
     return true;
 }
 
-bool ps_interpreter_free_variables(ps_interpreter *interpreter, const ps_ast_block *block, ps_frame *frame)
+static bool ps_interpreter_free_variables(ps_interpreter *interpreter, ps_frame *frame)
 {
     assert(interpreter != NULL);
-    assert(block != NULL);
     assert(frame != NULL);
 
+    const ps_ast_block *block = frame->block;
     int count = block->n_vars;
     for (int b = 0; b < block->symbols->table_size; b++)
     {
@@ -220,12 +253,8 @@ bool ps_interpreter_free_variables(ps_interpreter *interpreter, const ps_ast_blo
             if (ps_value_is_array(symbol->value))
                 return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "TODO!");
             // String? => free data
-            if (ps_value_is_string(symbol->value))
-            {
-                ps_string *s = frame->data[handle].s;
-                fprintf(stderr, "FREE STRING VARIABLE %s '%s' %d/%d\n", symbol->name, s->str, s->len, s->max);
-                frame->data[handle].s = ps_string_free(s);
-            }
+            if (!ps_interpreter_free_string(interpreter, frame, symbol, handle))
+                return false;
         }
     }
 
@@ -252,7 +281,7 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
         return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
 
     // Allocate non simple variables: arrays, strings, records, etc.
-    if (!ps_interpreter_allocate_variables(interpreter, block, frame))
+    if (!ps_interpreter_allocate_variables(interpreter, frame))
     {
         ps_frame_free(frame);
         return false;
@@ -275,7 +304,7 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     return true;
 }
 
-bool ps_interpreter_exit_frame(ps_interpreter *interpreter, const ps_ast_block *block)
+bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
 {
     assert(NULL != interpreter);
     assert(interpreter->level > 0);
@@ -294,7 +323,7 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter, const ps_ast_block *
     if (frame == NULL)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR,
                                                 "Stack error at level %d: pop failed", interpreter->level);
-    if (!ps_interpreter_free_variables(interpreter, block, frame))
+    if (!ps_interpreter_free_variables(interpreter, frame))
         return false;
     ps_frame_free(frame);
 

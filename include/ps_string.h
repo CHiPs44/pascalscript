@@ -84,7 +84,7 @@ extern "C"
     /// @brief Insert one string into another, cf. https://www.freepascal.org/docs-html/rtl/system/insert.html
     /// @example insert('123456789', 'ABC', 3) => '12ABC3456789'
     /// @return New string or NULL if error
-    ps_string *ps_string_insert_string(ps_string *source, ps_string *s, ps_string_len index);
+    ps_string *ps_string_insert_string(ps_string *source, const ps_string *s, ps_string_len index);
 
     /// @brief Convert string to lowercase
     /// @example lowercase('AbC') => 'abc'
