@@ -3,9 +3,11 @@
 REPORT_FILE="./examples/report.txt"
 date --iso-8601=seconds > "$REPORT_FILE"
 
-# make -C build-clang/ -j$(nproc) clean
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -B build-clang/
+make -C build-clang/ -j$(nproc) clean
 make -C build-clang/ -j$(nproc)
-# make -C build-gcc/ -j$(nproc) clean
+cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Debug -B build-gcc/
+make -C build-gcc/ -j$(nproc) clean
 make -C build-gcc/ -j$(nproc)
 
 OK=0

@@ -12,17 +12,18 @@ Running a program now has 2 phases:
 NB:
 
 - The AST is built in memory, no file is generated
-- The AST is not optimized, it is interpreted as-is
-- Many features of previous design were kept, hence the `ps_value` / `ps_ast_value` existence
+- The AST is not optimized at all, it is interpreted as-is
+- Many features of previous design were kept, hence the `ps_value` / `ps_ast_value` coexistence
 
-This may lead to other steps:
+This may lead to another sequence:
 
-- Emitting "P-Code" from the AST for a stack-based virtual machine
-- Then interpreting this P-Code like Pascal P4
+1. **Compilation** - Parsing the source file and building the AST
+2. **Generation** - Emitting "P-Code" from the AST for a stack-based virtual machine
+3. **Execution** - Interpreting this "P-Code" like Pascal P4
 
 ## Implementation of AST nodes
 
-As C has no classes, the AST nodes are implemented as structs with common fields at the beginning.
+As C has no classes, the AST nodes are implemented as structs with common fields at the beginning to implement inheritance.
 
 These common fields are:
 
@@ -31,10 +32,10 @@ These common fields are:
 - Kind:
   - Block: Program, Procedure, Function, Unit (future)
   - Statement: Statement list (compound), Assignment, If, Repeat, While, For, Procedure call
-  - Expression: Constant, Variable, Function Call, Unary, Binary
-  - LValue: Variable
+  - Expression: Constant, Variable, Function Call, Unary or Binary operation
+  - LValue: Variable reference, be it simple or array item access
 
-This means we have to cast the AST node to the proper type to access its specific fields and vice-versa.
+This means we have to checkk group and kind and then cast the AST node to the proper type to access its specific fields and vice-versa.
 
 This also means these structs can not be packed, as the size of the common fields must be the same for all nodes.
 
@@ -42,7 +43,7 @@ This also means these structs can not be packed, as the size of the common field
 
 Interpreter uses a stack of frames to manage variables values and function calls:
 
-- When a procedure or function is called, a new frame is pushed on this stack for the parameters and local variables
-- Variables are kept in the local symbol table they are defined in, their values are stored in a frame and accessed through an handle corresponding to their order of declaration
-- Functions automagically reserve a `Result` variable
-- Global variables are local variables of the program block
+- When a procedure or function is called, a new frame is pushed on this stack for its parameters and local variables
+- Variables are kept in the local symbol table they are defined in, their values are stored in this frame and accessed through an handle corresponding to their order of declaration
+- Functions automagically declare a `Result` variable
+- Global variables are local variables of the `Program` block
