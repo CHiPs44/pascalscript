@@ -25,26 +25,41 @@ extern "C"
 #endif
 
     /**
+     * @brief String heap entry with reference counting
+     */
+    typedef struct s_ps_string_heap_entry
+    {
+        ps_string *str;         /** @brief the string itself */
+        unsigned int ref_count; /** @brief reference count */
+    } ps_string_heap_entry;
+
+    /**
      * @brief String heap to make string constants unique instead of duplicating them.
      *        It saves a lot of memory for string constants used in loops.
      */
     typedef struct s_ps_string_heap
     {
-        size_t size;      /** @brief allocated count            */
-        size_t used;      /** @brief currently used count       */
-        size_t more;      /** @brief amount added for each grow */
-        ps_string **data; /** @brief the strings thmeselves     */
+        size_t size;                /** @brief allocated count            */
+        size_t used;                /** @brief currently used count       */
+        size_t more;                /** @brief amount added for each grow */
+        ps_string_heap_entry *data; /** @brief the strings with reference counts */
     } ps_string_heap;
 
 #define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
 
-    ps_string_heap *ps_string_heap_alloc(size_t size, size_t more);
-    ps_string_heap *ps_string_heap_free(ps_string_heap *heap);
-    ps_string *ps_string_heap_add(ps_string_heap *heap, ps_string *s);
-    ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z);
-    bool ps_string_heap_grow(ps_string_heap *heap);
-    bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
-    void ps_string_heap_dump(const ps_string_heap *heap, FILE *f);
+    // clang-format off
+
+    ps_string_heap *ps_string_heap_alloc      (size_t size, size_t more);
+    ps_string_heap *ps_string_heap_free       (ps_string_heap *heap);
+    ps_string      *ps_string_heap_add        (ps_string_heap *heap, ps_string *s);
+    ps_string      *ps_string_heap_create     (ps_string_heap *heap, const char *z);
+    ps_string      *ps_string_heap_retain     (ps_string_heap *heap, ps_string *s);
+    ps_string      *ps_string_heap_release    (ps_string_heap *heap, ps_string *s);
+    bool            ps_string_heap_grow       (ps_string_heap *heap);
+    bool            ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
+    void            ps_string_heap_dump       (const ps_string_heap *heap, FILE *f);
+
+    // clang-format on
 
 #ifdef __cplusplus
 }
