@@ -1,0 +1,7 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ContinuationIndentWidth: 8
+BreakBeforeBraces: Allman
+PointerAlignment: Right
+ColumnLimit: 120
+SortIncludes: false

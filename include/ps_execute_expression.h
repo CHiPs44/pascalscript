@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /** @brief Evaluate an expression */
-    bool ps_ast_evaluate_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
+    bool ps_evaluate_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
 
 #ifdef __cplusplus
 }

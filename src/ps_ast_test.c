@@ -133,7 +133,7 @@ bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     if (!result)
     {
         fprintf(stderr, "Error running the program: %s\n", interpreter->message);
@@ -195,7 +195,7 @@ bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_u_2 = ps_ast_create_literal_value(3, 15, value_u_2);
     ASSERT(rvalue_u_2 != NULL);
     ps_ast_binary_operation *mul_operation =
-        ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
+            ps_ast_create_binary_operation(3, 13, PS_OP_MUL, (ps_ast_node *)rvalue_u_21, (ps_ast_node *)rvalue_u_2);
     ASSERT(mul_operation != NULL);
     ps_ast_assignment *assignment_i = ps_ast_create_assignment(3, 5, variable_i, (ps_ast_node *)mul_operation);
     ASSERT(assignment_i != NULL);
@@ -216,7 +216,7 @@ bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
     // ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    bool result = ps_ast_execute_program(interpreter, block_program);
+    bool result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -224,7 +224,7 @@ bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
     // ps_value value_set = {.allocated = false, .type = symbol_i->value->type, .data = {.u = 42}};
     // ASSERT(ps_interpreter_set_variable_value(interpreter, variable_i, &value_set));
 
-    // Can't work as frame has been exited at end of ps_ast_execute_program...
+    // Can't work as frame has been exited at end of ps_execute_program...
     // ps_ast_debug_line(0, "Check that variable I has the expected value 42");
     // ASSERT(symbol_i->value != NULL);
     // ASSERT(symbol_i->value->type == &ps_system_unsigned);
@@ -316,7 +316,7 @@ bool ps_ast_test_if_then_else(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_u_10_cond = ps_ast_create_literal_value(6, 12, value_u_10_cond);
     ASSERT(rvalue_u_10_cond != NULL);
     ps_ast_binary_operation *condition =
-        ps_ast_create_binary_operation(6, 10, PS_OP_EQ, (ps_ast_node *)rvalue_i, (ps_ast_node *)rvalue_u_10_cond);
+            ps_ast_create_binary_operation(6, 10, PS_OP_EQ, (ps_ast_node *)rvalue_i, (ps_ast_node *)rvalue_u_10_cond);
     ASSERT(condition != NULL);
 
     ps_ast_debug_line(0, "Create the THEN branch with J := 42");
@@ -355,7 +355,7 @@ bool ps_ast_test_if_then_else(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -432,7 +432,7 @@ bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(5, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *while_condition =
-        ps_ast_create_binary_operation(5, 12, PS_OP_GT, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
+            ps_ast_create_binary_operation(5, 12, PS_OP_GT, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
     ASSERT(while_condition != NULL);
 
     ps_ast_debug_line(0, "Create the WHILE loop body: I := I - 1");
@@ -446,7 +446,7 @@ bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
-        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
+            ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
     ASSERT(i_minus_1 != NULL);
     ps_ast_assignment *assignment_i_body = ps_ast_create_assignment(6, 9, variable_i_body, (ps_ast_node *)i_minus_1);
     ASSERT(assignment_i_body != NULL);
@@ -464,7 +464,7 @@ bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -540,7 +540,7 @@ bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_i_1 = ps_ast_create_literal_value(6, 23, value_i_1);
     ASSERT(rvalue_i_1 != NULL);
     ps_ast_binary_operation *i_minus_1 =
-        ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
+            ps_ast_create_binary_operation(6, 21, PS_OP_SUB, (ps_ast_node *)rvalue_i_body, (ps_ast_node *)rvalue_i_1);
     ASSERT(i_minus_1 != NULL);
     ps_ast_assignment *assignment_i_body = ps_ast_create_assignment(6, 9, variable_i_body, (ps_ast_node *)i_minus_1);
     ASSERT(assignment_i_body != NULL);
@@ -553,7 +553,7 @@ bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_i_0 = ps_ast_create_literal_value(7, 14, value_i_0);
     ASSERT(rvalue_i_0 != NULL);
     ps_ast_binary_operation *repeat_condition =
-        ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
+            ps_ast_create_binary_operation(7, 12, PS_OP_EQ, (ps_ast_node *)rvalue_i_cond, (ps_ast_node *)rvalue_i_0);
     ASSERT(repeat_condition != NULL);
 
     ps_ast_debug_line(0, "Create the REPEAT statement");
@@ -568,7 +568,7 @@ bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -636,7 +636,7 @@ bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_value *rvalue_u_0 = ps_ast_create_literal_value(4, 13, value_u_0);
     ASSERT(rvalue_u_0 != NULL);
     ps_ast_assignment *assignment_sum_init =
-        ps_ast_create_assignment(4, 5, variable_sum_init, (ps_ast_node *)rvalue_u_0);
+            ps_ast_create_assignment(4, 5, variable_sum_init, (ps_ast_node *)rvalue_u_0);
     ASSERT(assignment_sum_init != NULL);
     block_program->statement_list->statements[0] = (ps_ast_node *)assignment_sum_init;
 
@@ -650,10 +650,10 @@ bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_variable *rvalue_i = ps_ast_create_variable_simple(6, 26, block_program, PS_AST_RVALUE, symbol_i);
     ASSERT(rvalue_i != NULL);
     ps_ast_binary_operation *add_sum_i =
-        ps_ast_create_binary_operation(6, 24, PS_OP_ADD, (ps_ast_node *)rvalue_sum, (ps_ast_node *)rvalue_i);
+            ps_ast_create_binary_operation(6, 24, PS_OP_ADD, (ps_ast_node *)rvalue_sum, (ps_ast_node *)rvalue_i);
     ASSERT(add_sum_i != NULL);
     ps_ast_assignment *assignment_sum_body =
-        ps_ast_create_assignment(6, 9, variable_sum_body, (ps_ast_node *)add_sum_i);
+            ps_ast_create_assignment(6, 9, variable_sum_body, (ps_ast_node *)add_sum_i);
     ASSERT(assignment_sum_body != NULL);
     for_body->statements[0] = (ps_ast_node *)assignment_sum_body;
 
@@ -673,7 +673,7 @@ bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_ast_debug_line(0, "Create the FOR statement: For I := 1 To 5 Do Sum := Sum + I");
     ps_ast_for *for_statement =
-        ps_ast_create_for(5, 5, for_variable, (ps_ast_node *)for_start, (ps_ast_node *)for_end, 1, for_body);
+            ps_ast_create_for(5, 5, for_variable, (ps_ast_node *)for_start, (ps_ast_node *)for_end, 1, for_body);
     ASSERT(for_statement != NULL);
     block_program->statement_list->statements[1] = (ps_ast_node *)for_statement;
 
@@ -684,7 +684,7 @@ bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -744,7 +744,7 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_ast_debug_line(0, "Create the first PROCEDURE CALL statement");
     ps_ast_call *statement1 =
-        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL);
+            ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL);
     ASSERT(statement1 != NULL);
 
     ps_ast_debug_line(0, "Create the first by value argument of second statement");
@@ -765,7 +765,7 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_ast_debug_line(0, "Create the second PROCEDURE CALL statement");
     ps_ast_call *statement2 =
-        ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 2, args2, NULL);
+            ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 2, args2, NULL);
     ASSERT(statement2 != NULL);
 
     ps_ast_debug_line(0, "Add the statements to the statement list");
@@ -779,7 +779,7 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    result = ps_ast_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     if (!result)
     {
         ps_ast_debug_line(0, "Error running the program: %s (%d)", interpreter->error,

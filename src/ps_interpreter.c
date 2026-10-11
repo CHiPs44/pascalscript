@@ -373,7 +373,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
                                    .group = PS_AST_EXPRESSION,
                                    .kind = PS_AST_RVALUE,
                                    .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_evaluate_expression(interpreter, ast_variable->indexes[i], &index_node))
+        if (!ps_evaluate_expression(interpreter, ast_variable->indexes[i], &index_node))
             return false;
         indexes[i].allocated = false;
         indexes[i].type = index_node.value.type;
@@ -461,7 +461,7 @@ static bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter
         return false;
     ps_handle handle = ast_variable->variable->value->data.h;
     ps_value variable_value = {
-        .allocated = false, .type = ast_variable->variable->value->type, .data = frame->data[handle]};
+            .allocated = false, .type = ast_variable->variable->value->type, .data = frame->data[handle]};
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
@@ -486,7 +486,7 @@ static bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter,
                                     .group = PS_AST_EXPRESSION,
                                     .kind = PS_AST_LITERAL_VALUE,
                                     .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_evaluate_expression(interpreter, ast_variable->indexes[i], &index_value))
+        if (!ps_evaluate_expression(interpreter, ast_variable->indexes[i], &index_value))
             return false;
         index_values[i] = index_value.value;
     }
@@ -530,10 +530,10 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
         return ps_interpreter_return_false(interpreter, error);
 
     return ps_interpreter_set_error_message(
-        interpreter, PS_ERROR_TYPE_MISMATCH,
-        "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
-        ps_value_type_get_name(ps_value_get_type(from)), ps_value_type_get_name(ps_value_get_base(from)),
-        ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
+            interpreter, PS_ERROR_TYPE_MISMATCH,
+            "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
+            ps_value_type_get_name(ps_value_get_type(from)), ps_value_type_get_name(ps_value_get_base(from)),
+            ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
 }
 
 bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program)
@@ -543,7 +543,7 @@ bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program
     assert(PS_AST_BLOCK == program->group && PS_AST_PROGRAM == program->kind);
 
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_run: %s\n", program->name);
-    bool result = ps_ast_execute_program(interpreter, program);
+    bool result = ps_execute_program(interpreter, program);
     if (!result)
         fprintf(stderr, "ERROR %d %s at line %u, column %u\n", interpreter->error,
                 ps_error_get_message(interpreter->error), interpreter->error_line + 1, interpreter->error_column + 1);

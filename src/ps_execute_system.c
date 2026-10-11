@@ -25,8 +25,8 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-static bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *interpreter,
-                                                               const ps_ast_call *procedure_call)
+static bool ps_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *interpreter,
+                                                              const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
@@ -64,7 +64,7 @@ static bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter
         ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
         int16_t width = procedure_call->formats[i].width;
         int16_t precision = procedure_call->formats[i].precision;
-        if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
+        if (!ps_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
                                ps_value_get_display_string(&arg_value.value, width, precision));
@@ -83,7 +83,7 @@ static bool ps_ast_execute_procedure_write_or_writeln_or_writestr(ps_interpreter
     return true;
 }
 
-bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
+bool ps_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
@@ -96,7 +96,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
         procedure_call->executable == &ps_system_procedure_writestr)
     {
         // WRITE or WRITELN procedure: Evaluate and output each argument
-        return ps_ast_execute_procedure_write_or_writeln_or_writestr(interpreter, procedure_call);
+        return ps_execute_procedure_write_or_writeln_or_writestr(interpreter, procedure_call);
     }
     else if (procedure_call->executable == &ps_system_procedure_randomize)
     {
@@ -109,7 +109,7 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
         else if (procedure_call->n_args == 1)
         {
             ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-            if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[0], &arg_value))
+            if (!ps_evaluate_expression(interpreter, procedure_call->args[0], &arg_value))
                 return false;
             PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
@@ -128,8 +128,8 @@ bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_
     }
 }
 
-static bool ps_ast_execute_function_call_system_random(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                                       ps_ast_value *result)
+static bool ps_execute_function_call_system_random(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                                   ps_ast_value *result)
 {
     if (function_call->n_args == 0)
     {
@@ -143,7 +143,7 @@ static bool ps_ast_execute_function_call_system_random(ps_interpreter *interpret
         ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
                                   .kind = PS_AST_LITERAL_VALUE,
                                   .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-        if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &ast_value))
+        if (!ps_evaluate_expression(interpreter, function_call->args[0], &ast_value))
             return false;
         ps_error error = ps_function_random(interpreter, &ast_value.value, &result->value);
         if (error != PS_ERROR_NONE)
@@ -154,8 +154,8 @@ static bool ps_ast_execute_function_call_system_random(ps_interpreter *interpret
                                             "RANDOM function expects 0 or 1 argument");
 }
 
-static bool ps_ast_execute_function_call_system_get_tick_count(ps_interpreter *interpreter,
-                                                               const ps_ast_call *function_call, ps_ast_value *result)
+static bool ps_execute_function_call_system_get_tick_count(ps_interpreter *interpreter,
+                                                           const ps_ast_call *function_call, ps_ast_value *result)
 {
     (void)function_call;
     ps_error error = ps_function_get_tick_count(interpreter, NULL, &result->value);
@@ -164,8 +164,8 @@ static bool ps_ast_execute_function_call_system_get_tick_count(ps_interpreter *i
     return true;
 }
 
-static bool ps_ast_execute_function_call_system_2arg(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                                     ps_ast_value *result)
+static bool ps_execute_function_call_system_2arg(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                                 ps_ast_value *result)
 {
     assert(function_call != NULL);
     assert(function_call->group == PS_AST_EXPRESSION);
@@ -181,18 +181,18 @@ static bool ps_ast_execute_function_call_system_2arg(ps_interpreter *interpreter
     ps_ast_value b = {.group = PS_AST_EXPRESSION,
                       .kind = PS_AST_LITERAL_VALUE,
                       .value = {.allocated = false, .type = &ps_system_real, .data = {0}}};
-    if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &a))
+    if (!ps_evaluate_expression(interpreter, function_call->args[0], &a))
         return false;
-    if (!ps_ast_evaluate_expression(interpreter, function_call->args[1], &b))
+    if (!ps_evaluate_expression(interpreter, function_call->args[1], &b))
         return false;
     ps_error error = function_call->executable == &ps_system_function_power
-                         ? ps_function_power(interpreter, &a.value, &b.value, &result->value)
-                         : ps_function_logn(interpreter, &a.value, &b.value, &result->value);
+                             ? ps_function_power(interpreter, &a.value, &b.value, &result->value)
+                             : ps_function_logn(interpreter, &a.value, &b.value, &result->value);
     return PS_ERROR_NONE == error;
 }
 
-static bool ps_ast_execute_function_call_system_1arg(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                                     ps_ast_value *result)
+static bool ps_execute_function_call_system_1arg(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                                 ps_ast_value *result)
 {
     if (function_call->n_args != 1)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
@@ -201,7 +201,7 @@ static bool ps_ast_execute_function_call_system_1arg(ps_interpreter *interpreter
     ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
                               .kind = PS_AST_LITERAL_VALUE,
                               .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
-    if (!ps_ast_evaluate_expression(interpreter, function_call->args[0], &ast_value))
+    if (!ps_evaluate_expression(interpreter, function_call->args[0], &ast_value))
         return false;
     // Call function with argument
     ps_function_1arg_v function = function_call->executable->value->data.x->func_1arg_v;
@@ -209,8 +209,8 @@ static bool ps_ast_execute_function_call_system_1arg(ps_interpreter *interpreter
     return PS_ERROR_NONE == error;
 }
 
-bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                         ps_ast_value *result)
+bool ps_execute_function_call_system(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                     ps_ast_value *result)
 {
     assert(function_call != NULL);
     assert(function_call->group == PS_AST_EXPRESSION);
@@ -221,16 +221,16 @@ bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_a
 
     // Random can have 0 or 1 argument
     if (function_call->executable == &ps_system_function_random)
-        return ps_ast_execute_function_call_system_random(interpreter, function_call, result);
+        return ps_execute_function_call_system_random(interpreter, function_call, result);
 
     // GetTickCount has no argument
     if (function_call->executable == &ps_system_function_get_tick_count)
-        return ps_ast_execute_function_call_system_get_tick_count(interpreter, function_call, result);
+        return ps_execute_function_call_system_get_tick_count(interpreter, function_call, result);
 
     // Power and logn have 2 arguments
     if (function_call->executable == &ps_system_function_power || function_call->executable == &ps_system_function_logn)
-        return ps_ast_execute_function_call_system_2arg(interpreter, function_call, result);
+        return ps_execute_function_call_system_2arg(interpreter, function_call, result);
 
     // All other system functions have 1 argument
-    return ps_ast_execute_function_call_system_1arg(interpreter, function_call, result);
+    return ps_execute_function_call_system_1arg(interpreter, function_call, result);
 }

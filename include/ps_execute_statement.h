@@ -15,25 +15,25 @@ extern "C"
 #endif
 
     /** @brief Execute a list of Pascal statements */
-    bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
+    bool ps_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
 
     /** @brief Execute statement */
-    bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement);
+    bool ps_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement);
 
     /** @brief Execute assignment */
-    bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment);
+    bool ps_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment);
 
     /** @brief Execute if statement */
-    bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement);
+    bool ps_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement);
 
     /** @brief Execute while statement */
-    bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement);
+    bool ps_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement);
 
     /** @brief Execute repeat statement */
-    bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement);
+    bool ps_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement);
 
     /** @brief Execute for statement */
-    bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement);
+    bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement);
 
 #ifdef __cplusplus
 }

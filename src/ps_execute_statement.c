@@ -20,7 +20,7 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
+bool ps_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list)
 {
     if (statement_list == NULL)
         return true; // Empty statement list is valid (no-op)
@@ -42,7 +42,7 @@ bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_sta
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu/%zu:", i + 1, statement_list->count);
         assert(statement_list->statements != NULL);
         assert(statement_list->statements[i] != NULL);
-        if (!ps_ast_execute_statement(interpreter, statement_list->statements[i]))
+        if (!ps_execute_statement(interpreter, statement_list->statements[i]))
         {
             PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "STATEMENT %zu failed", i + 1);
             return false;
@@ -54,7 +54,7 @@ bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_sta
     return true;
 }
 
-bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement)
+bool ps_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement)
 {
     if (statement == NULL || statement->group != PS_AST_STATEMENT)
     {
@@ -67,23 +67,23 @@ bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *st
     switch (statement->kind)
     {
     case PS_AST_ASSIGNMENT:
-        return ps_ast_execute_assignment(interpreter, (const ps_ast_assignment *)statement);
+        return ps_execute_assignment(interpreter, (const ps_ast_assignment *)statement);
     case PS_AST_IF:
-        return ps_ast_execute_if(interpreter, (const ps_ast_if *)statement);
+        return ps_execute_if(interpreter, (const ps_ast_if *)statement);
     case PS_AST_CASE:
         interpreter->error_line = statement->line;
         interpreter->error_column = statement->column;
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
                                                 "CASE statement not implemented");
-        // return ps_ast_execute_case(interpreter, (const ps_ast_case *)statement);
+        // return ps_execute_case(interpreter, (const ps_ast_case *)statement);
     case PS_AST_WHILE:
-        return ps_ast_execute_while(interpreter, (const ps_ast_while *)statement);
+        return ps_execute_while(interpreter, (const ps_ast_while *)statement);
     case PS_AST_REPEAT:
-        return ps_ast_execute_repeat(interpreter, (const ps_ast_repeat *)statement);
+        return ps_execute_repeat(interpreter, (const ps_ast_repeat *)statement);
     case PS_AST_FOR:
-        return ps_ast_execute_for(interpreter, (const ps_ast_for *)statement);
+        return ps_execute_for(interpreter, (const ps_ast_for *)statement);
     case PS_AST_PROCEDURE_CALL:
-        return ps_ast_execute_procedure_call(interpreter, (const ps_ast_call *)statement);
+        return ps_execute_procedure_call(interpreter, (const ps_ast_call *)statement);
     default:
         interpreter->error_line = statement->line;
         interpreter->error_column = statement->column;
@@ -91,7 +91,7 @@ bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *st
     }
 }
 
-bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
+bool ps_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment)
 {
     assert(interpreter != NULL);
     assert(assignment != NULL);
@@ -104,7 +104,7 @@ bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignm
                                .value.allocated = false,
                                .value.type = expected_type,
                                .value.data = {0}};
-    if (!ps_ast_evaluate_expression(interpreter, assignment->expression, &value_node))
+    if (!ps_evaluate_expression(interpreter, assignment->expression, &value_node))
         return false; // line & column of error set when evaluating expression
     ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
     if (!ps_interpreter_copy_value(interpreter, &value_node.value, &value))
@@ -122,7 +122,7 @@ error:
     return false;
 }
 
-bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
+bool ps_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement)
 {
     assert(if_statement != NULL);
     assert(if_statement->group == PS_AST_STATEMENT);
@@ -131,7 +131,7 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
 
     // Evaluate condition
     ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_boolean, .value.data = {0}};
-    if (!ps_ast_evaluate_expression(interpreter, if_statement->condition, &condition_value))
+    if (!ps_evaluate_expression(interpreter, if_statement->condition, &condition_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                            ps_value_get_display_string(&condition_value.value, 0, 0));
@@ -143,16 +143,16 @@ bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statemen
     {
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Then branch: %zu statements",
                                if_statement->then_branch->count);
-        return ps_ast_execute_statement_list(interpreter, if_statement->then_branch);
+        return ps_execute_statement_list(interpreter, if_statement->then_branch);
     }
     if (if_statement->else_branch != NULL)
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Else branch: %zu statements",
                                if_statement->else_branch->count);
 
-    return ps_ast_execute_statement_list(interpreter, if_statement->else_branch);
+    return ps_execute_statement_list(interpreter, if_statement->else_branch);
 }
 
-bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
+bool ps_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement)
 {
     assert(while_statement != NULL);
     assert(while_statement->group == PS_AST_STATEMENT);
@@ -163,7 +163,7 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
     while (true)
     {
         ps_ast_value condition_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-        bool result = ps_ast_evaluate_expression(interpreter, while_statement->condition, &condition_value);
+        bool result = ps_evaluate_expression(interpreter, while_statement->condition, &condition_value);
         if (!result)
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
@@ -173,14 +173,14 @@ bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while
         if (!condition_value.value.data.b)
             break;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body");
-        if (!ps_ast_execute_statement_list(interpreter, while_statement->body))
+        if (!ps_execute_statement_list(interpreter, while_statement->body))
             return false;
     }
 
     return true;
 }
 
-bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement)
+bool ps_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement)
 {
     assert(repeat_statement != NULL);
     assert(repeat_statement->group == PS_AST_STATEMENT);
@@ -193,9 +193,9 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
     do
     {
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body %d", ++iteration);
-        if (!ps_ast_execute_statement_list(interpreter, repeat_statement->body))
+        if (!ps_execute_statement_list(interpreter, repeat_statement->body))
             return false;
-        if (!ps_ast_evaluate_expression(interpreter, repeat_statement->condition, &condition_value))
+        if (!ps_evaluate_expression(interpreter, repeat_statement->condition, &condition_value))
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Condition value: %s",
                                ps_value_get_display_string(&condition_value.value, 0, 0));
@@ -206,9 +206,9 @@ bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *rep
     return true;
 }
 
-static bool ps_ast_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_for *for_statement,
-                                         const ps_ast_variable *for_variable, ps_value *iteration_value,
-                                         const ps_ast_value *end_value, bool *should_stop)
+static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_for *for_statement,
+                                     const ps_ast_variable *for_variable, ps_value *iteration_value,
+                                     const ps_ast_value *end_value, bool *should_stop)
 {
     if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
         return false;
@@ -220,14 +220,14 @@ static bool ps_ast_execute_for_iteration(ps_interpreter *interpreter, const ps_a
     *should_stop = stop.data.b;
     if (*should_stop)
     {
-        PS_AST_DEBUG_EXECUTION(
-            interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s", ps_value_get_display_string(iteration_value, 0, 0),
-            for_statement->downto ? "<=" : ">=", ps_value_get_display_string(&end_value->value, 0, 0));
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
+                               ps_value_get_display_string(iteration_value, 0, 0), for_statement->downto ? "<=" : ">=",
+                               ps_value_get_display_string(&end_value->value, 0, 0));
         return true;
     }
 
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
-    if (!ps_ast_execute_statement_list(interpreter, for_statement->body))
+    if (!ps_execute_statement_list(interpreter, for_statement->body))
         return false;
 
     bool range_check = interpreter->range_check;
@@ -246,7 +246,7 @@ static bool ps_ast_execute_for_iteration(ps_interpreter *interpreter, const ps_a
     return true;
 }
 
-bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
+bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
 {
     assert(for_statement != NULL);
     assert(for_statement->group == PS_AST_STATEMENT);
@@ -264,13 +264,13 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
     // clang-format on
 
     // Evaluate start value
-    if (!ps_ast_evaluate_expression(interpreter, for_statement->start, &start_value))
+    if (!ps_evaluate_expression(interpreter, for_statement->start, &start_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tStart value: %s",
                            ps_value_get_display_string(&start_value.value, 0, 0));
 
     // Evaluate end value
-    if (!ps_ast_evaluate_expression(interpreter, for_statement->end, &end_value))
+    if (!ps_evaluate_expression(interpreter, for_statement->end, &end_value))
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tEnd value: %s",
                            ps_value_get_display_string(&end_value.value, 0, 0));
@@ -283,8 +283,8 @@ bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_state
 
     do
     {
-        if (!ps_ast_execute_for_iteration(interpreter, for_statement, for_variable, &iteration_value, &end_value,
-                                          &should_stop))
+        if (!ps_execute_for_iteration(interpreter, for_statement, for_variable, &iteration_value, &end_value,
+                                      &should_stop))
             return false;
         if (should_stop)
             break;

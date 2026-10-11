@@ -24,7 +24,7 @@
 #include "ps_type_definition.h"
 #include "ps_value.h"
 
-bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
+bool ps_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
 {
     assert(function_call != NULL);
     assert(function_call->group == PS_AST_EXPRESSION);
@@ -34,13 +34,13 @@ bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call
     result->value.data = (ps_value_data){0};
     if (function_call->executable->system)
     {
-        return ps_ast_execute_function_call_system(interpreter, function_call, result);
+        return ps_execute_function_call_system(interpreter, function_call, result);
     }
     return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
                                             "User Function call not implemented");
 }
 
-bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
+bool ps_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call)
 {
     assert(procedure_call != NULL);
     assert(procedure_call->group == PS_AST_STATEMENT);
@@ -50,7 +50,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
 
     if (procedure_call->executable->system)
     {
-        return ps_ast_execute_procedure_call_system(interpreter, procedure_call);
+        return ps_execute_procedure_call_system(interpreter, procedure_call);
     }
 
     // Check if argument count is same as procedure declaration
@@ -76,7 +76,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
         }
         else
         {
-            if (!ps_ast_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
+            if (!ps_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
                 return false;
             PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
@@ -115,7 +115,7 @@ bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_cal
     }
 
     // Execute procedure with arguments on top frame of stack
-    ok = ps_ast_execute_block(interpreter, procedure, true);
+    ok = ps_execute_block(interpreter, procedure, true);
     if (!ps_interpreter_exit_frame(interpreter))
         return false;
 

@@ -27,7 +27,7 @@ void ps_ast_debug_execution(ps_interpreter *interpreter, ps_debug_level level, c
     va_end(args);
 }
 
-bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame)
+bool ps_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame)
 {
     bool result = false;
 
@@ -42,7 +42,7 @@ bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block
     if (!has_frame && !ps_interpreter_enter_frame(interpreter, block))
         goto error;
 
-    result = ps_ast_execute_statement_list(interpreter, block->statement_list);
+    result = ps_execute_statement_list(interpreter, block->statement_list);
 
     if (!has_frame && !ps_interpreter_exit_frame(interpreter))
         goto error;
@@ -55,7 +55,7 @@ error:
     return false;
 }
 
-bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
+bool ps_execute_program(ps_interpreter *interpreter, const ps_ast_block *program)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)program, PS_AST_PROGRAM))
     {
@@ -64,10 +64,10 @@ bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *pro
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE, "Expected PROGRAM AST node");
     }
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROGRAM %s;", program->name);
-    return ps_ast_execute_block(interpreter, program, false);
+    return ps_execute_block(interpreter, program, false);
 }
 
-bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
+bool ps_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)procedure, PS_AST_PROCEDURE))
     {
@@ -77,10 +77,10 @@ bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *p
                                                 "Expected PROCEDURE AST node");
     }
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE %s;", procedure->name);
-    return ps_ast_execute_block(interpreter, procedure, false);
+    return ps_execute_block(interpreter, procedure, false);
 }
 
-bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
+bool ps_execute_function(ps_interpreter *interpreter, const ps_ast_block *function)
 {
     if (!ps_ast_node_check_kind((const ps_ast_node *)function, PS_AST_FUNCTION))
     {
@@ -90,5 +90,5 @@ bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *fu
                                                 "Expected FUNCTION AST node");
     }
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FUNCTION %s;", function->name);
-    return ps_ast_execute_block(interpreter, function, false);
+    return ps_execute_block(interpreter, function, false);
 }

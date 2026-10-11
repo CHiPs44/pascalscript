@@ -30,16 +30,16 @@ extern "C"
     ps_ast_debug_execution(interpreter, level, __VA_ARGS__)
 
     /** @brief Execute program */
-    bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program);
+    bool ps_execute_program(ps_interpreter *interpreter, const ps_ast_block *program);
 
     /** @brief Execute procedure */
-    bool ps_ast_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure);
+    bool ps_execute_procedure(ps_interpreter *interpreter, const ps_ast_block *procedure);
 
     /** @brief Execute function */
-    bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
+    bool ps_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
 
     /** @brief Execute block (internal) */
-    bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame);
+    bool ps_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame);
 
 #ifdef __cplusplus
 }

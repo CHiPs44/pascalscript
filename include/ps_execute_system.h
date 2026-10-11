@@ -15,11 +15,11 @@ extern "C"
 #endif
 
     /** @brief Execute system procedure call */
-    bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
+    bool ps_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
 
     /** @brief Execute system function call */
-    bool ps_ast_execute_function_call_system(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                              ps_ast_value *result);
+    bool ps_execute_function_call_system(ps_interpreter *interpreter, const ps_ast_call *function_call,
+                                         ps_ast_value *result);
 
 #ifdef __cplusplus
 }
