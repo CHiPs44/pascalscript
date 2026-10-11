@@ -8,11 +8,25 @@
 #define _PS_AST_EXECUTE_H
 
 #include "ps_ast.h"
+#include <stdarg.h>
+
+// Include submodule headers
+#include "ps_execute_statement.h"
+#include "ps_ast_execute_expression.h"
+#include "ps_ast_execute_system.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+    /** @brief Debug execution output function */
+    void ps_ast_debug_execution(ps_interpreter *interpreter, ps_debug_level level, const char *format, ...);
+
+    // Macro to avoid call and evaluation of arguments
+#define PS_AST_DEBUG_EXECUTION(interpreter, level, ...)                                                                \
+    if (interpreter->logger->debug_level >= level)                                                                     \
+    ps_ast_debug_execution(interpreter, level, __VA_ARGS__)
 
     /** @brief Execute program */
     bool ps_ast_execute_program(ps_interpreter *interpreter, const ps_ast_block *program);
@@ -23,36 +37,8 @@ extern "C"
     /** @brief Execute function */
     bool ps_ast_execute_function(ps_interpreter *interpreter, const ps_ast_block *function);
 
-    /** @brief Execute a list of Pascal statements */
-    bool ps_ast_execute_statement_list(ps_interpreter *interpreter, const ps_ast_statement_list *statement_list);
-
-    /** @brief Execute statement */
-    bool ps_ast_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statement);
-
-    /** @brief Execute assignment */
-    bool ps_ast_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment *assignment);
-
-    /** @brief Execute if statement */
-    bool ps_ast_execute_if(ps_interpreter *interpreter, const ps_ast_if *if_statement);
-
-    /** @brief Execute while statement */
-    bool ps_ast_execute_while(ps_interpreter *interpreter, const ps_ast_while *while_statement);
-
-    /** @brief Execute repeat statement */
-    bool ps_ast_execute_repeat(ps_interpreter *interpreter, const ps_ast_repeat *repeat_statement);
-
-    /** @brief Execute for statement */
-    bool ps_ast_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement);
-
-    /** @brief Execute procedure call */
-    bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
-
-    /** @brief Execute function call */
-    bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call,
-                                      ps_ast_value *result);
-
-    /** @brief Evaluate an expression */
-    bool ps_ast_evaluate_expression(ps_interpreter *interpreter, const ps_ast_node *expression, ps_ast_value *result);
+    /** @brief Execute block (internal) */
+    bool ps_ast_execute_block(ps_interpreter *interpreter, const ps_ast_block *block, bool has_frame);
 
 #ifdef __cplusplus
 }
