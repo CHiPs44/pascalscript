@@ -4,17 +4,17 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_AST_EXECUTE_H
-#define _PS_AST_EXECUTE_H
+#ifndef _PS_EXECUTE_H
+#define _PS_EXECUTE_H
 
 #include "ps_ast.h"
 #include <stdarg.h>
 
 // Include submodule headers
 #include "ps_execute_statement.h"
-#include "ps_ast_execute_expression.h"
-#include "ps_ast_execute_system.h"
-#include "ps_ast_execute_call.h"
+#include "ps_execute_expression.h"
+#include "ps_execute_system.h"
+#include "ps_execute_call.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -45,4 +45,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_AST_EXECUTE_H */
+#endif /* _PS_EXECUTE_H */

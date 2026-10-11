@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_AST_EXECUTE_EXPRESSION_H
-#define _PS_AST_EXECUTE_EXPRESSION_H
+#ifndef _PS_EXECUTE_EXPRESSION_H
+#define _PS_EXECUTE_EXPRESSION_H
 
 #include "ps_ast.h"
 
@@ -21,4 +21,4 @@ extern "C"
 }
 #endif
 
-#endif /* _PS_AST_EXECUTE_EXPRESSION_H */
+#endif /* _PS_EXECUTE_EXPRESSION_H */

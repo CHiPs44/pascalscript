@@ -10,7 +10,7 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
-#include "ps_ast_execute.h"
+#include "ps_execute.h"
 #include "ps_error.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
