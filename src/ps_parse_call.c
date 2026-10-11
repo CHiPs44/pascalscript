@@ -226,7 +226,7 @@ static bool ps_parse_actual_signature(ps_compiler *compiler, ps_ast_block *block
     } while (true);
 
     ps_ast_node_kind node_kind =
-        executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
+            executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
     *call = ps_ast_create_call(start_line, start_column, node_kind, executable, parameter_count, args, NULL);
     if (*call == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
@@ -298,7 +298,7 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
     {
         // Build AST node for CALL
         ps_ast_node_kind executable_kind =
-            executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
+                executable->kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE_CALL : PS_AST_FUNCTION_CALL;
         *call = ps_ast_create_call(start_line, start_column, executable_kind, executable, 0, NULL, NULL);
         if (*call == NULL)
             GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)

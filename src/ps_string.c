@@ -170,10 +170,7 @@ ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len 
 
 /// @brief Compare two strings
 /// @return less than 0 if a<b, 0 if a=b, greater than 0 if a>b (uses C strcmp)
-int ps_string_compare(ps_string *a, ps_string *b)
-{
-    return strcmp((char *)a->str, (char *)b->str);
-}
+int ps_string_compare(ps_string *a, ps_string *b) { return strcmp((char *)a->str, (char *)b->str); }
 
 ps_string_len ps_string_position(ps_string *needle, ps_string *haystack)
 {

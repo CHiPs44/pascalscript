@@ -318,7 +318,7 @@ static ps_error ps_function_low_or_high_type(ps_interpreter *interpreter, ps_sym
     case PS_TYPE_BOOLEAN:
         result->type = &ps_system_boolean;
         result->data.b =
-            low ? ps_system_constant_boolean_true.value->data.b : ps_system_constant_boolean_false.value->data.b;
+                low ? ps_system_constant_boolean_true.value->data.b : ps_system_constant_boolean_false.value->data.b;
         break;
     case PS_TYPE_ARRAY:
         subrange = type_def->def.a.subranges[0];
@@ -730,9 +730,10 @@ ps_error ps_function_ln(ps_interpreter *interpreter, const ps_value *value, ps_v
 ps_error ps_function_power(ps_interpreter *interpreter, const ps_value *a, const ps_value *b, ps_value *result)
 {
     if (!ps_value_is_real(a) || !ps_value_is_real(b))
-        return ps_function_return_error_with_message(
-            interpreter, PS_ERROR_EXPECTED_REAL, "Power: Reals expected, got %s and %s",
-            ps_type_definition_get_name(a->type->value->data.t), ps_type_definition_get_name(b->type->value->data.t));
+        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_REAL,
+                                                     "Power: Reals expected, got %s and %s",
+                                                     ps_type_definition_get_name(a->type->value->data.t),
+                                                     ps_type_definition_get_name(b->type->value->data.t));
     result->type = &ps_system_real;
     double r = pow(a->data.r, b->data.r);
     if (interpreter->range_check && (r < PS_REAL_MIN || r > PS_REAL_MAX))

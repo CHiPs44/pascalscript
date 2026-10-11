@@ -119,7 +119,7 @@ void ps_memory_debug(FILE *output)
     for (int memory_class = 0; memory_class < PS_MEMORY_CLASS_COUNT; memory_class += 1)
     {
         size_t total_allocations =
-            mallocations[memory_class] + callocations[memory_class] + reallocations[memory_class];
+                mallocations[memory_class] + callocations[memory_class] + reallocations[memory_class];
         size_t total_allocated = mallocated[memory_class] + callocated[memory_class] + reallocated[memory_class];
         // clang-format off
         fprintf(output, "┃ %-16s ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃ %8zu ┃\n",

@@ -23,7 +23,7 @@ extern "C"
 
 #define PS_SYSTEM_FUNCTION(VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE, RETURN_TYPE)                                   \
     ps_executable ps_executable_function_##VALUE = {                                                                   \
-        .kind = KIND, CALLABLE_FIELD = CALLABLE, .return_type = RETURN_TYPE};                                          \
+            .kind = KIND, CALLABLE_FIELD = CALLABLE, .return_type = RETURN_TYPE};                                      \
     ps_value ps_value_function_##VALUE = {.type = &ps_system_function,                                                 \
                                           .data = {.x = &ps_executable_function_##VALUE}};                             \
     ps_symbol ps_system_function_##VALUE = {.kind = PS_SYMBOL_KIND_FUNCTION,                                           \
@@ -34,7 +34,7 @@ extern "C"
 #define PS_SYSTEM_PROCEDURE(VALUE, NAME, KIND, CALLABLE_FIELD, CALLABLE)                                               \
     ps_executable ps_executable_procedure_##VALUE = {.kind = KIND, CALLABLE_FIELD = CALLABLE};                         \
     ps_value ps_value_procedure_##VALUE = {.type = &ps_system_procedure,                                               \
-                                           .data = {.x = &ps_executable_procedure_##VALUE}};                            \
+                                           .data = {.x = &ps_executable_procedure_##VALUE}};                           \
     ps_symbol ps_system_procedure_##VALUE = {.kind = PS_SYMBOL_KIND_PROCEDURE,                                         \
                                              .name = NAME,                                                             \
                                              .value = &ps_value_procedure_##VALUE,                                     \

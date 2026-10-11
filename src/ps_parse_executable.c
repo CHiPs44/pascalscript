@@ -214,7 +214,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 
     // Create executable and symbol for the procedure/function
     ps_executable_kind executable_kind =
-        kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
+            kind == PS_SYMBOL_KIND_PROCEDURE ? PS_EXECUTABLE_PROC_USER : PS_EXECUTABLE_FUNC_USER;
     executable = ps_executable_alloc(executable_kind, block_executable);
     if (executable == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)

@@ -105,7 +105,7 @@ extern "C"
 
     /** @brief LOGN(REAL, REAL): REAL - Get logarithm of floating point value */
     ps_error ps_function_logn(ps_interpreter *interpreter, const ps_value *base, const ps_value *value,
-                          ps_value *result);
+                              ps_value *result);
 
     /** @brief ODD - true if integer/unsigned value is odd, false if even */
     ps_error ps_function_odd(ps_interpreter *interpreter, const ps_value *value, ps_value *result);

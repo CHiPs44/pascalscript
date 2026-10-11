@@ -67,7 +67,8 @@ extern "C"
 
     typedef struct s_ps_type_definition_subrange
     {
-        union {
+        union
+        {
             ps_type_definition_subrange_char c;
             ps_type_definition_subrange_integer i;
             ps_type_definition_subrange_unsigned u;
@@ -144,7 +145,8 @@ extern "C"
         ps_value_type type; /** @brief visible value type */
         ps_value_type base; /** @brief same as type for internal types like integer or char, values for sub-type for
                                subranges and enums, ... */
-        union {
+        union
+        {
             // clang-format off
             ps_type_definition_enum     e; /** @brief _e_numeration      */
             ps_type_definition_subrange g; /** @brief subran_g_e         */

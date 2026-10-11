@@ -28,7 +28,8 @@ extern "C"
     // clang-format on
 
     /** @brief Value union */
-    typedef union u_ps_value_data {
+    typedef union u_ps_value_data
+    {
         // clang-format off
         ps_ast_node        *n; /** @brief "n" is for "_n_ode"       */
         ps_handle           h; /** @brief "h" is for "_h_andle"     */

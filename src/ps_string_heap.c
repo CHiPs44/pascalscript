@@ -57,8 +57,8 @@ bool ps_string_heap_grow(ps_string_heap *heap)
     if (heap->more == 0)
         return false;
     // Reallocate memory
-    ps_string **data =
-        (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string *));
+    ps_string **data = (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data,
+                                                       (heap->size + heap->more) * sizeof(ps_string *));
     if (data == NULL)
         return false; // errno = ENOMEM
     // Clear newly allocated memory

@@ -22,15 +22,15 @@ char *minimal_source = "PROGRAM MINIMAL;\n"
                        "END.\n";
 
 char *hello_utf8 =
-    //  |         1         2         3         4         5         6         7         8|
-    //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
-    "Program Hello;\n"
-    // "Const\n"
-    // "\tK = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
-    "Begin\n"
-    "\tWriteLn('Hello, World!');\n"
-    // "\tWriteLn('K=', K);\n"
-    "End."; //\n";
+        //  |         1         2         3         4         5         6         7         8|
+        //  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
+        "Program Hello;\n"
+        // "Const\n"
+        // "\tK = 'Pépé le putois a 1\u00a0234,56€ en espèces sonnantes et trébuchantes.';\n"
+        "Begin\n"
+        "\tWriteLn('Hello, World!');\n"
+        // "\tWriteLn('K=', K);\n"
+        "End."; //\n";
 
 int main(void)
 {

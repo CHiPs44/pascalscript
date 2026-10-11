@@ -152,8 +152,8 @@ static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *
     PARSE_BEGIN("RELATIONAL_EXPRESSION", "");
 
     static ps_token_type relational_operators[] = {
-        // <         <=           >            >=           =            <>
-        PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
+            // <         <=           >            >=           =            <>
+            PS_TOKEN_LT, PS_TOKEN_LE, PS_TOKEN_GT, PS_TOKEN_GE, PS_TOKEN_EQ, PS_TOKEN_NE,
     };
     ps_ast_node *left = NULL;
     ps_ast_node *right = NULL;
@@ -163,7 +163,7 @@ static bool ps_parse_relational_expression(ps_compiler *compiler, ps_ast_block *
         TRACE_ERROR("RELATIONAL1");
     // No loop, only one relational operator allowed, no a <= b <= c
     relational_operator = ps_parser_expect_token_types(
-        compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
+            compiler->parser, sizeof(relational_operators) / sizeof(ps_token_type), relational_operators);
     if (relational_operator == PS_TOKEN_NONE)
     {
         *expression = left;
@@ -252,7 +252,7 @@ static bool ps_parse_term(ps_compiler *compiler, ps_ast_block *block, ps_ast_nod
     do
     {
         multiplicative_operator =
-            ps_parser_expect_token_types(compiler->parser, multiplicative_operator_count, multiplicative_operators);
+                ps_parser_expect_token_types(compiler->parser, multiplicative_operator_count, multiplicative_operators);
         if (multiplicative_operator == PS_TOKEN_NONE)
         {
             *expression = left;
@@ -324,7 +324,7 @@ static bool ps_parse_factor_identifier_array(ps_compiler *compiler, ps_ast_block
 
     // Create the variable array AST node
     ps_ast_variable *ast_variable =
-        ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, dimensions, indexes);
+            ps_ast_create_variable_array(start_line, start_column, block, PS_AST_RVALUE, symbol, dimensions, indexes);
     if (ast_variable == NULL)
         TRACE_ERROR("VARIABLE_ARRAY")
     *factor = (ps_ast_node *)ast_variable;
@@ -744,7 +744,7 @@ static bool ps_parse_constant_expression_numeric(ps_compiler *compiler, ps_ast_b
             RETURN_ERROR(PS_ERROR_OUT_OF_RANGE)
         constant->type = &ps_system_integer;
         constant->data.i =
-            negate ? -(ps_integer)lexer->current_token.value.u : (ps_integer)lexer->current_token.value.u;
+                negate ? -(ps_integer)lexer->current_token.value.u : (ps_integer)lexer->current_token.value.u;
         break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)

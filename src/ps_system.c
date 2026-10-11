@@ -42,7 +42,7 @@ ps_symbol          ps_system_type_def   = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITIO
 #define PS_SYSTEM_TYPE(__name__, __NAME__, __VALUE_TYPE__, __VALUE_BASE__)                                             \
     ps_type_definition ps_type_def_##__name__ = {.type = __VALUE_TYPE__, .base = __VALUE_BASE__};                      \
     ps_value ps_value_##__name__ = {                                                                                   \
-        .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                      \
+            .allocated = false, .type = &ps_symbol_type_def, .data = {.t = &ps_type_def_##__name__}};                  \
     ps_symbol ps_system_##__name__ = {.kind = PS_SYMBOL_KIND_TYPE_DEFINITION,                                          \
                                       .name = __NAME__,                                                                \
                                       .value = &ps_value_##__name__,                                                   \

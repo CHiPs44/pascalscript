@@ -178,9 +178,9 @@ bool ps_compiler_copy_value(ps_compiler *compiler, const ps_value *from, ps_valu
     if (error != PS_ERROR_TYPE_MISMATCH)
         return ps_compiler_return_false(compiler, error);
     ps_compiler_set_message(
-        compiler, "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
-        ps_value_type_get_name(from->type->value->data.t->type), ps_value_type_get_name(ps_value_get_base(from)),
-        ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
+            compiler, "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
+            ps_value_type_get_name(from->type->value->data.t->type), ps_value_type_get_name(ps_value_get_base(from)),
+            ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
     return ps_compiler_return_false(compiler, PS_ERROR_TYPE_MISMATCH);
 }
 

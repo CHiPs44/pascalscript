@@ -69,10 +69,7 @@ bool ps_value_is_ordinal(const ps_value *value)
     return false;
 }
 
-bool ps_value_is_scalar(const ps_value *value)
-{
-    return ps_value_is_ordinal(value) || ps_value_is_real(value);
-}
+bool ps_value_is_scalar(const ps_value *value) { return ps_value_is_ordinal(value) || ps_value_is_real(value); }
 
 bool ps_value_is_number(const ps_value *value)
 {
@@ -301,30 +298,15 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     }                                                                                                                  \
     return value
 
-ps_value *ps_value_set_integer(ps_value *value, ps_integer i)
-{
-    PS_VALUE_SET(ps_system_integer, i);
-}
+ps_value *ps_value_set_integer(ps_value *value, ps_integer i) { PS_VALUE_SET(ps_system_integer, i); }
 
-ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u)
-{
-    PS_VALUE_SET(ps_system_unsigned, u);
-}
+ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u) { PS_VALUE_SET(ps_system_unsigned, u); }
 
-ps_value *ps_value_set_real(ps_value *value, ps_real r)
-{
-    PS_VALUE_SET(ps_system_real, r);
-}
+ps_value *ps_value_set_real(ps_value *value, ps_real r) { PS_VALUE_SET(ps_system_real, r); }
 
-ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b)
-{
-    PS_VALUE_SET(ps_system_boolean, b);
-}
+ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b) { PS_VALUE_SET(ps_system_boolean, b); }
 
-ps_value *ps_value_set_char(ps_value *value, ps_char c)
-{
-    PS_VALUE_SET(ps_system_char, c);
-}
+ps_value *ps_value_set_char(ps_value *value, ps_char c) { PS_VALUE_SET(ps_system_char, c); }
 
 #define NULL_VALUE                                                                                                     \
     {                                                                                                                  \
@@ -436,7 +418,7 @@ ps_value *ps_value_set_char(ps_value *value, ps_char c)
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
     static char buffer[PS_STRING_MAX_LEN + 1];
-    const ps_executable *executable = NULL;                                                                   \
+    const ps_executable *executable = NULL;
 
     if (value == NULL)
         NULL_VALUE
@@ -504,10 +486,7 @@ char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t 
     return ps_value_to_string(value, false, width, precision);
 }
 
-char *ps_value_get_debug_string(const ps_value *value)
-{
-    return ps_value_to_string(value, true, 0, 0);
-}
+char *ps_value_get_debug_string(const ps_value *value) { return ps_value_to_string(value, true, 0, 0); }
 
 char *ps_value_get_type_name(const ps_value *value)
 {

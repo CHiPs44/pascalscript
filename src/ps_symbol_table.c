@@ -71,7 +71,7 @@ ps_symbol_table *ps_symbol_table_alloc(int table_size, int bucket_size)
 {
     table_size = table_size > 0 ? table_size : PS_SYMBOL_TABLE_SIZE;
     ps_symbol_table *table =
-        ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
+            ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol_table) + sizeof(ps_bucket *) * table_size);
     if (table == NULL)
         return NULL;
     table->table_size = table_size;
@@ -92,10 +92,7 @@ void *ps_symbol_table_free(ps_symbol_table *table)
     return NULL;
 }
 
-int ps_symbol_table_find_used_buckets(const ps_symbol_table *table)
-{
-    return table == NULL ? -1 : table->used_buckets;
-}
+int ps_symbol_table_find_used_buckets(const ps_symbol_table *table) { return table == NULL ? -1 : table->used_buckets; }
 
 int ps_symbol_table_find_free(const ps_symbol_table *table)
 {
@@ -165,7 +162,7 @@ ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol)
     {
         bucket->size += bucket->more;
         ps_bucket *bigger_bucket =
-            ps_memory_realloc(PS_MEMORY_SYMBOL, bucket, sizeof(ps_bucket) + bucket->size * sizeof(ps_symbol *));
+                ps_memory_realloc(PS_MEMORY_SYMBOL, bucket, sizeof(ps_bucket) + bucket->size * sizeof(ps_symbol *));
         if (bigger_bucket == NULL)
             return PS_ERROR_OUT_OF_MEMORY;
         table->buckets[index] = bigger_bucket;

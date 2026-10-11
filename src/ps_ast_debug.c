@@ -153,8 +153,8 @@ void ps_ast_debug_formal_signature(int margin, const ps_formal_signature *signat
     ps_ast_debug_line(margin + 2, "      Size: %d", signature->size);
     ps_ast_debug_line(margin + 2, "    Result: %s",
                       signature->result_type == NULL
-                          ? "N/A"
-                          : ps_type_definition_get_name(ps_symbol_get_type_def(signature->result_type)));
+                              ? "N/A"
+                              : ps_type_definition_get_name(ps_symbol_get_type_def(signature->result_type)));
     ps_ast_debug_line(margin + 2, "Parameters:");
     for (int i = 0; i < signature->parameter_count; i++)
     {
@@ -309,7 +309,7 @@ static void ps_ast_debug_call(int margin, const ps_ast_call *call)
     if (call->executable->kind == PS_SYMBOL_KIND_PROCEDURE)
         ps_ast_debug_line(margin, "{PROCEDURE_CALL %d} %s(", call->n_args, call->executable->name);
     else
-        ps_ast_debug_line(margin, "{FUNCTION_CALL %d} %s(", call->n_args,call->executable->name);
+        ps_ast_debug_line(margin, "{FUNCTION_CALL %d} %s(", call->n_args, call->executable->name);
     for (int i = 0; i < call->n_args; i++)
     {
         ps_ast_debug_node(margin + 1, call->args[i]);
@@ -317,15 +317,9 @@ static void ps_ast_debug_call(int margin, const ps_ast_call *call)
     ps_ast_debug_line(margin, ")");
 }
 
-void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call)
-{
-    ps_ast_debug_call(margin, call);
-}
+void ps_ast_debug_procedure_call(int margin, const ps_ast_call *call) { ps_ast_debug_call(margin, call); }
 
-void ps_ast_debug_function_call(int margin, const ps_ast_call *call)
-{
-    ps_ast_debug_call(margin, call);
-}
+void ps_ast_debug_function_call(int margin, const ps_ast_call *call) { ps_ast_debug_call(margin, call); }
 
 void ps_ast_debug_node(int margin, const ps_ast_node *node)
 {

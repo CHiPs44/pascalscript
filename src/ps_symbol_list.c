@@ -49,7 +49,7 @@ bool ps_symbol_list_grow(ps_symbol_list *list)
     if (list->size + list->more > 256)
         return false;
     ps_symbol **new_values =
-        ps_memory_realloc(PS_MEMORY_PARSER, list->values, (list->size + list->more) * sizeof(ps_symbol *));
+            ps_memory_realloc(PS_MEMORY_PARSER, list->values, (list->size + list->more) * sizeof(ps_symbol *));
     if (new_values == NULL)
         return false; // errno = ENOMEM
     list->values = new_values;

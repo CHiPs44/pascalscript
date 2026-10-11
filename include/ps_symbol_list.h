@@ -12,19 +12,19 @@ extern "C"
 {
 #endif
 
-typedef struct s_ps_symbol_list
-{
-    ps_unsigned size;
-    ps_unsigned more;
-    ps_unsigned used;
-    ps_symbol **values;
-} ps_symbol_list;
+    typedef struct s_ps_symbol_list
+    {
+        ps_unsigned size;
+        ps_unsigned more;
+        ps_unsigned used;
+        ps_symbol **values;
+    } ps_symbol_list;
 
-ps_symbol_list *ps_symbol_list_alloc(int size, int more);
-void ps_symbol_list_free(ps_symbol_list *list, bool free_symbols);
-bool ps_symbol_list_grow(ps_symbol_list *list);
-bool ps_symbol_list_find(const ps_symbol_list *list, const char *name);
-ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const char *name);
+    ps_symbol_list *ps_symbol_list_alloc(int size, int more);
+    void ps_symbol_list_free(ps_symbol_list *list, bool free_symbols);
+    bool ps_symbol_list_grow(ps_symbol_list *list);
+    bool ps_symbol_list_find(const ps_symbol_list *list, const char *name);
+    ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const char *name);
 
 #ifdef __cplusplus
 }

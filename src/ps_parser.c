@@ -52,10 +52,7 @@ bool ps_parser_use_lexer(ps_parser *parser, uint8_t current_lexer)
     return true;
 }
 
-ps_lexer *ps_parser_get_lexer(const ps_parser *parser)
-{
-    return parser->lexers[parser->current_lexer];
-}
+ps_lexer *ps_parser_get_lexer(const ps_parser *parser) { return parser->lexers[parser->current_lexer]; }
 
 void ps_parser_debug(const ps_parser *parser, char *message)
 {
@@ -90,5 +87,5 @@ ps_token_type ps_parser_expect_token_types(const ps_parser *parser, size_t token
 ps_token_type ps_parser_expect_statement_end_token(const ps_parser *parser)
 {
     return ps_parser_expect_token_types(
-        parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
+            parser, 4, (ps_token_type[]){PS_TOKEN_SEMI_COLON, PS_TOKEN_END, PS_TOKEN_ELSE, PS_TOKEN_UNTIL});
 }

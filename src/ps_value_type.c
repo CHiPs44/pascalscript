@@ -13,7 +13,4 @@ char *ps_type_names[] = {"UNKNOWN", "NODE",   "REAL",     "INTEGER",    "UNSIGNE
                          "CHAR",    "STRING", "TYPE_DEF", "EXECUTABLE", "SUBRANGE", "ENUM",
                          "ARRAY",   "SET",    "POINTER",  "RECORD",     "FILE"};
 
-char *ps_value_type_get_name(ps_value_type type)
-{
-    return ps_type_names[type];
-}
+char *ps_value_type_get_name(ps_value_type type) { return ps_type_names[type]; }

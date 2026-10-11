@@ -60,15 +60,9 @@ ps_frame_stack *ps_frame_stack_free(ps_frame_stack *stack)
     return NULL;
 }
 
-bool ps_frame_stack_is_empty(const ps_frame_stack *stack)
-{
-    return stack->used == 0;
-}
+bool ps_frame_stack_is_empty(const ps_frame_stack *stack) { return stack->used == 0; }
 
-bool ps_frame_stack_is_full(const ps_frame_stack *stack)
-{
-    return stack->used == stack->size;
-}
+bool ps_frame_stack_is_full(const ps_frame_stack *stack) { return stack->used == stack->size; }
 
 ps_frame *ps_frame_stack_push(ps_frame_stack *stack, ps_frame *frame)
 {

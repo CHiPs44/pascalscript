@@ -192,7 +192,8 @@ extern "C"
     } ps_token_type;
 
     /** @brief Token value */
-    typedef union u_ps_token_value {
+    typedef union u_ps_token_value
+    {
         char identifier[PS_IDENTIFIER_LEN + 1]; /** @brief Identifier             */
         ps_integer i;                           /** @brief Integer value          */
         ps_unsigned u;                          /** @brief Unsigned integer value */

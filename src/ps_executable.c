@@ -18,10 +18,7 @@ bool ps_executable_is_user_defined(ps_executable_kind kind)
     return kind == PS_EXECUTABLE_PROC_USER || kind == PS_EXECUTABLE_FUNC_USER;
 }
 
-bool ps_executable_is_system(ps_executable_kind kind)
-{
-    return !ps_executable_is_user_defined(kind);
-}
+bool ps_executable_is_system(ps_executable_kind kind) { return !ps_executable_is_user_defined(kind); }
 
 ps_executable *ps_executable_alloc(ps_executable_kind kind, ps_ast_block *block)
 {

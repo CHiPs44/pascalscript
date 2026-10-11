@@ -46,10 +46,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     return NULL;
 }
 
-uint32_t ps_symbol_get_auto_num()
-{
-    return ++ps_symbol_auto_index;
-}
+uint32_t ps_symbol_get_auto_num() { return ++ps_symbol_auto_index; }
 
 void ps_symbol_normalize_name(ps_symbol *symbol)
 {
@@ -87,7 +84,7 @@ typedef struct s_ps_symbol_kind_name
     char *name;
 } ps_symbol_kind_name;
 const ps_symbol_kind_name ps_symbol_kind_names[] = {
-    // clang-format off
+        // clang-format off
     //                                123456789
     {PS_SYMBOL_KIND_AUTO           , "AUTO"     },
     {PS_SYMBOL_KIND_TYPE_DEFINITION, "TYPE_DEF" },
@@ -98,7 +95,7 @@ const ps_symbol_kind_name ps_symbol_kind_names[] = {
     {PS_SYMBOL_KIND_PROCEDURE      , "PROCEDURE"},
     {PS_SYMBOL_KIND_FUNCTION       , "FUNCTION" },
     // ...
-    // clang-format on
+        // clang-format on
 };
 
 char *ps_symbol_get_kind_name(ps_symbol_kind kind)

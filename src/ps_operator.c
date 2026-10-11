@@ -188,30 +188,12 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
     }                                                                                                                  \
     else
 
-static inline bool ps_string_eq(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) == 0;
-}
-static inline bool ps_string_ne(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) != 0;
-}
-static inline bool ps_string_lt(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) < 0;
-}
-static inline bool ps_string_le(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) <= 0;
-}
-static inline bool ps_string_gt(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) > 0;
-}
-static inline bool ps_string_ge(ps_string *a, ps_string *b)
-{
-    return ps_string_compare(a, b) >= 0;
-}
+static inline bool ps_string_eq(ps_string *a, ps_string *b) { return ps_string_compare(a, b) == 0; }
+static inline bool ps_string_ne(ps_string *a, ps_string *b) { return ps_string_compare(a, b) != 0; }
+static inline bool ps_string_lt(ps_string *a, ps_string *b) { return ps_string_compare(a, b) < 0; }
+static inline bool ps_string_le(ps_string *a, ps_string *b) { return ps_string_compare(a, b) <= 0; }
+static inline bool ps_string_gt(ps_string *a, ps_string *b) { return ps_string_compare(a, b) > 0; }
+static inline bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_compare(a, b) >= 0; }
 
 bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // NOSONAR
                              const ps_value *b, ps_value *result, ps_operator_binary operator)
@@ -474,18 +456,20 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         result->type = &ps_system_string;
         break;
     default:
-        ps_interpreter_set_message(
-            interpreter, "Unknown binary operator %s (%d) result type %s (%) for types %s and %s\n",
-            ps_operator_binary_get_name(operator), operator, ps_value_type_get_name(r), r,
-            ps_value_type_get_name(a->type->value->data.t->base), ps_value_type_get_name(b->type->value->data.t->base));
+        ps_interpreter_set_message(interpreter,
+                                   "Unknown binary operator %s (%d) result type %s (%) for types %s and %s\n",
+                                   ps_operator_binary_get_name(operator), operator, ps_value_type_get_name(r), r,
+                                   ps_value_type_get_name(a->type->value->data.t->base),
+                                   ps_value_type_get_name(b->type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_OPERATOR_NOT_APPLICABLE);
     }
     if (expected_type != NULL && expected_type != &ps_system_none && result->type != expected_type)
     {
-        ps_interpreter_set_message(
-            interpreter, "Binary operator %s (%d) result type %s does not match expected type %s\n",
-            ps_operator_binary_get_name(operator), operator, ps_value_type_get_name(result->type->value->data.t->base),
-            expected_type == NULL, "NULL!", ps_value_type_get_name(expected_type->value->data.t->base));
+        ps_interpreter_set_message(interpreter,
+                                   "Binary operator %s (%d) result type %s does not match expected type %s\n",
+                                   ps_operator_binary_get_name(operator), operator,
+                                   ps_value_type_get_name(result->type->value->data.t->base), expected_type == NULL,
+                                   "NULL!", ps_value_type_get_name(expected_type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
     }
     return true;
