@@ -10,8 +10,8 @@
 
 #include "../include/ps_ast.h"
 #include "../include/ps_config.h"
+#include "../include/ps_frame_stack.h"
 #include "../include/ps_memory.h"
-#include "../include/ps_stack.h"
 #include "../include/ps_system.h"
 #include "../include/ps_value.h"
 
@@ -19,7 +19,7 @@
 // #include "../src/ps_executable.c"
 // #include "../src/ps_memory.c"
 // #include "../src/ps_signature.c"
-// #include "../src/ps_stack.c"
+// #include "../src/ps_frame_stack.c"
 // #include "../src/ps_string.c"
 // #include "../src/ps_symbol.c"
 // #include "../src/ps_symbol_table.c"

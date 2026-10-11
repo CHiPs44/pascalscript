@@ -11,8 +11,8 @@
 
 #include "ps_ast.h"
 #include "ps_error.h"
+#include "ps_frame_stack.h"
 #include "ps_logger.h"
-#include "ps_stack.h"
 #include "ps_string_heap.h"
 #include "ps_symbol_table.h"
 #include "ps_value.h"
@@ -33,7 +33,7 @@ extern "C"
     {
         ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions */
         ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)      */
-        ps_stack *stack;             /** @brief Stack to hold frames for variable values                       */
+        ps_frame_stack *stack;       /** @brief Stack to hold frames for variable values                       */
         char message[128];           /** @brief Explanatory error message                                      */
         uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...   */
         ps_error error;              /** @brief Current error PS_ERROR_XXX                                     */

@@ -13,12 +13,12 @@
 #include "ps_ast_debug.h"
 #include "ps_ast_execute.h"
 #include "ps_error.h"
+#include "ps_frame_stack.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_logger.h"
 #include "ps_memory.h"
 #include "ps_procedures.h"
-#include "ps_stack.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
@@ -54,7 +54,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     interpreter->io_check = io_check;
 
     // Allocate stack
-    interpreter->stack = ps_stack_alloc(PS_INTERPRETER_STACK_SIZE);
+    interpreter->stack = ps_frame_stack_alloc(PS_INTERPRETER_STACK_SIZE);
     if (interpreter->stack == NULL)
         return ps_interpreter_free(interpreter);
 
@@ -70,7 +70,7 @@ ps_interpreter *ps_interpreter_alloc(ps_ast_block *system, ps_string_heap *strin
     }
 
     // Push system frame on stack
-    if (NULL == ps_stack_push(interpreter->stack, frame))
+    if (NULL == ps_frame_stack_push(interpreter->stack, frame))
     {
         ps_frame_free(frame);
         return ps_interpreter_free(interpreter);
@@ -86,7 +86,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
         if (interpreter->logger != NULL)
             interpreter->logger = ps_logger_free(interpreter->logger);
         if (interpreter->stack != NULL)
-            interpreter->stack = ps_stack_free(interpreter->stack);
+            interpreter->stack = ps_frame_stack_free(interpreter->stack);
         ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);
     }
 
@@ -288,13 +288,13 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     }
 
     // Push the frame onto the stack
-    if (ps_stack_is_full(interpreter->stack))
+    if (ps_frame_stack_is_full(interpreter->stack))
     {
         ps_frame_free(frame);
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_OVERFLOW,
                                                 "Stack overflow at level %d for '%s'", interpreter->level, block->name);
     }
-    if (NULL == ps_stack_push(interpreter->stack, frame))
+    if (NULL == ps_frame_stack_push(interpreter->stack, frame))
     {
         ps_frame_free(frame);
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR, "Stack error at level %d for '%s'",
@@ -314,12 +314,12 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_INFO, "EXIT FRAME level=%d\n", interpreter->level);
 
     // Pop the frame from the stack
-    if (ps_stack_is_empty(interpreter->stack))
+    if (ps_frame_stack_is_empty(interpreter->stack))
     {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_UNDERFLOW, "Stack underflow at level %d",
                                                 interpreter->level);
     }
-    ps_frame *frame = ps_stack_pop(interpreter->stack);
+    ps_frame *frame = ps_frame_stack_pop(interpreter->stack);
     if (frame == NULL)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR,
                                                 "Stack error at level %d: pop failed", interpreter->level);
@@ -344,7 +344,7 @@ ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_a
                                          ps_symbol_get_kind_name(ast_variable->variable->kind));
         return NULL;
     }
-    ps_frame *frame = ps_stack_find_frame_for_block(interpreter->stack, ast_variable->owner);
+    ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, ast_variable->owner);
     if (frame == NULL)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Variable '%s' not found in any frame",

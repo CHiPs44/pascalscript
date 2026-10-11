@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#ifndef _PS_STACK_H
-#define _PS_STACK_H
+#ifndef _PS_FRAME_STACK_H
+#define _PS_FRAME_STACK_H
 
 #include "ps_value_data.h"
 
@@ -25,16 +25,16 @@ extern "C"
     } ps_frame;
 
     /** @brief Stack itself */
-    typedef struct s_ps_stack
+    typedef struct s_ps_frame_stack
     {
         size_t size;        /** @brief Count of frames in stack */
         size_t used;        /** @brief Count of frames used     */
         size_t sp;          /** @brief Stack pointer            */
         ps_frame *frames[]; /** @brief Frames (VLA)             */
-    } ps_stack;
+    } ps_frame_stack;
 
 #define PS_FRAME_SIZE sizeof(ps_frame)
-#define PS_STACK_SIZE sizeof(ps_stack)
+#define PS_FRAME_STACK_SIZE sizeof(ps_frame_stack)
 
     /**
      * @brief Allocate a new frame for block variables & parameters with parent frame
@@ -51,68 +51,68 @@ extern "C"
     ps_frame *ps_frame_free(ps_frame *frame);
 
     /**
-     * @brief Allocate a new stack for size frames
+     * @brief Allocate a new frame stack for size frames
      * @param size Maximum number of frames in stack
      * @return NULL if allocation failed
      */
-    ps_stack *ps_stack_alloc(size_t size);
+    ps_frame_stack *ps_frame_stack_alloc(size_t size);
 
     /**
-     * @brief Free a stack
-     * @param stack The stack to free
+     * @brief Free a frame stack
+     * @param stack The frame stack to free
      * @return NULL
      */
-    ps_stack *ps_stack_free(ps_stack *stack);
+    ps_frame_stack *ps_frame_stack_free(ps_frame_stack *stack);
 
     /**
-     * @brief Push a frame on the stack
-     * @param stack The stack
+     * @brief Push a frame on the frame stack
+     * @param stack The frame stack
      * @param frame The frame to push
      * @return NULL if stack is full else frame
      */
-    ps_frame *ps_stack_push(ps_stack *stack, ps_frame *frame);
+    ps_frame *ps_frame_stack_push(ps_frame_stack *stack, ps_frame *frame);
 
     /**
      * @brief Pop a frame
-     * @param stack The stack
+     * @param stack The frame stack
      * @return NULL if stack is empty else frame
      * @note Frame is not freed, caller must free it
      */
-    ps_frame *ps_stack_pop(ps_stack *stack);
+    ps_frame *ps_frame_stack_pop(ps_frame_stack *stack);
 
     /**
      * @brief Get the top frame
-     * @param stack The stack
+     * @param stack The frame stack
      * @return NULL if stack is empty else top frame
      */
-    ps_frame *ps_stack_top(const ps_stack *stack);
+    ps_frame *ps_frame_stack_top(const ps_frame_stack *stack);
 
     /**
-     * @brief Check if stack is empty
-     * @param stack The stack
-     * @return true if stack is empty, false otherwise
+     * @brief Check if frame stack is empty
+     * @param stack The frame stack
+     * @return true if frame stack is empty, false otherwise
      */
-    bool ps_stack_is_empty(const ps_stack *stack);
+    bool ps_frame_stack_is_empty(const ps_frame_stack *stack);
 
     /**
-     * @brief Check if stack is full
-     * @param stack The stack
-     * @return true if stack is full, false otherwise
+     * @brief Check if frame stack is full
+     * @param stack The frame stack
+     * @return true if frame stack is full, false otherwise
      */
-    bool ps_stack_is_full(const ps_stack *stack);
+    bool ps_frame_stack_is_full(const ps_frame_stack *stack);
 
     /**
      * @brief Find the top frame for a block
-     * @param stack The stack
+     * @param stack The frame stack
      * @param block The block to search for
      * @return The frame for the block or NULL if not found
      */
-    ps_frame *ps_stack_find_frame_for_block(const ps_stack *stack, const ps_ast_block *block);
+    ps_frame *ps_frame_stack_find_frame_for_block(const ps_frame_stack *stack, const ps_ast_block *block);
 
-    void ps_stack_dump(FILE *output, const ps_stack *stack);
+    void ps_frame_stack_dump(FILE *output, const ps_frame_stack *stack);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _PS_STACK_H */
+#endif /* _PS_FRAME_STACK_H */
