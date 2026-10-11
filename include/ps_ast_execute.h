@@ -14,6 +14,7 @@
 #include "ps_execute_statement.h"
 #include "ps_ast_execute_expression.h"
 #include "ps_ast_execute_system.h"
+#include "ps_ast_execute_call.h"
 
 #ifdef __cplusplus
 extern "C"

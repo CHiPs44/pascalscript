@@ -144,19 +144,3 @@ error:
     interpreter->error_column = expression->column;
     return false;
 }
-
-bool ps_ast_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
-{
-    assert(function_call != NULL);
-    assert(function_call->group == PS_AST_EXPRESSION);
-    assert(function_call->kind == PS_AST_FUNCTION_CALL);
-    PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FUNCTION CALL %s", function_call->executable->name);
-    result->value.type = &ps_system_none;
-    result->value.data = (ps_value_data){0};
-    if (function_call->executable->system)
-    {
-        return ps_ast_execute_function_call_system(interpreter, function_call, result);
-    }
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
-                                            "User Function call not implemented");
-}

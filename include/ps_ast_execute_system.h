@@ -14,9 +14,6 @@ extern "C"
 {
 #endif
 
-    /** @brief Execute procedure call */
-    bool ps_ast_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
-
     /** @brief Execute system procedure call */
     bool ps_ast_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_call *procedure_call);
 
