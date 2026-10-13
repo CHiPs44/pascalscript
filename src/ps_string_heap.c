@@ -34,7 +34,7 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
         return NULL;
     if (heap->data != NULL)
     {
-        ps_string_heap_dump(heap, stderr);
+        ps_string_heap_dump(stderr, heap);
         for (size_t i = 0; i < heap->size; i++)
             if (heap->data[i].str != NULL)
                 heap->data[i].str = ps_string_free(heap->data[i].str);
@@ -70,14 +70,15 @@ bool ps_string_heap_grow(ps_string_heap *heap)
     if (heap->more == 0)
         return false;
     // Reallocate memory
-    ps_string **data = (ps_string **)ps_memory_realloc(PS_MEMORY_STRING, heap->data,
-                                                       (heap->size + heap->more) * sizeof(ps_string *));
+    ps_string_heap_entry *data = (ps_string_heap_entry *)ps_memory_realloc(
+            PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string_heap_entry *));
     if (data == NULL)
-        return false; // errno = ENOMEM
+        return false;
     // Clear newly allocated memory
     for (size_t i = 0; i < heap->more; i += 1)
     {
-        data[heap->size + i] = NULL;
+        data[heap->size + i].ref_count = 0;
+        data[heap->size + i].str = NULL;
     }
     // Refresh heap values
     heap->data = data;
@@ -90,7 +91,7 @@ static size_t ps_string_heap_add_internal(ps_string_heap *heap, ps_string *s)
     if (s == NULL || heap == NULL)
     {
         errno = EINVAL;
-        return NULL;
+        return SIZE_MAX;
     }
     if (heap->used >= heap->size && !ps_string_heap_grow(heap))
     {
@@ -196,7 +197,9 @@ bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)
     return false; // String not found in the heap
 }
 
-void ps_string_heap_dump(const ps_string_heap *heap, FILE *f)
+ps_string_heap *ps_string_heap_alloc(size_t size, size_t more);
+
+void ps_string_heap_dump(FILE *f, const ps_string_heap *heap)
 {
     f = f == NULL ? stderr : f;
     if (heap == NULL)

@@ -10,8 +10,8 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
-#include "ps_execute.h"
 #include "ps_error.h"
+#include "ps_execute.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_memory.h"
@@ -820,7 +820,7 @@ bool ps_ast_test()
     result &= ps_ast_test_hello(system, string_heap);
     ps_ast_debug_line(0, "****************************************************************");
 
-    ps_string_heap_dump(string_heap, stderr);
+    ps_string_heap_dump(stderr, string_heap);
     ps_string_heap_free(string_heap);
     ps_system_free(system);
 

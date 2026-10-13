@@ -47,19 +47,15 @@ extern "C"
 
 #define PS_STRING_HEAP_SIZEOF sizeof(ps_string_heap)
 
-    // clang-format off
-
-    ps_string_heap *ps_string_heap_alloc      (size_t size, size_t more);
-    ps_string_heap *ps_string_heap_free       (ps_string_heap *heap);
-    ps_string      *ps_string_heap_add        (ps_string_heap *heap, ps_string *s);
-    ps_string      *ps_string_heap_create     (ps_string_heap *heap, const char *z);
-    ps_string      *ps_string_heap_retain     (ps_string_heap *heap, ps_string *s);
-    ps_string      *ps_string_heap_release    (ps_string_heap *heap, ps_string *s);
-    bool            ps_string_heap_grow       (ps_string_heap *heap);
-    bool            ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
-    void            ps_string_heap_dump       (const ps_string_heap *heap, FILE *f);
-
-    // clang-format on
+    ps_string_heap *ps_string_heap_alloc(size_t size, size_t more);
+    ps_string_heap *ps_string_heap_free(ps_string_heap *heap);
+    ps_string *ps_string_heap_add(ps_string_heap *heap, ps_string *s);
+    ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z);
+    ps_string *ps_string_heap_retain(ps_string_heap *heap, ps_string *s);
+    ps_string *ps_string_heap_release(ps_string_heap *heap, ps_string *s);
+    bool ps_string_heap_grow(ps_string_heap *heap);
+    bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s);
+    void ps_string_heap_dump(FILE *f, const ps_string_heap *heap);
 
 #ifdef __cplusplus
 }
