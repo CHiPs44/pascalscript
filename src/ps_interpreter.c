@@ -11,8 +11,8 @@
 #include "ps_array.h"
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
-#include "ps_execute.h"
 #include "ps_error.h"
+#include "ps_execute.h"
 #include "ps_frame_stack.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
@@ -400,7 +400,6 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     assert(NULL != interpreter);
     assert(NULL != ast_variable);
     assert(NULL != value);
-    // interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
 
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_DEBUG, "SET VARIABLE VALUE: %s.%s <= %s", ast_variable->owner->name,
                        ast_variable->variable->name, ps_value_get_debug_string(value));
@@ -449,7 +448,6 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
         }
     }
 
-    // interpreter->logger->debug_level = PS_DEBUG_FATAL;
     return true;
 }
 
