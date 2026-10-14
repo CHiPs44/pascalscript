@@ -36,8 +36,8 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
     {
         ps_string_heap_dump(stderr, heap);
         for (size_t i = 0; i < heap->size; i++)
-            if (heap->data[i].str != NULL)
-                heap->data[i].str = ps_string_free(heap->data[i].str);
+            if (heap->data[i].string != NULL)
+                heap->data[i].string = ps_string_free(heap->data[i].string);
         ps_memory_free(PS_MEMORY_STRING, heap->data);
     }
     ps_memory_free(PS_MEMORY_STRING, heap);
@@ -62,32 +62,10 @@ static unsigned int ps_string_heap_get_hash_key(const char *z)
     return hash;
 }
 
-bool ps_string_heap_grow(ps_string_heap *heap)
-{
-    if (heap == NULL)
-        return false;
-    // Allowed to grow?
-    if (heap->more == 0)
-        return false;
-    // Reallocate memory
-    ps_string_heap_entry *data = (ps_string_heap_entry *)ps_memory_realloc(
-            PS_MEMORY_STRING, heap->data, (heap->size + heap->more) * sizeof(ps_string_heap_entry *));
-    if (data == NULL)
-        return false;
-    // Clear newly allocated memory
-    for (size_t i = 0; i < heap->more; i += 1)
-    {
-        data[heap->size + i].ref_count = 0;
-        data[heap->size + i].str = NULL;
-    }
-    // Refresh heap values
-    heap->data = data;
-    heap->size += heap->more;
-    return true;
-}
-
 static size_t ps_string_heap_add_internal(ps_string_heap *heap, ps_string *s)
 {
+    bool debug = false;
+
     if (s == NULL || heap == NULL)
     {
         errno = EINVAL;
@@ -101,22 +79,28 @@ static size_t ps_string_heap_add_internal(ps_string_heap *heap, ps_string *s)
 
     unsigned int hash = ps_string_heap_get_hash_key((const char *)s->str);
     size_t index = hash % heap->size;
+    if (debug)
+        fprintf(stderr, "s='%s' h=%d i=%zu sz=%zu\n", s->str, hash, index, heap->size);
     size_t start = index;
     // Loop until we find an empty slot or looped back to the start
     do
     {
-        if (heap->data[index].str == NULL)
+        if (heap->data[index].string == NULL)
         {
-            heap->data[index].str = s;
+            heap->data[index].string = s;
             heap->data[index].ref_count = 1;
             heap->used++;
-            fprintf(stderr, "ps_string_heap_create: created string '%s' at index %zu\n", (char *)s->str, index);
+            if (debug)
+                fprintf(stderr, "ps_string_heap_create: created string '%s' at index %zu\n", (char *)s->str, index);
             return index;
         }
-        else if (heap->data[index].str == s || strcmp((char *)(heap->data[index].str), (char *)s->str) == 0)
+        if (heap->data[index].string == s || strcmp((char *)(heap->data[index].string->str), (char *)s->str) == 0)
         {
             heap->data[index].ref_count += 1;
-            return heap->data[index].str;
+            if (debug)
+                fprintf(stderr, "ps_string_heap_create: found string '%s' at index %zu, ref_count=%d\n", (char *)s->str,
+                        index, heap->data[index].ref_count);
+            return index;
         }
         index = (index + 1) % heap->size;
     } while (index != start);
@@ -138,12 +122,8 @@ bool ps_string_heap_grow(ps_string_heap *heap)
     heap->data = new_data;
     heap->size = new_size;
     for (size_t i = 0; i < old_size; i++)
-        if (old_data[i].str != NULL)
-        {
-            if (ps_string_heap_add(heap, old_data[i].str) == NULL)
-                return false;
-            // data[i].ref_count
-        }
+        if (old_data[i].string != NULL && ps_string_heap_add(heap, old_data[i].string) == NULL)
+            return false;
     heap->size += heap->more;
     return true;
 }
@@ -151,7 +131,7 @@ bool ps_string_heap_grow(ps_string_heap *heap)
 ps_string *ps_string_heap_add(ps_string_heap *heap, ps_string *s)
 {
     size_t index = ps_string_heap_add_internal(heap, s);
-    return index == SIZE_MAX ? NULL : heap->data[index].str;
+    return index == SIZE_MAX ? NULL : heap->data[index].string;
 }
 
 ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
@@ -184,11 +164,11 @@ bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)
     // Loop until we find an empty slot or looped back to the start
     do
     {
-        if (heap->data[index].str == s)
+        if (heap->data[index].string == s)
         {
             fprintf(stderr, "HEAP FREE STRING: %s %u/%u\n", (char *)s->str, s->len, s->max);
             ps_string_free(s);
-            heap->data[index].str = NULL;
+            heap->data[index].string = NULL;
             heap->data[index].ref_count = 0;
             heap->used -= 1;
             return true;
@@ -214,11 +194,11 @@ void ps_string_heap_dump(FILE *f, const ps_string_heap *heap)
     {
         for (size_t i = 0; i < heap->size; i++)
         {
-            if (heap->data[i].str != NULL)
+            if (heap->data[i].string != NULL)
             {
                 used += 1;
-                fprintf(f, "  [%zu] %d %s (max=%u, len=%u)\n", i, heap->data[i].ref_count, (char *)heap->data[i].str,
-                        heap->data[i].str->max, heap->data[i].str->len);
+                fprintf(f, "  %08zu %08d %-100s max=%03u len=%03u\n", i, heap->data[i].ref_count,
+                        (char *)heap->data[i].string->str, heap->data[i].string->max, heap->data[i].string->len);
             }
             else
             {

@@ -10,11 +10,11 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_executable.h"
 #include "ps_execute.h"
 #include "ps_execute_expression.h"
 #include "ps_execute_statement.h"
 #include "ps_execute_system.h"
-#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_operator.h"
@@ -62,8 +62,8 @@ static bool ps_execute_procedure_write_or_writeln_or_writestr(ps_interpreter *in
         if (procedure_call->args[i] == NULL)
             continue;
         ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-        int16_t width = procedure_call->formats[i].width;
-        int16_t precision = procedure_call->formats[i].precision;
+        int16_t width = procedure_call->formats == NULL ? 0 : procedure_call->formats[i].width;
+        int16_t precision = procedure_call->formats == NULL ? 0 : procedure_call->formats[i].precision;
         if (!ps_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
             return false;
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,

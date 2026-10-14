@@ -29,7 +29,7 @@ extern "C"
      */
     typedef struct s_ps_string_heap_entry
     {
-        ps_string *str;         /** @brief the string itself */
+        ps_string *string;      /** @brief the string itself */
         unsigned int ref_count; /** @brief reference count */
     } ps_string_heap_entry;
 
