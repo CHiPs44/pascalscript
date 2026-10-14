@@ -11,6 +11,8 @@
 #include "ps_memory.h"
 #include "ps_string_heap.h"
 
+bool ps_string_heap_debug = false;
+
 ps_string_heap *ps_string_heap_alloc(size_t size, size_t more)
 {
     ps_string_heap *heap = (ps_string_heap *)ps_memory_malloc(PS_MEMORY_STRING, sizeof(ps_string_heap));
@@ -34,7 +36,8 @@ ps_string_heap *ps_string_heap_free(ps_string_heap *heap)
         return NULL;
     if (heap->data != NULL)
     {
-        ps_string_heap_dump(stderr, heap);
+        if (ps_string_heap_debug)
+            ps_string_heap_dump(stderr, heap);
         for (size_t i = 0; i < heap->size; i++)
             if (heap->data[i].string != NULL)
                 heap->data[i].string = ps_string_free(heap->data[i].string);
