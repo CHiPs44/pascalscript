@@ -28,7 +28,6 @@ extern "C"
     typedef struct s_ps_frame_stack
     {
         size_t size;        /** @brief Count of frames in stack */
-        size_t used;        /** @brief Count of frames used     */
         size_t sp;          /** @brief Stack pointer            */
         ps_frame *frames[]; /** @brief Frames (VLA)             */
     } ps_frame_stack;

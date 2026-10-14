@@ -44,7 +44,7 @@ int main(void)
     ps_ast_block *system = ps_system_alloc();
 
     printf("TEST VALUE: BEGIN\n");
-    ps_value *dummy = ps_value_alloc(ps_system_integer.value->type, (ps_value_data){.i = 0});
+    ps_value *dummy = ps_value_alloc(&ps_system_integer, (ps_value_data){.i = 0});
     ps_value_debug(stdout, "DUMMY=", dummy);
     ps_value_free(dummy);
 

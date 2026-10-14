@@ -46,7 +46,6 @@ ps_frame_stack *ps_frame_stack_alloc(size_t size)
     if (stack == NULL)
         return NULL;
     stack->size = size;
-    stack->used = 0;
     stack->sp = 0;
     return stack;
 }
@@ -60,15 +59,14 @@ ps_frame_stack *ps_frame_stack_free(ps_frame_stack *stack)
     return NULL;
 }
 
-bool ps_frame_stack_is_empty(const ps_frame_stack *stack) { return stack->used == 0; }
+bool ps_frame_stack_is_empty(const ps_frame_stack *stack) { return stack->sp == 0; }
 
-bool ps_frame_stack_is_full(const ps_frame_stack *stack) { return stack->used == stack->size; }
+bool ps_frame_stack_is_full(const ps_frame_stack *stack) { return stack->sp == stack->size; }
 
 ps_frame *ps_frame_stack_push(ps_frame_stack *stack, ps_frame *frame)
 {
     if (ps_frame_stack_is_full(stack))
         return NULL; // stack overflow
-    stack->used += 1;
     stack->frames[stack->sp++] = frame;
     return frame;
 }
@@ -77,10 +75,8 @@ ps_frame *ps_frame_stack_pop(ps_frame_stack *stack)
 {
     if (ps_frame_stack_is_empty(stack))
         return NULL; // stack underflow
-    stack->sp -= 1;
-    ps_frame *frame = stack->frames[stack->sp];
+    ps_frame *frame = stack->frames[--stack->sp];
     stack->frames[stack->sp] = NULL;
-    stack->used -= 1;
     return frame;
 }
 
@@ -103,7 +99,7 @@ ps_frame *ps_frame_stack_find_frame_for_block(const ps_frame_stack *stack, const
 
 void ps_frame_stack_dump(FILE *output, const ps_frame_stack *stack)
 {
-    fprintf(output, "Stack: %zu/%zu\n", stack->used, stack->size);
+    fprintf(output, "Stack: %zu/%zu\n", stack->sp, stack->size);
     fprintf(output, "  SP: %zu\n", stack->sp);
     for (size_t i = 0; i < stack->sp; i++)
     {
