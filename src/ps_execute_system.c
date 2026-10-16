@@ -121,11 +121,9 @@ bool ps_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_
                                                     procedure_call->n_args);
     }
     else
-    {
-        ps_interpreter_set_message(interpreter, "%s not implemented yet", procedure_call->executable->name);
-        interpreter->error = PS_ERROR_NOT_IMPLEMENTED;
-        return false;
-    }
+        // Dec, Inc, Read, ReadLn, ReadStr
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "%s not implemented yet",
+                                                procedure_call->executable->name);
 }
 
 static bool ps_execute_function_call_system_random(ps_interpreter *interpreter, const ps_ast_call *function_call,

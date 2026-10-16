@@ -8,12 +8,12 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
+#include "ps_executable.h"
 #include "ps_execute.h"
 #include "ps_execute_call.h"
 #include "ps_execute_expression.h"
 #include "ps_execute_statement.h"
 #include "ps_execute_system.h"
-#include "ps_executable.h"
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_operator.h"
@@ -63,24 +63,26 @@ bool ps_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *p
     }
 
     // Evaluate arguments
-    ps_value parameters[procedure_call->n_args];
+    ps_value arguments[procedure_call->n_args];
     ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
     for (int i = 0; i < procedure_call->n_args; i++)
     {
         if (procedure->signature->parameters[i].byref)
         {
             // TODO initialize byref parameter / argument correctly
-            parameters[i].allocated = false;
-            parameters[i].type = procedure->signature->parameters[i].type;
-            parameters[i].data.h = 0; // ???
+            arguments[i].allocated = false;
+            arguments[i].type = procedure->signature->parameters[i].type;
+            arguments[i].data.h = 0; // ???
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
+                                                    "Initialization of byref parameters not implemented");
         }
         else
         {
             if (!ps_evaluate_expression(interpreter, procedure_call->args[i], &arg_value))
                 return false;
-            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument: %s",
+            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
                                    ps_value_get_display_string(&arg_value.value, 0, 0));
-            parameters[i] = arg_value.value;
+            arguments[i] = arg_value.value;
         }
     }
 
@@ -107,7 +109,7 @@ bool ps_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *p
         if (ok)
         {
             ast_variable->variable = symbol;
-            if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &parameters[i]))
+            if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &arguments[i]))
                 ok = false;
         }
         if (!ok)

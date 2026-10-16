@@ -354,11 +354,16 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
         if (!ps_parse_write_or_writeln_or_writestr(compiler, block, call, mode))
             TRACE_ERROR("WRITE[LN|STR]");
     }
-    else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln)
+    else if (executable == &ps_system_procedure_read || executable == &ps_system_procedure_readln ||
+             executable == &ps_system_procedure_readstr)
     {
-        // Read or ReadLn
-        compiler->error = PS_ERROR_NOT_IMPLEMENTED;
-        if (!ps_parse_read_or_readln_or_readstr(compiler, block, call, executable == &ps_system_procedure_readln))
+        // Read, ReadLn or ReadStr
+        ps_read_write_mode mode = PS_READ_WRITE_MODE;
+        if (executable == &ps_system_procedure_readln)
+            mode = PS_READ_WRITE_MODE_LN;
+        else
+            mode = PS_READ_WRITE_MODE_STR;
+        if (!ps_parse_read_or_readln_or_readstr(compiler, block, call, mode))
             TRACE_ERROR("READ[LN]");
     }
     else if (executable == &ps_system_procedure_randomize)

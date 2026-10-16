@@ -286,6 +286,7 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
             ps_value_free(value);
             TRACE_ERROR("CONSTANT_EXPRESSION")
         }
+        value->string_heap_owned = ps_value_is_string(value);
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, identifier, value);

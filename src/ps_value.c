@@ -28,6 +28,7 @@ ps_value *ps_value_alloc(ps_symbol *type, ps_value_data data)
     value->type = type;
     value->data = data;
     value->allocated = true;
+    value->string_heap_owned = false;
     return value;
 }
 
@@ -40,7 +41,10 @@ ps_value *ps_value_free(ps_value *value)
     {
         // clang-format off
     case PS_TYPE_UNKNOWN:       return NULL;
-    case PS_TYPE_STRING:        ps_string_free          (value->data.s); break;
+    case PS_TYPE_STRING:
+        if (!value->string_heap_owned)
+            ps_string_free(value->data.s);
+        break;
     case PS_TYPE_ARRAY:         ps_array_free_data      (value->data.a); break;
     case PS_TYPE_EXECUTABLE:    ps_executable_free      (value->data.x); break;
     case PS_TYPE_DEFINITION:    ps_type_definition_free (value->data.t); break;

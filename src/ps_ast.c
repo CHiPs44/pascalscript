@@ -289,7 +289,9 @@ ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t colu
 
 ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 {
-    assert(statement_list != NULL);
+    if (statement_list == NULL)
+        return NULL;
+
     assert(statement_list->kind == PS_AST_STATEMENT_LIST);
 
     for (int i = 0; i < statement_list->count; i++)

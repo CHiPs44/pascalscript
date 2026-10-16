@@ -7,12 +7,12 @@
 Program Example003Hello;
 Const
     HelloWorld = '''Hello'', ''world''!';
-    H = 'H';
-    Hello = 'Hello';
-    World = 'world';
+//     H = 'H';
+//     Hello = 'Hello';
+//     World = 'world';
 Begin
     WriteLn(HelloWorld);
-    WriteLn('''Hello, ''world''!''');
-    WriteLn(H);
-    WriteLn(Hello, ', ', World, '!');
+    // WriteLn('''Hello, ''world''!''');
+    // WriteLn(H);
+    // WriteLn(Hello, ', ', World, '!');
 End.

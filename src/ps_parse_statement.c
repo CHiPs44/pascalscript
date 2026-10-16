@@ -129,7 +129,7 @@ bool ps_parse_compound_statement(ps_compiler *compiler, ps_ast_block *block, ps_
 
 /**
  * Parse
- *      'READ'  | 'READLN' [ '('
+ *      'READ'  | 'READLN' | 'READSTR' [ '('
  *          variable [ ',' variable ] ]*
  *      ')' ] ;
  * Next steps:
@@ -154,10 +154,11 @@ bool ps_parse_read_or_readln_or_readstr(ps_compiler *compiler, ps_ast_block *blo
     (void)block;
     (void)call_ptr;
     (void)mode;
-    PARSE_BEGIN("STATEMENT", "READ_OR_READLN")
+    PARSE_BEGIN("STATEMENT", "READ_OR_READLN_READSTR")
     (void)start_line;
     (void)start_column;
-    RETURN_ERROR(PS_ERROR_NOT_IMPLEMENTED)
+    ps_compiler_set_error_message(compiler, PS_ERROR_NOT_IMPLEMENTED, "Read, ReadLn and ReadStr not implemented yet!");
+    TRACE_ERROR("NOT_IMPLEMENTED")
 }
 
 static inline bool ps_parse_write_format(ps_compiler *compiler, ps_ast_block *block, int16_t *width, int16_t *precision)
