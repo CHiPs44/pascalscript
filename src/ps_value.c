@@ -39,17 +39,26 @@ ps_value *ps_value_free(ps_value *value)
     ps_value_type type = ps_value_get_type(value);
     switch (type)
     {
-        // clang-format off
-    case PS_TYPE_UNKNOWN:       return NULL;
+    case PS_TYPE_UNKNOWN:
+        return NULL;
     case PS_TYPE_STRING:
         if (!value->string_heap_owned)
-            ps_string_free(value->data.s);
+        {
+            ps_string *string = value->data.s;
+            ps_string_free(string);
+        }
         break;
-    case PS_TYPE_ARRAY:         ps_array_free_data      (value->data.a); break;
-    case PS_TYPE_EXECUTABLE:    ps_executable_free      (value->data.x); break;
-    case PS_TYPE_DEFINITION:    ps_type_definition_free (value->data.t); break;
-    default:                                                             break;
-        // clang-format on
+    case PS_TYPE_ARRAY:
+        ps_array_free_data(value->data.a);
+        break;
+    case PS_TYPE_EXECUTABLE:
+        ps_executable_free(value->data.x);
+        break;
+    case PS_TYPE_DEFINITION:
+        ps_type_definition_free(value->data.t);
+        break;
+    default:
+        break;
     }
     ps_memory_free(PS_MEMORY_VALUE, value);
     return NULL;

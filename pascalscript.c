@@ -30,10 +30,10 @@
 // #define DEBUG_SOURCE "examples/000-minimal.pas"
 // #define DEBUG_SOURCE "examples/001-hello.pas"
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
-#define DEBUG_SOURCE "examples/003-hello2.pas"
+// #define DEBUG_SOURCE "examples/003-hello2.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/007-strings1.pas"
-// #define DEBUG_SOURCE "examples/008-strings2.pas"
+#define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/009-operators.pas"
 // #define DEBUG_SOURCE "examples/011-subrange1.pas"
 // #define DEBUG_SOURCE "examples/012-typedef0.pas"
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
         ps_ast_debug = save;
     }
 
-    if (exec)
+    if (exec && ok)
     {
         if (verbose)
             fprintf(stderr, "Executing %s...\n", source_file);

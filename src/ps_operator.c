@@ -13,6 +13,7 @@
 #include "ps_interpreter.h"
 #include "ps_operator.h"
 #include "ps_string.h"
+#include "ps_string_heap.h"
 #include "ps_system.h"
 #include "ps_token.h"
 #include "ps_type_definition.h"
@@ -195,6 +196,19 @@ static inline bool ps_string_le(ps_string *a, ps_string *b) { return ps_string_c
 static inline bool ps_string_gt(ps_string *a, ps_string *b) { return ps_string_compare(a, b) > 0; }
 static inline bool ps_string_ge(ps_string *a, ps_string *b) { return ps_string_compare(a, b) >= 0; }
 
+static bool ps_operator_add_string_result(ps_interpreter *interpreter, ps_value *result, ps_string *string)
+{
+    if (string == NULL)
+        return false;
+    result->data.s = ps_string_heap_add(interpreter->string_heap, string);
+    if (result->data.s == NULL)
+    {
+        ps_string_free(string);
+        return false;
+    }
+    return true;
+}
+
 bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // NOSONAR
                              const ps_value *b, ps_value *result, ps_operator_binary operator)
 {
@@ -238,7 +252,8 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         s->str[0] = a->data.c;
         s->str[1] = b->data.c;
         s->len = 2;
-        result->data.s = s;
+        if (!ps_operator_add_string_result(interpreter, result, s))
+            return false;
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | CS)) // char + string => string
@@ -248,9 +263,9 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
             return false;
         s->str[0] = a->data.c;
         s->len = 1;
-        result->data.s = ps_string_concat(s, b->data.s, PS_STRING_MAX_LEN);
+        ps_string *concat = ps_string_concat(s, b->data.s, PS_STRING_MAX_LEN);
         ps_string_free(s);
-        if (result->data.s == NULL)
+        if (!ps_operator_add_string_result(interpreter, result, concat))
             return false;
         r = PS_TYPE_STRING;
     }
@@ -262,23 +277,17 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         s->str[0] = b->data.c;
         s->str[1] = '\0';
         s->len = 1;
-        result->data.s = ps_string_concat(a->data.s, s, PS_STRING_MAX_LEN);
+        ps_string *concat = ps_string_concat(a->data.s, s, PS_STRING_MAX_LEN);
         ps_string_free(s);
-        if (result->data.s == NULL)
+        if (!ps_operator_add_string_result(interpreter, result, concat))
             return false;
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | SS)) // string + string => string
     {
         s = ps_string_concat(a->data.s, b->data.s, PS_STRING_MAX_LEN);
-        if (s == NULL)
+        if (!ps_operator_add_string_result(interpreter, result, s))
             return false;
-        if (NULL == ps_string_heap_add(interpreter->string_heap, s))
-        {
-            ps_string_free(s);
-            return false;
-        }
-        result->data.s = s;
         r = PS_TYPE_STRING;
     }
     else

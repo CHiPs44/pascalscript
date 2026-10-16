@@ -101,8 +101,10 @@ static size_t ps_string_heap_add_internal(ps_string_heap *heap, ps_string *s)
         {
             heap->data[index].ref_count += 1;
             if (debug)
-                fprintf(stderr, "ps_string_heap_create: found string '%s' at index %zu, ref_count=%d\n", (char *)s->str,
-                        index, heap->data[index].ref_count);
+                fprintf(stderr, "ps_string_heap_create: found string '%s' at index %zu, ref_count=%d\n",
+                        (char *)heap->data[index].string->str, index, heap->data[index].ref_count);
+            if (heap->data[index].string != s)
+                ps_string_free(s);
             return index;
         }
         index = (index + 1) % heap->size;
@@ -117,17 +119,24 @@ bool ps_string_heap_grow(ps_string_heap *heap)
         return false;
     size_t old_size = heap->size;
     size_t new_size = heap->size + heap->more;
-    ps_string_heap_entry *old_data = heap->data;
-    ps_string_heap_entry *new_data =
-            (ps_string_heap_entry *)ps_memory_calloc(PS_MEMORY_STRING, new_size, sizeof(ps_string_heap_entry));
+    if (new_size <= old_size)
+        return false;
+    ps_string_heap_entry *new_data = (ps_string_heap_entry *)ps_memory_calloc(
+            PS_MEMORY_STRING, new_size, sizeof(ps_string_heap_entry));
     if (new_data == NULL)
         return false;
+    for (size_t i = 0; i < old_size; i++)
+    {
+        if (heap->data[i].string == NULL)
+            continue;
+        size_t index = ps_string_heap_get_hash_key((const char *)heap->data[i].string->str) % new_size;
+        while (new_data[index].string != NULL)
+            index = (index + 1) % new_size;
+        new_data[index] = heap->data[i];
+    }
+    ps_memory_free(PS_MEMORY_STRING, heap->data);
     heap->data = new_data;
     heap->size = new_size;
-    for (size_t i = 0; i < old_size; i++)
-        if (old_data[i].string != NULL && ps_string_heap_add(heap, old_data[i].string) == NULL)
-            return false;
-    heap->size += heap->more;
     return true;
 }
 
@@ -152,7 +161,10 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
     }
     ps_string *s = ps_string_create(z, (ps_string_len)len);
 
-    return ps_string_heap_add(heap, s);
+    ps_string *result = ps_string_heap_add(heap, s);
+    if (result == NULL)
+        ps_string_free(s);
+    return result;
 }
 
 bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)

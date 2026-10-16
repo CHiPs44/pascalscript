@@ -16,6 +16,7 @@
 #include "ps_functions.h"
 #include "ps_interpreter.h"
 #include "ps_string.h"
+#include "ps_string_heap.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
 #include "ps_token.h"
@@ -805,8 +806,13 @@ ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *valu
     ps_string *s = ps_string_lowercase(value->data.s);
     if (s == NULL)
         return PS_ERROR_OUT_OF_MEMORY;
+    result->data.s = ps_string_heap_add(interpreter->string_heap, s);
+    if (result->data.s == NULL)
+    {
+        ps_string_free(s);
+        return PS_ERROR_OUT_OF_MEMORY;
+    }
     result->type = &ps_system_string;
-    result->data.s = s;
     return PS_ERROR_NONE;
 }
 
@@ -816,10 +822,16 @@ ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *valu
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
                                                      "UpperCase: String expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
-    result->type = &ps_system_string;
-    result->data.s = ps_string_uppercase(value->data.s);
-    if (result->data.s == NULL)
+    ps_string *s = ps_string_uppercase(value->data.s);
+    if (s == NULL)
         return PS_ERROR_OUT_OF_MEMORY;
+    result->data.s = ps_string_heap_add(interpreter->string_heap, s);
+    if (result->data.s == NULL)
+    {
+        ps_string_free(s);
+        return PS_ERROR_OUT_OF_MEMORY;
+    }
+    result->type = &ps_system_string;
     return PS_ERROR_NONE;
 }
 

@@ -7,9 +7,11 @@ Program Strings2;
 
 Const
     HelloWorld = 'Hello, World!';
+
 Var
     s1, s2, s3, s4: String;
     I: Integer;
+
 Begin
     WriteLn('*** PascalScript version ', PS_VERSION, ' ', PS_BITNESS, ' bits ***');
     WriteLn('------------------------------');
