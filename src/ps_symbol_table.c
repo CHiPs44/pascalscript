@@ -59,10 +59,30 @@ ps_bucket *ps_symbol_table_bucket_free(ps_bucket *bucket, bool free_symbols)
 
 void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 {
+    if (free_symbols)
+    {
+        // Values such as enum constants may refer to their type symbol.
+        for (int pass = 0; pass < 2; pass++)
+        {
+            for (int i = 0; i < table->table_size; i++)
+            {
+                ps_bucket *bucket = table->buckets[i];
+                if (bucket == NULL)
+                    continue;
+                for (int j = 0; j < bucket->used; j++)
+                {
+                    ps_symbol *symbol = bucket->symbols[j];
+                    if (symbol != NULL && symbol->allocated &&
+                        ((symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION) == (pass == 1)))
+                        bucket->symbols[j] = ps_symbol_free(symbol);
+                }
+            }
+        }
+    }
     for (int i = 0; i < table->table_size; i++)
     {
         if (table->buckets[i] != NULL)
-            table->buckets[i] = ps_symbol_table_bucket_free(table->buckets[i], free_symbols);
+            table->buckets[i] = ps_symbol_table_bucket_free(table->buckets[i], false);
     }
     table->used_buckets = 0;
 }
