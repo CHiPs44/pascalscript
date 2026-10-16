@@ -23,12 +23,13 @@ ps_type_definition *ps_type_definition_alloc(ps_value_type type, ps_value_type b
         return NULL; // errno = ENOMEM
     type_def->type = type;
     type_def->base = base;
+    type_def->allocated = true;
     return type_def;
 }
 
 ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
 {
-    if (type_def == NULL)
+    if (type_def == NULL || !type_def->allocated)
         return NULL;
     if (type_def->type == PS_TYPE_ENUM)
     {

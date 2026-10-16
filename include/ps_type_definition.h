@@ -158,6 +158,7 @@ extern "C"
             ps_type_definition_file     f; /** @brief _f_ile    *FUTURE* */
             // clang-format on
         } def; /** @brief type definition */
+        bool allocated; /** @brief True if this definition was allocated and must be freed */
     } __attribute__((__packed__)) ps_type_definition;
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
