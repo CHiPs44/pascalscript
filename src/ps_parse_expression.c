@@ -421,7 +421,7 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
 {
     PARSE_BEGIN("FACTOR", "");
 
-    ps_value factor_value = {.type = &ps_system_none, .data.v = NULL};
+    ps_value factor_value = {.type = &ps_system_none, .data = {0}};
 
     switch (lexer->current_token.type)
     {

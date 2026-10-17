@@ -85,6 +85,7 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     {
         if (interpreter->logger != NULL)
             interpreter->logger = ps_logger_free(interpreter->logger);
+        // Do not pop top of stack, just destroy it!
         if (interpreter->stack != NULL)
             interpreter->stack = ps_frame_stack_free(interpreter->stack);
         ps_memory_free(PS_MEMORY_INTERPRETER, interpreter);

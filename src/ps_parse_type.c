@@ -111,7 +111,7 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     (void)start_column;
 
     ps_string_len len = 0;
-    ps_value constant = {.type = &ps_system_none, .data.v = NULL};
+    ps_value constant = {.type = &ps_system_none, .data = {0}};
     ps_type_definition *type_def = NULL;
     ps_value *type_value = NULL;
     ps_identifier name = {0};
