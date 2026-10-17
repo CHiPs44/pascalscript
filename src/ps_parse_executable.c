@@ -235,11 +235,9 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     executable_symbol_added = true;
 
     // Function have a return value
-    if (kind == PS_SYMBOL_KIND_FUNCTION)
-    {
-        if (!ps_compiler_add_variable(compiler, block_executable, result_identifier, signature->result_type))
-            goto cleanup;
-    }
+    if (kind == PS_SYMBOL_KIND_FUNCTION &&
+        !ps_compiler_add_variable(compiler, block_executable, result_identifier, signature->result_type))
+        goto cleanup;
 
     // Finally parse the block
     if (!ps_parse_block(compiler, block_executable))
