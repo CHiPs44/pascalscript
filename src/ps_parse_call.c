@@ -244,10 +244,6 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
 
     PARSE_BEGIN("EXECUTABLE", "PROCEDURE_OR_FUNCTION_CALL_USER")
 
-    ps_symbol *result_symbol = NULL;
-    ps_identifier result_identifier = "RESULT";
-    ps_value *result_value = NULL;
-
     if (executable->kind != PS_SYMBOL_KIND_PROCEDURE && executable->kind != PS_SYMBOL_KIND_FUNCTION)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
 
@@ -276,24 +272,6 @@ bool ps_parse_procedure_or_function_call_user(ps_compiler *compiler, ps_ast_bloc
             goto cleanup;
         }
     }
-    else if (executable->kind == PS_SYMBOL_KIND_FUNCTION)
-    {
-        // Function have a return value stored in a variable named RESULT
-        const ps_ast_block *executable_block = ps_symbol_get_executable_block(executable);
-        const ps_formal_signature *signature = executable_block->signature;
-        result_value = ps_value_alloc(signature->result_type, (ps_value_data){.h = 0});
-        if (result_value == NULL)
-            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
-        if (result_symbol == NULL)
-            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_compiler_add_symbol(compiler, block, result_symbol))
-        {
-            ps_symbol_free(result_symbol);
-            goto cleanup;
-        }
-    }
-
     if (*call == NULL)
     {
         // Build AST node for CALL

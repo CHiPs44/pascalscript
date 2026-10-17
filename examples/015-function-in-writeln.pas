@@ -7,21 +7,21 @@ Program FunctionInWriteLn;
 
 Function F(A, B: Integer): Integer;
 Begin
-  F := A + B;
+    F := A + B;
 End;
 
 Var
-  I: Integer;
+    I: Integer;
 
 Begin
-  I := F(F(12, 34), 56) + 1;
-//   I := I + 1;
-//   WriteLn(I);
-//WriteLn(F(12, 34));
-//WriteLn(F(12, 34), ' trailing');
-//WriteLn('prefix: ', F(12, 34));
-//WriteLn('prefix: ', F(12, 34), ' trailing');
-//WriteLn(F(1, 2), ' + ', F(3, 4));
-//Write(F(10, 20));
-//WriteLn(' done');
+    I := F(F(12, 34), 56) + 1;
+    I := I + 1;
+    WriteLn(I);
+    WriteLn(F(12, 34));
+    WriteLn(F(12, 34), ' trailing');
+    WriteLn('prefix: ', F(12, 34));
+    WriteLn('prefix: ', F(12, 34), ' trailing');
+    WriteLn(F(1, 2), ' + ', F(3, 4));
+    Write(F(10, 20));
+    WriteLn(' done');
 End.

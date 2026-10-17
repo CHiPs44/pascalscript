@@ -715,6 +715,7 @@ static bool ps_parse_function_call(ps_compiler *compiler, ps_ast_block *block, p
     else
     {
         // User defined function
+        READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (!ps_parse_procedure_or_function_call(compiler, block, call, function))
             TRACE_ERROR("FUNCTION_CALL");
     }

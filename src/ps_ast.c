@@ -171,8 +171,13 @@ static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *functi
         }
         return NULL;
     }
-    else if (function != NULL && function->value != NULL)
-        return function->value->type;
+    else if (function != NULL && function->value != NULL && function->value->data.x != NULL &&
+             function->value->data.x->block != NULL && function->value->data.x->block->signature != NULL &&
+             function->value->data.x->block->signature->result_type != NULL)
+    {
+        ps_symbol *result = function->value->data.x->block->signature->result_type;
+        return result->value == NULL ? NULL : result->value->type;
+    }
 
     return NULL;
 }
@@ -289,9 +294,7 @@ ps_ast_statement_list *ps_ast_create_statement_list(uint16_t line, uint16_t colu
 
 ps_ast_node *ps_ast_free_statement_list(ps_ast_statement_list *statement_list)
 {
-    if (statement_list == NULL)
-        return NULL;
-
+    assert(statement_list != NULL);
     assert(statement_list->kind == PS_AST_STATEMENT_LIST);
 
     for (int i = 0; i < statement_list->count; i++)
@@ -363,7 +366,8 @@ ps_ast_node *ps_ast_free_if(ps_ast_if *if_statement)
 
     if_statement->condition = ps_ast_free_node(if_statement->condition);
     if_statement->then_branch = (ps_ast_statement_list *)ps_ast_free_statement_list(if_statement->then_branch);
-    if_statement->else_branch = (ps_ast_statement_list *)ps_ast_free_statement_list(if_statement->else_branch);
+    if (if_statement->else_branch != NULL)
+        if_statement->else_branch = (ps_ast_statement_list *)ps_ast_free_statement_list(if_statement->else_branch);
     ps_memory_free(PS_MEMORY_AST, if_statement);
 
     return NULL;
