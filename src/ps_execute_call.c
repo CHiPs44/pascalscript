@@ -64,6 +64,11 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     // Store arguments in frame
     ps_symbol *symbol = NULL;
     ps_ast_variable *ast_variable = ps_ast_create_variable_simple(0, 0, block, PS_AST_LVALUE, symbol);
+    if (ast_variable == NULL)
+    {
+        ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY, "Could not allocate AST variable");
+        goto cleanup;
+    }
     bool ok = true;
     for (int i = 0; i < call->n_args; i++)
     {
@@ -90,12 +95,16 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     // Execute block with arguments on top frame of stack
     ok = ps_execute_block(interpreter, block, true);
 
-    // Get RESULT variable value into result value
-    if (result != NULL)
+    // For functions, copy RESULT variable value into result value
+    if (ok && result != NULL)
     {
         ps_symbol *result_symbol = ps_symbol_table_find(block->symbols, "RESULT");
         if (result_symbol == NULL)
+        {
+            ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "RESULT variable not found");
+            ok = false;
             goto cleanup;
+        }
         ps_ast_variable result_variable = {0};
         result_variable.owner = block;
         result_variable.variable = result_symbol;
@@ -104,19 +113,25 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
         result_variable.dimensions = 0;
         ps_value result_value = {.allocated = false, .type = block->signature->result_type, .data = {0}};
         if (!ps_interpreter_get_variable_value(interpreter, &result_variable, &result_value))
+        {
+            // ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "Could not get RESULT variable value");
+            ok = false;
             goto cleanup;
+        }
+        if (!ps_interpreter_copy_value(interpreter, &result_value, &result->value))
+        {
+            // ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "Could not copy RESULT variable value");
+            ok = false;
+            goto cleanup;
+        }
     }
 
-    // Release frame
-    if (!ps_interpreter_exit_frame(interpreter))
-        return false;
-
-    return ok;
-
 cleanup:
+    if (ast_variable != NULL)
+        ps_ast_free_variable(ast_variable);
     ps_interpreter_exit_frame(interpreter);
 
-    return false;
+    return ok;
 }
 
 bool ps_execute_function_call(ps_interpreter *interpreter, const ps_ast_call *function_call, ps_ast_value *result)
