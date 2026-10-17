@@ -15,9 +15,9 @@ Var
     Numbers: NumberArray;
 
 Begin
-    // Numbers[1] := 42;
-    // N := Numbers[1];
-    // WriteLn(N);
+    Numbers[1] := 42;
+    N := Numbers[1];
+    WriteLn(N);
     N := 2;
     For I := 1 To 10 Do
     Begin
@@ -26,4 +26,5 @@ Begin
     End;
     For I := 1 To 10 Do
         WriteLn('Numbers[', I:2, '] = ', Numbers[I]:4);
+    WriteLn('End of program.');
 End.

@@ -27,11 +27,13 @@
 static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, const ps_ast_call *call,
                             ps_ast_value *result)
 {
+    bool ok = true;
+
     // Check if argument count is same as declaration
     if (call->n_args != block->signature->parameter_count)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_PARAMETER_COUNT_MISMATCH,
-                                                "Expected %d arguments, got %d", block->signature->parameter_count,
-                                                call->n_args);
+                                                "Expected %d arguments, got %d in call of %s",
+                                                block->signature->parameter_count, call->n_args, block->name);
 
     // Evaluate arguments
     ps_value arguments[call->n_args];
@@ -69,7 +71,6 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
         ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY, "Could not allocate AST variable");
         goto cleanup;
     }
-    bool ok = true;
     for (int i = 0; i < call->n_args; i++)
     {
         if (block->signature->parameters[i].byref)

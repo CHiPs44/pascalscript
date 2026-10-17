@@ -895,7 +895,7 @@ ps_ast_node *ps_ast_free_variable_array(ps_ast_variable *variable)
         ps_ast_free_node(variable->indexes[i]);
         variable->indexes[i] = NULL;
     }
-    ps_memory_free(PS_MEMORY_AST, variable->indexes);
+    // ps_memory_free(PS_MEMORY_AST, variable->indexes);
     ps_memory_free(PS_MEMORY_AST, variable);
 
     return NULL;

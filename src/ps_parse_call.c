@@ -134,10 +134,8 @@ static bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, 
         TRACE_ERROR("EXPRESSION")
 
     // Check that the expression type matches the parameter type
-    ps_symbol_debug(stderr, "parameter  ", parameter->type);
     const ps_type_definition *parameter_type_def = ps_symbol_get_type_def(parameter->type);
     const ps_symbol *expression_type = ps_ast_node_get_type(expression);
-    ps_symbol_debug(stderr, "expression ", parameter->type);
     const ps_type_definition *expression_type_def = ps_symbol_get_type_def(expression_type);
     if (parameter_type_def != expression_type_def)
     {
