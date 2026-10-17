@@ -164,12 +164,9 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     ps_identifier identifier = {0};
     ps_ast_block *executable_owner = NULL;
     ps_symbol *executable_symbol = NULL;
-    ps_value *value = NULL;
+    ps_value *executable_value = NULL;
     ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
-    ps_symbol *result_symbol = NULL;
-    ps_value *result_value = NULL;
-    bool result_symbol_added = false;
     bool executable_symbol_added = false;
     ps_identifier result_identifier = "RESULT";
 
@@ -223,37 +220,25 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     executable_symbol = ps_symbol_alloc(kind, identifier, NULL);
     if (executable_symbol == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-    value = ps_value_alloc(kind == PS_SYMBOL_KIND_PROCEDURE ? &ps_system_procedure : &ps_system_function,
-                           (ps_value_data){.x = executable});
-    if (value == NULL)
+    executable_value = ps_value_alloc(kind == PS_SYMBOL_KIND_PROCEDURE ? &ps_system_procedure : &ps_system_function,
+                                      (ps_value_data){.x = executable});
+    if (executable_value == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-    executable_symbol->value = value;
+    executable_symbol->value = executable_value;
 
     // Add the procedure/function to the current block
     if (!ps_compiler_add_symbol(compiler, block, executable_symbol))
         goto cleanup;
 
-    /* Ownership of 'value' is transferred to the environment via the symbol */
-    value = NULL;
+    /* Ownership of 'executable_value' is transferred to the environment via the symbol */
+    executable_value = NULL;
     executable_symbol_added = true;
 
     // Function have a return value
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
-        result_value = ps_value_alloc(signature->result_type, (ps_value_data){.v = NULL});
-        if (result_value == NULL)
-            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        result_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, result_identifier, result_value);
-        if (result_symbol == NULL)
-            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
-        if (!ps_compiler_add_symbol(compiler, block, result_symbol))
-        {
-            result_symbol = ps_symbol_free(result_symbol);
-            result_value = NULL;
+        if (!ps_compiler_add_variable(compiler, block_executable, result_identifier, signature->result_type))
             goto cleanup;
-        }
-        executable_symbol->value->data.x->block->signature->result_type = result_symbol;
-        result_symbol_added = true;
     }
 
     // Finally parse the block
@@ -275,20 +260,10 @@ cleanup:
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "DEBUG\tfreeing executable_symbol\n");
         ps_symbol_free(executable_symbol);
-        value = NULL;
+        executable_value = NULL;
     }
-    if (compiler->debug >= PS_DEBUG_VERBOSE)
-        fprintf(stderr, "DEBUG\tresult_symbol: %p%s\n", (void *)result_symbol,
-                result_symbol_added ? " (added)" : " (not added)");
-    if (result_symbol != NULL && !result_symbol_added)
-    {
-        if (compiler->debug >= PS_DEBUG_VERBOSE)
-            fprintf(stderr, "DEBUG\tfreeing result_symbol\n");
-        ps_symbol_free(result_symbol);
-        result_value = NULL;
-    }
-    if (value != NULL)
-        ps_value_free(value);
+    if (executable_value != NULL)
+        ps_value_free(executable_value);
     if (compiler->error != PS_ERROR_NONE)
     {
         if (executable != NULL)

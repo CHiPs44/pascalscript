@@ -175,8 +175,7 @@ static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *functi
              function->value->data.x->block != NULL && function->value->data.x->block->signature != NULL &&
              function->value->data.x->block->signature->result_type != NULL)
     {
-        ps_symbol *result = function->value->data.x->block->signature->result_type;
-        return result->value == NULL ? NULL : result->value->type;
+        return function->value->data.x->block->signature->result_type;
     }
 
     return NULL;
