@@ -37,6 +37,12 @@ ps_type_definition *ps_type_definition_free(ps_type_definition *type_def)
         type_def->def.e.values = NULL;
         type_def->def.e.count = 0;
     }
+    else if (type_def->type == PS_TYPE_ARRAY)
+    {
+        ps_memory_free(PS_MEMORY_TYPE, type_def->def.a.subranges);
+        type_def->def.a.subranges = NULL;
+        type_def->def.a.dimensions = 0;
+    }
     ps_memory_free(PS_MEMORY_TYPE, type_def);
     return NULL;
 }

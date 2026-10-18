@@ -202,6 +202,23 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_frame *fr
 
     for (int b = 0; b < block->symbols->table_size; b++)
     {
+        if (block->symbols->buckets[b] == NULL)
+            continue;
+        for (int i = 0; i < block->symbols->buckets[b]->size; i++)
+        {
+            ps_symbol *symbol = block->symbols->buckets[b]->symbols[i];
+            if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_VARIABLE)
+                continue;
+            ps_handle handle = symbol->value->data.h;
+            if (ps_value_is_array(symbol->value))
+                frame->data[handle].a = NULL;
+            else if (ps_value_is_string(symbol->value))
+                frame->data[handle].s = NULL;
+        }
+    }
+
+    for (int b = 0; b < block->symbols->table_size; b++)
+    {
         // Empty bucket? => next
         if (block->symbols->buckets[b] == NULL)
             continue;
@@ -252,7 +269,7 @@ static bool ps_interpreter_free_variables(ps_interpreter *interpreter, ps_frame 
             ps_handle handle = symbol->value->data.h;
             // Array? => free data
             if (ps_value_is_array(symbol->value))
-                return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED, "TODO!");
+                frame->data[handle].a = ps_array_free_data(frame->data[handle].a);
             // String? => free data
             if (!ps_interpreter_free_string(interpreter, frame, symbol, handle))
                 return false;
@@ -284,6 +301,11 @@ bool ps_interpreter_enter_frame(ps_interpreter *interpreter, const ps_ast_block 
     // Allocate non simple variables: arrays, strings, records, etc.
     if (!ps_interpreter_allocate_variables(interpreter, frame))
     {
+        if (!ps_interpreter_free_variables(interpreter, frame))
+        {
+            ps_frame_free(frame);
+            return false;
+        }
         ps_frame_free(frame);
         return false;
     }
@@ -324,11 +346,10 @@ bool ps_interpreter_exit_frame(ps_interpreter *interpreter)
     if (frame == NULL)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_STACK_ERROR,
                                                 "Stack error at level %d: pop failed", interpreter->level);
-    if (!ps_interpreter_free_variables(interpreter, frame))
-        return false;
+    bool result = ps_interpreter_free_variables(interpreter, frame);
     ps_frame_free(frame);
 
-    return true;
+    return result;
 }
 
 ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_ast_variable *ast_variable)

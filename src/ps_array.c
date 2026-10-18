@@ -45,7 +45,8 @@ ps_array_data *ps_array_free_data(ps_array_data *array_data)
 {
     if (ps_array_debug)
         fprintf(stderr, "ps_array_free_data, array_data: %p\n", (void *)array_data);
-    ps_memory_free(PS_MEMORY_VALUE, array_data->values);
+    if (array_data == NULL)
+        return NULL;
     ps_memory_free(PS_MEMORY_VALUE, array_data);
     return NULL;
 }
