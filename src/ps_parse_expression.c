@@ -551,20 +551,40 @@ static bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block 
     PARSE_BEGIN("FUNCTION_CALL", "LOW_HIGH")
     (void)start_line;
     (void)start_column;
-    ps_ast_block *owner = NULL;
 
+    ps_ast_block *owner = NULL;
     ps_identifier identifier = {0};
 
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_PARENTHESIS)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
+    // Integer, Unsigned, Char or Identifier (type definition or variable)
     if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER &&
         lexer->current_token.type != PS_TOKEN_UNSIGNED && lexer->current_token.type != PS_TOKEN_CHAR)
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     COPY_IDENTIFIER(identifier)
     if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-    if (!ps_value_is_ordinal((*symbol)->value) && !ps_value_is_array((*symbol)->value))
+    fprintf(stderr, "INFO\tLOW/HIGH: identifier '%s' is a '%s' of type '%s'\n", (*symbol)->name,
+            ps_symbol_get_kind_name((*symbol)->kind),
+            ps_type_definition_get_name((*symbol)->value->type->value->data.t));
+    // Check that the symbol is a type definition or a variable of an ordinal type
+    bool supported_type = false;
+    if ((*symbol)->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
+    {
+        const ps_type_definition *type_def = ps_symbol_get_type_def(*symbol);
+        supported_type = ps_type_definition_is_ordinal(type_def) || ps_type_definition_is_array(type_def);
+    }
+    else
+    {
+        const ps_value *value = (*symbol)->value;
+        supported_type = ps_value_is_ordinal(value) || ps_value_is_array(value);
+    }
+    if (!supported_type)
+    {
+        ps_compiler_set_message(compiler, "Low/High: expected ordinal or array type for argument %s", (*symbol)->name);
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TYPE)
+    }
+    // Check next token is ')' and skip it
     READ_NEXT_TOKEN_OR_RETURN_FALSE
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_RIGHT_PARENTHESIS)
     READ_NEXT_TOKEN_OR_RETURN_FALSE

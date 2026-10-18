@@ -166,8 +166,37 @@ static inline ps_symbol *ps_ast_function_call_get_type(const ps_ast_call *functi
         // High, Low
         if (function == &ps_system_function_high || function == &ps_system_function_low)
         {
-            ps_symbol *parameter_type = ps_ast_node_get_type(function_call->args[0]);
-            return parameter_type;
+            const ps_ast_variable *argument = (const ps_ast_variable *)function_call->args[0];
+            if (argument == NULL || argument->kind != PS_AST_RVALUE || argument->variable == NULL)
+                return NULL;
+            const ps_type_definition *type_def = ps_symbol_get_type_def(argument->variable);
+            ps_symbol *type = argument->variable;
+            if (type_def == NULL)
+                return NULL;
+            if (type_def->type == PS_TYPE_ARRAY)
+            {
+                if (type_def->def.a.dimensions < 1)
+                    return NULL;
+                type = type_def->def.a.subranges[0];
+                type_def = ps_symbol_get_type_def(type);
+                if (type_def == NULL)
+                    return NULL;
+            }
+            if (type_def->type == PS_TYPE_SUBRANGE)
+            {
+                switch (type_def->base)
+                {
+                case PS_TYPE_CHAR:
+                    return &ps_system_char;
+                case PS_TYPE_INTEGER:
+                    return &ps_system_integer;
+                case PS_TYPE_UNSIGNED:
+                    return &ps_system_unsigned;
+                default:
+                    break;
+                }
+            }
+            return type;
         }
         return NULL;
     }
@@ -205,7 +234,7 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
         ast_variable = (const ps_ast_variable *)node;
         variable = ast_variable->variable;
         if (ast_variable->dimensions == 0)
-            return variable->value->type;
+            return variable->kind == PS_SYMBOL_KIND_TYPE_DEFINITION ? (ps_symbol *)variable : variable->value->type;
         else
             return ps_array_get_item_type(variable);
     case PS_AST_UNARY_OPERATION:
@@ -832,7 +861,8 @@ ps_ast_variable *ps_ast_create_variable_simple(uint16_t line, uint16_t column, p
                                                ps_ast_node_kind kind, ps_symbol *variable)
 {
     assert(kind == PS_AST_RVALUE || kind == PS_AST_LVALUE);
-    assert(variable == NULL || variable->kind == PS_SYMBOL_KIND_VARIABLE);
+    assert(variable == NULL || variable->kind == PS_SYMBOL_KIND_VARIABLE ||
+           (kind == PS_AST_RVALUE && variable->kind == PS_SYMBOL_KIND_TYPE_DEFINITION));
 
     ps_ast_node_group group = kind == PS_AST_LVALUE ? PS_AST_GROUP_LVALUE : PS_AST_EXPRESSION;
     ps_ast_variable *variable_simple =

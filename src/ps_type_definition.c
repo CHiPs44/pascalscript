@@ -86,6 +86,13 @@ bool ps_type_definition_is_array(const ps_type_definition *type_def)
     return type_def != NULL && type_def->type == PS_TYPE_ARRAY;
 }
 
+bool ps_type_definition_is_ordinal(const ps_type_definition *type_def)
+{
+    return type_def != NULL &&
+           (type_def->type == PS_TYPE_BOOLEAN || type_def->type == PS_TYPE_CHAR || type_def->type == PS_TYPE_INTEGER ||
+            type_def->type == PS_TYPE_UNSIGNED || type_def->type == PS_TYPE_ENUM || type_def->type == PS_TYPE_SUBRANGE);
+}
+
 char *ps_type_definition_get_name(const ps_type_definition *type_def)
 {
     static char buffer[128];

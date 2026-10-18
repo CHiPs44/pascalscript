@@ -40,7 +40,6 @@ Begin
     End;
 End;
 
-// #55 Passing array by value should work
 Procedure PrintArray(Var Numbers: NumberArray);
 Var
     I: Integer;

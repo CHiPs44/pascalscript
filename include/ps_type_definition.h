@@ -230,6 +230,13 @@ extern "C"
      */
     bool ps_type_definition_is_array(const ps_type_definition *type_def);
 
+    /**
+     * @brief Check if a type definition is ordinal (integer, unsigned, char, boolean, enumeration, or subrange)
+     * @param type_def Pointer to the type definition
+     * @return true if the type is ordinal, false otherwise
+     */
+    bool ps_type_definition_is_ordinal(const ps_type_definition *type_def);
+
 #ifdef __cplusplus
 }
 #endif

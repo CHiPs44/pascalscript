@@ -73,11 +73,8 @@ bool ps_value_is_ordinal(const ps_value *value)
 {
     if (ps_value_is_valid(value))
     {
-        ps_value_type type = value->type->value->data.t->type;
-        ps_value_type base = value->type->value->data.t->base;
-        if ((type == PS_TYPE_BOOLEAN || type == PS_TYPE_CHAR || type == PS_TYPE_ENUM) ||
-            (base == PS_TYPE_INTEGER || base == PS_TYPE_UNSIGNED))
-            return true;
+        const ps_type_definition *type_def = value->type->value->data.t;
+        return ps_type_definition_is_ordinal(type_def);
     }
     return false;
 }

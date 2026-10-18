@@ -210,6 +210,17 @@ static bool ps_execute_function_call_system_1arg(ps_interpreter *interpreter, co
     if (function_call->n_args != 1)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TOO_MANY_ARGUMENTS,
                                                 "Function %s expects 1 argument", function_call->executable->name);
+    if (function_call->executable->value->data.x->kind == PS_EXECUTABLE_FUNC_1ARG_S)
+    {
+        const ps_ast_variable *argument = (const ps_ast_variable *)function_call->args[0];
+        if (argument == NULL || argument->kind != PS_AST_RVALUE || argument->variable == NULL)
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
+                                                    "Function %s expects a symbolic argument",
+                                                    function_call->executable->name);
+        ps_error error = ps_function_exec_1arg_s(interpreter, function_call->executable, argument->variable,
+                                                &result->value);
+        return error == PS_ERROR_NONE ? true : ps_interpreter_return_false(interpreter, error);
+    }
     // Evaluate argument
     ps_ast_value ast_value = {.group = PS_AST_EXPRESSION,
                               .kind = PS_AST_LITERAL_VALUE,
