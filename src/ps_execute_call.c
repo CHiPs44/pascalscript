@@ -125,6 +125,19 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
             ok = false;
             goto cleanup;
         }
+        if (ps_value_is_string(&result_value))
+        {
+            const ps_string *source = result_value.data.s;
+            result->value.data.s = ps_string_heap_create(interpreter->string_heap, (const char *)source->str);
+            if (result->value.data.s == NULL)
+            {
+                ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
+                                                 "Could not retain string result from %s", block->name);
+                ok = false;
+                goto cleanup;
+            }
+            result->value.string_heap_owned = true;
+        }
     }
 
 cleanup:
