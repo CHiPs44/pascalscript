@@ -57,25 +57,32 @@ ps_bucket *ps_symbol_table_bucket_free(ps_bucket *bucket, bool free_symbols)
     return NULL;
 }
 
+static void ps_symbol_table_free_bucket(ps_bucket *bucket, int pass)
+{
+    if (bucket == NULL)
+        return;
+    for (int j = 0; j < bucket->used; j++)
+    {
+        ps_symbol *symbol = bucket->symbols[j];
+        if (symbol != NULL && symbol->allocated &&
+            ((symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION && pass == 1) ||
+             (symbol->kind != PS_SYMBOL_KIND_TYPE_DEFINITION && pass == 0)))
+            bucket->symbols[j] = ps_symbol_free(symbol);
+    }
+}
+
 void ps_symbol_table_reset(ps_symbol_table *table, bool free_symbols)
 {
     if (free_symbols)
     {
         // Values such as enum constants may refer to their type symbol.
+        // Free type symbols after other symbols.
         for (int pass = 0; pass < 2; pass++)
         {
             for (int i = 0; i < table->table_size; i++)
             {
                 ps_bucket *bucket = table->buckets[i];
-                if (bucket == NULL)
-                    continue;
-                for (int j = 0; j < bucket->used; j++)
-                {
-                    ps_symbol *symbol = bucket->symbols[j];
-                    if (symbol != NULL && symbol->allocated &&
-                        ((symbol->kind == PS_SYMBOL_KIND_TYPE_DEFINITION) == (pass == 1)))
-                        bucket->symbols[j] = ps_symbol_free(symbol);
-                }
+                ps_symbol_table_free_bucket(bucket, pass);
             }
         }
     }
@@ -96,6 +103,7 @@ ps_symbol_table *ps_symbol_table_alloc(int table_size, int bucket_size)
         return NULL;
     table->table_size = table_size;
     table->bucket_size = bucket_size > 0 ? bucket_size : PS_SYMBOL_BUCKET_SIZE;
+    table->bucket_more = table->bucket_size;
     table->used_buckets = 0;
     for (int i = 0; i < table_size; i++)
         table->buckets[i] = NULL;

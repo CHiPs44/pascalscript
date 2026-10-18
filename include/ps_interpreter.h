@@ -88,6 +88,10 @@ extern "C"
     /** @brief Exit current frame / block */
     bool ps_interpreter_exit_frame(ps_interpreter *interpreter);
 
+    /** @brief Bind a variable parameter slot to the caller's variable storage */
+    bool ps_interpreter_bind_variable_reference(ps_interpreter *interpreter, const ps_ast_variable *parameter,
+                                                const ps_ast_variable *argument);
+
     /** @brief Get variable value */
     bool ps_interpreter_get_variable_value(ps_interpreter *interpreter, const ps_ast_variable *variable_node,
                                            ps_value *value);

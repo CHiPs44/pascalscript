@@ -28,6 +28,13 @@ ps_frame *ps_frame_alloc(const ps_ast_block *block)
         return NULL;
     memset(frame, 0, size);
     frame->block = block;
+    frame->slot_count = count;
+    frame->references = count == 0 ? NULL : ps_memory_calloc(PS_MEMORY_STACK, count, sizeof(ps_frame_reference));
+    if (count > 0 && frame->references == NULL)
+    {
+        ps_memory_free(PS_MEMORY_STACK, frame);
+        return NULL;
+    }
     for (size_t i = 0; i < count; i++)
         frame->data[i].u = i % 2 == 0 ? 0xDEADDEAD : 0xBEEFBEEF;
     return frame;
@@ -36,6 +43,8 @@ ps_frame *ps_frame_alloc(const ps_ast_block *block)
 ps_frame *ps_frame_free(ps_frame *frame)
 {
     // NB: block is not freed here, it is owned by the AST
+    if (frame->references != NULL)
+        ps_memory_free(PS_MEMORY_STACK, frame->references);
     ps_memory_free(PS_MEMORY_STACK, frame);
     return NULL;
 }

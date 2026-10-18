@@ -41,14 +41,7 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     for (int i = 0; i < call->n_args; i++)
     {
         if (block->signature->parameters[i].byref)
-        {
-            // TODO initialize byref parameter / argument correctly
-            arguments[i].allocated = false;
-            arguments[i].type = block->signature->parameters[i].type;
-            arguments[i].data.h = 0; // ???
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
-                                                    "Initialization of byref parameters not implemented");
-        }
+            continue;
         else
         {
             if (!ps_evaluate_expression(interpreter, call->args[i], &arg_value))
@@ -73,8 +66,6 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     }
     for (int i = 0; i < call->n_args; i++)
     {
-        if (block->signature->parameters[i].byref)
-            continue;
         symbol = ps_symbol_table_find(block->symbols, block->signature->parameters[i].name);
         if (symbol == NULL)
         {
@@ -85,9 +76,19 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
         }
         if (ok)
         {
-            ast_variable->variable = symbol;
-            if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &arguments[i]))
-                ok = false;
+            if (block->signature->parameters[i].byref)
+            {
+                ps_ast_variable parameter_variable = {.owner = block, .variable = symbol};
+                const ps_ast_variable *argument = (const ps_ast_variable *)call->args[i];
+                if (!ps_interpreter_bind_variable_reference(interpreter, &parameter_variable, argument))
+                    ok = false;
+            }
+            else
+            {
+                ast_variable->variable = symbol;
+                if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &arguments[i]))
+                    ok = false;
+            }
         }
         if (!ok)
             goto cleanup;

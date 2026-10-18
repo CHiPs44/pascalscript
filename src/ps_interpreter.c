@@ -18,6 +18,7 @@
 #include "ps_interpreter.h"
 #include "ps_logger.h"
 #include "ps_memory.h"
+#include "ps_signature.h"
 #include "ps_procedures.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
@@ -92,6 +93,29 @@ ps_interpreter *ps_interpreter_free(ps_interpreter *interpreter)
     }
 
     return NULL;
+}
+
+static void ps_interpreter_resolve_variable_slot(ps_frame **frame, ps_handle *handle)
+{
+    while ((*frame)->references[*handle].frame != NULL)
+    {
+        ps_frame_reference reference = (*frame)->references[*handle];
+        *frame = reference.frame;
+        *handle = reference.handle;
+    }
+}
+
+static bool ps_interpreter_is_byref_parameter(const ps_ast_block *block, const ps_symbol *symbol)
+{
+    if (block->signature == NULL)
+        return false;
+    for (int i = 0; i < block->signature->parameter_count; i++)
+    {
+        const ps_formal_parameter *parameter = &block->signature->parameters[i];
+        if (parameter->byref && strcmp(parameter->name, symbol->name) == 0)
+            return true;
+    }
+    return false;
 }
 
 void ps_interpreter_log(ps_interpreter *interpreter, ps_debug_level debug_level, const char *format, ...) // NOSONAR
@@ -210,6 +234,8 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_frame *fr
             if (symbol == NULL || symbol->kind != PS_SYMBOL_KIND_VARIABLE)
                 continue;
             ps_handle handle = symbol->value->data.h;
+            if (ps_interpreter_is_byref_parameter(block, symbol))
+                continue;
             if (ps_value_is_array(symbol->value))
                 frame->data[handle].a = NULL;
             else if (ps_value_is_string(symbol->value))
@@ -231,6 +257,8 @@ bool ps_interpreter_allocate_variables(ps_interpreter *interpreter, ps_frame *fr
             // Should be 0 at end of loop
             count -= 1;
             ps_handle handle = symbol->value->data.h;
+            if (ps_interpreter_is_byref_parameter(block, symbol))
+                continue;
             // Array? => allocate data
             if (!ps_interpreter_allocate_array(interpreter, frame, symbol, handle))
                 return false;
@@ -267,6 +295,8 @@ static bool ps_interpreter_free_variables(ps_interpreter *interpreter, ps_frame 
             // Should be 0 at end of loop
             count -= 1;
             ps_handle handle = symbol->value->data.h;
+            if (ps_interpreter_is_byref_parameter(block, symbol))
+                continue;
             // Array? => free data
             if (ps_value_is_array(symbol->value))
                 frame->data[handle].a = ps_array_free_data(frame->data[handle].a);
@@ -377,6 +407,29 @@ ps_frame *ps_interpreter_get_block_frame(ps_interpreter *interpreter, const ps_a
     return frame;
 }
 
+bool ps_interpreter_bind_variable_reference(ps_interpreter *interpreter, const ps_ast_variable *parameter,
+                                            const ps_ast_variable *argument)
+{
+    assert(interpreter != NULL);
+    assert(parameter != NULL);
+    assert(argument != NULL);
+
+    ps_frame *parameter_frame = ps_interpreter_get_block_frame(interpreter, parameter);
+    ps_frame *argument_frame = ps_interpreter_get_block_frame(interpreter, argument);
+    if (parameter_frame == NULL || argument_frame == NULL)
+        return false;
+
+    ps_handle parameter_handle = parameter->variable->value->data.h;
+    ps_handle argument_handle = argument->variable->value->data.h;
+    if (parameter_handle >= parameter_frame->slot_count || argument_handle >= argument_frame->slot_count)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "Invalid variable parameter handle");
+    ps_interpreter_resolve_variable_slot(&argument_frame, &argument_handle);
+
+    parameter_frame->references[parameter_handle].frame = argument_frame;
+    parameter_frame->references[parameter_handle].handle = argument_handle;
+    return true;
+}
+
 bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_frame *frame,
                                              const ps_ast_variable *ast_variable, const ps_value *value)
 {
@@ -404,6 +457,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
 
     // Set value in array data
     ps_handle handle = ast_variable->variable->value->data.h;
+    ps_interpreter_resolve_variable_slot(&frame, &handle);
     ps_value_data array_data = frame->data[handle];
     ps_error error = ps_array_set_value(variable, &array_data, dimensions, indexes, value, interpreter->range_check);
     if (error != PS_ERROR_NONE)
@@ -411,7 +465,7 @@ bool ps_interpreter_set_variable_value_array(ps_interpreter *interpreter, ps_fra
         ps_interpreter_set_error_message(interpreter, error, "Error setting array value");
         return false;
     }
-    frame->data[ast_variable->variable->value->data.h] = array_data;
+    frame->data[handle] = array_data;
 
     return true;
 }
@@ -444,6 +498,7 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
     else
     {
         ps_handle handle = ast_variable->variable->value->data.h;
+        ps_interpreter_resolve_variable_slot(&frame, &handle);
         if (ps_value_is_string(ast_variable->variable->value))
         {
             const ps_string *source_string = value->data.s;
@@ -480,8 +535,10 @@ static bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter
     if (frame == NULL)
         return false;
     ps_handle handle = ast_variable->variable->value->data.h;
+    ps_frame *resolved_frame = (ps_frame *)frame;
+    ps_interpreter_resolve_variable_slot(&resolved_frame, &handle);
     ps_value variable_value = {
-            .allocated = false, .type = ast_variable->variable->value->type, .data = frame->data[handle]};
+            .allocated = false, .type = ast_variable->variable->value->type, .data = resolved_frame->data[handle]};
 
     return ps_interpreter_copy_value(interpreter, &variable_value, value);
 }
@@ -512,6 +569,7 @@ static bool ps_interpreter_get_variable_value_array(ps_interpreter *interpreter,
     }
     // Get the value
     ps_handle handle = ast_variable->variable->value->data.h;
+    ps_interpreter_resolve_variable_slot(&frame, &handle);
     ps_array_data *array_data = frame->data[handle].a;
     ps_error error = ps_array_get_value(ast_variable->variable, array_data, ast_variable->dimensions, index_values,
                                         value, interpreter->range_check);

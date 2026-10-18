@@ -16,13 +16,23 @@ extern "C"
 
     // Forward reference
     typedef struct s_ps_ast_block ps_ast_block;
+    typedef struct s_ps_frame ps_frame;
+
+    /** @brief Storage reference for a by-reference variable parameter */
+    typedef struct s_ps_frame_reference
+    {
+        ps_frame *frame;
+        ps_handle handle;
+    } ps_frame_reference;
 
     /** @brief Stack frame holding variables & parameters */
-    typedef struct s_ps_frame
+    struct s_ps_frame
     {
-        const ps_ast_block *block; /** @brief Block with symbols, variabless, parameters & lexical parent   */
-        ps_value_data data[];      /** @brief Variable type is in symbol, index is handle from symbol (VLA) */
-    } ps_frame;
+        const ps_ast_block *block;           /** @brief Block with symbols, variables, parameters & lexical parent */
+        size_t slot_count;                   /** @brief Number of allocated variable slots */
+        ps_frame_reference *references;      /** @brief Optional target for by-reference parameter slots */
+        ps_value_data data[];                /** @brief Variable values indexed by the symbol handle */
+    };
 
     /** @brief Stack itself */
     typedef struct s_ps_frame_stack
