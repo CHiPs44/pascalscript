@@ -31,7 +31,7 @@ Begin
             If A<>B Then
             Begin
                 R := LCM(A, B);
-                Write('(', A:2, ',', B:2, ')=', R:4, ' ');
+                Write('(', A:2, ',', B:2, ')=', R:2, ' ');
             End;
         End;
         WriteLn;
