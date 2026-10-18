@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
     // trace = true;
     // debug = true;
 
-    // ast_test = true;
     if (ast_test)
     {
         if (!ps_ast_test())
@@ -329,10 +328,6 @@ int main(int argc, char *argv[])
     }
     free(current_path);
     current_path = NULL;
-
-    // trace = false;
-    // debug = false;
-    // verbose = true;
 
     /* Initialize compiler */
     system_block = ps_system_alloc();

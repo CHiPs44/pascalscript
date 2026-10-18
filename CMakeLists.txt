@@ -13,8 +13,8 @@ endif()
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
-set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -g -O0")
+set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
+# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -g -O0")
 # set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -g -O0")
 
 set(PS_VERSION_MAJOR 0)
@@ -37,6 +37,13 @@ target_link_libraries(pascalscript m)
 # Enable CTest testing
 include(CTest)
 enable_testing()
+
+# Customize some CTest properties
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake
+    COPYONLY
+)
 
 function(add_c_tests DIR LABEL)
     file(GLOB TEST_C_FILES "${DIR}/*.c")

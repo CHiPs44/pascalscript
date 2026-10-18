@@ -1,23 +1,12 @@
 {
     "files.associations": {
-        "LICENSE": "plaintext",
-        "ps_visit.h": "c",
-        "type_traits": "c",
-        "ps_symbol.h": "c",
-        "ps_symbol_table.h": "c",
-        "ps_environment.h": "c",
-        "ps_interpreter.h": "c",
-        "ps_parser.h": "c",
-        "ps_value.h": "c",
-        "ps_string.h": "c",
-        "string.h": "c",
-        "math.h": "c"
+        "LICENSE": "plaintext"
     },
     "makefile.configureOnOpen": false,
-    "workbench.iconTheme": "fira-code-material-minimal",
-    "editor.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
+    "editor.fontFamily": "Jetbrains Mono, fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
     "editor.fontLigatures": true,
-    "terminal.integrated.fontFamily": "fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
+    "editor.fontSize": 13,
+    "terminal.integrated.fontFamily": "Jetbrains Mono, fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
     "terminal.integrated.fontLigatures.enabled": true,
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
     "terminal.integrated.fontSize": 12,
