@@ -65,6 +65,40 @@ bool ps_parse_variable_reference(ps_compiler *compiler, ps_ast_block *block, ps_
     PARSE_END("OK")
 }
 
+static bool ps_parse_argument_type_is_scalar(const ps_type_definition *type_def)
+{
+    if (type_def == NULL)
+        return false;
+
+    if (type_def->type == PS_TYPE_SUBRANGE)
+    {
+        return type_def->base == PS_TYPE_CHAR || type_def->base == PS_TYPE_INTEGER ||
+               type_def->base == PS_TYPE_UNSIGNED;
+    }
+
+    return type_def->type == PS_TYPE_CHAR || type_def->type == PS_TYPE_INTEGER || type_def->type == PS_TYPE_UNSIGNED ||
+           type_def->type == PS_TYPE_REAL;
+}
+
+static bool ps_parse_argument_types_compatible(const ps_type_definition *parameter_type,
+                                               const ps_type_definition *argument_type)
+{
+    if (parameter_type == NULL || argument_type == NULL)
+        return false;
+    if (parameter_type == argument_type)
+        return true;
+    if (!ps_parse_argument_type_is_scalar(parameter_type) || !ps_parse_argument_type_is_scalar(argument_type))
+        return false;
+
+    ps_value_type parameter_base = parameter_type->base;
+    ps_value_type argument_base = argument_type->base;
+    if (parameter_base == argument_base)
+        return true;
+
+    return (argument_base == PS_TYPE_INTEGER || argument_base == PS_TYPE_UNSIGNED) &&
+           (parameter_base == PS_TYPE_INTEGER || parameter_base == PS_TYPE_UNSIGNED || parameter_base == PS_TYPE_REAL);
+}
+
 static bool ps_parse_byref_argument(ps_compiler *compiler, ps_ast_block *block, const ps_formal_parameter *parameter,
                                     ps_ast_node *args[PS_PARAMETERS_MAX], int i)
 {
@@ -110,24 +144,24 @@ static bool ps_parse_byval_argument(ps_compiler *compiler, ps_ast_block *block, 
 
     PARSE_BEGIN("EXECUTABLE", "BYVAL_ARGUMENT")
 
-    ps_ast_node *expression = NULL;
+    ps_ast_node *argument = NULL;
 
-    if (!ps_parse_expression(compiler, block, &expression))
+    if (!ps_parse_expression(compiler, block, &argument))
         TRACE_ERROR("EXPRESSION")
 
     // Check that the expression type matches the parameter type
     const ps_type_definition *parameter_type_def = ps_symbol_get_type_def(parameter->type);
-    const ps_symbol *expression_type = ps_ast_node_get_type(expression);
-    const ps_type_definition *expression_type_def = ps_symbol_get_type_def(expression_type);
-    if (parameter_type_def != expression_type_def)
+    const ps_symbol *argument_type = ps_ast_node_get_type(argument);
+    const ps_type_definition *argument_type_def = ps_symbol_get_type_def(argument_type);
+    if (!ps_parse_argument_types_compatible(parameter_type_def, argument_type_def))
     {
         ps_compiler_set_message(compiler, "Parameter %s expects %s@%p, got %s@%p (undegned=%p)", parameter->name,
                                 ps_type_definition_get_name(parameter_type_def), parameter_type_def,
-                                ps_type_definition_get_name(expression_type_def), expression_type_def,
+                                ps_type_definition_get_name(argument_type_def), argument_type_def,
                                 ps_system_unsigned.value->data.t);
         RETURN_ERROR(PS_ERROR_TYPE_MISMATCH)
     }
-    args[i] = expression;
+    args[i] = argument;
 
     PARSE_END("OK")
 }

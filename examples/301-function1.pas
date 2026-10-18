@@ -37,6 +37,7 @@ Var
     Characteristic, Minimum, Maximum, Count2: Unsigned;
     Total2: Real;
     Start, Finish: Unsigned;
+
 Begin
     Start := GetTickCount();
     WriteLn('--------------------------------------------------------------------------------');
