@@ -564,9 +564,6 @@ static bool ps_parse_function_call_low_high(ps_compiler *compiler, ps_ast_block 
     COPY_IDENTIFIER(identifier)
     if (!ps_compiler_find_symbol(compiler, block, identifier, false, &owner, symbol))
         RETURN_ERROR(PS_ERROR_SYMBOL_NOT_FOUND)
-    fprintf(stderr, "INFO\tLOW/HIGH: identifier '%s' is a '%s' of type '%s'\n", (*symbol)->name,
-            ps_symbol_get_kind_name((*symbol)->kind),
-            ps_type_definition_get_name((*symbol)->value->type->value->data.t));
     // Check that the symbol is a type definition or a variable of an ordinal type
     bool supported_type = false;
     if ((*symbol)->kind == PS_SYMBOL_KIND_TYPE_DEFINITION)
