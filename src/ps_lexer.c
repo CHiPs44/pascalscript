@@ -592,7 +592,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
         if (!ps_lexer_read_number(lexer))
             return false;
     }
-    else if (isalnum(current_char))
+    else if (isalnum(current_char) || current_char == '_')
     {
         if (!ps_lexer_read_identifier_or_keyword(lexer))
             return false;

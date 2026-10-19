@@ -18,8 +18,8 @@ block                   =   declaration_part ,
                         ;
 declaration_part        =   {
                               'CONST' , constant_declaration  , ';' , { constant_declaration , ';' }
-                            | 'TYPE'  , type_declaration      , ';' , { type_declaration , ';' } ,
-                            | 'VAR'   , variable_declaration  , ';' , { variable_declaration , ';' } ,
+                            | 'TYPE'  , type_declaration      , ';' , { type_declaration , ';' }
+                            | 'VAR'   , variable_declaration  , ';' , { variable_declaration , ';' }
                             | { procedure_declaration | function_declaration }
                             }
                         ;
@@ -76,6 +76,7 @@ sign                =   '+' | '-' ;
 scale_factor        =   ( 'E' | 'e' ) , [ sign ] , dec_digit_sequence ;
 unsigned_number     =   unsigned_real | unsigned_integer ;
 
+(* TODO: Implement character_string as described below *)
 character_string    =   ( quoted_string | control_string ) , { quoted_string | control_string }
                     ;
 quoted_string       =   "'" , { string_character } , "'" ;
@@ -119,6 +120,7 @@ string_type             =   'STRING' , [ '[' , ( unsigned_integer | constant_exp
 enumerated_type         =   '(' , identifier_list , ')'
                         ;
 structured_type         =   enumerated_type
+                        |   subrange_type
                         |   array_type
                         ;
 array_type              =   'ARRAY' , '[' , index_list , ']' , 'OF' , type
@@ -141,7 +143,7 @@ identifier_list         =   identifier , { ',' , identifier }
                         ;
 
 additive_operator       =   '+' | '-' ;
-multiplicative_operator =   '*' | '/'| 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' ;
+multiplicative_operator =   '*' | '/'| 'DIV' | 'MOD' | 'SHL' | 'SHR' ;
 relational_operator     =   '=' | '<>' | '<' | '>' | '<=' | '>=' ;
 
 expression              =   or_expression ;
@@ -166,7 +168,7 @@ constant_value          =   unsigned_number
                         |   real_constant
                         |   character_string
                         ;
-variable_reference      =   identifier , [ '[' , [ expression , { ',' , expression } ] , ']' ]
+variable_reference      =   identifier , [ '[' , expression , { ',' , expression } , ']' ]
                         ;
 
 function_call           =   function_identifier , [ actual_parameter_list ] ;
@@ -232,6 +234,7 @@ while_statement         =   'WHILE' , expression , 'DO' , statement
 for_statement           =   'FOR' , control_variable , ':=' , expression , ( 'TO' | 'DOWNTO' ) , expression , 'DO' ,
                                 statement
                         ;
-control_variable        =   variable_reference
+(* we don't allow variable_reference, just a "simple" variable identifier *)
+control_variable        =   identifier
                         ;
 (* EOF *)

@@ -818,9 +818,9 @@ static bool ps_parse_constant_expression_identifier(ps_compiler *compiler, ps_as
 
 /**
  * Parse constant expression:
- *        [ '-' ] INTEGER_VALUE
- *      | [ '-' ] REAL_VALUE
- *      | [ '-' ] IDENTIFIER
+ *        [ '-' | '+' ] INTEGER_VALUE
+ *      | [ '-' | '+' ] REAL_VALUE
+ *      | [ '-' | '+' ] IDENTIFIER
  *      | UNSIGNED_VALUE
  *      | CHAR_VALUE
  *      | BOOLEAN_VALUE
@@ -835,9 +835,9 @@ bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps
     bool negate = false;
 
     // For now only keep track of '-' so "Const Foo = -4;" or "Const Bar = -Foo;" work as expected
-    if (lexer->current_token.type == PS_TOKEN_MINUS)
+    if (lexer->current_token.type == PS_TOKEN_MINUS || lexer->current_token.type == PS_TOKEN_PLUS)
     {
-        negate = true;
+        negate = lexer->current_token.type == PS_TOKEN_MINUS;
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         if (lexer->current_token.type != PS_TOKEN_IDENTIFIER && lexer->current_token.type != PS_TOKEN_INTEGER_VALUE &&
             lexer->current_token.type != PS_TOKEN_REAL_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
