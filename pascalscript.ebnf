@@ -1,0 +1,237 @@
+(*
+    This file is part of the PascalScript Pascal interpreter.
+    SPDX-FileCopyrightText: 2026 Christophe 'CHiPs' Petit <chips44@gmail.com>
+    SPDX-License-Identifier: LGPL-3.0-or-later
+*)
+
+program                 =   program_header ,
+                            [ uses_clause ] ,
+                            block ,
+                            '.'
+                        ;
+program_header          =   'PROGRAM' , identifier , [ '(' , identifier_list , ')' ] , ';'
+                        ;
+uses_clause             =   'USES' , identifier_list, ';'
+                        ;
+block                   =   declaration_part ,
+                            compound_statement
+                        ;
+declaration_part        =   {
+                                'CONST' , constant_declaration  , ';' , { constant_declaration , ';' } ,
+                                'TYPE'  , type_declaration      , ';' , { type_declaration , ';' } ,
+                                'VAR'   , variable_declaration  , ';' , { variable_declaration , ';' } ,
+                                { procedure_declaration | function_declaration }
+                            }
+                        ;
+variable_declaration    =   identifier_list , ':' , type
+                        ;
+(*
+    Examples:
+        Procedure Example1;
+        Procedure Example2();
+        Procedure Example3(A, B: Integer);
+        Procedure Example4(A: Integer, B: Char, Var C: String);
+        ...
+*)
+procedure_declaration   =   'PROCEDURE' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ';' ,
+                            block , ';'
+                        ;
+(*
+    Function Example1: Integer;
+    Function Example2(): Integer;
+    Function Example3(A, B: Integer): Integer;
+    Function Example4(Var A: Integer): Integer;
+    ...
+*)
+function_declaration    =   'FUNCTION' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ':' , type , ';' ,
+                            block , ';'
+                        ;
+formal_parameter_list   =   formal_parameter , { ',' , formal_parameter }
+                        ;
+formal_parameter        =   [ 'VAR' | 'OUT' ] , identifier_list , ':' , type
+                        ;
+
+
+uppercase_letter = ? 'A'..'Z' ? ;
+lowercase_letter = ? 'a'..'z' ? ;
+letter           = uppercase_letter | lowercase_letter ;
+
+bin_digit   =   '0' | '1' ;
+oct_digit   =   bin_digit | '2' | '3' | '4' |'5' | '6' | '7' ;
+dec_digit   =   oct_digit | '8' | '9' ;
+hex_digit   =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
+bin_digit_sequence  =   bin_digit , { bin_digit } ;
+oct_digit_sequence  =   oct_digit , { oct_digit } ;
+dec_digit_sequence  =   dec_digit , { dec_digit } ;
+hex_digit_sequence  =   hex_digit , { hex_digit } ;
+unsigned_integer    =   dec_digit_sequence
+                    |   '%' , bin_digit_sequence
+                    |   '&' , oct_digit_sequence
+                    |   '$' , hex_digit_sequence
+                    ;
+
+(* Real number *)
+unsigned_real       =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
+sign                =   '+' | '-' ;
+scale_factor        =   ( 'E' | 'e' ) , [ sign ] , dec_digit_sequence ;
+unsigned_number     =   unsigned_real | unsigned_integer ;
+
+character_string    =   ( quoted_string | control_string ) , { quoted_string | control_string }
+                    ;
+quoted_string       =   "'" , { string_character } , "'" ;
+string_character    =   "''" | ? Any character except ', CR and LF ? ;
+(* #65 or #$41 for 'A' *)
+control_string_sharp =   '#' , unsigned_integer ;
+(* ^@ for NUL, ^A for #1, ..., ^Z for #26, up to ^_ for #31 *)
+control_string_caret =   '^' , ( '@' | uppercase_letter | lowercase_letter | '[' | '\' | ']' | '^' | '_' )
+                    ;
+control_string      =  control_string_sharp | control_string_caret ;
+
+identifier          =   ( letter | '_' ) , { letter | dec_digit | '_' } ;
+
+constant_declaration    =   identifier , '=' , constant_expression
+                        ;
+constant_expression     =   [ sign ] , identifier
+                        |   ordinal_constant
+                        |   real_constant
+                        |   character_string
+                        |   identifier
+                        ;
+ordinal_constant        =   [ sign ] , unsigned_integer
+                        |   char_constant
+                        ;
+char_constant           =   control_string
+                        |   "'" , ( string_character ) , "'"
+                        ;
+real_constant           =   [ sign ] , unsigned_real;
+
+type_declaration        =   identifier , '=' , type ;
+type                    =   simple_type
+                        |   string_type
+                        |   structured_type
+                        ;
+simple_type             =   ordinal_type | real_type | boolean_type ;
+real_type               =   real_type_identifier ;
+real_type_identifier    =   'REAL' ;
+ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR' ;
+boolean_type            =   'BOOLEAN' ;
+string_type             =   'STRING' , [ '[' , ( unsigned_integer | constant_expression ) , ']' ] ;
+enumerated_type         =   '(' , identifier_list , ')'
+                        ;
+structured_type         =   enumerated_type
+                        |   array_type
+                        ;
+array_type              =   'ARRAY' , '[' , [ index_list ] , ']' , 'OF' , type
+                        ;
+index_list              =   subrange_type , { ',' , subrange_type }
+                        ;
+(*
+    Examples:
+        1..10
+        -9..+9
+        'A'..'Z'
+        0..$FF
+*)
+subrange_type           =   subrange_limit , '..' , subrange_limit
+                        ;
+
+subrange_limit          =   identifier | ordinal_constant
+                        ;
+identifier_list         =   identifier , { ',' , identifier }
+                        ;
+
+additive_operator       =   '+' | '-' ;
+multiplicative_operator =   '*' | '/'| 'DIV' | 'MOD' | 'AND' | 'SHL' | 'SHR' ;
+relational_operator     =   '=' | '<>' | '<' | '>' | '<=' | '>=' | 'IN' | 'IS' ;
+
+expression              =   or_expression ;
+or_expression           =   and_expression , { ( 'OR' | 'XOR' ) , and_expression } ;
+and_expression          =   relational_expression , { 'AND' , relational_expression } ;
+relational_expression   =   simple_expression , [ relational_operator , simple_expression ] ;
+simple_expression       =   term , { additive_operator , term } ;
+term                    =   factor , { multiplicative_operator , factor } ;
+factor                  =   '(' , expression , ')'
+                        |   variable_reference
+                        |   function_call
+                        |   'NOT' , factor
+                        |   sign , factor
+                        |   unsigned_number
+                        |   real_constant
+                        |   character_string
+                        |   constant_value
+                        |   'TRUE'
+                        |   'FALSE'
+                        ;
+constant_value          =   unsigned_number
+                        |   real_constant
+                        |   character_string
+                        ;
+variable_reference      =   identifier , [ '[' , [ expression , { ',' , expression } ] , ']' ]
+                        ;
+
+function_call           =   function_identifier , [ actual_parameter_list ] ;
+function_identifier     =   identifier ;
+actual_parameter_list   =   '(' , [ expression , { ',' , expression } ] , ')' ;
+
+statement               =   simple_statement | structured_statement
+                        ;
+
+simple_statement        =   assignment_statement
+                        |   procedure_statement
+                        ;
+
+assignment_statement    =   ( variable_reference | function_identifier | 'RESULT' ) , ':=' , expression
+                        ;
+
+procedure_statement     =   ( procedure_identifier | variable_reference ) , [ actual_parameter_list ]
+;
+
+procedure_identifier    =   identifier ;
+
+
+structured_statement    =   compound_statement
+                        |   conditional_statement
+                        |   repetitive_statement
+                        ;
+
+compound_statement      =   'BEGIN' , [ statement_list ] , [ ';' ] , 'END'
+                        ;
+
+statement_list          =   statement , { ';' , statement }
+                        ;
+
+conditional_statement   =   if_statement
+                        |   case_statement
+                        ;
+if_statement            =   'IF' , expression , 'THEN' ,
+                                statement ,
+                            [ 'ELSE' , statement ]
+                        ;
+(* TODO: Case statement is not implemented yet *)
+case_statement          =   'CASE' , expression , 'OF' ,
+                                case_list_element ,
+                                { case_list_element } ,
+                                [ ( 'ELSE' | 'OTHERWISE' ) , statement , [ ';' ] ] ,
+                            'END'
+                        ;
+case_list_element       =   case_constant_list , ':' , statement, [ ';' ]
+                        ;
+case_constant_list      =   case_constant , { ',' , case_constant }
+                        ;
+case_constant           =   identifier | subrange_type
+                        ;
+
+repetitive_statement    =   repeat_statement
+                        |   while_statement
+                        |   for_statement
+                        ;
+repeat_statement        =   'REPEAT' , statement_list , [ ';' ] , 'UNTIL' , expression
+                        ;
+while_statement         =   'WHILE' , expression , 'DO' , statement
+                        ;
+for_statement           =   'FOR' , control_variable , ':=' , expression , ( 'TO' | 'DOWNTO' ) , expression , 'DO' ,
+                                statement
+                        ;
+control_variable        =   variable_reference
+                        ;
+(* EOF *)
