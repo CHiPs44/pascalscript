@@ -230,7 +230,9 @@ case_list_element       =   case_constant_list , ':' , statement, [ ';' ]
                         ;
 case_constant_list      =   case_constant , { ',' , case_constant }
                         ;
-case_constant           =   identifier | subrange_type
+case_constant           =   identifier
+                        |   subrange_type
+                        |   ordinal_constant
                         ;
 
 repetitive_statement    =   repeat_statement
