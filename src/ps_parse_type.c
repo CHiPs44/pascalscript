@@ -662,6 +662,7 @@ bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symb
         /* ********** Other types ********** */
     case PS_TOKEN_CHAR_VALUE:
     case PS_TOKEN_INTEGER_VALUE:
+    case PS_TOKEN_PLUS:
     case PS_TOKEN_MINUS:
     case PS_TOKEN_UNSIGNED_VALUE:
         // => SUBRANGE definition

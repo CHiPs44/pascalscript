@@ -11,6 +11,7 @@ Type
   TMonth = 1..12;
   TDay = 1..31;
   TYear = -9999..9999;
+  TPositive = +1..10;
 
 Procedure TestInnerType;
 Type
