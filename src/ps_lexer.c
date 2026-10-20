@@ -22,7 +22,9 @@
 bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
 bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
 bool ps_lexer_read_number(ps_lexer *lexer);
-bool ps_lexer_read_char_or_string_value(ps_lexer *lexer);
+bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer);
+bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer);
+bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer);
 
 #define ADVANCE()                                                                                                      \
     if (!ps_lexer_read_next_char(lexer))                                                                               \
@@ -382,9 +384,9 @@ bool ps_lexer_read_number(ps_lexer *lexer)
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
 /**
- * Read a single character or a string value.
+ * Read a single character or a string value enclosed in single quotes.
  */
-bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
+bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
     char c;
     char buffer[PS_STRING_MAX_LEN + 1];
@@ -441,6 +443,90 @@ bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
         ps_strscpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN + 1);
     }
+    return true;
+}
+
+bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer)
+{
+    char c;
+
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c != '^')
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                     "Expected a caret (^) character for char value");
+    // Consume the ^
+    ADVANCE()
+
+    bool is_valid = false;
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c >= '@' && c <= '_')
+    {
+        is_valid = true;
+        c = c - '@'; // Convert to control character
+        lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+        lexer->current_token.value.c = c;
+    }
+    if (c >= 'a' && c <= 'z')
+    {
+        is_valid = true;
+        c = c - 'a' + 1; // Convert to control character
+        lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+        lexer->current_token.value.c = c;
+    }
+
+    if (!is_valid)
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                     "Invalid character after caret (^) for char value");
+
+    ADVANCE() // Consume the character after ^
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c == '^')
+        return ps_lexer_return_error(
+                lexer, PS_ERROR_NOT_IMPLEMENTED,
+                "Only one caret (^) for char value allowed, multiple carets (^A^Z) are not supported (yet)");
+    if (c == '#')
+        return ps_lexer_return_error(lexer, PS_ERROR_NOT_IMPLEMENTED, "# after caret (^) is not supported (yet)");
+    if (c == '\'')
+        return ps_lexer_return_error(lexer, PS_ERROR_NOT_IMPLEMENTED, "' after caret (^) is not supported (yet)");
+
+    return true;
+}
+
+bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer)
+{
+    char c;
+
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c != '#')
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                     "Expected a hash (#) character for char value");
+    // Consume the #
+    ADVANCE()
+
+    // Read the number after the #
+    if (!ps_lexer_read_number(lexer))
+        return false;
+
+    if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                     "Expected an integer or unsigned value after hash (#) for char value");
+
+    if (lexer->current_token.value.u > 255)
+        return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Char value must be in the range 0..255");
+
+    c = ps_buffer_peek_char(lexer->buffer);
+    if (c == '#')
+        return ps_lexer_return_error(
+                lexer, PS_ERROR_NOT_IMPLEMENTED,
+                "Only one hash (#) for char value allowed, multiple hashes (#13#10) are not supported (yet)");
+    if (c == '^')
+        return ps_lexer_return_error(lexer, PS_ERROR_NOT_IMPLEMENTED, "^ after hash (#) is not supported (yet)");
+    if (c == '\'')
+        return ps_lexer_return_error(lexer, PS_ERROR_NOT_IMPLEMENTED, "' after hash (#) is not supported (yet)");
+
+    lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
+    lexer->current_token.value.c = (ps_char)lexer->current_token.value.u;
+
     return true;
 }
 
@@ -600,7 +686,17 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     }
     else if (current_char == '\'')
     {
-        if (!ps_lexer_read_char_or_string_value(lexer))
+        if (!ps_lexer_read_char_or_string_value_quote(lexer))
+            return false;
+    }
+    else if (current_char == '^')
+    {
+        if (!ps_lexer_read_char_or_string_value_caret(lexer))
+            return false;
+    }
+    else if (current_char == '#')
+    {
+        if (!ps_lexer_read_char_or_string_value_hash(lexer))
             return false;
     }
     else
