@@ -5,13 +5,20 @@
 *)
 Program StringsHashControl;
 Const
+  BEL = #7;
+  BS = #8;
+  HT = #9;
+  LF = #10;
+  FF = #12;
+  CR = #13;
+  ESC = #27;
 //   K1 = 'first'#9'line'#10'second'#9'line'#10;
-//   K2 = 'first'^I'line'#10'second'^i'line'#10;
-  K1 = ^M;
+//   K2 = 'first' ^I 'line' #10 'second' ^i 'line' #10;
+  K1 = LF;
   K2 = #65;
   K3 = #$42;
 Begin
-  WriteLn(Ord(K1));
-  WriteLn(K2);
-  WriteLn(K3);
+  WriteLn('''', K1, ''' => #', Ord(K1));
+  WriteLn('''', K2, ''' => #', Ord(K2));
+  WriteLn('''', K3, ''' => #', Ord(K3));
 End.
