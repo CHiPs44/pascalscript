@@ -123,8 +123,7 @@ type                    =   simple_type
                         |   structured_type
                         ;
 simple_type             =   ordinal_type | real_type | boolean_type ;
-real_type               =   real_type_identifier ;
-real_type_identifier    =   'REAL' ;
+real_type               =   'REAL' ;
 ordinal_type            =   'INTEGER' | 'UNSIGNED' | 'CHAR' ;
 boolean_type            =   'BOOLEAN' ;
 string_type             =   'STRING' , [ '[' , ( unsigned_integer | constant_expression ) , ']' ] ;
