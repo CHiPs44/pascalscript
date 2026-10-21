@@ -27,10 +27,11 @@ block                   =   declaration_part ,
                             compound_statement
                         ;
 declaration_part        =   {
-                              'CONST' , constant_declaration  , ';' , { constant_declaration , ';' }
-                            | 'TYPE'  , type_declaration      , ';' , { type_declaration , ';' }
-                            | 'VAR'   , variable_declaration  , ';' , { variable_declaration , ';' }
-                            | { procedure_declaration | function_declaration }
+                              'CONST' , constant_declaration , ';' , { constant_declaration , ';' }
+                            | 'TYPE'  , type_declaration     , ';' , { type_declaration , ';' }
+                            | 'VAR'   , variable_declaration , ';' , { variable_declaration , ';' }
+                            | procedure_declaration
+                            | function_declaration
                             }
                         ;
 variable_declaration    =   identifier_list , ':' , type
@@ -62,43 +63,43 @@ formal_parameter        =   [ 'VAR' | 'OUT' ] , identifier_list , ':' , type
                         ;
 
 
-uppercase_letter = ? 'A'..'Z' ? ;
-lowercase_letter = ? 'a'..'z' ? ;
-letter           = uppercase_letter | lowercase_letter ;
+uppercase_letter        = ? 'A'..'Z' ? ;
+lowercase_letter        = ? 'a'..'z' ? ;
+letter                  = uppercase_letter | lowercase_letter ;
 
-bin_digit   =   '0' | '1' ;
-oct_digit   =   bin_digit | '2' | '3' | '4' |'5' | '6' | '7' ;
-dec_digit   =   oct_digit | '8' | '9' ;
-hex_digit   =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
-bin_digit_sequence  =   bin_digit , { bin_digit } ;
-oct_digit_sequence  =   oct_digit , { oct_digit } ;
-dec_digit_sequence  =   dec_digit , { dec_digit } ;
-hex_digit_sequence  =   hex_digit , { hex_digit } ;
-unsigned_integer    =   dec_digit_sequence
-                    |   '%' , bin_digit_sequence
-                    |   '&' , oct_digit_sequence
-                    |   '$' , hex_digit_sequence
-                    ;
+bin_digit               =   '0' | '1' ;
+oct_digit               =   bin_digit | '2' | '3' | '4' |'5' | '6' | '7' ;
+dec_digit               =   oct_digit | '8' | '9' ;
+hex_digit               =   dec_digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' ;
+bin_digit_sequence      =   bin_digit , { bin_digit } ;
+oct_digit_sequence      =   oct_digit , { oct_digit } ;
+dec_digit_sequence      =   dec_digit , { dec_digit } ;
+hex_digit_sequence      =   hex_digit , { hex_digit } ;
+unsigned_integer        =   dec_digit_sequence
+                        |   '%' , bin_digit_sequence
+                        |   '&' , oct_digit_sequence
+                        |   '$' , hex_digit_sequence
+                        ;
 
 (* Real number *)
-unsigned_real       =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
-sign                =   '+' | '-' ;
-scale_factor        =   ( 'E' | 'e' ) , [ sign ] , dec_digit_sequence ;
-unsigned_number     =   unsigned_real | unsigned_integer ;
+unsigned_real           =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
+sign                    =   '+' | '-' ;
+scale_factor            =   ( 'E' | 'e' ) , [ sign ] , dec_digit_sequence ;
+unsigned_number         =   unsigned_real | unsigned_integer ;
 
 (* TODO: Implement character_string as described below *)
-character_string    =   ( quoted_string | control_string ) , { quoted_string | control_string }
-                    ;
-quoted_string       =   "'" , { string_character } , "'" ;
-string_character    =   "''" | ? Any character except ', CR and LF ? ;
-control_string      =  control_string_sharp | control_string_caret ;
+character_string        =   ( quoted_string | control_string ) , { quoted_string | control_string }
+                        ;
+quoted_string           =   "'" , { string_character } , "'" ;
+string_character        =   "''" | ? Any character except ', CR and LF ? ;
+control_string          =  control_string_sharp | control_string_caret ;
 (* #65 or #$41 for 'A' *)
-control_string_sharp =   '#' , unsigned_integer ;
+control_string_sharp    =   '#' , unsigned_integer ;
 (* ^@ for NUL, ^A for #1, ..., ^Z for #26, up to ^_ for #31 *)
-control_string_caret =   '^' , ( '@' | uppercase_letter | lowercase_letter | '[' | '\' | ']' | '^' | '_' )
-                    ;
+control_string_caret    =   '^' , ( '@' | uppercase_letter | lowercase_letter | '[' | '\' | ']' | '^' | '_' )
+                        ;
 
-identifier          =   ( letter | '_' ) , { letter | dec_digit | '_' } ;
+identifier              =   ( letter | '_' ) , { letter | dec_digit | '_' } ;
 
 constant_declaration    =   identifier , '=' , constant_expression
                         ;
