@@ -13,7 +13,7 @@ Begin
     End
   Else
     Begin
-      Result := N * RecursiveFactorial(N -1);
+      Result := N * RecursiveFactorial(N - 1);
       If Trace Then
         WriteLn('RecursiveFactorial(', N, ') = ', Result);
     End;
@@ -56,7 +56,7 @@ Begin
   // N := 31;
   WriteLn(' N  Recursive   Iterative');
   WriteLn('--- ---------- ----------');
-  For N := 0 To 13 Do
+  For N := 0 To 12 Do
   Begin
     Recursive := RecursiveFactorial(N);
     Iterative := IterativeFactorial(N);
