@@ -121,8 +121,8 @@ bool ps_string_heap_grow(ps_string_heap *heap)
     size_t new_size = heap->size + heap->more;
     if (new_size <= old_size)
         return false;
-    ps_string_heap_entry *new_data = (ps_string_heap_entry *)ps_memory_calloc(
-            PS_MEMORY_STRING, new_size, sizeof(ps_string_heap_entry));
+    ps_string_heap_entry *new_data =
+            (ps_string_heap_entry *)ps_memory_calloc(PS_MEMORY_STRING, new_size, sizeof(ps_string_heap_entry));
     if (new_data == NULL)
         return false;
     for (size_t i = 0; i < old_size; i++)
@@ -176,18 +176,20 @@ bool ps_string_heap_free_string(ps_string_heap *heap, ps_string *s)
     unsigned int hash = ps_string_heap_get_hash_key((const char *)s->str);
     size_t index = hash % heap->size;
     size_t start = index;
-    // Loop until we find an empty slot or looped back to the start
+    // Loop until we find the string or looped back to the start
     do
     {
         if (heap->data[index].string == s)
         {
-            fprintf(stderr, "HEAP FREE STRING: %s %u/%u\n", (char *)s->str, s->len, s->max);
+            if (ps_string_heap_debug)
+                fprintf(stderr, "HEAP FREE STRING: %s %u/%u\n", (char *)s->str, s->len, s->max);
             ps_string_free(s);
             heap->data[index].string = NULL;
             heap->data[index].ref_count = 0;
             heap->used -= 1;
             return true;
         }
+        index = (index + 1) % heap->size;
     } while (index != start);
     return false; // String not found in the heap
 }
