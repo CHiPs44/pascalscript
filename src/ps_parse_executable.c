@@ -176,12 +176,12 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 
     // Get procedure or function name
     READ_NEXT_TOKEN_OR_GOTO_CLEANUP
-    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_IDENTIFIER);
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_IDENTIFIER)
     COPY_IDENTIFIER(identifier)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
     // Does it already exist in the current block?
     if (ps_compiler_find_symbol(compiler, block, identifier, true, &executable_owner, &executable_symbol))
-        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS);
+        RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
 
     // Create a new block for the procedure or function, and set its parent to the current block
     ps_ast_node_kind node_kind = kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
@@ -197,7 +197,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     // ':' TYPE_REFERENCE for function result type
     if (kind == PS_SYMBOL_KIND_FUNCTION)
     {
-        EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_COLON);
+        EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_COLON)
         READ_NEXT_TOKEN_OR_GOTO_CLEANUP
         ps_symbol *type_reference = NULL;
         if (!ps_parse_type_reference(compiler, block, &type_reference, NULL))
@@ -206,7 +206,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     }
 
     // ';' after procedure or function declaration
-    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_SEMI_COLON);
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // Create executable and symbol for the procedure/function
@@ -224,6 +224,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
                                       (ps_value_data){.x = executable});
     if (executable_value == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    executable = NULL;
     executable_symbol->value = executable_value;
 
     // Add the procedure/function to the current block
@@ -244,7 +245,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     {
         goto cleanup;
     }
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON);
+    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
 cleanup:
@@ -266,7 +267,7 @@ cleanup:
     {
         if (executable != NULL)
             ps_executable_free(executable);
-        TRACE_ERROR("CLEANUP");
+        TRACE_ERROR("CLEANUP")
     }
     PARSE_END("OK")
 }
