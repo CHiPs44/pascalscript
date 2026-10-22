@@ -28,6 +28,17 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
                             ps_ast_value *result)
 {
     bool ok = true;
+    bool frame_entered = false;
+    ps_symbol *symbol = NULL;
+    ps_ast_variable *ast_variable = NULL;
+    ps_ast_variable result_variable = {0};
+    ps_value argument = {0};
+    ps_ast_value arg_value = {.line = call->line,
+                              .column = call->column,
+                              .group = PS_AST_EXPRESSION,
+                              .kind = PS_AST_LITERAL_VALUE,
+                              .flags = 0,
+                              .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
 
     // Check if argument count is same as declaration
     if (call->n_args != block->signature->parameter_count)
@@ -35,58 +46,73 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
                                                 "Expected %d arguments, got %d in call of %s",
                                                 block->signature->parameter_count, call->n_args, block->name);
 
-    // Evaluate arguments
-    ps_value arguments[call->n_args];
-    ps_ast_value arg_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    for (int i = 0; i < call->n_args; i++)
-    {
-        if (block->signature->parameters[i].byref)
-            continue;
-        else
-        {
-            if (!ps_evaluate_expression(interpreter, call->args[i], &arg_value))
-                return false;
-            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
-                                   ps_value_get_display_string(&arg_value.value, 0, 0));
-            arguments[i] = arg_value.value;
-        }
-    }
-
     // Allocate frame for procedure
     if (!ps_interpreter_enter_frame(interpreter, block))
         return false;
+    frame_entered = true;
 
-    // Store arguments in frame
-    ps_symbol *symbol = NULL;
-    ps_ast_variable *ast_variable = ps_ast_create_variable_simple(0, 0, block, PS_AST_LVALUE, symbol);
+    ast_variable = ps_ast_create_variable_simple(call->line, call->column, block, PS_AST_LVALUE, symbol);
     if (ast_variable == NULL)
     {
         ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY, "Could not allocate AST variable");
         goto cleanup;
     }
+
+    // Evaluate arguments
     for (int i = 0; i < call->n_args; i++)
     {
-        symbol = ps_symbol_table_find(block->symbols, block->signature->parameters[i].name);
-        if (symbol == NULL)
+        if (block->signature->parameters[i].byref)
         {
-            ps_formal_parameter parameter = block->signature->parameters[i];
-            ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Parameter %s not found",
-                                             parameter.name);
-            ok = false;
+            // For by-reference parameters, the argument must be a variable (lvalue)
+            if (call->args[i]->group != PS_AST_GROUP_LVALUE)
+            {
+                ps_interpreter_set_error_message(interpreter, PS_ERROR_EXPECTED_VARIABLE,
+                                                 "Argument %d must be a variable for by-reference parameter %s", i,
+                                                 block->signature->parameters[i].name);
+                ok = false;
+            }
+            else
+            {
+                // empty value, the actual value will be set in the frame by reference
+                argument = (ps_value){.allocated = false, .type = &ps_system_none, .data = {0}};
+            }
+        }
+        else
+        {
+            if (!ps_evaluate_expression(interpreter, call->args[i], &arg_value))
+                ok = false;
+            else
+            {
+                PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
+                                       ps_value_get_display_string(&arg_value.value, 0, 0));
+                argument = arg_value.value;
+            }
+        }
+        if (ok)
+        {
+            // Store argument in frame
+            symbol = ps_symbol_table_find(block->symbols, block->signature->parameters[i].name);
+            if (symbol == NULL)
+            {
+                ps_formal_parameter parameter = block->signature->parameters[i];
+                ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Parameter %s not found",
+                                                 parameter.name);
+                ok = false;
+            }
         }
         if (ok)
         {
             if (block->signature->parameters[i].byref)
             {
                 ps_ast_variable parameter_variable = {.owner = block, .variable = symbol};
-                const ps_ast_variable *argument = (const ps_ast_variable *)call->args[i];
-                if (!ps_interpreter_bind_variable_reference(interpreter, &parameter_variable, argument))
+                const ps_ast_variable *argument_variable = (const ps_ast_variable *)call->args[i];
+                if (!ps_interpreter_bind_variable_reference(interpreter, &parameter_variable, argument_variable))
                     ok = false;
             }
             else
             {
                 ast_variable->variable = symbol;
-                if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &arguments[i]))
+                if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &argument))
                     ok = false;
             }
         }
@@ -107,7 +133,6 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
             ok = false;
             goto cleanup;
         }
-        ps_ast_variable result_variable = {0};
         result_variable.owner = block;
         result_variable.variable = result_symbol;
         result_variable.group = PS_AST_GROUP_LVALUE;
@@ -144,7 +169,8 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
 cleanup:
     if (ast_variable != NULL)
         ps_ast_free_variable(ast_variable);
-    ps_interpreter_exit_frame(interpreter);
+    if (frame_entered)
+        ps_interpreter_exit_frame(interpreter);
 
     return ok;
 }
