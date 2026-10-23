@@ -167,6 +167,8 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     ps_value *executable_value = NULL;
     ps_formal_signature *signature = NULL;
     ps_executable *executable = NULL;
+    ps_ast_block *block_executable = NULL;
+    bool block_assigned = false;
     bool executable_symbol_added = false;
     ps_identifier result_identifier = "RESULT";
 
@@ -185,14 +187,15 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
 
     // Create a new block for the procedure or function, and set its parent to the current block
     ps_ast_node_kind node_kind = kind == PS_SYMBOL_KIND_PROCEDURE ? PS_AST_PROCEDURE : PS_AST_FUNCTION;
-    ps_ast_block *block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier, NULL);
+    block_executable = ps_ast_create_block(start_line, start_column, block, node_kind, identifier, NULL);
     if (block_executable == NULL)
         RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
 
     // Parameters?
-    if (!ps_parse_formal_signature(compiler, block_executable, &signature))
-        goto cleanup;
+    bool signature_assigned = ps_parse_formal_signature(compiler, block_executable, &signature);
     block_executable->signature = signature;
+    if (!signature_assigned)
+        goto cleanup;
 
     // ':' TYPE_REFERENCE for function result type
     if (kind == PS_SYMBOL_KIND_FUNCTION)
@@ -215,6 +218,7 @@ bool ps_parse_procedure_or_function_declaration(ps_compiler *compiler, ps_ast_bl
     executable = ps_executable_alloc(executable_kind, block_executable);
     if (executable == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+    block_assigned = true;
 
     // Create symbol for the procedure or function
     executable_symbol = ps_symbol_alloc(kind, identifier, NULL);
@@ -263,11 +267,11 @@ cleanup:
     }
     if (executable_value != NULL)
         ps_value_free(executable_value);
+    if (executable != NULL)
+        ps_executable_free(executable);
+    if (block_executable != NULL && !block_assigned)
+        ps_ast_free_block(block_executable);
     if (compiler->error != PS_ERROR_NONE)
-    {
-        if (executable != NULL)
-            ps_executable_free(executable);
         TRACE_ERROR("CLEANUP")
-    }
     PARSE_END("OK")
 }
