@@ -45,6 +45,8 @@ End;
 
 Var
   N, Recursive, Iterative: Unsigned;
+  Message: String;
+
 Begin
   WriteLn('Factorial - Recursive and Iterative:');
   WriteLn('--------------------------------------------------------------------------------');
@@ -60,7 +62,11 @@ Begin
   Begin
     Recursive := RecursiveFactorial(N);
     Iterative := IterativeFactorial(N);
-    WriteLn(N:2, '! ', Recursive:10, ' ', Iterative:10);
+    If Recursive <> Iterative Then
+      Message := 'KO!'
+    Else
+      Message := 'OK!';
+    WriteLn(N:2, '! ', Recursive:10, ' ', Iterative:10, ' ', Message);
   End;
   WriteLn('--------------------------------------------------------------------------------');
   WriteLn('OK!');

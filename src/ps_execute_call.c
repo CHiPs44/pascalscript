@@ -32,7 +32,7 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     ps_symbol *symbol = NULL;
     ps_ast_variable *ast_variable = NULL;
     ps_ast_variable result_variable = {0};
-    ps_value argument = {0};
+    ps_value arguments[PS_PARAMETERS_MAX] = {0};
     ps_ast_value arg_value = {.line = call->line,
                               .column = call->column,
                               .group = PS_AST_EXPRESSION,
@@ -45,11 +45,6 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_PARAMETER_COUNT_MISMATCH,
                                                 "Expected %d arguments, got %d in call of %s",
                                                 block->signature->parameter_count, call->n_args, block->name);
-
-    // Allocate frame for procedure
-    if (!ps_interpreter_enter_frame(interpreter, block))
-        return false;
-    frame_entered = true;
 
     ast_variable = ps_ast_create_variable_simple(call->line, call->column, block, PS_AST_LVALUE, symbol);
     if (ast_variable == NULL)
@@ -74,7 +69,7 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
             else
             {
                 // empty value, the actual value will be set in the frame by reference
-                argument = (ps_value){.allocated = false, .type = &ps_system_none, .data = {0}};
+                arguments[i] = (ps_value){.allocated = false, .type = &ps_system_none, .data = {0}};
             }
         }
         else
@@ -85,36 +80,41 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
             {
                 PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Argument %d: %s", i,
                                        ps_value_get_display_string(&arg_value.value, 0, 0));
-                argument = arg_value.value;
+                arguments[i] = arg_value.value;
             }
         }
-        if (ok)
+        if (!ok)
+            goto cleanup;
+    }
+
+    // Allocate frame for procedure
+    if (!ps_interpreter_enter_frame(interpreter, block))
+        return false;
+    frame_entered = true;
+
+    // Store argument in frame
+    for (int i = 0; i < call->n_args; i++)
+    {
+        symbol = ps_symbol_table_find(block->symbols, block->signature->parameters[i].name);
+        if (symbol == NULL)
         {
-            // Store argument in frame
-            symbol = ps_symbol_table_find(block->symbols, block->signature->parameters[i].name);
-            if (symbol == NULL)
-            {
-                ps_formal_parameter parameter = block->signature->parameters[i];
-                ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Parameter %s not found",
-                                                 parameter.name);
+            ps_formal_parameter parameter = block->signature->parameters[i];
+            ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "Parameter %s not found",
+                                             parameter.name);
+            ok = false;
+        }
+        if (ok && block->signature->parameters[i].byref)
+        {
+            ps_ast_variable parameter_variable = {.owner = block, .variable = symbol};
+            const ps_ast_variable *argument_variable = (const ps_ast_variable *)call->args[i];
+            if (!ps_interpreter_bind_variable_reference(interpreter, &parameter_variable, argument_variable))
                 ok = false;
-            }
         }
-        if (ok)
+        else if (ok)
         {
-            if (block->signature->parameters[i].byref)
-            {
-                ps_ast_variable parameter_variable = {.owner = block, .variable = symbol};
-                const ps_ast_variable *argument_variable = (const ps_ast_variable *)call->args[i];
-                if (!ps_interpreter_bind_variable_reference(interpreter, &parameter_variable, argument_variable))
-                    ok = false;
-            }
-            else
-            {
-                ast_variable->variable = symbol;
-                if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &argument))
-                    ok = false;
-            }
+            ast_variable->variable = symbol;
+            if (!ps_interpreter_set_variable_value(interpreter, ast_variable, &arguments[i]))
+                ok = false;
         }
         if (!ok)
             goto cleanup;
