@@ -44,8 +44,10 @@ variable_declaration    =   identifier_list , ':' , type
         Procedure Example4(A: Integer, B: Char, Var C: String);
         ...
 *)
-procedure_declaration   =   'PROCEDURE' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ';' ,
-                            block , ';'
+procedure_declaration   =   procedure_header , block , ';'
+                        |   procedure_header , 'FORWARD' , ';'
+                        ;
+procedure_header        =   'PROCEDURE' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ';'
                         ;
 (*
     Function Example1: Integer;
@@ -54,8 +56,10 @@ procedure_declaration   =   'PROCEDURE' , identifier , [ '(' , [ formal_paramete
     Function Example4(Var A: Integer): Integer;
     ...
 *)
-function_declaration    =   'FUNCTION' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ':' , type , ';' ,
-                            block , ';'
+function_declaration    =   function_header , block , ';'
+                        |   function_header , 'FORWARD' , ';'
+                        ;
+function_header         =   'FUNCTION' , identifier , [ '(' , [ formal_parameter_list ] , ')' ] , ':' , type , ';'
                         ;
 formal_parameter_list   =   formal_parameter , { ',' , formal_parameter }
                         ;
