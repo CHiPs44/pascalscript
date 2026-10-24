@@ -80,9 +80,11 @@ unsigned_integer        =   dec_digit_sequence
                         |   '&' , oct_digit_sequence
                         |   '$' , hex_digit_sequence
                         ;
-
 (* Real number *)
-unsigned_real           =   dec_digit_sequence , [ '.' , dec_digit_sequence ] , [ scale_factor ] ;
+unsigned_real           =   dec_digit_sequence ,  '.' , [ dec_digit_sequence ] , [ scale_factor ]
+                        |   '.' , dec_digit_sequence , [ scale_factor ]
+                        |   dec_digit_sequence , scale_factor
+                        ;
 sign                    =   '+' | '-' ;
 scale_factor            =   ( 'E' | 'e' ) , [ sign ] , dec_digit_sequence ;
 unsigned_number         =   unsigned_real | unsigned_integer ;

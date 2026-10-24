@@ -13,9 +13,9 @@ endif()
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
+# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
 # set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -g -O0")
-# set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -g -O0")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -g")
 
 set(PS_VERSION_MAJOR 0)
 set(PS_VERSION_MINOR 1)

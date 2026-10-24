@@ -3,10 +3,10 @@
         "LICENSE": "plaintext"
     },
     "makefile.configureOnOpen": false,
-    "editor.fontFamily": "Jetbrains Mono, fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
+    "editor.fontFamily": "Jetbrains Mono, fira-code, FiraCode Font, Consolas, 'Courier New', monospace",
     "editor.fontLigatures": true,
     "editor.fontSize": 13,
-    "terminal.integrated.fontFamily": "Jetbrains Mono, fira-code-nerd, FiraCode Nerd Font, Consolas, 'Courier New', monospace",
+    "terminal.integrated.fontFamily": "Jetbrains Mono, fira-code, FiraCode Font, Consolas, 'Courier New', monospace",
     "terminal.integrated.fontLigatures.enabled": true,
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json",
     "terminal.integrated.fontSize": 12,

@@ -5,16 +5,18 @@
 *)
 Program TestExpression1;
 Var
-    U: Unsigned;
     I: Integer;
+    U: Unsigned;
     R: Real;
 Begin
-    WriteLn('Example 002 - Test expression #1');
-    WriteLn('--------------------------------');
-    U := 1 + (2 * 3) - 4;     // Should evaluate to 3
+    WriteLn('Example - Test expression #1');
+    WriteLn('----------------------------');
     I := (1 + 2) div (4 - 3); // Should evaluate to 3
-    R := 12.34 + 10.0 / 4.0;  // Should evaluate to 14.84
-    WriteLn('U=', U:5, '    (delta=', U - 3, ')');
     WriteLn('I=', I:5, '    (delta=', I - 3, ')');
-    WriteLn('R=', R:8:2, ' (delta=', (R - 14.84):8:7, ')');
+    U := 1 + (2 * 3) - 4;     // Should evaluate to 3
+    WriteLn('U=', U:5, '    (delta=', U - 3, ')');
+    R := .123;             // Should evaluate to 0.123
+    WriteLn('R=', R:8:3, ' (delta=', (R - 0.123):8:7, ')');
+    R := 12.34 + 10.0 / 4.0;  // Should evaluate to 14.84
+    WriteLn('R=', R:8:3, ' (delta=', (R - 14.84):8:7, ')');
 End.

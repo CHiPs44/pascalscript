@@ -19,12 +19,12 @@
 #include "ps_token.h"
 #include "ps_tools.h"
 
-bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
-bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
-bool ps_lexer_read_number(ps_lexer *lexer);
-bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer);
-bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer);
-bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer);
+static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
+static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
+static bool ps_lexer_read_number(ps_lexer *lexer);
+static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer);
+static bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer);
+static bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer);
 
 #define ADVANCE()                                                                                                      \
     if (!ps_lexer_read_next_char(lexer))                                                                               \
@@ -94,7 +94,7 @@ bool ps_lexer_read_next_char(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, lexer->buffer->error, "Cannot read next character");
 }
 
-bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
+static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 {
     char c = ps_buffer_peek_char(lexer->buffer);
     *changed = false;
@@ -109,7 +109,7 @@ bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 /**
  * Skip comment #1: '{' ... comment ... '}'
  */
-bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
+static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
 {
     char c = ps_buffer_peek_char(lexer->buffer);
     *changed = false;
@@ -130,7 +130,7 @@ bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
 /**
  * Skip comment #2: '(*' ... comment ... '*)'
  */
-bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
+static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
 {
     char c1 = ps_buffer_peek_char(lexer->buffer);
     char c2 = ps_buffer_peek_next_char(lexer->buffer);
@@ -161,7 +161,7 @@ bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
 /**
  * Skip comment #1: '//' ... comment ... '\n' or end of file
  */
-bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
+static bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
 {
     char c1 = ps_buffer_peek_char(lexer->buffer);
     char c2 = ps_buffer_peek_next_char(lexer->buffer);
@@ -184,7 +184,7 @@ bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
 /**
  * Skip whitespace, comments and read next token.
  */
-bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
+static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
 {
     bool changed1 = true;
     bool changed2 = true;
@@ -207,7 +207,7 @@ bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
 /**
  * Read an identifier or a keyword.
  */
-bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
+static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
     char buffer[PS_IDENTIFIER_LEN + 1];
     char c = ps_buffer_peek_char(lexer->buffer);
@@ -233,7 +233,7 @@ bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid start of identifier or keyword");
 }
 
-bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
+static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
 {
     char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
     char c = ps_buffer_peek_char(lexer->buffer);
@@ -303,7 +303,7 @@ bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *dig
         }                                                                                                              \
     }
 
-bool ps_lexer_read_number_dec(ps_lexer *lexer)
+static bool ps_lexer_read_number_dec(ps_lexer *lexer)
 {
     char buffer[33] = {0};
     int pos = 0;
@@ -312,15 +312,25 @@ bool ps_lexer_read_number_dec(ps_lexer *lexer)
     char *end = NULL;
     char c = ps_buffer_peek_char(lexer->buffer);
 
-    if (!isdigit(c))
+    // Check if the first character is a digit or a dot
+    if (!isdigit(c) && c != '.')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
+
+    if (c == '.')
+    {
+        is_real = true;
+        buffer[pos++] = '0';
+    }
 
     do
     {
         APPEND_CHAR_DEC()
         // floating point?
         if (c == '.')
-            READ_DOT_DEC()
+        {
+            is_real = true;
+            APPEND_CHAR_DEC()
+        }
         // exponent part?
         else if (c == 'e' || c == 'E')
             READ_EXP_DEC()
@@ -357,7 +367,7 @@ bool ps_lexer_read_number_dec(ps_lexer *lexer)
  * Read a positive number, either integer or real.
  * The number can be in decimal, binary, octal or hexadecimal format.
  */
-bool ps_lexer_read_number(ps_lexer *lexer)
+static bool ps_lexer_read_number(ps_lexer *lexer)
 {
     char c = ps_buffer_peek_char(lexer->buffer);
     if (c == '%') // Binary?
@@ -386,7 +396,7 @@ bool ps_lexer_read_number(ps_lexer *lexer)
 /**
  * Read a single character or a string value enclosed in single quotes.
  */
-bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
+static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
     char c;
     char buffer[PS_STRING_MAX_LEN + 1];
@@ -446,7 +456,7 @@ bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     return true;
 }
 
-bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer)
+static bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer)
 {
     char c;
 
@@ -492,7 +502,7 @@ bool ps_lexer_read_char_or_string_value_caret(ps_lexer *lexer)
     return true;
 }
 
-bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer)
+static bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer)
 {
     char c;
 
@@ -530,7 +540,7 @@ bool ps_lexer_read_char_or_string_value_hash(ps_lexer *lexer)
     return true;
 }
 
-bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_char)
+static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_char)
 {
     snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "%c", current_char);
     switch (current_char)
@@ -564,6 +574,13 @@ bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_ch
             snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "..");
             lexer->current_token.type = PS_TOKEN_RANGE;
             ADVANCE()
+        }
+        else if (isdigit(next_char))
+        {
+            // This is a real number starting with a dot, e.g., .123
+            if (!ps_lexer_read_number(lexer))
+                return false;
+            return true;
         }
         else
             lexer->current_token.type = PS_TOKEN_DOT;
@@ -669,31 +686,38 @@ bool ps_lexer_read_token(ps_lexer *lexer)
 {
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
+
     char current_char = ps_buffer_peek_char(lexer->buffer);
     char next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;
     lexer->start_column = lexer->buffer->current_column;
+
+    // Number: integer or real value?
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
     {
         if (!ps_lexer_read_number(lexer))
             return false;
     }
+    // Identifier or keyword?
     else if (isalnum(current_char) || current_char == '_')
     {
         if (!ps_lexer_read_identifier_or_keyword(lexer))
             return false;
         lexer->current_token.type = ps_token_is_keyword(lexer->current_token.value.identifier);
     }
+    // String or char value?
     else if (current_char == '\'')
     {
         if (!ps_lexer_read_char_or_string_value_quote(lexer))
             return false;
     }
+    // ^A..Z char value?
     else if (current_char == '^')
     {
         if (!ps_lexer_read_char_or_string_value_caret(lexer))
             return false;
     }
+    // #nnn char value?
     else if (current_char == '#')
     {
         if (!ps_lexer_read_char_or_string_value_hash(lexer))
