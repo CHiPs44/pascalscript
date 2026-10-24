@@ -1,93 +1,124 @@
 # System library
 
-This document describes the system procedures and functions currently registered by the engine.
+This document lists the symbols currently added to the runtime system block by `ps_system_alloc()`. Pascal identifiers are case-insensitive; names below are shown in Pascal style.
 
 Note:
 
 - `Number` stands for `Integer`, `Unsigned` or `Real`
-- `Ordinal` stands for `Integer`, `Unsigned`, `Char`,`Boolean`, `Subrange` or `Enum`
+- `Ordinal` stands for `Integer`, `Unsigned`, `Char`, `Boolean`, `Subrange` or `Enum`
 
-## Input/Output
+## Built-in constants
 
-These are the two canonical procedures with a variadic number of parameters, which have to be implemented at the language level.
+| Definition                        | Type       | Use                            |
+| --------------------------------- | ---------- | ------------------------------ |
+| `False` / `True`                  | `Boolean`  | Logical constants              |
+| `MaxInt` / `MinInt`               | `Integer`  | Integer bounds                 |
+| `MaxUInt`                         | `Unsigned` | Maximum unsigned integer value |
+| `MaxReal` / `MinReal` / `EpsReal` | `Real`     | Real bounds and epsilon        |
+| `Pi`                              | `Real`     | Mathematical constant π        |
+| `PS_BITNESS`                      | `Unsigned` | Runtime bitness (`32` or `64`) |
+| `PS_VERSION`                      | `String`   | PascalScript version string    |
 
-Implementation is made with a single parameter and looped at execution.
+## Built-in variables
 
-| Definition                              | Purpose                                                                                                        |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `Write([Value[:Width[:Precision]]]*)`   | Writes values to standard output, optionally with a field width and precision.                                 |
-| `WriteLn([Value[:Width[:Precision]]]*)` | Writes values to standard output and then moves to the next line, optionally with a field width and precision. |
-| `Read(Value)`                           | Reads a value from standard input.                                                                             |
-| `ReadLn(Value)`                         | Reads a value from standard input and advances to the next line.                                               |
+| Definition | Type      | Use                                  |
+| ---------- | --------- | ------------------------------------ |
+| `IOResult` | `Integer` | Standard runtime I/O status variable |
+| `ExitCode` | `Integer` | Standard runtime exit code           |
 
-Up to 16 (`PS_PARAMETERS_MAX`) parameters can be passed to `Write` and `WriteLn`.
+## Input / output
+
+| Definition                                          | Status                                      | Use                                           |
+| --------------------------------------------------- | ------------------------------------------- | --------------------------------------------- |
+| `Write([Value[:Width[:Precision]]]*)`               | Implemented                                 | Writes values to standard output              |
+| `WriteLn([Value[:Width[:Precision]]]*)`             | Implemented                                 | Writes values and then moves to the next line |
+| `WriteStr(StringVar; [Value[:Width[:Precision]]]*)` | Implemented                                 | Appends formatted text to a string variable   |
+| `Read(Value)`                                       | Registered, not implemented                 | Reads a value from standard input             |
+| `ReadLn(Value)`                                     | Registered, not implemented                 | Reads a value and advances to next line       |
+| `ReadStr(StringVar, Value)`                         | Parser supports it, runtime not implemented | Reads from a string buffer into a variable    |
+
+Up to 16 (`PS_PARAMETERS_MAX`) parameters can be passed to `Write`, `WriteLn` and `WriteStr`
+
+This includes the `StringVar` parameter, and the `File` parameter when file I/O will be implemented.
 
 ## Math
 
-| Family        | Definition                                | Purpose                                                                          |
-| ------------- | ----------------------------------------- | -------------------------------------------------------------------------------- |
-| Constant      | `EpsReal`: `Real`                         | Smallest positive real number such that `1.0 + EpsReal > 1.0`.                   |
-| Constant      | `MaxReal`: `Real`                         | Maximum value of a real number.                                                  |
-| Constant      | `MinReal`: `Real`                         | Minimum value of a real number.                                                  |
-| Constant      | `Pi`: `Real`                              | Mathematical constant for the ratio of a circle's circumference to its diameter. |
-| Exponential   | `Exp(X: Real): Real`                      | Returns the exponential function `e^X`.                                          |
-| Exponential   | `Ln(X: Real): Real`                       | Returns the natural logarithm of `X`.                                            |
-| Exponential   | `Log(X: Real): Real`                      | Returns the logarithm of `X` (base 10 in Pascal-style usage).                    |
-| Exponential   | `Power(Base: Real; Exponent: Real): Real` | Raises `Base` to the power `Exponent`.                                           |
-| Numeric       | `Abs(X: Number): Number`                  | Returns the absolute value of a number.                                          |
-| Numeric       | `Frac(X: Real): Real`                     | Returns the fractional part of `X`.                                              |
-| Numeric       | `Int(X: Real): Real`                      | Returns the integer part of `X` truncated toward zero.                           |
-| Numeric       | `Round(X: Real): Integer`                 | Rounds `X` to the nearest integer.                                               |
-| Numeric       | `Sqr(X: Real): Real`                      | Returns the square of `X`.                                                       |
-| Numeric       | `Sqrt(X: Real): Real`                     | Returns the square root of `X`.                                                  |
-| Numeric       | `Trunc(X: Real): Integer`                 | Returns the integer part of `X` by truncating toward zero.                       |
-| Predicate     | `Even(X: Ordinal): Boolean`               | Tests whether an ordinal value is even.                                          |
-| Predicate     | `Odd(X: Ordinal): Boolean`                | Tests whether an ordinal value is odd.                                           |
-| Trigonometric | `Arctan(X: Real): Real`                   | Returns the angle whose tangent is `X` in radians.                               |
-| Trigonometric | `Cos(X: Real): Real`                      | Returns the cosine of an angle `X` in radians.                                   |
-| Trigonometric | `Sin(X: Real): Real`                      | Returns the sine of an angle `X` in radians.                                     |
-| Trigonometric | `Tan(X: Real): Real`                      | Returns the tangent of an angle `X` in radians.                                  |
+| Family        | Definition                                | Use                                                           |
+| ------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| Constant      | `EpsReal: Real`                           | Smallest positive real number such that `1.0 + EpsReal > 1.0` |
+| Constant      | `MaxReal: Real`                           | Maximum value of a real number                                |
+| Constant      | `MinReal: Real`                           | Minimum value of a real number                                |
+| Constant      | `Pi: Real`                                | Ratio of a circle's circumference to its diameter             |
+| Exponential   | `Exp(X: Real): Real`                      | Returns `e^X`                                                 |
+| Exponential   | `Ln(X: Real): Real`                       | Returns the natural logarithm of `X`                          |
+| Exponential   | `Log10(X: Real): Real`                    | Returns the base-10 logarithm                                 |
+| Exponential   | `Log2(X: Real): Real`                     | Returns the base-2 logarithm                                  |
+| Exponential   | `LogN(Base: Real; X: Real): Real`         | Returns the logarithm of `X` in base `Base`                   |
+| Exponential   | `Power(Base: Real; Exponent: Real): Real` | Raises `Base` to the power `Exponent`                         |
+| Numeric       | `Abs(X: Number): Number`                  | Absolute value                                                |
+| Numeric       | `Frac(X: Real): Real`                     | Fractional part                                               |
+| Numeric       | `Int(X: Real): Real`                      | Integer part (truncated toward zero)                          |
+| Numeric       | `Round(X: Real): Integer`                 | Rounds to nearest integer                                     |
+| Numeric       | `Sqr(X: Real): Real`                      | Square                                                        |
+| Numeric       | `Sqrt(X: Real): Real`                     | Square root                                                   |
+| Numeric       | `Trunc(X: Real): Integer`                 | Truncates toward zero                                         |
+| Predicate     | `Even(X: Ordinal): Boolean`               | `True` when `X` is even                                       |
+| Predicate     | `Odd(X: Ordinal): Boolean`                | `True` when `X` is odd                                        |
+| Trigonometric | `Arctan(X: Real): Real`                   | Arc tangent                                                   |
+| Trigonometric | `Cos(X: Real): Real`                      | Cosine                                                        |
+| Trigonometric | `Sin(X: Real): Real`                      | Sine                                                          |
+| Trigonometric | `Tan(X: Real): Real`                      | Tangent                                                       |
 
 Note:
 
-- `Log` is the same as `Log10` in Pascal.
-- `Power` is the same as `**` in Pascal.
+- The runtime exposes `Log10`, `Log2` and `LogN` as distinct functions. Pascal-style `Log` is therefore represented by these system symbols rather than a single `Log` symbol.
+- `Power` is the same as the `**` operator introduced by Free Pascal.
 
 ## Random
 
-| Definition                                                        | Purpose                                                                                                          |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `Random([Max: Integer \| Unsigned]): Real \| Integer \| Unsigned` | Returns a random value in `[0.0, 1.0[` when called without an argument, or in `[0, Max[` when `Max` is provided. |
-| `Randomize([Seed: Integer \| Unsigned])`                          | Initializes the random number generator with an optional seed.                                                   |
+| Definition                                              | Use                                                           |
+| ------------------------------------------------------- | ------------------------------------------------------------- |
+| `Random(): Real`                                        | Returns a random value in `[0.0, 1.0[`                        |
+| `Random(Max: Integer \| Unsigned): Integer \| Unsigned` | Returns a random value in `[0, Max[` when `Max` is provided   |
+| `Randomize([Seed: Integer \| Unsigned])`                | Initializes the random number generator with an optional seed |
 
 ## Time
 
-| Definition                 | Purpose                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| `GetTickCount(): Unsigned` | Returns the number of milliseconds that have elapsed since the program started. |
+| Definition                 | Use                                                            |
+| -------------------------- | -------------------------------------------------------------- |
+| `GetTickCount(): Unsigned` | Returns the number of milliseconds elapsed since program start |
 
 ## String
 
-| Definition | Purpose |
-program ------------------------------ | --------------------------------------------- |
-| `Length(S: String): Unsigned` | Returns the number of characters in `S`. |
-| `LowerCase(S: String): String` | Returns a copy of `S` converted to lowercase. |
-| `UpperCase(S: String): String` | Returns a copy of `S` converted to uppercase. |
+| Definition                     | Use                                     |
+| ------------------------------ | --------------------------------------- |
+| `Length(S: String): Unsigned`  | Returns the number of characters in `S` |
+| `LowerCase(S: String): String` | Returns a lowercase copy of `S`         |
+| `UpperCase(S: String): String` | Returns an uppercase copy of `S`        |
 
 ## Conversion
 
-| Definition                  | Purpose                                                           |
-| --------------------------- | ----------------------------------------------------------------- |
-| `Chr(X: Ordinal): Char`     | Returns the character corresponding to the given ordinal value.   |
-| `Ord(X: Ordinal): Unsigned` | Returns the ordinal value of the given ordinal type or character. |
+| Definition                  | Use                                                      |
+| --------------------------- | -------------------------------------------------------- |
+| `Chr(X: Ordinal): Char`     | Returns the character corresponding to the ordinal value |
+| `Ord(X: Ordinal): Unsigned` | Returns the ordinal value of the given type or character |
 
 ## Other
 
-| Definition                         | Purpose                                                              |
-| ---------------------------------- | -------------------------------------------------------------------- |
-| `Low(Type \| Variable): Ordinal`   | Returns the lowest valid value for a type or variable.               |
-| `High(Type \| Variable): Ordinal`  | Returns the highest valid value for a type or variable.              |
-| `Pred(X: Ordinal): same type as X` | Returns the previous value before `X` in its ordinal type.           |
-| `Succ(X: Ordinal): same type as X` | Returns the next value after `X` in its ordinal type.                |
-| `Inc(Variable)`                    | Increments a variable by one. This procedure is not implemented yet. |
-| `Dec(Variable)`                    | Decrements a variable by one. This procedure is not implemented yet. |
+| Definition                        | Use                                                                                |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `Low(Type \| Variable): Ordinal`  | Lowest value of a type or variable, or lowest index of an array type or variable   |
+| `High(Type \| Variable): Ordinal` | Highest value of a type or variable, or highest index of an array type or variable |
+| `Pred(X: Ordinal): Ordinal`       | Predecessor: value before `X`                                                      |
+| `Succ(X: Ordinal): Ordinal`       | Successor: value after `X`                                                         |
+| `Inc(Variable [ , Amount ])`      | Registered, but not implemented yet                                                |
+| `Dec(Variable [ , Amount ])`      | Registered, but not implemented yet                                                |
+
+## Implementation status
+
+The current engine registers the following runtime entries:
+
+- implemented: `Write`, `WriteLn`, `WriteStr`, `Randomize`, `Random`, `GetTickCount`, all math functions listed above, `Chr`, `Ord`, `Low`, `High`, `Pred`, `Succ`, `Length`, `LowerCase`, `UpperCase`
+- registered but intentionally NOT implemented yet: `Read`, `ReadLn`, `ReadStr`, `Inc`, `Dec`
+
+This matches the runtime code in `src/ps_system.c`, `src/ps_procedures.c`, and `src/ps_functions.c`.
