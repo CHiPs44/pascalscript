@@ -102,6 +102,11 @@ ps_token_type quotes_expected[] = {
         // EOF
 };
 
+char *range_source = "1..10";
+ps_token_type range_expected[] = {
+        PS_TOKEN_INTEGER_VALUE, PS_TOKEN_RANGE, PS_TOKEN_INTEGER_VALUE
+};
+
 void test_lexer(char *name, char *source, const ps_token_type *expected, int count)
 {
     int index;
@@ -178,6 +183,9 @@ int main(void)
 
     printf("================================================================================\n");
     test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type));
+
+    printf("================================================================================\n");
+    test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type));
 
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");

@@ -316,7 +316,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     if (!isdigit(c) && c != '.')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
 
-    if (c == '.')
+    if (c=='.')
     {
         is_real = true;
         buffer[pos++] = '0';
@@ -327,10 +327,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
         APPEND_CHAR_DEC()
         // floating point?
         if (c == '.')
-        {
-            is_real = true;
-            APPEND_CHAR_DEC()
-        }
+            READ_DOT_DEC()
         // exponent part?
         else if (c == 'e' || c == 'E')
             READ_EXP_DEC()
@@ -711,7 +708,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
         if (!ps_lexer_read_char_or_string_value_quote(lexer))
             return false;
     }
-    // ^A..Z char value?
+    // ^A..^Z char value?
     else if (current_char == '^')
     {
         if (!ps_lexer_read_char_or_string_value_caret(lexer))
