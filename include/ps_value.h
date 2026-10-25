@@ -32,8 +32,8 @@ extern "C"
         ps_value_data data;         /** @brief Current value or handle for variables           */
         bool allocated : 1;         /** @brief True if value was allocated (and must be freed) */
         bool string_heap_owned : 1; /** @brief True if string data is owned by the string heap */
-        int32_t padding : 30;       /** @brief Padding                                         */
-    } /*__attribute__((__packed__))*/ ps_value;
+        uint16_t padding : 14;      /** @brief Padding                                         */
+    } ps_value;
 
 #define PS_VALUE_SIZE sizeof(ps_value)
 

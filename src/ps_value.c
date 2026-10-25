@@ -66,7 +66,10 @@ ps_value *ps_value_free(ps_value *value)
 
 bool ps_value_is_valid(const ps_value *value)
 {
-    return value != NULL; // && value->type != NULL && value->type->value != NULL && value->type->value->data.t != NULL;
+    return value != NULL                  // not null
+           && value->type != NULL         // has a type
+           && value->type->value != NULL; // type has a value
+                                          // && value->type->value->data.t != NULL;
 }
 
 bool ps_value_is_ordinal(const ps_value *value)
