@@ -36,14 +36,13 @@ extern "C"
     /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
     {
-        // clang-format off
-        ps_identifier   name;             /** @brief Symbol name in uppercase                                         */
-        ps_value       *value;            /** @brief current value, must be a pointer as it is a forward reference    */
-        ps_symbol_kind  kind;             /** @brief Auto, type definition, program, ...                              */
-        bool            system       : 1; /** @brief true if symbol is a system symbol (predefined)                   */
-        bool            allocated    : 1; /** @brief true if symbol was allocated (and must be freed)                 */
-        uint16_t        lexical_index:14; /** @brief Index in the block source code (for transpilation and debugging) */
-        // clang-format on
+        ps_identifier name;    /** @brief Symbol name in uppercase                                      */
+        ps_value *value;       /** @brief current value, must be a pointer as it is a forward reference */
+        ps_symbol_kind kind;   /** @brief Auto, type definition, program, ...                           */
+        bool system : 1;       /** @brief true if symbol is a system symbol (predefined)                */
+        bool allocated : 1;    /** @brief true if symbol was allocated (and must be freed)              */
+        bool forward_ref : 1;  /** @brief *FUTURE* true if symbol is a forward reference                */
+        uint16_t padding : 13; /** @brief align to 16 bits                                              */
     } __attribute__((__packed__)) ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
