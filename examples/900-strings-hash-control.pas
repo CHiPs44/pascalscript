@@ -6,6 +6,7 @@
 Program StringsHashControl;
 
 Const
+  QUOTE = '''';
   // Control characters
   BEL = #7;
   BS = #8;
@@ -19,13 +20,17 @@ Const
   K2 = #65;     // 'A'
   K3 = #$42;    // 'B'
   // Test strings
-//   K4 = 'First'#9'line'#10'Second'#9'line'#10;
-//   K5 = 'First' ^I 'line' #10 'Second' ^i 'line' #10;
+  K4 = 'First'#9'line'#10'Second'#9'line'#10;
+  K5 = 'First' ^I 'line' #10 'Second' ^i 'line' #10;
+
+Var
+  Dummy: Integer;
 
 Begin
-  WriteLn('''', K1, ''' => #', Ord(K1));
-  WriteLn('''', K2, ''' => #', Ord(K2));
-  WriteLn('''', K3, ''' => #', Ord(K3));
+  WriteLn(QUOTE);
+//   WriteLn('''', K1, ''' => #', Ord(K1));
+//   WriteLn('''', K2, ''' => #', Ord(K2));
+//   WriteLn('''', K3, ''' => #', Ord(K3));
 //   WriteLn(K4);
 //   WriteLn(K5);
 End.

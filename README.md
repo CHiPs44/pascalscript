@@ -115,6 +115,18 @@ There are big differences between `For` and `Repeat` / `While` loops for each la
 
 ² simulated with `while` for Python
 
+## Memory checking
+
+When Valgrind is installed, CMake configures CTest's MemCheck mode to check for memory errors and definite or indirect leaks. Build and run it from the build directory:
+
+```sh
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build -T memcheck
+```
+
+CTest reports Valgrind errors as failed tests. If Valgrind is not found during configuration, MemCheck is unavailable; install it and reconfigure.
+
 ## Introduction
 
 `PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.

@@ -34,6 +34,14 @@ add_executable(pascalscript ${CMAKE_CURRENT_SOURCE_DIR}/pascalscript.c ${SOURCES
 
 target_link_libraries(pascalscript m)
 
+# Configure CTest's MemCheck mode when Valgrind is available.
+find_program(MEMORYCHECK_COMMAND NAMES valgrind)
+if(MEMORYCHECK_COMMAND)
+  set(MEMORYCHECK_COMMAND_OPTIONS
+      "--leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=definite,indirect --error-exitcode=1"
+      CACHE STRING "Arguments passed to Valgrind by CTest MemCheck")
+endif()
+
 # Enable CTest testing
 include(CTest)
 enable_testing()

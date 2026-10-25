@@ -82,7 +82,14 @@ bool ps_value_is_ordinal(const ps_value *value)
     return false;
 }
 
-bool ps_value_is_scalar(const ps_value *value) { return ps_value_is_ordinal(value) || ps_value_is_real(value); }
+bool ps_value_is_scalar(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        return ps_value_is_ordinal(value) || ps_value_is_real(value);
+    }
+    return false;
+}
 
 bool ps_value_is_number(const ps_value *value)
 {
