@@ -22,9 +22,6 @@
 static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer);
 static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer);
 static bool ps_lexer_read_number(ps_lexer *lexer);
-static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer);
-static bool ps_lexer_read_char_value_caret(ps_lexer *lexer);
-static bool ps_lexer_read_char_value_hash(ps_lexer *lexer);
 
 #define ADVANCE()                                                                                                      \
     if (!ps_lexer_read_next_char(lexer))                                                                               \
@@ -390,57 +387,6 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
-static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
-{
-    ps_token token = {0};
-    size_t pos = 0;
-    char c = ps_buffer_peek_char(lexer->buffer);
-    do
-    {
-        switch (c)
-        {
-        case '\'':
-            if (!ps_lexer_read_char_or_string_value_quote(lexer))
-                return false;
-            size_t len = strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-            if (len + pos >= PS_STRING_MAX_LEN)
-                return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-            ps_strscpy(token.value.s + pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-            break;
-        case '^':
-            if (!ps_lexer_read_char_value_caret(lexer))
-                return false;
-            CHECK_STRING_OVERFLOW
-            token.value.s[pos++] = lexer->current_token.value.c;
-            break;
-        case '#':
-            if (!ps_lexer_read_char_value_hash(lexer))
-                return false;
-            CHECK_STRING_OVERFLOW
-            token.type = token.type == PS_TOKEN_NONE ? lexer->current_token.type : token.type;
-            token.value.s[pos++] = lexer->current_token.value.c;
-            break;
-        default:
-            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected character in string value");
-        }
-        c = ps_buffer_peek_char(lexer->buffer);
-    } while (c == '\'' || c == '^' || c == '#');
-    if (pos == 1)
-    {
-        token.type = PS_TOKEN_CHAR_VALUE;
-        token.value.c = token.value.c;
-    }
-    else if (pos > 1)
-    {
-        token.value.s[pos] = '\0';
-        token.type = token.type == PS_TOKEN_NONE ? PS_TOKEN_STRING_VALUE : token.type;
-        lexer->current_token.type = token.type;
-        lexer->current_token.value = token.value;
-    }
-    return true;
-    // return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "No character or string value found");
-}
-
 /**
  * Read a single character or a string value enclosed in single quotes.
  */
@@ -564,6 +510,57 @@ static bool ps_lexer_read_char_value_hash(ps_lexer *lexer)
     lexer->current_token.value.c = (ps_char)lexer->current_token.value.u; // == .i in this case
 
     return true;
+}
+
+static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
+{
+    ps_token token = {0};
+    size_t pos = 0;
+    char c = ps_buffer_peek_char(lexer->buffer);
+    do
+    {
+        switch (c)
+        {
+        case '\'':
+            if (!ps_lexer_read_char_or_string_value_quote(lexer))
+                return false;
+            size_t len = strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+            if (len + pos >= PS_STRING_MAX_LEN)
+                return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
+            ps_strscpy(token.value.s + pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+            break;
+        case '^':
+            if (!ps_lexer_read_char_value_caret(lexer))
+                return false;
+            CHECK_STRING_OVERFLOW
+            token.value.s[pos++] = lexer->current_token.value.c;
+            break;
+        case '#':
+            if (!ps_lexer_read_char_value_hash(lexer))
+                return false;
+            CHECK_STRING_OVERFLOW
+            token.type = token.type == PS_TOKEN_NONE ? lexer->current_token.type : token.type;
+            token.value.s[pos++] = lexer->current_token.value.c;
+            break;
+        default:
+            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected character in string value");
+        }
+        c = ps_buffer_peek_char(lexer->buffer);
+    } while (c == '\'' || c == '^' || c == '#');
+    if (pos == 1)
+    {
+        token.type = PS_TOKEN_CHAR_VALUE;
+        token.value.c = token.value.c;
+    }
+    else if (pos > 1)
+    {
+        token.value.s[pos] = '\0';
+        token.type = token.type == PS_TOKEN_NONE ? PS_TOKEN_STRING_VALUE : token.type;
+        lexer->current_token.type = token.type;
+        lexer->current_token.value = token.value;
+    }
+    return true;
+    // return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "No character or string value found");
 }
 
 static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_char)

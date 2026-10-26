@@ -69,7 +69,7 @@ bool debug = false;
 bool dump_buffer = false;
 bool dump_symbols = false;
 bool exec = true;
-bool memory = false;
+bool dump_memory = false;
 bool trace = false;
 bool verbose = false;
 
@@ -142,7 +142,7 @@ int get_options(int argc, char *argv[])
             arg++;
             break;
         case 'm':
-            memory = true;
+            dump_memory = true;
             arg++;
             break;
         case 'n':
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     {
         banner(stdout);
         fprintf(stderr, "Runtime options:\n");
-        fprintf(stderr, " - boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
+        fprintf(stderr, " - Boolean evaluation: $B%c (*FUTURE*)\n", bool_eval ? '+' : '-');
         fprintf(stderr, " - IO check          : $I%c (*FUTURE*)\n", io_check ? '+' : '-');
         fprintf(stderr, " - Range check       : $R%c\n", range_check ? '+' : '-');
         fprintf(stderr, "Current working directory: %s\n", current_path);
@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
     system_block = (ps_ast_block *)ps_ast_free_block(system_block);
     string_heap = ps_string_heap_free(string_heap);
 
-    if (memory)
+    if (dump_memory)
         ps_memory_debug(stderr);
 
     fprintf(stderr, "%s\n", ok ? "SUCCESS!" : "FAILURE!");
