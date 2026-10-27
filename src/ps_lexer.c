@@ -632,7 +632,7 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     } while (c == '\'' || c == '^' || c == '#');
-    if (pos == 0)
+    if (pos == 0 && token.type == PS_TOKEN_CHAR_VALUE)
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected empty char or string");
     if (pos > 1)
     {

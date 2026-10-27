@@ -6,6 +6,7 @@
 Program StringsHashControl;
 
 Const
+  EMPTY = ''; // <== FAILS!
   HELLO = 'Hello, world!';
   QUOTE = '''';
   // Control characters
