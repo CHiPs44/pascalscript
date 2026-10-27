@@ -6,6 +6,7 @@
 Program StringsHashControl;
 
 Const
+  HELLO = 'Hello, world!';
   QUOTE = '''';
   // Control characters
   BEL = #7;
@@ -28,13 +29,13 @@ Const
   K9 = #39 'Dog' #39;
 
 Begin
-  WriteLn(QUOTE, K1, QUOTE, ' => #', Ord(K1));
-  WriteLn(QUOTE, K2, QUOTE, ' => #', Ord(K2));
-  WriteLn(QUOTE, K3, QUOTE, ' => #', Ord(K3));
-  WriteLn(QUOTE, K4, QUOTE, ' => #', Ord(K4));
-  WriteLn(QUOTE, K5, QUOTE, ' => #', Ord(K5));
-  WriteLn(QUOTE, K6, QUOTE, ' => #', Ord(K6));
-  WriteLn(QUOTE, K7, QUOTE);
-  WriteLn(QUOTE, K8, QUOTE);
-  WriteLn(QUOTE, K9, QUOTE);
+  WriteLn('K1: ', QUOTE, K1, QUOTE, ' => #', Ord(K1));
+  WriteLn('K2: ', QUOTE, K2, QUOTE, ' => #', Ord(K2));
+  WriteLn('K3: ', QUOTE, K3, QUOTE, ' => #', Ord(K3));
+  WriteLn('K4: ', QUOTE, K4, QUOTE, ' => #', Ord(K4));
+  WriteLn('K5: ', QUOTE, K5, QUOTE, ' => #', Ord(K5));
+  WriteLn('K6: ', QUOTE, K6, QUOTE, ' => #', Ord(K6));
+  WriteLn('K7: ', QUOTE, K7, QUOTE);
+  WriteLn('K8: ', QUOTE, K8, QUOTE);
+  WriteLn('K9: ', QUOTE, K9, QUOTE);
 End.
