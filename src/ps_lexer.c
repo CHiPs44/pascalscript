@@ -599,6 +599,9 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         token->value.s[(*pos)++] = lexer->current_token.value.c;
         return true;
     }
+
+    // Should not happen
+    return false;
 }
 
 static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)

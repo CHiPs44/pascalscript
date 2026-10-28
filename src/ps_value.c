@@ -148,6 +148,17 @@ bool ps_value_is_real(const ps_value *value)
     return false;
 }
 
+bool ps_value_is_char(const ps_value *value)
+{
+    if (ps_value_is_valid(value))
+    {
+        ps_value_type type = value->type->value->data.t->type;
+        if (type == PS_TYPE_CHAR)
+            return true;
+    }
+    return false;
+}
+
 bool ps_value_is_string(const ps_value *value)
 {
     if (ps_value_is_valid(value))

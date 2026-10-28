@@ -788,17 +788,27 @@ ps_error ps_function_logn(ps_interpreter *interpreter, const ps_value *base, con
 
 ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    if (!ps_value_is_string(value))
+    ps_string_len len = 0;
+    if (ps_value_is_char(value))
+    {
+        len = 1;
+    }
+    else if (ps_value_is_string(value))
+    {
+        len = value->data.s->len;
+    }
+    else
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
                                                      "Length: String expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_unsigned;
-    result->data.u = value->data.s->len;
+    result->data.u = len;
     return PS_ERROR_NONE;
 }
 
 ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    // TODO accept CHAR value
     if (!ps_value_is_string(value))
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
                                                      "LowerCase: String expected, got %s",
@@ -818,6 +828,7 @@ ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *valu
 
 ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
+    // TODO accept CHAR value
     if (!ps_value_is_string(value))
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
                                                      "UpperCase: String expected, got %s",
@@ -841,7 +852,7 @@ ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *valu
 
 ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value *value, ps_value *result) // NOSONAR
 {
-    // NB: interprter & value parameters are not used
+    // NB: interpreter & value parameters are not used
     ((void)(interpreter));
     ((void)value);
     result->type = &ps_system_unsigned;

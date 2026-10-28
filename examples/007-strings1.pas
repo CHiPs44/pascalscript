@@ -26,6 +26,7 @@ Begin
     WriteLn('Hello: ''', 'Hello, world!', '''');
     WriteLn('Quote: ''', QUOTE_CHAR, '''');
     WriteLn('Z    : ''', Z_CHAR, '''');
+    WriteLn('Len  : ', Length(Z_CHAR));
     WriteLn('K    : ''', K, '''');
     WriteLn('Empty: ''', EMPTY_STRING, '''');
     WriteLn('Zero : ''', HELLO_WORLD_0, '''');
