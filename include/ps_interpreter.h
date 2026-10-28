@@ -31,18 +31,18 @@ extern "C"
     /** @brief Interpreter instance: all the glue to run a Pascal program */
     typedef struct s_ps_interpreter
     {
-        ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions   */
-        ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)        */
-        ps_frame_stack *stack;       /** @brief Stack to hold frames for variable values                         */
-        char message[128];           /** @brief Explanatory error message                                        */
-        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...     */
-        ps_error error;              /** @brief Current error PS_ERROR_XXX                                       */
-        ps_logger *logger;           /** @brief Logger for error and debug messages                              */
-        uint16_t error_line;         /** @brief Line number of error                                             */
-        uint16_t error_column;       /** @brief Column number of error                                           */
-        bool range_check;            /** @brief Range checking for integer and real values                       */
-        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation $B+ evaluate all terms */
-        bool io_check;               /** @brief *FUTURE* Stop or set IOResult on I/O error                       */
+        ps_ast_block *system;        /** @brief Built-in types, constants, variables, procedures and functions    */
+        ps_string_heap *string_heap; /** @brief String heap to hold string constants (filled by compiler)         */
+        ps_frame_stack *stack;       /** @brief Stack to hold frames for variable values                          */
+        char message[128];           /** @brief Explanatory error message                                         */
+        uint16_t level;              /** @brief Current environment index : 0 for system, 1 for program, ...      */
+        ps_error error;              /** @brief Current error PS_ERROR_XXX                                        */
+        ps_logger *logger;           /** @brief Logger for error and debug messages                               */
+        uint16_t error_line;         /** @brief Line number of error                                              */
+        uint16_t error_column;       /** @brief Column number of error                                            */
+        bool range_check;            /** @brief Range checking for integer and real values $R+                    */
+        bool bool_eval;              /** @brief *FUTURE* Short circuit boolean evaluation  $B+ evaluate all terms */
+        bool io_check;               /** @brief *FUTURE* Halt or set IOResult on I/O error $I+                    */
     } ps_interpreter;
 
 #define PS_INTERPRETER_SIZEOF sizeof(ps_interpreter)

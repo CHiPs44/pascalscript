@@ -17,6 +17,10 @@ Const
   FF = #12;
   CR = #13;
   ESC = #27;
+  CRLF = #13#10;
+  SGR_RESET = #$1b '[0m';
+  SGR_BOLD  = #$1b '[1m';
+  SGR_REVERSE = #$1b '[7m';
   // Test characters
   K1 = LF;
   K2 = #65;        // 'A'
@@ -35,6 +39,9 @@ Const
   K13 = #$41 'BC';      // Numeric code followed by text
 
 Begin
+  WriteLn('CRLF: ', Length(CRLF));
+  WriteLn(SGR_BOLD, 'BOLD', SGR_RESET);
+  WriteLn(SGR_REVERSE, '         ', LF, ' REVERSE ', LF, '         ', SGR_RESET);
   WriteLn('K1: ', QUOTE, K1, QUOTE, ' => #', Ord(K1));
   WriteLn('K2: ', QUOTE, K2, QUOTE, ' => #', Ord(K2));
   WriteLn('K3: ', QUOTE, K3, QUOTE, ' => #', Ord(K3));

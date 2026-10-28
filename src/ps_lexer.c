@@ -540,15 +540,14 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
             *pos = 2;
             return true;
         }
-
         // C + S => S
         token->type = PS_TOKEN_STRING_VALUE;
         token->value.s[0] = token->value.c;
         size_t len = strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
         if (len + *pos > PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-        ps_strscpy(token->value.s + *pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-        *pos += len;
+        ps_strscpy(token->value.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+        *pos += 1 + len;
         return true;
     }
     if (lexer->current_token.type == PS_TOKEN_CHAR_VALUE)
@@ -575,6 +574,23 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
     if (c == '#' && !ps_lexer_read_char_value_hash(lexer))
         return false;
 
+    if (token->type == PS_TOKEN_NONE)
+    {
+        token->type = PS_TOKEN_CHAR_VALUE;
+        token->value = lexer->current_token.value;
+        *pos = 1;
+        return true;
+    }
+
+    if (token->type == PS_TOKEN_CHAR_VALUE)
+    {
+        token->type = PS_TOKEN_STRING_VALUE;
+        token->value.s[0] = token->value.c;
+        token->value.s[1] = lexer->current_token.value.c;
+        *pos = 2;
+        return true;
+    }
+
     if (token->type == PS_TOKEN_STRING_VALUE)
     {
         // S + C => S
@@ -583,10 +599,6 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         token->value.s[(*pos)++] = lexer->current_token.value.c;
         return true;
     }
-    token->type = PS_TOKEN_CHAR_VALUE;
-    token->value = lexer->current_token.value;
-    *pos = 1;
-    return true;
 }
 
 static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
@@ -594,8 +606,6 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
     ps_token token = {.type = PS_TOKEN_NONE, .value = {.c = '\0'}};
     int pos = 0;
     char c = ps_buffer_peek_char(lexer->buffer);
-
-    //
     do
     {
         if (c == '\'')
@@ -620,15 +630,11 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     } while (c == '\'' || c == '^' || c == '#');
-
-    if (pos == 0 && token.type == PS_TOKEN_CHAR_VALUE)
-        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected empty char or string");
     if (pos > 1)
     {
         token.type = PS_TOKEN_STRING_VALUE;
         token.value.s[pos] = '\0';
     }
-
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
     return true;

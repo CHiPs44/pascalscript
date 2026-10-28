@@ -2,7 +2,7 @@
 
 This document lists the symbols currently added to the runtime system block by `ps_system_alloc()`. Pascal identifiers are case-insensitive; names below are shown in Pascal style.
 
-Note:
+Definitions:
 
 - `Number` stands for `Integer`, `Unsigned` or `Real`
 - `Ordinal` stands for `Integer`, `Unsigned`, `Char`, `Boolean`, `Subrange` or `Enum`
