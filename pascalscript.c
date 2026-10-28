@@ -41,6 +41,7 @@
 // #define DEBUG_SOURCE "examples/013-typedef1.pas"
 // #define DEBUG_SOURCE "examples/015-function-in-writeln.pas"
 // #define DEBUG_SOURCE "examples/016-writestr.pas"
+#define DEBUG_SOURCE "examples/017-strings-hash-control.pas"
 // #define DEBUG_SOURCE "examples/021-repeat-until.pas"
 // #define DEBUG_SOURCE "examples/024-for-do.pas"
 // #define DEBUG_SOURCE "examples/030-array0.pas"
@@ -56,7 +57,6 @@
 // #define DEBUG_SOURCE "examples/220-procedure2.pas"
 // #define DEBUG_SOURCE "examples/230-procedure3.pas"
 // #define DEBUG_SOURCE "examples/301-function1.pas"
-#define DEBUG_SOURCE "examples/900-strings-hash-control.pas"
 
 // Runtime options
 bool bool_eval = false;
