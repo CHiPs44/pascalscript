@@ -37,6 +37,7 @@ Const
   K11 = #127;         // DEL
   K12 = 'It''s Pascal'; // Doubled quote
   K13 = #$41 'BC';      // Numeric code followed by text
+  K14 = #65 'bc' #68;   // AbcD
 
 Begin
   WriteLn('CRLF: ', Length(CRLF));
@@ -55,4 +56,5 @@ Begin
   WriteLn('K11: ', QUOTE, K11, QUOTE, ' => #', Ord(K11));
   WriteLn('K12: ', QUOTE, K12, QUOTE);
   WriteLn('K13: ', QUOTE, K13, QUOTE);
+  WriteLn('K14: ', QUOTE, K14, QUOTE);
 End.

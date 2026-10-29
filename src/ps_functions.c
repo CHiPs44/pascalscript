@@ -799,7 +799,7 @@ ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, 
     }
     else
         return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
-                                                     "Length: String expected, got %s",
+                                                     "Length: String or Char expected, got %s",
                                                      ps_type_definition_get_name(value->type->value->data.t));
     result->type = &ps_system_unsigned;
     result->data.u = len;
@@ -808,62 +808,56 @@ ps_error ps_function_length(ps_interpreter *interpreter, const ps_value *value, 
 
 ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    ps_string *s = NULL;
     if (ps_value_is_char(value))
     {
-        ps_string s1 = {.max = 1, .len = 1, .str = {0}};
-        s1.str[0] = value->data.c;
-        s1.str[1] = '\0';
-        s = ps_string_lowercase(&s1);
+        result->type = &ps_system_char;
+        result->data.c = value->data.c >= 'a' && value->data.c <= 'z' ? value->data.c + 'A' - 'a' : value->data.c;
+        return PS_ERROR_NONE;
     }
     else if (ps_value_is_string(value))
     {
-        s = ps_string_lowercase(value->data.s);
+        ps_string *s = ps_string_lowercase(value->data.s);
+        if (s == NULL)
+            return PS_ERROR_OUT_OF_MEMORY;
+        result->data.s = ps_string_heap_add(interpreter->string_heap, s);
+        if (result->data.s == NULL)
+        {
+            s = ps_string_free(s);
+            return PS_ERROR_OUT_OF_MEMORY;
+        }
+        result->type = &ps_system_string;
+        return PS_ERROR_NONE;
     }
-    else
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
-                                                     "LowerCase: Char or String expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->data.t));
-    if (s == NULL)
-        return PS_ERROR_OUT_OF_MEMORY;
-    result->data.s = ps_string_heap_add(interpreter->string_heap, s);
-    if (result->data.s == NULL)
-    {
-        s = ps_string_free(s);
-        return PS_ERROR_OUT_OF_MEMORY;
-    }
-    result->type = &ps_system_string;
-    return PS_ERROR_NONE;
+    return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
+                                                 "LowerCase: String or Char expected, got %s",
+                                                 ps_type_definition_get_name(value->type->value->data.t));
 }
 
 ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
 {
-    ps_string *s = NULL;
     if (ps_value_is_char(value))
     {
-        ps_string s1 = {.max = 1, .len = 1, .str = {0}};
-        s1.str[0] = value->data.c;
-        s1.str[1] = '\0';
-        s = ps_string_uppercase(&s1);
+        result->type = &ps_system_char;
+        result->data.c = value->data.c >= 'A' && value->data.c <= 'Z' ? value->data.c - 'A' + 'a' : value->data.c;
+        return PS_ERROR_NONE;
     }
     else if (ps_value_is_string(value))
     {
-        s = ps_string_uppercase(value->data.s);
+        ps_string *s = ps_string_uppercase(value->data.s);
+        if (s == NULL)
+            return PS_ERROR_OUT_OF_MEMORY;
+        result->data.s = ps_string_heap_add(interpreter->string_heap, s);
+        if (result->data.s == NULL)
+        {
+            s = ps_string_free(s);
+            return PS_ERROR_OUT_OF_MEMORY;
+        }
+        result->type = &ps_system_string;
+        return PS_ERROR_NONE;
     }
-    else
-        return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
-                                                     "UpperCase: Char or String expected, got %s",
-                                                     ps_type_definition_get_name(value->type->value->data.t));
-    if (s == NULL)
-        return PS_ERROR_OUT_OF_MEMORY;
-    result->data.s = ps_string_heap_add(interpreter->string_heap, s);
-    if (result->data.s == NULL)
-    {
-        s = ps_string_free(s);
-        return PS_ERROR_OUT_OF_MEMORY;
-    }
-    result->type = &ps_system_string;
-    return PS_ERROR_NONE;
+    return ps_function_return_error_with_message(interpreter, PS_ERROR_EXPECTED_STRING,
+                                                 "UpperCase: String or Char expected, got %s",
+                                                 ps_type_definition_get_name(value->type->value->data.t));
 }
 
 /******************************************************************************/

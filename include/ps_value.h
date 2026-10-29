@@ -58,7 +58,7 @@ extern "C"
     bool ps_value_is_boolean(const ps_value *value);
     /** @brief Is Real? */
     bool ps_value_is_real(const ps_value *value);
-    /** @brief Is Char? */
+    /** @brief Is Char or Char subrange? */
     bool ps_value_is_char(const ps_value *value);
     /** @brief Is String? */
     bool ps_value_is_string(const ps_value *value);

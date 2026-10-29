@@ -153,7 +153,8 @@ bool ps_value_is_char(const ps_value *value)
     if (ps_value_is_valid(value))
     {
         ps_value_type type = value->type->value->data.t->type;
-        if (type == PS_TYPE_CHAR)
+        ps_value_type base = value->type->value->data.t->base;
+        if (type == PS_TYPE_CHAR || (type == PS_TYPE_ENUM && base == PS_TYPE_CHAR))
             return true;
     }
     return false;

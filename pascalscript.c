@@ -32,7 +32,7 @@
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/003-hello2.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
-#define DEBUG_SOURCE "examples/007-strings1.pas"
+// #define DEBUG_SOURCE "examples/007-strings1.pas"
 // #define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/009-operators.pas"
 // #define DEBUG_SOURCE "examples/010-enum1.pas"
@@ -90,22 +90,26 @@ void usage(FILE *out, char *program_name)
 {
     banner(out);
     fprintf(out, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
-    fprintf(out, "Runtime options:\n");
-    fprintf(out, "  -b : flips short circuit boolean evaluation (default: false, {$B})\n");
-    fprintf(out, "  -i : flips I/O error checking (default: true, ${I})\n");
-    fprintf(out, "  -r : flips range checking (default: true, {$R})\n");
-    fprintf(out, "Other options:\n");
-    fprintf(out, "  -a : launch AST tests\n");
-    fprintf(out, "  -c : display configuration and exit\n");
-    fprintf(out, "  -d : debug (more verbose trace)\n");
-    fprintf(out, "  -h : display this help message and exit\n");
-    fprintf(out, "  -m : display memory usage at end\n");
-    fprintf(out, "  -n : do not execute program, just parse source code\n");
-    fprintf(out, "  -s : dump symbols at initialization and termination\n");
-    fprintf(out, "  -t : trace execution\n");
-    fprintf(out, "  -u : dump source buffer after loading\n");
-    fprintf(out, "  -v : verbose (display banner and other infos)\n");
+#ifdef DEBUG_SOURCE
     fprintf(out, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUG_SOURCE);
+#else
+    fprintf(out, "  program_file : path to the Pascal source file to run\n");
+#endif
+    fprintf(out, "Runtime options:\n");
+    fprintf(out, " -b : flips short circuit boolean evaluation (default: false, {$B-})\n");
+    fprintf(out, " -i : flips I/O error checking (default: true, ${I+})\n");
+    fprintf(out, " -r : flips range checking (default: true, {$R+})\n");
+    fprintf(out, "Other options:\n");
+    fprintf(out, " -a : launch AST tests\n");
+    fprintf(out, " -c : display configuration and exit\n");
+    fprintf(out, " -d : debug (more verbose trace)\n");
+    fprintf(out, " -h : display this help message and exit\n");
+    fprintf(out, " -m : display memory usage at end\n");
+    fprintf(out, " -n : do not execute program, just parse source code\n");
+    fprintf(out, " -s : dump symbols at initialization and termination\n");
+    fprintf(out, " -t : trace execution\n");
+    fprintf(out, " -u : dump source buffer after loading\n");
+    fprintf(out, " -v : verbose (display banner and other infos)\n");
 }
 
 int get_options(int argc, char *argv[])
@@ -291,23 +295,22 @@ int main(int argc, char *argv[])
     }
     else
     {
+#ifdef DEBUG_SOURCE
         program_file = DEBUG_SOURCE;
-        if (program_file != NULL)
+        char self[128] = {0};
+        ssize_t nchar = readlink("/proc/self/exe", self, sizeof(self));
+        if (nchar < 0 || nchar >= (int)sizeof(self))
         {
-            char self[128] = {0};
-            ssize_t nchar = readlink("/proc/self/exe", self, sizeof(self));
-            if (nchar < 0 || nchar >= (int)sizeof(self))
-            {
-                fprintf(stderr, "/proc/self/exe readlink : %s\n", self);
-                exit(EXIT_FAILURE);
-            }
-            char *separator = strrchr(self, '/');
-            if (separator != NULL)
-                *separator = '\0';
-            snprintf(source_file, sizeof(source_file), "%s/../%s", /*executable_path*/ self, program_file);
+            fprintf(stderr, "/proc/self/exe readlink : %s\n", self);
+            exit(EXIT_FAILURE);
         }
-        else
-            source_file[0] = '\0';
+        char *separator = strrchr(self, '/');
+        if (separator != NULL)
+            *separator = '\0';
+        snprintf(source_file, sizeof(source_file), "%s/../%s", /*executable_path*/ self, program_file);
+#else
+        source_file[0] = '\0';
+#endif
     }
     if (source_file[0] == '\0')
     {

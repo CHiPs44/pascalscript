@@ -92,8 +92,11 @@ Note:
 
 | Definition                     | Use                                     |
 | ------------------------------ | --------------------------------------- |
+| `Length(C: Char): Unsigned`    | Returns `1`                             |
 | `Length(S: String): Unsigned`  | Returns the number of characters in `S` |
+| `LowerCase(C: Char): Char`     | Returns lowercase of `C`                |
 | `LowerCase(S: String): String` | Returns a lowercase copy of `S`         |
+| `UpperCase(C: Char): Char`     | Returns uppercase of `C`                |
 | `UpperCase(S: String): String` | Returns an uppercase copy of `S`        |
 
 ## Conversion

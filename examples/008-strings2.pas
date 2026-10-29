@@ -9,6 +9,7 @@ Const
     HelloWorld = 'Hello, World!';
 
 Var
+    C: Char;
     s1, s2, s3, s4: String;
     I: Integer;
 
@@ -32,8 +33,10 @@ Begin
     WriteLn('Length(''', s2, ''') = ', Length(s2));
     WriteLn('LowerCase(''', s2, ''') = ', LowerCase(s2));
     WriteLn('UpperCase(''', s1, ''') = ', UpperCase(s1));
-    WriteLn('LowerCase(''A'') = ', LowerCase('A'));
-    WriteLn('UpperCase(''a'') = ', UpperCase('a'));
+    C := LowerCase('A');
+    WriteLn('LowerCase(''A'') = ', C);
+    C := UpperCase('a');
+    WriteLn('UpperCase(''a'') = ', C);
     // *FUTURE*
     // WriteLn('Pos(''lo'', s1) = ', Pos('lo', s1));
     // WriteLn('Pos(''lo'', s2) = ', Pos('lo', s2));
