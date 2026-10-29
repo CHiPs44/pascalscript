@@ -40,7 +40,7 @@ ps_symbol *ps_symbol_free(ps_symbol *symbol)
     if (symbol != NULL && symbol->allocated)
     {
         // variables contain handles, not real values
-        if (symbol->kind == PS_SYMBOL_KIND_VARIABLE && symbol->value != NULL)
+        if (symbol->kind == PS_SYMBOL_KIND_VARIABLE && symbol->value != NULL && symbol->value->allocated)
             ps_memory_free(PS_MEMORY_VALUE, symbol->value);
         else if (symbol->value != NULL)
             symbol->value = ps_value_free(symbol->value);
