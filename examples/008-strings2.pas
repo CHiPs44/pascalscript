@@ -30,8 +30,10 @@ Begin
     WriteLn('s4 = ', s4);
     WriteLn('Length(''', s1, ''') = ', Length(s1));
     WriteLn('Length(''', s2, ''') = ', Length(s2));
-    WriteLn('UpperCase(''', s1, ''') = ', UpperCase(s1));
     WriteLn('LowerCase(''', s2, ''') = ', LowerCase(s2));
+    WriteLn('UpperCase(''', s1, ''') = ', UpperCase(s1));
+    WriteLn('LowerCase(''A'') = ', LowerCase('A'));
+    WriteLn('UpperCase(''a'') = ', UpperCase('a'));
     // *FUTURE*
     // WriteLn('Pos(''lo'', s1) = ', Pos('lo', s1));
     // WriteLn('Pos(''lo'', s2) = ', Pos('lo', s2));
