@@ -28,7 +28,7 @@ extern "C"
         PS_TYPE_DEFINITION, /** @brief [T]ype definition                               */
         PS_TYPE_EXECUTABLE, /** @brief [X] eXecutable: procedure or function           */
         PS_TYPE_SUBRANGE,   /** @brief [G] subranGe                                    */
-        PS_TYPE_ENUM,       /** @brief [E]numerarion                                   */
+        PS_TYPE_ENUM,       /** @brief [E]numeration                                   */
         PS_TYPE_ARRAY,      /** @brief [A]rray                               *FUTURE*  */
         PS_TYPE_SET,        /** @brief [Z] Set                               *FUTURE*  */
         PS_TYPE_POINTER,    /** @brief [P]ointer                             *FUTURE*  */
