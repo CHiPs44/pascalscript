@@ -98,7 +98,7 @@ bool ps_procedure_inc(ps_interpreter *interpreter, ps_symbol *variable)
 }
 
 /**
- * Execute system procedure Randomize / Randomise(Seed)
+ * Execute system procedure Randomize / Randomize(Seed)
  */
 bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
 {
