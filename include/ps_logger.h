@@ -7,6 +7,7 @@
 #ifndef _PS_LOGGER_H
 #define _PS_LOGGER_H
 
+#include <stdint.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -14,7 +15,7 @@ extern "C"
 {
 #endif
 
-    typedef enum e_ps_debug_level
+    typedef enum e_ps_debug_level : uint8_t
     {
         PS_DEBUG_FATAL = 0,
         PS_DEBUG_CRITICAL,
@@ -24,7 +25,7 @@ extern "C"
         PS_DEBUG_DEBUG,
         PS_DEBUG_TRACE,
         PS_DEBUG_VERBOSE,
-    } __attribute__((__packed__)) ps_debug_level;
+    } /*__attribute__((__packed__))*/ ps_debug_level;
 
     typedef struct s_ps_logger
     {

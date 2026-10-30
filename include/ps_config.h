@@ -105,6 +105,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
+#define PS_REAL_PI 3.14159265f
 #define PS_REAL_FMT "G"
 #define PS_REAL_FMT_WP "f"
 #endif
@@ -114,6 +115,7 @@ extern "C"
 #define PS_REAL_MIN FLT_MIN
 #define PS_REAL_MAX FLT_MAX
 #define PS_REAL_EPSILON FLT_EPSILON
+#define PS_REAL_PI 3.14159265f
 #define PS_REAL_FMT "G"
 #define PS_REAL_FMT_WP "f"
 #endif
@@ -123,6 +125,7 @@ extern "C"
 #define PS_REAL_MIN DBL_MIN
 #define PS_REAL_MAX DBL_MAX
 #define PS_REAL_EPSILON DBL_EPSILON
+#define PS_REAL_PI 3.14159265358979323846
 #define PS_REAL_FMT "lG"
 #define PS_REAL_FMT_WP "d"
 #endif

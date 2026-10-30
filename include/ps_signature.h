@@ -24,7 +24,7 @@ extern "C"
         ps_identifier name; /** @brief parameter name                                  */
         ps_symbol *type;    /** @brief parameter type                                  */
         bool byref : 1;     /** @brief true if parameter has to be passed by reference */
-    } __attribute__((__packed__)) ps_formal_parameter;
+    } ps_formal_parameter;
 
     typedef struct s_ps_formal_signature
     {
@@ -32,7 +32,7 @@ extern "C"
         uint8_t parameter_count; /** @brief Parameter count               */
         uint8_t size;            /** @brief size can be bigger than count */
         ps_formal_parameter *parameters;
-    } __attribute__((__packed__)) ps_formal_signature;
+    } ps_formal_signature;
 
 #define PS_FORMAL_PARAMETER_SIZE sizeof(ps_formal_parameter)
 #define PS_FORMAL_SIGNATURE_SIZE sizeof(ps_formal_signature)

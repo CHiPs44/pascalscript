@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 # Allow users to specify compiler (gcc or clang)
 # Usage: cmake -DCMAKE_C_COMPILER=gcc .. or cmake -DCMAKE_C_COMPILER=clang ..
@@ -13,20 +13,24 @@ endif()
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -O3")
-# set(CMAKE_C_FLAGS "-m32 -Wall -Wextra -Wpedantic -g -O0")
-set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -g")
+set(CMAKE_C_EXTENSIONS OFF)
 
-set(PS_VERSION_MAJOR 0)
-set(PS_VERSION_MINOR 1)
-set(PS_VERSION_PATCH 2)
-set(PS_VERSION_BUILD 3)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PS_VERSION_STRING LIMIT_COUNT 1)
+string(STRIP "${PS_VERSION_STRING}" PS_VERSION_STRING)
+if(NOT PS_VERSION_STRING MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
+    message(FATAL_ERROR "VERSION must contain four numeric components, e.g. 0.1.2.3")
+endif()
+set(PS_VERSION_MAJOR "${CMAKE_MATCH_1}")
+set(PS_VERSION_MINOR "${CMAKE_MATCH_2}")
+set(PS_VERSION_PATCH "${CMAKE_MATCH_3}")
+set(PS_VERSION_BUILD "${CMAKE_MATCH_4}")
 
 project(pascalscript VERSION ${PS_VERSION_MAJOR}.${PS_VERSION_MINOR}.${PS_VERSION_PATCH}.${PS_VERSION_BUILD} LANGUAGES C)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/ps_version.h)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 

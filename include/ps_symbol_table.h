@@ -41,7 +41,7 @@ extern "C"
         int bucket_more;      /** @brief bucket realloc increment        */
         int used_buckets;     /** @brief count of used buckets           */
         ps_bucket *buckets[]; /** @brief buckets in the table (VLA)      */
-    } __attribute__((__packed__)) ps_symbol_table;
+    } ps_symbol_table;
 
 #define PS_SYMBOL_TABLE_SIZEOF sizeof(ps_symbol_table)
 

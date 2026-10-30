@@ -99,21 +99,33 @@ On 2025-10-19, using GCC optimization `-O3`, execution times reduced considerabl
 
 On 2026-08-02, using GCC optimization `-O3` and AST based interpreter, execution times are back to previous values.
 
-For 100,000 iterations, see `examples/13-big-loops.[pas|lua|py]`¹:
+For **100,000** iterations¹:
 
 | Interpreter               |     For |    While |  Repeat² |
 | ------------------------- | ------: | -------: | -------: |
 | PascalScript (2025-09-19) |  121 ms |   407 ms |   344 ms |
 | PascalScript (2025-10-19) |   66 ms |   266 ms |   232 ms |
 | PascalScript (2026-08-02) |  134 ms |   263 ms |   239 ms |
-| Lua 5.4.6                 | 0.37 ms |  0.85 ms |  0.92 ms |
+| Lua 5.4.6³                | 0.37 ms |  0.85 ms |  0.92 ms |
 | Python 3.12.3             | 4.87 ms | 15.27 ms | 12.27 ms |
 
 There are big differences between `For` and `Repeat` / `While` loops for each language, and Lua runs much faster.
 
 ¹ on my Lenovo Thinkpad P70 / Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz with Ubuntu 24.04 LTS and GCC 13.3.0
 
-² simulated with `while` for Python
+² simulated with `while` for Python, see [examples/130-big-loops.py](examples/130-big-loops.py)
+
+3 see [examples/130-big-loops.lua](examples/130-big-loops.lua)
+
+On 2O26-10-30, after migration to Ubuntu 26.04, for **1,000,000** iterations:
+
+| Interpreter               |       For |     While |   Repeat² |
+| ------------------------- | --------: | --------: | --------: |
+| PascalScript (2026-10-30) |    108 ms |    168 ms |    151 ms |
+| Lua 5.4.8                 |   4.46 ms |   9.62 ms |  14.22 ms |
+| Python 3.14.4             | 424.30 ms | 871.84 ms | 620.38 ms |
+
+Lua keeps its blazing speed, Python now lags behind, and PascalScript is comparable to
 
 ## Memory checking
 
@@ -129,7 +141,7 @@ CTest reports Valgrind errors as failed tests. If Valgrind is not found during c
 
 ## Introduction
 
-`PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C17](<https://en.wikipedia.org/wiki/C17_(C_standard_revision)>)), with an handmade lexer and parser.
+`PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C23](<https://en.wikipedia.org/wiki/C23_(C_standard_revision)>)), with an handmade lexer and parser.
 
 First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
 

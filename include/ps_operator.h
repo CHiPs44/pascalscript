@@ -22,18 +22,18 @@ extern "C"
     typedef struct s_ps_interpreter ps_interpreter;
 
     /** @brief Unary operators */
-    typedef enum e_ps_operator_unary
+    typedef enum e_ps_operator_unary : uint16_t
     {
         PS_OP_UNARY_INVALID = 0,
         PS_OP_POS, // +
         PS_OP_NEG, // -
         PS_OP_NOT,
-        // force 16 bits size
-        PS_OP_UNARY_MAX = 0xffff
-    } __attribute__((__packed__)) ps_operator_unary;
+        // // force 16 bits size
+        // PS_OP_UNARY_MAX = 0xffff
+    } /*__attribute__((__packed__))*/ ps_operator_unary;
 
     /** @brief Binary operators */
-    typedef enum e_ps_operator_binary
+    typedef enum e_ps_operator_binary : uint16_t
     {
         PS_OP_BINARY_INVALID = 0,
         // additive / terms
@@ -56,9 +56,9 @@ extern "C"
         PS_OP_LE,
         PS_OP_LT,
         PS_OP_NE,
-        // force 16 bits size
-        PS_OP_BINARY_MAX = 0xffff
-    } __attribute__((__packed__)) ps_operator_binary;
+        // // force 16 bits size
+        // PS_OP_BINARY_MAX = 0xffff
+    } /*__attribute__((__packed__))*/ ps_operator_binary;
 
 #define PS_OP_UNARY_SIZE sizeof(ps_operator_unary)
 #define PS_OP_BINARY_SIZE sizeof(ps_operator_binary)

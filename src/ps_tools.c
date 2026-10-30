@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-ssize_t ps_strscpy(char *dest, const char *src, ssize_t size)
+bool ps_strscpy(char *dest, const char *src, size_t size)
 {
-    ssize_t i;
+    size_t i;
 
     if (size == 0)
-        return -EINVAL;
+        return false;
 
     for (i = 0; i < size - 1 && src[i] != '\0'; i++)
     {
@@ -21,5 +21,13 @@ ssize_t ps_strscpy(char *dest, const char *src, ssize_t size)
     }
     dest[i] = '\0';
 
-    return (src[i] != '\0') ? -E2BIG : i;
+    return src[i] == '\0';
+}
+
+size_t ps_strnlen(const char *s, size_t maxlen)
+{
+    size_t len = 0;
+    while (len < maxlen && s[len] != '\0')
+        ++len;
+    return len;
 }

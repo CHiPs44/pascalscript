@@ -43,7 +43,7 @@ extern "C"
         ps_string_len max;                  /** @brief max length */
         ps_string_len len;                  /** @brief actual length */
         ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
-    } __attribute__((__packed__)) ps_string;
+    } ps_string;
 
     typedef uint32_t ps_set[8]; /** @brief Set of 32 * 8 = 256 bits */
 

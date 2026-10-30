@@ -20,7 +20,7 @@ extern "C"
     typedef struct s_ps_type_definition ps_type_definition;
 
     /** @brief Only?! 8 kinds of symbols for now... */
-    typedef enum e_ps_symbol_kind
+    typedef enum e_ps_symbol_kind : uint8_t
     {
         PS_SYMBOL_KIND_AUTO,
         PS_SYMBOL_KIND_TYPE_DEFINITION,
@@ -31,7 +31,7 @@ extern "C"
         PS_SYMBOL_KIND_PROCEDURE,
         PS_SYMBOL_KIND_FUNCTION,
         // ...
-    } __attribute__((__packed__)) ps_symbol_kind;
+    } /*__attribute__((__packed__))*/ ps_symbol_kind;
 
     /** @brief Symbol is a named typed value */
     typedef struct s_ps_symbol
@@ -43,7 +43,7 @@ extern "C"
         bool allocated : 1;    /** @brief true if symbol was allocated (and must be freed)              */
         bool forward_ref : 1;  /** @brief *FUTURE* true if symbol is a forward reference                */
         uint16_t padding : 13; /** @brief align to 16 bits                                              */
-    } __attribute__((__packed__)) ps_symbol;
+    } ps_symbol;
 
 #define PS_SYMBOL_KIND_SIZE sizeof(ps_symbol_kind)
 #define PS_SYMBOL_SIZE sizeof(ps_symbol)

@@ -7,13 +7,15 @@
 #ifndef _PS_VALUE_TYPE
 #define _PS_VALUE_TYPE
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
     /** @brief Base types: */
-    typedef enum e_ps_value_type
+    typedef enum e_ps_value_type : uint8_t
     {
         PS_TYPE_UNKNOWN,    /** @brief [_] unknown or no type yet                      */
         PS_TYPE_NODE,       /** @brief [N]ode (pointer to AST node)                    */
@@ -32,7 +34,7 @@ extern "C"
         PS_TYPE_POINTER,    /** @brief [P]ointer                             *FUTURE*  */
         PS_TYPE_RECORD,     /** @brief [R]ecord                              *FUTURE*  */
         PS_TYPE_FILE,       /** @brief [F]ile                                *FUTURE*  */
-    } __attribute__((__packed__)) ps_value_type;
+    } /*__attribute__((__packed__))*/ ps_value_type;
 
 #define PS_VALUE_TYPE_SIZE sizeof(ps_value_type)
 

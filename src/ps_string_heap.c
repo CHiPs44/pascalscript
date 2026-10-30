@@ -10,6 +10,7 @@
 
 #include "ps_memory.h"
 #include "ps_string_heap.h"
+#include "ps_tools.h"
 
 bool ps_string_heap_debug = false;
 
@@ -153,7 +154,7 @@ ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
         errno = EINVAL;
         return NULL;
     }
-    size_t len = strnlen(z, PS_STRING_MAX_LEN + 1);
+    size_t len = ps_strnlen(z, PS_STRING_MAX_LEN + 1);
     if (len > PS_STRING_MAX_LEN)
     {
         errno = EINVAL;

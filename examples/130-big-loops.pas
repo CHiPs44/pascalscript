@@ -5,7 +5,7 @@
 *)
 Program Example13BigLoops;
 Const
-  MaxLoops = 100000;
+  MaxLoops = 1000000;
 Var
   I: Integer;
   Start, Finish: Unsigned;

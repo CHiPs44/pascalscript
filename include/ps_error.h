@@ -16,7 +16,7 @@ extern "C"
 {
 #endif
 
-    typedef enum e_ps_error
+    typedef enum e_ps_error : uint8_t
     {
         /* -------------------- GENERAL -------------------- */
         PS_ERROR_NONE = 0,
@@ -85,7 +85,7 @@ extern "C"
         PS_ERROR_MATH_NAN_INF,
         // ...
         PS_ERROR_MAX = UINT8_MAX
-    } __attribute__((__packed__)) ps_error;
+    } /*__attribute__((__packed__))*/ ps_error;
 
 #define PS_ERROR_SIZE sizeof(ps_error)
 

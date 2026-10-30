@@ -19,17 +19,17 @@ extern "C"
 #endif
 
     /** @brief Abstract Syntax Tree node group */
-    typedef enum e_ps_ast_node_group
+    typedef enum e_ps_ast_node_group : uint8_t
     {
         PS_AST_GROUP_UNKNOWN = 0, /** @brief Unknown node group                                                 */
         PS_AST_BLOCK,             /** @brief PROGRAM, PROCEDURE, FUNCTION, UNIT                                 */
         PS_AST_STATEMENT,         /** @brief List, IF, CASE, WHILE, REPEAT, FOR, Procedure call                 */
         PS_AST_EXPRESSION,        /** @brief Unary or binary operation, literal value, simple or array variable */
         PS_AST_GROUP_LVALUE,      /** @brief Variable assignment                                                */
-    } __attribute__((__packed__)) ps_ast_node_group;
+    } /*__attribute__((__packed__))*/ ps_ast_node_group;
 
     /** @brief Abstract Syntax Tree node kind */
-    typedef enum e_ps_ast_node_kind
+    typedef enum e_ps_ast_node_kind : uint8_t
     {
         PS_AST_KIND_UNKNOWN = 0, /** @brief Unknown node kind                                     */
         PS_AST_PROGRAM,          /** @brief BLOCK:      PROGRAM                                   */
@@ -50,7 +50,7 @@ extern "C"
         PS_AST_LITERAL_VALUE,    /** @brief EXPRESSION: Literal value: integer, real, string, ... */
         PS_AST_RVALUE,           /** @brief EXPRESSION: Variable (or constant) being accessed     */
         PS_AST_LVALUE,           /** @brief LVALUE:     Variable being written to                 */
-    } __attribute__((__packed__)) ps_ast_node_kind;
+    } /*__attribute__((__packed__))*/ ps_ast_node_kind;
 
 #define PS_AST_NODE_COMMON                                                                                             \
     ps_ast_node_group group; /** @brief 1 Node group                                                        */         \

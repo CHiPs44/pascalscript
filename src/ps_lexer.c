@@ -543,7 +543,7 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         // C + S => S
         token->type = PS_TOKEN_STRING_VALUE;
         token->value.s[0] = token->value.c;
-        size_t len = strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+        size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
         if (*pos + len > PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         ps_strscpy(token->value.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
@@ -559,7 +559,7 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         return true;
     }
     // S + S => S
-    size_t len = strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+    size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
     if (len + *pos > PS_STRING_MAX_LEN)
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
     ps_strscpy(token->value.s + *pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);

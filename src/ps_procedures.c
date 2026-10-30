@@ -191,7 +191,7 @@ bool ps_procedure_writestr(ps_interpreter *interpreter, ps_string *s, const ps_v
     if (display_value == NULL)
         return ps_interpreter_return_false(interpreter, PS_ERROR_EXPECTED_STRING);
     snprintf(buffer, sizeof(buffer), "%s%s", s->str, display_value);
-    ps_strscpy((char *)s->str, buffer, (ssize_t)s->max);
-    s->len = (ps_string_len)strnlen((char *)s->str, (size_t)s->max);
+    ps_strscpy((char *)s->str, buffer, (size_t)s->max);
+    s->len = (ps_string_len)ps_strnlen((char *)s->str, (size_t)s->max);
     return true;
 }

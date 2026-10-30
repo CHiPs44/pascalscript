@@ -30,7 +30,7 @@ extern "C"
         bool is_append : 1;       /** @brief File opened for append                           */
         bool is_text : 1;         /** @brief true if text file, false if binary or structured */
         bool is_open : 1;         /** @brief true if file is open                             */
-    } __attribute__((__packed__)) ps_file;
+    } ps_file;
 
 #define PS_FILE_SIZE sizeof(ps_file)
 

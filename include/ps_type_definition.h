@@ -38,32 +38,32 @@ extern "C"
     {
         ps_unsigned count;  /** @brief Number of items in the enumeration */
         ps_symbol **values; /** @brief TODO use a VLA - Array of symbols for each item in the enumeration */
-    } __attribute__((__packed__)) ps_type_definition_enum;
+    } ps_type_definition_enum;
 
     typedef struct s_ps_type_definition_subrange_char
     {
         ps_char min;
         ps_char max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_char;
+    } ps_type_definition_subrange_char;
 
     typedef struct s_ps_type_definition_subrange_integer
     {
         ps_integer min;
         ps_integer max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_integer;
+    } ps_type_definition_subrange_integer;
 
     typedef struct s_ps_type_definition_subrange_unsigned
     {
         ps_unsigned min;
         ps_unsigned max;
-    } __attribute__((__packed__)) ps_type_definition_subrange_unsigned;
+    } ps_type_definition_subrange_unsigned;
 
     typedef struct s_ps_type_definition_subrange_enum
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the subrange values */
         ps_unsigned min;        /** @brief Minimum value in the enumeration for the subrange      */
         ps_unsigned max;        /** @brief Maximum value in the enumeration for the subrange      */
-    } __attribute__((__packed__)) ps_type_definition_subrange_enum;
+    } ps_type_definition_subrange_enum;
 
     typedef struct s_ps_type_definition_subrange
     {
@@ -74,7 +74,7 @@ extern "C"
             ps_type_definition_subrange_unsigned u;
             ps_type_definition_subrange_enum e;
         };
-    } __attribute__((__packed__)) ps_type_definition_subrange;
+    } ps_type_definition_subrange;
 
 #define PS_TYPE_DEFINITION_SUBRANGE_SIZE sizeof(ps_type_definition_subrange)
 
@@ -91,25 +91,25 @@ extern "C"
     typedef struct s_ps_type_definition_set
     {
         ps_symbol *symbol_enum; /** @brief Symbol of the enumeration defining the set values */
-    } __attribute__((__packed__)) ps_type_definition_set;
+    } ps_type_definition_set;
 
     /** @brief Pointer type is stored in a symbol */
     typedef struct s_ps_type_definition_pointer
     {
         ps_symbol *type_def;
-    } __attribute__((__packed__)) ps_type_definition_pointer;
+    } ps_type_definition_pointer;
 
     /** @brief Type definition type stored in a symbol */
     typedef struct s_ps_type_definition_type_def
     {
         ps_symbol *type_def;
-    } __attribute__((__packed__)) ps_type_definition_type_def;
+    } ps_type_definition_type_def;
 
     /** @brief *IN PROGRESS* => maximum length only, nothing more */
     typedef struct s_ps_type_definition_string
     {
         ps_string_len max;
-    } __attribute__((__packed__)) ps_type_definition_string;
+    } ps_type_definition_string;
 
     /** @brief Array type definition: item type + dimensions + subranges */
     typedef struct s_ps_type_definition_array
@@ -117,27 +117,27 @@ extern "C"
         ps_symbol *item_type;  /** @brief type of elements, may be another array definition */
         int dimensions;        /** @brief 1 for vectors, more than 1 for arrays of arrays   */
         ps_symbol **subranges; /** @brief index range as subrange                           */
-    } __attribute__((__packed__)) ps_type_definition_array;
+    } ps_type_definition_array;
 
     /** @brief *FUTURE* */
     typedef struct s_ps_type_definition_record_field
     {
         ps_identifier name;  /** @brief field name */
         ps_symbol *type_def; /** @brief field type definition */
-    } __attribute__((__packed__)) ps_type_definition_record_field;
+    } ps_type_definition_record_field;
 
     /** @brief *FUTURE* */
     typedef struct s_ps_type_definition_record
     {
         uint8_t count;
         ps_type_definition_record_field **fields;
-    } __attribute__((__packed__)) ps_type_definition_record;
+    } ps_type_definition_record;
 
     /** @brief *FUTURE* => file type definition */
     typedef struct s_ps_type_definition_file
     {
         ps_symbol *type_def; /** @brief type definition of the file content */
-    } __attribute__((__packed__)) ps_type_definition_file;
+    } ps_type_definition_file;
 
     /** @brief Type definition: type + base + parameters if needed (simple types have type == base) */
     typedef struct s_ps_type_definition
@@ -159,7 +159,7 @@ extern "C"
             // clang-format on
         } def; /** @brief type definition */
         bool allocated; /** @brief True if this definition was allocated and must be freed */
-    } __attribute__((__packed__)) ps_type_definition;
+    } ps_type_definition;
 
 #define PS_TYPE_DEFINITION_SIZE sizeof(ps_type_definition)
 
