@@ -16,15 +16,15 @@ extern "C"
 {
 #endif
 
-/// @brief Converts a character to lowercase
-/// @param c
-/// @return The lowercase version of the character
-ps_char ps_char_lowercase(ps_char c);
+    /// @brief Converts a character to lowercase
+    /// @param c
+    /// @return The lowercase version of the character
+    ps_char ps_char_lowercase(ps_char c);
 
-/// @brief Converts a character to uppercase
-/// @param c
-/// @return The uppercase version of the character
-ps_char ps_char_uppercase(ps_char c);
+    /// @brief Converts a character to uppercase
+    /// @param c
+    /// @return The uppercase version of the character
+    ps_char ps_char_uppercase(ps_char c);
 
 #ifdef __cplusplus
 }
