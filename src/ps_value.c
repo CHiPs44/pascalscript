@@ -154,7 +154,7 @@ bool ps_value_is_char(const ps_value *value)
     {
         ps_value_type type = value->type->value->data.t->type;
         ps_value_type base = value->type->value->data.t->base;
-        if (type == PS_TYPE_CHAR || (type == PS_TYPE_ENUM && base == PS_TYPE_CHAR))
+        if (type == PS_TYPE_CHAR || (type == PS_TYPE_SUBRANGE && base == PS_TYPE_CHAR))
             return true;
     }
     return false;

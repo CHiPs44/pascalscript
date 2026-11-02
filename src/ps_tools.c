@@ -8,12 +8,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool ps_strscpy(char *dest, const char *src, size_t size)
+size_t ps_strscpy(char *dest, const char *src, size_t size)
 {
     size_t i;
 
     if (size == 0)
-        return false;
+    {
+        errno = EINVAL;
+        return 0;
+    }
 
     for (i = 0; i < size - 1 && src[i] != '\0'; i++)
     {
@@ -21,7 +24,13 @@ bool ps_strscpy(char *dest, const char *src, size_t size)
     }
     dest[i] = '\0';
 
-    return src[i] == '\0';
+    if (src[i] == '\0')
+        return i;
+    else
+    {
+        errno = E2BIG;
+        return 0; // Not enough space to copy the string
+    }
 }
 
 size_t ps_strnlen(const char *s, size_t maxlen)

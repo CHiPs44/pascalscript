@@ -36,9 +36,10 @@ Const
   // Additional edge cases
   K10 = #0;             // NUL
   K11 = #127;         // DEL
-  K12 = 'It''s Pascal'; // Doubled quote
-  K13 = #$41 'BC';      // Numeric code followed by text
+  K12 = 'It''s Pascal'; // It's Pascal
+  K13 = #$41 'BC';      // ABC
   K14 = #65 'bc' #68;   // AbcD
+  K14 = 'bc' #68;       // bcD
 
 Begin
   WriteLn('CRLF: ', Length(CRLF));

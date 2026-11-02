@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ps_char.h"
 #include "ps_memory.h"
 #include "ps_string.h"
 #include "ps_value.h"
@@ -241,12 +242,7 @@ ps_string *ps_string_lowercase(const ps_string *s)
         return NULL; // errno = ENOMEM
 
     for (ps_string_len i = 0; i < s->len; i++)
-    {
-        if (s->str[i] >= 'A' && s->str[i] <= 'Z')
-            t->str[i] = s->str[i] + ('a' - 'A'); // PLUS!
-        else
-            t->str[i] = s->str[i];
-    }
+        t->str[i] = ps_char_lowercase(s->str[i]);
     t->len = s->len;
     return t;
 }
@@ -257,12 +253,7 @@ ps_string *ps_string_uppercase(const ps_string *s)
     if (t == NULL)
         return NULL; // errno = ENOMEM
     for (ps_string_len i = 0; i < s->len; i++)
-    {
-        if (s->str[i] >= 'a' && s->str[i] <= 'z')
-            t->str[i] = s->str[i] - ('a' - 'A'); // MINUS!
-        else
-            t->str[i] = s->str[i];
-    }
+        t->str[i] = ps_char_uppercase(s->str[i]);
     t->len = s->len;
     return t;
 }

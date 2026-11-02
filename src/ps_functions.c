@@ -11,6 +11,7 @@
 #include <time.h>
 
 #include "ps_ast.h"
+#include "ps_char.h"
 #include "ps_error.h"
 #include "ps_executable.h"
 #include "ps_functions.h"
@@ -811,7 +812,7 @@ ps_error ps_function_lowercase(ps_interpreter *interpreter, const ps_value *valu
     if (ps_value_is_char(value))
     {
         result->type = &ps_system_char;
-        result->data.c = value->data.c >= 'a' && value->data.c <= 'z' ? value->data.c + 'A' - 'a' : value->data.c;
+        result->data.c = ps_char_lowercase(value->data.c);
         return PS_ERROR_NONE;
     }
     else if (ps_value_is_string(value))
@@ -838,7 +839,7 @@ ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *valu
     if (ps_value_is_char(value))
     {
         result->type = &ps_system_char;
-        result->data.c = value->data.c >= 'A' && value->data.c <= 'Z' ? value->data.c - 'A' + 'a' : value->data.c;
+        result->data.c = ps_char_uppercase(value->data.c);
         return PS_ERROR_NONE;
     }
     else if (ps_value_is_string(value))

@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /** @brief Our own implementation of strscpy (incompatible) */
-    bool ps_strscpy(char *dest, const char *src, size_t size);
+    size_t ps_strscpy(char *dest, const char *src, size_t size);
     /** @brief Our own implementation of strnlen (compatible) */
     size_t ps_strnlen(const char *s, size_t maxlen);
 
