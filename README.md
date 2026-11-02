@@ -2,36 +2,21 @@
 
 NB: this project has no link with [RemObjects Pascal Script](https://github.com/remobjects/pascalscript).
 
+## Introduction
+
+`PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C23](<https://en.wikipedia.org/wiki/C23_(C_standard_revision)>)), with an handmade lexer and parser.
+
+First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
+
+During July 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
+
+A self-made lexer and parser was then developed.
 
 PascalScript now uses an Abstract Syntax instead of "direct" interpretation, see [AST](doc/ast.md).
 
-## TODO
+See [STATUS](STATUS.md) & [TODO](TODO.md) for further about what is currently worked on.
 
-Work in progress:
-
-- Documentation: README, STATUS, ...
-- Bug fixes
-
-More advanced features:
-
-- **String**
-  - Individual character access with `[]`
-  - Memory management handling with garbage collection or reference counting
-  - Perhaps handle "unlimited" strings and make classic Pascal usage transparent
-- **Statement** - `Case` ... `Of` ... `Else` / `Otherwise`
-- **Records** - Record/struct type definitions
-- **Pointers and Heap** - Pointer type and operations:
-  - `Pointer`, `New`, `Dispose`, `^`
-  - Maybe we need to handle `Forward` declarations?
-- **Sets** - Set type and operations
-- **Files** - File I/O operations
-  - `File`, `Text`, `Assign`, `Rewrite`, `Reset`, `Close`, `Read`, `Write`, `Seek`, `Eof`, `Eoln`
-- **Units** - Module/unit system
-  - this time `Forward` declarations will be mandatory as `Interface` is essentially a bunch of forward declarations for `Implementation`
-- Additional system procedures:
-  - `Read`, `ReadLn`, `ReadStr`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
-- Memory access arrays:
-  - `Mem`, `MemW`
+[CLI options](doc/CLI.md) are here.
 
 ## Performance
 
@@ -57,17 +42,17 @@ There are big differences between `For` and `Repeat` / `While` loops for each la
 
 ² simulated with `while` for Python, see [examples/130-big-loops.py](examples/130-big-loops.py)
 
-3 see [examples/130-big-loops.lua](examples/130-big-loops.lua)
+³ see [examples/130-big-loops.lua](examples/130-big-loops.lua)
 
 On 2O26-10-30, after migration to Ubuntu 26.04, for **1,000,000** iterations:
 
-| Interpreter               |       For |     While |   Repeat² |
-| ------------------------- | --------: | --------: | --------: |
-| PascalScript (2026-10-30) |    108 ms |    168 ms |    151 ms |
-| Lua 5.4.8                 |   4.46 ms |   9.62 ms |  14.22 ms |
-| Python 3.14.4             | 424.30 ms | 871.84 ms | 620.38 ms |
+| Interpreter               |      For |    While |   Repeat² |
+| ------------------------- | -------: | -------: | --------: |
+| PascalScript (2026-10-30) |   108 ms |   168 ms |    151 ms |
+| Lua 5.4.8                 |  4.46 ms |  9.62 ms |  14.22 ms |
+| Python 3.14.4             | 60.26 ms | 96.64 ms | 103.46 ms |
 
-Lua keeps its blazing speed, Python now lags behind, and PascalScript is comparable to
+Lua keeps its blazing speed, Python now lags behind, and PascalScript is comparable to previous results.
 
 ## Memory checking
 
@@ -81,19 +66,9 @@ ctest --test-dir build -T memcheck
 
 CTest reports Valgrind errors as failed tests. If Valgrind is not found during configuration, MemCheck is unavailable; install it and reconfigure.
 
-## Introduction
-
-`PascalScript` is a Turbo Pascal inspired **interpreted** language written in C ([C23](<https://en.wikipedia.org/wiki/C23_(C_standard_revision)>)), with an handmade lexer and parser.
-
-First try (see branch `lex-yacc`) was made trying to use `lex` and `yacc` (in fact `flex` and `bison`).
-
-During July 2024, another test/validation was made using AntLR4, which lacks C output, but can help to develop lexer, parser & AST structures.
-
-A self-made lexer and parser was then developed.
-
 ## Examples
 
-The traditional `hello.pas` will be like:
+The traditional `hello.pas` is like:
 
 ```pascal
 Program HelloWorld;
@@ -102,7 +77,7 @@ Begin
 End.
 ```
 
-And `factorial.pas` (see [examples/60-Factorial.pas](examples/60-Factorial.pas)) should be like:
+And `factorial.pas` (see [examples/60-Factorial.pas](examples/60-Factorial.pas)) is like:
 
 ```pascal
 Program Factorial;
@@ -154,12 +129,12 @@ Begin
 End.
 ```
 
-At first, a simple CLI should be implemented (under GNU/Linux):
+For now, a simple CLI is implemented under GNU/Linux:
 
 ```text
-# source as standard input
+# source as standard input (NO)
 pascalscript < hello.pas
-# with UUOC (useless use of cat ;-))
+# with UUOC (useless use of cat ;-)) (NO)
 cat hello.pas | pascalscript
 # source file as argument
 pascalscript hello.pas
