@@ -8,6 +8,7 @@ Const
   MaxLoops = 1000000;
 Var
   I: Integer;
+  R: Real;
   Start, Finish: Unsigned;
   T1For, T2For: Unsigned;
   T1While, T2While: Unsigned;
@@ -39,7 +40,9 @@ Begin
 
   Finish := GetTickCount();
 
-  WriteLn('PascalScript - Comparison of execution times for ', MaxLoops,' iterations:');
+  // Convert MaxLoops to Real so it displays in scientific notation
+  R := MaxLoops;
+  WriteLn('PascalScript - Comparison of execution times for ', R,' iterations:');
   WriteLn(' - for    : ', T2For    - T1For   , ' ms');
   WriteLn(' - repeat : ', T2Repeat - T1Repeat, ' ms');
   WriteLn(' - while  : ', T2While  - T1While , ' ms');
