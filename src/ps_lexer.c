@@ -209,7 +209,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
     char buffer[PS_IDENTIFIER_LEN + 1];
     char c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
-    if (isalpha(c))
+    if (isalpha(c) || c == '_')
     {
         do
         {
@@ -273,6 +273,8 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
             break;                                                                                                     \
         is_real = true;                                                                                                \
         APPEND_CHAR_DEC()                                                                                              \
+        if (c == 'e' || c == 'E')                                                                                      \
+            READ_EXP_DEC()                                                                                              \
     }
 
 #define READ_EXP_DEC()                                                                                                 \
@@ -799,7 +801,8 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     lexer->start_column = lexer->buffer->current_column;
 
     // Number: integer or real value?
-    if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$')
+    if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$' ||
+        (current_char == '.' && next_char != '.' && isdigit(next_char)))
     {
         if (!ps_lexer_read_number(lexer))
             return false;

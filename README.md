@@ -2,35 +2,6 @@
 
 NB: this project has no link with [RemObjects Pascal Script](https://github.com/remobjects/pascalscript).
 
-## Status
-
-As of 2026-09-12, the AST based interpreter is able to run Pascal programs with:
-
-- **Data types**
-  - `Integer`, `Unsigned`, `Real`, `Boolean`, `Char`
-  - `String`: fixed-size buffers (max 255 chars, no garbage collection, a long running program will exhaust memory)
-  - `Array`: multi-dimensional arrays
-  - `Type` definition for subranges & enumerations
-- **Assignment** to variable from an expression with `:=`
-- **Expressions**
-  - Arithmetic: `+`, `-`, `*`, `/`, `DIV`, `MOD`
-  - Relational: `=`, `<>`, `<`, `<=`, `>`, `>=`
-  - Logical: `AND`, `OR`, `NOT`
-  - Bitwise: `SHL`, `SHR`, `AND`, `OR`, `XOR`, `NOT`
-  - Array item access with `[]`
-- **Writing** values to standard output with `Write` / `WriteLn`, formatting with `:width:precision`
-- **Conditional** execution with `If` / `Then` / `Else`
-- **Loops**
-  - `Repeat` / `Until`
-  - `While` / `Do`
-  - `For` / `To` / `Downto` / `Do`
-- **Type** definitions
-- **System constants, procedures & functions**
-  - see [System Library](doc/system.md)
-- **User defined** procedures
-  - For now
-    - without parameters
-    - no functions
 
 PascalScript now uses an Abstract Syntax instead of "direct" interpretation, see [AST](doc/ast.md).
 
@@ -38,19 +9,14 @@ PascalScript now uses an Abstract Syntax instead of "direct" interpretation, see
 
 Work in progress:
 
-- **Procedure** declaration and calls
-- **Function** declaration and calls, with return value
-
-Next steps should be implementing:
-
-- Check if **Recursivity** works
-- Check if **Enums** & **Subranges** still work within the AST context
+- Documentation: README, STATUS, ...
+- Bug fixes
 
 More advanced features:
 
 - **String**
   - Individual character access with `[]`
-  - Memory management handling with garbage collection
+  - Memory management handling with garbage collection or reference counting
   - Perhaps handle "unlimited" strings and make classic Pascal usage transparent
 - **Statement** - `Case` ... `Of` ... `Else` / `Otherwise`
 - **Records** - Record/struct type definitions
@@ -63,33 +29,9 @@ More advanced features:
 - **Units** - Module/unit system
   - this time `Forward` declarations will be mandatory as `Interface` is essentially a bunch of forward declarations for `Implementation`
 - Additional system procedures:
-  - `Read`, `ReadLn`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
+  - `Read`, `ReadLn`, `ReadStr`, `Delay`, `Exit`, `Halt`, `FillChar`, `Move`
 - Memory access arrays:
   - `Mem`, `MemW`
-
-## History
-
-As of 2026-02-20, the interpreter itself implements:
-
-- Assignment to variable from an expression with `:=`
-- Expressions with full operator support
-- Writing values to standard output with `Write` / `WriteLn`
-- `If` / `Then` / `Else`
-- `Repeat` / `Until`
-- `While` / `Do`
-- `For` / `To` / `Downto` / `Do`
-- **Procedure** definition and procedure calls
-  - parameters by value and reference
-  - imbrication works
-  - recursion supported
-- **Function** definition and user function calls with parameters
-  - `Result` pseudo-variable for return values
-  - recursion supported
-- **Type** definitions including:
-  - **Enumerations**: (e.g., `TGender = (Male, Female, Other)`)
-  - **Subranges**: (e.g., `Score = 1..20`, `Letters = 'A'..'Z'`)
-- Many functions (scalar / ordinal / math) in the `System` library
-- Strings with fixed-size buffers (max 255 chars)
 
 ## Performance
 
