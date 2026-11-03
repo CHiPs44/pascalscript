@@ -36,6 +36,8 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 
 add_executable(pascalscript ${CMAKE_CURRENT_SOURCE_DIR}/pascalscript.c ${SOURCES})
 
+target_compile_options(pascalscript PRIVATE -Wall -Wextra -Wpedantic)
+
 target_link_libraries(pascalscript m)
 
 # Configure CTest's MemCheck mode when Valgrind is available.
