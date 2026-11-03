@@ -15,19 +15,18 @@ extern "C"
 #endif
 
     /**
-     * @brief Our own implementation of strscpy (incompatible)
-     *
-     *        Changes the value of errno to EINVAL if size is 0,
-     *        or E2BIG if the string is too long
+     * @brief Our own implementation of strscpy (with int instead of ssize_t)
      * @param dest Destination buffer
      * @param src Source string
      * @param size Size of the destination buffer
-     * @return The number of characters copied (excluding the null terminator) or 0
+     * @return -EINVAL if the size is zero,
+     *         -E2BIG if the destination buffer is too small,
+     *         the number of characters copied (excluding the null terminator) otherwise
      */
-    size_t ps_strscpy(char *dest, const char *src, size_t size);
+    int ps_strscpy(char *dest, const char *src, int size);
 
     /** @brief Our own implementation of strnlen (compatible) */
-    size_t ps_strnlen(const char *s, size_t maxlen);
+    int ps_strnlen(const char *s, int maxlen);
 
 #ifdef __cplusplus
 }

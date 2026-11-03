@@ -5,17 +5,14 @@
 */
 
 #include <errno.h>
-#include <stdlib.h>
-#include <string.h>
 
-size_t ps_strscpy(char *dest, const char *src, size_t size)
+int ps_strscpy(char *dest, const char *src, int size)
 {
-    size_t i;
+    int i;
 
     if (size == 0)
     {
-        errno = EINVAL;
-        return 0;
+        return -EINVAL;
     }
 
     for (i = 0; i < size - 1 && src[i] != '\0'; i++)
@@ -25,20 +22,14 @@ size_t ps_strscpy(char *dest, const char *src, size_t size)
     dest[i] = '\0';
 
     if (src[i] == '\0')
-    {
-        errno = 0;
         return i;
-    }
     else
-    {
-        errno = E2BIG;
-        return 0; // Not enough space to copy the string
-    }
+        return -E2BIG; // Not enough space to copy the string
 }
 
-size_t ps_strnlen(const char *s, size_t maxlen)
+int ps_strnlen(const char *s, int maxlen)
 {
-    size_t len = 0;
+    int len = 0;
     while (len < maxlen && s[len] != '\0')
         ++len;
     return len;

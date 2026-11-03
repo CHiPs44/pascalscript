@@ -85,6 +85,10 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
             TRACE_ERROR("FOR")
         *statement_ptr = (ps_ast_node *)for_statement;
         break;
+    case PS_TOKEN_SEMI_COLON:
+        statement_list = ps_ast_create_statement_list(start_line, start_column, 0);
+        *statement_ptr = (ps_ast_node *)statement_list;
+        break;
     default:
         RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
     }

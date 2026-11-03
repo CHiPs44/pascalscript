@@ -5,12 +5,9 @@
 */
 
 #include <errno.h>
-#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "ps_buffer.h"
 #include "ps_error.h"
@@ -330,6 +327,7 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
     fprintf(output,
             "              |         1         2         3         4         5         6         7         8|\n");
     fprintf(output,
+            //   123456789012345 <== margin guide for 80 columns
             "Line   (Len)  |12345678901234567890123456789012345678901234567890123456789012345678901234567890|\n");
     for (int line_number = from_line; line_number < from_line + line_count - 1; line_number += 1)
     {
@@ -339,12 +337,11 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
             length = 80;
         else
             length = 1 + buffer->line_lengths[line_number];
-        errno = 0;
-        ps_strscpy(line, buffer->line_starts[line_number], length);
-        errno = 0;
+        if (ps_strscpy(line, buffer->line_starts[line_number], length) == -E2BIG)
+            return 0;
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
-    return 15;
+    return 15; // <== margin guide for 80 columns
 }
 
 char ps_buffer_peek_char(const ps_buffer *buffer)

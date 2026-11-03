@@ -451,7 +451,6 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     {
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
         ps_strscpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN + 1);
-        errno = 0;
     }
     return true;
 }
@@ -532,10 +531,9 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         }
         // S => S
         token->type = PS_TOKEN_STRING_VALUE;
-        int len = (int)ps_strscpy(token->value.s, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-        if (errno == E2BIG)
+        int len = ps_strscpy(token->value.s, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
+        if (len == -E2BIG)
         {
-            errno = 0;
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         }
         errno = 0;
@@ -560,7 +558,6 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         if (*pos + len > PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         ps_strscpy(token->value.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
-        errno = 0;
         *pos += len;
         return true;
     }
@@ -574,10 +571,8 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
     }
     // S + S => S
     size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-    if (len + *pos > PS_STRING_MAX_LEN)
+    if (ps_strscpy(token->value.s + *pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1 - *pos) == -E2BIG)
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-    ps_strscpy(token->value.s + *pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-    errno = 0;
     *pos += len;
     return true;
 }
@@ -893,8 +888,7 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         snprintf(value, sizeof(value), "CHAR '%c'", lexer->current_token.value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
-        ps_strscpy(string, lexer->current_token.value.s, sizeof(string) - 1);
-        errno = 0;
+        ps_strscpy(string, lexer->current_token.value.s, sizeof(string));
         snprintf(value, sizeof(value), "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:
