@@ -265,6 +265,8 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
     (void)start_column;
 
     ps_identifier identifier;
+    ps_ast_block *owner=NULL;
+    ps_symbol *symbol=NULL;
     ps_value *value;
     ps_value_data data = {0};
     ps_symbol *constant;
@@ -275,6 +277,8 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
     {
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifier)
+        if (ps_compiler_find_symbol(compiler, block, identifier, true,&owner,&symbol))
+            RETURN_ERROR(PS_ERROR_SYMBOL_EXISTS)
         READ_NEXT_TOKEN_OR_RETURN_FALSE
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_EQ)
         READ_NEXT_TOKEN_OR_RETURN_FALSE

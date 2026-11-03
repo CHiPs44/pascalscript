@@ -11,7 +11,7 @@ As of 2026-11-02, this outputs:
 
 ```text
 PascalScript v0.1.2.3 (32 bits) - License: LGPL 3.0 or later, see LICENSE file
-Usage: ./build-clang/pascalscript [-t] [-d] [-s] [-b] [-v] [program_file]
+Usage: ./build-clang/pascalscript [options] [program_file]
   program_file : path to the Pascal source file to run
 Runtime options:
  -b : flips short circuit boolean evaluation (default: false, {$B-})

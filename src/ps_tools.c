@@ -25,7 +25,10 @@ size_t ps_strscpy(char *dest, const char *src, size_t size)
     dest[i] = '\0';
 
     if (src[i] == '\0')
+    {
+        errno = 0;
         return i;
+    }
     else
     {
         errno = E2BIG;

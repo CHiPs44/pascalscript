@@ -7,8 +7,6 @@
 #ifndef _PS_CHAR_H
 #define _PS_CHAR_H
 
-#include <stdio.h>
-
 #include "ps_value.h"
 
 #ifdef __cplusplus

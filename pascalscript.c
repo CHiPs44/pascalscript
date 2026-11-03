@@ -89,7 +89,7 @@ void banner(FILE *out)
 void usage(FILE *out, char *program_name)
 {
     banner(out);
-    fprintf(out, "Usage: %s [-t] [-d] [-s] [-b] [-v] [program_file]\n", program_name);
+    fprintf(out, "Usage: %s [options] [program_file]\n", program_name);
 #ifdef DEBUG_SOURCE
     fprintf(out, "  program_file : path to the Pascal source file to run (default: %s)\n", DEBUG_SOURCE);
 #else
@@ -97,7 +97,7 @@ void usage(FILE *out, char *program_name)
 #endif
     fprintf(out, "Runtime options:\n");
     fprintf(out, " -b : flips short circuit boolean evaluation (default: false, {$B-})\n");
-    fprintf(out, " -i : flips I/O error checking (default: true, ${I+})\n");
+    fprintf(out, " -i : flips I/O error checking (default: true, {$I+})\n");
     fprintf(out, " -r : flips range checking (default: true, {$R+})\n");
     fprintf(out, "Other options:\n");
     fprintf(out, " -a : launch AST tests\n");

@@ -246,6 +246,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         GET_NEXT_CHAR(c)
     } while (strchr(digits, c) != NULL);
     buffer[pos] = '\0';
+    errno = 0;
     unsigned long u = strtoul(buffer, &end, base);
     if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
         return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
@@ -274,7 +275,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         is_real = true;                                                                                                \
         APPEND_CHAR_DEC()                                                                                              \
         if (c == 'e' || c == 'E')                                                                                      \
-            READ_EXP_DEC()                                                                                              \
+            READ_EXP_DEC()                                                                                             \
     }
 
 #define READ_EXP_DEC()                                                                                                 \
@@ -334,6 +335,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     buffer[pos] = '\0';
     if (is_real)
     {
+        errno = 0;
         double d = strtod(buffer, &end);
         if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid real number value");
@@ -342,6 +344,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     }
     else
     {
+        errno = 0;
         unsigned long u = strtoul(buffer, &end, 10);
         if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
@@ -447,7 +450,9 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     else
     {
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
+        errno = 0;
         ps_strscpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN + 1);
+        errno = 0;
     }
     return true;
 }
@@ -528,9 +533,13 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         }
         // S => S
         token->type = PS_TOKEN_STRING_VALUE;
+        errno = 0;
         int len = (int)ps_strscpy(token->value.s, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
         if (errno == E2BIG)
+        {
+            errno = 0;
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
+        }
         *pos = len;
         return true;
     }
@@ -551,7 +560,14 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
         if (*pos + len > PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
+        errno = 0;
         ps_strscpy(token->value.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
+        if (errno == E2BIG)
+        {
+            errno = 0;
+            return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
+        }
+        errno = 0;
         *pos += len;
         return true;
     }
@@ -802,7 +818,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
 
     // Number: integer or real value?
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$' ||
-        (current_char == '.' && next_char != '.' && isdigit(next_char)))
+        (current_char == '.' && next_char != '.'))
     {
         if (!ps_lexer_read_number(lexer))
             return false;

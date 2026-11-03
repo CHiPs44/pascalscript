@@ -4,12 +4,6 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "ps_char.h"
 
 ps_char ps_char_lowercase(ps_char c)

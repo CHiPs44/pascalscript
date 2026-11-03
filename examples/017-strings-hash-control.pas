@@ -39,7 +39,7 @@ Const
   K12 = 'It''s Pascal'; // It's Pascal
   K13 = #$41 'BC';      // ABC
   K14 = #65 'bc' #68;   // AbcD
-  K14 = 'bc' #68;       // bcD
+  K15 = 'bc' #68;       // bcD
 
 Begin
   WriteLn('CRLF: ', Length(CRLF));
@@ -61,4 +61,5 @@ Begin
   WriteLn('K12: ', QUOTE, K12, QUOTE);
   WriteLn('K13: ', QUOTE, K13, QUOTE);
   WriteLn('K14: ', QUOTE, K14, QUOTE);
+  WriteLn('K15: ', QUOTE, K15, QUOTE);
 End.
