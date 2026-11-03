@@ -213,7 +213,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
     {
         do
         {
-            if (pos > (int)PS_IDENTIFIER_LEN)
+            if (pos >= (int)PS_IDENTIFIER_LEN)
             {
                 return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG, "Identifier or keyword too long");
             }
@@ -240,7 +240,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
     do
     {
-        if (pos > PS_BITNESS)
+        if (pos >= PS_BITNESS)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
         buffer[pos++] = c;
         GET_NEXT_CHAR(c)
@@ -257,7 +257,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
 
 #define APPEND_CHAR_DEC()                                                                                              \
     {                                                                                                                  \
-        if (pos > 32)                                                                                                  \
+        if (pos >= 32)                                                                                                 \
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                       \
         buffer[pos++] = c;                                                                                             \
         GET_NEXT_CHAR(c)                                                                                               \
