@@ -50,6 +50,12 @@ char *hello_source = "Program HelloWorld;\n"
                      "Begin\n"
                      "  { Comment1 (* Comment2 *) }\n"
                      "  WriteLn('Hello, World!');\n"
+                    "  (* comment before\n"
+                    "\n"
+                    "     comment after *)\n"
+                    "  { comment before\n"
+                    "\n"
+                    "    comment after }\n"
                      "  WriteLn(K1, K2);\n"
                      "End.\n"
                      "";
@@ -59,7 +65,7 @@ ps_token_type hello_expected[] = {
         // CONST
         PS_TOKEN_CONST,
         // K1 = 1234;
-        PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_UNSIGNED_VALUE, PS_TOKEN_SEMI_COLON,
+        PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_INTEGER_VALUE, PS_TOKEN_SEMI_COLON,
         // K2 = 'Choose ''A'' or ''B''.';\n"
         PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
         // BEGIN
@@ -130,7 +136,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
     {
         printf("TEST LEXER: ERROR %d %s / %d %s\n", lexer->error, ps_error_get_message(lexer->error),
                lexer->buffer->error, ps_error_get_message(lexer->buffer->error));
-        lexer = ps_lexer_free(lexer);
+        ps_lexer_free(lexer);
         return;
     }
     ps_buffer_dump(stdout, lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
@@ -170,7 +176,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
         // printf("TEST LEXER: %02d/%02d END\n", index + 1, count);
         index += 1;
     } while (index < count);
-    lexer = ps_lexer_free(lexer);
+    ps_lexer_free(lexer);
 }
 
 int main(void)

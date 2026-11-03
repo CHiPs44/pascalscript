@@ -389,18 +389,13 @@ bool ps_buffer_read_next_char(ps_buffer *buffer)
     }
     else
     {
-        if (buffer->line_lengths[buffer->current_line] == 0)
-            buffer->next_char = '\0';
-        else if (buffer->current_line < buffer->line_count)
+        buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
+        if (ps_buffer_debug_flag)
         {
-            buffer->next_char = buffer->line_starts[buffer->current_line][buffer->current_column];
-            if (ps_buffer_debug_flag)
-                fprintf(stderr, "BUFFER: NEXT    line=%5d, column=%5d, current_char = '%-5s', next_char = '%-5s'\n",
-                        buffer->current_line, buffer->current_column, ps_buffer_debug_char(buffer->current_char),
-                        ps_buffer_debug_char(buffer->next_char));
+            fprintf(stderr, "BUFFER: NEXT    line=%5d, column=%5d, current_char = '%-5s', next_char = '%-5s'\n",
+                    buffer->current_line, buffer->current_column, ps_buffer_debug_char(buffer->current_char),
+                    ps_buffer_debug_char(buffer->next_char));
         }
-        else
-            buffer->next_char = '\0';
     }
     return true;
 }
