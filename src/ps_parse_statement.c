@@ -491,19 +491,29 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_THEN)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
 
-    // Statement or compound statement
-    if (!ps_parse_statement(compiler, block, &then_node))
-        TRACE_ERROR("THEN")
-    if (then_node->kind == PS_AST_STATEMENT_LIST)
-        then_branch = (ps_ast_statement_list *)(then_node);
+    // An immediate ELSE means the then-branch is an empty statement.
+    if (lexer->current_token.type == PS_TOKEN_ELSE)
+    {
+        then_branch = ps_ast_create_statement_list(lexer->start_line, lexer->start_column, 0);
+        if (then_branch == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+    }
     else
     {
-        // 1 statement in statement list
-        statement_list = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
-        if (statement_list == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-        statement_list->statements[0] = then_node;
-        then_branch = statement_list;
+        // Statement or compound statement
+        if (!ps_parse_statement(compiler, block, &then_node))
+            TRACE_ERROR("THEN")
+        if (then_node->kind == PS_AST_STATEMENT_LIST)
+            then_branch = (ps_ast_statement_list *)(then_node);
+        else
+        {
+            // 1 statement in statement list
+            statement_list = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
+            if (statement_list == NULL)
+                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            statement_list->statements[0] = then_node;
+            then_branch = statement_list;
+        }
     }
 
     // ELSE?
@@ -739,34 +749,48 @@ bool ps_parse_statement_list(ps_compiler *compiler, ps_ast_block *block, ps_ast_
     ps_ast_node *statement = NULL;
     // Up to 256 statements for now
     int count = 0;
-    ps_ast_node *statements[256];
+    ps_ast_node *statements[256] = {0};
     bool loop = true;
+    bool failed_to_parse_statement = false;
     do
     {
         if (!ps_parse_statement(compiler, block, &statement))
-            TRACE_ERROR("STATEMENT");
+        {
+            failed_to_parse_statement = true;
+            goto cleanup;
+        }
         count += 1;
         if (count > 255)
-            RETURN_ERROR(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
+        {
+            ps_ast_free_node(statement);
+            GOTO_CLEANUP(PS_ERROR_TOO_MANY_ARGUMENTS) // should be PS_ERROR_TOO_MANY_STATEMENTS
+        }
         statements[count - 1] = statement;
         // NB: semi-colon at statement list end is optional
         if (lexer->current_token.type == PS_TOKEN_SEMI_COLON)
         {
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
+            READ_NEXT_TOKEN_OR_GOTO_CLEANUP
             if (lexer->current_token.type == stop) // NOSONAR
                 loop = false;
         }
         else if (lexer->current_token.type == stop)
             loop = false;
         else
-            RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+            GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
     } while (loop);
 
     // Create statement list and copy statements into it
     *statement_list = ps_ast_create_statement_list(start_line, start_column, count);
     if (*statement_list == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     memcpy((*statement_list)->statements, statements, sizeof(ps_ast_node *) * count);
 
     PARSE_END("OK")
+
+cleanup:
+    for (int i = 0; i < count && i < 255; i++)
+        ps_ast_free_node(statements[i]);
+    if (failed_to_parse_statement)
+        TRACE_ERROR("STATEMENT")
+    return false;
 }

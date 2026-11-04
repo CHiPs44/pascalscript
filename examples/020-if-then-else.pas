@@ -8,6 +8,9 @@ Var
     I : Integer;
 Begin
     I := 1;
+    { Empty then branch }
+    If I = 0 Then Else
+        WriteLn('Empty then branch');
     { One statement and no else }
     If I = 1 Then
         WriteLn('I', '=', '1', ' ', '(' , I, ')');
