@@ -98,7 +98,7 @@ bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const 
 bool ps_compiler_find_system_symbol(ps_compiler *compiler, const char *name, ps_ast_block **owner, ps_symbol **symbol)
 {
     *symbol = ps_symbol_table_find(compiler->system->symbols, name);
-    *owner = symbol == NULL ? NULL : compiler->system;
+    *owner = *symbol == NULL ? NULL : compiler->system;
     return *symbol != NULL;
 }
 
@@ -114,7 +114,7 @@ bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const c
 
     // Search in current block
     *symbol = ps_symbol_table_find(block->symbols, name);
-    *owner = symbol == NULL ? NULL : block;
+    *owner = *symbol == NULL ? NULL : block;
     if (!local && *symbol == NULL)
         // Search in parent(s)
         return ps_compiler_find_symbol(compiler, block->parent, name, false, owner, symbol);
