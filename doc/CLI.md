@@ -29,3 +29,7 @@ Other options:
  -u : dump source buffer after loading
  -v : verbose (display banner and other infos)
  ```
+
+Relative program paths are resolved from the current working directory.
+
+Absolute paths are used as provided.

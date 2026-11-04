@@ -268,7 +268,8 @@ int main(int argc, char *argv[])
     // Paths & file names
     char *current_path = NULL;
     char *program_file = NULL;
-    char source_file[256] = {0};
+    char source_file_buffer[256] = {0};
+    const char *source_file = NULL;
 
     int arg = get_options(argc, argv);
 
@@ -291,7 +292,13 @@ int main(int argc, char *argv[])
     if (arg + 1 < argc)
     {
         program_file = argv[argc - 1];
-        snprintf(source_file, sizeof(source_file), "%s/%s", current_path, program_file);
+        if (program_file[0] == '/')
+            source_file = program_file;
+        else
+        {
+            snprintf(source_file_buffer, sizeof(source_file_buffer), "%s/%s", current_path, program_file);
+            source_file = source_file_buffer;
+        }
     }
     else
     {
@@ -307,12 +314,13 @@ int main(int argc, char *argv[])
         char *separator = strrchr(self, '/');
         if (separator != NULL)
             *separator = '\0';
-        snprintf(source_file, sizeof(source_file), "%s/../%s", /*executable_path*/ self, program_file);
+        snprintf(source_file_buffer, sizeof(source_file_buffer), "%s/../%s", /*executable_path*/ self, program_file);
+        source_file = source_file_buffer;
 #else
-        source_file[0] = '\0';
+        source_file_buffer[0] = '\0';
 #endif
     }
-    if (source_file[0] == '\0')
+    if (source_file == NULL || source_file[0] == '\0')
     {
         fprintf(stderr, "No file to run!\n");
         usage(stderr, argv[0]);

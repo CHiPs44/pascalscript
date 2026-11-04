@@ -97,3 +97,8 @@ function(add_executable_pascal_examples DIR LABEL)
 endfunction()
 
 add_executable_pascal_examples("examples" "examples")
+
+add_test(
+    NAME cli_absolute_path
+    COMMAND $<TARGET_FILE:pascalscript> "${CMAKE_CURRENT_SOURCE_DIR}/examples/000-minimal.pas"
+)
