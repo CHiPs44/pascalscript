@@ -16,14 +16,6 @@
 #include "../include/ps_token.h"
 #include "../include/ps_tools.h"
 
-// #include "../src/ps_buffer.c"
-// #include "../src/ps_error.c"
-// #include "../src/ps_lexer.c"
-// #include "../src/ps_memory.c"
-// #include "../src/ps_readall.c"
-// #include "../src/ps_token.c"
-// #include "../src/ps_tools.c"
-
 char *empty_source = "Program Empty;\n"
                      "{ Comment made with curly brackets }   \n"
                      "Begin\n"
@@ -121,6 +113,7 @@ ps_token_type real_exponent_expected[] = {
 void test_lexer(char *name, char *source, const ps_token_type *expected, int count)
 {
     int index;
+    bool failed;
 
     // ps_memory_debug_enabled = true;
 
@@ -143,6 +136,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
 
     printf("TEST LEXER: LOOP ON %s\n", name);
     index = 0;
+    failed = false;
     ps_buffer_read_next_char(lexer->buffer);
     if (lexer->error != PS_ERROR_NONE || lexer->buffer->error != PS_ERROR_NONE)
     {
@@ -158,14 +152,14 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
             printf("TEST LEXER: %02d/%02d ERROR %d %s / %d %s\n", index + 1, count, lexer->error,
                    ps_error_get_message(lexer->error), lexer->buffer->error,
                    ps_error_get_message(lexer->buffer->error));
-            break;
+                 failed = true;
         }
         else if (lexer->current_token.type != expected[index])
         {
             printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d ", index + 1, count, expected[index],
                    lexer->current_token.type);
             ps_token_debug(stdout, "", &lexer->current_token);
-            break;
+                 failed = true;
         }
         else
         {
@@ -174,8 +168,9 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
             ps_token_debug(stdout, "", &lexer->current_token);
         }
         // printf("TEST LEXER: %02d/%02d END\n", index + 1, count);
-        index += 1;
-    } while (index < count);
+        if (!failed)
+            index += 1;
+    } while (index < count && !failed);
     ps_lexer_free(lexer);
 }
 
