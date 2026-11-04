@@ -75,7 +75,7 @@ bool ps_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statem
         interpreter->error_column = statement->column;
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_NOT_IMPLEMENTED,
                                                 "CASE statement not implemented");
-        // return ps_execute_case(interpreter, (const ps_ast_case *)statement);
+        // this should call ps_execute_case(interpreter, (const ps_ast_case *)statement);
     case PS_AST_WHILE:
         return ps_execute_while(interpreter, (const ps_ast_while *)statement);
     case PS_AST_REPEAT:
@@ -84,10 +84,13 @@ bool ps_execute_statement(ps_interpreter *interpreter, const ps_ast_node *statem
         return ps_execute_for(interpreter, (const ps_ast_for *)statement);
     case PS_AST_PROCEDURE_CALL:
         return ps_execute_procedure_call(interpreter, (const ps_ast_call *)statement);
+    case PS_AST_STATEMENT_LIST:
+        return ps_execute_statement_list(interpreter, (const ps_ast_statement_list *)statement);
     default:
         interpreter->error_line = statement->line;
         interpreter->error_column = statement->column;
-        return ps_interpreter_set_message(interpreter, "Unexpected statement kind %d\n", statement->kind);
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
+                                                "Unexpected statement kind %d\n", statement->kind);
     }
 }
 
