@@ -337,8 +337,7 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
             length = 80;
         else
             length = 1 + buffer->line_lengths[line_number];
-        if (ps_strscpy(line, buffer->line_starts[line_number], length) == -E2BIG)
-            return 0;
+        ps_strscpy(line, buffer->line_starts[line_number], length);
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     return 15; // <== margin guide for 80 columns

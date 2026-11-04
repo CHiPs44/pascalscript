@@ -10,10 +10,8 @@ int ps_strscpy(char *dest, const char *src, int size)
 {
     int i;
 
-    if (size == 0)
-    {
+    if (size <= 0)
         return -EINVAL;
-    }
 
     for (i = 0; i < size - 1 && src[i] != '\0'; i++)
     {

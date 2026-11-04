@@ -15,11 +15,11 @@ extern "C"
 #endif
 
     /**
-     * @brief Our own implementation of strscpy (with int instead of ssize_t)
+     * @brief Our own implementation of strscpy (with int instead of ssize_t which is a GNU extension)
      * @param dest Destination buffer
      * @param src Source string
      * @param size Size of the destination buffer
-     * @return -EINVAL if the size is zero,
+     * @return -EINVAL if the size is zero or less,
      *         -E2BIG if the destination buffer is too small,
      *         the number of characters copied (excluding the null terminator) otherwise
      */
