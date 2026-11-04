@@ -643,11 +643,8 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     } while (c == '\'' || c == '^' || c == '#');
-    if (pos > 1)
-    {
-        token.type = PS_TOKEN_STRING_VALUE;
+    if (token.type == PS_TOKEN_STRING_VALUE)
         token.value.s[pos] = '\0';
-    }
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
     return true;

@@ -174,6 +174,29 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
     ps_lexer_free(lexer);
 }
 
+static bool test_empty_string_plus_char(void)
+{
+    char source[] = "'POISON', ''#65";
+    ps_lexer *lexer = ps_lexer_alloc();
+    if (lexer == NULL)
+    {
+        printf("TEST LEXER: ERROR allocating lexer for empty string plus char\n");
+        return false;
+    }
+
+    bool ok = ps_buffer_load_string(lexer->buffer, source, strlen(source)) &&
+              ps_buffer_read_next_char(lexer->buffer) && ps_lexer_read_token(lexer) &&
+              lexer->current_token.type == PS_TOKEN_STRING_VALUE && ps_lexer_read_token(lexer) &&
+              lexer->current_token.type == PS_TOKEN_COMMA && ps_lexer_read_token(lexer) &&
+              lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s[0] == 'A' &&
+              lexer->current_token.value.s[1] == '\0';
+    if (!ok)
+        printf("TEST LEXER: ERROR empty string plus char should produce terminated string \"A\"\n");
+
+    ps_lexer_free(lexer);
+    return ok;
+}
+
 int main(void)
 {
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
@@ -196,6 +219,10 @@ int main(void)
     printf("================================================================================\n");
     test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
                sizeof(real_exponent_expected) / sizeof(ps_token_type));
+
+    printf("================================================================================\n");
+    if (!test_empty_string_plus_char())
+        return 1;
 
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");
