@@ -87,6 +87,8 @@ bool ps_parse_statement(ps_compiler *compiler, ps_ast_block *block, ps_ast_node 
         break;
     case PS_TOKEN_SEMI_COLON:
         statement_list = ps_ast_create_statement_list(start_line, start_column, 0);
+        if (statement_list == NULL)
+            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
         *statement_ptr = (ps_ast_node *)statement_list;
         break;
     default:
