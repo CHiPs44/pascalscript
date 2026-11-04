@@ -267,14 +267,16 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
     ps_identifier identifier;
     ps_ast_block *owner=NULL;
     ps_symbol *symbol=NULL;
-    ps_value *value;
+    ps_value *value = NULL;
     ps_value_data data = {0};
-    ps_symbol *constant;
+    ps_symbol *constant = NULL;
 
     EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_CONST)
     READ_NEXT_TOKEN_OR_RETURN_FALSE
     do
     {
+        value = NULL;
+        constant = NULL;
         EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IDENTIFIER)
         COPY_IDENTIFIER(identifier)
         if (ps_compiler_find_symbol(compiler, block, identifier, true,&owner,&symbol))
@@ -291,16 +293,25 @@ bool ps_parse_const(ps_compiler *compiler, ps_ast_block *block)
             TRACE_ERROR("CONSTANT_EXPRESSION")
         }
         value->string_heap_owned = ps_value_is_string(value);
-        EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_SEMI_COLON)
-        READ_NEXT_TOKEN_OR_RETURN_FALSE
+        EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_SEMI_COLON)
+        READ_NEXT_TOKEN_OR_GOTO_CLEANUP
         constant = ps_symbol_alloc(PS_SYMBOL_KIND_CONSTANT, identifier, value);
         if (constant == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         if (!ps_compiler_add_symbol(compiler, block, constant))
-            TRACE_ERROR("ADD SYMBOL")
+            goto cleanup;
+        value = NULL;
+        constant = NULL;
     } while (lexer->current_token.type == PS_TOKEN_IDENTIFIER);
 
     PARSE_END("OK")
+
+cleanup:
+    if (constant != NULL)
+        ps_symbol_free(constant);
+    else
+        ps_value_free(value);
+    return false;
 }
 
 /**
