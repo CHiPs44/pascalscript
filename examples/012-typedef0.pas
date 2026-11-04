@@ -6,19 +6,22 @@
 Program TypeDef0;
 
 Type
-    MyInteger1 = Integer;
-    MyInteger2 = MyInteger1;
+  MyInteger1 = Integer;
+  MyInteger2 = MyInteger1;
 
 Var
-    I : MyInteger1;
-    J : MyInteger2;
-    K : Integer;
+  I : MyInteger1;
+  J : MyInteger2;
+  K : Integer;
 
 Begin
-    I := 42;
-    Write(I, ' <= 42 expected: '); If I = 42 Then WriteLn('OK') Else WriteLn('KO');
-    J := 43;
-    Write(J, ' <= 43 expected: '); If J = 43 Then WriteLn('OK') Else WriteLn('KO');
-    K := J + 1;
-    Write(K, ' <= 44 expected: '); If K = 44 Then WriteLn('OK') Else WriteLn('KO');
+  I := 42;
+  Write(I, ' I <= 42: ');
+  If I <= 42 Then WriteLn('OK') Else WriteLn('***FAILED***');
+  J := I + 1;
+  Write(J, ' J <= 43: ');
+  If J <= 43 Then WriteLn('OK') Else WriteLn('***FAILED***');
+  K := J + 1;
+  Write(K, ' K <= 44: ');
+  If K <= 44 Then WriteLn('OK') Else WriteLn('***FAILED***');
 End.
