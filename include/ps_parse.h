@@ -107,7 +107,8 @@ extern "C"
                     ps_token_type_get_string(__PS_TOKEN_TYPE__, "UNKNOWN"));                                           \
             ps_token_debug(stderr, "NEXT", &lexer->current_token);                                                     \
         }                                                                                                              \
-        ps_compiler_set_message(compiler, "Expected '%s'", ps_token_get_keyword(__PS_TOKEN_TYPE__));                   \
+        ps_compiler_set_error_message(compiler, PS_ERROR_UNEXPECTED_TOKEN, "Expected '%s'",                            \
+                                      ps_token_get_keyword(__PS_TOKEN_TYPE__));                                        \
         goto cleanup;                                                                                                  \
     }
 

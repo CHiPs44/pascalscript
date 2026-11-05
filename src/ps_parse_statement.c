@@ -473,73 +473,98 @@ bool ps_parse_if_then_else(ps_compiler *compiler, ps_ast_block *block, ps_ast_if
     ps_ast_statement_list *then_branch = NULL;
     ps_ast_node *then_node = NULL;
     ps_ast_statement_list *else_branch = NULL;
-    ps_ast_statement_list *statement_list = NULL;
     ps_ast_node *else_node = NULL;
+    const char *trace_error = NULL;
 
     // IF
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_IF)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_IF)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // Condition: boolean expression
     if (!ps_parse_expression(compiler, block, &condition))
-        TRACE_ERROR("CONDITION")
+    {
+        trace_error = "CONDITION";
+        goto cleanup;
+    }
     const ps_symbol *result_type = ps_ast_node_get_type(condition);
     if (result_type != &ps_system_boolean)
-        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
+        GOTO_CLEANUP(PS_ERROR_EXPECTED_BOOLEAN);
 
     // THEN
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_THEN)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_THEN)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // An immediate ELSE means the then-branch is an empty statement.
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
         then_branch = ps_ast_create_statement_list(lexer->start_line, lexer->start_column, 0);
         if (then_branch == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     }
     else
     {
         // Statement or compound statement
         if (!ps_parse_statement(compiler, block, &then_node))
-            TRACE_ERROR("THEN")
+        {
+            trace_error = "THEN";
+            goto cleanup;
+        }
         if (then_node->kind == PS_AST_STATEMENT_LIST)
+        {
             then_branch = (ps_ast_statement_list *)(then_node);
+            then_node = NULL;
+        }
         else
         {
             // 1 statement in statement list
-            statement_list = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
-            if (statement_list == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            statement_list->statements[0] = then_node;
-            then_branch = statement_list;
+            then_branch = ps_ast_create_statement_list(then_node->line, then_node->column, 1);
+            if (then_branch == NULL)
+                GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+            then_branch->statements[0] = then_node;
+            then_node = NULL;
         }
     }
 
     // ELSE?
     if (lexer->current_token.type == PS_TOKEN_ELSE)
     {
-        READ_NEXT_TOKEN_OR_RETURN_FALSE
+        READ_NEXT_TOKEN_OR_GOTO_CLEANUP
         // Statement
         if (!ps_parse_statement(compiler, block, &else_node))
-            TRACE_ERROR("ELSE")
+        {
+            trace_error = "ELSE";
+            goto cleanup;
+        }
         if (else_node->kind == PS_AST_STATEMENT_LIST)
+        {
             else_branch = (ps_ast_statement_list *)else_node;
+            else_node = NULL;
+        }
         else
         {
-            statement_list = ps_ast_create_statement_list(else_node->line, else_node->column, 1);
-            if (statement_list == NULL)
-                RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
-            statement_list->statements[0] = else_node;
-            else_branch = statement_list;
+            else_branch = ps_ast_create_statement_list(else_node->line, else_node->column, 1);
+            if (else_branch == NULL)
+                GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
+            else_branch->statements[0] = else_node;
+            else_node = NULL;
         }
     }
 
     *if_statement = ps_ast_create_if(start_line, start_column, condition, then_branch, else_branch);
     if (*if_statement == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
+
+cleanup:
+    ps_ast_free_node(condition);
+    ps_ast_free_node(then_node);
+    ps_ast_free_node((ps_ast_node *)then_branch);
+    ps_ast_free_node(else_node);
+    ps_ast_free_node((ps_ast_node *)else_branch);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
 
 /**
@@ -556,32 +581,46 @@ bool ps_parse_repeat_until(ps_compiler *compiler, ps_ast_block *block, ps_ast_re
 
     ps_ast_statement_list *body = NULL;
     ps_ast_node *condition = NULL;
+    const char *trace_error = NULL;
 
     // REPEAT
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_REPEAT)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_REPEAT)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // STATEMENT LIST
     if (!ps_parse_statement_list(compiler, block, &body, PS_TOKEN_UNTIL))
-        TRACE_ERROR("STATEMENTS");
+    {
+        trace_error = "STATEMENTS";
+        goto cleanup;
+    }
 
     // UNTIL
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_UNTIL)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_UNTIL)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
-        TRACE_ERROR("EXPRESSION");
+    {
+        trace_error = "EXPRESSION";
+        goto cleanup;
+    }
     const ps_symbol *result_type = ps_ast_node_get_type(condition);
     if (result_type != &ps_system_boolean)
-        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
+        GOTO_CLEANUP(PS_ERROR_EXPECTED_BOOLEAN);
 
     // AST NODE => REPEAT(BODY, CONDITION)
     *repeat_statement = ps_ast_create_repeat(start_line, start_column, body, condition);
     if (*repeat_statement == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
+
+cleanup:
+    ps_ast_free_node((ps_ast_node *)body);
+    ps_ast_free_node(condition);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
 
 /**
@@ -599,40 +638,59 @@ bool ps_parse_while_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_while 
     ps_ast_node *condition = NULL;
     ps_ast_statement_list *statement_list = NULL;
     ps_ast_node *body = NULL;
+    const char *trace_error = NULL;
 
     // WHILE
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_WHILE)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_WHILE)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // CONDITION
     if (!ps_parse_expression(compiler, block, &condition))
-        TRACE_ERROR("EXPRESSION");
+    {
+        trace_error = "EXPRESSION";
+        goto cleanup;
+    }
     const ps_symbol *result_type = ps_ast_node_get_type(condition);
     if (result_type != &ps_system_boolean)
-        RETURN_ERROR(PS_ERROR_EXPECTED_BOOLEAN);
+        GOTO_CLEANUP(PS_ERROR_EXPECTED_BOOLEAN);
 
     // DO
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_DO);
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_DO);
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // BODY
     if (!ps_parse_statement(compiler, block, &body))
-        TRACE_ERROR("STATEMENT");
+    {
+        trace_error = "STATEMENT";
+        goto cleanup;
+    }
     if (body->kind == PS_AST_STATEMENT_LIST)
+    {
         statement_list = (ps_ast_statement_list *)body;
+        body = NULL;
+    }
     else
     {
         statement_list = ps_ast_create_statement_list(body->line, body->column, 1);
         if (statement_list == NULL)
-            RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         statement_list->statements[0] = body;
+        body = NULL;
     }
 
     *while_statement = ps_ast_create_while(start_line, start_column, condition, statement_list);
     if (*while_statement == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
+
+cleanup:
+    ps_ast_free_node(condition);
+    ps_ast_free_node(body);
+    ps_ast_free_node((ps_ast_node *)statement_list);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
 
 /**
@@ -655,33 +713,40 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     bool downto = false;
     ps_ast_node *statement = NULL;
     ps_ast_statement_list *body = NULL;
+    const char *trace_error = NULL;
 
     // FOR
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_FOR)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_FOR)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // CONTROL_VARIABLE
     //  - must be an ordinal simple variable, not an array item
     if (!ps_parse_variable_reference(compiler, block, &owner, &variable))
     {
-        ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Expected variable, got %s",
-                                      ps_symbol_get_kind_name(variable->kind));
-        TRACE_ERROR("EXPECTED_VARIABLE")
+        if (variable != NULL)
+            ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_VARIABLE, "Expected variable, got %s",
+                                          ps_symbol_get_kind_name(variable->kind));
+        trace_error = "EXPECTED_VARIABLE";
+        goto cleanup;
     }
     if (!ps_value_is_ordinal(variable->value))
     {
         ps_compiler_set_error_message(compiler, PS_ERROR_EXPECTED_ORDINAL, "Expected ordinal variable, got %s",
                                       ps_value_get_type_name(variable->value));
-        TRACE_ERROR("ORDINAL_VARIABLE")
+        trace_error = "ORDINAL_VARIABLE";
+        goto cleanup;
     }
 
     // :=
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_ASSIGN)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // START VALUE
     if (!ps_parse_expression(compiler, block, &start))
-        TRACE_ERROR("START")
+    {
+        trace_error = "START";
+        goto cleanup;
+    }
 
     // TO | DOWNTO
     if (lexer->current_token.type == PS_TOKEN_TO)
@@ -689,38 +754,58 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     else if (lexer->current_token.type == PS_TOKEN_DOWNTO)
         downto = true;
     else
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     // FINISH VALUE
     if (!ps_parse_expression(compiler, block, &finish))
-        TRACE_ERROR("FINISH");
+    {
+        trace_error = "FINISH";
+        goto cleanup;
+    }
 
     // DO
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_DO)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_DO)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
 
     if (!ps_parse_statement(compiler, block, &statement))
-        TRACE_ERROR("BODY")
+    {
+        trace_error = "BODY";
+        goto cleanup;
+    }
     if (PS_AST_STATEMENT_LIST == statement->kind)
     {
         body = (ps_ast_statement_list *)statement;
+        statement = NULL;
     }
     else
     {
         body = ps_ast_create_statement_list(statement->line, statement->column, 1);
+        if (body == NULL)
+            GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
         body->statements[0] = statement;
+        statement = NULL;
     }
 
     variable_node = ps_ast_create_variable_simple(start_line, start_column, owner, PS_AST_LVALUE, variable);
     if (variable_node == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     *for_statement = ps_ast_create_for(start_line, start_column, variable_node, start, finish, downto, body);
     if (*for_statement == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
 
     PARSE_END("OK")
+
+cleanup:
+    ps_ast_free_node((ps_ast_node *)variable_node);
+    ps_ast_free_node(start);
+    ps_ast_free_node(finish);
+    ps_ast_free_node(statement);
+    ps_ast_free_node((ps_ast_node *)body);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
 
 /**

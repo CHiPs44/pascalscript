@@ -31,26 +31,34 @@ static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps
     if (dimensions > PS_ARRAY_MAX_DIMENSIONS)
         RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
     ps_ast_node *indexes[dimensions];
+    int index_count = 0;
+    const char *trace_error = NULL;
+    for (int i = 0; i < dimensions; i++)
+        indexes[i] = NULL;
 
     // Parse indexes enclosed in '[' and ']', separated by ','
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_LEFT_BRACKET)
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_LEFT_BRACKET)
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
     int dimension = 0;
     do
     {
         // At least one index
         ps_ast_node *index = NULL;
         if (!ps_parse_expression(compiler, block, &index))
-            TRACE_ERROR("INDEX")
+        {
+            trace_error = "INDEX";
+            goto cleanup;
+        }
         indexes[dimension] = index;
+        index_count += 1;
         dimension += 1;
         // ',' begins another index
         if (lexer->current_token.type == PS_TOKEN_COMMA)
         {
             // Too many indexes?
             if (dimension >= dimensions)
-                RETURN_ERROR(PS_ERROR_TOO_MANY_DIMENSIONS)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
+                GOTO_CLEANUP(PS_ERROR_TOO_MANY_DIMENSIONS)
+            READ_NEXT_TOKEN_OR_GOTO_CLEANUP
             continue;
         }
         // ']' ends indexes (and loop)
@@ -58,21 +66,28 @@ static bool ps_parse_array_lvalue(ps_compiler *compiler, ps_ast_block *block, ps
         {
             // Not enough indexes?
             if (dimension != dimensions)
-                RETURN_ERROR(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
-            READ_NEXT_TOKEN_OR_RETURN_FALSE
+                GOTO_CLEANUP(PS_ERROR_NOT_ENOUGH_DIMENSIONS)
+            READ_NEXT_TOKEN_OR_GOTO_CLEANUP
             break;
         }
-        RETURN_ERROR(PS_ERROR_UNEXPECTED_TOKEN)
+        GOTO_CLEANUP(PS_ERROR_UNEXPECTED_TOKEN)
     } while (true);
 
     // Create left part of assignment
     ps_ast_variable *ast_variable = ps_ast_create_variable_array(start_line, start_column, owner, PS_AST_LVALUE,
                                                                  variable, dimensions, (ps_ast_node **)(&indexes));
     if (ast_variable == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     *lvalue = ast_variable;
 
     PARSE_END("OK")
+
+cleanup:
+    for (int i = 0; i < index_count; i++)
+        ps_ast_free_node(indexes[i]);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
 
 /**
@@ -104,6 +119,7 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
 
     ps_ast_variable *lvalue = NULL;
     ps_ast_node *rvalue = NULL;
+    const char *trace_error = NULL;
 
     // IDENTIFIER
     if (variable->kind == PS_SYMBOL_KIND_CONSTANT)
@@ -136,21 +152,33 @@ bool ps_parse_assignment(ps_compiler *compiler, ps_ast_block *block, ps_ast_assi
     }
 
     // ':='
-    EXPECT_TOKEN_OR_RETURN_FALSE(PS_TOKEN_ASSIGN);
-    READ_NEXT_TOKEN_OR_RETURN_FALSE
+    EXPECT_TOKEN_OR_GOTO_CLEANUP(PS_TOKEN_ASSIGN);
+    READ_NEXT_TOKEN_OR_GOTO_CLEANUP
     ps_ast_debug_line(1, "DEBUG\tParsing assignment to variable '%s' of type '%s'", variable->name,
                       ps_type_definition_get_name(variable->value->type->value->data.t));
 
     // RVALUE / EXPRESSION
     if (!ps_parse_expression(compiler, block, &rvalue))
-        TRACE_ERROR("EXPRESSION1");
+    {
+        trace_error = "EXPRESSION1";
+        goto cleanup;
+    }
 
     // TODO check if rvalue type matches lvalue type
 
     // Create assignement
     ps_ast_assignment *assignment = ps_ast_create_assignment(start_line, start_column, lvalue, rvalue);
     if (assignment == NULL)
-        RETURN_ERROR(PS_ERROR_OUT_OF_MEMORY)
+        GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     *assignment_ptr = assignment;
+    lvalue = NULL;
+    rvalue = NULL;
     PARSE_END("OK")
+
+cleanup:
+    ps_ast_free_node((ps_ast_node *)lvalue);
+    ps_ast_free_node(rvalue);
+    if (trace_error != NULL)
+        TRACE_ERROR(trace_error)
+    return false;
 }
