@@ -15,11 +15,11 @@
 #include "../include/ps_tools.h"
 #include <stdlib.h>
 
-char *minimal_source = "PROGRAM MINIMAL;\n"
-                       "    (* This program does nothing. *)\n"
-                       "BEGIN\n"
-                       "    { NOP! }\n"
-                       "END.\n";
+char minimal_source[] = "PROGRAM MINIMAL;\n"
+                        "    (* This program does nothing. *)\n"
+                        "BEGIN\n"
+                        "    { NOP! }\n"
+                        "END.\n";
 
 char *hello_utf8 =
         //  |         1         2         3         4         5         6         7         8|
@@ -62,8 +62,8 @@ int main(void)
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT MINIMAL\n");
-    int minimal_length = strlen(minimal_source);
-    printf("TEST BUFFER: minimal_length=%d\n", minimal_length);
+    size_t minimal_length = sizeof(minimal_source) - 1;
+    printf("TEST BUFFER: minimal_length=%zu\n", minimal_length);
     if (!ps_buffer_load_string(buffer, minimal_source, minimal_length))
     {
         printf(" => error=%d\n", buffer->error);
@@ -71,12 +71,12 @@ int main(void)
     }
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
-    int count = 0;
+    size_t count = 0;
     while (ps_buffer_read_next_char(buffer))
     {
         count += 1;
     }
-    printf("TEST BUFFER: count=%d, length=%d\n", count, minimal_length);
+    printf("TEST BUFFER: count=%zu, length=%zu\n", count, minimal_length);
     if (count != minimal_length)
     {
         printf(" => ERROR: count does not match length!\n");
@@ -84,26 +84,30 @@ int main(void)
     }
 
     printf("TEST BUFFER: SET TEXT HELLO\n");
-    if (!ps_buffer_load_string(buffer, hello_utf8, strlen(hello_utf8)))
+    if (!ps_buffer_load_string(buffer, hello_utf8, sizeof(hello_utf8) - 1))
     {
         printf(" => error=%d\n", buffer->error);
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: LOAD FILE\n");
     ps_buffer_reset(buffer);
-    static char *filename = "./test_10_buffer.pas";
+    char *filename = "/tmp/test_10_buffer.pas"; // NOSONAR
+    FILE *f = fopen(filename, "w");
+    fprintf(f, "Program Test10Buffer;\n"
+               "Begin\n"
+               " { 1234567890123456789012345678901234567890123456789012345678901234567890 }\n"
+               "End.\n");
+    fclose(f);
     if (!ps_buffer_load_file(buffer, filename))
     {
         printf("%s => error=%d, file_errno=%d\n", filename, buffer->error, buffer->file_errno);
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
@@ -112,8 +116,8 @@ int main(void)
     return EXIT_SUCCESS;
 
 failure:
-    printf("TEST BUFFER: FAILURE\n");
+    printf("TEST BUFFER: FAILURE!\n");
     if (buffer != NULL)
-        buffer = ps_buffer_free(buffer);
+        ps_buffer_free(buffer);
     return EXIT_FAILURE;
 }

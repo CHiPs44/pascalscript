@@ -17,11 +17,11 @@ Var
 Begin
   I := 42;
   Write(I, ' I <= 42: ');
-  If I <= 42 Then WriteLn('OK') Else WriteLn('***FAILED***');
+  If I <= 42 Then WriteLn('OK') Else WriteLn('FAILED!');
   J := I + 1;
   Write(J, ' J <= 43: ');
-  If J <= 43 Then WriteLn('OK') Else WriteLn('***FAILED***');
+  If J <= 43 Then WriteLn('OK') Else WriteLn('FAILED!');
   K := J + 1;
   Write(K, ' K <= 44: ');
-  If K <= 44 Then WriteLn('OK') Else WriteLn('***FAILED***');
+  If K <= 44 Then WriteLn('OK') Else WriteLn('FAILED!');
 End.

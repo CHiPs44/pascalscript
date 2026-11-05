@@ -29,9 +29,7 @@ int main(void)
     ok = ok && ps_string_stack_pop(stack) == second && ps_string_stack_pop(stack) == first;
     ok = ok && ps_string_stack_is_empty(stack) && ps_string_stack_pop(stack) == NULL;
 
-    ps_string_stack_free(stack);
-    ps_string_free(first);
-    ps_string_free(second);
-    printf("TEST STRING STACK %s\n", ok ? "OK" : "KO");
+    ps_string_stack_free(stack,true);
+    printf("TEST STRING STACK %s\n", ok ? "OK" : "FAILURE!");
     return ok ? 0 : 1;
 }

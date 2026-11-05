@@ -17,25 +17,6 @@
 #include "../include/ps_tools.h"
 #include "../include/ps_value.h"
 
-// #include "../src/ps_array.c"
-// #include "../src/ps_ast.c"
-// #include "../src/ps_ast_debug.c"
-// #include "../src/ps_executable.c"
-// #include "../src/ps_functions.c"
-// #include "../src/ps_memory.c"
-// #include "../src/ps_procedures.c"
-// #include "../src/ps_signature.c"
-// #include "../src/ps_frame_stack.c"
-// #include "../src/ps_string.c"
-// #include "../src/ps_symbol.c"
-// #include "../src/ps_symbol_table.c"
-// #include "../src/ps_system.c"
-// #include "../src/ps_tools.c"
-// #include "../src/ps_type_definition.c"
-// #include "../src/ps_value.c"
-// #include "../src/ps_subrange.c"
-// #include "../src/ps_value_type.c"
-
 int main(void)
 {
     struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};

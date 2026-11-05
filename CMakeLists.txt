@@ -63,13 +63,14 @@ function(add_c_tests DIR LABEL)
     file(GLOB TEST_C_FILES "${DIR}/*.c")
     foreach(CFILE IN LISTS TEST_C_FILES)
         get_filename_component(TEST_NAME "${CFILE}" NAME_WE)
-        add_executable("${TEST_NAME}" "${CFILE}")
+        add_executable("${TEST_NAME}" "${CFILE}" ${SOURCES})
+        target_link_libraries("${TEST_NAME}" m)
         message(STATUS "Added ${LABEL}_${TEST_NAME} for ../${DIR}/${TEST_FILE}")
         add_test(NAME "${LABEL}_${TEST_NAME}" COMMAND "${TEST_NAME}")
     endforeach()
 endfunction()
 
-# add_c_tests("${CMAKE_SOURCE_DIR}/test" "c_tests")
+add_c_tests("${CMAKE_SOURCE_DIR}/test" "c")
 
 function(add_executable_pascal_examples DIR LABEL)
     file(GLOB PAS_FILES "${CMAKE_SOURCE_DIR}/${DIR}/*.pas")
@@ -89,14 +90,21 @@ function(add_executable_pascal_examples DIR LABEL)
         if(SHOULD_ADD)
             add_test(
                 NAME "${LABEL}_${TEST_NAME}"
-                COMMAND $<TARGET_FILE:pascalscript> "../${DIR}/${TEST_FILE}"
+                COMMAND $<TARGET_FILE:pascalscript> "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}/${TEST_FILE}"
             )
-            message(STATUS "Added ${LABEL}_${TEST_NAME} for ../${DIR}/${TEST_FILE}")
+            set_tests_properties(
+                "${LABEL}_${TEST_NAME}"
+                PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED!"
+            )
+            message(
+                STATUS
+                "Added ${LABEL}_${TEST_NAME} for ${DIR}/${TEST_FILE}"
+            )
         endif()
     endforeach()
 endfunction()
 
-add_executable_pascal_examples("examples" "examples")
+add_executable_pascal_examples("examples" "pascal")
 
 add_test(
     NAME cli_absolute_path
