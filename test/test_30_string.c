@@ -11,31 +11,30 @@
 #include "../include/ps_string.h"
 #include "../include/ps_tools.h"
 
-// #include "../src/ps_memory.c"
-// #include "../src/ps_string.c"
-// #include "../src/ps_tools.c"
-
 int main(void)
 {
-    struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    setrlimit(RLIMIT_AS, &rl);
+    // struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
+    // setrlimit(RLIMIT_AS, &rl);
 
     printf("TEST STRINGS: BEGIN\n\n");
 
-    bool ok;
+    bool ok = false;
+    bool failed = false;
 
     printf("TEST STRINGS: ALLOC\n");
     ps_string *s = ps_string_alloc(PS_STRING_MAX_LEN);
     ps_string_debug(stdout, "s  ", s);
     ok = s != NULL && s->max == PS_STRING_MAX_LEN;
-    printf("TEST STRINGS: ALLOC %s\n\n", ok ? "OK" : "FAILURE!");
+    printf("TEST STRINGS: ALLOC %s\n\n", ok ? "OK" : "FAILED!");
+    failed || = !ok;
 
     printf("TEST STRINGS: SET\n");
     //                12345678901234567890123456789012345678901234
     ps_string_set(s, "The Quick Brown Fox Jumps Over The Lazy Dog!");
     ps_string_debug(stdout, "s  ", s);
     ok = s != NULL && s->len == 44;
-    printf("TEST STRINGS: SET %s\n\n", ok ? "OK" : "FAILURE!");
+    printf("TEST STRINGS: SET %s\n\n", ok ? "OK" : "FAILED!");
+    failed || = !ok;
 
     printf("TEST STRINGS: CONCAT\n");
     //                                    123456789012345678901234s
@@ -46,13 +45,15 @@ int main(void)
     ps_string *s3 = ps_string_concat(s1, s2, 60);
     ps_string_debug(stdout, "s3 ", s3);
     ok = s3 != NULL && s3->len == 44;
-    printf("TEST STRINGS: CONCAT %s\n\n", ok ? "OK" : "FAILURE!");
+    printf("TEST STRINGS: CONCAT %s\n\n", ok ? "OK" : "FAILED!");
+    failed || = !ok;
 
     printf("TEST STRINGS: SUBSTRING\n");
     ps_string *s4 = ps_string_copy(s, 11, 5);
     ps_string_debug(stdout, "s4 ", s4);
     ok = s4 != NULL && 0 == strcmp((char *)s4->str, "Brown");
-    printf("TEST STRINGS: SUBSTRING %s\n\n", ok ? "OK" : "FAILURE!");
+    printf("TEST STRINGS: SUBSTRING %s\n\n", ok ? "OK" : "FAILED!");
+    failed || = !ok;
 
     printf("TEST STRINGS: COMPARE DIFFERENT\n");
     int test = ps_string_compare(s1, s2);
@@ -60,7 +61,8 @@ int main(void)
     ps_string_debug(stdout, "s2 ", s2);
     printf("TEST STRINGS: COMPARE s1 vs s2: %d\n", test);
     ok = test > 0;
-    printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILURE!", test);
+    printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILED!", test);
+    failed || = !ok;
 
     printf("TEST STRINGS: COMPARE SAME\n");
     test = ps_string_compare(s1, s1);
@@ -68,7 +70,16 @@ int main(void)
     ps_string_debug(stdout, "s1 ", s1);
     printf("TEST STRINGS: COMPARE s1 vs s1: %d\n", test);
     ok = test == 0;
-    printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILURE!", test);
+    printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILED!", test);
+    failed || = !ok;
+
+    if (failed)
+        goto failure;
 
     printf("TEST STRINGS: END\n");
+    return EXIT_SUCCESS;
+
+failure:
+    printf("TEST STRINGS: FAILED!\n");
+    return EXIT_FAILURE;
 }

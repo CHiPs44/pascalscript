@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/resource.h>
+// #include <sys/resource.h>
 
 #include "../include/ps_config.h"
 #include "../include/ps_error.h"
@@ -42,12 +42,12 @@ char *hello_source = "Program HelloWorld;\n"
                      "Begin\n"
                      "  { Comment1 (* Comment2 *) }\n"
                      "  WriteLn('Hello, World!');\n"
-                    "  (* comment before\n"
-                    "\n"
-                    "     comment after *)\n"
-                    "  { comment before\n"
-                    "\n"
-                    "    comment after }\n"
+                     "  (* comment before\n"
+                     "\n"
+                     "     comment after *)\n"
+                     "  { comment before\n"
+                     "\n"
+                     "    comment after }\n"
                      "  WriteLn(K1, K2);\n"
                      "End.\n"
                      "";
@@ -101,28 +101,22 @@ ps_token_type quotes_expected[] = {
 };
 
 char *range_source = "1..10";
-ps_token_type range_expected[] = {
-        PS_TOKEN_INTEGER_VALUE, PS_TOKEN_RANGE, PS_TOKEN_INTEGER_VALUE
-};
+ps_token_type range_expected[] = {PS_TOKEN_INTEGER_VALUE, PS_TOKEN_RANGE, PS_TOKEN_INTEGER_VALUE};
 
 char *real_exponent_source = "1.e2";
-ps_token_type real_exponent_expected[] = {
-        PS_TOKEN_REAL_VALUE
-};
+ps_token_type real_exponent_expected[] = {PS_TOKEN_REAL_VALUE};
 
-void test_lexer(char *name, char *source, const ps_token_type *expected, int count)
+bool test_lexer(char *name, char *source, const ps_token_type *expected, int count)
 {
     int index;
-    bool failed;
-
-    // ps_memory_debug_enabled = true;
+    bool failed = false;
 
     printf("TEST LEXER: INIT %s\n", name);
     ps_lexer *lexer = ps_lexer_alloc();
     if (lexer == NULL)
     {
         printf("TEST LEXER: ERROR allocating lexer\n");
-        return;
+        return false;
     }
     printf("TEST LEXER: LOAD %s\n", name);
     if (!ps_buffer_load_string(lexer->buffer, source, strlen(source)))
@@ -130,7 +124,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
         printf("TEST LEXER: ERROR %d %s / %d %s\n", lexer->error, ps_error_get_message(lexer->error),
                lexer->buffer->error, ps_error_get_message(lexer->buffer->error));
         ps_lexer_free(lexer);
-        return;
+        return false;
     }
     ps_buffer_dump(stdout, lexer->buffer, 0, PS_BUFFER_MAX_LINES - 1);
 
@@ -142,7 +136,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
     {
         printf("TEST LEXER: ERROR %d %s / %d %s\n", lexer->error, ps_error_get_message(lexer->error),
                lexer->buffer->error, ps_error_get_message(lexer->buffer->error));
-        return;
+        return false;
     }
     do
     {
@@ -152,14 +146,14 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
             printf("TEST LEXER: %02d/%02d ERROR %d %s / %d %s\n", index + 1, count, lexer->error,
                    ps_error_get_message(lexer->error), lexer->buffer->error,
                    ps_error_get_message(lexer->buffer->error));
-                 failed = true;
+            failed = true;
         }
         else if (lexer->current_token.type != expected[index])
         {
             printf("TEST LEXER: %02d/%02d ERROR EXPECTED TOKEN %4d, GOT %4d ", index + 1, count, expected[index],
                    lexer->current_token.type);
             ps_token_debug(stdout, "", &lexer->current_token);
-                 failed = true;
+            failed = true;
         }
         else
         {
@@ -172,6 +166,7 @@ void test_lexer(char *name, char *source, const ps_token_type *expected, int cou
             index += 1;
     } while (index < count && !failed);
     ps_lexer_free(lexer);
+    return !failed;
 }
 
 static bool test_empty_string_plus_char(void)
@@ -184,10 +179,9 @@ static bool test_empty_string_plus_char(void)
         return false;
     }
 
-    bool ok = ps_buffer_load_string(lexer->buffer, source, strlen(source)) &&
-              ps_buffer_read_next_char(lexer->buffer) && ps_lexer_read_token(lexer) &&
-              lexer->current_token.type == PS_TOKEN_STRING_VALUE && ps_lexer_read_token(lexer) &&
-              lexer->current_token.type == PS_TOKEN_COMMA && ps_lexer_read_token(lexer) &&
+    bool ok = ps_buffer_load_string(lexer->buffer, source, strlen(source)) && ps_buffer_read_next_char(lexer->buffer) &&
+              ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
+              ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_COMMA && ps_lexer_read_token(lexer) &&
               lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s[0] == 'A' &&
               lexer->current_token.value.s[1] == '\0';
     if (!ok)
@@ -199,32 +193,41 @@ static bool test_empty_string_plus_char(void)
 
 int main(void)
 {
-    struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    setrlimit(RLIMIT_AS, &rl);
+    // struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
+    // setrlimit(RLIMIT_AS, &rl);
 
     printf("TEST LEXER: BEGIN\n");
 
     printf("================================================================================\n");
-    test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type));
+    if (!test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
-    test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type));
+    if (!test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
-    test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type));
+    if (!test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
-    test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type));
+    if (!test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
-    test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
-               sizeof(real_exponent_expected) / sizeof(ps_token_type));
+    if (!test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
+                    sizeof(real_exponent_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
     if (!test_empty_string_plus_char())
-        return 1;
+        goto failure;
 
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");
-    return 0;
+    return EXIT_SUCCESS;
+
+failure:
+    printf("TEST LEXER: FAILED!\n");
+    return EXIT_FAILURE;
 }

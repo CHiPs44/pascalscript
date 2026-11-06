@@ -60,27 +60,29 @@ configure_file(
 )
 
 function(add_c_tests DIR LABEL)
-    file(GLOB TEST_C_FILES "${DIR}/*.c")
-    foreach(CFILE IN LISTS TEST_C_FILES)
-        get_filename_component(TEST_NAME "${CFILE}" NAME_WE)
-        add_executable("${TEST_NAME}" "${CFILE}" ${SOURCES})
+    file(GLOB C_FILES "${DIR}/*.c")
+    foreach(C_FILE IN LISTS C_FILES)
+        get_filename_component(TEST_NAME "${C_FILE}" NAME_WE)
+        get_filename_component(TEST_FILE "${C_FILE}" NAME)
+        add_executable("${TEST_NAME}" "${C_FILE}" ${SOURCES})
         target_link_libraries("${TEST_NAME}" m)
-        message(STATUS "Added ${LABEL}_${TEST_NAME} for ../${DIR}/${TEST_FILE}")
         add_test(NAME "${LABEL}_${TEST_NAME}" COMMAND "${TEST_NAME}")
+        set_tests_properties("${LABEL}_${TEST_NAME}" PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED!")
+        message(STATUS "Added ${LABEL}_${TEST_NAME} for ${DIR}/${TEST_FILE}")
     endforeach()
 endfunction()
 
 add_c_tests("${CMAKE_SOURCE_DIR}/test" "c")
 
 function(add_executable_pascal_examples DIR LABEL)
-    file(GLOB PAS_FILES "${CMAKE_SOURCE_DIR}/${DIR}/*.pas")
-    foreach(PAS_FILE IN LISTS PAS_FILES)
-        get_filename_component(TEST_NAME "${PAS_FILE}" NAME_WE)
-        get_filename_component(TEST_FILE "${PAS_FILE}" NAME)
+    file(GLOB PASCAL_FILES "${CMAKE_SOURCE_DIR}/${DIR}/*.pas")
+    foreach(PASCAL_FILE IN LISTS PASCAL_FILES)
+        get_filename_component(TEST_NAME "${PASCAL_FILE}" NAME_WE)
+        get_filename_component(TEST_FILE "${PASCAL_FILE}" NAME)
         set(SHOULD_ADD TRUE)
         if(UNIX)
             execute_process(
-                COMMAND /usr/bin/env sh -c "test -x \"$1\"" -- "${PAS_FILE}"
+                COMMAND /usr/bin/env sh -c "test -x \"$1\"" -- "${PASCAL_FILE}"
                 RESULT_VARIABLE EXEC_CHECK
             )
             if(NOT EXEC_CHECK EQUAL 0)
