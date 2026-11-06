@@ -6,22 +6,18 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/resource.h>
 
-#include "../include/ps_array.h"
-#include "../include/ps_ast.h"
-#include "../include/ps_config.h"
-#include "../include/ps_frame_stack.h"
-#include "../include/ps_memory.h"
-#include "../include/ps_system.h"
-#include "../include/ps_tools.h"
-#include "../include/ps_value.h"
+#include "ps_array.h"
+#include "ps_ast.h"
+#include "ps_config.h"
+#include "ps_frame_stack.h"
+#include "ps_memory.h"
+#include "ps_system.h"
+#include "ps_tools.h"
+#include "ps_value.h"
 
 int main(void)
 {
-    struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    setrlimit(RLIMIT_AS, &rl);
-
     ps_ast_block *system = ps_system_alloc();
 
     printf("TEST VALUE: BEGIN\n");
@@ -60,5 +56,5 @@ int main(void)
     printf("TEST VALUE: END\n");
 
     ps_system_free(system);
-    return 0;
+    return EXIT_SUCCESS;
 }

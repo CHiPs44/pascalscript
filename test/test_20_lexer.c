@@ -6,15 +6,14 @@
 
 #include <stdio.h>
 #include <string.h>
-// #include <sys/resource.h>
 
-#include "../include/ps_config.h"
-#include "../include/ps_error.h"
-#include "../include/ps_lexer.h"
-#include "../include/ps_memory.h"
-#include "../include/ps_readall.h"
-#include "../include/ps_token.h"
-#include "../include/ps_tools.h"
+#include "ps_config.h"
+#include "ps_error.h"
+#include "ps_lexer.h"
+#include "ps_memory.h"
+#include "ps_readall.h"
+#include "ps_token.h"
+#include "ps_tools.h"
 
 char *empty_source = "Program Empty;\n"
                      "{ Comment made with curly brackets }   \n"
@@ -26,13 +25,11 @@ char *empty_source = "Program Empty;\n"
                      "End.\n"
                      "";
 ps_token_type empty_expected[] = {
-        // PROGRAM EMPTY;
+        // clang-format off
         PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
-        // BEGIN
         PS_TOKEN_BEGIN,
-        // END.
         PS_TOKEN_END, PS_TOKEN_DOT
-        // EOF
+        // clang-format on
 };
 
 char *hello_source = "Program HelloWorld;\n"
@@ -52,25 +49,18 @@ char *hello_source = "Program HelloWorld;\n"
                      "End.\n"
                      "";
 ps_token_type hello_expected[] = {
-        // PROGRAM HELLOWORLD;
+        // clang-format off
         PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
-        // CONST
         PS_TOKEN_CONST,
-        // K1 = 1234;
         PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_INTEGER_VALUE, PS_TOKEN_SEMI_COLON,
-        // K2 = 'Choose ''A'' or ''B''.';\n"
         PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
-        // BEGIN
         PS_TOKEN_BEGIN,
-        // WRITELN('Hello, World!');
         PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_STRING_VALUE, PS_TOKEN_RIGHT_PARENTHESIS,
         PS_TOKEN_SEMI_COLON,
-        // WRITELN(K1, K2);
         PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_IDENTIFIER, PS_TOKEN_COMMA, PS_TOKEN_IDENTIFIER,
         PS_TOKEN_RIGHT_PARENTHESIS, PS_TOKEN_SEMI_COLON,
-        // END.
         PS_TOKEN_END, PS_TOKEN_DOT
-        // EOF
+        // clang-format on
 };
 
 char *quotes_source = "Program Quotes;\n"
@@ -82,22 +72,16 @@ char *quotes_source = "Program Quotes;\n"
                       "End.\n"
                       "";
 ps_token_type quotes_expected[] = {
-        // PROGRAM QUOTES;
+        // clang-format off
         PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
-        // CONST K = '''X''=''Y'' ';
         PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
-        // CONST K1 = 'X';
         PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_CHAR_VALUE, PS_TOKEN_SEMI_COLON,
-        // CONST K2 = '''';
         PS_TOKEN_CONST, PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_CHAR_VALUE, PS_TOKEN_SEMI_COLON,
-        // BEGIN
         PS_TOKEN_BEGIN,
-        // WRITE(K1);
         PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_IDENTIFIER, PS_TOKEN_RIGHT_PARENTHESIS,
         PS_TOKEN_SEMI_COLON,
-        // END.
         PS_TOKEN_END, PS_TOKEN_DOT
-        // EOF
+        // clang-format on
 };
 
 char *range_source = "1..10";
@@ -140,7 +124,6 @@ bool test_lexer(char *name, char *source, const ps_token_type *expected, int cou
     }
     do
     {
-        // printf("TEST LEXER: %02d/%02d BEGIN\n", index + 1, count);
         if (!ps_lexer_read_token(lexer))
         {
             printf("TEST LEXER: %02d/%02d ERROR %d %s / %d %s\n", index + 1, count, lexer->error,
@@ -179,11 +162,17 @@ static bool test_empty_string_plus_char(void)
         return false;
     }
 
-    bool ok = ps_buffer_load_string(lexer->buffer, source, strlen(source)) && ps_buffer_read_next_char(lexer->buffer) &&
-              ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
-              ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_COMMA && ps_lexer_read_token(lexer) &&
-              lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s[0] == 'A' &&
-              lexer->current_token.value.s[1] == '\0';
+    bool ok = true;
+    ok = ok && !ps_buffer_load_string(lexer->buffer, source, sizeof(source) - 1);
+    ok = ok && !ps_buffer_read_next_char(lexer->buffer);
+    ok = ok && !ps_lexer_read_token(lexer);
+    ok = ok && lexer->current_token.type != PS_TOKEN_STRING_VALUE;
+    ok = ok && !ps_lexer_read_token(lexer);
+    ok = ok && lexer->current_token.type != PS_TOKEN_COMMA;
+    ok = ok && !ps_lexer_read_token(lexer);
+    ok = ok && lexer->current_token.type != PS_TOKEN_STRING_VALUE;
+    ok = ok && (lexer->current_token.value.s[0] != 'A');
+    ok = ok && (lexer->current_token.value.s[1] != '\0');
     if (!ok)
         printf("TEST LEXER: ERROR empty string plus char should produce terminated string \"A\"\n");
 
@@ -193,9 +182,6 @@ static bool test_empty_string_plus_char(void)
 
 int main(void)
 {
-    // struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    // setrlimit(RLIMIT_AS, &rl);
-
     printf("TEST LEXER: BEGIN\n");
 
     printf("================================================================================\n");

@@ -5,7 +5,6 @@
 */
 
 #include <stdio.h>
-#include <sys/resource.h>
 
 #include "../include/ps_memory.h"
 #include "../include/ps_string.h"
@@ -13,9 +12,6 @@
 
 int main(void)
 {
-    // struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    // setrlimit(RLIMIT_AS, &rl);
-
     printf("TEST STRINGS: BEGIN\n\n");
 
     bool ok = false;
@@ -26,7 +22,7 @@ int main(void)
     ps_string_debug(stdout, "s  ", s);
     ok = s != NULL && s->max == PS_STRING_MAX_LEN;
     printf("TEST STRINGS: ALLOC %s\n\n", ok ? "OK" : "FAILED!");
-    failed || = !ok;
+    failed = failed || !ok;
 
     printf("TEST STRINGS: SET\n");
     //                12345678901234567890123456789012345678901234
@@ -34,7 +30,7 @@ int main(void)
     ps_string_debug(stdout, "s  ", s);
     ok = s != NULL && s->len == 44;
     printf("TEST STRINGS: SET %s\n\n", ok ? "OK" : "FAILED!");
-    failed || = !ok;
+    failed = failed || !ok;
 
     printf("TEST STRINGS: CONCAT\n");
     //                                    123456789012345678901234s
@@ -46,14 +42,14 @@ int main(void)
     ps_string_debug(stdout, "s3 ", s3);
     ok = s3 != NULL && s3->len == 44;
     printf("TEST STRINGS: CONCAT %s\n\n", ok ? "OK" : "FAILED!");
-    failed || = !ok;
+    failed = failed || !ok;
 
     printf("TEST STRINGS: SUBSTRING\n");
     ps_string *s4 = ps_string_copy(s, 11, 5);
     ps_string_debug(stdout, "s4 ", s4);
     ok = s4 != NULL && 0 == strcmp((char *)s4->str, "Brown");
     printf("TEST STRINGS: SUBSTRING %s\n\n", ok ? "OK" : "FAILED!");
-    failed || = !ok;
+    failed = failed || !ok;
 
     printf("TEST STRINGS: COMPARE DIFFERENT\n");
     int test = ps_string_compare(s1, s2);
@@ -62,7 +58,7 @@ int main(void)
     printf("TEST STRINGS: COMPARE s1 vs s2: %d\n", test);
     ok = test > 0;
     printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILED!", test);
-    failed || = !ok;
+    failed = failed || !ok;
 
     printf("TEST STRINGS: COMPARE SAME\n");
     test = ps_string_compare(s1, s1);
@@ -71,7 +67,7 @@ int main(void)
     printf("TEST STRINGS: COMPARE s1 vs s1: %d\n", test);
     ok = test == 0;
     printf("TEST STRINGS: COMPARE %s (%d)\n\n", ok ? "OK" : "FAILED!", test);
-    failed || = !ok;
+    failed = failed || !ok;
 
     if (failed)
         goto failure;

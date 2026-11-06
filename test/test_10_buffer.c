@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <string.h>
-// #include <sys/resource.h>
 
 #include "../include/ps_buffer.h"
 #include "../include/ps_error.h"
@@ -31,9 +30,6 @@ char *hello_utf8 = "Program Hello;\n"
 
 int main(void)
 {
-    // struct rlimit rl = {1024 * 1024 * 8, 1024 * 1024 * 8};
-    // setrlimit(RLIMIT_AS, &rl);
-
     printf("TEST BUFFER: BEGIN\n");
 
     printf("TEST BUFFER: INIT\n");

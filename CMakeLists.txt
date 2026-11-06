@@ -32,13 +32,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRE
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
+# Build sources as library and use object files for pascalscript and C tests
+file(GLOB CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+add_library(pascalscript_core STATIC ${CORE_SOURCES})
+target_compile_options(pascalscript_core PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(pascalscript_core PUBLIC m)
 
-add_executable(pascalscript ${CMAKE_CURRENT_SOURCE_DIR}/pascalscript.c ${SOURCES})
-
+add_executable(pascalscript ${CMAKE_CURRENT_SOURCE_DIR}/pascalscript.c)
 target_compile_options(pascalscript PRIVATE -Wall -Wextra -Wpedantic)
-
-target_link_libraries(pascalscript m)
+target_link_libraries(pascalscript PRIVATE pascalscript_core)
 
 # Configure CTest's MemCheck mode when Valgrind is available.
 find_program(MEMORYCHECK_COMMAND NAMES valgrind)
@@ -60,12 +62,12 @@ configure_file(
 )
 
 function(add_c_tests DIR LABEL)
-    file(GLOB C_FILES "${DIR}/*.c")
+    file(GLOB C_FILES "${DIR}/test_*.c")
     foreach(C_FILE IN LISTS C_FILES)
         get_filename_component(TEST_NAME "${C_FILE}" NAME_WE)
         get_filename_component(TEST_FILE "${C_FILE}" NAME)
-        add_executable("${TEST_NAME}" "${C_FILE}" ${SOURCES})
-        target_link_libraries("${TEST_NAME}" m)
+        add_executable("${TEST_NAME}" "${C_FILE}")
+        target_link_libraries("${TEST_NAME}" PRIVATE pascalscript_core)
         add_test(NAME "${LABEL}_${TEST_NAME}" COMMAND "${TEST_NAME}")
         set_tests_properties("${LABEL}_${TEST_NAME}" PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED!")
         message(STATUS "Added ${LABEL}_${TEST_NAME} for ${DIR}/${TEST_FILE}")
