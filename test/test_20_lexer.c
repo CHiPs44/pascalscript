@@ -162,19 +162,19 @@ static bool test_empty_string_plus_char(void)
         return false;
     }
 
-    bool ok = true;
-    ok = ok && !ps_buffer_load_string(lexer->buffer, source, sizeof(source) - 1);
-    ok = ok && !ps_buffer_read_next_char(lexer->buffer);
-    ok = ok && !ps_lexer_read_token(lexer);
-    ok = ok && lexer->current_token.type != PS_TOKEN_STRING_VALUE;
-    ok = ok && !ps_lexer_read_token(lexer);
-    ok = ok && lexer->current_token.type != PS_TOKEN_COMMA;
-    ok = ok && !ps_lexer_read_token(lexer);
-    ok = ok && lexer->current_token.type != PS_TOKEN_STRING_VALUE;
-    ok = ok && (lexer->current_token.value.s[0] != 'A');
-    ok = ok && (lexer->current_token.value.s[1] != '\0');
+    bool ok = ps_buffer_load_string(lexer->buffer, source, sizeof(source) - 1);
+    if (ok)
+        ok = ps_buffer_read_next_char(lexer->buffer);
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
+             strcmp(lexer->current_token.value.s, "POISON") == 0;
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_COMMA;
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
+             strcmp(lexer->current_token.value.s, "A") == 0;
     if (!ok)
-        printf("TEST LEXER: ERROR empty string plus char should produce terminated string \"A\"\n");
+        printf("TEST LEXER: ERROR empty string plus char should produce string \"A\"\n");
 
     ps_lexer_free(lexer);
     return ok;

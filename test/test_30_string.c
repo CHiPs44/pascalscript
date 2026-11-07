@@ -4,7 +4,9 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/ps_memory.h"
 #include "../include/ps_string.h"
@@ -70,12 +72,14 @@ int main(void)
     failed = failed || !ok;
 
     if (failed)
-        goto failure;
+        printf("TEST STRINGS: FAILED!\n");
+    else
+        printf("TEST STRINGS: END\n");
 
-    printf("TEST STRINGS: END\n");
-    return EXIT_SUCCESS;
-
-failure:
-    printf("TEST STRINGS: FAILED!\n");
-    return EXIT_FAILURE;
+    ps_string_free(s4);
+    ps_string_free(s3);
+    ps_string_free(s2);
+    ps_string_free(s1);
+    ps_string_free(s);
+    return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
