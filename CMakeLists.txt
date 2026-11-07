@@ -33,6 +33,18 @@ set(PS_VERSION_MINOR "${CMAKE_MATCH_2}")
 set(PS_VERSION_PATCH "${CMAKE_MATCH_3}")
 set(PS_VERSION_BUILD "${CMAKE_MATCH_4}")
 project(pascalscript VERSION ${PS_VERSION_MAJOR}.${PS_VERSION_MINOR}.${PS_VERSION_PATCH}.${PS_VERSION_BUILD} LANGUAGES C)
+
+# Enable AddressSanitizer for all project targets
+# ==============================================
+option(ENABLE_ASAN "Build with AddressSanitizer" OFF)
+if(ENABLE_ASAN)
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    message(FATAL_ERROR "ENABLE_ASAN requires GCC or Clang")
+  endif()
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address)
+endif()
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/ps_version.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/ps_version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)

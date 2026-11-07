@@ -73,3 +73,21 @@ jobs:
     - name: Memcheck
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: ctest --build-config ${{ matrix.build_type }} -T memcheck --output-on-failure
+
+  asan:
+    name: AddressSanitizer
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: cmake -S . -B build-asan -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Debug -DENABLE_ASAN=ON
+
+    - name: Build
+      run: cmake --build build-asan --parallel
+
+    - name: Test
+      run: ctest --test-dir build-asan --output-on-failure
+      env:
+        ASAN_OPTIONS: detect_leaks=1

@@ -66,6 +66,22 @@ ctest --test-dir build -T memcheck
 
 CTest reports Valgrind errors as failed tests. If Valgrind is not found during configuration, MemCheck is unavailable; install it and reconfigure.
 
+For an AddressSanitizer build, use a separate build directory and enable `ENABLE_ASAN`:
+
+```sh
+cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug -DENABLE_ASAN=ON
+cmake --build build-asan
+ASAN_OPTIONS=detect_leaks=1 ctest --test-dir build-asan --output-on-failure
+```
+
+To run the CLI directly under AddressSanitizer:
+
+```sh
+ASAN_OPTIONS=detect_leaks=1 ./build-asan/pascalscript examples/000-minimal.pas
+```
+
+AddressSanitizer builds require GCC or Clang. Use the normal MemCheck instructions above for Valgrind instead.
+
 ## Examples
 
 The traditional `hello.pas` is like:
