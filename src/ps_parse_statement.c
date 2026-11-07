@@ -693,6 +693,25 @@ cleanup:
     return false;
 }
 
+static bool ps_parse_for_check_bound_type(ps_compiler *compiler, const ps_ast_node *bound, ps_symbol *variable_type)
+{
+    ps_symbol *bound_type = ps_ast_node_get_type(bound);
+    if (bound_type == NULL || bound_type->value == NULL || bound_type->value->data.t == NULL)
+        return ps_compiler_set_error_message(compiler, PS_ERROR_TYPE_MISMATCH,
+                                             "Cannot determine type of FOR loop bound");
+    ps_value from = {.type = bound_type, .data = {0}};
+    ps_value to = {.type = variable_type, .data = {0}};
+    ps_error error = ps_value_copy(&from, &to, false);
+    if (error == PS_ERROR_TYPE_MISMATCH)
+        return ps_compiler_set_error_message(
+                compiler, error, "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
+                ps_value_type_get_name(ps_value_get_type(&from)), ps_value_type_get_name(ps_value_get_base(&from)),
+                ps_value_type_get_name(ps_value_get_type(&to)), ps_value_type_get_name(ps_value_get_base(&to)));
+    if (error != PS_ERROR_NONE)
+        return ps_compiler_return_false(compiler, error);
+    return true;
+}
+
 /**
  * Parse
  *      'FOR' control_variable ':=' expression ( 'TO' | 'DOWNTO' ) expression 'DO' statement ;
@@ -747,6 +766,11 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
         trace_error = "START";
         goto cleanup;
     }
+    if (!ps_parse_for_check_bound_type(compiler, start, variable->value->type))
+    {
+        trace_error = "START_TYPE";
+        goto cleanup;
+    }
 
     // TO | DOWNTO
     if (lexer->current_token.type == PS_TOKEN_TO)
@@ -761,6 +785,11 @@ bool ps_parse_for_do(ps_compiler *compiler, ps_ast_block *block, ps_ast_for **fo
     if (!ps_parse_expression(compiler, block, &finish))
     {
         trace_error = "FINISH";
+        goto cleanup;
+    }
+    if (!ps_parse_for_check_bound_type(compiler, finish, variable->value->type))
+    {
+        trace_error = "FINISH_TYPE";
         goto cleanup;
     }
 

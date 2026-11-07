@@ -138,7 +138,11 @@ All these yield a Boolean result.
 
 ## Type compatibility matrix
 
-This table is for asssignment `:=` and parameter passing.
+This table is for:
+
+- asssignment `:=`
+- parameter passing
+- For-loop start and finish expressions (for compatibility with the control variable)
 
 Same type for left and right should be always compatible, this is not shown in the table.
 
