@@ -340,6 +340,8 @@ ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b) { PS_VALUE_SET(ps_
 
 ps_value *ps_value_set_char(ps_value *value, ps_char c) { PS_VALUE_SET(ps_system_char, c); }
 
+ps_value *ps_value_set_string(ps_value *value, ps_string *s) { PS_VALUE_SET(ps_system_string, s); }
+
 #define NULL_VALUE                                                                                                     \
     {                                                                                                                  \
         if (debug)                                                                                                     \

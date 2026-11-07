@@ -79,12 +79,18 @@ extern "C"
     /** @returns PS_ERROR_NONE if successful */
     ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check);
 
-    ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
-    ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
-    ps_value *ps_value_set_real(ps_value *value, ps_real r);
+    /** @brief Set boolean value */
     ps_value *ps_value_set_boolean(ps_value *value, ps_boolean b);
+    /** @brief Set char value */
     ps_value *ps_value_set_char(ps_value *value, ps_char c);
+    /** @brief Set integer value */
+    ps_value *ps_value_set_integer(ps_value *value, ps_integer i);
+    /** @brief Set real value */
+    ps_value *ps_value_set_real(ps_value *value, ps_real r);
+    /** @brief Set string value */
     ps_value *ps_value_set_string(ps_value *value, ps_string *s);
+    /** @brief Set unsigned value */
+    ps_value *ps_value_set_unsigned(ps_value *value, ps_unsigned u);
 
     char *ps_value_get_type_name(const ps_value *value);
     char *ps_value_get_display_string(const ps_value *value, int16_t width, int16_t precision);

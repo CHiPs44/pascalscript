@@ -66,6 +66,10 @@ static unsigned int ps_string_heap_get_hash_key(const char *z)
     return hash;
 }
 
+/**
+ * @brief Add string to heap or increment ref_count
+ * @return Index of string in heap or SIZE_MAX on error
+ */
 static size_t ps_string_heap_add_internal(ps_string_heap *heap, ps_string *s)
 {
     bool debug = false;
