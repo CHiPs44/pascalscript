@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/ps_memory.h"
-#include "../include/ps_string.h"
-#include "../include/ps_tools.h"
+#include "ps_memory.h"
+#include "ps_string.h"
+#include "ps_tools.h"
 
 int main(void)
 {
@@ -35,7 +35,7 @@ int main(void)
     failed = failed || !ok;
 
     printf("TEST STRINGS: CONCAT\n");
-    //                                    123456789012345678901234s
+    //                                123456789012345678901234s
     ps_string *s1 = ps_string_create("The Quick Brown Fox ", 30);
     ps_string_debug(stdout, "s1 ", s1);
     ps_string *s2 = ps_string_create("Jumps Over The Lazy Dog!", 30);

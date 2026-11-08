@@ -7,10 +7,10 @@
 #include <stdio.h>
 #include <sys/resource.h>
 
-#include "../include/ps_value.h"
-#include "../include/ps_symbol.h"
+#include "ps_value.h"
+#include "ps_symbol.h"
 // #define PS_SYMBOL_STACK_SIZE 3
-#include "../include/ps_symbol_stack.h"
+#include "ps_symbol_stack.h"
 
 #include "../src/ps_value.c"
 #include "../src/ps_symbol.c"

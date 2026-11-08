@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/ps_string.h"
-#include "../include/ps_string_stack.h"
+#include "ps_string.h"
+#include "ps_string_stack.h"
 
 int main(void)
 {

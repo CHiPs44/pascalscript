@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <sys/resource.h>
 
-#include "../include/ps_vm.h"
-#include "../include/ps_vm_operator.h"
+#include "ps_vm.h"
+#include "ps_vm_operator.h"
 
 ps_vm _vm;
 ps_vm *vm = &_vm;

@@ -7,10 +7,10 @@
 #include <stdio.h>
 #include <sys/resource.h>
 
-#include "../include/ps_value.h"
-#include "../include/ps_symbol_table.h"
-#include "../include/ps_symbol_stack.h"
-#include "../include/ps_vm.h"
+#include "ps_value.h"
+#include "ps_symbol_table.h"
+#include "ps_symbol_stack.h"
+#include "ps_vm.h"
 
 ps_vm _vm;
 ps_vm *vm = &_vm;

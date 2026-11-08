@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "../include/ps_system.h"
-#include "../include/ps_vm.h"
+#include "ps_system.h"
+#include "ps_vm.h"
 
 #include "../src/ps_buffer.c"
 #include "../src/ps_environment.c"

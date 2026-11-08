@@ -7,11 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/ps_buffer.h"
-#include "../include/ps_error.h"
-#include "../include/ps_memory.h"
-#include "../include/ps_readall.h"
-#include "../include/ps_tools.h"
+#include "ps_buffer.h"
+#include "ps_error.h"
+#include "ps_memory.h"
+#include "ps_readall.h"
+#include "ps_tools.h"
 #include <stdlib.h>
 
 char minimal_source[] = "PROGRAM MINIMAL;\n"
