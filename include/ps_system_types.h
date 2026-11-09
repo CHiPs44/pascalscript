@@ -45,11 +45,11 @@ extern "C"
         ps_char str[];     /** @brief string itself, zero terminated for C compatibility */
     } ps_string;
 
-    typedef uint32_t ps_set[8]; /** @brief Set of 32 * 8 = 256 bits */
+    typedef uint32_t ps_set[8]; /** @brief *FUTURE* Set of 32 * 8 = 256 bits */
 
     typedef PS_HANDLE ps_handle;
 
-    /** @brief pointer *FUTURE* */
+    /** @brief *FUTURE* pointer */
     typedef void *ps_pointer;
 
     // clang-format off

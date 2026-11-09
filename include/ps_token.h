@@ -191,16 +191,16 @@ extern "C"
         PS_TOKEN_MAX = UINT8_MAX
     } ps_token_type;
 
-    /** @brief Token value */
+    /** @brief Token value, either identifier, integer, unsigned, real, char, boolean or string */
     typedef union u_ps_token_value
     {
-        char identifier[PS_IDENTIFIER_LEN + 1]; /** @brief Identifier             */
-        ps_integer i;                           /** @brief Integer value          */
-        ps_unsigned u;                          /** @brief Unsigned integer value */
-        ps_real r;                              /** @brief Real value             */
-        ps_char c;                              /** @brief Char value             */
-        ps_boolean b;                           /** @brief Boolean value          */
-        char s[PS_STRING_MAX_LEN + 1];          /** @brief String value           */
+        char identifier[PS_IDENTIFIER_SIZE]; /** @brief Identifier             */
+        ps_integer i;                        /** @brief Integer value          */
+        ps_unsigned u;                       /** @brief Unsigned integer value */
+        ps_real r;                           /** @brief Real value             */
+        ps_char c;                           /** @brief Char value             */
+        ps_boolean b;                        /** @brief Boolean value          */
+        ps_string *s;                        /** @brief String value           */
     } ps_token_value;
 
     /** @brief Token itself: type + value*/
@@ -217,7 +217,7 @@ extern "C"
     /** @brief Convert token type to string */
     char *ps_token_type_get_string(ps_token_type token_type, char *default_value);
 
-    /** @brief Dump token to stderr */
+    /** @brief Dump token to output (stderr if NULL) */
     void ps_token_debug(FILE *output, const char *message, ps_token *token);
 
     /** @brief Convert token to string */
@@ -227,6 +227,7 @@ extern "C"
     char *ps_token_get_keyword(ps_token_type token_type);
 
     /** @brief Convert identifier to keyword */
+    /** @return PS_TOKEN_IDENTIFIER if not a keyword */
     ps_token_type ps_token_is_keyword(const char *identifier);
 
 #ifdef __cplusplus

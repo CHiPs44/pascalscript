@@ -17,26 +17,15 @@
 
 ps_string *ps_string_alloc(ps_string_len max)
 {
-    // When sizeof(ps_char) == 1 and sizeof(ps_string_len) == 1:
-    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
-    //  maximum: 1           + 1           +  255 + 1  bytes for "short" strings
-    //      => 258
-    // When sizeof(ps_char) == 1 and sizeof(ps_string_len) == 2:
-    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
-    //  maximum: 2           + 2           +  65536 + 1 chars
-    //      => 65541
-    // When sizeof(ps_char) == 2 and sizeof(ps_string_len) == 2:
-    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
-    //  maximum: 2           + 2           +  65536 + 2 "wide" chars
-    //      => 65542
     if (max == 0)
-        max = PS_STRING_MAX_LEN;
-    size_t size = sizeof(ps_string_len) + sizeof(ps_string_len) + (max + 1) * sizeof(ps_char);
+        return NULL;
+    size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
     ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     s->max = max;
     s->len = 0;
+    // for now, ensure allocated memory is cleared
     memset(s->str, '\0', max + 1);
     return s;
 }
@@ -48,12 +37,11 @@ ps_string *ps_string_free(ps_string *s)
     return NULL;
 }
 
-ps_string *ps_string_set(ps_string *s, const char *z)
+ps_string *ps_string_set(ps_string *s, ps_string_len len, const char *z)
 {
-    size_t len = z == NULL ? 0 : strlen(z); // NOSONAR
     if (len > s->max)
     {
-        errno = EINVAL;
+        errno = EINVAL; // or E2BUG?
         return NULL;
     }
     s->len = (ps_string_len)len;
@@ -63,24 +51,32 @@ ps_string *ps_string_set(ps_string *s, const char *z)
     return s;
 }
 
-ps_string *ps_string_create(const char *z, ps_string_len max)
+ps_string *ps_string_create(const char *z)
 {
     size_t len = z == NULL ? 0 : strlen(z); // NOSONAR
-    if (max == 0)
-        max = PS_STRING_MAX_LEN; // default max length
-    if (len > max)
+    if (len > PS_STRING_MAX_LEN)
+        return NULL;
+    ps_string *s = ps_string_alloc((ps_string_len)len);
+    if (s == NULL)
+        return NULL; // errno = ENOMEM
+    if (ps_string_set(s, z, (ps_string_len)len) == NULL)
     {
+        ps_string_free(s);
         errno = EINVAL;
         return NULL;
     }
-    ps_string *s = ps_string_alloc(max);
+    return s;
+}
+
+ps_string *ps_string_grow(ps_string *s, ps_string_len max)
+{
+    if (max <= s->max)
+        return NULL;
+    size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
+    s = (ps_string *)ps_memory_realloc(PS_MEMORY_STRING, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM
-    if (ps_string_set(s, z) == NULL)
-    {
-        ps_string_free(s);
-        return NULL; // errno = EINVAL
-    }
+    s->max = max;
     return s;
 }
 
@@ -95,26 +91,13 @@ ps_string *ps_string_create_char(ps_char c)
     return s;
 }
 
-ps_string *ps_string_concat(const ps_string *a, const ps_string *b, ps_string_len max)
+ps_string *ps_string_concat(const ps_string *a, const ps_string *b)
 {
     size_t len = a->len + b->len;
-    // exit if max length is specified and exceeded
-    if (max > 0)
+    if (len > PS_STRING_MAX_LEN)
     {
-        if (len > max)
-        {
-            errno = EINVAL;
-            return NULL;
-        }
-    }
-    else
-    {
-        max = PS_STRING_MAX_LEN;
-        // truncate if max length is exceeded
-        if (len > max)
-        {
-            len = PS_STRING_MAX_LEN;
-        }
+        errno = EINVAL;
+        return NULL;
     }
     ps_string *c = ps_string_alloc((ps_string_len)len);
     if (c == NULL)
@@ -143,11 +126,14 @@ ps_string *ps_string_concat_chars(ps_char a, ps_char b)
 ps_string *ps_string_append(ps_string *a, const ps_string *b)
 {
     size_t len = a->len + b->len;
-    if (len > a->max)
+    if (len > PS_STRING_MAX_LEN)
     {
         errno = EINVAL;
         return NULL;
     }
+    ps_string *c = ps_string_grow(a, (ps_string_len)len);
+    if (c == NULL)
+        return NULL; // errno = ENOMEM
     memcpy(a->str + a->len, b->str, b->len);
     a->len = (ps_string_len)len;
     return a;
@@ -169,13 +155,16 @@ ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len 
     memcpy(b->str, &a->str[from - 1], len);
     b->len = len;
     b->str[len] = '\0';
-
     return b;
 }
 
 /// @brief Compare two strings
 /// @return less than 0 if a<b, 0 if a=b, greater than 0 if a>b (uses C strcmp)
-int ps_string_compare(ps_string *a, ps_string *b) { return strcmp((char *)a->str, (char *)b->str); }
+int ps_string_compare(ps_string *a, ps_string *b)
+{
+    // just use strcmp for now
+    return strcmp((char *)a->str, (char *)b->str);
+}
 
 ps_string_len ps_string_position(ps_string *needle, ps_string *haystack)
 {
