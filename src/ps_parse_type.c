@@ -135,7 +135,7 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     switch (constant.type->value->data.t->base)
     {
     case PS_TYPE_INTEGER:
-        if (constant.data.i < 1 || constant.data.i > PS_STRING_MAX_LEN)
+        if (constant.data.i < 1 || constant.data.i > (ps_integer)PS_STRING_MAX_LEN)
             GOTO_CLEANUP(PS_ERROR_EXPECTED_STRING_LENGTH)
         len = (ps_string_len)constant.data.i;
         break;

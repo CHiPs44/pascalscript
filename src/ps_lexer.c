@@ -564,7 +564,7 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
     if (lexer->current_token.type == PS_TOKEN_CHAR_VALUE)
     {
         // S + C => S
-        if (*pos >= PS_STRING_MAX_LEN)
+        if (*pos >= (int)PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         token->value.s[(*pos)++] = lexer->current_token.value.c;
         return true;
@@ -604,7 +604,7 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
     if (token->type == PS_TOKEN_STRING_VALUE)
     {
         // S + C => S
-        if (*pos >= PS_STRING_MAX_LEN)
+        if (*pos >= (int)PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         token->value.s[(*pos)++] = lexer->current_token.value.c;
         return true;

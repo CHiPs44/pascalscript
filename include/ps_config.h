@@ -145,23 +145,33 @@ extern "C"
 #endif
 
 #ifndef PS_CHAR
-// #define PS_CHAR unsigned char (does not work for now)
-// #define PS_CHAR char
 #define PS_CHAR uint8_t
 #define PS_CHAR_MAX UINT8_MAX
 #endif
 
 #ifndef PS_STRING_MAX_LEN
-// "Short" strings
-#define PS_STRING_LEN_TYPE uint8_t
-#define PS_STRING_MAX_LEN UINT8_MAX
 /**
- * "Wide" strings
+ * "Short" strings => 255 chars capacity
+ * #define PS_STRING_LEN_TYPE uint8_t
+ * #define PS_STRING_MAX_LEN UINT8_MAX
+ * #define PS_STRING_MAX_SIZE (PS_STRING_MAX_LEN + 2 * sizeof(PS_STRING_LEN_TYPE) + 1)
+ */
+// "Long" strings, capped to 64K => 65,530 chars capacity
+#define PS_STRING_LEN_TYPE uint16_t
+#define PS_STRING_MAX_SIZE (UINT16_MAX + 1)
+#define PS_STRING_MAX_LEN (PS_STRING_MAX_SIZE - 2 * sizeof(PS_STRING_LEN_TYPE) - 1)
+#define PS_STRING_SIZE_FMT_10 PRIu16
+/**
+ * "Wide" strings => 65,536 chars capacity
  * #define PS_STRING_LEN_TYPE uint16_t
  * #define PS_STRING_MAX_LEN UINT16_MAX
- * "Ultra-wide" strings
+ * #define PS_STRING_MAX_SIZE (PS_STRING_MAX_LEN + 2 * sizeof(PS_STRING_LEN_TYPE) + 1)
+ */
+/**
+ * "Ultra-wide" strings => 4,294,967,295 chars capacity
  * #define PS_STRING_LEN_TYPE uint32_t
  * #define PS_STRING_MAX_LEN UINT32_MAX
+ * #define PS_STRING_MAX_SIZE (PS_STRING_MAX_LEN + 2 * sizeof(PS_STRING_LEN_TYPE) + 1)
  */
 #endif
 

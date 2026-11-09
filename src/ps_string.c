@@ -21,6 +21,10 @@ ps_string *ps_string_alloc(ps_string_len max)
     //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
     //  maximum: 1           + 1           +  255 + 1  bytes for "short" strings
     //      => 258
+    // When sizeof(ps_char) == 1 and sizeof(ps_string_len) == 2:
+    //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
+    //  maximum: 2           + 2           +  65536 + 1 chars
+    //      => 65541
     // When sizeof(ps_char) == 2 and sizeof(ps_string_len) == 2:
     //  allocate sizeof(max) + sizeof(len) + (max + 1) chars
     //  maximum: 2           + 2           +  65536 + 2 "wide" chars

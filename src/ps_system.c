@@ -118,8 +118,10 @@ PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", h, (ps_handle)1               
 /**********************************************************************************************************************/
 
 PS_SYSTEM_CONSTANT(unsigned, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS                                      );
-ps_string ps_version_string = {.max = 0, .len = 0, .str = "PS_VERSION"};
-PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, &ps_version_string                              );
+ps_string *ps_version_string = NULL;
+ps_value ps_value_string_ps_version={0};
+// PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, ps_version_string                              );
+ps_symbol ps_system_constant_string_ps_version = {0};
 
 /**********************************************************************************************************************/
 /* STANDARD + MATH LIBRARY                                                    */
@@ -187,6 +189,16 @@ ps_ast_block *ps_system_alloc(void)
     /**************************************************************************/
 
     ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_bitness)
+
+    // String constants are a bit more convoluted...
+    ps_version_string = ps_string_create(PS_VERSION, strlen(PS_VERSION));
+    ps_value_string_ps_version.type = &ps_system_string;
+    ps_value_string_ps_version.data.s = ps_version_string;
+    ps_system_constant_string_ps_version.kind = PS_SYMBOL_KIND_CONSTANT;
+    snprintf(ps_system_constant_string_ps_version.name, PS_IDENTIFIER_LEN, "PS_VERSION");
+    ps_system_constant_string_ps_version.value = &ps_value_string_ps_version;
+    ps_system_constant_string_ps_version.system = true;
+    ps_system_constant_string_ps_version.allocated = false;
     ps_system_constant_string_ps_version.value->data.s->len = strlen(PS_VERSION);
     ps_system_constant_string_ps_version.value->data.s->max = strlen(PS_VERSION);
     ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version)
@@ -213,6 +225,8 @@ ps_ast_block *ps_system_free(ps_ast_block *system)
 {
     if (system != NULL)
         ps_ast_free_block(system);
+    if (ps_version_string != NULL)
+        ps_string_free(ps_version_string);
     return NULL;
 }
 

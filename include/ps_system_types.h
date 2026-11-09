@@ -40,9 +40,9 @@ extern "C"
     /** @note should be allocated as sizeof(max) + sizeof(len) + (max + 1) ps_chars */
     typedef struct s_ps_string
     {
-        ps_string_len max;                  /** @brief max length */
-        ps_string_len len;                  /** @brief actual length */
-        ps_char str[PS_STRING_MAX_LEN + 1]; /** @brief string itself, zero terminated for C compatibility */
+        ps_string_len max; /** @brief max length */
+        ps_string_len len; /** @brief actual length */
+        ps_char str[];     /** @brief string itself, zero terminated for C compatibility */
     } ps_string;
 
     typedef uint32_t ps_set[8]; /** @brief Set of 32 * 8 = 256 bits */
