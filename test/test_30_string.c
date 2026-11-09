@@ -4,8 +4,8 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ps_memory.h"
@@ -27,8 +27,8 @@ int main(void)
     failed = failed || !ok;
 
     printf("TEST STRINGS: SET\n");
-    //                12345678901234567890123456789012345678901234
-    ps_string_set(s, "The Quick Brown Fox Jumps Over The Lazy Dog!");
+    //                    12345678901234567890123456789012345678901234
+    ps_string_set(s, 44, "The Quick Brown Fox Jumps Over The Lazy Dog!");
     ps_string_debug(stdout, "s  ", s);
     ok = s != NULL && s->len == 44;
     printf("TEST STRINGS: SET %s\n\n", ok ? "OK" : "FAILED!");

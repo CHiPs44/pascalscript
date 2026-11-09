@@ -59,7 +59,7 @@ ps_string *ps_string_create(const char *z)
     ps_string *s = ps_string_alloc((ps_string_len)len);
     if (s == NULL)
         return NULL; // errno = ENOMEM
-    if (ps_string_set(s, z, (ps_string_len)len) == NULL)
+    if (ps_string_set(s, z, (ps_string_len)len, z) == NULL)
     {
         ps_string_free(s);
         errno = EINVAL;

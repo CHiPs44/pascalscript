@@ -25,7 +25,7 @@ extern "C"
 
     /// @brief Set existing string to new value if length fits
     /// @return string NULL if len > max
-    ps_string *ps_string_set(ps_string *s, const char *z);
+    ps_string *ps_string_set(ps_string *s, ps_string_len len, const char *z);
 
     /// @brief Allocate and set a new string from a null terminated "C" string
     /// @example create("Hello") => "Hello"
