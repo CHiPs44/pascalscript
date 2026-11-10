@@ -33,9 +33,10 @@ extern "C"
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_create(const char *z);
 
-    /// @brief Grow string up to max chars
-    /// @return reallocated string if OK else NULL (check errno for EINVAL)
-    ps_string *ps_string_grow(ps_string *s, ps_string_len max);
+    /// @brief Grow string up to len chars upper rounded to next multiple of 16
+    /// @example grow(s, 23) will round max length to (23 + 16) & ~&15 => 39 & ~15 => 32
+    /// @return reallocated string if OK else NULL (check errno for ENOMEM)
+    ps_string *ps_string_grow(ps_string *s, ps_string_len len);
 
     /// @brief Allocate and set a new string from a char
     /// @example create_char('A') => "A"

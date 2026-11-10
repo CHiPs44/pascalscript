@@ -79,17 +79,25 @@ ps_string *ps_string_create(const char *z)
     return s;
 }
 
-ps_string *ps_string_grow(ps_string *s, ps_string_len max)
+ps_string *ps_string_grow(ps_string *s, ps_string_len len)
 {
     assert(s != NULL);
 
-    if (max <= s->max)
+    // Does it already fit?
+    if (len < s->max)
         return s;
+    // Grow to next multiple of 16
+    size_t max = (len + 16) & ~15;
+    // Cap?
+    if (max > PS_STRING_MAX_LEN)
+        max = PS_STRING_MAX_LEN;
+    // Realloc
     size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
     s = (ps_string *)ps_memory_realloc(PS_MEMORY_STRING, s, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM
-    s->max = max;
+    // Length unchanged
+    s->max = (ps_string_len)max;
 
     return s;
 }
