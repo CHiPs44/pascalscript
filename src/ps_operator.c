@@ -246,48 +246,76 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     // ADD.I/U/R/C/S
     if (key == (PS_OP_ADD << 16 | CC)) // char + char => string
     {
-        s = ps_string_alloc(2);
+        s = ps_string_concat_chars(a->data.c, b->data.c);
         if (s == NULL)
+        {
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
             return false;
-        s->str[0] = a->data.c;
-        s->str[1] = b->data.c;
-        s->len = 2;
+        }
         if (!ps_operator_add_string_result(interpreter, result, s))
             return false;
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | CS)) // char + string => string
     {
-        s = ps_string_alloc(1);
+        s = ps_string_create_char(b->data.c);
         if (s == NULL)
+        {
+            interpreter->error = PS_ERROR_STRING_TOO_LONG;
             return false;
-        s->str[0] = a->data.c;
-        s->len = 1;
-        ps_string *concat = ps_string_concat(s, b->data.s, PS_STRING_MAX_LEN);
+        }
+        ps_string *concat = ps_string_concat(s, b->data.s);
+        if (concat == NULL)
+        {
+            interpreter->error = PS_ERROR_STRING_TOO_LONG;
+            ps_string_free(s);
+            return false;
+        }
         ps_string_free(s);
         if (!ps_operator_add_string_result(interpreter, result, concat))
+        {
+            interpreter->error = PS_ERROR_GENERIC;
             return false;
+        }
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | SC)) // string + char => string
     {
-        s = ps_string_alloc(1);
+        s = ps_string_create_char(b->data.c);
         if (s == NULL)
+        {
+            interpreter->error = PS_ERROR_STRING_TOO_LONG;
             return false;
-        s->str[0] = b->data.c;
-        s->str[1] = '\0';
-        s->len = 1;
-        ps_string *concat = ps_string_concat(a->data.s, s, PS_STRING_MAX_LEN);
+        }
+        ps_string *concat = ps_string_concat(a->data.s, s);
+        if (concat == NULL)
+        {
+            interpreter->error = PS_ERROR_STRING_TOO_LONG;
+            ps_string_free(s);
+            return false;
+        }
         ps_string_free(s);
         if (!ps_operator_add_string_result(interpreter, result, concat))
+        {
+            interpreter->error = PS_ERROR_GENERIC;
             return false;
+        }
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | SS)) // string + string => string
     {
-        s = ps_string_concat(a->data.s, b->data.s, PS_STRING_MAX_LEN);
-        if (!ps_operator_add_string_result(interpreter, result, s))
+        s = ps_string_concat(a->data.s, b->data.s);
+        if (s == NULL)
+        {
+            interpreter->error = PS_ERROR_STRING_TOO_LONG;
+            ps_string_free(s);
             return false;
+        }
+        if (!ps_operator_add_string_result(interpreter, result, s))
+        {
+            interpreter->error = PS_ERROR_GENERIC;
+            return false;
+        }
         r = PS_TYPE_STRING;
     }
     else

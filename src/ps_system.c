@@ -191,7 +191,7 @@ ps_ast_block *ps_system_alloc(void)
     ADD_SYSTEM_SYMBOL(ps_system_constant_unsigned_ps_bitness)
 
     // String constants are a bit more convoluted...
-    ps_version_string = ps_string_create(PS_VERSION, strlen(PS_VERSION));
+    ps_version_string = ps_string_create(PS_VERSION);
     ps_value_string_ps_version.type = &ps_system_string;
     ps_value_string_ps_version.data.s = ps_version_string;
     ps_system_constant_string_ps_version.kind = PS_SYMBOL_KIND_CONSTANT;
@@ -199,8 +199,6 @@ ps_ast_block *ps_system_alloc(void)
     ps_system_constant_string_ps_version.value = &ps_value_string_ps_version;
     ps_system_constant_string_ps_version.system = true;
     ps_system_constant_string_ps_version.allocated = false;
-    ps_system_constant_string_ps_version.value->data.s->len = strlen(PS_VERSION);
-    ps_system_constant_string_ps_version.value->data.s->max = strlen(PS_VERSION);
     ADD_SYSTEM_SYMBOL(ps_system_constant_string_ps_version)
 
     /**************************************************************************/

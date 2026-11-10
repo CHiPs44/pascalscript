@@ -73,7 +73,7 @@ ps_string *ps_string_grow(ps_string *s, ps_string_len max)
     if (max <= s->max)
         return NULL;
     size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
-    s = (ps_string *)ps_memory_realloc(PS_MEMORY_STRING, size);
+    s = (ps_string *)ps_memory_realloc(PS_MEMORY_STRING, s, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     s->max = max;

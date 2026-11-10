@@ -34,6 +34,15 @@ int main(void)
     printf("TEST STRINGS: SET %s\n\n", ok ? "OK" : "FAILED!");
     failed = failed || !ok;
 
+    printf("TEST STRINGS: APPEND\n");
+    //                               123456
+    ps_string *b = ps_string_create("APPEND");
+    ps_string_append(s, b);
+    ps_string_debug(stdout, "s  ", s);
+    ok = s != NULL && s->len == (44+6);
+    printf("TEST STRINGS: APPEND %s\n\n", ok ? "OK" : "FAILED!");
+    failed = failed || !ok;
+
     printf("TEST STRINGS: CONCAT\n");
     //                                123456789012345678901234s
     ps_string *s1 = ps_string_create("The Quick Brown Fox ", 30);
@@ -80,6 +89,7 @@ int main(void)
     ps_string_free(s3);
     ps_string_free(s2);
     ps_string_free(s1);
+    ps_string_free(b);
     ps_string_free(s);
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
