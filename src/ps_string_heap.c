@@ -153,19 +153,14 @@ ps_string *ps_string_heap_add(ps_string_heap *heap, ps_string *s)
 
 ps_string *ps_string_heap_create(ps_string_heap *heap, const char *z)
 {
-    if (z == NULL || heap == NULL)
+    if (heap == NULL || z == NULL)
     {
         errno = EINVAL;
         return NULL;
     }
-    size_t len = ps_strnlen(z, PS_STRING_MAX_LEN + 1);
-    if (len > PS_STRING_MAX_LEN)
-    {
-        errno = EINVAL;
+    ps_string *s = ps_string_create(z);
+    if (s == NULL)
         return NULL;
-    }
-    ps_string *s = ps_string_create(z, (ps_string_len)len);
-
     ps_string *result = ps_string_heap_add(heap, s);
     if (result == NULL)
         ps_string_free(s);

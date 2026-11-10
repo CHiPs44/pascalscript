@@ -4,6 +4,7 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -17,8 +18,6 @@
 
 ps_string *ps_string_alloc(ps_string_len max)
 {
-    if (max == 0)
-        return NULL;
     size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
     ps_string *s = (ps_string *)ps_memory_malloc(PS_MEMORY_STRING, size);
     if (s == NULL)
@@ -27,6 +26,7 @@ ps_string *ps_string_alloc(ps_string_len max)
     s->len = 0;
     // for now, ensure allocated memory is cleared
     memset(s->str, '\0', max + 1);
+
     return s;
 }
 
@@ -34,20 +34,25 @@ ps_string *ps_string_free(ps_string *s)
 {
     if (s != NULL)
         ps_memory_free(PS_MEMORY_STRING, s);
+
     return NULL;
 }
 
 ps_string *ps_string_set(ps_string *s, ps_string_len len, const char *z)
 {
+    assert(s != NULL);
+
     if (len > s->max)
     {
         errno = EINVAL; // or E2BUG?
         return NULL;
     }
-    s->len = (ps_string_len)len;
+    s->len = len;
     if (z != NULL)
         memcpy(s->str, z, len);
-    s->str[len] = '\0'; // null terminate
+    // Be sure string is null terminated
+    s->str[len] = '\0';
+
     return s;
 }
 
@@ -55,11 +60,17 @@ ps_string *ps_string_create(const char *z)
 {
     size_t len = z == NULL ? 0 : strlen(z); // NOSONAR
     if (len > PS_STRING_MAX_LEN)
+    {
+        errno = EINVAL;
         return NULL;
+    }
     ps_string *s = ps_string_alloc((ps_string_len)len);
     if (s == NULL)
-        return NULL; // errno = ENOMEM
-    if (ps_string_set(s, z, (ps_string_len)len, z) == NULL)
+    {
+        errno = ENOMEM;
+        return NULL;
+    }
+    if (ps_string_set(s, (ps_string_len)len, z) == NULL)
     {
         ps_string_free(s);
         errno = EINVAL;
@@ -70,13 +81,16 @@ ps_string *ps_string_create(const char *z)
 
 ps_string *ps_string_grow(ps_string *s, ps_string_len max)
 {
+    assert(s != NULL);
+
     if (max <= s->max)
-        return NULL;
+        return s;
     size_t size = sizeof(ps_string) + (max + 1) * sizeof(ps_char);
     s = (ps_string *)ps_memory_realloc(PS_MEMORY_STRING, s, size);
     if (s == NULL)
         return NULL; // errno = ENOMEM
     s->max = max;
+
     return s;
 }
 
@@ -134,9 +148,30 @@ ps_string *ps_string_append(ps_string *a, const ps_string *b)
     ps_string *c = ps_string_grow(a, (ps_string_len)len);
     if (c == NULL)
         return NULL; // errno = ENOMEM
-    memcpy(a->str + a->len, b->str, b->len);
-    a->len = (ps_string_len)len;
-    return a;
+    memcpy(c->str + c->len, b->str, b->len);
+    c->len = (ps_string_len)len;
+    c->str[len] = '\0';
+    return c;
+}
+
+ps_string *ps_string_append_char(ps_string *s, ps_char c)
+{
+    assert(s != NULL);
+
+    size_t len = a->len + 1;
+    if (len > PS_STRING_MAX_LEN)
+    {
+        errno = EINVAL;
+        return NULL;
+    }
+    ps_string *t = ps_string_grow(s, (ps_string_len)len);
+    if (t == NULL)
+        return NULL; // errno = ENOMEM
+    t->len = (ps_string_len)len;
+    t->str[t->len - 1] = c;
+    t->str[t->len] = '\0';
+
+    return t;
 }
 
 ps_string *ps_string_copy(const ps_string *a, ps_string_len from, ps_string_len len)

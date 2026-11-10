@@ -37,9 +37,17 @@ int main(void)
     printf("TEST STRINGS: APPEND\n");
     //                               123456
     ps_string *b = ps_string_create("APPEND");
-    ps_string_append(s, b);
-    ps_string_debug(stdout, "s  ", s);
-    ok = s != NULL && s->len == (44+6);
+    ps_string *c = ps_string_append(s, b);
+    if (c == NULL)
+    {
+        ok = false;
+    }
+    else
+    {
+        s = c;
+        ps_string_debug(stdout, "s  ", s);
+        ok = s != NULL && s->len == (44 + 6);
+    }
     printf("TEST STRINGS: APPEND %s\n\n", ok ? "OK" : "FAILED!");
     failed = failed || !ok;
 

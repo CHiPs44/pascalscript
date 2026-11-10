@@ -392,15 +392,21 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
+static bool ps_lexer_append_char(ps_string *string, char c)
+{
+    ps_string_append_char(string, c);
+    return true;
+}
+
 /**
  * Read a single character or a string value enclosed in single quotes.
  */
 static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
-    char c;
-    ps_string *buffer = NULL;
+    char c = '\0';
+    char next_char = '\0';
     unsigned int pos = 0;
-    char next_char;
+    ps_string *string = ps_string_alloc(0);
 
     c = ps_buffer_peek_char(lexer->buffer);
     if (c != '\'')

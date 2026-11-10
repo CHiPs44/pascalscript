@@ -248,58 +248,35 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
     {
         s = ps_string_concat_chars(a->data.c, b->data.c);
         if (s == NULL)
-        {
-            interpreter->error = PS_ERROR_OUT_OF_MEMORY;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         if (!ps_operator_add_string_result(interpreter, result, s))
-            return false;
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | CS)) // char + string => string
     {
-        s = ps_string_create_char(b->data.c);
+        s = ps_string_create_char(a->data.c);
         if (s == NULL)
-        {
-            interpreter->error = PS_ERROR_STRING_TOO_LONG;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         ps_string *concat = ps_string_concat(s, b->data.s);
-        if (concat == NULL)
-        {
-            interpreter->error = PS_ERROR_STRING_TOO_LONG;
-            ps_string_free(s);
-            return false;
-        }
         ps_string_free(s);
+        if (concat == NULL)
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         if (!ps_operator_add_string_result(interpreter, result, concat))
-        {
-            interpreter->error = PS_ERROR_GENERIC;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | SC)) // string + char => string
     {
         s = ps_string_create_char(b->data.c);
         if (s == NULL)
-        {
-            interpreter->error = PS_ERROR_STRING_TOO_LONG;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         ps_string *concat = ps_string_concat(a->data.s, s);
-        if (concat == NULL)
-        {
-            interpreter->error = PS_ERROR_STRING_TOO_LONG;
-            ps_string_free(s);
-            return false;
-        }
         ps_string_free(s);
+        if (concat == NULL)
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         if (!ps_operator_add_string_result(interpreter, result, concat))
-        {
-            interpreter->error = PS_ERROR_GENERIC;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         r = PS_TYPE_STRING;
     }
     else if (key == (PS_OP_ADD << 16 | SS)) // string + string => string
@@ -307,15 +284,11 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         s = ps_string_concat(a->data.s, b->data.s);
         if (s == NULL)
         {
-            interpreter->error = PS_ERROR_STRING_TOO_LONG;
             ps_string_free(s);
-            return false;
+            return ps_interpreter_return_false(interpreter, PS_ERROR_STRING_TOO_LONG);
         }
         if (!ps_operator_add_string_result(interpreter, result, s))
-        {
-            interpreter->error = PS_ERROR_GENERIC;
-            return false;
-        }
+            return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
         r = PS_TYPE_STRING;
     }
     else
