@@ -92,6 +92,25 @@ bool ps_lexer_read_next_char(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, lexer->buffer->error, "Cannot read next character");
 }
 
+static bool ps_lexer_append_char(ps_lexer *lexer, ps_string **string, char c)
+{
+    ps_string *old = string == NULL ? lexer->current_token.value.s : *string;
+    errno = 0;
+    ps_string *new = ps_string_append_char(old, c);
+    if (new == NULL)
+    {
+        lexer->error = ps_error_map_errno();
+        return false;
+    }
+    if (string == NULL)
+    {
+        lexer->current_token.value.s = new;
+        return true;
+    }
+    *string = new;
+    return true;
+}
+
 static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 {
     char c = ps_buffer_peek_char(lexer->buffer);
@@ -243,7 +262,9 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
     {
         if (pos >= PS_BITNESS)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
-        buffer[pos++] = c;
+        pos += 1;
+        if (!ps_lexer_append_char(lexer, NULL, c))
+            return false;
         GET_NEXT_CHAR(c)
     } while (strchr(digits, c) != NULL);
     buffer[pos] = '\0';
@@ -260,7 +281,9 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
     {                                                                                                                  \
         if (pos >= 32)                                                                                                 \
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                       \
-        buffer[pos++] = c;                                                                                             \
+        pos += 1;                                                                                                      \
+        if (!ps_lexer_append_char(lexer, NULL, c))                                                                     \
+            return false;                                                                                              \
         GET_NEXT_CHAR(c)                                                                                               \
     }
 
@@ -320,7 +343,10 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     if (c == '.')
     {
         is_real = true;
-        buffer[pos++] = '0';
+        pos += 1;
+        if (!ps_lexer_append_char(lexer, NULL, c))
+            return false;
+        GET_NEXT_CHAR(c)
     }
 
     do
@@ -393,25 +419,6 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
-static bool ps_lexer_append_char(ps_lexer *lexer, ps_string **string, char c)
-{
-    ps_string *old = string == NULL ? lexer->current_token.value.s : *string;
-    errno = 0;
-    const ps_string *new = ps_string_append_char(old, c);
-    if (new == NULL)
-    {
-        lexer->error = ps_error_map_errno();
-        return false;
-    }
-    if (string == NULL)
-    {
-        lexer->current_token.value.s = new;
-        return true;
-    }
-    *string = new;
-    return true;
-}
-
 /**
  * Read a single character or a string value enclosed in single quotes.
  */
@@ -443,7 +450,10 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
             if (next_char == '\'')
             {
                 CHECK_STRING_OVERFLOW
-                buffer[pos++] = '\'';
+                pos += 1;
+                if (!ps_lexer_append_char(lexer, &string, c))
+                    return false;
+                GET_NEXT_CHAR(c)
                 ADVANCE() // Consume the first quote
                 ADVANCE() // Consume the second quote
             }
@@ -457,20 +467,23 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
         else
         {
             CHECK_STRING_OVERFLOW
-            buffer[pos++] = c;
+            pos += 1;
+            if (!ps_lexer_append_char(lexer, &string, c))
+                return false;
+            GET_NEXT_CHAR(c)
             ADVANCE()
         }
     }
-    buffer[pos] = '\0';
+    string->str[pos] = '\0';
     if (pos == 1)
     {
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-        lexer->current_token.value.c = buffer[0];
+        lexer->current_token.value.c = string->str[0];
     }
     else
     {
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
-        (void)ps_strscpy((char *)lexer->current_token.value.s, buffer, PS_STRING_MAX_LEN + 1);
+        lexer->current_token.value.s = string;
     }
     return true;
 }
@@ -551,13 +564,13 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         }
         // S => S
         token->type = PS_TOKEN_STRING_VALUE;
-        int len = ps_strscpy(token->value.s, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-        if (len == -E2BIG)
+        ps_string *new = ps_string_append(token->value.s, lexer->current_token.value.s);
+        if (new == NULL)
         {
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
         }
-        errno = 0;
-        *pos = len;
+        token->value.s = new;
+        *pos = new->len;
         return true;
     }
     if (token->type == PS_TOKEN_CHAR_VALUE)
@@ -565,20 +578,22 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         if (lexer->current_token.type == PS_TOKEN_CHAR_VALUE)
         {
             // C + C => S
-            token->type = PS_TOKEN_STRING_VALUE;
-            token->value.s[0] = token->value.c;
-            token->value.s[1] = lexer->current_token.value.c;
+            ps_string *new = ps_string_concat_chars(token->value.c, lexer->current_token.value.c);
             *pos = 2;
+            token->type = PS_TOKEN_STRING_VALUE;
+            token->value.s = new;
             return true;
         }
         // C + S => S
         token->type = PS_TOKEN_STRING_VALUE;
-        token->value.s[0] = token->value.c;
-        size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-        if (*pos + len > PS_STRING_MAX_LEN)
-            return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-        (void)ps_strscpy(token->value.s + 1, lexer->current_token.value.s, PS_STRING_MAX_LEN);
-        *pos += len;
+        token->value.s = ps_string_create_char(token->value.c);
+        if (token->value.s == NULL)
+            return ps_lexer_return_error(lexer, ps_error_map_errno(), "CREATE_CHAR!");
+        ps_string *new = ps_string_append(token->value.s, lexer->current_token.value.s);
+        if (new == NULL)
+            return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_STRING!");
+        token->value.s = new;
+        *pos += new->len;
         return true;
     }
     if (lexer->current_token.type == PS_TOKEN_CHAR_VALUE)
@@ -586,14 +601,17 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         // S + C => S
         if (*pos >= (int)PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-        token->value.s[(*pos)++] = lexer->current_token.value.c;
+        ps_string *new = ps_string_append_char(token->value.s, lexer->current_token.value.c);
+        if (new == NULL)
+            return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_CHAR!");
+        token->value.s = new;
+        *pos += 1;
         return true;
     }
     // S + S => S
-    size_t len = ps_strnlen(lexer->current_token.value.s, PS_STRING_MAX_LEN + 1);
-    if (ps_strscpy(token->value.s + *pos, lexer->current_token.value.s, PS_STRING_MAX_LEN + 1 - *pos) == -E2BIG)
-        return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-    *pos += len;
+    ps_string *new = ps_string_append(token->value.s, lexer->current_token.value.s);
+    if (new == NULL)
+        return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_STRING!");
     return true;
 }
 
@@ -615,8 +633,9 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
     if (token->type == PS_TOKEN_CHAR_VALUE)
     {
         token->type = PS_TOKEN_STRING_VALUE;
-        token->value.s[0] = token->value.c;
-        token->value.s[1] = lexer->current_token.value.c;
+        ps_string *new = ps_string_concat_chars(token->value.c, lexer->current_token.value.c);
+        if (new == NULL)
+            return ps_lexer_return_error(lexer, ps_error_map_errno(), "CONCAT_CHARS!");
         *pos = 2;
         return true;
     }
@@ -626,7 +645,11 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         // S + C => S
         if (*pos >= (int)PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-        token->value.s[(*pos)++] = lexer->current_token.value.c;
+        // token->value.s[(*pos)++] = lexer->current_token.value.c;
+        ps_string *new = ps_string_append_char(token->value.s, lexer->current_token.value.c);
+        if (new == NULL)
+            return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_CHAR!");
+        token->value.s = new;
         return true;
     }
 
@@ -663,8 +686,6 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
             return false;
         c = ps_buffer_peek_char(lexer->buffer);
     } while (c == '\'' || c == '^' || c == '#');
-    if (token.type == PS_TOKEN_STRING_VALUE)
-        token.value.s[pos] = '\0';
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
     return true;
@@ -905,7 +926,7 @@ char *ps_lexer_get_debug_value(ps_lexer *lexer)
         snprintf(value, sizeof(value), "CHAR '%c'", lexer->current_token.value.c);
         break;
     case PS_TOKEN_STRING_VALUE:
-        (void)ps_strscpy(string, lexer->current_token.value.s, sizeof(string));
+        (void)ps_strscpy(string, (char *)lexer->current_token.value.s->str, sizeof(string));
         snprintf(value, sizeof(value), "STRING \"%s\"", string);
         break;
     case PS_TOKEN_IDENTIFIER:

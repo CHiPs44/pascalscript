@@ -310,7 +310,7 @@ void ps_string_debug(FILE *f, char *message, ps_string *s)
 {
     if (f == NULL)
         f = stderr;
-    if (message == NULL || strlen(message == 0)) // NOSONAR
+    if (message == NULL || strlen(message) == 0) // NOSONAR
         message = "PS_STRING: ";
     fprintf(f, "DEBUG\t%s%s\n", message, ps_string_dump(s));
 }

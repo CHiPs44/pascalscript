@@ -481,7 +481,7 @@ static bool ps_parse_factor(ps_compiler *compiler, ps_ast_block *block, ps_ast_n
         break;
     case PS_TOKEN_STRING_VALUE:
         factor_value.type = &ps_system_string;
-        factor_value.data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
+        factor_value.data.s = ps_string_heap_create(compiler->string_heap, (char *)lexer->current_token.value.s->str);
         if (factor_value.data.s == NULL)
         {
             ps_compiler_set_error_message(compiler, ps_error_map_errno(), "Failed to create string value: %s",
