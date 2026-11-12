@@ -166,7 +166,7 @@ ps_string *ps_string_append_char(ps_string *s, ps_char c)
 {
     assert(s != NULL);
 
-    size_t len = a->len + 1;
+    size_t len = s->len + 1;
     if (len > PS_STRING_MAX_LEN)
     {
         errno = EINVAL;
@@ -297,12 +297,12 @@ ps_string *ps_string_uppercase(const ps_string *s)
 char *ps_string_dump(ps_string *s)
 {
     const ps_string_len width = PS_IDENTIFIER_LEN;
+    const int format = PS_STRING_MAX_LEN > 255 ? 5 : 3; // NOSONAR
     static char buffer[128];
     if (s == NULL)
         snprintf(buffer, sizeof(buffer), "NULL");
     else
-        snprintf(buffer, sizeof(buffer), "max=%0*d, len=%0*d, str=\"%.*s%s\"", PS_STRING_MAX_LEN > 255 ? 5 : 3, s->max,
-                 PS_STRING_MAX_LEN > 255 ? 5 : 3, s->len, width, s->str, s->len > width ? "..." : "");
+        snprintf(buffer, sizeof(buffer), "%0*d/%0*d \"%.*s\"", format, s->len, format, s->max, width, s->str);
     return buffer;
 }
 
@@ -310,7 +310,7 @@ void ps_string_debug(FILE *f, char *message, ps_string *s)
 {
     if (f == NULL)
         f = stderr;
-    if (message == NULL || 0 == strlen(message))
+    if (message == NULL || strlen(message == 0)) // NOSONAR
         message = "PS_STRING: ";
     fprintf(f, "DEBUG\t%s%s\n", message, ps_string_dump(s));
 }

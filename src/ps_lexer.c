@@ -16,6 +16,7 @@
 #include "ps_error.h"
 #include "ps_lexer.h"
 #include "ps_memory.h"
+#include "ps_string.h"
 #include "ps_token.h"
 #include "ps_tools.h"
 
@@ -392,9 +393,22 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
         return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
 
-static bool ps_lexer_append_char(ps_string *string, char c)
+static bool ps_lexer_append_char(ps_lexer *lexer, ps_string **string, char c)
 {
-    ps_string_append_char(string, c);
+    ps_string *old = string == NULL ? lexer->current_token.value.s : *string;
+    errno = 0;
+    const ps_string *new = ps_string_append_char(old, c);
+    if (new == NULL)
+    {
+        lexer->error = ps_error_map_errno();
+        return false;
+    }
+    if (string == NULL)
+    {
+        lexer->current_token.value.s = new;
+        return true;
+    }
+    *string = new;
     return true;
 }
 
