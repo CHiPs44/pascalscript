@@ -41,7 +41,7 @@ int main(void)
     }
 
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    (void)ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT EMPTY\n");
@@ -51,7 +51,7 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    (void)ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: SET TEXT MINIMAL\n");
@@ -63,7 +63,7 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    (void)ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     size_t count = 0;
     while (ps_buffer_read_next_char(buffer))
     {
@@ -83,7 +83,7 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    (void)ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: LOAD FILE\n");
@@ -101,11 +101,11 @@ int main(void)
         goto failure;
     }
     printf("TEST BUFFER: DUMP\n");
-    ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
+    (void)ps_buffer_dump(stdout, buffer, 0, PS_BUFFER_MAX_LINES - 1);
     printf("\n");
 
     printf("TEST BUFFER: END\n");
-    ps_buffer_free(buffer);
+    (void)ps_buffer_free(buffer);
     return EXIT_SUCCESS;
 
 failure:

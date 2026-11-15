@@ -5,5 +5,6 @@
 *)
 Program Hello;
 Begin
-    WriteLn('Hello', ', ', 'world', '!');
+    WriteLn('Hello, world!');
+    // WriteLn('Hello', ', ', 'world', '!');
 End.

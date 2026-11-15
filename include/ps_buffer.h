@@ -78,11 +78,17 @@ extern "C"
     /** @brief Read next char of buffer */
     bool ps_buffer_read_next_char(ps_buffer *buffer);
 
-    /** @brief Get current char of buffer */
-    char ps_buffer_peek_char(const ps_buffer *buffer);
+    /**
+     * @brief Get current char of buffer
+     * @return char or EOF
+     */
+    int ps_buffer_peek_char(const ps_buffer *buffer);
 
-    /** @brief Peek next char of buffer */
-    char ps_buffer_peek_next_char(const ps_buffer *buffer);
+    /**
+     * @brief Peek next char of buffer
+     * @return char or EOF
+     */
+    int ps_buffer_peek_next_char(const ps_buffer *buffer);
 
     /** @brief Send debug message for buffer to file (stderr if NULL)  */
     void ps_buffer_debug(FILE *output, const ps_buffer *buffer, char *message);

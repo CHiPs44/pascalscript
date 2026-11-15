@@ -343,14 +343,14 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
     return 15; // <== margin guide for 80 columns
 }
 
-char ps_buffer_peek_char(const ps_buffer *buffer)
+int ps_buffer_peek_char(const ps_buffer *buffer)
 {
-    return buffer->error == PS_ERROR_NONE ? buffer->current_char : '\0';
+    return buffer->error == PS_ERROR_NONE ? buffer->current_char : EOF;
 }
 
-char ps_buffer_peek_next_char(const ps_buffer *buffer)
+int ps_buffer_peek_next_char(const ps_buffer *buffer)
 {
-    return buffer->error == PS_ERROR_NONE ? buffer->next_char : '\0';
+    return buffer->error == PS_ERROR_NONE ? buffer->next_char : EOF;
 }
 
 bool ps_buffer_read_next_char(ps_buffer *buffer)

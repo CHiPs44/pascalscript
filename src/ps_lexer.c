@@ -92,11 +92,38 @@ bool ps_lexer_read_next_char(ps_lexer *lexer)
     return ps_lexer_return_error(lexer, lexer->buffer->error, "Cannot read next character");
 }
 
+/**
+ * @brief Append char to current token (string=NULL) or given string
+ * @return false on out of memory or string length overflow
+ */
 static bool ps_lexer_append_char(ps_lexer *lexer, ps_string **string, char c)
 {
     ps_string *old = string == NULL ? lexer->current_token.value.s : *string;
     errno = 0;
     ps_string *new = ps_string_append_char(old, c);
+    if (new == NULL)
+    {
+        lexer->error = ps_error_map_errno();
+        return false;
+    }
+    if (string == NULL)
+    {
+        lexer->current_token.value.s = new;
+        return true;
+    }
+    *string = new;
+    return true;
+}
+
+/**
+ * @brief Append string to current token (string=NULL) or given string
+ * @return false on out of memory or string length overflow
+ */
+static bool ps_lexer_append_string(ps_lexer *lexer, ps_string **string, const ps_string *append)
+{
+    ps_string *old = string == NULL ? lexer->current_token.value.s : *string;
+    errno = 0;
+    ps_string *new = ps_string_append(old, append);
     if (new == NULL)
     {
         lexer->error = ps_error_map_errno();
@@ -136,7 +163,7 @@ static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
         while (c != '}')
         {
             GET_NEXT_CHAR(c)
-            if (c == '\0')
+            if (c == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE()
@@ -253,7 +280,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
 {
     char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     char *end = NULL;
     if (strchr(digits, c) == NULL)
@@ -263,7 +290,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         if (pos >= PS_BITNESS)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
         pos += 1;
-        if (!ps_lexer_append_char(lexer, NULL, c))
+        if (!ps_lexer_append_char(lexer, NULL, (char)c))
             return false;
         GET_NEXT_CHAR(c)
     } while (strchr(digits, c) != NULL);
@@ -279,11 +306,9 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
 
 #define APPEND_CHAR_DEC()                                                                                              \
     {                                                                                                                  \
-        if (pos >= 32)                                                                                                 \
+        if (pos >= PS_BITNESS)                                                                                         \
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                       \
-        pos += 1;                                                                                                      \
-        if (!ps_lexer_append_char(lexer, NULL, c))                                                                     \
-            return false;                                                                                              \
+        buffer[pos++] = (char)c;                                                                                       \
         GET_NEXT_CHAR(c)                                                                                               \
     }
 
@@ -329,12 +354,12 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
 
 static bool ps_lexer_read_number_dec(ps_lexer *lexer)
 {
-    char buffer[33] = {0};
+    char buffer[PS_BITNESS + 1] = {0};
     int pos = 0;
     bool is_real = false;
     bool has_exponent = false;
     char *end = NULL;
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
 
     // Check if the first character is a digit or a dot
     if (!isdigit(c) && c != '.')
@@ -344,7 +369,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     {
         is_real = true;
         pos += 1;
-        if (!ps_lexer_append_char(lexer, NULL, c))
+        if (!ps_lexer_append_char(lexer, NULL, (char)c))
             return false;
         GET_NEXT_CHAR(c)
     }
@@ -395,7 +420,7 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
  */
 static bool ps_lexer_read_number(ps_lexer *lexer)
 {
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     if (c == '%') // Binary?
     {
         GET_NEXT_CHAR(c)
@@ -424,8 +449,8 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
  */
 static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
-    char c = '\0';
-    char next = '\0';
+    int c = '\0';
+    int next = '\0';
     unsigned int pos = 0;
     ps_string *string = ps_string_alloc(0);
 
@@ -438,7 +463,7 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     while (true)
     {
         c = ps_buffer_peek_char(lexer->buffer);
-        if (c == '\0')
+        if (c == EOF)
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
                                          "Unexpected end of file in char or string value");
         if (c == '\n')
@@ -451,11 +476,10 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
             {
                 CHECK_STRING_OVERFLOW
                 pos += 1;
-                if (!ps_lexer_append_char(lexer, &string, c))
+                if (!ps_lexer_append_char(lexer, &string, (char)c))
                     return false;
-                GET_NEXT_CHAR(c)
-                ADVANCE() // Consume the first quote
-                ADVANCE() // Consume the second quote
+                GET_NEXT_CHAR(c) // Consume the first quote
+                ADVANCE()        // Consume the second quote
             }
             else
             {
@@ -468,10 +492,9 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
         {
             CHECK_STRING_OVERFLOW
             pos += 1;
-            if (!ps_lexer_append_char(lexer, &string, c))
+            if (!ps_lexer_append_char(lexer, &string, (char)c))
                 return false;
             GET_NEXT_CHAR(c)
-            ADVANCE()
         }
     }
     string->str[pos] = '\0';
@@ -618,6 +641,8 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
     ps_string *new = ps_string_append(token->value.s, lexer->current_token.value.s);
     if (new == NULL)
         return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_STRING!");
+    token->value.s = new;
+    *pos += new->len;
     return true;
 }
 
@@ -635,17 +660,16 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         *pos = 1;
         return true;
     }
-
     if (token->type == PS_TOKEN_CHAR_VALUE)
     {
         token->type = PS_TOKEN_STRING_VALUE;
         ps_string *new = ps_string_concat_chars(token->value.c, lexer->current_token.value.c);
         if (new == NULL)
             return ps_lexer_return_error(lexer, ps_error_map_errno(), "CONCAT_CHARS!");
+        token->value.s = new;
         *pos = 2;
         return true;
     }
-
     if (token->type == PS_TOKEN_STRING_VALUE)
     {
         // S + C => S
@@ -658,7 +682,6 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         token->value.s = new;
         return true;
     }
-
     // Should not happen
     return false;
 }

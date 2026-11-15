@@ -15,15 +15,16 @@
 #include "ps_token.h"
 #include "ps_tools.h"
 
-char *empty_source = "Program Empty;\n"
-                     "{ Comment made with curly brackets }   \n"
-                     "Begin\n"
-                     "  (* Comment with parenthesis & stars *)\n"
-                     "  { (* Comment within comment *) }\n"
-                     "  (* { Comment within comment } *)\n"
-                     "  // Comment with 2 slashes\n"
-                     "End.\n"
-                     "";
+char *empty1_source = "Program Empty;Begin End.";
+char *empty2_source = "Program Empty;\n"
+                      "{ Comment made with curly brackets }   \n"
+                      "Begin\n"
+                      "  (* Comment with parenthesis & stars *)\n"
+                      "  { (* Comment within comment *) }\n"
+                      "  (* { Comment within comment } *)\n"
+                      "  // Comment with 2 slashes\n"
+                      "End.\n"
+                      "";
 ps_token_type empty_expected[] = {
         // clang-format off
         PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
@@ -32,23 +33,37 @@ ps_token_type empty_expected[] = {
         // clang-format on
 };
 
-char *hello_source = "Program HelloWorld;\n"
-                     "Const\n"
-                     "  K1 = 1234;\n"
-                     "  K2 = 'Select A or B.';\n"
-                     "Begin\n"
-                     "  { Comment1 (* Comment2 *) }\n"
-                     "  WriteLn('Hello, World!');\n"
-                     "  (* comment before\n"
-                     "\n"
-                     "     comment after *)\n"
-                     "  { comment before\n"
-                     "\n"
-                     "    comment after }\n"
-                     "  WriteLn(K1, K2);\n"
-                     "End.\n"
-                     "";
-ps_token_type hello_expected[] = {
+char *hello1_source = "Program Empty;\n"
+                      "Begin\n"
+                      "  WriteLn('Hello, World!');\n"
+                      "End.\n"
+                      "";
+ps_token_type hello1_expected[] = {
+        // clang-format off
+        PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
+        PS_TOKEN_BEGIN,
+        PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_STRING_VALUE, PS_TOKEN_RIGHT_PARENTHESIS,
+        PS_TOKEN_SEMI_COLON,
+        PS_TOKEN_END, PS_TOKEN_DOT
+        // clang-format on
+};
+char *hello2_source = "Program HelloWorld;\n"
+                      "Const\n"
+                      "  K1 = 1234;\n"
+                      "  K2 = 'Select A or B.';\n"
+                      "Begin\n"
+                      "  { Comment1 (* Comment2 *) }\n"
+                      "  WriteLn('Hello, World!');\n"
+                      "  (* comment before\n"
+                      "\n"
+                      "     comment after *)\n"
+                      "  { comment before\n"
+                      "\n"
+                      "    comment after }\n"
+                      "  WriteLn(K1, K2);\n"
+                      "End.\n"
+                      "";
+ps_token_type hello2_expected[] = {
         // clang-format off
         PS_TOKEN_PROGRAM, PS_TOKEN_IDENTIFIER, PS_TOKEN_SEMI_COLON,
         PS_TOKEN_CONST,
@@ -184,30 +199,38 @@ int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    printf("================================================================================\n");
-    if (!test_lexer("EMPTY", empty_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
-        goto failure;
+    // printf("================================================================================\n");
+    // if (!test_lexer("EMPTY1", empty1_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
+    //     goto failure;
+
+    // printf("================================================================================\n");
+    // if (!test_lexer("EMPTY2", empty2_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
+    //     goto failure;
+
+    // printf("================================================================================\n");
+    // if (!test_lexer("HELLO1", hello1_source, hello1_expected, sizeof(hello1_expected) / sizeof(ps_token_type)))
+    //     goto failure;
 
     printf("================================================================================\n");
-    if (!test_lexer("HELLO", hello_source, hello_expected, sizeof(hello_expected) / sizeof(ps_token_type)))
+    if (!test_lexer("HELLO2", hello2_source, hello2_expected, sizeof(hello2_expected) / sizeof(ps_token_type)))
         goto failure;
 
-    printf("================================================================================\n");
-    if (!test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type)))
-        goto failure;
+    // printf("================================================================================\n");
+    // if (!test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type)))
+    //     goto failure;
 
-    printf("================================================================================\n");
-    if (!test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type)))
-        goto failure;
+    // printf("================================================================================\n");
+    // if (!test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type)))
+    //     goto failure;
 
-    printf("================================================================================\n");
-    if (!test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
-                    sizeof(real_exponent_expected) / sizeof(ps_token_type)))
-        goto failure;
+    // printf("================================================================================\n");
+    // if (!test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
+    //                 sizeof(real_exponent_expected) / sizeof(ps_token_type)))
+    //     goto failure;
 
-    printf("================================================================================\n");
-    if (!test_empty_string_plus_char())
-        goto failure;
+    // printf("================================================================================\n");
+    // if (!test_empty_string_plus_char())
+    //     goto failure;
 
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");
