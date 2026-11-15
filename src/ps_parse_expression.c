@@ -860,7 +860,7 @@ bool ps_parse_constant_expression(ps_compiler *compiler, ps_ast_block *block, ps
         break;
     case PS_TOKEN_STRING_VALUE:
         constant->type = &ps_system_string;
-        constant->data.s = ps_string_heap_create(compiler->string_heap, lexer->current_token.value.s);
+        constant->data.s = ps_string_heap_create(compiler->string_heap, (char *)lexer->current_token.value.s->str);
         if (constant->data.s == NULL)
         {
             compiler->error = PS_ERROR_OUT_OF_MEMORY;

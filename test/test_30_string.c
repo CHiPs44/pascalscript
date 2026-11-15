@@ -53,11 +53,11 @@ int main(void)
 
     printf("TEST STRINGS: CONCAT\n");
     //                                123456789012345678901234s
-    ps_string *s1 = ps_string_create("The Quick Brown Fox ", 30);
+    ps_string *s1 = ps_string_create("The Quick Brown Fox ");
     ps_string_debug(stdout, "s1 ", s1);
-    ps_string *s2 = ps_string_create("Jumps Over The Lazy Dog!", 30);
+    ps_string *s2 = ps_string_create("Jumps Over The Lazy Dog!");
     ps_string_debug(stdout, "s2 ", s2);
-    ps_string *s3 = ps_string_concat(s1, s2, 60);
+    ps_string *s3 = ps_string_concat(s1, s2);
     ps_string_debug(stdout, "s3 ", s3);
     ok = s3 != NULL && s3->len == 44;
     printf("TEST STRINGS: CONCAT %s\n\n", ok ? "OK" : "FAILED!");

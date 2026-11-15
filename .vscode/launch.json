@@ -11,37 +11,8 @@
             "program": "${workspaceFolder}/build/pascalscript",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch test_vm_00",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/test/test_vm_00",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [
-                {
-                    "name": "C_INCLUDE_PATH",
-                    "value": "../include/"
-                }
-            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
@@ -61,10 +32,10 @@
             "name": "(gdb) Launch pascalscript (GCC)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build-gcc/pascalscript",
+            "program": "${workspaceFolder}/build/pascalscript",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [
                 {
                     "name": "C_INCLUDE_PATH",

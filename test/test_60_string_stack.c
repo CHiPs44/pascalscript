@@ -14,8 +14,8 @@
 int main(void)
 {
     ps_string_stack *stack = ps_string_stack_alloc(2);
-    ps_string *first = ps_string_create("first", 5);
-    ps_string *second = ps_string_create("second", 6);
+    ps_string *first = ps_string_create("first");
+    ps_string *second = ps_string_create("second");
     if (stack == NULL || first == NULL || second == NULL)
     {
         ps_string_stack_free(stack, false);

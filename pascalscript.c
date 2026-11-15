@@ -28,7 +28,7 @@
 #include "ps_version.h"
 
 // #define DEBUG_SOURCE "examples/000-minimal.pas"
-// #define DEBUG_SOURCE "examples/001-hello.pas"
+#define DEBUG_SOURCE "examples/001-hello.pas"
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/003-hello2.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
@@ -274,8 +274,8 @@ int main(int argc, char *argv[])
     int arg = get_options(argc, argv);
 
     // Force when debugging as I didn't find how to pass command line options
-    // trace = true;
-    // debug = true;
+    trace = true;
+    debug = true;
 
     if (ast_test)
     {
@@ -289,6 +289,11 @@ int main(int argc, char *argv[])
     }
 
     current_path = getcwd(NULL, 0);
+    if (current_path == NULL)
+    {
+        perror("getcwd");
+        return EXIT_FAILURE;
+    }
     if (arg + 1 < argc)
     {
         program_file = argv[argc - 1];
@@ -304,17 +309,8 @@ int main(int argc, char *argv[])
     {
 #ifdef DEBUG_SOURCE
         program_file = DEBUG_SOURCE;
-        char self[128] = {0};
-        ssize_t nchar = readlink("/proc/self/exe", self, sizeof(self));
-        if (nchar < 0 || nchar >= (int)sizeof(self))
-        {
-            fprintf(stderr, "/proc/self/exe readlink : %s\n", self);
-            exit(EXIT_FAILURE);
-        }
-        char *separator = strrchr(self, '/');
-        if (separator != NULL)
-            *separator = '\0';
-        snprintf(source_file_buffer, sizeof(source_file_buffer), "%s/../%s", /*executable_path*/ self, program_file);
+        snprintf(source_file_buffer, sizeof(source_file_buffer), "%s/%s", current_path, program_file);
+        fprintf(stderr, "%s\n", source_file_buffer);
         source_file = source_file_buffer;
 #else
         source_file_buffer[0] = '\0';

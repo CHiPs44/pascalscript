@@ -363,7 +363,7 @@ static void test_ps_function_succ(void)
 
 static void test_ps_function_length(void)
 {
-    ps_string *text = ps_string_create("Hello", 5);
+    ps_string *text = ps_string_create("Hello");
     CHECK(text != NULL);
     if (text == NULL)
         return;
@@ -379,7 +379,7 @@ static void test_ps_function_length(void)
 
 static void test_ps_function_lowercase(void)
 {
-    ps_string *text = ps_string_create("HeLLo", 5);
+    ps_string *text = ps_string_create("HeLLo");
     CHECK(text != NULL);
     if (text == NULL)
         return;
@@ -395,7 +395,7 @@ static void test_ps_function_lowercase(void)
 
 static void test_ps_function_uppercase(void)
 {
-    ps_string *text = ps_string_create("HeLLo", 5);
+    ps_string *text = ps_string_create("HeLLo");
     CHECK(text != NULL);
     if (text == NULL)
         return;
@@ -482,7 +482,7 @@ static void test_ps_procedure_readln(void)
 
 static void test_ps_procedure_readstr(void)
 {
-    ps_string *input = ps_string_create("123", 3);
+    ps_string *input = ps_string_create("123");
     CHECK(input != NULL);
     if (input == NULL)
         return;
@@ -524,7 +524,7 @@ static void test_ps_procedure_writeln(void)
 
 static void test_ps_procedure_writestr(void)
 {
-    ps_string *buffer = ps_string_create("Value=", PS_STRING_MAX_LEN);
+    ps_string *buffer = ps_string_create("Value=");
     CHECK(buffer != NULL);
     if (buffer == NULL)
         return;

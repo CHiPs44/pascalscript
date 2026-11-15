@@ -30,10 +30,10 @@ int main(void)
     ok &= check(ps_string_heap_grow(NULL) == false, "GROW NULL");
     ok &= check(ps_string_heap_grow(heap) && heap->size == 3 && heap->used == 0, "GROW");
 
-    ps_string *alpha = ps_string_create("alpha", 5);
-    ps_string *beta = ps_string_create("beta", 4);
-    ps_string *gamma = ps_string_create("gamma", 5);
-    ps_string *delta = ps_string_create("delta", 5);
+    ps_string *alpha = ps_string_create("alpha");
+    ps_string *beta = ps_string_create("beta");
+    ps_string *gamma = ps_string_create("gamma");
+    ps_string *delta = ps_string_create("delta");
     if (!check(alpha != NULL && beta != NULL && gamma != NULL && delta != NULL, "CREATE INPUTS"))
     {
         ps_string_free(alpha);
@@ -45,11 +45,11 @@ int main(void)
     }
 
     ok &= check(ps_string_heap_add(heap, alpha) == alpha && heap->used == 1, "ADD");
-    ok &= check(ps_string_heap_add(heap, alpha) == alpha && heap->data[0].ref_count +
-                    heap->data[1].ref_count + heap->data[2].ref_count == 2,
+    ok &= check(ps_string_heap_add(heap, alpha) == alpha &&
+                        heap->data[0].ref_count + heap->data[1].ref_count + heap->data[2].ref_count == 2,
                 "ADD SAME POINTER");
 
-    ps_string *duplicate = ps_string_create("alpha", 5);
+    ps_string *duplicate = ps_string_create("alpha");
     const ps_string *canonical = ps_string_heap_add(heap, duplicate);
     ok &= check(canonical == alpha, "ADD DUPLICATE VALUE");
 
@@ -61,19 +61,16 @@ int main(void)
     beta = NULL;
     ok &= check(ps_string_heap_add(heap, gamma) == gamma && heap->used == 3 && heap->size == 3,
                 "ADD BEFORE AUTOMATIC GROW");
-    ok &= check(ps_string_heap_add(heap, delta) == delta && heap->size == 4 && heap->used == 4,
-                "ADD AUTOMATIC GROW");
+    ok &= check(ps_string_heap_add(heap, delta) == delta && heap->size == 4 && heap->used == 4, "ADD AUTOMATIC GROW");
     ps_string *created_new = ps_string_heap_create(heap, "new");
-    ok &= check(created_new != NULL && strcmp((char *)created_new->str, "new") == 0 &&
-                    heap->size == 5 && heap->used == 5,
+    ok &= check(created_new != NULL && strcmp((char *)created_new->str, "new") == 0 && heap->size == 5 &&
+                        heap->used == 5,
                 "CREATE ANOTHER WITH GROW");
 
     ps_string_heap *defaults = ps_string_heap_alloc(0, 0);
-    ok &= check(defaults != NULL && defaults->size == PS_STRING_HEAP_SIZE &&
-                    defaults->more == PS_STRING_HEAP_SIZE,
+    ok &= check(defaults != NULL && defaults->size == PS_STRING_HEAP_SIZE && defaults->more == PS_STRING_HEAP_SIZE,
                 "ALLOC DEFAULTS");
-    ok &= check(ps_string_heap_grow(defaults) && defaults->size == 2 * PS_STRING_HEAP_SIZE,
-                "GROW DEFAULTS");
+    ok &= check(ps_string_heap_grow(defaults) && defaults->size == 2 * PS_STRING_HEAP_SIZE, "GROW DEFAULTS");
     defaults->more = 0;
     ok &= check(!ps_string_heap_grow(defaults), "GROW WITHOUT MORE");
     ps_string_heap_free(defaults);
@@ -89,7 +86,7 @@ int main(void)
     errno = 0;
     ok &= check(ps_string_heap_create(heap, too_long) == NULL && errno == EINVAL, "CREATE TOO LONG");
 
-    ps_string *orphan = ps_string_create("orphan", 6);
+    ps_string *orphan = ps_string_create("orphan");
     errno = 0;
     ok &= check(orphan != NULL && ps_string_heap_add(NULL, orphan) == NULL && errno == EINVAL, "ADD NULL HEAP");
     ps_string_free(orphan);
@@ -106,7 +103,7 @@ int main(void)
         size_t count = fread(output, 1, sizeof(output) - 1, dump);
         output[count] = '\0';
         ok &= check(strstr(output, "String Heap: size=5, used=5, more=1") != NULL &&
-                        strstr(output, "Free slots: OK, Used slots: OK") != NULL,
+                            strstr(output, "Free slots: OK, Used slots: OK") != NULL,
                     "DUMP CONTENT");
         fclose(dump);
     }
@@ -116,15 +113,14 @@ int main(void)
 
     ps_string_heap *removal_heap = ps_string_heap_alloc(8, 2);
     ps_string *removed = ps_string_heap_create(removal_heap, "remove me");
-    ps_string *unknown = ps_string_create("not in heap", 11);
+    ps_string *unknown = ps_string_create("not in heap");
     ok &= check(removal_heap != NULL && removed != NULL && unknown != NULL, "FREE STRING SETUP");
     if (removal_heap != NULL && removed != NULL && unknown != NULL)
     {
         ok &= check(!ps_string_heap_free_string(NULL, removed), "FREE STRING NULL HEAP");
         ok &= check(!ps_string_heap_free_string(removal_heap, NULL), "FREE STRING NULL VALUE");
         ok &= check(!ps_string_heap_free_string(removal_heap, unknown), "FREE STRING UNKNOWN");
-        ok &= check(ps_string_heap_free_string(removal_heap, removed) && removal_heap->used == 0,
-                    "FREE STRING");
+        ok &= check(ps_string_heap_free_string(removal_heap, removed) && removal_heap->used == 0, "FREE STRING");
         ps_string_free(unknown);
     }
     else

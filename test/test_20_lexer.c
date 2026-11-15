@@ -167,12 +167,12 @@ static bool test_empty_string_plus_char(void)
         ok = ps_buffer_read_next_char(lexer->buffer);
     if (ok)
         ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
-             strcmp(lexer->current_token.value.s, "POISON") == 0;
+             strcmp((char *)lexer->current_token.value.s->str, "POISON") == 0;
     if (ok)
         ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_COMMA;
     if (ok)
         ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
-             strcmp(lexer->current_token.value.s, "A") == 0;
+             strcmp((char *)lexer->current_token.value.s->str, "A") == 0;
     if (!ok)
         printf("TEST LEXER: ERROR empty string plus char should produce string \"A\"\n");
 

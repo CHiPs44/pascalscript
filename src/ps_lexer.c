@@ -425,7 +425,7 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
 static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
     char c = '\0';
-    char next_char = '\0';
+    char next = '\0';
     unsigned int pos = 0;
     ps_string *string = ps_string_alloc(0);
 
@@ -446,8 +446,8 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
         if (c == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
-            next_char = ps_buffer_peek_next_char(lexer->buffer);
-            if (next_char == '\'')
+            next = ps_buffer_peek_next_char(lexer->buffer);
+            if (next == '\'')
             {
                 CHECK_STRING_OVERFLOW
                 pos += 1;
@@ -564,6 +564,12 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
         }
         // S => S
         token->type = PS_TOKEN_STRING_VALUE;
+        if (token->value.s == NULL)
+        {
+            token->value.s = ps_string_alloc(252);
+            if (token->value.s == NULL)
+                return ps_lexer_return_error(lexer, PS_ERROR_OUT_OF_MEMORY, "TOKEN!");
+        }
         ps_string *new = ps_string_append(token->value.s, lexer->current_token.value.s);
         if (new == NULL)
         {
