@@ -207,8 +207,8 @@ static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
 {
-    char c1 = ps_buffer_peek_char(lexer->buffer);
-    char c2 = ps_buffer_peek_next_char(lexer->buffer);
+    int c1 = ps_buffer_peek_char(lexer->buffer);
+    int c2 = ps_buffer_peek_next_char(lexer->buffer);
     *changed = false;
     if (c1 == '/' && c2 == '/')
     {
@@ -217,7 +217,7 @@ static bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
         {
             ADVANCE()
             c1 = ps_buffer_peek_char(lexer->buffer);
-            if (c1 == '\0')
+            if (c1 == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE()
@@ -368,9 +368,8 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     if (c == '.')
     {
         is_real = true;
-        pos += 1;
-        if (!ps_lexer_append_char(lexer, NULL, (char)c))
-            return false;
+        buffer[pos++] = '0';
+        buffer[pos++] = '.';
         GET_NEXT_CHAR(c)
     }
 
@@ -862,12 +861,10 @@ bool ps_lexer_read_token(ps_lexer *lexer)
 {
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
-
-    char current_char = ps_buffer_peek_char(lexer->buffer);
-    char next_char = ps_buffer_peek_next_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    int next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;
     lexer->start_column = lexer->buffer->current_column;
-
     // Number: integer or real value?
     if (isdigit(current_char) || current_char == '%' || current_char == '&' || current_char == '$' ||
         (current_char == '.' && isdigit(next_char)))

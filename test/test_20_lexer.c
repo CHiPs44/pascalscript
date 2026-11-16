@@ -49,8 +49,10 @@ ps_token_type hello1_expected[] = {
 };
 char *hello2_source = "Program HelloWorld;\n"
                       "Const\n"
-                      "  K1 = 1234;\n"
+                      "  K1 = $FF;\n"
                       "  K2 = 'Select A or B.';\n"
+                      "  K3 = .5;\n"
+                      "  K4 = %101;\n"
                       "Begin\n"
                       "  { Comment1 (* Comment2 *) }\n"
                       "  WriteLn('Hello, World!');\n"
@@ -69,6 +71,8 @@ ps_token_type hello2_expected[] = {
         PS_TOKEN_CONST,
         PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_INTEGER_VALUE, PS_TOKEN_SEMI_COLON,
         PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_STRING_VALUE, PS_TOKEN_SEMI_COLON,
+        PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_REAL_VALUE, PS_TOKEN_SEMI_COLON,
+        PS_TOKEN_IDENTIFIER, PS_TOKEN_EQ, PS_TOKEN_INTEGER_VALUE, PS_TOKEN_SEMI_COLON,
         PS_TOKEN_BEGIN,
         PS_TOKEN_IDENTIFIER, PS_TOKEN_LEFT_PARENTHESIS, PS_TOKEN_STRING_VALUE, PS_TOKEN_RIGHT_PARENTHESIS,
         PS_TOKEN_SEMI_COLON,

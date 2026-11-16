@@ -451,7 +451,7 @@ ps_value *ps_value_set_string(ps_value *value, ps_string *s) { PS_VALUE_SET(ps_s
 
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
-    static char buffer[PS_STRING_MAX_LEN + 1];
+    static char buffer[256];
     const ps_executable *executable = NULL;
 
     if (value == NULL)
@@ -486,14 +486,15 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         UNSIGNED_VALUE
         break;
     case PS_TYPE_BOOLEAN:
-        snprintf(buffer, sizeof(buffer) - 1, "%s", value->data.b ? "TRUE" : "FALSE");
+        snprintf(buffer, sizeof(buffer), "%s", value->data.b ? "TRUE" : "FALSE");
         break;
     case PS_TYPE_CHAR:
         CHAR_VALUE
         break;
     case PS_TYPE_STRING:
         // TODO use handle for variables at upper level
-        STRING_VALUE
+        // STRING_VALUE
+        snprintf(buffer, sizeof(buffer), "***String(%d) / %p***", value->data.s->max, value->data.s->str);
         break;
     case PS_TYPE_EXECUTABLE:
         EXECUTABLE_VALUE

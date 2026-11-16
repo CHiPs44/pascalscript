@@ -524,13 +524,13 @@ static void test_ps_procedure_writeln(void)
 
 static void test_ps_procedure_writestr(void)
 {
-    ps_string *buffer = ps_string_create("Value=");
+    ps_string *buffer = ps_string_alloc(16);
     CHECK(buffer != NULL);
     if (buffer == NULL)
         return;
-    ps_value value = integer_value(12);
+    ps_value value = integer_value(12345);
     CHECK(ps_procedure_writestr(interpreter, buffer, &value, 0, 0));
-    CHECK(strcmp((char *)buffer->str, "Value=12") == 0);
+    CHECK(strcmp((char *)buffer->str, "12345") == 0);
     ps_string_free(buffer);
 }
 
