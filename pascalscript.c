@@ -28,7 +28,7 @@
 #include "ps_version.h"
 
 // #define DEBUG_SOURCE "examples/000-minimal.pas"
-#define DEBUG_SOURCE "examples/001-hello.pas"
+// #define DEBUG_SOURCE "examples/001-hello.pas"
 // #define DEBUG_SOURCE "examples/002-test-expr1.pas"
 // #define DEBUG_SOURCE "examples/003-hello2.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
@@ -274,8 +274,8 @@ int main(int argc, char *argv[])
     int arg = get_options(argc, argv);
 
     // Force when debugging as I didn't find how to pass command line options
-    trace = true;
-    debug = true;
+    // trace = true;
+    // debug = true;
 
     if (ast_test)
     {
