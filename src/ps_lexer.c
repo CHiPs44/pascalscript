@@ -289,9 +289,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
     {
         if (pos >= PS_BITNESS)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
-        pos += 1;
-        if (!ps_lexer_append_char(lexer, NULL, (char)c))
-            return false;
+        buffer[pos++] = (char)c;
         GET_NEXT_CHAR(c)
     } while (strchr(digits, c) != NULL);
     buffer[pos] = '\0';
