@@ -253,8 +253,8 @@ static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
  */
 static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
-    char buffer[PS_IDENTIFIER_LEN + 1];
-    char c = ps_buffer_peek_char(lexer->buffer);
+    char buffer[PS_IDENTIFIER_LEN + 1] = {0};
+    int c = ps_buffer_peek_char(lexer->buffer);
     int pos = 0;
     if (isalpha(c) || c == '_')
     {
@@ -267,8 +267,8 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             buffer[pos] = (ps_char)toupper(c);
             GET_NEXT_CHAR(c)
             pos += 1;
-            buffer[pos] = '\0';
         } while (isalnum(c) || c == '_');
+        buffer[pos] = '\0';
         lexer->current_token.type = ps_token_is_keyword(buffer);
         memcpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
         return true;
@@ -513,7 +513,7 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 
 static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
 {
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     if (c != '^')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Expected a caret (^) character for char value");
@@ -547,26 +547,22 @@ static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
 
 static bool ps_lexer_read_char_value_hash(ps_lexer *lexer)
 {
-    char c;
-
-    c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     if (c != '#')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Expected a hash (#) character for char value");
     // Consume the #
     ADVANCE()
-
     // Read the number after the #
     if (!ps_lexer_read_number(lexer))
         return false;
-
+    // Check the number
     if (lexer->current_token.type != PS_TOKEN_INTEGER_VALUE && lexer->current_token.type != PS_TOKEN_UNSIGNED_VALUE)
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Expected an integer or unsigned value after hash (#) for char value");
-
     if (lexer->current_token.value.u > 255)
         return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Char value must be in the range 0..255");
-
+    // Legal value
     lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
     lexer->current_token.value.c = (ps_char)lexer->current_token.value.u; // == .i in this case
 
