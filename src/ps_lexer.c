@@ -32,6 +32,8 @@ static bool ps_lexer_read_number(ps_lexer *lexer);
     {                                                                                                                  \
         ADVANCE()                                                                                                      \
         C = ps_buffer_peek_char(lexer->buffer);                                                                        \
+        if (C == EOF)                                                                                                  \
+            return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");                               \
     }
 
 ps_lexer *ps_lexer_alloc(void)
@@ -140,11 +142,13 @@ static bool ps_lexer_append_string(ps_lexer *lexer, ps_string **string, const ps
 
 static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 {
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     *changed = false;
-    while (isspace(c) || c == '\n')
+    while (isspace(current_char) || current_char == '\n')
     {
-        GET_NEXT_CHAR(c)
+        GET_NEXT_CHAR(current_char)
         *changed = true;
     }
     return true;
@@ -155,15 +159,17 @@ static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
 {
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     *changed = false;
-    if (c == '{')
+    if (current_char == '{')
     {
         *changed = true;
-        while (c != '}')
+        while (current_char != '}')
         {
-            GET_NEXT_CHAR(c)
-            if (c == EOF)
+            GET_NEXT_CHAR(current_char)
+            if (current_char == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE()
@@ -176,20 +182,22 @@ static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
 {
-    int c1 = ps_buffer_peek_char(lexer->buffer);
-    int c2 = ps_buffer_peek_next_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    int next_char = ps_buffer_peek_next_char(lexer->buffer);
     *changed = false;
-    if (c1 == '(' && c2 == '*')
+    if (current_char == '(' && next_char == '*')
     {
         *changed = true;
         do
         {
             ADVANCE()
-            c1 = ps_buffer_peek_char(lexer->buffer);
-            c2 = ps_buffer_peek_next_char(lexer->buffer);
-            if (c1 == EOF || c2 == EOF)
+            current_char = ps_buffer_peek_char(lexer->buffer);
+            next_char = ps_buffer_peek_next_char(lexer->buffer);
+            if (current_char == EOF || next_char == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
-            if (c1 == '*' && c2 == ')')
+            if (current_char == '*' && next_char == ')')
             {
                 break;
             }
@@ -207,17 +215,19 @@ static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment3(ps_lexer *lexer, bool *changed)
 {
-    int c1 = ps_buffer_peek_char(lexer->buffer);
-    int c2 = ps_buffer_peek_next_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    int next_char = ps_buffer_peek_next_char(lexer->buffer);
     *changed = false;
-    if (c1 == '/' && c2 == '/')
+    if (current_char == '/' && next_char == '/')
     {
         *changed = true;
-        while (c1 != '\n')
+        while (current_char != '\n')
         {
             ADVANCE()
-            c1 = ps_buffer_peek_char(lexer->buffer);
-            if (c1 == EOF)
+            current_char = ps_buffer_peek_char(lexer->buffer);
+            if (current_char == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
         }
         ADVANCE()
@@ -254,9 +264,11 @@ static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
 static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
     char buffer[PS_IDENTIFIER_LEN + 1] = {0};
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     int pos = 0;
-    if (isalpha(c) || c == '_')
+    if (isalpha(current_char) || current_char == '_')
     {
         do
         {
@@ -264,10 +276,10 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             {
                 return ps_lexer_return_error(lexer, PS_ERROR_IDENTIFIER_TOO_LONG, "Identifier or keyword too long");
             }
-            buffer[pos] = (ps_char)toupper(c);
-            GET_NEXT_CHAR(c)
+            buffer[pos] = (ps_char)toupper(current_char);
+            GET_NEXT_CHAR(current_char)
             pos += 1;
-        } while (isalnum(c) || c == '_');
+        } while (isalnum(current_char) || current_char == '_');
         buffer[pos] = '\0';
         lexer->current_token.type = ps_token_is_keyword(buffer);
         memcpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
@@ -280,18 +292,20 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
 {
     char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     int pos = 0;
     char *end = NULL;
-    if (strchr(digits, c) == NULL)
+    if (strchr(digits, current_char) == NULL)
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
     do
     {
         if (pos >= PS_BITNESS)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");
-        buffer[pos++] = (char)c;
-        GET_NEXT_CHAR(c)
-    } while (strchr(digits, c) != NULL);
+        buffer[pos++] = (char)current_char;
+        GET_NEXT_CHAR(current_char)
+    } while (strchr(digits, current_char) != NULL);
     buffer[pos] = '\0';
     errno = 0;
     unsigned long u = strtoul(buffer, &end, base);
@@ -333,20 +347,22 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         is_real = true;                                                                                                \
         has_exponent = true;                                                                                           \
         APPEND_CHAR_DEC()                                                                                              \
-        char c2 = ps_buffer_peek_char(lexer->buffer);                                                                  \
+        int c2 = ps_buffer_peek_char(lexer->buffer);                                                                   \
+        if (c2 == EOF)                                                                                                 \
+            return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");                               \
         if (c2 != '+' && c2 != '-' && !isdigit(c2))                                                                    \
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                         \
-                                         "Exponent must begin by +, - or a digit in real constants");                  \
+                                         "Exponent must begin by +, - or a digit in Real constants");                  \
         if (c == '+' || c == '-')                                                                                      \
         {                                                                                                              \
             APPEND_CHAR_DEC()                                                                                          \
             c2 = ps_buffer_peek_char(lexer->buffer);                                                                   \
             if (c2 == '+' || c2 == '-')                                                                                \
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                     \
-                                             "Only one exponent sign allowed in real constants");                      \
+                                             "Only one exponent sign allowed in Real constants");                      \
             if (!isdigit(c2))                                                                                          \
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                     \
-                                             "Exponent sign must be followed by a digit in real constants");           \
+                                             "Exponent sign must be followed by a digit in Real constants");           \
         }                                                                                                              \
     }
 
@@ -357,30 +373,32 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     bool is_real = false;
     bool has_exponent = false;
     char *end = NULL;
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
 
     // Check if the first character is a digit or a dot
-    if (!isdigit(c) && c != '.')
+    if (!isdigit(current_char) && current_char != '.')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Invalid digit at start of number");
 
-    if (c == '.')
+    if (current_char == '.')
     {
         is_real = true;
         buffer[pos++] = '0';
         buffer[pos++] = '.';
-        GET_NEXT_CHAR(c)
+        GET_NEXT_CHAR(current_char)
     }
 
     do
     {
         APPEND_CHAR_DEC()
         // floating point?
-        if (c == '.')
+        if (current_char == '.')
             READ_DOT_DEC()
         // exponent part?
-        else if (c == 'e' || c == 'E')
+        else if (current_char == 'e' || current_char == 'E')
             READ_EXP_DEC()
-    } while (isdigit(c));
+    } while (isdigit(current_char));
     buffer[pos] = '\0';
     if (is_real)
     {
@@ -417,20 +435,22 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
  */
 static bool ps_lexer_read_number(ps_lexer *lexer)
 {
-    int c = ps_buffer_peek_char(lexer->buffer);
-    if (c == '%') // Binary?
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    if (current_char == '%') // Binary?
     {
-        GET_NEXT_CHAR(c)
+        GET_NEXT_CHAR(current_char)
         return ps_lexer_read_number_bin_oct_hex(lexer, 2, "01");
     }
-    if (c == '&') // Octal?
+    if (current_char == '&') // Octal?
     {
-        GET_NEXT_CHAR(c)
+        GET_NEXT_CHAR(current_char)
         return ps_lexer_read_number_bin_oct_hex(lexer, 8, "01234567");
     }
-    if (c == '$') // Hexadecimal?
+    if (current_char == '$') // Hexadecimal?
     {
-        GET_NEXT_CHAR(c)
+        GET_NEXT_CHAR(current_char)
         return ps_lexer_read_number_bin_oct_hex(lexer, 16, "01234567abcdefABCDEF");
     }
     // Decimal
@@ -446,37 +466,39 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
  */
 static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
-    int c = '\0';
-    int next = '\0';
+    int current_char = '\0';
+    int next_char = '\0';
     unsigned int pos = 0;
     ps_string *string = ps_string_alloc(0);
 
-    c = ps_buffer_peek_char(lexer->buffer);
-    if (c != '\'')
+    current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    if (current_char != '\'')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Char or string value must start with a single quote");
     // Consume the opening quote
     ADVANCE()
     while (true)
     {
-        c = ps_buffer_peek_char(lexer->buffer);
-        if (c == EOF)
+        current_char = ps_buffer_peek_char(lexer->buffer);
+        if (current_char == EOF)
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
                                          "Unexpected end of file in char or string value");
-        if (c == '\n')
+        if (current_char == '\n')
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
-        if (c == '\'')
+        if (current_char == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
-            next = ps_buffer_peek_next_char(lexer->buffer);
-            if (next == '\'')
+            next_char = ps_buffer_peek_next_char(lexer->buffer);
+            if (next_char == '\'')
             {
                 CHECK_STRING_OVERFLOW
                 pos += 1;
-                if (!ps_lexer_append_char(lexer, &string, (char)c))
+                if (!ps_lexer_append_char(lexer, &string, (char)current_char))
                     return false;
-                GET_NEXT_CHAR(c) // Consume the first quote
-                ADVANCE()        // Consume the second quote
+                GET_NEXT_CHAR(current_char) // Consume the first quote
+                ADVANCE()                   // Consume the second quote
             }
             else
             {
@@ -489,9 +511,9 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
         {
             CHECK_STRING_OVERFLOW
             pos += 1;
-            if (!ps_lexer_append_char(lexer, &string, (char)c))
+            if (!ps_lexer_append_char(lexer, &string, (char)current_char))
                 return false;
-            GET_NEXT_CHAR(c)
+            GET_NEXT_CHAR(current_char)
         }
     }
     string->str[pos] = '\0';
@@ -510,27 +532,29 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 
 static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
 {
-    int c = ps_buffer_peek_char(lexer->buffer);
-    if (c != '^')
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    if (current_char != '^')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Expected a caret (^) character for char value");
     // Consume the ^
     ADVANCE()
 
     // Read the character after ^
-    c = ps_buffer_peek_char(lexer->buffer);
+    current_char = ps_buffer_peek_char(lexer->buffer);
 
-    if (c >= '@' && c <= '_')
+    if (current_char >= '@' && current_char <= '_')
     {
-        c = c - '@'; // Convert to control character
+        current_char = current_char - '@'; // Convert to control character
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-        lexer->current_token.value.c = (ps_char)c;
+        lexer->current_token.value.c = (ps_char)current_char;
     }
-    else if (c >= 'a' && c <= 'z')
+    else if (current_char >= 'a' && current_char <= 'z')
     {
-        c = c - 'a' + 1; // Convert to control character
+        current_char = current_char - 'a' + 1; // Convert to control character
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-        lexer->current_token.value.c = (ps_char)c;
+        lexer->current_token.value.c = (ps_char)current_char;
     }
     else
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
@@ -544,8 +568,10 @@ static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
 
 static bool ps_lexer_read_char_value_hash(ps_lexer *lexer)
 {
-    int c = ps_buffer_peek_char(lexer->buffer);
-    if (c != '#')
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    if (current_char != '#')
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Expected a hash (#) character for char value");
     // Consume the #
@@ -639,13 +665,12 @@ static bool ps_lexer_append_quoted_value(ps_lexer *lexer, ps_token *token, int *
     return true;
 }
 
-static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int *pos, char c)
+static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int *pos, char current_char)
 {
-    if (c == '^' && !ps_lexer_read_char_value_caret(lexer))
+    if (current_char == '^' && !ps_lexer_read_char_value_caret(lexer))
         return false;
-    if (c == '#' && !ps_lexer_read_char_value_hash(lexer))
+    if (current_char == '#' && !ps_lexer_read_char_value_hash(lexer))
         return false;
-
     if (token->type == PS_TOKEN_NONE)
     {
         token->type = PS_TOKEN_CHAR_VALUE;
@@ -682,19 +707,21 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     ps_token token = {.type = PS_TOKEN_NONE, .value = {.c = '\0'}};
     int pos = 0;
-    int c = ps_buffer_peek_char(lexer->buffer);
+    int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     do
     {
-        if (c == '\'')
+        if (current_char == '\'')
         {
             if (!ps_lexer_read_char_or_string_value_quote(lexer))
                 return false;
             if (!ps_lexer_append_quoted_value(lexer, &token, &pos))
                 return false;
         }
-        else if (c == '^' || c == '#')
+        else if (current_char == '^' || current_char == '#')
         {
-            if (!ps_lexer_append_escaped_value(lexer, &token, &pos, (char)c))
+            if (!ps_lexer_append_escaped_value(lexer, &token, &pos, (char)current_char))
                 return false;
         }
         else
@@ -705,8 +732,10 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         // Example: 'Hello' [SPACE] #32 [SPACE] 'World!' => 'Hello'#32'World!' => 'Hello World!'
         if (!ps_lexer_skip_whitespace_and_comments(lexer))
             return false;
-        c = ps_buffer_peek_char(lexer->buffer);
-    } while (c == '\'' || c == '^' || c == '#');
+        current_char = ps_buffer_peek_char(lexer->buffer);
+        if (current_char == EOF)
+            return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    } while (current_char == '\'' || current_char == '^' || current_char == '#');
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
     return true;
@@ -856,15 +885,17 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
  */
 bool ps_lexer_read_token(ps_lexer *lexer)
 {
+    // Free last token string value id needed?
     if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
     {
-        lexer->current_token.value.s = NULL;
-
+        lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
     }
     lexer->current_token.type = PS_TOKEN_NONE;
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
     int current_char = ps_buffer_peek_char(lexer->buffer);
+    if (current_char == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     int next_char = ps_buffer_peek_next_char(lexer->buffer);
     lexer->start_line = lexer->buffer->current_line;
     lexer->start_column = lexer->buffer->current_column;
