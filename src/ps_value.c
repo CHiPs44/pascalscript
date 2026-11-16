@@ -492,9 +492,18 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
         CHAR_VALUE
         break;
     case PS_TYPE_STRING:
-        // TODO use handle for variables at upper level
         // STRING_VALUE
-        snprintf(buffer, sizeof(buffer), "***String(%d) / %p***", value->data.s->max, value->data.s->str);
+        if (debug)
+        {
+            snprintf(buffer, sizeof(buffer), "***String(%d) / %p***", value->data.s != NULL ? value->data.s->max : 0,
+                     value->data.s != NULL ? value->data.s->str : NULL);
+        }
+        else
+        {
+            const char *string_value1 = value->data.s != NULL ? (const char *)value->data.s->str : NULL;
+            const char *string_value2 = string_value1 != NULL ? string_value1 : "?NULL?";
+            snprintf(buffer, sizeof(buffer), "%s", (value->data.h < 1000) ? "?VAR?" : string_value2);
+        }
         break;
     case PS_TYPE_EXECUTABLE:
         EXECUTABLE_VALUE

@@ -140,7 +140,7 @@ static bool ps_lexer_append_string(ps_lexer *lexer, ps_string **string, const ps
 
 static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
 {
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     *changed = false;
     while (isspace(c) || c == '\n')
     {
@@ -155,7 +155,7 @@ static bool ps_lexer_skip_whitespace(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
 {
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     *changed = false;
     if (c == '{')
     {
@@ -176,8 +176,8 @@ static bool ps_lexer_skip_comment1(ps_lexer *lexer, bool *changed)
  */
 static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
 {
-    char c1 = ps_buffer_peek_char(lexer->buffer);
-    char c2 = ps_buffer_peek_next_char(lexer->buffer);
+    int c1 = ps_buffer_peek_char(lexer->buffer);
+    int c2 = ps_buffer_peek_next_char(lexer->buffer);
     *changed = false;
     if (c1 == '(' && c2 == '*')
     {
@@ -187,7 +187,7 @@ static bool ps_lexer_skip_comment2(ps_lexer *lexer, bool *changed)
             ADVANCE()
             c1 = ps_buffer_peek_char(lexer->buffer);
             c2 = ps_buffer_peek_next_char(lexer->buffer);
-            if (c1 == '\0' || c2 == '\0')
+            if (c1 == EOF || c2 == EOF)
                 return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in comment");
             if (c1 == '*' && c2 == ')')
             {
@@ -524,13 +524,13 @@ static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
     {
         c = c - '@'; // Convert to control character
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-        lexer->current_token.value.c = c;
+        lexer->current_token.value.c = (ps_char)c;
     }
     else if (c >= 'a' && c <= 'z')
     {
         c = c - 'a' + 1; // Convert to control character
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
-        lexer->current_token.value.c = c;
+        lexer->current_token.value.c = (ps_char)c;
     }
     else
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
@@ -668,7 +668,6 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
         // S + C => S
         if (*pos >= (int)PS_STRING_MAX_LEN)
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
-        // token->value.s[(*pos)++] = lexer->current_token.value.c;
         ps_string *new = ps_string_append_char(token->value.s, lexer->current_token.value.c);
         if (new == NULL)
             return ps_lexer_return_error(lexer, ps_error_map_errno(), "APPEND_CHAR!");
@@ -683,7 +682,7 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     ps_token token = {.type = PS_TOKEN_NONE, .value = {.c = '\0'}};
     int pos = 0;
-    char c = ps_buffer_peek_char(lexer->buffer);
+    int c = ps_buffer_peek_char(lexer->buffer);
     do
     {
         if (c == '\'')
@@ -695,7 +694,7 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         }
         else if (c == '^' || c == '#')
         {
-            if (!ps_lexer_append_escaped_value(lexer, &token, &pos, c))
+            if (!ps_lexer_append_escaped_value(lexer, &token, &pos, (char)c))
                 return false;
         }
         else
@@ -857,6 +856,12 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
  */
 bool ps_lexer_read_token(ps_lexer *lexer)
 {
+    if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
+    {
+        lexer->current_token.value.s = NULL;
+
+    }
+    lexer->current_token.type = PS_TOKEN_NONE;
     if (!ps_lexer_skip_whitespace_and_comments(lexer))
         return false;
     int current_char = ps_buffer_peek_char(lexer->buffer);
@@ -888,7 +893,7 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     }
     else
     {
-        return ps_lexer_read_other_tokens(lexer, current_char, next_char);
+        return ps_lexer_read_other_tokens(lexer, (char)current_char, (char)next_char);
     }
     return true;
 }
