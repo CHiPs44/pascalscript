@@ -6,8 +6,6 @@
 
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -263,7 +261,7 @@ static bool ps_lexer_skip_whitespace_and_comments(ps_lexer *lexer)
  */
 static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 {
-    char buffer[PS_IDENTIFIER_LEN + 1] = {0};
+    ps_char buffer[PS_IDENTIFIER_LEN + 1] = {0};
     int current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
         return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
@@ -281,7 +279,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             pos += 1;
         } while (isalnum(current_char) || current_char == '_');
         buffer[pos] = '\0';
-        lexer->current_token.type = ps_token_is_keyword(buffer);
+        lexer->current_token.type = ps_token_is_keyword((char *)buffer);
         memcpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
         return true;
     }
@@ -291,7 +289,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
 
 static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const char *digits)
 {
-    char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
+    ps_char buffer[PS_BITNESS + 1] = {0}; // up to PS_BITNESS binary digits
     int current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
         return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
@@ -308,11 +306,11 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
     } while (strchr(digits, current_char) != NULL);
     buffer[pos] = '\0';
     errno = 0;
-    unsigned long u = strtoul(buffer, &end, base);
-    if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
+    unsigned long ul = strtoul((char *)buffer, &end, base);
+    if (errno == ERANGE || end == (char *)buffer || ul > PS_UNSIGNED_MAX)
         return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
     lexer->current_token.type = PS_TOKEN_UNSIGNED_VALUE;
-    lexer->current_token.value.u = (ps_unsigned)u;
+    lexer->current_token.value.u = (ps_unsigned)ul;
     return true;
 }
 
@@ -320,8 +318,8 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
     {                                                                                                                  \
         if (pos >= PS_BITNESS)                                                                                         \
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Too many digits in number");                       \
-        buffer[pos++] = (char)c;                                                                                       \
-        GET_NEXT_CHAR(c)                                                                                               \
+        buffer[pos++] = (ps_char)current_char;                                                                         \
+        GET_NEXT_CHAR(current_char)                                                                                    \
     }
 
 #define READ_DOT_DEC()                                                                                                 \
@@ -335,7 +333,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
             break;                                                                                                     \
         is_real = true;                                                                                                \
         APPEND_CHAR_DEC()                                                                                              \
-        if (c == 'e' || c == 'E')                                                                                      \
+        if (current_char == 'e' || current_char == 'E')                                                                \
             READ_EXP_DEC()                                                                                             \
     }
 
@@ -353,7 +351,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
         if (c2 != '+' && c2 != '-' && !isdigit(c2))                                                                    \
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,                                         \
                                          "Exponent must begin by +, - or a digit in Real constants");                  \
-        if (c == '+' || c == '-')                                                                                      \
+        if (current_char == '+' || current_char == '-')                                                                \
         {                                                                                                              \
             APPEND_CHAR_DEC()                                                                                          \
             c2 = ps_buffer_peek_char(lexer->buffer);                                                                   \
@@ -368,7 +366,7 @@ static bool ps_lexer_read_number_bin_oct_hex(ps_lexer *lexer, int base, const ch
 
 static bool ps_lexer_read_number_dec(ps_lexer *lexer)
 {
-    char buffer[PS_BITNESS + 1] = {0};
+    ps_char buffer[PS_BITNESS + 1] = {0};
     int pos = 0;
     bool is_real = false;
     bool has_exponent = false;
@@ -403,8 +401,8 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     if (is_real)
     {
         errno = 0;
-        double d = strtod(buffer, &end);
-        if (errno == ERANGE || end == buffer || d > PS_REAL_MAX)
+        double d = strtod((char *)buffer, &end);
+        if (errno == ERANGE || end == (char *)buffer || d > PS_REAL_MAX)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid real number value");
         lexer->current_token.type = PS_TOKEN_REAL_VALUE;
         lexer->current_token.value.r = (ps_real)d;
@@ -412,8 +410,8 @@ static bool ps_lexer_read_number_dec(ps_lexer *lexer)
     else
     {
         errno = 0;
-        unsigned long u = strtoul(buffer, &end, 10);
-        if (errno == ERANGE || end == buffer || u > PS_UNSIGNED_MAX)
+        unsigned long u = strtoul((char *)buffer, &end, 10);
+        if (errno == ERANGE || end == (char *)buffer || u > PS_UNSIGNED_MAX)
             return ps_lexer_return_error(lexer, PS_ERROR_OVERFLOW, "Invalid unsigned integer value");
         if (u <= PS_INTEGER_MAX)
         {

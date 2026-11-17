@@ -123,7 +123,7 @@ void ps_buffer_debug(FILE *output, const ps_buffer *buffer, char *message)
             buffer->error, ps_error_get_message(buffer->error));
 }
 
-static int ps_buffer_count_lines(const char *text)
+static int ps_buffer_count_lines(const unsigned char *text)
 {
     int line_count = 0;
     char current_char = *text++;
@@ -155,9 +155,9 @@ static int ps_buffer_count_lines(const char *text)
 static bool ps_buffer_index_lines(ps_buffer *buffer)
 {
     int line = 0;
-    char *start = buffer->text;
-    char *text = start;
-    char current_char;
+    unsigned char *start = buffer->text;
+    unsigned char *text = start;
+    unsigned char current_char;
     ptrdiff_t line_length;
 
     while (true)
@@ -268,7 +268,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, const char *filename)
         return false;
     }
     // Read file
-    result = ps_readall(input, &(buffer->text), &length);
+    result = ps_readall(input, (char **)&(buffer->text), &length);
     buffer->file_errno = errno;
     fclose(input);
     switch (result)
@@ -287,7 +287,7 @@ bool ps_buffer_load_file(ps_buffer *buffer, const char *filename)
     }
 }
 
-bool ps_buffer_load_string(ps_buffer *buffer, char *text, size_t length)
+bool ps_buffer_load_string(ps_buffer *buffer, unsigned char *text, size_t length)
 {
     buffer->text = text;
     if (length > PS_BUFFER_MAX_SIZE)
@@ -337,16 +337,13 @@ int ps_buffer_dump(FILE *output, const ps_buffer *buffer, uint16_t from_line, ui
             length = 80;
         else
             length = 1 + buffer->line_lengths[line_number];
-        (void)ps_strscpy(line, buffer->line_starts[line_number], length);
+        (void)ps_strscpy(line, (char *)buffer->line_starts[line_number], length);
         fprintf(output, "%05d (%05d) |%-80s|\n", line_number + 1, buffer->line_lengths[line_number], line);
     }
     return 15; // <== margin guide for 80 columns
 }
 
-int ps_buffer_peek_char(const ps_buffer *buffer)
-{
-    return buffer->error == PS_ERROR_NONE ? buffer->current_char : EOF;
-}
+int ps_buffer_peek_char(const ps_buffer *buffer) { return buffer->error == PS_ERROR_NONE ? buffer->current_char : EOF; }
 
 int ps_buffer_peek_next_char(const ps_buffer *buffer)
 {
