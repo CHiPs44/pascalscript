@@ -63,7 +63,7 @@ bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block)
 /**
  * @brief Register type definition in symbol table
  */
-static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *block, const char *name,
+static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *block, const ps_char *name,
                                         ps_type_definition *type_def, ps_symbol **symbol)
 {
     PARSE_BEGIN("REGISTER", "")
@@ -104,7 +104,7 @@ static bool ps_type_definition_register(ps_compiler *compiler, ps_ast_block *blo
  *   'STRING' [ '[' IDENTIFIER | UNSIGNED ']' ]
  */
 static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                           const char *type_name)
+                                           const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_STRING", "")
     (void)start_line;
@@ -157,7 +157,7 @@ static bool ps_parse_type_reference_string(ps_compiler *compiler, ps_ast_block *
     if (type_value == NULL)
         GOTO_CLEANUP(PS_ERROR_OUT_OF_MEMORY)
     if (type_name == NULL)
-        snprintf(name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
+        snprintf((char *)name, sizeof(name) - 1, "#STRING_%08X", ps_symbol_get_auto_num());
     else
         memcpy(name, type_name, PS_IDENTIFIER_SIZE);
     *type_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_TYPE_DEFINITION, name, type_value);
@@ -179,7 +179,7 @@ cleanup:
 }
 
 static bool ps_parse_type_reference_enum(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                         const char *type_name)
+                                         const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_ENUM", "");
     (void)start_line;
@@ -331,7 +331,7 @@ static bool ps_parse_type_reference_subrange_max(ps_compiler *compiler, ps_ast_b
 }
 
 static bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *compiler, ps_ast_block *block,
-                                                               const char *type_name, ps_symbol **type_symbol,
+                                                               const ps_char *type_name, ps_symbol **type_symbol,
                                                                ps_symbol *type,
                                                                const ps_type_definition_subrange *subrange)
 {
@@ -348,28 +348,28 @@ static bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *comp
     case PS_TYPE_CHAR:
         type_def = ps_subrange_create_char(subrange->c.min, subrange->c.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
+            snprintf((char *)name, sizeof(name) - 1, "#SUBRANGE_C_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_INTEGER:
         type_def = ps_subrange_create_integer(subrange->i.min, subrange->i.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
+            snprintf((char *)name, sizeof(name) - 1, "#SUBRANGE_I_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_UNSIGNED:
         type_def = ps_subrange_create_unsigned(subrange->u.min, subrange->u.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
+            snprintf((char *)name, sizeof(name) - 1, "#SUBRANGE_U_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
     case PS_TYPE_ENUM:
         type_def = ps_subrange_create_enum(type, subrange->e.min, subrange->e.max);
         if (type_name == NULL)
-            snprintf(name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
+            snprintf((char *)name, sizeof(name) - 1, "#SUBRANGE_E_%08X", ps_symbol_get_auto_num());
         else
             memcpy(name, type_name, PS_IDENTIFIER_SIZE);
         break;
@@ -386,7 +386,7 @@ static bool ps_parse_type_reference_subrange_register_type_def(ps_compiler *comp
 }
 
 static bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                             const char *type_name)
+                                             const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_SUBRANGE", "")
     (void)start_line;
@@ -442,7 +442,7 @@ static bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block
  *  'ARRAY' '[' SUBRANGE | IDENTIFIER [ ',' SUBRANGE | IDENTIFIER ]* ']' 'OF' TYPE_REFERENCE
  */
 static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
-                                          const char *type_name)
+                                          const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE_ARRAY", "")
     (void)start_line;
@@ -509,7 +509,7 @@ static bool ps_parse_type_reference_array(ps_compiler *compiler, ps_ast_block *b
     ps_type_definition *type_def = NULL;
     ps_identifier name = {0};
     if (type_name == NULL)
-        snprintf(name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
+        snprintf((char *)name, sizeof(name) - 1, "#ARRAY_%08X", ps_symbol_get_auto_num());
     else
         memcpy(name, type_name, PS_IDENTIFIER_SIZE);
     type_def = ps_type_definition_create_array(item_type, dimensions, subranges);
@@ -615,7 +615,7 @@ bool ps_parse_type_reference_identifier(ps_compiler *compiler, ps_ast_block *blo
  *      | POINTER     = 'POINTER'
  *      | TPOINTER    = '^' TYPE_REFERENCE
  */
-bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name)
+bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE", "");
     (void)start_line;

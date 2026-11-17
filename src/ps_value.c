@@ -462,7 +462,8 @@ char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16
     {
         const char *enum_value = ps_enum_get_string_value(value);
         if (debug)
-            snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)", enum_value == NULL ? "NULL" : value->type->name,
+            snprintf(buffer, sizeof(buffer) - 1, "%s.%s (%u)",
+                     enum_value == NULL ? "NULL" : (const char *)value->type->name,
                      enum_value == NULL ? "NULL" : enum_value, value->data.u);
         else
             snprintf(buffer, sizeof(buffer) - 1, "%s", enum_value == NULL ? "NULL" : enum_value);
@@ -540,7 +541,7 @@ char *ps_value_get_type_name(const ps_value *value)
         if (value->type == NULL)
             type = "TYPE!";
         else
-            type = value->type->name;
+            type = (char *)value->type->name;
     }
     return type;
 }

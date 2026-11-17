@@ -253,21 +253,21 @@ ps_symbol *ps_ast_node_get_type(const ps_ast_node *node)
 // =============================================================================
 
 ps_ast_block *ps_ast_create_block(uint16_t line, uint16_t column, ps_ast_block *parent, ps_ast_node_kind kind,
-                                  const char *name, ps_symbol_table *symbols)
+                                  const ps_char *name, ps_symbol_table *symbols)
 {
     static uint32_t block_id = 0;
 
     assert(kind == PS_AST_PROGRAM || kind == PS_AST_PROCEDURE || kind == PS_AST_FUNCTION || kind == PS_AST_UNIT);
-    assert(name == NULL || (strlen(name) > 0 && strlen(name) < PS_IDENTIFIER_SIZE));
+    assert(name == NULL || (strlen((const char *)name) > 0 && strlen((const char *)name) < PS_IDENTIFIER_SIZE));
 
     ps_ast_block *block = (ps_ast_block *)ps_ast_create_node(line, column, PS_AST_BLOCK, kind, sizeof(ps_ast_block));
     if (block == NULL)
         return NULL;
-    memset(block->name, 0, PS_IDENTIFIER_SIZE);
+    memset(block->name, 0, sizeof(block->name));
     if (name == NULL)
-        snprintf(block->name, PS_IDENTIFIER_SIZE, "BLOCK#%08x", ++block_id);
+        snprintf((char *)block->name, PS_IDENTIFIER_SIZE, "BLOCK#%08x", ++block_id);
     else
-        snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", name);
+        snprintf((char *)block->name, PS_IDENTIFIER_SIZE, "%s", name);
     block->parent = parent;
     block->symbols = symbols != NULL ? symbols : ps_symbol_table_alloc(0, 0);
     block->signature = NULL;

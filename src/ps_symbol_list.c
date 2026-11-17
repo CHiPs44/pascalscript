@@ -57,15 +57,15 @@ bool ps_symbol_list_grow(ps_symbol_list *list)
     return true;
 }
 
-bool ps_symbol_list_find(const ps_symbol_list *list, const char *name)
+bool ps_symbol_list_find(const ps_symbol_list *list, const ps_char *name)
 {
     for (ps_unsigned i = 0; i < list->used; i++)
-        if (strcmp(name, list->values[i]->name) == 0)
+        if (strncmp((const char *)name, (const char *)list->values[i]->name, PS_IDENTIFIER_LEN) == 0)
             return true;
     return false;
 }
 
-ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const char *name)
+ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const ps_char *name)
 {
     // Create a new symbol for the enumeration value
     ps_value *value = ps_value_alloc(type_symbol, (ps_value_data){.u = list->used});

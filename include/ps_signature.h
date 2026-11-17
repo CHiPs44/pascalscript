@@ -44,10 +44,10 @@ extern "C"
     ps_formal_signature *ps_formal_signature_free(ps_formal_signature *signature);
 
     /** @brief Find a parameter in a formal signature by name */
-    ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, const char *name);
+    ps_formal_parameter *ps_formal_signature_find_parameter(ps_formal_signature *signature, const ps_char *name);
 
     /** @brief Add parameter to formal signature */
-    bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, const char *name,
+    bool ps_formal_signature_add_parameter(ps_formal_signature *signature, bool byref, const ps_char *name,
                                            ps_symbol *type);
 
     /** @brief Dump formal signature */

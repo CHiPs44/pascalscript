@@ -32,7 +32,8 @@
 ps_ast_block *ps_ast_test_create_block_program(const char *name)
 {
     ps_ast_debug_line(0, "Create a PROGRAM node with name '%s' at line 1, column 1", name);
-    ps_ast_block *block_program = ps_ast_create_block(1, 1, NULL, PS_AST_PROGRAM, name, NULL);
+    ps_ast_block *block_program =
+            ps_ast_create_block(1, 1, NULL, PS_AST_PROGRAM, (const ps_char *)name, NULL);
     if (block_program == NULL)
         return NULL;
 
@@ -51,7 +52,7 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
     ASSERT(block_program->kind == PS_AST_PROGRAM);
     ASSERT(block_program->line == 1);
     ASSERT(block_program->column == 1);
-    ASSERT(strcmp(block_program->name, name) == 0);
+    ASSERT(strncmp((const char *)block_program->name, name, PS_IDENTIFIER_LEN) == 0);
     ASSERT(block_program->n_vars == 0);
     ASSERT(block_program->statement_list == NULL);
     ASSERT(block_program->signature == NULL);

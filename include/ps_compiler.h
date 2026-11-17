@@ -52,7 +52,7 @@ extern "C"
     bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const char *format, ...); // NOSONAR
 
     /** @brief Find symbol by name in current block (or its parents if not local) */
-    bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local,
+    bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const ps_char *name, bool local,
                                  ps_ast_block **owner, ps_symbol **symbol);
 
     /** @brief Add symbol to current block */
@@ -69,7 +69,7 @@ extern "C"
     bool ps_compiler_copy_value(ps_compiler *compiler, const ps_value *from, ps_value *to);
 
     /** @brief Load source code from string */
-    bool ps_compiler_load_string(ps_compiler *compiler, char *source, size_t length);
+    bool ps_compiler_load_string(ps_compiler *compiler, ps_char *source, size_t length);
 
     /** @brief Load source code from file */
     bool ps_compiler_load_file(ps_compiler *compiler, const char *filename);

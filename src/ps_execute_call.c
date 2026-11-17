@@ -126,7 +126,7 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     // For functions, copy RESULT variable value into result value
     if (ok && result != NULL)
     {
-        ps_symbol *result_symbol = ps_symbol_table_find(block->symbols, "RESULT");
+        ps_symbol *result_symbol = ps_symbol_table_find(block->symbols, (const ps_char *)"RESULT");
         if (result_symbol == NULL)
         {
             ps_interpreter_set_error_message(interpreter, PS_ERROR_SYMBOL_NOT_FOUND, "RESULT variable not found");

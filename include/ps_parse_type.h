@@ -18,13 +18,9 @@ extern "C"
 {
 #endif
 
-    // clang-format off
-    bool ps_parse_type_definition        (ps_compiler *compiler, ps_ast_block *block);
-    bool ps_parse_type_reference         (ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name);
-    // bool ps_parse_type_reference_enum    (ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name);
-    // bool ps_parse_type_reference_subrange(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name);
-    // bool ps_parse_type_reference_array   (ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const char *type_name);
-    // clang-format on
+    bool ps_parse_type_definition(ps_compiler *compiler, ps_ast_block *block);
+    bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                                 const ps_char *type_name);
 
 #ifdef __cplusplus
 }

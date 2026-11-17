@@ -23,8 +23,8 @@ extern "C"
     ps_symbol_list *ps_symbol_list_alloc(int size, int more);
     void ps_symbol_list_free(ps_symbol_list *list, bool free_symbols);
     bool ps_symbol_list_grow(ps_symbol_list *list);
-    bool ps_symbol_list_find(const ps_symbol_list *list, const char *name);
-    ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const char *name);
+    bool ps_symbol_list_find(const ps_symbol_list *list, const ps_char *name);
+    ps_symbol *ps_symbol_list_add(ps_symbol_list *list, ps_symbol *type_symbol, const ps_char *name);
 
 #ifdef __cplusplus
 }

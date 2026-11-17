@@ -127,7 +127,7 @@ int ps_symbol_table_find_free(const ps_symbol_table *table)
     return table == NULL ? -1 : table->table_size - table->used_buckets;
 }
 
-ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
+ps_symbol_hash_key ps_symbol_get_hash_key(const ps_char *name)
 {
     // DJB2, cf. https://en.wikipedia.org/wiki/Universal_hashing#Hashing_strings
     //  NB: 33 * x => 32 * x + x => x << 5 + x
@@ -142,7 +142,7 @@ ps_symbol_hash_key ps_symbol_get_hash_key(const char *name)
     return hash;
 }
 
-ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
+ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const ps_char *name)
 {
     ps_symbol_hash_key hash = ps_symbol_get_hash_key(name);
     int index = hash % table->table_size;
@@ -154,7 +154,7 @@ ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name)
     }
     for (int i = 0; i < bucket->used; i++)
     {
-        if (strcmp(bucket->symbols[i]->name, name) == 0)
+        if (strncmp((const char *)bucket->symbols[i]->name, (const char *)name, PS_IDENTIFIER_LEN) == 0)
         {
             ps_symbol_table_log(PS_DEBUG_TRACE, "TRACE\tps_symbol_table_find: '%s' found at index %d position %d\n",
                                 name, index, i);
@@ -258,9 +258,9 @@ void ps_symbol_table_dump(FILE *output, char *title, const ps_symbol_table *tabl
         for (int j = 0; j < table->buckets[i]->used; j++)
         {
             symbol = table->buckets[i]->symbols[j];
-            hash = ps_symbol_get_hash_key((char *)symbol->name);
+            hash = ps_symbol_get_hash_key(symbol->name);
             kind_name = ps_symbol_get_kind_name(symbol->kind);
-            type_name = symbol->value == NULL ? "NULL!" : symbol->value->type->name;
+            type_name = symbol->value == NULL ? "NULL!" : (char *)symbol->value->type->name;
             display_value = ps_symbol_table_get_dump_value(symbol);
             fprintf(output, "┃%c%c%05d┃%08x┃%05d┃%-*s┃%-10s┃%-20s┃%-*s┃\n", symbol->system ? 'S' : ' ',
                     symbol->allocated ? 'A' : ' ', i, hash, j, PS_IDENTIFIER_LEN, symbol->name, kind_name, type_name,

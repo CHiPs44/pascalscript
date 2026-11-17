@@ -112,7 +112,8 @@ static bool ps_interpreter_is_byref_parameter(const ps_ast_block *block, const p
     for (int i = 0; i < block->signature->parameter_count; i++)
     {
         const ps_formal_parameter *parameter = &block->signature->parameters[i];
-        if (parameter->byref && strcmp(parameter->name, symbol->name) == 0)
+        if (parameter->byref &&
+            strncmp((const char *)parameter->name, (const char *)symbol->name, PS_IDENTIFIER_LEN) == 0)
             return true;
     }
     return false;
@@ -599,8 +600,10 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
     assert(NULL != to);
 
     PS_INTERPRETER_LOG(interpreter, PS_DEBUG_VERBOSE, "ps_interpreter_copy_value: FROM %s (%s) TO %s (%s)\n",
-                       ps_value_get_debug_string(from), from == NULL || from->type == NULL ? "NULL!" : from->type->name,
-                       ps_value_get_debug_string(to), to == NULL || to->type == NULL ? "NULL!" : to->type->name);
+                       ps_value_get_debug_string(from),
+                       from == NULL || from->type == NULL ? "NULL!" : (const char *)from->type->name,
+                       ps_value_get_debug_string(to),
+                       to == NULL || to->type == NULL ? "NULL!" : (const char *)to->type->name);
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
         return true;

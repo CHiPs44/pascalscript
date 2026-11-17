@@ -194,7 +194,7 @@ extern "C"
     /** @brief Token value, either identifier, integer, unsigned, real, char, boolean or string */
     typedef union u_ps_token_value
     {
-        char identifier[PS_IDENTIFIER_SIZE]; /** @brief Identifier             */
+        ps_identifier identifier;           /** @brief Identifier             */
         ps_integer i;                        /** @brief Integer value          */
         ps_unsigned u;                       /** @brief Unsigned integer value */
         ps_real r;                           /** @brief Real value             */
@@ -228,7 +228,7 @@ extern "C"
 
     /** @brief Convert identifier to keyword */
     /** @return PS_TOKEN_IDENTIFIER if not a keyword */
-    ps_token_type ps_token_is_keyword(const char *identifier);
+    ps_token_type ps_token_is_keyword(const ps_char *identifier);
 
 #ifdef __cplusplus
 }

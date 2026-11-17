@@ -15,7 +15,7 @@
 
 static uint32_t ps_symbol_auto_index = 0;
 
-ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const char *name, ps_value *value)
+ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const void *name, ps_value *value)
 {
     ps_symbol *symbol = (ps_symbol *)ps_memory_malloc(PS_MEMORY_SYMBOL, sizeof(ps_symbol));
     if (symbol == NULL)
@@ -26,7 +26,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const char *name, ps_value *valu
     else
     {
         memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);
-        snprintf(symbol->name, PS_IDENTIFIER_SIZE, "#AUTO_%08X", ps_symbol_get_auto_num());
+        snprintf((char *)symbol->name, PS_IDENTIFIER_SIZE, "#AUTO_%08X", ps_symbol_get_auto_num());
     }
     symbol->system = false;
     symbol->allocated = true;
@@ -53,7 +53,7 @@ uint32_t ps_symbol_get_auto_num() { return ++ps_symbol_auto_index; }
 
 void ps_symbol_normalize_name(ps_symbol *symbol)
 {
-    char *name = symbol->name;
+    ps_char *name = symbol->name;
     while (*name)
         /* a-z => A-Z */
         if (*name >= 'a' && *name <= 'z')
@@ -125,9 +125,11 @@ char *ps_symbol_dump_value(const ps_symbol *symbol)
     snprintf(buffer, sizeof(buffer) - 1,
         "SYMBOL: name=%-*s, kind=%-16s, type=%-16s, value=%s",
         PS_IDENTIFIER_LEN + 1,
-        symbol == NULL ? "NULL!" : symbol->name,
+        symbol == NULL ? "NULL!" : (const char *)symbol->name,
         symbol == NULL ? "NULL!" : ps_symbol_get_kind_name(symbol->kind),
-        symbol == NULL || symbol->value == NULL || symbol->value->type == NULL ? "NULL!" : symbol->value->type->name,
+        symbol == NULL || symbol->value == NULL || symbol->value->type == NULL
+                ? "NULL!"
+                : (const char *)symbol->value->type->name,
         symbol == NULL || symbol->value == NULL ? "NULL!" : value
     );
     // clang-format on

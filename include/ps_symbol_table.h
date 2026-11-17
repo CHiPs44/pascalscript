@@ -61,10 +61,7 @@ extern "C"
     int ps_symbol_table_find_free(const ps_symbol_table *table);
 
     /** @brief Find symbol in table by name or return NULL */
-    ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name);
-
-    /** @brief Find symbol in table by name */
-    ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const char *name);
+    ps_symbol *ps_symbol_table_find(const ps_symbol_table *table, const ps_char *name);
 
     /** @brief Add symbol, returning error if table is full or symbol already exists */
     ps_error ps_symbol_table_add(ps_symbol_table *table, ps_symbol *symbol);

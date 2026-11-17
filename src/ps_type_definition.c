@@ -129,7 +129,7 @@ char *ps_type_definition_get_name(const ps_type_definition *type_def)
     case PS_TYPE_ENUM:
         // (One, Two, Three) => "ENUM(UNSIGNED, 3, 'One', ...)"
         snprintf(buffer, sizeof(buffer) - 1, "%s(%s, %d, '%s', ...)", type_name, base_name, type_def->def.e.count,
-                 type_def->def.e.count == 0 ? "???" : type_def->def.e.values[0]->name);
+                 type_def->def.e.count == 0 ? "???" : (const char *)type_def->def.e.values[0]->name);
         break;
     case PS_TYPE_SUBRANGE:
         // -5..24 => "SUBRANGE(INTEGER, -5..24)"

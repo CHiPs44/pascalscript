@@ -135,7 +135,8 @@ ps_ast_block *ps_system_alloc(void)
     ps_symbol_table *symbols = ps_symbol_table_alloc(64, 4);
     if (symbols == NULL)
         return NULL;
-    ps_ast_block *system = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "#SYSTEM", symbols);
+    ps_ast_block *system =
+            ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, (const ps_char *)"#SYSTEM", symbols);
     if (system == NULL)
         return NULL;
 
@@ -195,7 +196,7 @@ ps_ast_block *ps_system_alloc(void)
     ps_value_string_ps_version.type = &ps_system_string;
     ps_value_string_ps_version.data.s = ps_version_string;
     ps_system_constant_string_ps_version.kind = PS_SYMBOL_KIND_CONSTANT;
-    snprintf(ps_system_constant_string_ps_version.name, PS_IDENTIFIER_LEN, "PS_VERSION");
+    snprintf((char *)ps_system_constant_string_ps_version.name, PS_IDENTIFIER_LEN, "PS_VERSION");
     ps_system_constant_string_ps_version.value = &ps_value_string_ps_version;
     ps_system_constant_string_ps_version.system = true;
     ps_system_constant_string_ps_version.allocated = false;

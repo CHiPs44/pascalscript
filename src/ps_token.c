@@ -246,7 +246,7 @@ char *ps_token_get_keyword(ps_token_type token_type)
     return NULL;
 }
 
-ps_token_type ps_token_is_keyword(const char *identifier)
+ps_token_type ps_token_is_keyword(const ps_char *identifier)
 {
     // NB: identifier must already be normalized to uppercase
     int left = 0;
@@ -256,7 +256,7 @@ ps_token_type ps_token_is_keyword(const char *identifier)
     while (left <= right)
     {
         mid = left + (right - left) / 2;
-        cmp = strcmp(identifier, keywords[mid].keyword);
+        cmp = strcmp((const char *)identifier, keywords[mid].keyword);
         if (cmp == 0)
             return keywords[mid].token_type;
         else if (cmp < 0)

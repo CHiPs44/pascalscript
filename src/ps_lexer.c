@@ -279,7 +279,7 @@ static bool ps_lexer_read_identifier_or_keyword(ps_lexer *lexer)
             pos += 1;
         } while (isalnum(current_char) || current_char == '_');
         buffer[pos] = '\0';
-        lexer->current_token.type = ps_token_is_keyword((char *)buffer);
+        lexer->current_token.type = ps_token_is_keyword(buffer);
         memcpy(lexer->current_token.value.identifier, buffer, PS_IDENTIFIER_SIZE);
         return true;
     }
@@ -741,13 +741,13 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 
 static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_char)
 {
-    snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "%c", current_char);
+    snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "%c", current_char);
     switch (current_char)
     {
     case ':':
         if (next_char == '=')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ":=");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ":=");
             lexer->current_token.type = PS_TOKEN_ASSIGN;
             ADVANCE()
         }
@@ -770,7 +770,7 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
     case '.':
         if (next_char == '.')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "..");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "..");
             lexer->current_token.type = PS_TOKEN_RANGE;
             ADVANCE()
         }
@@ -816,7 +816,7 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
     case '*':
         if (next_char == '*')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "**");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "**");
             lexer->current_token.type = PS_TOKEN_POWER;
             ADVANCE()
         }
@@ -835,19 +835,19 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
     case '<':
         if (next_char == '>')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<>");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<>");
             lexer->current_token.type = PS_TOKEN_NE;
             ADVANCE()
         }
         else if (next_char == '=')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<=");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<=");
             lexer->current_token.type = PS_TOKEN_LE;
             ADVANCE()
         }
         else if (next_char == '<')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<<");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, "<<");
             lexer->current_token.type = PS_TOKEN_SHL;
             ADVANCE()
         }
@@ -858,13 +858,13 @@ static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char 
     case '>':
         if (next_char == '=')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">=");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">=");
             lexer->current_token.type = PS_TOKEN_GE;
             ADVANCE()
         }
         else if (next_char == '>')
         {
-            snprintf(lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">>");
+            snprintf((char *)lexer->current_token.value.identifier, PS_IDENTIFIER_SIZE, ">>");
             lexer->current_token.type = PS_TOKEN_SHR;
             ADVANCE()
         }

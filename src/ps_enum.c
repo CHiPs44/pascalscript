@@ -44,5 +44,5 @@ char *ps_enum_get_string_value(const ps_value *value)
     ps_unsigned index = value->data.u;
     if (index >= type_def->def.e.count)
         return NULL;
-    return values[index]->name;
+    return (char *)values[index]->name;
 }

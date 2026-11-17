@@ -95,14 +95,14 @@ bool ps_compiler_set_error_message(ps_compiler *compiler, ps_error error, const 
     return false;
 }
 
-bool ps_compiler_find_system_symbol(ps_compiler *compiler, const char *name, ps_ast_block **owner, ps_symbol **symbol)
+bool ps_compiler_find_system_symbol(ps_compiler *compiler, const ps_char *name, ps_ast_block **owner, ps_symbol **symbol)
 {
     *symbol = ps_symbol_table_find(compiler->system->symbols, name);
     *owner = *symbol == NULL ? NULL : compiler->system;
     return *symbol != NULL;
 }
 
-bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const char *name, bool local,
+bool ps_compiler_find_symbol(ps_compiler *compiler, ps_ast_block *block, const ps_char *name, bool local,
                              ps_ast_block **owner, ps_symbol **symbol)
 {
     assert(compiler != NULL);
@@ -143,7 +143,7 @@ bool ps_compiler_add_variable(ps_compiler *compiler, ps_ast_block *block, const 
 {
     assert(compiler != NULL);
     assert(block != NULL);
-    assert(identifier != NULL && strlen(identifier) > 0);
+    assert(identifier != NULL && strlen((const char *)identifier) > 0);
     assert(type_symbol != NULL);
     // Variable handle is its index in frame variables for block
     ps_value_data data = {.h = block->n_vars++};
@@ -184,7 +184,7 @@ bool ps_compiler_copy_value(ps_compiler *compiler, const ps_value *from, ps_valu
     return ps_compiler_return_false(compiler, PS_ERROR_TYPE_MISMATCH);
 }
 
-bool ps_compiler_load_string(ps_compiler *compiler, char *source, size_t length)
+bool ps_compiler_load_string(ps_compiler *compiler, ps_char *source, size_t length)
 {
     assert(NULL != source);
     compiler->error = PS_ERROR_NONE;

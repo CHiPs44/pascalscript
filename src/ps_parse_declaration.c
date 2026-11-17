@@ -97,7 +97,7 @@ bool ps_parse_program(ps_compiler *compiler, ps_ast_block *block)
     // block is already an AST_PROGRAM block created by caller, we just need to fill it
     block->line = start_line;
     block->column = start_column;
-    snprintf(block->name, PS_IDENTIFIER_SIZE, "%s", program_identifier);
+    snprintf((char *)block->name, PS_IDENTIFIER_SIZE, "%s", (const char *)program_identifier);
 
     // Register program in symbol table of program block
     program_symbol = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, program_identifier, NULL);

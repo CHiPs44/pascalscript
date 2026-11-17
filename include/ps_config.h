@@ -193,7 +193,7 @@ extern "C"
 
 #define PS_IDENTIFIER_SIZE ((size_t)(PS_IDENTIFIER_LEN + 1u))
 
-    typedef char ps_identifier[PS_IDENTIFIER_SIZE];
+    typedef PS_CHAR ps_identifier[PS_IDENTIFIER_SIZE];
 
     void ps_config_report(FILE *output);
 
