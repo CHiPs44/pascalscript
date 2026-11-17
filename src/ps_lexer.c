@@ -471,20 +471,31 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 
     current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
+    {
+        (void)ps_string_free(string);
         return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    }
     if (current_char != '\'')
+    {
+        (void)ps_string_free(string);
         return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
                                      "Char or string value must start with a single quote");
-    // Consume the opening quote
+    } // Consume the opening quote
     ADVANCE()
     while (true)
     {
         current_char = ps_buffer_peek_char(lexer->buffer);
         if (current_char == EOF)
+        {
+            (void)ps_string_free(string);
             return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
                                          "Unexpected end of file in char or string value");
+        }
         if (current_char == '\n')
+        {
+            (void)ps_string_free(string);
             return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
+        }
         if (current_char == '\'')
         {
             // Check for doubled single quotes (escaped single quote)
@@ -519,9 +530,12 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     {
         lexer->current_token.type = PS_TOKEN_CHAR_VALUE;
         lexer->current_token.value.c = string->str[0];
+        (void)ps_string_free(string);
     }
     else
     {
+        if (lexer->current_token.type == PS_TOKEN_STRING_VALUE&&lexer->current_token.value.s!=NULL)
+            (void)ps_string_free(lexer->current_token.value.s);
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
         lexer->current_token.value.s = string;
     }
@@ -703,7 +717,7 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
 
 static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
-    ps_token token = {.type = PS_TOKEN_NONE, .value = {.c = '\0'}};
+    ps_token token = {.type = PS_TOKEN_NONE, .value = {0}};
     int pos = 0;
     int current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
@@ -734,6 +748,8 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         if (current_char == EOF)
             return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     } while (current_char == '\'' || current_char == '^' || current_char == '#');
+    if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
+        (void)ps_string_free(lexer->current_token.value.s);
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
     return true;
