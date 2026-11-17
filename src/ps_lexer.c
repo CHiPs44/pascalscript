@@ -927,33 +927,6 @@ bool ps_lexer_read_token(ps_lexer *lexer)
     return true;
 }
 
-/**
- * Get the current cursor position in lexer's buffer.
- */
-bool ps_lexer_get_cursor(const ps_lexer *lexer, uint16_t *line, uint16_t *column)
-{
-    if (lexer == NULL || lexer->buffer == NULL)
-        return false;
-    *line = lexer->buffer->current_line;
-    *column = lexer->buffer->current_column;
-    return true;
-}
-
-/**
- * Set the cursor position in lexer's buffer.
- */
-bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column)
-{
-    if (lexer == NULL || lexer->buffer == NULL || line >= lexer->buffer->line_count ||
-        column > lexer->buffer->line_lengths[line])
-        return false;
-    lexer->buffer->current_line = line;
-    lexer->buffer->current_column = column;
-    lexer->buffer->current_char = '\0';
-    lexer->buffer->next_char = '\0';
-    return ps_buffer_read_next_char(lexer->buffer);
-}
-
 char *ps_lexer_get_debug_value(ps_lexer *lexer)
 {
     static char value[128] = {0};

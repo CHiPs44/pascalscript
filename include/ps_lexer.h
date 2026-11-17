@@ -19,17 +19,20 @@ extern "C"
 
     typedef struct s_ps_lexer
     {
-        ps_buffer *buffer;
-        ps_error error;
-        uint16_t start_line;
-        uint16_t start_column;
-        ps_token current_token;
+        ps_buffer *buffer;      /** @brief Source                        */
+        ps_error error;         /** @brief Error code                    */
+        uint16_t start_line;    /** @brief Start line of current token   */
+        uint16_t start_column;  /** @brief Start colmun of current token */
+        ps_token current_token; /** @brief Current token itself          */
     } ps_lexer;
 
     /** @brief Allocate new lexer */
     ps_lexer *ps_lexer_alloc(void);
 
-    /** @brief Free lexer */
+    /**
+     * @brief Free lexer
+     * @return NULL
+     */
     ps_lexer *ps_lexer_free(ps_lexer *lexer);
 
     /** @brief Reset lexer to a known state */
@@ -38,13 +41,10 @@ extern "C"
     /** @brief Read next token from buffer */
     bool ps_lexer_read_token(ps_lexer *lexer);
 
-    /** @brief Get current "cursor" */
-    bool ps_lexer_get_cursor(const ps_lexer *lexer, uint16_t *line, uint16_t *column);
-
-    /** @brief Set "cursor" to previously saved position */
-    bool ps_lexer_set_cursor(ps_lexer *lexer, uint16_t line, uint16_t column);
-
-    /** @brief Get a debug-friendly string representation of the current token's value. */
+    /**
+     * @brief Get a debug-friendly string representation of the current token's value.
+     * @return Static buffer of at most 127 chars
+     */
     char *ps_lexer_get_debug_value(ps_lexer *lexer);
 
     /** @brief Dump the current state of the lexer. */
