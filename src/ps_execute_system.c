@@ -217,8 +217,8 @@ static bool ps_execute_function_call_system_1arg(ps_interpreter *interpreter, co
             return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_AST_NODE,
                                                     "Function %s expects a symbolic argument",
                                                     function_call->executable->name);
-        ps_error error = ps_function_exec_1arg_s(interpreter, function_call->executable, argument->variable,
-                                                &result->value);
+        ps_error error =
+                ps_function_exec_1arg_s(interpreter, function_call->executable, argument->variable, &result->value);
         return error == PS_ERROR_NONE ? true : ps_interpreter_return_false(interpreter, error);
     }
     // Evaluate argument

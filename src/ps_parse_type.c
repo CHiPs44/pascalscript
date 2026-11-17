@@ -615,7 +615,8 @@ bool ps_parse_type_reference_identifier(ps_compiler *compiler, ps_ast_block *blo
  *      | POINTER     = 'POINTER'
  *      | TPOINTER    = '^' TYPE_REFERENCE
  */
-bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol, const ps_char *type_name)
+bool ps_parse_type_reference(ps_compiler *compiler, ps_ast_block *block, ps_symbol **type_symbol,
+                             const ps_char *type_name)
 {
     PARSE_BEGIN("TYPE_REFERENCE", "");
     (void)start_line;

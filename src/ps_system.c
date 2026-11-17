@@ -135,8 +135,7 @@ ps_ast_block *ps_system_alloc(void)
     ps_symbol_table *symbols = ps_symbol_table_alloc(64, 4);
     if (symbols == NULL)
         return NULL;
-    ps_ast_block *system =
-            ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, (const ps_char *)"#SYSTEM", symbols);
+    ps_ast_block *system = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, (const ps_char *)"#SYSTEM", symbols);
     if (system == NULL)
         return NULL;
 

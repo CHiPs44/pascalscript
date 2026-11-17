@@ -28,10 +28,10 @@ extern "C"
     /** @brief Stack frame holding variables & parameters */
     struct s_ps_frame
     {
-        const ps_ast_block *block;           /** @brief Block with symbols, variables, parameters & lexical parent */
-        size_t slot_count;                   /** @brief Number of allocated variable slots */
-        ps_frame_reference *references;      /** @brief Optional target for by-reference parameter slots */
-        ps_value_data data[];                /** @brief Variable values indexed by the symbol handle */
+        const ps_ast_block *block;      /** @brief Block with symbols, variables, parameters & lexical parent */
+        size_t slot_count;              /** @brief Number of allocated variable slots */
+        ps_frame_reference *references; /** @brief Optional target for by-reference parameter slots */
+        ps_value_data data[];           /** @brief Variable values indexed by the symbol handle */
     };
 
     /** @brief Stack itself */

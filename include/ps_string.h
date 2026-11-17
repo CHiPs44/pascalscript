@@ -107,7 +107,8 @@ extern "C"
     ps_string *ps_string_uppercase(const ps_string *s);
 
     /// @brief Dump first PS_IDENTIFIER_MAX chars of string, with max and length prefix
-    /// @example ps_string_dump('012345679ABCDEFGHIJKLMNOPQRSTUVWXYZ012345679') => 009/255 str="012345679ABCDEFGHIJKLMNOPQRSTU"
+    /// @example ps_string_dump('012345679ABCDEFGHIJKLMNOPQRSTUVWXYZ012345679') => 009/255
+    /// str="012345679ABCDEFGHIJKLMNOPQRSTU"
     /// @return static buffer
     char *ps_string_dump(ps_string *s);
 

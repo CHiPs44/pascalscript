@@ -157,7 +157,7 @@ extern "C"
             ps_type_definition_record   r; /** @brief _r_ecord  *FUTURE* */
             ps_type_definition_file     f; /** @brief _f_ile    *FUTURE* */
             // clang-format on
-        } def; /** @brief type definition */
+        } def;          /** @brief type definition */
         bool allocated; /** @brief True if this definition was allocated and must be freed */
     } ps_type_definition;
 

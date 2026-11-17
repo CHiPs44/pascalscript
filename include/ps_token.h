@@ -194,13 +194,13 @@ extern "C"
     /** @brief Token value, either identifier, integer, unsigned, real, char, boolean or string */
     typedef union u_ps_token_value
     {
-        ps_identifier identifier;           /** @brief Identifier             */
-        ps_integer i;                        /** @brief Integer value          */
-        ps_unsigned u;                       /** @brief Unsigned integer value */
-        ps_real r;                           /** @brief Real value             */
-        ps_char c;                           /** @brief Char value             */
-        ps_boolean b;                        /** @brief Boolean value          */
-        ps_string *s;                        /** @brief String value           */
+        ps_identifier identifier; /** @brief Identifier             */
+        ps_integer i;             /** @brief Integer value          */
+        ps_unsigned u;            /** @brief Unsigned integer value */
+        ps_real r;                /** @brief Real value             */
+        ps_char c;                /** @brief Char value             */
+        ps_boolean b;             /** @brief Boolean value          */
+        ps_string *s;             /** @brief String value           */
     } ps_token_value;
 
     /** @brief Token itself: type + value*/

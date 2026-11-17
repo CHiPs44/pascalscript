@@ -401,8 +401,7 @@ bool ps_parse_assignment_or_procedure_call(ps_compiler *compiler, ps_ast_block *
         if (compiler->debug >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "INFO\tAssignment to current function '%s' as Result\n", (char *)identifier);
         // Assign to the not so implicit "Result" local variable
-        symbol_found =
-                ps_compiler_find_symbol(compiler, block, (const ps_char *)"RESULT", false, &owner, &symbol);
+        symbol_found = ps_compiler_find_symbol(compiler, block, (const ps_char *)"RESULT", false, &owner, &symbol);
         is_result = true;
     }
     else
