@@ -467,7 +467,7 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         break;
     default:
         ps_interpreter_set_message(interpreter,
-                                   "Unknown binary operator %s (%d) result type %s (%) for types %s and %s\n",
+                                   "Unknown binary operator %s (%d) result type %s (%d) for types %s and %s\n",
                                    ps_operator_binary_get_name(operator), operator, ps_value_type_get_name(r), r,
                                    ps_value_type_get_name(a->type->value->data.t->base),
                                    ps_value_type_get_name(b->type->value->data.t->base));
@@ -478,8 +478,8 @@ bool ps_operator_binary_eval(ps_interpreter *interpreter, const ps_value *a, // 
         ps_interpreter_set_message(interpreter,
                                    "Binary operator %s (%d) result type %s does not match expected type %s\n",
                                    ps_operator_binary_get_name(operator), operator,
-                                   ps_value_type_get_name(result->type->value->data.t->base), expected_type == NULL,
-                                   "NULL!", ps_value_type_get_name(expected_type->value->data.t->base));
+                                   ps_value_type_get_name(result->type->value->data.t->base),
+                                   ps_value_type_get_name(expected_type->value->data.t->base));
         return ps_interpreter_return_false(interpreter, PS_ERROR_TYPE_MISMATCH);
     }
     return true;
