@@ -216,19 +216,6 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
     if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
         return false;
 
-    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
-    if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop,
-                                 for_statement->downto ? PS_OP_LT : PS_OP_GT))
-        return false;
-    *should_stop = stop.data.b;
-    if (*should_stop)
-    {
-        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
-                               ps_value_get_display_string(iteration_value, 0, 0), for_statement->downto ? "<=" : ">=",
-                               ps_value_get_display_string(&end_value->value, 0, 0));
-        return true;
-    }
-
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
     if (!ps_execute_statement_list(interpreter, for_statement->body))
         return false;
@@ -246,11 +233,23 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
         return false;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tVariable value: %s",
                            ps_value_get_display_string(iteration_value, 0, 0));
+
+    // Should we stop loop?
+    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+    if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop, PS_OP_EQ))
+        return false;
+    *should_stop = stop.data.b;
+    if (*should_stop)
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
+                               ps_value_get_display_string(iteration_value, 0, 0), "=",
+                               ps_value_get_display_string(&end_value->value, 0, 0));
+
     return true;
 }
 
 bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement)
 {
+    assert(interpreter != NULL);
     assert(for_statement != NULL);
     assert(for_statement->group == PS_AST_STATEMENT);
     assert(for_statement->kind == PS_AST_FOR);
@@ -258,13 +257,11 @@ bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR statement");
 
     // Initialize variables
-    // clang-format off
-    ps_ast_variable *for_variable    = for_statement->variable;
-    ps_ast_value     start_value     = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    ps_ast_value     end_value       = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
-    ps_value         iteration_value = {.allocated = false, .type = for_variable->variable->value->type, .data = {0}};
-    bool             should_stop     = false;
-    // clang-format on
+    ps_ast_variable *for_variable = for_statement->variable;
+    ps_ast_value start_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    ps_ast_value end_value = {.value.allocated = false, .value.type = &ps_system_none, .value.data = {0}};
+    ps_value iteration_value = {.allocated = false, .type = for_variable->variable->value->type, .data = {0}};
+    bool should_stop = false;
 
     // Evaluate start value
     if (!ps_evaluate_expression(interpreter, for_statement->start, &start_value))
@@ -290,7 +287,15 @@ bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
                                       &should_stop))
             return false;
         if (should_stop)
+        {
+            // For I := 1 To MaxInt should stop at MaxInt,
+            //  but Succ(MaxInt) is -MaxInt-1 when range checking is off
+            //  so we execute another time for limit
+            if (!ps_execute_for_iteration(interpreter, for_statement, for_variable, &iteration_value, &end_value,
+                                          &should_stop))
+                return false;
             break;
+        }
     } while (true);
 
     return true;

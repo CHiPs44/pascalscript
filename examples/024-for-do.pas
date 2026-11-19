@@ -6,7 +6,7 @@
 Program ForDo;
 Const
     Limit = 99;
-    PerLine = 25;
+    PerLine = 20;
 Var
     I: Integer;
     C: Char;
@@ -19,6 +19,7 @@ Begin
     BOL := True;
     For I := 0 To Limit Do
     Begin
+        Write(' ');
         If I < 10 Then
             Write('0');
         Write(I);
