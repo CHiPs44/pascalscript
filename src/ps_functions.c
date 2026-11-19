@@ -880,11 +880,12 @@ ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value 
 //   => correct "bias" introduced by modulus operator
 static int rand_range_integer(int n)
 {
+    assert(n > 0);
     int r;
     int limit;
 
     limit = RAND_MAX - (RAND_MAX % n);
-    while ((r = rand()) >= limit)
+    while ((r = rand()) >= limit) // NOSONAR
         ;
 
     return r % n;
@@ -898,7 +899,7 @@ static unsigned int rand_range_unsigned(unsigned int n)
         return (unsigned int)rand_range_integer((int)n);
     }
     // use double for larger values
-    return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX);
+    return (unsigned int)((double)rand() * (double)n / (double)RAND_MAX); // NOSONAR
 }
 
 ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, ps_value *result)
@@ -923,10 +924,18 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
         switch (ps_value_get_base(value))
         {
         case PS_TYPE_INTEGER:
+            if (value->data.i <= 0)
+                return ps_function_return_error_with_message(
+                        interpreter, PS_ERROR_INVALID_PARAMETERS,
+                        "Random: Integer parameter must be strictly greater than 0");
             result->type = &ps_system_integer;
             result->data.i = (ps_integer)rand_range_integer(value->data.i); // NOSONAR
             break;
         case PS_TYPE_UNSIGNED:
+            if (value->data.u == 0)
+                return ps_function_return_error_with_message(
+                        interpreter, PS_ERROR_INVALID_PARAMETERS,
+                        "Random: Unsigned parameter must be strictly greater than 0");
             result->type = &ps_system_unsigned;
             result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u); // NOSONAR
             break;
