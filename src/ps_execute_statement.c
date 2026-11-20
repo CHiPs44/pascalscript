@@ -217,6 +217,20 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
     if (!ps_execute_statement_list(interpreter, for_statement->body))
         return false;
 
+    // Should we stop? => iteration = end
+    ps_value stop_value = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+    fprintf(stderr, "=> iteration=%s, end=%s\n", ps_value_get_debug_string(iteration_value),
+            ps_value_get_debug_string(&end_value->value));
+    if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop_value, PS_OP_EQ))
+        return false;
+    *should_stop = stop_value.data.b;
+    fprintf(stderr, "=> SHOULD STOP: %s\n", *should_stop ? "YES" : "NO");
+    if (*should_stop)
+        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
+                               ps_value_get_display_string(iteration_value, 0, 0), "=",
+                               ps_value_get_display_string(&end_value->value, 0, 0));
+
+    // Increment for To or decrement for Downto
     if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
         return false;
     ps_error error = for_statement->downto ? ps_function_pred(interpreter, iteration_value, iteration_value)
@@ -230,21 +244,6 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tVariable value: %s",
                            ps_value_get_display_string(iteration_value, 0, 0));
 
-    // Should we stop loop at next iteration?
-    if (!*should_stop)
-    {
-        ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
-        if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop, PS_OP_EQ))
-            return false;
-        *should_stop = stop.data.b;
-        fprintf(stderr,"=> SHOULD STOP: %s\n", *should_stop?"YES":"NO");
-        if (*should_stop)
-            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
-                                   ps_value_get_display_string(iteration_value, 0, 0), "=",
-                                   ps_value_get_display_string(&end_value->value, 0, 0));
-    } else{
-        fprintf(stderr,"=> SHOULD HAVE STOPPED OR LAST ITERATION!");
-    }
     return true;
 }
 
@@ -282,22 +281,28 @@ bool ps_execute_for(ps_interpreter *interpreter, const ps_ast_for *for_statement
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tVariable value: %s",
                            ps_value_get_display_string(for_variable->variable->value, 0, 0));
 
-    do
+    // Check if we should enter loop: start >= stop for downto, start <= stop for to
+    ps_value enter_value = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+    if (for_statement->downto)
     {
-        if (!ps_execute_for_iteration(interpreter, for_statement, for_variable, &iteration_value, &end_value,
-                                      &should_stop))
-            return false;
-        if (should_stop)
+        if (!ps_operator_binary_eval(interpreter, &start_value.value, &end_value.value, &enter_value, PS_OP_GE))
+            return ps_interpreter_set_message(interpreter, "Error evaluating start > stop");
+    }
+    else
+    {
+        if (!ps_operator_binary_eval(interpreter, &start_value.value, &end_value.value, &enter_value, PS_OP_LE))
+            return ps_interpreter_set_message(interpreter, "Error evaluating start < stop");
+    }
+    if (enter_value.data.b)
+    {
+        // Loop from start to/downto end
+        do
         {
-            // For I := 1 To MaxInt should stop at MaxInt,
-            //  but Succ(MaxInt) is -MaxInt-1 when range checking is off
-            //  so we execute another time for limit
             if (!ps_execute_for_iteration(interpreter, for_statement, for_variable, &iteration_value, &end_value,
                                           &should_stop))
                 return false;
-            break;
-        }
-    } while (true);
+        } while (!should_stop);
+    }
 
     return true;
 }
