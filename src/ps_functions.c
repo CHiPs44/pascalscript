@@ -924,12 +924,21 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
         switch (ps_value_get_base(value))
         {
         case PS_TYPE_INTEGER:
-            if (value->data.i <= 0)
-                return ps_function_return_error_with_message(
-                        interpreter, PS_ERROR_INVALID_PARAMETERS,
-                        "Random: Integer parameter must be strictly greater than 0");
-            result->type = &ps_system_integer;
-            result->data.i = (ps_integer)rand_range_integer(value->data.i); // NOSONAR
+            if (value->data.i >= -1 && value->data.i <= 1)
+            {
+                result->type = &ps_system_integer;
+                result->data.i = 0;
+            }
+            else if (value->data.i < 0)
+            {
+                result->type = &ps_system_integer;
+                result->data.i = (ps_integer)(-rand_range_integer(-value->data.i - 1)); // NOSONAR
+            }
+            else
+            {
+                result->type = &ps_system_integer;
+                result->data.i = (ps_integer)rand_range_integer(value->data.i); // NOSONAR
+            }
             break;
         case PS_TYPE_UNSIGNED:
             if (value->data.u == 0)
