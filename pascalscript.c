@@ -57,6 +57,7 @@
 // #define DEBUG_SOURCE "examples/220-procedure2.pas"
 // #define DEBUG_SOURCE "examples/230-procedure3.pas"
 // #define DEBUG_SOURCE "examples/301-function1.pas"
+#define DEBUG_SOURCE "examples/310-factorial.pas"
 
 // Runtime options
 bool bool_eval = false;

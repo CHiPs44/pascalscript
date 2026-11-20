@@ -213,20 +213,16 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
                                      const ps_ast_variable *for_variable, ps_value *iteration_value,
                                      const ps_ast_value *end_value, bool *should_stop)
 {
-    if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
-        return false;
-
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Body: %d statements", for_statement->body->count);
     if (!ps_execute_statement_list(interpreter, for_statement->body))
         return false;
 
-    bool range_check = interpreter->range_check;
-    interpreter->range_check = false;
+    if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
+        return false;
     ps_error error = for_statement->downto ? ps_function_pred(interpreter, iteration_value, iteration_value)
                                            : ps_function_succ(interpreter, iteration_value, iteration_value);
-    interpreter->range_check = range_check;
     if (error != PS_ERROR_NONE)
-        return false;
+        return ps_interpreter_set_error_message(interpreter, error, "Error when stepping for loop");
     if (!ps_interpreter_set_variable_value(interpreter, for_variable, iteration_value))
         return false;
     if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
@@ -234,16 +230,21 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tVariable value: %s",
                            ps_value_get_display_string(iteration_value, 0, 0));
 
-    // Should we stop loop?
-    ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
-    if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop, PS_OP_EQ))
-        return false;
-    *should_stop = stop.data.b;
-    if (*should_stop)
-        PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
-                               ps_value_get_display_string(iteration_value, 0, 0), "=",
-                               ps_value_get_display_string(&end_value->value, 0, 0));
-
+    // Should we stop loop at next iteration?
+    if (!*should_stop)
+    {
+        ps_value stop = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
+        if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop, PS_OP_EQ))
+            return false;
+        *should_stop = stop.data.b;
+        fprintf(stderr,"=> SHOULD STOP: %s\n", *should_stop?"YES":"NO");
+        if (*should_stop)
+            PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
+                                   ps_value_get_display_string(iteration_value, 0, 0), "=",
+                                   ps_value_get_display_string(&end_value->value, 0, 0));
+    } else{
+        fprintf(stderr,"=> SHOULD HAVE STOPPED OR LAST ITERATION!");
+    }
     return true;
 }
 
