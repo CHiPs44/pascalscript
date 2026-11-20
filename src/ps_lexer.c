@@ -534,7 +534,7 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     }
     else
     {
-        if (lexer->current_token.type == PS_TOKEN_STRING_VALUE&&lexer->current_token.value.s!=NULL)
+        if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
             (void)ps_string_free(lexer->current_token.value.s);
         lexer->current_token.type = PS_TOKEN_STRING_VALUE;
         lexer->current_token.value.s = string;
@@ -717,7 +717,7 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
 
 static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
-    ps_token token = {.type = PS_TOKEN_NONE, .value = {0}};
+    ps_token token = {.type = PS_TOKEN_NONE, .value = {.identifier = {0}}};
     int pos = 0;
     int current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
