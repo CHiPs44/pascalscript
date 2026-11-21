@@ -232,11 +232,13 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
     // fprintf(stderr, "%*c%02d ", interpreter->level * 2, ' ', interpreter->level);
     // fprintf(stderr, "=> SHOULD STOP: %s\n", *should_stop ? "YES" : "NO");
     if (*should_stop)
+    {
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
                                ps_value_get_display_string(iteration_value, 0, 0), "=",
                                ps_value_get_display_string(&end_value->value, 0, 0));
-
-    // Increment for To or decrement for Downto
+        return true;
+    }
+    // Increment variable for To or decrement for Downto
     if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
         return false;
     ps_error error = for_statement->downto ? ps_function_pred(interpreter, iteration_value, iteration_value)

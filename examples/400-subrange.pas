@@ -50,6 +50,7 @@ Begin
   // WriteLn('L = ''', L, '''');
   TestInnerType;
   // "Calendar"
+  WriteLn('Low=', Low(TDay), ', High=', High(TDay));
   Write('  |');
   For Day := Low(TDay) To High(TDay) Do
     Write(Day:2, '|');
@@ -58,7 +59,7 @@ Begin
   Begin
     Write(Month:2, '|');
     For Day := Low(TDay) To High(TDay) Do
-      Write(' -', '|');
+      Write('  ', '|');
     WriteLn;
   End;
 End.
