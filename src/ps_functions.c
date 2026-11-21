@@ -941,12 +941,16 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
             }
             break;
         case PS_TYPE_UNSIGNED:
-            if (value->data.u == 0)
-                return ps_function_return_error_with_message(
-                        interpreter, PS_ERROR_INVALID_PARAMETERS,
-                        "Random: Unsigned parameter must be strictly greater than 0");
-            result->type = &ps_system_unsigned;
-            result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u); // NOSONAR
+            if (value->data.u <= 1)
+            {
+                result->type = &ps_system_unsigned;
+                result->data.u = 0;
+            }
+            else
+            {
+                result->type = &ps_system_unsigned;
+                result->data.u = (ps_unsigned)rand_range_unsigned(value->data.u); // NOSONAR
+            }
             break;
         default:
             return PS_ERROR_UNEXPECTED_TYPE;

@@ -64,10 +64,7 @@ void ps_lexer_reset(ps_lexer *lexer)
     if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
         lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
     if (lexer->buffer != NULL)
-    {
         ps_buffer_reset(lexer->buffer);
-        lexer->buffer = NULL;
-    }
     lexer->error = PS_ERROR_NONE;
     lexer->current_token.type = PS_TOKEN_NONE;
     memset(&lexer->current_token.value, 0, sizeof(lexer->current_token.value));
