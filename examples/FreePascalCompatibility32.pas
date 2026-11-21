@@ -60,7 +60,7 @@ End;
 
 Function GetTickCount: Unsigned;
 Begin
-  GetTickCount := SysUtils.GetTickCount;
+  GetTickCount := SysUtils.GetTickCount64 And MaxUint;
 End;
 
 End.
