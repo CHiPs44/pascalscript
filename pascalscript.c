@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
     compiler = ps_compiler_free(compiler);
     if (program != NULL)
         program = (ps_ast_block *)ps_ast_free_block(program);
-    system_block = (ps_ast_block *)ps_ast_free_block(system_block);
+    system_block = ps_system_free(system_block);
     string_heap = ps_string_heap_free(string_heap);
 
     if (dump_memory)

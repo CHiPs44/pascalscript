@@ -37,6 +37,7 @@ ps_lexer *ps_lexer_alloc(void)
     ps_lexer *lexer = ps_memory_malloc(PS_MEMORY_LEXER, sizeof(ps_lexer));
     if (lexer == NULL)
         return NULL;
+    memset(lexer, 0, sizeof(ps_lexer));
     lexer->buffer = ps_buffer_alloc();
     if (lexer->buffer == NULL)
     {
@@ -49,14 +50,20 @@ ps_lexer *ps_lexer_alloc(void)
 
 ps_lexer *ps_lexer_free(ps_lexer *lexer)
 {
-    if (lexer->buffer != NULL)
-        lexer->buffer = ps_buffer_free(lexer->buffer);
-    ps_memory_free(PS_MEMORY_LEXER, lexer);
+    if (lexer != NULL)
+    {
+        ps_lexer_reset(lexer);
+        if (lexer->buffer != NULL)
+            lexer->buffer = ps_buffer_free(lexer->buffer);
+        ps_memory_free(PS_MEMORY_LEXER, lexer);
+    }
     return NULL;
 }
 
 void ps_lexer_reset(ps_lexer *lexer)
 {
+    if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
+        lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
     ps_buffer_reset(lexer->buffer);
     lexer->error = PS_ERROR_NONE;
     lexer->current_token.type = PS_TOKEN_NONE;
@@ -574,6 +581,9 @@ static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
     // Read the character after ^
     current_char = ps_buffer_peek_char(lexer->buffer);
 
+    if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
+        lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
+
     if (current_char >= '@' && current_char <= '_')
     {
         current_char = current_char - '@'; // Convert to control character
@@ -607,6 +617,8 @@ static bool ps_lexer_read_char_value_hash(ps_lexer *lexer)
     // Consume the #
     ADVANCE()
     // Read the number after the #
+    if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
+        lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
     if (!ps_lexer_read_number(lexer))
         return false;
     // Check the number
@@ -737,6 +749,7 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     ps_token token = {.type = PS_TOKEN_NONE, .value = {.identifier = {0}}};
     int pos = 0;
+    bool success = false;
     int current_char = ps_buffer_peek_char(lexer->buffer);
     if (current_char == EOF)
         return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
@@ -745,30 +758,36 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         if (current_char == '\'')
         {
             if (!ps_lexer_read_char_or_string_value_quote(lexer))
-                return false;
+                goto cleanup;
             if (!ps_lexer_append_quoted_value(lexer, &token, &pos))
-                return false;
+                goto cleanup;
         }
         else if (current_char == '^' || current_char == '#')
         {
             if (!ps_lexer_append_escaped_value(lexer, &token, &pos, (char)current_char))
-                return false;
+                goto cleanup;
         }
         else
         {
-            return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
-                                         "Unexpected character in char or string value");
+            (void)ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
+                                        "Unexpected character in char or string value");
+            goto cleanup;
         }
         // Example: 'Hello' [SPACE] #32 [SPACE] 'World!' => 'Hello'#32'World!' => 'Hello World!'
         if (!ps_lexer_skip_whitespace_and_comments(lexer))
-            return false;
+            goto cleanup;
         current_char = ps_buffer_peek_char(lexer->buffer);
     } while (current_char != EOF && (current_char == '\'' || current_char == '^' || current_char == '#'));
     if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
         (void)ps_string_free(lexer->current_token.value.s);
     lexer->current_token.type = token.type;
     lexer->current_token.value = token.value;
-    return true;
+    success = true;
+
+cleanup:
+    if (!success && token.type == PS_TOKEN_STRING_VALUE)
+        (void)ps_string_free(token.value.s);
+    return success;
 }
 
 static bool ps_lexer_read_other_tokens(ps_lexer *lexer, char current_char, char next_char)
