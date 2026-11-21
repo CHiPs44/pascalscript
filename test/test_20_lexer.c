@@ -199,42 +199,98 @@ static bool test_empty_string_plus_char(void)
     return ok;
 }
 
+static bool test_multiline_quote(void)
+{
+    char source[] = "'abc\n";
+    ps_lexer *lexer = ps_lexer_alloc();
+    if (lexer == NULL)
+    {
+        printf("TEST LEXER: ERROR allocating lexer for multi-line quote\n");
+        return false;
+    }
+
+    bool ok = ps_buffer_load_string(lexer->buffer, source, sizeof(source) - 1);
+    if (ok)
+        ok = ps_buffer_read_next_char(lexer->buffer);
+    if (ok)
+        ok = !ps_lexer_read_token(lexer) && lexer->error == PS_ERROR_STRING_NOT_MULTI_LINE;
+    if (!ok)
+        printf("TEST LEXER: ERROR multi-line quote should report a string error\n");
+
+    ps_lexer_free(lexer);
+    return ok;
+}
+
+static bool test_eof_token(void)
+{
+    char source[] = "name 'abc' // trailing comment";
+    ps_lexer *lexer = ps_lexer_alloc();
+    if (lexer == NULL)
+    {
+        printf("TEST LEXER: ERROR allocating lexer for EOF token\n");
+        return false;
+    }
+
+    bool ok = ps_buffer_load_string(lexer->buffer, source, sizeof(source) - 1);
+    if (ok)
+        ok = ps_buffer_read_next_char(lexer->buffer);
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_IDENTIFIER;
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_STRING_VALUE &&
+             strcmp((char *)lexer->current_token.value.s->str, "abc") == 0;
+    if (ok)
+        ok = ps_lexer_read_token(lexer) && lexer->current_token.type == PS_TOKEN_EOF && lexer->error == PS_ERROR_NONE;
+    if (!ok)
+        printf("TEST LEXER: ERROR expected an EOF token after the final value\n");
+
+    ps_lexer_free(lexer);
+    return ok;
+}
+
 int main(void)
 {
     printf("TEST LEXER: BEGIN\n");
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("EMPTY1", empty1_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_lexer("EMPTY1", empty1_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
+        goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("EMPTY2", empty2_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_lexer("EMPTY2", empty2_source, empty_expected, sizeof(empty_expected) / sizeof(ps_token_type)))
+        goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("HELLO1", hello1_source, hello1_expected, sizeof(hello1_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_lexer("HELLO1", hello1_source, hello1_expected, sizeof(hello1_expected) / sizeof(ps_token_type)))
+        goto failure;
 
     printf("================================================================================\n");
     if (!test_lexer("HELLO2", hello2_source, hello2_expected, sizeof(hello2_expected) / sizeof(ps_token_type)))
         goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_lexer("QUOTES", quotes_source, quotes_expected, sizeof(quotes_expected) / sizeof(ps_token_type)))
+        goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_multiline_quote())
+        goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
-    //                 sizeof(real_exponent_expected) / sizeof(ps_token_type)))
-    //     goto failure;
+    if (!test_eof_token())
+        goto failure;
 
-    // printf("================================================================================\n");
-    // if (!test_empty_string_plus_char())
-    //     goto failure;
+    printf("================================================================================\n");
+    if (!test_lexer("RANGE", range_source, range_expected, sizeof(range_expected) / sizeof(ps_token_type)))
+        goto failure;
+
+    printf("================================================================================\n");
+    if (!test_lexer("REAL_EXPONENT", real_exponent_source, real_exponent_expected,
+                    sizeof(real_exponent_expected) / sizeof(ps_token_type)))
+        goto failure;
+
+    printf("================================================================================\n");
+    if (!test_empty_string_plus_char())
+        goto failure;
 
     printf("================================================================================\n");
     printf("TEST LEXER: END\n");

@@ -24,6 +24,7 @@ char *ps_token_type_get_string(ps_token_type token_type, char *default_value)
     {
         //                                   12345678901234567890
     case PS_TOKEN_NONE:              return "   NONE             ";
+    case PS_TOKEN_EOF:               return "   EOF              ";
     case PS_TOKEN_INTEGER_VALUE:     return "   INTEGER          ";
     case PS_TOKEN_UNSIGNED_VALUE:    return "   UNSIGNED         ";
     case PS_TOKEN_REAL_VALUE:        return "   REAL             ";
@@ -76,6 +77,9 @@ char *ps_token_dump_value(ps_token *token)
     switch (token->type) // NOSONAR
     {
     case PS_TOKEN_NONE:
+        snprintf(value, sizeof(value) - 1, "%04d: %s", token->type, type_name);
+        break;
+    case PS_TOKEN_EOF:
         snprintf(value, sizeof(value) - 1, "%04d: %s", token->type, type_name);
         break;
     case PS_TOKEN_INTEGER_VALUE:

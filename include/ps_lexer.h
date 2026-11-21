@@ -38,7 +38,7 @@ extern "C"
     /** @brief Reset lexer to a known state */
     void ps_lexer_reset(ps_lexer *lexer);
 
-    /** @brief Read next token from buffer */
+    /** @brief Read next token from buffer; sets PS_TOKEN_EOF at end of input */
     bool ps_lexer_read_token(ps_lexer *lexer);
 
     /**

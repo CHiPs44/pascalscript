@@ -94,6 +94,7 @@ extern "C"
     typedef enum e_ps_token_type
     {
         PS_TOKEN_NONE = 0,
+        PS_TOKEN_EOF, // End of input
         // Base type values
         // ====================================================================================================c
         PS_TOKEN_INTEGER_VALUE,
