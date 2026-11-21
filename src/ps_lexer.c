@@ -450,7 +450,7 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
 #define CHECK_STRING_OVERFLOW                                                                                          \
     if (pos >= PS_STRING_MAX_LEN)                                                                                      \
     {                                                                                                                  \
-        (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");            \
+        (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");           \
         goto cleanup;                                                                                                  \
     }
 
@@ -463,8 +463,9 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     int next_char = '\0';
     unsigned int pos = 0;
     bool success = false;
-    ps_string *string = ps_string_alloc(0);
+    ps_string *string = NULL;
 
+    string = ps_string_alloc(0);
     if (string == NULL)
     {
         (void)ps_lexer_return_error(lexer, PS_ERROR_OUT_OF_MEMORY, "Cannot allocate string value");
@@ -495,8 +496,7 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
         }
         if (current_char == '\n')
         {
-            (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE,
-                                        "String value cannot be multi-line");
+            (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
             goto cleanup;
         }
         if (current_char == '\'')
@@ -745,6 +745,19 @@ static bool ps_lexer_append_escaped_value(ps_lexer *lexer, ps_token *token, int 
     return false;
 }
 
+static bool ps_lexer_read_char_or_string_component(ps_lexer *lexer, ps_token *token, int *pos, int current_char)
+{
+    if (current_char == '\'')
+    {
+        if (!ps_lexer_read_char_or_string_value_quote(lexer))
+            return false;
+        return ps_lexer_append_quoted_value(lexer, token, pos);
+    }
+    if (current_char == '^' || current_char == '#')
+        return ps_lexer_append_escaped_value(lexer, token, pos, (char)current_char);
+    return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER, "Unexpected character in char or string value");
+}
+
 static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
 {
     ps_token token = {.type = PS_TOKEN_NONE, .value = {.identifier = {0}}};
@@ -755,26 +768,9 @@ static bool ps_lexer_read_char_or_string_value(ps_lexer *lexer)
         return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
     do
     {
-        if (current_char == '\'')
-        {
-            if (!ps_lexer_read_char_or_string_value_quote(lexer))
-                goto cleanup;
-            if (!ps_lexer_append_quoted_value(lexer, &token, &pos))
-                goto cleanup;
-        }
-        else if (current_char == '^' || current_char == '#')
-        {
-            if (!ps_lexer_append_escaped_value(lexer, &token, &pos, (char)current_char))
-                goto cleanup;
-        }
-        else
-        {
-            (void)ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_CHARACTER,
-                                        "Unexpected character in char or string value");
-            goto cleanup;
-        }
-        // Example: 'Hello' [SPACE] #32 [SPACE] 'World!' => 'Hello'#32'World!' => 'Hello World!'
-        if (!ps_lexer_skip_whitespace_and_comments(lexer))
+        if (!ps_lexer_read_char_or_string_component(lexer, &token, &pos, current_char) ||
+            // Example: 'Hello' [SPACE] #32 [SPACE] 'World!' => 'Hello'#32'World!' => 'Hello World!'
+            !ps_lexer_skip_whitespace_and_comments(lexer))
             goto cleanup;
         current_char = ps_buffer_peek_char(lexer->buffer);
     } while (current_char != EOF && (current_char == '\'' || current_char == '^' || current_char == '#'));
