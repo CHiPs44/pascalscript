@@ -447,12 +447,73 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
     return ps_lexer_read_number_dec(lexer);
 }
 
-#define CHECK_STRING_OVERFLOW                                                                                          \
-    if (pos >= PS_STRING_MAX_LEN)                                                                                      \
-    {                                                                                                                  \
-        (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");           \
-        goto cleanup;                                                                                                  \
+static bool ps_lexer_append_quoted_character(ps_lexer *lexer, ps_string **string, unsigned int *pos, int character)
+{
+    if (*pos >= PS_STRING_MAX_LEN)
+        return ps_lexer_return_error(lexer, PS_ERROR_STRING_TOO_LONG, "Too many characters in string value");
+    if (!ps_lexer_append_char(lexer, string, (char)character))
+        return false;
+    *pos += 1;
+    return true;
+}
+
+static bool ps_lexer_validate_quoted_string_character(ps_lexer *lexer, int character)
+{
+    if (character == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
+                                     "Unexpected end of file in char or string value");
+    if (character == '\n')
+        return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE,
+                                     "String value cannot be multi-line");
+    return true;
+}
+
+static bool ps_lexer_read_escaped_quote(ps_lexer *lexer, ps_string **string, unsigned int *pos)
+{
+    if (!ps_lexer_append_quoted_character(lexer, string, pos, '\''))
+        return false;
+    if (!ps_lexer_read_next_char(lexer))
+        return false; // Consume the first quote
+    if (ps_buffer_peek_char(lexer->buffer) == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    return ps_lexer_read_next_char(lexer); // Consume the second quote
+}
+
+static bool ps_lexer_read_quoted_string_character(ps_lexer *lexer, ps_string **string, unsigned int *pos,
+                                                  int character)
+{
+    if (!ps_lexer_append_quoted_character(lexer, string, pos, character))
+        return false;
+    if (!ps_lexer_read_next_char(lexer))
+        return false;
+    if (ps_buffer_peek_char(lexer->buffer) == EOF)
+        return ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
+    return true;
+}
+
+static bool ps_lexer_read_quoted_string_content(ps_lexer *lexer, ps_string **string, unsigned int *pos)
+{
+    int current_char = '\0';
+
+    while (true)
+    {
+        current_char = ps_buffer_peek_char(lexer->buffer);
+        if (!ps_lexer_validate_quoted_string_character(lexer, current_char))
+            return false;
+
+        if (current_char == '\'')
+        {
+            if (ps_buffer_peek_next_char(lexer->buffer) != '\'')
+                return ps_lexer_read_next_char(lexer); // Consume the closing quote
+            if (!ps_lexer_read_escaped_quote(lexer, string, pos))
+                return false;
+            continue;
+        }
+
+        if (!ps_lexer_read_quoted_string_character(lexer, string, pos, current_char))
+            return false;
     }
+}
 
 /**
  * Read a single character or a string value enclosed in single quotes.
@@ -460,7 +521,6 @@ static bool ps_lexer_read_number(ps_lexer *lexer)
 static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
 {
     int current_char = '\0';
-    int next_char = '\0';
     unsigned int pos = 0;
     bool success = false;
     ps_string *string = NULL;
@@ -485,65 +545,8 @@ static bool ps_lexer_read_char_or_string_value_quote(ps_lexer *lexer)
     } // Consume the opening quote
     if (!ps_lexer_read_next_char(lexer))
         goto cleanup;
-    while (true)
-    {
-        current_char = ps_buffer_peek_char(lexer->buffer);
-        if (current_char == EOF)
-        {
-            (void)ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
-                                        "Unexpected end of file in char or string value");
-            goto cleanup;
-        }
-        if (current_char == '\n')
-        {
-            (void)ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
-            goto cleanup;
-        }
-        if (current_char == '\'')
-        {
-            // Check for doubled single quotes (escaped single quote)
-            next_char = ps_buffer_peek_next_char(lexer->buffer);
-            if (next_char == '\'')
-            {
-                CHECK_STRING_OVERFLOW
-                pos += 1;
-                if (!ps_lexer_append_char(lexer, &string, (char)current_char))
-                    goto cleanup;
-                if (!ps_lexer_read_next_char(lexer))
-                    goto cleanup;
-                current_char = ps_buffer_peek_char(lexer->buffer);
-                if (current_char == EOF)
-                {
-                    (void)ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
-                    goto cleanup;
-                } // Consume the first quote
-                if (!ps_lexer_read_next_char(lexer))
-                    goto cleanup; // Consume the second quote
-            }
-            else
-            {
-                // End of the string
-                if (!ps_lexer_read_next_char(lexer))
-                    goto cleanup; // Consume the closing quote
-                break;
-            }
-        }
-        else
-        {
-            CHECK_STRING_OVERFLOW
-            pos += 1;
-            if (!ps_lexer_append_char(lexer, &string, (char)current_char))
-                goto cleanup;
-            if (!ps_lexer_read_next_char(lexer))
-                goto cleanup;
-            current_char = ps_buffer_peek_char(lexer->buffer);
-            if (current_char == EOF)
-            {
-                (void)ps_lexer_return_error(lexer, PS_ERROR_EOF, "Unexpected end of file");
-                goto cleanup;
-            }
-        }
-    }
+    if (!ps_lexer_read_quoted_string_content(lexer, &string, &pos))
+        goto cleanup;
     string->str[pos] = '\0';
     if (pos == 1)
     {
@@ -564,8 +567,6 @@ cleanup:
     (void)ps_string_free(string);
     return success;
 }
-
-#undef CHECK_STRING_OVERFLOW
 
 static bool ps_lexer_read_char_value_caret(ps_lexer *lexer)
 {
