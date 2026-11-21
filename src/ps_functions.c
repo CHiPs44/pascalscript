@@ -910,7 +910,7 @@ ps_error ps_function_random(ps_interpreter *interpreter, const ps_value *value, 
         result->type = &ps_system_real;
         do
         {
-            double r = (double)rand() / (double)RAND_MAX;
+            double r = (double)rand() / (double)RAND_MAX; // NOSONAR
             result->data.r = (ps_real)r;
         } while (result->data.r >= 1.0);
     }

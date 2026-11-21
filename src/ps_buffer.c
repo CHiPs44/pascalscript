@@ -69,6 +69,8 @@ ps_buffer *ps_buffer_alloc(void)
 
 ps_buffer *ps_buffer_free(ps_buffer *buffer)
 {
+    if (buffer == NULL)
+        return NULL;
     if (buffer->from_file)
         ps_memory_free(PS_MEMORY_BUFFER, buffer->text);
     ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
@@ -79,6 +81,8 @@ ps_buffer *ps_buffer_free(ps_buffer *buffer)
 
 void ps_buffer_reset(ps_buffer *buffer)
 {
+    if (buffer == NULL)
+        return;
     buffer->current_line = 0;
     buffer->current_column = 0;
     buffer->current_char = '\0';

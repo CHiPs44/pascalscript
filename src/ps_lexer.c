@@ -50,13 +50,12 @@ ps_lexer *ps_lexer_alloc(void)
 
 ps_lexer *ps_lexer_free(ps_lexer *lexer)
 {
-    if (lexer != NULL)
-    {
-        ps_lexer_reset(lexer);
-        if (lexer->buffer != NULL)
-            lexer->buffer = ps_buffer_free(lexer->buffer);
-        ps_memory_free(PS_MEMORY_LEXER, lexer);
-    }
+    if (lexer == NULL)
+        return NULL;
+    ps_lexer_reset(lexer);
+    if (lexer->buffer != NULL)
+        lexer->buffer = ps_buffer_free(lexer->buffer);
+    ps_memory_free(PS_MEMORY_LEXER, lexer);
     return NULL;
 }
 
@@ -64,7 +63,11 @@ void ps_lexer_reset(ps_lexer *lexer)
 {
     if (lexer->current_token.type == PS_TOKEN_STRING_VALUE && lexer->current_token.value.s != NULL)
         lexer->current_token.value.s = ps_string_free(lexer->current_token.value.s);
-    ps_buffer_reset(lexer->buffer);
+    if (lexer->buffer != NULL)
+    {
+        ps_buffer_reset(lexer->buffer);
+        lexer->buffer = NULL;
+    }
     lexer->error = PS_ERROR_NONE;
     lexer->current_token.type = PS_TOKEN_NONE;
     memset(&lexer->current_token.value, 0, sizeof(lexer->current_token.value));
@@ -460,11 +463,9 @@ static bool ps_lexer_append_quoted_character(ps_lexer *lexer, ps_string **string
 static bool ps_lexer_validate_quoted_string_character(ps_lexer *lexer, int character)
 {
     if (character == EOF)
-        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF,
-                                     "Unexpected end of file in char or string value");
+        return ps_lexer_return_error(lexer, PS_ERROR_UNEXPECTED_EOF, "Unexpected end of file in char or string value");
     if (character == '\n')
-        return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE,
-                                     "String value cannot be multi-line");
+        return ps_lexer_return_error(lexer, PS_ERROR_STRING_NOT_MULTI_LINE, "String value cannot be multi-line");
     return true;
 }
 
@@ -479,8 +480,7 @@ static bool ps_lexer_read_escaped_quote(ps_lexer *lexer, ps_string **string, uns
     return ps_lexer_read_next_char(lexer); // Consume the second quote
 }
 
-static bool ps_lexer_read_quoted_string_character(ps_lexer *lexer, ps_string **string, unsigned int *pos,
-                                                  int character)
+static bool ps_lexer_read_quoted_string_character(ps_lexer *lexer, ps_string **string, unsigned int *pos, int character)
 {
     if (!ps_lexer_append_quoted_character(lexer, string, pos, character))
         return false;

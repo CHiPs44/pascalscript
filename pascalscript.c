@@ -57,7 +57,7 @@
 // #define DEBUG_SOURCE "examples/220-procedure2.pas"
 // #define DEBUG_SOURCE "examples/230-procedure3.pas"
 // #define DEBUG_SOURCE "examples/301-function1.pas"
-#define DEBUG_SOURCE "examples/310-factorial.pas"
+// #define DEBUG_SOURCE "examples/310-factorial.pas"
 
 // Runtime options
 bool bool_eval = false;
@@ -217,7 +217,7 @@ bool compile(const char *source_file)
     if (verbose)
         fprintf(stderr, "=============================== BEGIN COMPILATION ==============================\n");
     ok = ps_compiler_compile(compiler, &program);
-    if (compiler->error != PS_ERROR_NONE)
+    if (compiler->error != PS_ERROR_NONE) // NOSONAR
     {
         fprintf(stderr, "Compiler error:   %d %s\n", compiler->error, ps_error_get_message(compiler->error));
         ok = false;
@@ -263,7 +263,7 @@ bool execute()
     return ok;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[]) // NOSONAR
 {
     bool ok = false;
     // Paths & file names
