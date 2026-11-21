@@ -218,13 +218,19 @@ static bool ps_execute_for_iteration(ps_interpreter *interpreter, const ps_ast_f
         return false;
 
     // Should we stop? => iteration = end
+    if (!ps_interpreter_get_variable_value(interpreter, for_variable, iteration_value))
+        return false;
     ps_value stop_value = {.allocated = false, .type = &ps_system_boolean, .data.b = false};
-    fprintf(stderr, "=> iteration=%s, end=%s\n", ps_value_get_debug_string(iteration_value),
-            ps_value_get_debug_string(&end_value->value));
+    // fprintf(stderr, "%*c%02d ", interpreter->level * 2, ' ', interpreter->level);
+    // fprintf(stderr, "=> iteration=%s", ps_value_get_display_string(iteration_value, 0, 0));
+    // fprintf(stderr, ", end=%s\n", ps_value_get_display_string(&end_value->value, 0, 0));
+    interpreter->logger->debug_level = PS_DEBUG_VERBOSE;
     if (!ps_operator_binary_eval(interpreter, iteration_value, &end_value->value, &stop_value, PS_OP_EQ))
         return false;
+    interpreter->logger->debug_level = PS_DEBUG_FATAL;
     *should_stop = stop_value.data.b;
-    fprintf(stderr, "=> SHOULD STOP: %s\n", *should_stop ? "YES" : "NO");
+    // fprintf(stderr, "%*c%02d ", interpreter->level * 2, ' ', interpreter->level);
+    // fprintf(stderr, "=> SHOULD STOP: %s\n", *should_stop ? "YES" : "NO");
     if (*should_stop)
         PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "FOR\tSTOP! %s %s %s",
                                ps_value_get_display_string(iteration_value, 0, 0), "=",

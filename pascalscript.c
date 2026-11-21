@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
     if (dump_memory)
         ps_memory_debug(stderr);
 
-    fprintf(stderr, "%s\n", ok ? "SUCCESS!" : "FAILURE!");
+    fprintf(stderr, "%s\n", ok ? "OK!" : "FAILED!");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

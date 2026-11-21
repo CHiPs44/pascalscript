@@ -4,13 +4,19 @@
     SPDX-License-Identifier: LGPL-3.0-or-later
 *)
 Program ForDo;
+
+Uses
+    FreePascalCompatibility32;
+
 Const
     Limit = 99;
     PerLine = 20;
+
 Var
-    I: Integer;
+    I, J: Integer;
     C: Char;
     BOL: Boolean;
+
 Begin
     WriteLn('Example 024: For-Do Loop');
     WriteLn('--------------------------------------------------------------------------------');
@@ -23,7 +29,7 @@ Begin
         If I < 10 Then
             Write('0');
         Write(I);
-        If I > 0 And (I + 1) Mod PerLine = 0 Then
+        If (I >= 1) And (((I + 1) Mod PerLine) = 0) Then
         Begin
             WriteLn;
             BOL := True;
@@ -54,6 +60,12 @@ Begin
     End;
     If Not BOL Then
         WriteLn;
+    WriteLn('--------------------------------------------------------------------------------');
+    WriteLn('2. Imbricated for loops:');
+    WriteLn('--------------------------------------------------------------------------------');
+    For I := 11 To 14 Do
+        For J := 21 To 24 Do
+            WriteLn(I:2, ' * ', J:2, ' = ', I*J:3);
     WriteLn('--------------------------------------------------------------------------------');
     WriteLn('OK!');
 End.

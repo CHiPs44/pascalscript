@@ -19,11 +19,11 @@ Begin
     End;
 End;
 
-Function IterativeFactorial(N2: Unsigned): Unsigned;
+Function IterativeFactorial(N: Unsigned): Unsigned;
 Var
   I, F: Unsigned;
 Begin
-  If N2 <= 1 Then
+  If N <= 1 Then
     Begin
       If Trace Then
         WriteLn('IterativeFactorial: I=', I, ', F=', F);
@@ -32,11 +32,11 @@ Begin
   Else
     Begin
       F := 1;
-      For I := 2 To N2 Do
+      For I := 2 To N Do
       Begin
         If Trace Then
-          WriteLn('IterativeFactorial: N=', N2, ', I=', I, ', F=', F);
-        If I > 10 Then
+          WriteLn('IterativeFactorial: N=', N, ', I=', I, ', F=', F);
+        If I > 100 Then
             F := 1 / 0;
         F := F * I;
       End;
@@ -46,23 +46,24 @@ Begin
 End;
 
 Var
-  N, Recursive, Iterative: Unsigned;
+  Recursive, Iterative: Unsigned;
+  N: Unsigned;
   Message: String;
 
 Begin
   WriteLn('Factorial - Recursive and Iterative:');
   WriteLn('--------------------------------------------------------------------------------');
-  WriteLn;
   // Repeat
   //   Write('N=');
   //   ReadLn(N);
   // Until N > 0;
-  // N := 31;
+  // N := 13;
   WriteLn(' N  Recursive   Iterative');
   WriteLn('--- ---------- ----------');
-  For N := 1 To 2 Do
+  //       123 1234567890 1234567890
+  For N := 0 To 13 Do
   Begin
-    Recursive := 0;//RecursiveFactorial(N);
+    Recursive := RecursiveFactorial(N);
     Iterative := IterativeFactorial(N);
     If Recursive <> Iterative Then
       Message := 'FAILED!'
