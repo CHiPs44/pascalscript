@@ -70,6 +70,11 @@ extern "C"
     extern ps_symbol ps_system_array;
     extern ps_symbol ps_system_record;
 
+    /* System variables */
+    extern ps_symbol ps_system_variable_integer_ioresult;
+    extern ps_symbol ps_system_variable_integer_exitcode;
+    extern ps_symbol ps_system_variable_unsigned_randseed;
+
     /* System constants */
     extern ps_symbol ps_system_constant_boolean_false;
     extern ps_symbol ps_system_constant_boolean_true;

@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "ps_ast.h"
+#include "ps_frame_stack.h"
 #include "ps_functions.h"
 #include "ps_procedures.h"
 #include "ps_string.h"
@@ -54,6 +55,17 @@ static void test_ps_functions_init(void)
     CHECK(ps_symbol_table_find(block->symbols, "ABS") == &ps_system_function_abs);
     CHECK(ps_symbol_table_find(block->symbols, "GETTICKCOUNT") == &ps_system_function_get_tick_count);
     ps_ast_free_block(block);
+}
+
+static void test_ps_randseed_variable(void)
+{
+    CHECK(ps_symbol_table_find(system_block->symbols, "RANDSEED") == &ps_system_variable_unsigned_randseed);
+    CHECK(ps_system_variable_unsigned_randseed.value->type == &ps_system_unsigned);
+    CHECK(ps_system_variable_unsigned_randseed.value->data.h == 2);
+    const ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, system_block);
+    CHECK(frame != NULL);
+    if (frame != NULL)
+        CHECK(frame->data[2].u == 0);
 }
 
 static void test_ps_procedures_init(void)
@@ -233,6 +245,19 @@ static void test_ps_function_random(void)
     CHECK(result.type == &ps_system_unsigned && result.data.u < 3);
     CHECK(ps_function_random(interpreter, NULL, &result) == PS_ERROR_NONE);
     CHECK(result.type == &ps_system_real && result.data.r >= 0.0 && result.data.r < 1.0);
+
+    const ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, system_block);
+    CHECK(frame != NULL);
+    if (frame != NULL)
+    {
+        ps_interpreter_set_random_seed(interpreter, 42);
+        ps_value integer_limit = integer_value(100);
+        CHECK(ps_function_random(interpreter, &integer_limit, &result) == PS_ERROR_NONE);
+        ps_integer first = result.data.i;
+        ps_interpreter_set_random_seed(interpreter, 42);
+        CHECK(ps_function_random(interpreter, &integer_limit, &result) == PS_ERROR_NONE);
+        CHECK(result.data.i == first);
+    }
 }
 
 static void test_ps_function_round(void)
@@ -445,6 +470,10 @@ static void test_ps_procedure_randomize(void)
 {
     ps_value seed = integer_value(42);
     CHECK(ps_procedure_randomize(interpreter, &seed));
+    const ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, system_block);
+    CHECK(frame != NULL);
+    if (frame != NULL)
+        CHECK(frame->data[ps_system_variable_unsigned_randseed.value->data.h].u == 42);
     int expected = rand(); // NOSONAR
     CHECK(ps_procedure_randomize(interpreter, &seed));
     CHECK(rand() == expected);
@@ -581,6 +610,7 @@ int main(void)
 
     RUN_TEST(test_ps_functions_init);
     RUN_TEST(test_ps_procedures_init);
+    RUN_TEST(test_ps_randseed_variable);
     RUN_TEST(test_ps_function_exec_1arg);
     RUN_TEST(test_ps_function_exec_1arg_s);
     RUN_TEST(test_ps_function_exec_2args);

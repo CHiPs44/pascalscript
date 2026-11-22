@@ -32,12 +32,13 @@ Const
 Type
   Unsigned = 0..MaxUint;
 
-{ Supplemental functions }
+{ Supplemental functions and procedures }
 
 Function Even(N: Integer): Boolean;
 Function Even(N: Unsigned): Boolean;
 Function Tan(X: Real): Real;
 Function GetTickCount: Unsigned;
+Procedure Randomize(Seed: Unsigned);
 
 Implementation
 
@@ -61,6 +62,11 @@ End;
 Function GetTickCount: Unsigned;
 Begin
   GetTickCount := SysUtils.GetTickCount64 And MaxUint;
+End;
+
+Procedure Randomize(Seed: Unsigned)
+Begin
+  RandSeed := Seed;
 End;
 
 End.

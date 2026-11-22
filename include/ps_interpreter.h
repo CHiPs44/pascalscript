@@ -113,6 +113,9 @@ extern "C"
      */
     bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from, ps_value *to);
 
+    /** @brief Set random seed in the system RandSeed variable */
+    bool ps_interpreter_set_random_seed(ps_interpreter *interpreter, ps_unsigned seed);
+
     /** @brief Run the program */
     bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program);
 

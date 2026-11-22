@@ -110,8 +110,9 @@ PS_SYSTEM_CONSTANT(real    , pi     , "PI"     , r, (ps_real)PS_REAL_PI         
 
 /* clang-format off */
 
-PS_SYSTEM_VARIABLE(integer, ioresult, "IORESULT", h, (ps_handle)0                                                     );
-PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", h, (ps_handle)1                                                     );
+PS_SYSTEM_VARIABLE(integer , ioresult, "IORESULT", h, (ps_handle)0                                                    );
+PS_SYSTEM_VARIABLE(integer , exitcode, "EXITCODE", h, (ps_handle)1                                                    );
+PS_SYSTEM_VARIABLE(unsigned, randseed, "RANDSEED", h, (ps_handle)2                                                    );
 
 /**********************************************************************************************************************/
 /* BITNESS & VERSION                                                                                                  */
@@ -120,7 +121,6 @@ PS_SYSTEM_VARIABLE(integer, exitcode, "EXITCODE", h, (ps_handle)1               
 PS_SYSTEM_CONSTANT(unsigned, ps_bitness      , "PS_BITNESS"      , u, PS_BITNESS                                      );
 ps_string *ps_version_string = NULL;
 ps_value ps_value_string_ps_version={0};
-// PS_SYSTEM_CONSTANT(string  , ps_version      , "PS_VERSION"      , s, ps_version_string                              );
 ps_symbol ps_system_constant_string_ps_version = {0};
 
 /**********************************************************************************************************************/
@@ -168,7 +168,8 @@ ps_ast_block *ps_system_alloc(void)
 
     ADD_SYSTEM_SYMBOL(ps_system_variable_integer_exitcode)
     ADD_SYSTEM_SYMBOL(ps_system_variable_integer_ioresult)
-    system->n_vars = 2;
+    ADD_SYSTEM_SYMBOL(ps_system_variable_unsigned_randseed)
+    system->n_vars = 3;
 
     /**************************************************************************/
     /* CONSTANTS                                                              */

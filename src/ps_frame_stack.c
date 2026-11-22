@@ -100,7 +100,7 @@ ps_frame *ps_frame_stack_find_frame_for_block(const ps_frame_stack *stack, const
 {
     if (ps_frame_stack_is_empty(stack))
         return NULL;
-    for (size_t i = stack->sp - 1; i > 0; --i)
+    for (size_t i = stack->sp; i-- > 0;)
         if (stack->frames[i]->block == block)
             return stack->frames[i];
     return NULL;

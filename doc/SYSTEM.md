@@ -25,6 +25,7 @@ Definitions:
 | ---------- | --------- | ------------------------------------ |
 | `IOResult` | `Integer` | Standard runtime I/O status variable |
 | `ExitCode` | `Integer` | Standard runtime exit code           |
+| `RandSeed`  | `Unsigned` | Current random number generator seed |
 
 NB: as of 2026-11-22, these are not changed or used by runtime.
 
@@ -84,10 +85,13 @@ Note:
 | `Random(): Real`                                        | Returns a random value in `[0.0, 1.0[`                        |
 | `Random(Max: Integer \| Unsigned): Integer \| Unsigned` | Returns a random value in `[0, Max[` when `Max` is provided   |
 | `Randomize([Seed: Integer \| Unsigned])`                | Initializes the random number generator with an optional seed |
+| `RandSeed: Unsigned`                                    | Current seed used by `Random` and `Randomize`                  |
 
 NB:
 
-- Parameter to Randomize is a PascalScript extension, Free Pascal uses global variable `RandSeed`
+- Assigning `RandSeed` stores the value and calls `srand` with that seed.
+- `Randomize(Seed)` stores `Seed` in `RandSeed` and calls `srand` with that seed.
+- `Randomize` without a seed stores a time-based seed in `RandSeed` and calls `srand` with that seed.
 
 ## Time
 

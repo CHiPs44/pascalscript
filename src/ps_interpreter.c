@@ -18,8 +18,8 @@
 #include "ps_interpreter.h"
 #include "ps_logger.h"
 #include "ps_memory.h"
-#include "ps_signature.h"
 #include "ps_procedures.h"
+#include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
 #include "ps_system.h"
@@ -522,7 +522,10 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
             ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
             if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
                 return false;
-            frame->data[handle] = variable_value.data;
+            if (ast_variable->variable == &ps_system_variable_unsigned_randseed)
+                ps_interpreter_set_random_seed(interpreter, variable_value.data.u);
+            else
+                frame->data[handle] = variable_value.data;
         }
     }
 
@@ -532,11 +535,11 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
 static bool ps_interpreter_get_variable_value_simple(ps_interpreter *interpreter, const ps_ast_variable *ast_variable,
                                                      ps_value *value)
 {
-    const ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
+    ps_frame *frame = ps_interpreter_get_block_frame(interpreter, ast_variable);
     if (frame == NULL)
         return false;
     ps_handle handle = ast_variable->variable->value->data.h;
-    ps_frame *resolved_frame = (ps_frame *)frame;
+    ps_frame *resolved_frame = frame;
     ps_interpreter_resolve_variable_slot(&resolved_frame, &handle);
     ps_value variable_value = {
             .allocated = false, .type = ast_variable->variable->value->type, .data = resolved_frame->data[handle]};
@@ -615,6 +618,17 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
             "Cannot convert value from type '%s' (based on '%s') to type '%s' (based on '%s')",
             ps_value_type_get_name(ps_value_get_type(from)), ps_value_type_get_name(ps_value_get_base(from)),
             ps_value_type_get_name(ps_value_get_type(to)), ps_value_type_get_name(ps_value_get_base(to)));
+}
+
+bool ps_interpreter_set_random_seed(ps_interpreter *interpreter, ps_unsigned seed)
+{
+    ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, interpreter->system);
+    if (frame == NULL)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "No frame found for system variables");
+    ps_handle handle = ps_system_variable_unsigned_randseed.value->data.h;
+    frame->data[handle].u = seed;
+    srand((unsigned int)seed);
+    return true;
 }
 
 bool ps_interpreter_run(ps_interpreter *interpreter, const ps_ast_block *program)

@@ -124,14 +124,17 @@ bool ps_procedure_randomize(ps_interpreter *interpreter, const ps_value *value)
             seed = (unsigned int)(value->data.u); // NOSONAR
             break;
         default:
-            return ps_interpreter_return_false(interpreter, PS_ERROR_UNEXPECTED_TYPE);
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_UNEXPECTED_TYPE,
+                                                    "Unexpected type %s for random seed",
+                                                    ps_type_definition_get_name(value->type->value->data.t));
         }
-        srand(seed);
+        ps_interpreter_set_random_seed(interpreter, (ps_unsigned)seed);
         if (interpreter->logger->debug_level >= PS_DEBUG_VERBOSE)
             fprintf(stderr, "RANDOMIZE(%u)\n", seed);
         return true;
     }
-    srand((unsigned int)time(NULL));
+    seed = (unsigned int)time(NULL);
+    ps_interpreter_set_random_seed(interpreter, (ps_unsigned)seed);
     if (interpreter->logger->debug_level >= PS_DEBUG_VERBOSE)
         fprintf(stderr, "RANDOMIZE\n");
     return true;
