@@ -478,7 +478,7 @@ static void test_ps_procedure_readln(void)
     CHECK(input != NULL);
     if (input != NULL)
     {
-        CHECK(fputs("123\n456\n", input) >= 0);
+        CHECK(fputs("123 999\n456\n", input) >= 0);
         rewind(input);
         CHECK(ps_procedure_readln(interpreter, input, &value));
         CHECK(value.data.i == 123);
@@ -500,6 +500,21 @@ static void test_ps_procedure_readstr(void)
     ps_value real = real_value(0.0);
     CHECK(ps_procedure_readstr(interpreter, input, &real));
     CHECK_REAL(real.data.r, 4.5);
+    ps_string_free(input);
+
+    static const char *boolean_inputs[] = {"0", "-0", "1", "-2", "18446744073709551615", "TRUE", "FALSE"};
+    static const bool boolean_results[] = {false, false, true, true, true, true, false};
+    input = ps_string_alloc(32);
+    CHECK(input != NULL);
+    if (input == NULL)
+        return;
+    ps_value boolean = boolean_value(false);
+    for (size_t i = 0; i < sizeof(boolean_inputs) / sizeof(boolean_inputs[0]); i += 1)
+    {
+        CHECK(ps_string_set(input, (ps_string_len)strlen(boolean_inputs[i]), boolean_inputs[i]) != NULL);
+        CHECK(ps_procedure_readstr(interpreter, input, &boolean));
+        CHECK(boolean.data.b == boolean_results[i]);
+    }
     ps_string_free(input);
 }
 

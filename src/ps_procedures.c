@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include <math.h>
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -146,115 +146,55 @@ bool ps_procedure_read(ps_interpreter *interpreter, FILE *f, ps_value *value) //
     assert(value != NULL);
 
     FILE *input = f == NULL ? stdin : f;
-    ps_value_type type = ps_value_get_base(value);
-    ps_value_type visible_type = ps_value_get_type(value);
+    int c;
 
-    if (type == PS_TYPE_INTEGER)
+    do
     {
-        char token[64];
-        if (fscanf(input, "%63s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read integer");
-        errno = 0;
-        char *end = NULL;
-        ps_integer number = (ps_integer)strtoll(token, &end, 10);
-        if (errno == ERANGE || end == token || *end != '\0')
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read integer from '%s'", token);
-        ps_value_set_integer(value, number);
-        return true;
+        c = fgetc(input);
+    } while (c != EOF && isspace((unsigned char)c));
+    if (c == EOF)
+        return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
+                                                "Failed to read value");
+
+    ps_string *buffer = ps_string_alloc(0);
+    if (buffer == NULL)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY, "Could not allocate read buffer");
+
+    ps_string *appended = ps_string_append_char(buffer, (ps_char)c);
+    if (appended == NULL)
+    {
+        ps_string_free(buffer);
+        return ps_interpreter_set_error_message(interpreter,
+                                                errno == EINVAL ? PS_ERROR_STRING_TOO_LONG : PS_ERROR_OUT_OF_MEMORY,
+                                                "Could not append to read buffer");
     }
-    if (type == PS_TYPE_UNSIGNED)
+    buffer = appended;
+
+    if (ps_value_get_base(value) != PS_TYPE_CHAR)
     {
-        char token[64];
-        if (fscanf(input, "%63s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read unsigned integer");
-        errno = 0;
-        char *end = NULL;
-        ps_unsigned number = (ps_unsigned)strtoull(token, &end, 10);
-        if (errno == ERANGE || end == token || *end != '\0')
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read unsigned integer from '%s'", token);
-        ps_value_set_unsigned(value, number);
-        return true;
-    }
-    if (type == PS_TYPE_REAL)
-    {
-        char token[64];
-        if (fscanf(input, "%63s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read real");
-        errno = 0;
-        char *end = NULL;
-        ps_real number = strtod(token, &end);
-        if (errno == ERANGE || end == token || *end != '\0')
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read real from '%s'", token);
-        ps_value_set_real(value, number);
-        return true;
-    }
-    if (type == PS_TYPE_CHAR)
-    {
-        ps_char c = '\0';
-        if (fscanf(input, " %c", &c) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read character");
-        ps_value_set_char(value, c);
-        return true;
-    }
-    if (visible_type == PS_TYPE_STRING)
-    {
-        char token[PS_STRING_MAX_LEN + 1];
-        if (fscanf(input, "%255s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read string");
-        ps_string *string = ps_string_create(token);
-        if (string == NULL)
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
-                                                    "Could not allocate read string");
-        ps_value_set_string(value, string);
-        return true;
-    }
-    if (visible_type == PS_TYPE_BOOLEAN)
-    {
-        char token[16];
-        if (fscanf(input, "%15s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read boolean");
-        if (!strcasecmp(token, "TRUE"))
-            ps_value_set_boolean(value, true);
-        else if (!strcasecmp(token, "FALSE"))
-            ps_value_set_boolean(value, false);
-        else
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read boolean from '%s'", token);
-        return true;
-    }
-    if (visible_type == PS_TYPE_ENUM || type == PS_TYPE_ENUM)
-    {
-        char token[64];
-        if (fscanf(input, "%63s", token) != 1)
-            return ps_interpreter_set_error_message(interpreter, feof(input) ? PS_ERROR_EOF : PS_ERROR_READING_FILE,
-                                                    "Failed to read enum");
-        ps_symbol *enum_type = value->type;
-        ps_type_definition *type_def = enum_type->value->data.t;
-        if (ps_value_get_type(value) == PS_TYPE_SUBRANGE)
-            type_def = type_def->def.g.e.symbol_enum->value->data.t;
-        for (ps_unsigned i = 0; i < type_def->def.e.count; i += 1)
+        while (c != EOF && !isspace((unsigned char)c))
         {
-            if (!strcasecmp((char *)type_def->def.e.values[i]->name, token))
+            c = fgetc(input);
+            if (c == EOF || isspace((unsigned char)c))
+                break;
+
+            appended = ps_string_append_char(buffer, (ps_char)c);
+            if (appended == NULL)
             {
-                value->data.u = i;
-                return true;
+                ps_string_free(buffer);
+                return ps_interpreter_set_error_message(
+                        interpreter, errno == EINVAL ? PS_ERROR_STRING_TOO_LONG : PS_ERROR_OUT_OF_MEMORY,
+                        "Could not append to read buffer");
             }
+            buffer = appended;
         }
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                "Cannot read enum value '%s'", token);
+        if (c != EOF)
+            (void)ungetc(c, input);
     }
 
-    return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                            "Cannot read value of type '%s'", ps_value_get_type_name(value));
+    bool ok = ps_procedure_readstr(interpreter, buffer, value);
+    ps_string_free(buffer);
+    return ok;
 }
 
 /**
@@ -274,6 +214,143 @@ bool ps_procedure_readln(ps_interpreter *interpreter, FILE *f, ps_value *value) 
     return true;
 }
 
+static bool ps_procedure_readstr_integer(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                         ps_string_len *consumed)
+{
+    errno = 0;
+    char *end = NULL;
+    long long number = strtoll((char *)&s->str[pos], &end, 10);
+    if (errno == ERANGE || end == (char *)&s->str[pos] || number < PS_INTEGER_MIN || number > PS_INTEGER_MAX)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
+                                                "Cannot read integer from ReadStr string");
+    ps_value_set_integer(value, (ps_integer)number);
+    *consumed = (ps_string_len)(end - (char *)s->str);
+    return true;
+}
+
+static bool ps_procedure_readstr_unsigned(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                          ps_string_len *consumed)
+{
+    errno = 0;
+    char *end = NULL;
+    unsigned long long number = strtoull((char *)&s->str[pos], &end, 10);
+    if (errno == ERANGE || end == (char *)&s->str[pos] || number > PS_UNSIGNED_MAX)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
+                                                "Cannot read unsigned integer from ReadStr string");
+    ps_value_set_unsigned(value, (ps_unsigned)number);
+    *consumed = (ps_string_len)(end - (char *)s->str);
+    return true;
+}
+
+static bool ps_procedure_readstr_real(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                      ps_string_len *consumed)
+{
+    errno = 0;
+    char *end = NULL;
+    double d = strtod((char *)&s->str[pos], &end);
+    if (errno == ERANGE || end == (char *)&s->str[pos])
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
+                                                "Cannot read real from ReadStr string");
+    ps_real number = (ps_real)d;
+    ps_value_set_real(value, number);
+    *consumed = (ps_string_len)(end - (char *)s->str);
+    return true;
+}
+
+static bool ps_procedure_readstr_char(ps_value *value, const ps_string *s, ps_string_len pos, ps_string_len *consumed)
+{
+    ps_value_set_char(value, s->str[pos]);
+    *consumed = pos + 1;
+    return true;
+}
+
+static ps_string_len ps_procedure_readstr_token_end(const ps_string *s, ps_string_len pos)
+{
+    ps_string_len end = pos;
+    while (end < s->len && !isspace((unsigned char)s->str[end]))
+        end += 1;
+    return end;
+}
+
+static bool ps_procedure_readstr_string(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                        ps_string_len *consumed)
+{
+    ps_string_len end = ps_procedure_readstr_token_end(s, pos);
+    ps_string_len length = end - pos;
+    ps_string *string = ps_string_alloc(length);
+    if (string == NULL)
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
+                                                "Could not allocate ReadStr string");
+    if (!ps_string_set(string, length, (char *)&s->str[pos]))
+    {
+        ps_string_free(string);
+        return ps_interpreter_set_error_message(interpreter, PS_ERROR_STRING_TOO_LONG,
+                                                "ReadStr string value is too long");
+    }
+    ps_value_set_string(value, string);
+    *consumed = end;
+    return true;
+}
+
+static bool ps_procedure_readstr_boolean(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                         ps_string_len *consumed)
+{
+    ps_string_len end = ps_procedure_readstr_token_end(s, pos);
+    ps_string_len length = end - pos;
+    char *token = (char *)&s->str[pos];
+    if (length == 4 && !strncasecmp(token, "TRUE", length))
+        ps_value_set_boolean(value, true);
+    else if (length == 5 && !strncasecmp(token, "FALSE", length))
+        ps_value_set_boolean(value, false);
+    else
+    {
+        const char *token_end = (char *)&s->str[end];
+        char *parsed_end = NULL;
+        errno = 0;
+        long long signed_number = strtoll(token, &parsed_end, 10);
+        if (parsed_end == token_end && parsed_end != token && errno != ERANGE)
+            ps_value_set_boolean(value, signed_number != 0);
+        else if (token[0] != '-')
+        {
+            errno = 0;
+            unsigned long long unsigned_number = strtoull(token, &parsed_end, 10);
+            if (parsed_end == token_end && parsed_end != token && errno != ERANGE)
+                ps_value_set_boolean(value, unsigned_number != 0);
+            else
+                return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
+                                                        "Cannot read boolean from '%.*s'", (int)length, token);
+        }
+        else
+            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
+                                                    "Cannot read boolean from '%.*s'", (int)length, token);
+    }
+    *consumed = end;
+    return true;
+}
+
+static bool ps_procedure_readstr_enum(ps_interpreter *interpreter, ps_string *s, ps_value *value, ps_string_len pos,
+                                      ps_string_len *consumed)
+{
+    ps_string_len end = ps_procedure_readstr_token_end(s, pos);
+    ps_string_len length = end - pos;
+    ps_symbol *enum_type = value->type;
+    ps_type_definition *type_def = enum_type->value->data.t;
+    if (ps_value_get_type(value) == PS_TYPE_SUBRANGE)
+        type_def = type_def->def.g.e.symbol_enum->value->data.t;
+    for (ps_unsigned i = 0; i < type_def->def.e.count; i += 1)
+    {
+        ps_char *name = type_def->def.e.values[i]->name;
+        if ((ps_string_len)ps_strnlen((char *)name, PS_IDENTIFIER_SIZE + 1) == length &&
+            !strncasecmp((char *)name, (char *)&s->str[pos], length))
+        {
+            value->data.u = i;
+            *consumed = end;
+            return true;
+        }
+    }
+    return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH, "Cannot read enum value from ReadStr");
+}
+
 /**
  * Execute system procedure ReadStr(S, Value)
  */
@@ -291,115 +368,35 @@ bool ps_procedure_readstr(ps_interpreter *interpreter, ps_string *s, ps_value *v
 
     ps_value_type type = ps_value_get_base(value);
     ps_value_type visible_type = ps_value_get_type(value);
+    ps_string_len consumed = pos;
+    bool ok = false;
 
     if (type == PS_TYPE_INTEGER)
-    {
-        errno = 0;
-        char *end = NULL;
-        ps_integer number = (ps_integer)strtoll((char *)&s->str[pos], &end, 10);
-        if (errno == ERANGE || end == (char *)&s->str[pos])
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read integer from ReadStr string");
-        ps_value_set_integer(value, number);
-        pos = (ps_string_len)((char *)end - (char *)s->str);
-    }
+        ok = ps_procedure_readstr_integer(interpreter, s, value, pos, &consumed);
     else if (type == PS_TYPE_UNSIGNED)
-    {
-        errno = 0;
-        char *end = NULL;
-        ps_unsigned number = (ps_unsigned)strtoull((char *)&s->str[pos], &end, 10);
-        if (errno == ERANGE || end == (char *)&s->str[pos])
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read unsigned integer from ReadStr string");
-        ps_value_set_unsigned(value, number);
-        pos = (ps_string_len)((char *)end - (char *)s->str);
-    }
+        ok = ps_procedure_readstr_unsigned(interpreter, s, value, pos, &consumed);
     else if (type == PS_TYPE_REAL)
-    {
-        errno = 0;
-        char *end = NULL;
-        ps_real number = strtod((char *)&s->str[pos], &end);
-        if (errno == ERANGE || end == (char *)&s->str[pos])
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read real from ReadStr string");
-        ps_value_set_real(value, number);
-        pos = (ps_string_len)((char *)end - (char *)s->str);
-    }
+        ok = ps_procedure_readstr_real(interpreter, s, value, pos, &consumed);
     else if (type == PS_TYPE_CHAR)
-    {
-        ps_value_set_char(value, s->str[pos]);
-        pos += 1;
-    }
+        ok = ps_procedure_readstr_char(value, s, pos, &consumed);
     else if (visible_type == PS_TYPE_STRING)
-    {
-        ps_string_len end = pos;
-        while (end < s->len && !isspace((unsigned char)s->str[end]))
-            end += 1;
-        ps_string *string = ps_string_create((char *)&s->str[pos]);
-        if (string == NULL)
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_OUT_OF_MEMORY,
-                                                    "Could not allocate ReadStr string");
-        string->str[end - pos] = '\0';
-        string->len = end - pos;
-        ps_value_set_string(value, string);
-        pos = end;
-    }
+        ok = ps_procedure_readstr_string(interpreter, s, value, pos, &consumed);
     else if (visible_type == PS_TYPE_BOOLEAN)
-    {
-        ps_string_len end = pos;
-        while (end < s->len && !isspace((unsigned char)s->str[end]))
-            end += 1;
-        char token[16];
-        ps_string_len length = end - pos < 15 ? end - pos : 15;
-        memcpy(token, &s->str[pos], length);
-        token[length] = '\0';
-        if (!strcasecmp(token, "TRUE"))
-            ps_value_set_boolean(value, true);
-        else if (!strcasecmp(token, "FALSE"))
-            ps_value_set_boolean(value, false);
-        else
-            return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                    "Cannot read boolean from '%s'", token);
-        pos = end;
-    }
+        ok = ps_procedure_readstr_boolean(interpreter, s, value, pos, &consumed);
     else if (visible_type == PS_TYPE_ENUM || type == PS_TYPE_ENUM)
-    {
-        ps_string_len end = pos;
-        while (end < s->len && !isspace((unsigned char)s->str[end]))
-            end += 1;
-        ps_string_len length = end - pos;
-        ps_symbol *enum_type = value->type;
-        ps_type_definition *type_def = enum_type->value->data.t;
-        if (ps_value_get_type(value) == PS_TYPE_SUBRANGE)
-            type_def = type_def->def.g.e.symbol_enum->value->data.t;
-        for (ps_unsigned i = 0; i < type_def->def.e.count; i += 1)
-        {
-            ps_char *name = type_def->def.e.values[i]->name;
-            if ((ps_string_len)strlen((char *)name) == length &&
-                !strncasecmp((char *)name, (char *)&s->str[pos], length))
-            {
-                value->data.u = i;
-                pos = end;
-                goto enum_read_done;
-            }
-        }
-        return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
-                                                "Cannot read enum value from ReadStr");
-enum_read_done:
-        ;
-    }
+        ok = ps_procedure_readstr_enum(interpreter, s, value, pos, &consumed);
     else
-    {
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_TYPE_MISMATCH,
                                                 "Cannot read value of type '%s' from ReadStr",
                                                 ps_value_get_type_name(value));
-    }
+    if (!ok)
+        return false;
 
-    while (pos < s->len && isspace((unsigned char)s->str[pos]))
-        pos += 1;
-    ps_string_len remaining = s->len - pos;
-    if (pos > 0)
-        memmove(s->str, &s->str[pos], remaining);
+    while (consumed < s->len && isspace((unsigned char)s->str[consumed]))
+        consumed += 1;
+    ps_string_len remaining = s->len - consumed;
+    if (consumed > 0)
+        memmove(s->str, &s->str[consumed], remaining);
     s->len = remaining;
     s->str[remaining] = '\0';
     return true;
