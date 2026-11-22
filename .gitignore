@@ -92,6 +92,8 @@ test/test_10_buffer
 test/test_20_lexer
 test/test_30_string
 test/test_40_value
-test/test_60_symbol_table
-test/test_70_string_stack
+test/test_50_symbol_table
+test/test_60_string_heap
+test/test_70_system_lib
+test/test_80_for_type_check
 test/Testing/
