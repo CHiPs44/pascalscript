@@ -461,8 +461,12 @@ static void test_ps_procedure_read(void)
     CHECK(input != NULL);
     if (input != NULL)
     {
-        CHECK(!ps_procedure_read(interpreter, input, &value));
-        CHECK(interpreter->error == PS_ERROR_NOT_IMPLEMENTED);
+        CHECK(fputs("123 456\n", input) >= 0);
+        rewind(input);
+        CHECK(ps_procedure_read(interpreter, input, &value));
+        CHECK(value.data.i == 123);
+        CHECK(ps_procedure_read(interpreter, input, &value));
+        CHECK(value.data.i == 456);
         fclose(input);
     }
 }
@@ -474,21 +478,28 @@ static void test_ps_procedure_readln(void)
     CHECK(input != NULL);
     if (input != NULL)
     {
-        CHECK(!ps_procedure_readln(interpreter, input, &value));
-        CHECK(interpreter->error == PS_ERROR_NOT_IMPLEMENTED);
+        CHECK(fputs("123\n456\n", input) >= 0);
+        rewind(input);
+        CHECK(ps_procedure_readln(interpreter, input, &value));
+        CHECK(value.data.i == 123);
+        CHECK(ps_procedure_read(interpreter, input, &value));
+        CHECK(value.data.i == 456);
         fclose(input);
     }
 }
 
 static void test_ps_procedure_readstr(void)
 {
-    ps_string *input = ps_string_create("123");
+    ps_string *input = ps_string_create("123 4.5");
     CHECK(input != NULL);
     if (input == NULL)
         return;
     ps_value value = integer_value(0);
-    CHECK(!ps_procedure_readstr(interpreter, input, &value));
-    CHECK(interpreter->error == PS_ERROR_NOT_IMPLEMENTED);
+    CHECK(ps_procedure_readstr(interpreter, input, &value));
+    CHECK(value.data.i == 123);
+    ps_value real = real_value(0.0);
+    CHECK(ps_procedure_readstr(interpreter, input, &real));
+    CHECK_REAL(real.data.r, 4.5);
     ps_string_free(input);
 }
 
