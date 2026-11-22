@@ -17,6 +17,7 @@ extern "C"
 {
 #endif
 
+    /** @brief Lexer structure */
     typedef struct s_ps_lexer
     {
         ps_buffer *buffer;      /** @brief Source                        */
@@ -38,7 +39,10 @@ extern "C"
     /** @brief Reset lexer to a known state */
     void ps_lexer_reset(ps_lexer *lexer);
 
-    /** @brief Read next token from buffer; sets PS_TOKEN_EOF at end of input */
+    /**
+     * @brief Read next token from buffer; sets PS_TOKEN_EOF at end of input
+     * @return true if OK, false on error, with error code in lexer.error
+     */
     bool ps_lexer_read_token(ps_lexer *lexer);
 
     /**
@@ -47,7 +51,7 @@ extern "C"
      */
     char *ps_lexer_get_debug_value(ps_lexer *lexer);
 
-    /** @brief Dump the current state of the lexer. */
+    /** @brief Dump the current state of the lexer to stderr. */
     void ps_lexer_dump(ps_lexer *lexer);
 
 #ifdef __cplusplus
