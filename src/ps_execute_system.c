@@ -43,7 +43,8 @@ bool ps_execute_procedure_call_system(ps_interpreter *interpreter, const ps_ast_
         return ps_execute_procedure_write_call(interpreter, procedure_call);
     }
     else if (procedure_call->executable == &ps_system_procedure_read ||
-             procedure_call->executable == &ps_system_procedure_readln)
+             procedure_call->executable == &ps_system_procedure_readln ||
+             procedure_call->executable == &ps_system_procedure_readstr)
     {
         return ps_execute_procedure_read_call(interpreter, procedure_call);
     }

@@ -17,7 +17,7 @@ Var
 Begin
 //   WriteLn('Enter the radius of the circle');
 //   ReadLn(Radius);
-  Buffer := '123456.789';
+  Buffer := '123456.789 this is text that should not break anything...';
   ReadStr(Buffer, Radius);
   WriteLn('The radius of the circle is        ', Radius:1:3);
   Diameter := Radius * 2.0;
