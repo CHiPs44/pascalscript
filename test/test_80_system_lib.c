@@ -56,6 +56,17 @@ static void test_ps_functions_init(void)
     ps_ast_free_block(block);
 }
 
+static void test_ps_procedures_init(void)
+{
+    ps_ast_block *block = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "PROCEDURES", ps_symbol_table_alloc(32, 4));
+    CHECK(block != NULL);
+    if (block == NULL)
+        return;
+    CHECK(ps_procedures_init(block));
+    CHECK(ps_symbol_table_find(block->symbols, "WRITELN") == &ps_system_procedure_writeln);
+    ps_ast_free_block(block);
+}
+
 static void test_ps_function_exec_1arg(void)
 {
     ps_value input = integer_value(-12);
@@ -416,17 +427,6 @@ static void test_ps_function_get_tick_count(void)
     CHECK(result.type == &ps_system_unsigned);
 }
 
-static void test_ps_procedures_init(void)
-{
-    ps_ast_block *block = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "PROCEDURES", ps_symbol_table_alloc(32, 4));
-    CHECK(block != NULL);
-    if (block == NULL)
-        return;
-    CHECK(ps_procedures_init(block));
-    CHECK(ps_symbol_table_find(block->symbols, "WRITELN") == &ps_system_procedure_writeln);
-    ps_ast_free_block(block);
-}
-
 static void test_ps_procedure_dec(void)
 {
     ps_symbol variable = {.name = "VALUE", .kind = PS_SYMBOL_KIND_VARIABLE};
@@ -554,6 +554,7 @@ int main(void)
         goto cleanup;
 
     RUN_TEST(test_ps_functions_init);
+    RUN_TEST(test_ps_procedures_init);
     RUN_TEST(test_ps_function_exec_1arg);
     RUN_TEST(test_ps_function_exec_1arg_s);
     RUN_TEST(test_ps_function_exec_2args);
@@ -587,7 +588,6 @@ int main(void)
     RUN_TEST(test_ps_function_lowercase);
     RUN_TEST(test_ps_function_uppercase);
     RUN_TEST(test_ps_function_get_tick_count);
-    RUN_TEST(test_ps_procedures_init);
     RUN_TEST(test_ps_procedure_dec);
     RUN_TEST(test_ps_procedure_inc);
     RUN_TEST(test_ps_procedure_randomize);
