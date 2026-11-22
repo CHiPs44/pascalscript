@@ -15,7 +15,9 @@
 #include "ps_parse_call.h"
 #include "ps_parse_executable.h"
 #include "ps_parse_expression.h"
+#include "ps_parse_read.h"
 #include "ps_parse_statement.h"
+#include "ps_parse_write.h"
 #include "ps_procedures.h"
 #include "ps_system.h"
 #include "ps_type_definition.h"
@@ -353,10 +355,10 @@ bool ps_parse_procedure_or_function_call(ps_compiler *compiler, ps_ast_block *bl
         ps_read_write_mode mode = PS_READ_WRITE_MODE;
         if (executable == &ps_system_procedure_readln)
             mode = PS_READ_WRITE_MODE_LN;
-        else
+        else if (executable == &ps_system_procedure_readstr)
             mode = PS_READ_WRITE_MODE_STR;
         if (!ps_parse_read_or_readln_or_readstr(compiler, block, call, mode))
-            TRACE_ERROR("READ[LN]");
+            TRACE_ERROR("READ[LN|STR]");
     }
     else if (executable == &ps_system_procedure_randomize)
     {

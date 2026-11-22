@@ -13,12 +13,11 @@ Program ConstCircle{(Input, Output)};
 Var Radius, Diameter, Circumference : Real;
 
 Begin
-  {WriteLn('Enter the radius of the circle');
-  ReadLn(Radius);}
-  Radius := 5.0;
-  WriteLn(Radius);
+  WriteLn('Enter the radius of the circle');
+  ReadLn(Radius);
+  WriteLn('The radius of the circle is ', Radius:0:3);
   Diameter := Radius * 2.0;
-  WriteLn(Diameter);
+  WriteLn('The diameter of the circle is ', Diameter:0:3);
   Circumference :=  Pi * Diameter;
-  WriteLn('The circumference of the circle is ', Circumference{:0:3});
+  WriteLn('The circumference of the circle is ', Circumference:0:3);
 End.

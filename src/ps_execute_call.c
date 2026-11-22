@@ -203,6 +203,9 @@ bool ps_execute_procedure_call(ps_interpreter *interpreter, const ps_ast_call *p
     assert(procedure_call->group == PS_AST_STATEMENT);
     assert(procedure_call->kind == PS_AST_PROCEDURE_CALL);
 
+    interpreter->error_line = procedure_call->line;
+    interpreter->error_column = procedure_call->column;
+
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "PROCEDURE CALL %s", procedure_call->executable->name);
 
     if (procedure_call->executable->system)
