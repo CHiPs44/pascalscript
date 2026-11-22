@@ -33,9 +33,9 @@ Definitions:
 | `Write([Value[:Width[:Precision]]]*)`               | Implemented                                 | Writes values to standard output              |
 | `WriteLn([Value[:Width[:Precision]]]*)`             | Implemented                                 | Writes values and then moves to the next line |
 | `WriteStr(StringVar; [Value[:Width[:Precision]]]*)` | Implemented                                 | Appends formatted text to a string variable   |
-| `Read(Value)`                                       | Registered, not implemented                 | Reads a value from standard input             |
-| `ReadLn(Value)`                                     | Registered, not implemented                 | Reads a value and advances to next line       |
-| `ReadStr(StringVar, Value)`                         | Parser supports it, runtime not implemented | Reads from a string buffer into a variable    |
+| `Read(Value)`                                       | Implemented                                 | Reads a value from standard input             |
+| `ReadLn(Value)`                                     | Implemented                                 | Reads a value and advances to next line       |
+| `ReadStr(StringVar, Value)`                         | Implemented                                 | Reads values from a string buffer              |
 
 Up to 16 (`PS_PARAMETERS_MAX`) parameters can be passed to `Write`, `WriteLn` and `WriteStr`
 
@@ -121,7 +121,7 @@ Note:
 
 The current engine registers the following runtime entries:
 
-- implemented: `Write`, `WriteLn`, `WriteStr`, `Randomize`, `Random`, `GetTickCount`, all math functions listed above, `Chr`, `Ord`, `Low`, `High`, `Pred`, `Succ`, `Length`, `LowerCase`, `UpperCase`
-- registered but intentionally NOT implemented yet: `Read`, `ReadLn`, `ReadStr`, `Inc`, `Dec`
+- implemented: `Write`, `WriteLn`, `WriteStr`, `Read`, `ReadLn`, `ReadStr`, `Randomize`, `Random`, `GetTickCount`, all math functions listed above, `Chr`, `Ord`, `Low`, `High`, `Pred`, `Succ`, `Length`, `LowerCase`, `UpperCase`
+- registered but intentionally NOT implemented yet: `Inc`, `Dec`
 
 This matches the runtime code in `src/ps_system.c`, `src/ps_procedures.c`, and `src/ps_functions.c`.

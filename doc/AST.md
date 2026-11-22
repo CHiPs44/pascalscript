@@ -1,6 +1,6 @@
 # AST - Abstract Syntax Tree
 
-As of 2026-05-21, use of a compiler generating an AST then an interpreter executing this AST is on its way.
+Since 2026-05-21, compilation to an AST and interpretation of that AST are the active implementation model.
 
 Direct interpretation within the recursive descent parser was really too cumbersome to implement, mostly with array item access...
 

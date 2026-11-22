@@ -122,15 +122,15 @@ NB:
 | I/O: File         | Procedure | `Close`      | TODO |                                                 |
 | I/O: File         | Procedure | `Erase`      | TODO |                                                 |
 | I/O: File         | Procedure | `Flush`      | TODO |                                                 |
-| I/O: File         | Procedure | `Read`       | TODO | Special parameters                              |
-| I/O: File         | Procedure | `ReadLn`     | TODO | Special parameters                              |
+| I/O: File         | Procedure | `Read`       | Yes  | Console input; file input TODO                  |
+| I/O: File         | Procedure | `ReadLn`     | Yes  | Console input; file input TODO                  |
 | I/O: File         | Procedure | `Rename`     | TODO |                                                 |
 | I/O: File         | Procedure | `Reset`      | TODO |                                                 |
 | I/O: File         | Procedure | `Rewrite`    | TODO |                                                 |
 | I/O: File         | Procedure | `Seek`       | TODO |                                                 |
 | I/O: File         | Procedure | `Truncate`   | TODO |                                                 |
-| I/O: File         | Procedure | `Write`      | Yes  | Special parameters                              |
-| I/O: File         | Procedure | `WriteLn`    | Yes  | Special parameters                              |
+| I/O: File         | Procedure | `Write`      | Yes  | Special parameters; file output TODO            |
+| I/O: File         | Procedure | `WriteLn`    | Yes  | Special parameters; file output TODO            |
 | I/O: File         | Type      | `Text`       | TODO |                                                 |
 | I/O: File         | Variable  | `BufLen`     |  No  |                                                 |
 | I/O: File         | Variable  | `Input`      | TODO |                                                 |

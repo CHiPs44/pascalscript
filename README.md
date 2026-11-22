@@ -18,6 +18,8 @@ See [STATUS](STATUS.md) & [TODO](TODO.md) for further about what is currently wo
 
 [CLI options](doc/CLI.md) are here.
 
+As of 2026-11-22, the lexer is organized into core, number, and char/string modules. Standard-input procedures `Read`, `ReadLn`, and `ReadStr` are implemented, while file I/O and several additional system procedures remain under development.
+
 ## Performance
 
 As of 2025-09-19, using GCC without optimizations, it is not too bad but far less than Lua or Python.

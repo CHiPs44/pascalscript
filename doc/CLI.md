@@ -7,7 +7,7 @@ supported by the current build, run:
 pascalscript --help
 ```
 
-As of 2026-11-02, this outputs:
+As of 2026-11-22, this outputs:
 
 ```text
 PascalScript v0.1.2.3 (32 bits) - License: LGPL 3.0 or later, see LICENSE file

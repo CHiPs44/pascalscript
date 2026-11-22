@@ -1,8 +1,15 @@
 # Status
 
-As of 2026-11-02, the AST based interpreter is able to run Pascal programs with the following constructs.
+As of 2026-11-22, the AST based interpreter is able to run Pascal programs with the following constructs.
 
 [EBNF grammar](pascalscript.ebnf) is up to date, too.
+
+## Development state
+
+- The lexer is split into dedicated number, string, and core lexer modules.
+- Console input supports `Read`, `ReadLn`, and `ReadStr`.
+- File-oriented input and output remain to be implemented.
+- Documentation and the remaining system procedures are under active work.
 
 ## Data types
 
@@ -28,6 +35,12 @@ To variable from an expression with `:=`.
 - to standard output with `Write` / `WriteLn`
 - to strings with `WriteStr`
 - formatting with `:width` for integers, `:width:precision` for reals
+
+## Reading values
+
+- from standard input with `Read` / `ReadLn`
+- from a string with `ReadStr`
+- reading through files is not implemented yet
 
 ## Conditional
 
