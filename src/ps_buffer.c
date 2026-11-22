@@ -30,6 +30,7 @@ bool ps_buffer_alloc_lines(ps_buffer *buffer)
     {
         ps_memory_free(PS_MEMORY_BUFFER, buffer->line_starts);
         buffer->line_starts = NULL;
+        buffer->line_count = 0;
         buffer->error = PS_ERROR_OUT_OF_MEMORY;
         return false;
     }
@@ -48,6 +49,7 @@ void ps_buffer_free_lines(ps_buffer *buffer)
         ps_memory_free(PS_MEMORY_BUFFER, buffer->line_lengths);
         buffer->line_lengths = NULL;
     }
+    buffer->line_count = 0;
 }
 
 ps_buffer *ps_buffer_alloc(void)
