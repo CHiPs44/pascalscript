@@ -11,6 +11,7 @@
 #include "ps_memory.h"
 #include "ps_symbol.h"
 #include "ps_system.h"
+#include "ps_tools.h"
 #include "ps_value.h"
 
 static uint32_t ps_symbol_auto_index = 0;
@@ -22,7 +23,7 @@ ps_symbol *ps_symbol_alloc(ps_symbol_kind kind, const void *name, ps_value *valu
         return NULL;
     symbol->kind = kind;
     if (name != NULL)
-        memcpy(&symbol->name, name, PS_IDENTIFIER_SIZE);
+        ps_strscpy((char *)symbol->name, (const char *)name, (int)PS_IDENTIFIER_SIZE);
     else
     {
         memset(&symbol->name, 0, PS_IDENTIFIER_SIZE);

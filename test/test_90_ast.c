@@ -37,7 +37,6 @@ ps_ast_block *ps_ast_test_create_block_program(const char *name)
         return NULL;
 
     ps_ast_debug_line(0, "Create symbol table");
-    block_program->symbols = ps_symbol_table_alloc(0, 0);
     ASSERT(block_program->symbols != NULL);
 
     ps_symbol *symbol_program = ps_symbol_alloc(PS_SYMBOL_KIND_PROGRAM, name, NULL);
@@ -746,6 +745,7 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_call *statement1 =
             ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 1, args1, NULL);
     ASSERT(statement1 != NULL);
+    ps_memory_free(PS_MEMORY_AST, args1);
 
     ps_ast_debug_line(0, "Create the first by value argument of second statement");
     ps_value value_i_42 = {.allocated = false, .type = &ps_system_integer, .data.i = -42};
@@ -767,6 +767,7 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     ps_ast_call *statement2 =
             ps_ast_create_call(3, 5, PS_AST_PROCEDURE_CALL, &ps_system_procedure_writeln, 2, args2, NULL);
     ASSERT(statement2 != NULL);
+    ps_memory_free(PS_MEMORY_AST, args2);
 
     ps_ast_debug_line(0, "Add the statements to the statement list");
     block_program->statement_list->statements[0] = (ps_ast_node *)statement1;
