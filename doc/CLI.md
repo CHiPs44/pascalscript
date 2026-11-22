@@ -18,7 +18,6 @@ Runtime options:
  -i : flips I/O error checking (default: true, ${I+})
  -r : flips range checking (default: true, {$R+})
 Other options:
- -a : launch AST tests
  -c : display configuration and exit
  -d : debug (more verbose trace)
  -h : display this help message and exit

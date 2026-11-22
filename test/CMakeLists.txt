@@ -19,6 +19,7 @@ add_executable(test_50_symbol_table test_50_symbol_table.c ${SOURCES})
 add_executable(test_60_string_heap  test_60_string_heap.c  ${SOURCES})
 add_executable(test_70_system_lib   test_70_system_lib.c   ${SOURCES})
 add_executable(test_80_for_type_check test_80_for_type_check.c ${SOURCES})
+add_executable(test_90_ast          test_90_ast.c          ${SOURCES})
 
 # Add math library to each test executable
 target_link_libraries(test_10_buffer       m)
@@ -29,6 +30,7 @@ target_link_libraries(test_50_symbol_table m)
 target_link_libraries(test_60_string_heap  m)
 target_link_libraries(test_70_system_lib   m)
 target_link_libraries(test_80_for_type_check m)
+target_link_libraries(test_90_ast          m)
 
 # Add tests to CTest
 add_test(NAME Test10Buffer      COMMAND test_10_buffer)
@@ -39,3 +41,4 @@ add_test(NAME Test50SymbolTable COMMAND test_50_symbol_table)
 add_test(NAME Test60StringHeap  COMMAND test_60_string_heap)
 add_test(NAME Test70SystemLib   COMMAND test_70_system_lib)
 add_test(NAME Test80ForTypeCheck COMMAND test_80_for_type_check)
+add_test(NAME Test90Ast          COMMAND test_90_ast)

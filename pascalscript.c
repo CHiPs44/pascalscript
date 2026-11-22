@@ -14,7 +14,6 @@
 
 #include "ps_ast.h"
 #include "ps_ast_debug.h"
-#include "ps_ast_test.h"
 #include "ps_buffer.h"
 #include "ps_compiler.h"
 #include "ps_config.h"
@@ -65,7 +64,6 @@ bool io_check = true;
 bool range_check = true;
 
 // Others options
-bool ast_test = false;
 bool debug = false;
 bool dump_buffer = false;
 bool dump_symbols = false;
@@ -101,7 +99,6 @@ void usage(FILE *out, char *program_name)
     fprintf(out, " -i : flips I/O error checking (default: true, {$I+})\n");
     fprintf(out, " -r : flips range checking (default: true, {$R+})\n");
     fprintf(out, "Other options:\n");
-    fprintf(out, " -a : launch AST tests\n");
     fprintf(out, " -c : display configuration and exit\n");
     fprintf(out, " -d : debug (more verbose trace)\n");
     fprintf(out, " -h : display this help message and exit\n");
@@ -117,13 +114,10 @@ int get_options(int argc, char *argv[])
 {
     int opt;
     int arg = 0;
-    while ((opt = getopt(argc, argv, "abircdhmnstuv")) != -1)
+    while ((opt = getopt(argc, argv, "bircdhmnstuv")) != -1)
     {
         switch (opt)
         {
-        case 'a':
-            ast_test = true;
-            break;
         case 'c':
             ps_config_report(stdout);
             exit(EXIT_SUCCESS);
@@ -277,17 +271,6 @@ int main(int argc, char *argv[]) // NOSONAR
     // Force when debugging as I didn't find how to pass command line options
     // trace = true;
     // debug = true;
-
-    if (ast_test)
-    {
-        if (!ps_ast_test())
-        {
-            fprintf(stderr, "AST tests failed!\n");
-            exit(EXIT_FAILURE);
-        }
-        fprintf(stderr, "AST tests passed!\n");
-        exit(EXIT_SUCCESS);
-    }
 
     current_path = getcwd(NULL, 0);
     if (current_path == NULL)

@@ -96,4 +96,5 @@ test/test_50_symbol_table
 test/test_60_string_heap
 test/test_70_system_lib
 test/test_80_for_type_check
+test/test_90_ast
 test/Testing/

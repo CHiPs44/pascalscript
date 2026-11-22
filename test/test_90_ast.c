@@ -828,3 +828,14 @@ bool ps_ast_test()
 cleanup:
     return false;
 }
+
+int main(void)
+{
+    if (!ps_ast_test())
+    {
+        fprintf(stderr, "AST tests FAILED!\n");
+        return EXIT_FAILURE;
+    }
+    fprintf(stderr, "AST tests PASSED!\n");
+    return EXIT_SUCCESS;
+}
