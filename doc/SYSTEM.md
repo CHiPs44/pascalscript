@@ -9,15 +9,15 @@ Definitions:
 
 ## Built-in constants
 
-| Definition                        | Type       | Use                            |
-| --------------------------------- | ---------- | ------------------------------ |
-| `False` / `True`                  | `Boolean`  | Logical constants              |
-| `MaxInt` / `MinInt`               | `Integer`  | Integer bounds                 |
-| `MaxUInt`                         | `Unsigned` | Maximum unsigned integer value |
-| `MaxReal` / `MinReal` / `EpsReal` | `Real`     | Real bounds and epsilon        |
-| `Pi`                              | `Real`     | Mathematical constant π        |
-| `PS_BITNESS`                      | `Unsigned` | Runtime bitness (`32` or `64`) |
-| `PS_VERSION`                      | `String`   | PascalScript version string    |
+| Definition                        | Type       | Use                                                             |
+| --------------------------------- | ---------- | --------------------------------------------------------------- |
+| `False` / `True`                  | `Boolean`  | Logical constants                                               |
+| `MaxInt` / `MinInt`               | `Integer`  | Integer bounds                                                  |
+| `MaxUInt`                         | `Unsigned` | Maximum unsigned integer value (`MinUInt` is `0` by definition) |
+| `MaxReal` / `MinReal` / `EpsReal` | `Real`     | Real bounds and epsilon                                         |
+| `Pi`                              | `Real`     | Mathematical constant π                                         |
+| `PS_BITNESS`                      | `Unsigned` | Runtime bitness (`32` or `64`)                                  |
+| `PS_VERSION`                      | `String`   | PascalScript version string                                     |
 
 ## Built-in variables
 
@@ -26,20 +26,23 @@ Definitions:
 | `IOResult` | `Integer` | Standard runtime I/O status variable |
 | `ExitCode` | `Integer` | Standard runtime exit code           |
 
+NB: as of 2026-11-22, these are not changed or used by runtime.
+
 ## Input / output
 
-| Definition                                          | Status                                      | Use                                           |
-| --------------------------------------------------- | ------------------------------------------- | --------------------------------------------- |
-| `Write([Value[:Width[:Precision]]]*)`               | Implemented                                 | Writes values to standard output              |
-| `WriteLn([Value[:Width[:Precision]]]*)`             | Implemented                                 | Writes values and then moves to the next line |
-| `WriteStr(StringVar; [Value[:Width[:Precision]]]*)` | Implemented                                 | Appends formatted text to a string variable   |
-| `Read(Value)`                                       | Implemented                                 | Reads a value from standard input             |
-| `ReadLn(Value)`                                     | Implemented                                 | Reads a value and advances to next line       |
-| `ReadStr(StringVar, Value)`                         | Implemented                                 | Reads values from a string buffer              |
+| Definition                                          | Status      | Use                                           |
+| --------------------------------------------------- | ----------- | --------------------------------------------- |
+| `Write([Value[:Width[:Precision]]]*)`               | Implemented | Writes values to standard output              |
+| `WriteLn([Value[:Width[:Precision]]]*)`             | Implemented | Writes values and then moves to the next line |
+| `WriteStr(StringVar; [Value[:Width[:Precision]]]*)` | Implemented | Appends formatted text to a string variable   |
+| `Read(Value)`                                       | Implemented | Reads a value from standard input             |
+| `ReadLn(Value)`                                     | Implemented | Reads a value and advances to next line       |
+| `ReadStr(StringVar, Value)`                         | Implemented | Reads values from a string buffer             |
 
-Up to 16 (`PS_PARAMETERS_MAX`) parameters can be passed to `Write`, `WriteLn` and `WriteStr`
+NB:
 
-This includes the `StringVar` parameter, and the `File` parameter when file I/O will be implemented.
+- Up to 16 (`PS_PARAMETERS_MAX`) parameters can be passed to `Write`, `WriteLn` and `WriteStr`
+- This includes the `StringVar` parameter, and the `File` parameter when file I/O will be implemented.
 
 ## Math
 
@@ -81,6 +84,10 @@ Note:
 | `Random(): Real`                                        | Returns a random value in `[0.0, 1.0[`                        |
 | `Random(Max: Integer \| Unsigned): Integer \| Unsigned` | Returns a random value in `[0, Max[` when `Max` is provided   |
 | `Randomize([Seed: Integer \| Unsigned])`                | Initializes the random number generator with an optional seed |
+
+NB:
+
+- Parameter to Randomize is a PascalScript extension, Free Pascal uses global variable `RandSeed`
 
 ## Time
 
