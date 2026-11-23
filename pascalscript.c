@@ -32,7 +32,7 @@
 // #define DEBUG_SOURCE "examples/003-hello2.pas"
 // #define DEBUG_SOURCE "examples/005-first.pas"
 // #define DEBUG_SOURCE "examples/007-strings1.pas"
-// #define DEBUG_SOURCE "examples/008-strings2.pas"
+#define DEBUG_SOURCE "examples/008-strings2.pas"
 // #define DEBUG_SOURCE "examples/009-operators.pas"
 // #define DEBUG_SOURCE "examples/010-enum1.pas"
 // #define DEBUG_SOURCE "examples/011-subrange1.pas"

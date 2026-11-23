@@ -34,15 +34,15 @@ extern "C"
     /// @return new string if OK else NULL (check errno for ENOMEM or EINVAL)
     ps_string *ps_string_create(const char *z);
 
-    /// @brief Grow string up to len chars upper rounded to next multiple of 16
-    /// @example ps_string_grow(s, 23) will round max length to (23 + 16) & ~&15 => 39 & ~15 => 32
-    /// @return reallocated string if OK else NULL (check errno for ENOMEM or EINVAL)
-    ps_string *ps_string_grow(ps_string *s, ps_string_len len);
-
     /// @brief Allocate and set a new string from a char
     /// @example ps_string_create_char('A') => "A"
     /// @return new string if OK else NULL (check errno for ENOMEM)
     ps_string *ps_string_create_char(ps_char c);
+
+    /// @brief Grow string up to len chars upper rounded to next multiple of 16
+    /// @example ps_string_grow(s, 23) will round max length to (23 + 16) & ~&15 => 39 & ~15 => 32
+    /// @return reallocated string if OK else NULL (check errno for ENOMEM or EINVAL)
+    ps_string *ps_string_grow(ps_string *s, ps_string_len len);
 
     /// @brief Concatenate two strings into another one if lengths are OK
     /// @example ps_string_concat("ABC", "DEF") => "ABCDEF"

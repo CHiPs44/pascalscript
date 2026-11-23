@@ -79,6 +79,17 @@ ps_string *ps_string_create(const char *z)
     return s;
 }
 
+ps_string *ps_string_create_char(ps_char c)
+{
+    ps_string *s = ps_string_alloc(1);
+    if (s == NULL)
+        return NULL; // errno = ENOMEM
+    s->str[0] = c;
+    s->str[1] = '\0'; // null terminator
+    s->len = 1;
+    return s;
+}
+
 ps_string *ps_string_grow(ps_string *s, ps_string_len len)
 {
     assert(s != NULL);
@@ -99,17 +110,6 @@ ps_string *ps_string_grow(ps_string *s, ps_string_len len)
     // Length unchanged
     s->max = (ps_string_len)max;
 
-    return s;
-}
-
-ps_string *ps_string_create_char(ps_char c)
-{
-    ps_string *s = ps_string_alloc(1);
-    if (s == NULL)
-        return NULL; // errno = ENOMEM
-    s->str[0] = c;
-    s->str[1] = '\0'; // null terminator
-    s->len = 1;
     return s;
 }
 

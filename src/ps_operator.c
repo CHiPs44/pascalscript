@@ -156,11 +156,9 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
 #define STRING_CASE_CS(__KEY__, __OP__)                                                                                \
     if (key == (__KEY__))                                                                                              \
     {                                                                                                                  \
-        s = ps_string_alloc(1);                                                                                        \
+        s = ps_string_create_char(a->data.c);                                                                          \
         if (s == NULL)                                                                                                 \
             return false;                                                                                              \
-        s->str[0] = a->data.c;                                                                                         \
-        s->len = 1;                                                                                                    \
         result->data.b = __OP__(s, b->data.s);                                                                         \
         ps_string_free(s);                                                                                             \
         r = PS_TYPE_BOOLEAN;                                                                                           \
@@ -170,11 +168,9 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
 #define STRING_CASE_SC(__KEY__, __OP__)                                                                                \
     if (key == (__KEY__))                                                                                              \
     {                                                                                                                  \
-        s = ps_string_alloc(1);                                                                                        \
+        s = ps_string_create_char(b->data.c);                                                                          \
         if (s == NULL)                                                                                                 \
             return false;                                                                                              \
-        s->str[0] = a->data.c;                                                                                         \
-        s->len = 1;                                                                                                    \
         result->data.b = __OP__(a->data.s, s);                                                                         \
         ps_string_free(s);                                                                                             \
         r = PS_TYPE_BOOLEAN;                                                                                           \

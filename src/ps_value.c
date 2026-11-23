@@ -313,6 +313,16 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         to->data.r = (ps_real)from->data.u;
         return PS_ERROR_NONE;
     }
+    if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_STRING)
+    {
+        if (to->data.s != NULL)
+            ps_string_free(to->data.s);
+        to->data.s = ps_string_create_char(from->data.c);
+        if (to->data.s == NULL)
+            return PS_ERROR_OUT_OF_MEMORY;
+        to->string_heap_owned = true;
+        return PS_ERROR_NONE;
+    }
     return PS_ERROR_TYPE_MISMATCH;
 }
 
@@ -440,14 +450,6 @@ ps_value *ps_value_set_string(ps_value *value, ps_string *s) { PS_VALUE_SET(ps_s
     else                                                                                                               \
         snprintf(buffer, sizeof(buffer) - 1, "%s@%p", ps_executable_get_kind_name(executable->kind),                   \
                  executable->address);
-
-#define ARRAY_VALUE                                                                                                    \
-    if (debug)                                                                                                         \
-    {                                                                                                                  \
-    }                                                                                                                  \
-    else                                                                                                               \
-    {                                                                                                                  \
-    }
 
 char *ps_value_to_string(const ps_value *value, bool debug, int16_t width, int16_t precision)
 {
