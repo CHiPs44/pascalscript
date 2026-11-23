@@ -68,6 +68,86 @@ static void test_ps_randseed_variable(void)
         CHECK(frame->data[2].u == 0);
 }
 
+static void test_ps_interpreter_set_randseed_by_reference(void)
+{
+    ps_symbol_table *symbols = ps_symbol_table_alloc(8, 4);
+    CHECK(symbols != NULL);
+    if (symbols == NULL)
+        return;
+
+    ps_ast_block *parameter_block =
+            ps_ast_create_block(0, 0, system_block, PS_AST_PROCEDURE, "SETSEED", symbols);
+    CHECK(parameter_block != NULL);
+    if (parameter_block == NULL)
+    {
+        ps_symbol_table_free(symbols);
+        return;
+    }
+
+    ps_value parameter_slot = {.type = &ps_system_unsigned, .data.h = 0};
+    ps_symbol *parameter = ps_symbol_alloc(PS_SYMBOL_KIND_VARIABLE, "SEED", &parameter_slot);
+    CHECK(parameter != NULL);
+    if (parameter == NULL)
+        goto cleanup;
+
+    if (ps_symbol_table_add(parameter_block->symbols, parameter) != PS_ERROR_NONE)
+    {
+        CHECK(false);
+        ps_symbol_free(parameter);
+        goto cleanup;
+    }
+    parameter_block->n_vars = 1;
+
+    ps_ast_variable *parameter_variable =
+            ps_ast_create_variable_simple(1, 1, parameter_block, PS_AST_LVALUE, parameter);
+    ps_ast_variable *randseed_variable =
+            ps_ast_create_variable_simple(1, 1, system_block, PS_AST_LVALUE, &ps_system_variable_unsigned_randseed);
+    CHECK(parameter_variable != NULL && randseed_variable != NULL);
+    if (parameter_variable == NULL || randseed_variable == NULL)
+    {
+        ps_ast_free_node((ps_ast_node *)parameter_variable);
+        ps_ast_free_node((ps_ast_node *)randseed_variable);
+        goto cleanup;
+    }
+
+    bool entered = ps_interpreter_enter_frame(interpreter, parameter_block);
+    CHECK(entered);
+    if (!entered)
+    {
+        ps_ast_free_node((ps_ast_node *)parameter_variable);
+        ps_ast_free_node((ps_ast_node *)randseed_variable);
+        goto cleanup;
+    }
+
+    bool bound = ps_interpreter_bind_variable_reference(interpreter, parameter_variable, randseed_variable);
+    CHECK(bound);
+    if (!bound)
+    {
+        ps_interpreter_exit_frame(interpreter);
+        ps_ast_free_node((ps_ast_node *)parameter_variable);
+        ps_ast_free_node((ps_ast_node *)randseed_variable);
+        goto cleanup;
+    }
+
+    CHECK(ps_interpreter_set_random_seed(interpreter, 42));
+    int expected = rand(); // NOSONAR
+    ps_value seed = unsigned_value(42);
+    CHECK(ps_interpreter_set_variable_value(interpreter, parameter_variable, &seed));
+    CHECK(rand() == expected); // NOSONAR
+
+    const ps_frame *system_frame = ps_frame_stack_find_frame_for_block(interpreter->stack, system_block);
+    CHECK(system_frame != NULL);
+    if (system_frame != NULL)
+        CHECK(system_frame->data[ps_system_variable_unsigned_randseed.value->data.h].u == 42);
+
+    CHECK(ps_interpreter_exit_frame(interpreter));
+    ps_ast_free_node((ps_ast_node *)parameter_variable);
+    ps_ast_free_node((ps_ast_node *)randseed_variable);
+
+cleanup:
+    ps_ast_free_block(parameter_block);
+}
+
 static void test_ps_procedures_init(void)
 {
     ps_ast_block *block = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "PROCEDURES", ps_symbol_table_alloc(32, 4));
@@ -611,6 +691,7 @@ int main(void)
     RUN_TEST(test_ps_functions_init);
     RUN_TEST(test_ps_procedures_init);
     RUN_TEST(test_ps_randseed_variable);
+    RUN_TEST(test_ps_interpreter_set_randseed_by_reference);
     RUN_TEST(test_ps_function_exec_1arg);
     RUN_TEST(test_ps_function_exec_1arg_s);
     RUN_TEST(test_ps_function_exec_2args);
