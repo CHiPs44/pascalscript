@@ -64,7 +64,7 @@ Begin
   GetTickCount := SysUtils.GetTickCount64 And MaxUint;
 End;
 
-Procedure Randomize(Seed: Unsigned)
+Procedure Randomize(Seed: Unsigned);
 Begin
   RandSeed := Seed;
 End;
