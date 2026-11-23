@@ -137,6 +137,7 @@ bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
     {
         fprintf(stderr, "Error running the program: %s\n", interpreter->message);
     }
+    ASSERT(result);
 
     ps_ast_test_delete_interpreter(interpreter, block_program);
 
@@ -783,9 +784,10 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     result = ps_execute_program(interpreter, block_program);
     if (!result)
     {
-        ps_ast_debug_line(0, "Error running the program: %s (%d)", interpreter->error,
-                          ps_error_get_message(interpreter->error));
+        ps_ast_debug_line(0, "Error running the program: %s (%d)",
+                          ps_error_get_message(interpreter->error), interpreter->error);
     }
+    ASSERT(result);
 
     ps_ast_test_delete_interpreter(interpreter, block_program);
 
