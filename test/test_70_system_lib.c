@@ -148,6 +148,31 @@ cleanup:
     ps_ast_free_block(parameter_block);
 }
 
+#if PS_BITNESS == 64
+static void test_ps_interpreter_wide_random_seed_truncation(void)
+{
+    ps_unsigned wide_seed = UINT64_C(4294967297);
+    CHECK(ps_interpreter_set_random_seed(interpreter, 1));
+    int seed_one_first = rand(); // NOSONAR
+
+    CHECK(ps_interpreter_set_random_seed(interpreter, wide_seed));
+    int wide_seed_first = rand(); // NOSONAR
+    CHECK(wide_seed_first == seed_one_first);
+
+    CHECK(ps_interpreter_set_random_seed(interpreter, wide_seed));
+    CHECK(rand() == wide_seed_first); // NOSONAR
+
+    ps_value seed_value = unsigned_value(wide_seed);
+    CHECK(ps_procedure_randomize(interpreter, &seed_value));
+    CHECK(rand() == wide_seed_first); // NOSONAR
+
+    const ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, system_block);
+    CHECK(frame != NULL);
+    if (frame != NULL)
+        CHECK(frame->data[ps_system_variable_unsigned_randseed.value->data.h].u == wide_seed);
+}
+#endif
+
 static void test_ps_procedures_init(void)
 {
     ps_ast_block *block = ps_ast_create_block(0, 0, NULL, PS_AST_PROGRAM, "PROCEDURES", ps_symbol_table_alloc(32, 4));
@@ -561,6 +586,17 @@ static void test_ps_procedure_randomize(void)
     CHECK(!ps_procedure_randomize(interpreter, &seed));
     CHECK(interpreter->error == PS_ERROR_UNEXPECTED_TYPE);
     CHECK(ps_procedure_randomize(interpreter, NULL));
+
+    ps_ast_block *system = interpreter->system;
+    interpreter->system = NULL;
+    seed = unsigned_value(42);
+    CHECK(!ps_procedure_randomize(interpreter, &seed));
+    CHECK(interpreter->error == PS_ERROR_GENERIC);
+    interpreter->error = PS_ERROR_NONE;
+    CHECK(!ps_procedure_randomize(interpreter, NULL));
+    CHECK(interpreter->error == PS_ERROR_GENERIC);
+    interpreter->system = system;
+    interpreter->error = PS_ERROR_NONE;
 }
 
 static void test_ps_procedure_read(void)
@@ -692,6 +728,9 @@ int main(void)
     RUN_TEST(test_ps_procedures_init);
     RUN_TEST(test_ps_randseed_variable);
     RUN_TEST(test_ps_interpreter_set_randseed_by_reference);
+#if PS_BITNESS == 64
+    RUN_TEST(test_ps_interpreter_wide_random_seed_truncation);
+#endif
     RUN_TEST(test_ps_function_exec_1arg);
     RUN_TEST(test_ps_function_exec_1arg_s);
     RUN_TEST(test_ps_function_exec_2args);
