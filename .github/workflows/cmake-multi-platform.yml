@@ -48,7 +48,7 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get install -y libc6-dev-i386 valgrind
+        sudo apt-get install -y libc6-dev-i386 valgrind fp-compiler
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
