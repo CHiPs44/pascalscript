@@ -665,6 +665,8 @@ static ps_symbol *ps_ast_binary_operation_get_result_type_comparison(ps_operator
         ok = true;
     else if (left_base == PS_TYPE_STRING && right_base == PS_TYPE_CHAR)
         ok = true;
+    else if (left_base == PS_TYPE_STRING && right_base == PS_TYPE_STRING)
+        ok = true;
     else if (left_base == PS_TYPE_BOOLEAN && right_base == PS_TYPE_BOOLEAN)
         ok = operator == PS_OP_EQ || operator == PS_OP_NE;
     return ok ? &ps_system_boolean : NULL;
