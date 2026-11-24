@@ -523,8 +523,7 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
             ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
             if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
                 return false;
-            ps_frame *system_frame = ps_frame_stack_find_frame_for_block(interpreter->stack, interpreter->system);
-            if (frame == system_frame && handle == ps_system_variable_unsigned_randseed.value->data.h)
+            if (frame->block == interpreter->system && handle == ps_system_variable_unsigned_randseed.value->data.h)
                 return ps_interpreter_set_random_seed(interpreter, variable_value.data.u);
             frame->data[handle] = variable_value.data;
         }
