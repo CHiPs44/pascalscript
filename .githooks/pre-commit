@@ -11,3 +11,28 @@ if printf '%s\n' "$staged_source" |
     printf '%s\n' 'Commit rejected: pascalscript.c defines DEBUG_SOURCE.' >&2
     exit 1
 fi
+
+tmp_dir=$(mktemp -d)
+trap 'rm -f "$tmp_dir/files" "$tmp_dir/staged" "$tmp_dir/formatted"; rmdir "$tmp_dir"' EXIT
+
+if ! git diff --cached --name-only --diff-filter=ACMR -- '*.c' '*.h' > "$tmp_dir/files"; then
+    printf '%s\n' 'Unable to list staged C source and header files.' >&2
+    exit 1
+fi
+
+while IFS= read -r file; do
+    if ! git show ":$file" > "$tmp_dir/staged"; then
+        printf 'Commit rejected: unable to read staged %s.\n' "$file" >&2
+        exit 1
+    fi
+
+    if ! clang-format --assume-filename="$file" < "$tmp_dir/staged" > "$tmp_dir/formatted"; then
+        printf 'Commit rejected: clang-format failed for %s.\n' "$file" >&2
+        exit 1
+    fi
+
+    if ! cmp -s "$tmp_dir/staged" "$tmp_dir/formatted"; then
+        printf 'Commit rejected: clang-format would change %s.\n' "$file" >&2
+        exit 1
+    fi
+done < "$tmp_dir/files"

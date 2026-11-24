@@ -22,13 +22,13 @@ As of 2026-11-22, the lexer is organized into core, number, and char/string modu
 
 ## Git pre-commit hook
 
-To reject commits that enable `DEBUG_SOURCE` in `pascalscript.c`, enable the repository hook once after cloning:
+The hook rejects commits that enable `DEBUG_SOURCE` in `pascalscript.c` and runs `clang-format` on staged C source and header files. Formatting changes or formatter errors reject the commit. Install `clang-format`, then enable the repository hook once after cloning:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-The hook checks the staged version of `pascalscript.c`.
+Both checks use staged file contents.
 
 ## Performance
 
