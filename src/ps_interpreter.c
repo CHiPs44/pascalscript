@@ -507,7 +507,7 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
             if (source_string->len > target_string->max)
             {
                 memcpy(target_string->str, source_string->str, target_string->max);
-                target_string->str[target_string->max + 1] = '\0';
+                target_string->str[target_string->max] = '\0';
                 target_string->len = target_string->max;
             }
             else

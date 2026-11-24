@@ -158,7 +158,10 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
     {                                                                                                                  \
         s = ps_string_create_char(a->data.c);                                                                          \
         if (s == NULL)                                                                                                 \
+        {                                                                                                              \
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;                                                               \
             return false;                                                                                              \
+        }                                                                                                              \
         result->data.b = __OP__(s, b->data.s);                                                                         \
         ps_string_free(s);                                                                                             \
         r = PS_TYPE_BOOLEAN;                                                                                           \
@@ -170,7 +173,10 @@ bool ps_operator_unary_eval(ps_interpreter *interpreter, const ps_value *value, 
     {                                                                                                                  \
         s = ps_string_create_char(b->data.c);                                                                          \
         if (s == NULL)                                                                                                 \
+        {                                                                                                              \
+            interpreter->error = PS_ERROR_OUT_OF_MEMORY;                                                               \
             return false;                                                                                              \
+        }                                                                                                              \
         result->data.b = __OP__(a->data.s, s);                                                                         \
         ps_string_free(s);                                                                                             \
         r = PS_TYPE_BOOLEAN;                                                                                           \
