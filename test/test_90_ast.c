@@ -117,12 +117,15 @@ cleanup:
  */
 bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("MINIMAL");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("MINIMAL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Debug print the program");
@@ -139,13 +142,12 @@ bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
     }
     ASSERT(result);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
 cleanup:
-    return false;
+    if (interpreter != NULL)
+        ps_ast_test_delete_interpreter(interpreter, block_program);
+    if (block_program != NULL)
+        ps_ast_test_delete_block_program(block_program);
+    return result;
 }
 
 /**
@@ -718,12 +720,15 @@ cleanup:
  */
 bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("HELLO");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("HELLO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create a statement list with 2 statements");
@@ -789,13 +794,12 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     }
     ASSERT(result);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
 cleanup:
-    return false;
+    if (interpreter != NULL)
+        ps_ast_test_delete_interpreter(interpreter, block_program);
+    if (block_program != NULL)
+        ps_ast_test_delete_block_program(block_program);
+    return result;
 }
 
 bool ps_ast_test()
