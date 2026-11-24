@@ -315,8 +315,8 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     }
     if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_STRING)
     {
-        if (to->data.s != NULL)
-            ps_string_free(to->data.s);
+        // to->data.s should be heap allocated, but we don't know if it is,
+        // so we won't free it, we will just overwrite it with a new string
         to->data.s = ps_string_create_char(from->data.c);
         if (to->data.s == NULL)
             return PS_ERROR_OUT_OF_MEMORY;
