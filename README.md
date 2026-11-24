@@ -22,13 +22,13 @@ As of 2026-11-22, the lexer is organized into core, number, and char/string modu
 
 ## Git pre-commit hook
 
-The hook rejects commits that enable `DEBUG_SOURCE` in `pascalscript.c` and runs `clang-format` on staged C source and header files. Formatting changes or formatter errors reject the commit. Install `clang-format`, then enable the repository hook once after cloning:
+The hook rejects commits that enable `DEBUG_SOURCE` in `pascalscript.c` and runs `clang-format -i` on staged C source and header files. If formatting changes a file, the commit is rejected; review and stage the formatted result before retrying. Install `clang-format`, then enable the repository hook once after cloning:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-Both checks use staged file contents.
+The `DEBUG_SOURCE` check uses staged contents; clang-format runs on the working-tree versions of staged paths.
 
 ## Performance
 
