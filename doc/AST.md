@@ -47,3 +47,4 @@ Interpreter uses a stack of frames to manage variables values and function calls
 - Variables are kept in the local symbol table they are defined in, their values are stored in this frame and accessed through an handle corresponding to their order of declaration
 - Functions automagically declare a `Result` variable
 - Global variables are local variables of the `Program` block
+- System variables are local variables of the `System` block
