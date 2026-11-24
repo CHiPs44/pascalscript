@@ -328,7 +328,7 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
         to->data.s = ps_string_create_char(from->data.c);
         if (to->data.s == NULL)
             return PS_ERROR_OUT_OF_MEMORY;
-        to->string_heap_owned = true;
+        to->string_heap_owned = false;
         return PS_ERROR_NONE;
     }
     return PS_ERROR_TYPE_MISMATCH;

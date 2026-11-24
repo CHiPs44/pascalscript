@@ -22,6 +22,7 @@
 #include "ps_signature.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
+#include "ps_string.h"
 #include "ps_system.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
@@ -607,9 +608,25 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
                        from == NULL || from->type == NULL ? "NULL!" : (const char *)from->type->name,
                        ps_value_get_debug_string(to),
                        to == NULL || to->type == NULL ? "NULL!" : (const char *)to->type->name);
+    bool char_to_string = ps_value_is_char(from) && ps_value_is_string(to);
+    if (char_to_string)
+        to->string_heap_owned = false;
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
+    {
+        if (char_to_string)
+        {
+            ps_string *string = ps_string_heap_add(interpreter->string_heap, to->data.s);
+            if (string == NULL)
+            {
+                ps_string_free(to->data.s);
+                return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
+            }
+            to->data.s = string;
+            to->string_heap_owned = true;
+        }
         return true;
+    }
     if (error != PS_ERROR_TYPE_MISMATCH)
         return ps_interpreter_return_false(interpreter, error);
 
