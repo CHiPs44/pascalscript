@@ -32,13 +32,13 @@ Begin
     WriteOkOrFailed(HelloWorld = 'Hello, World!');
     s1 := 'Hello';
     Write('s1 = ', s1);
-    WriteOkOrFailed(s1 <> 'Hello');
+    WriteOkOrFailed(s1 = 'Hello');
     s2 := 'World';
     Write('s2 = ', s2);
-    WriteOkOrFailed(s2 <> 'World');
+    WriteOkOrFailed(s2 = 'World');
     s3 := s1 + ', ' + s2 + '!';
-    Write('s3 = s1, s2! = ', s3);
-    WriteOkOrFailed(s3 <> 'Hello, World!');
+    Write('s3 = s1 + s2 + ! = ', s3);
+    WriteOkOrFailed(s3 = 'Hello, World!');
     s4 := '';
     For I := 1 to 10 do
         s4 := s4 + '-_';
