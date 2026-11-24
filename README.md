@@ -20,6 +20,16 @@ See [STATUS](STATUS.md) & [TODO](TODO.md) for further about what is currently wo
 
 As of 2026-11-22, the lexer is organized into core, number, and char/string modules. Standard-input procedures `Read`, `ReadLn`, and `ReadStr` are implemented, while file I/O and several additional system procedures remain under development.
 
+## Git pre-commit hook
+
+To reject commits that enable `DEBUG_SOURCE` in `pascalscript.c`, enable the repository hook once after cloning:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook checks the staged version of `pascalscript.c`.
+
 ## Performance
 
 As of 2025-09-19, using GCC without optimizations, it is not too bad but far less than Lua or Python.

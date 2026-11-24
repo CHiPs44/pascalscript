@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+if ! staged_source=$(git show :pascalscript.c); then
+    printf '%s\n' 'Unable to read staged pascalscript.c.' >&2
+    exit 1
+fi
+
+if printf '%s\n' "$staged_source" |
+    grep -Eq '^[[:space:]]*#[[:space:]]*define[[:space:]]+DEBUG_SOURCE([[:space:]]|$)'; then
+    printf '%s\n' 'Commit rejected: pascalscript.c defines DEBUG_SOURCE.' >&2
+    exit 1
+fi
