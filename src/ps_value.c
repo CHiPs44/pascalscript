@@ -279,7 +279,11 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     // Same value type, just copy value
     if (from->type == to->type)
     {
-        // TODO copy string or array?
+        // TODO copy string or array
+        // if (from_base == PS_TYPE_STRING && to_base == PS_TYPE_STRING)
+        //     return PS_ERROR_NOT_IMPLEMENTED;
+        if (from_base == PS_TYPE_ARRAY && to_base == PS_TYPE_ARRAY)
+            return PS_ERROR_NOT_IMPLEMENTED;
         to->data = from->data;
         return PS_ERROR_NONE;
     }
@@ -315,8 +319,12 @@ ps_error ps_value_copy(const ps_value *from, ps_value *to, bool range_check)
     }
     if (from_base == PS_TYPE_CHAR && to_base == PS_TYPE_STRING)
     {
-        // to->data.s should be heap allocated, but we don't know if it is,
-        // so we won't free it, we will just overwrite it with a new string
+        if (to->string_heap_owned)
+        {
+            ps_string *string = to->data.s;
+            ps_string_free(string);
+            to->string_heap_owned = false;
+        }
         to->data.s = ps_string_create_char(from->data.c);
         if (to->data.s == NULL)
             return PS_ERROR_OUT_OF_MEMORY;

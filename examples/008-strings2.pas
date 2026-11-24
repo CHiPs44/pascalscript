@@ -53,9 +53,11 @@ Begin
     Write('UpperCase(''', s1, ''') = ', UpperCase(s1));
     WriteOkOrFailed(UpperCase(s1) = 'HELLO');
     C := LowerCase('A');
-    Write('LowerCase(''A'') = ', C);
+    Write('LowerCase(''A'') = ''', C,'''');
+    WriteOkOrFailed(C = 'a');
     C := UpperCase('a');
-    Write('UpperCase(''a'') = ', C);
+    Write('UpperCase(''a'') = ''', C,'''');
+    WriteOkOrFailed(C = 'A');
     C := 'A';
     S1 := C;
     Write('S1 = C = "', S1, '"');
