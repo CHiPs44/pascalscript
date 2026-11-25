@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "(gdb) pascalscript",
             "type": "cppdbg",
@@ -29,10 +30,10 @@
             ]
         },
         {
-            "name": "(gdb) test_20_lexer",
+            "name": "(gdb) test_70_system_lib",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/test_20_lexer",
+            "program": "${workspaceFolder}/build/test_70_system_lib",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

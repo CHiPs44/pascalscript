@@ -20,9 +20,9 @@
 #include "ps_memory.h"
 #include "ps_procedures.h"
 #include "ps_signature.h"
+#include "ps_string.h"
 #include "ps_symbol.h"
 #include "ps_symbol_table.h"
-#include "ps_string.h"
 #include "ps_system.h"
 #include "ps_type_definition.h"
 #include "ps_value.h"
@@ -523,7 +523,8 @@ bool ps_interpreter_set_variable_value(ps_interpreter *interpreter, const ps_ast
             ps_value variable_value = {.allocated = false, .type = ast_variable->variable->value->type, .data = {0}};
             if (!ps_interpreter_copy_value(interpreter, value, &variable_value))
                 return false;
-            if (frame->block == interpreter->system && handle == ps_system_variable_unsigned_randseed.value->data.h)
+            ps_frame *system_frame = interpreter->stack->frames[0];
+            if (frame == system_frame && handle == ps_system_variable_unsigned_randseed.value->data.h)
                 return ps_interpreter_set_random_seed(interpreter, variable_value.data.u);
             frame->data[handle] = variable_value.data;
         }
@@ -618,7 +619,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
             ps_string *string = ps_string_heap_add(interpreter->string_heap, to->data.s);
             if (string == NULL)
             {
-                ps_string_free(to->data.s);
+                to->data.s = ps_string_free(to->data.s);
                 return ps_interpreter_return_false(interpreter, PS_ERROR_OUT_OF_MEMORY);
             }
             to->data.s = string;
@@ -638,7 +639,7 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
 
 bool ps_interpreter_set_random_seed(ps_interpreter *interpreter, ps_unsigned seed)
 {
-    ps_frame *frame = ps_frame_stack_find_frame_for_block(interpreter->stack, interpreter->system);
+    ps_frame *frame = interpreter->system == NULL ? NULL : interpreter->stack->frames[0];
     if (frame == NULL)
         return ps_interpreter_set_error_message(interpreter, PS_ERROR_GENERIC, "No frame found for system variables");
     ps_handle handle = ps_system_variable_unsigned_randseed.value->data.h;
