@@ -97,15 +97,12 @@ cleanup:
 bool ps_ast_test_delete_interpreter(ps_interpreter *interpreter, ps_ast_block *block_program)
 {
     ps_ast_debug_line(0, "Exit environment for the program %s", block_program->name);
-    ASSERT(ps_interpreter_exit_frame(interpreter));
+    bool result = ps_interpreter_exit_frame(interpreter);
     ps_ast_debug_line(0, "Free interpreter");
     interpreter->system = NULL;
     interpreter->string_heap = NULL;
     interpreter = ps_interpreter_free(interpreter);
-    ASSERT(interpreter == NULL);
-    return true;
-cleanup:
-    return false;
+    return result && interpreter == NULL;
 }
 
 /**
@@ -143,10 +140,10 @@ bool ps_ast_test_minimal(ps_ast_block *system, ps_string_heap *string_heap)
     ASSERT(result);
 
 cleanup:
-    if (interpreter != NULL)
-        ps_ast_test_delete_interpreter(interpreter, block_program);
-    if (block_program != NULL)
-        ps_ast_test_delete_block_program(block_program);
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
     return result;
 }
 
@@ -162,12 +159,16 @@ cleanup:
  */
 bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
 {
+    bool result = false;
     ps_error error = PS_ERROR_NONE;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("ASSIGNMENT");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("ASSIGNMENT");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I & J of type Unsigned and add them to the symbol table");
@@ -218,7 +219,7 @@ bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
     // ps_ast_debug_line(0, "================================================================");
 
     ps_ast_debug_line(0, "Run the program and check that it returns true");
-    bool result = ps_execute_program(interpreter, block_program);
+    result = ps_execute_program(interpreter, block_program);
     ps_ast_debug_line(0, "Interpreter error:   %s", ps_error_get_message(interpreter->error));
     ps_ast_debug_line(0, "Interpreter message: %s", interpreter->message);
     ASSERT(result);
@@ -242,13 +243,13 @@ bool ps_ast_test_assignment(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
+    result = true;
 cleanup:
-    return false;
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
+    return result;
 }
 
 /**
@@ -267,12 +268,15 @@ cleanup:
  */
 bool ps_ast_test_if_then_else(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("IFTHENELSE");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("IFTHENELSE");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and J of type Integer and add them to the symbol tables");
@@ -376,13 +380,13 @@ bool ps_ast_test_if_then_else(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
+    result = true;
 cleanup:
-    return false;
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
+    return result;
 }
 
 /**
@@ -398,12 +402,15 @@ cleanup:
  */
 bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("WHILEDO");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("WHILEDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -479,13 +486,13 @@ bool ps_ast_test_while_do(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
+    result = true;
 cleanup:
-    return false;
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
+    return result;
 }
 
 /**
@@ -502,12 +509,15 @@ cleanup:
  */
 bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("REPEATUNTIL");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("REPEATUNTIL");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbol I of type Integer and add it to the symbol tables");
@@ -583,13 +593,13 @@ bool ps_ast_test_repeat_until(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
+    result = true;
 cleanup:
-    return false;
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
+    return result;
 }
 
 /**
@@ -605,13 +615,16 @@ cleanup:
  */
 bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
 {
-    bool result;
+    bool result = false;
     ps_error error;
 
-    ps_ast_block *block_program = ps_ast_test_create_block_program("FORDO");
+    ps_ast_block *block_program = NULL;
+    ps_interpreter *interpreter = NULL;
+
+    block_program = ps_ast_test_create_block_program("FORDO");
     ASSERT(block_program != NULL);
 
-    ps_interpreter *interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
+    interpreter = ps_ast_test_create_interpreter(system, string_heap, block_program);
     ASSERT(interpreter != NULL);
 
     ps_ast_debug_line(0, "Create variable symbols I and Sum of type Integer and add them to the symbol tables");
@@ -699,13 +712,13 @@ bool ps_ast_test_for_do(ps_ast_block *system, ps_string_heap *string_heap)
 
     ps_symbol_table_dump(stderr, NULL, block_program->symbols);
 
-    ps_ast_test_delete_interpreter(interpreter, block_program);
-
-    ps_ast_test_delete_block_program(block_program);
-
-    return true;
+    result = true;
 cleanup:
-    return false;
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
+    return result;
 }
 
 /**
@@ -789,16 +802,16 @@ bool ps_ast_test_hello(ps_ast_block *system, ps_string_heap *string_heap)
     result = ps_execute_program(interpreter, block_program);
     if (!result)
     {
-        ps_ast_debug_line(0, "Error running the program: %s (%d)",
-                          ps_error_get_message(interpreter->error), interpreter->error);
+        ps_ast_debug_line(0, "Error running the program: %s (%d)", ps_error_get_message(interpreter->error),
+                          interpreter->error);
     }
     ASSERT(result);
 
 cleanup:
-    if (interpreter != NULL)
-        ps_ast_test_delete_interpreter(interpreter, block_program);
-    if (block_program != NULL)
-        ps_ast_test_delete_block_program(block_program);
+    if (interpreter != NULL && !ps_ast_test_delete_interpreter(interpreter, block_program))
+        result = false;
+    if (block_program != NULL && !ps_ast_test_delete_block_program(block_program))
+        result = false;
     return result;
 }
 
