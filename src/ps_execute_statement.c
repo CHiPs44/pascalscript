@@ -109,7 +109,7 @@ bool ps_execute_assignment(ps_interpreter *interpreter, const ps_ast_assignment 
                                .value.data = {0}};
     if (!ps_evaluate_expression(interpreter, assignment->expression, &value_node))
         return false; // line & column of error set when evaluating expression
-    ps_value value = {.allocated = false, .type = value_node.value.type, .data = {0}};
+    ps_value value = {.allocated = false, .type = expected_type, .data = {0}};
     if (!ps_interpreter_copy_value(interpreter, &value_node.value, &value))
         goto error;
     PS_AST_DEBUG_EXECUTION(interpreter, PS_DEBUG_VERBOSE, "Expression value: %s", ps_value_get_debug_string(&value));
