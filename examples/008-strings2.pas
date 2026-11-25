@@ -68,6 +68,13 @@ Begin
     WriteOkOrFailed(S1 = C);
     Write(' ');
     WriteOkOrFailed(S1 = 'A');
+    // Won't work unti PascalScript strings aren't C strings
+    // S1 := Chr(0);
+    // Write('Length(S1) = ', Length(S1));
+    // WriteOkOrFailed(Length(S1) = 1);
+    S1 := Chr(66);
+    Write('S1 = Chr(66) = ', S1);
+    WriteOkOrFailed(S1 = 'B');
     // *FUTURE*
     // WriteLn('Pos(''lo'', s1) = ', Pos('lo', s1));
     // WriteLn('Pos(''lo'', s2) = ', Pos('lo', s2));
