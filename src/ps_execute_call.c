@@ -33,12 +33,6 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     ps_ast_variable *ast_variable = NULL;
     ps_ast_variable result_variable = {0};
     ps_value arguments[PS_PARAMETERS_MAX] = {0};
-    ps_ast_value arg_value = {.line = call->line,
-                              .column = call->column,
-                              .group = PS_AST_EXPRESSION,
-                              .kind = PS_AST_LITERAL_VALUE,
-                              .flags = 0,
-                              .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
 
     // Check if argument count is same as declaration
     if (call->n_args != block->signature->parameter_count)
@@ -56,6 +50,12 @@ static bool ps_execute_call(ps_interpreter *interpreter, ps_ast_block *block, co
     // Evaluate arguments
     for (int i = 0; i < call->n_args; i++)
     {
+        ps_ast_value arg_value = {.line = call->line,
+                                  .column = call->column,
+                                  .group = PS_AST_EXPRESSION,
+                                  .kind = PS_AST_LITERAL_VALUE,
+                                  .flags = 0,
+                                  .value = {.allocated = false, .type = &ps_system_none, .data = {0}}};
         if (block->signature->parameters[i].byref)
         {
             // For by-reference parameters, the argument must be a variable (lvalue)
