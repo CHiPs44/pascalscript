@@ -75,8 +75,7 @@ static void test_ps_interpreter_set_randseed_by_reference(void)
     if (symbols == NULL)
         return;
 
-    ps_ast_block *parameter_block =
-            ps_ast_create_block(0, 0, system_block, PS_AST_PROCEDURE, "SETSEED", symbols);
+    ps_ast_block *parameter_block = ps_ast_create_block(0, 0, system_block, PS_AST_PROCEDURE, "SETSEED", symbols);
     CHECK(parameter_block != NULL);
     if (parameter_block == NULL)
     {
@@ -550,6 +549,35 @@ static void test_ps_function_uppercase(void)
     ps_string_free(text);
 }
 
+static void test_ps_function_pos(void)
+{
+    ps_string *string_needle = ps_string_create("World");
+    CHECK(string_needle != NULL);
+    if (string_needle == NULL)
+        return;
+    //                                      1234567890123
+    ps_string *haystack = ps_string_create("Hello, World!");
+    CHECK(haystack != NULL);
+    if (haystack == NULL)
+    {
+        ps_string_free(string_needle);
+        return;
+    }
+    ps_value value_string_needle = {
+            .allocated = false, .string_heap_owned = false, .type = &ps_system_string, .data.s = string_needle};
+    ps_value value_haystack = {
+            .allocated = false, .string_heap_owned = false, .type = &ps_system_string, .data.s = haystack};
+    ps_value result = {0};
+    ps_error error = ps_function_pos(interpreter, &value_string_needle, &value_haystack, &result);
+    CHECK(error == PS_ERROR_NONE);
+    if (error != PS_ERROR_NONE)
+        fprintf(stderr, "ERROR: %s\n", ps_error_get_message(error));
+    CHECK(result.type == &ps_system_unsigned);
+    CHECK(result.data.u == 8);
+    ps_string_free(string_needle);
+    ps_string_free(haystack);
+}
+
 static void test_ps_function_get_tick_count(void)
 {
     ps_value result = {0};
@@ -763,6 +791,7 @@ int main(void)
     RUN_TEST(test_ps_function_length);
     RUN_TEST(test_ps_function_lowercase);
     RUN_TEST(test_ps_function_uppercase);
+    RUN_TEST(test_ps_function_pos);
     RUN_TEST(test_ps_function_get_tick_count);
     RUN_TEST(test_ps_procedure_dec);
     RUN_TEST(test_ps_procedure_inc);

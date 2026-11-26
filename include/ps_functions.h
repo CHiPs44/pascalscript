@@ -163,6 +163,10 @@ extern "C"
     /** @brief UPPERCASE(STRING): STRING - Compute uppercase string */
     ps_error ps_function_uppercase(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
+    /** @brief POS(STRING|CHAR, STRING): UNSIGNED - Get position of STRING|CHAR in STRING */
+    ps_error ps_function_pos(ps_interpreter *interpreter, const ps_value *needle, const ps_value *haystack,
+                             ps_value *result);
+
     /** @brief GETTICKCOUNT(): UNSIGNED - Get milliseconds since program start */
     ps_error ps_function_get_tick_count(ps_interpreter *interpreter, const ps_value *value, ps_value *result);
 
