@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include <errno.h>
 #include <string.h>
 
 #include "ps_array.h"
@@ -609,8 +608,6 @@ bool ps_interpreter_copy_value(ps_interpreter *interpreter, const ps_value *from
                        ps_value_get_debug_string(to),
                        to == NULL || to->type == NULL ? "NULL!" : (const char *)to->type->name);
     bool char_to_string = ps_value_is_char(from) && ps_value_is_string(to);
-    if (char_to_string)
-        to->string_heap_owned = false;
     ps_error error = ps_value_copy(from, to, interpreter->range_check);
     if (error == PS_ERROR_NONE)
     {

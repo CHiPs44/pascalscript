@@ -68,7 +68,7 @@ Begin
     WriteOkOrFailed(S1 = C);
     Write(' ');
     WriteOkOrFailed(S1 = 'A');
-    // Won't work unti PascalScript strings aren't C strings
+    // Won't work unti PascalScript strings are no longer C strings
     // S1 := Chr(0);
     // Write('Length(S1) = ', Length(S1));
     // WriteOkOrFailed(Length(S1) = 1);
